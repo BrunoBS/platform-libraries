@@ -1,0 +1,17 @@
+# ====================================================================
+# 1. SILENCIAMENTO AGRESSIVO DE INFRAESTRUTURA (Evita poluir o console)
+# ====================================================================
+platform.logging.defaults.org.springframework=ERROR
+platform.logging.defaults.org.hibernate=ERROR
+platform.logging.defaults.org.hibernate.orm.deprecation=OFF
+platform.logging.defaults.com.zaxxer.hikari=ERROR
+platform.logging.defaults.org.apache.catalina=ERROR
+platform.logging.defaults.org.apache.coyote=ERROR
+platform.logging.defaults.org.hibernate.validator=ERROR
+platform.logging.defaults.org.apache.kafka=ERROR
+
+# ====================================================================
+# 2. PADRÃO DOS PACOTES DE NEGÓCIO DA EMPRESA (Garante que você veja seus logs)
+# ====================================================================\
+platform.logging.defaults.com.brunobs=INFO
+platform.logging.defaults.com.empresa.platform=INFO

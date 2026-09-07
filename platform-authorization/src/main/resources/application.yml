@@ -1,0 +1,19 @@
+platform:
+  messaging:
+    enabled: true
+    default-locale: pt-BR
+    mdc-correlation-key: traceId
+    datasource:
+      view-name: vw_api_message
+    cache:
+      enabled: false
+      ttl: 1h
+  authorization:
+    enabled: true
+    service-url: "http://localhost:2020"
+  logging:
+    levels:
+      com.novaequipe.vendas: DEBUG         # Pacote novo (Ativa o DEBUG)
+      com.novaequipe.vendas.utils: WARN    # Pacote novo (Exibe só avisos e erros)
+      org.springframework: INFO            # Sobrescreve o ERROR padrão para INFO
+

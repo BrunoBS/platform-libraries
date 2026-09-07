@@ -1,0 +1,23 @@
+com.empresa.platform.authorization.autoconfigure.PlatformAuthorizationAutoConfiguration
+
+
+
+com.empresa.platform.authorization
+    annotation
+        AuthorizationRequired.java
+    autoconfigure
+        PlatformAuthorizationAutoConfiguration.java
+    config
+        PlatformAuthorizationProperties.java
+    model
+        AuthorizationPolicy.java
+        AuthorizationLevel.java
+        ParsedGroup.java
+        UserContext.java
+        UserSession.java
+    registry
+        AuthorizationMetadataRegistry.java
+    service
+        AuthorizationClientService.java
+    web
+        AuthorizationInterceptor.java
