@@ -7,7 +7,6 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = "platform.messaging")
 public class PlatformMessagingProperties {
     private boolean enabled = true;
-    private String mdcCorrelationKey = "traceId";
     private String defaultLocale = "pt-BR";
     private final Datasource datasource = new Datasource();
     private final Cache cache = new Cache();
@@ -18,14 +17,6 @@ public class PlatformMessagingProperties {
 
     public void setEnabled(boolean v) {
         enabled = v;
-    }
-
-    public String getMdcCorrelationKey() {
-        return mdcCorrelationKey;
-    }
-
-    public void setMdcCorrelationKey(String mdcCorrelationKey) {
-        this.mdcCorrelationKey = mdcCorrelationKey;
     }
 
     public String getDefaultLocale() {

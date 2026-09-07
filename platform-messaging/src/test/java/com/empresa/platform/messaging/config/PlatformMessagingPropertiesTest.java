@@ -12,7 +12,6 @@ class PlatformMessagingPropertiesTest {
         
         assertTrue(properties.isEnabled());
         assertEquals("pt-BR", properties.getDefaultLocale());
-        assertEquals("traceId", properties.getMdcCorrelationKey());
         assertEquals("vw_api_message", properties.getDatasource().getViewName());
         assertFalse(properties.getCache().isEnabled());
         assertEquals(Duration.ofHours(1), properties.getCache().getTtl());

@@ -52,7 +52,6 @@ class AuthorizationInterceptorTest {
     @BeforeEach
     void setUp() {
         messagingProperties = new PlatformMessagingProperties();
-        messagingProperties.setMdcCorrelationKey("traceId");
 
         interceptor = new AuthorizationInterceptor(
                 clientService,
@@ -76,9 +75,6 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("traceId"))
-                .thenReturn(null);
-
         when(request.getHeader("correlationId"))
                 .thenReturn(null);
 
@@ -100,11 +96,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        /*
-         * O interceptor consulta User-Agent antes
-         * de validar Authorization.
-         */
-        when(request.getHeader("traceId"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
@@ -131,7 +123,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("traceId"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
@@ -158,7 +150,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("traceId"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
@@ -178,9 +170,20 @@ class AuthorizationInterceptorTest {
 
         Map<String, String> pathVariables = new HashMap<>();
 
-        pathVariables.put("accountId", "account-123");
-        pathVariables.put("environmentId", "env-123");
-        pathVariables.put("applicationId", "app-123");
+        pathVariables.put(
+                "accountId",
+                "account-123"
+        );
+
+        pathVariables.put(
+                "environmentId",
+                "env-123"
+        );
+
+        pathVariables.put(
+                "applicationId",
+                "app-123"
+        );
 
         when(request.getAttribute(
                 HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE
@@ -215,35 +218,86 @@ class AuthorizationInterceptorTest {
                 AuthorizationLevel.DEV
         )).thenReturn(session);
 
-        boolean result = interceptor.preHandle(
-                request,
-                response,
-                handlerMethod
-        );
+        boolean result =
+                interceptor.preHandle(
+                        request,
+                        response,
+                        handlerMethod
+                );
 
         assertTrue(result);
 
         UserSession context =
                 UserContext.get().orElseThrow();
 
-        assertEquals("12345", context.getTraceId());
-        assertEquals("bruno", context.getUserName());
-        assertEquals("account-123", context.getAccountId());
-        assertEquals("env-123", context.getEnvironmentId());
-        assertEquals("app-123", context.getApplicationId());
+        assertEquals(
+                "12345",
+                context.getTraceId()
+        );
 
-        assertEquals("12345", MDC.get("traceId"));
-        assertEquals("bruno", MDC.get("username"));
-        assertEquals("127.0.0.1", MDC.get("clientIp"));
-        assertEquals("JUnit", MDC.get("userAgent"));
-        assertEquals("/api/v1/resource", MDC.get("uri"));
-        assertEquals("account-123", MDC.get("accountId"));
-        assertEquals("env-123", MDC.get("environmentId"));
-        assertEquals("app-123", MDC.get("applicationId"));
+        assertEquals(
+                "bruno",
+                context.getUserName()
+        );
+
+        assertEquals(
+                "account-123",
+                context.getAccountId()
+        );
+
+        assertEquals(
+                "env-123",
+                context.getEnvironmentId()
+        );
+
+        assertEquals(
+                "app-123",
+                context.getApplicationId()
+        );
+
+        assertEquals(
+                "12345",
+                MDC.get("correlationId")
+        );
+
+        assertEquals(
+                "bruno",
+                MDC.get("username")
+        );
+
+        assertEquals(
+                "127.0.0.1",
+                MDC.get("clientIp")
+        );
+
+        assertEquals(
+                "JUnit",
+                MDC.get("userAgent")
+        );
+
+        assertEquals(
+                "/api/v1/resource",
+                MDC.get("uri")
+        );
+
+        assertEquals(
+                "account-123",
+                MDC.get("accountId")
+        );
+
+        assertEquals(
+                "env-123",
+                MDC.get("environmentId")
+        );
+
+        assertEquals(
+                "app-123",
+                MDC.get("applicationId")
+        );
 
         verify(registry).resolve(
-                any(),
-                any()
+                String.class,
+                methodForHandler()
         );
 
         verify(clientService).authorize(
@@ -258,16 +312,13 @@ class AuthorizationInterceptorTest {
     }
 
     @Test
-    void shouldUseFallbackCorrelationIdHeader()
+    void shouldAuthorizeWithoutPathVariables()
             throws Exception {
 
         configureHandlerMethod();
 
-        when(request.getHeader("traceId"))
-                .thenReturn(null);
-
         when(request.getHeader("correlationId"))
-                .thenReturn("fallback-123");
+                .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
                 .thenReturn("Bearer valid-token");
@@ -286,7 +337,7 @@ class AuthorizationInterceptorTest {
 
         when(request.getAttribute(
                 HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE
-        )).thenReturn(new HashMap<>());
+        )).thenReturn(null);
 
         AuthorizationPolicy policy =
                 new AuthorizationPolicy(
@@ -295,17 +346,17 @@ class AuthorizationInterceptorTest {
                 );
 
         when(registry.resolve(
-                any(),
-                any()
+                String.class,
+                methodForHandler()
         )).thenReturn(policy);
 
         UserSession session = new UserSession();
 
-        session.setTraceId("fallback-123");
+        session.setTraceId("12345");
         session.setUserName("bruno");
 
         when(clientService.authorize(
-                "fallback-123",
+                "12345",
                 "Bearer valid-token",
                 null,
                 null,
@@ -314,21 +365,22 @@ class AuthorizationInterceptorTest {
                 AuthorizationLevel.DEV
         )).thenReturn(session);
 
-        boolean result = interceptor.preHandle(
-                request,
-                response,
-                handlerMethod
-        );
+        boolean result =
+                interceptor.preHandle(
+                        request,
+                        response,
+                        handlerMethod
+                );
 
         assertTrue(result);
 
         assertEquals(
-                "fallback-123",
-                MDC.get("traceId")
+                "12345",
+                MDC.get("correlationId")
         );
 
         verify(clientService).authorize(
-                "fallback-123",
+                "12345",
                 "Bearer valid-token",
                 null,
                 null,
@@ -344,11 +396,12 @@ class AuthorizationInterceptorTest {
 
         Object handler = new Object();
 
-        boolean result = interceptor.preHandle(
-                request,
-                response,
-                handler
-        );
+        boolean result =
+                interceptor.preHandle(
+                        request,
+                        response,
+                        handler
+                );
 
         assertTrue(result);
 
@@ -372,7 +425,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("traceId"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
@@ -401,8 +454,8 @@ class AuthorizationInterceptorTest {
                 );
 
         when(registry.resolve(
-                any(),
-                any()
+                String.class,
+                methodForHandler()
         )).thenReturn(policy);
 
         UserSession session = new UserSession();
@@ -420,11 +473,12 @@ class AuthorizationInterceptorTest {
                 AuthorizationLevel.DEV
         )).thenReturn(session);
 
-        boolean result = interceptor.preHandle(
-                request,
-                response,
-                handlerMethod
-        );
+        boolean result =
+                interceptor.preHandle(
+                        request,
+                        response,
+                        handlerMethod
+                );
 
         assertTrue(result);
 
@@ -478,15 +532,18 @@ class AuthorizationInterceptorTest {
     private void configureHandlerMethod()
             throws NoSuchMethodException {
 
-        Method method =
-                String.class.getMethod("toString");
-
         doReturn(String.class)
                 .when(handlerMethod)
                 .getBeanType();
 
-        doReturn(method)
+        doReturn(methodForHandler())
                 .when(handlerMethod)
                 .getMethod();
+    }
+
+    private Method methodForHandler()
+            throws NoSuchMethodException {
+
+        return String.class.getMethod("toString");
     }
 }

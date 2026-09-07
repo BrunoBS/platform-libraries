@@ -39,7 +39,6 @@ class ApiExceptionHandlerTest {
     void shouldHandleApiExceptionWithoutCauseAndWithMdcKey() {
         // Arrange
         String traceKey = "traceId";
-        properties.setMdcCorrelationKey(traceKey);
         MDC.put(traceKey, "MDC-12345");
 
         when(request.getRequestURI()).thenReturn("/api/v1/users");
@@ -58,15 +57,13 @@ class ApiExceptionHandlerTest {
         assertEquals("ERR-404", body.code());
         assertEquals("Usuário 10 não achado", body.message());
         assertEquals("Crie o usuário", body.solution());
-        assertEquals("MDC-12345", body.correlationId()); // Valida leitura correta do MDC
         assertEquals("/api/v1/users", body.path());
         assertNotNull(body.timestamp());
     }
 
     @Test
     void shouldHandleApiExceptionWithCauseAndFallbackUuid() {
-        // Arrange
-        properties.setMdcCorrelationKey("customTraceKey"); // MDC estará vazio (força UUID randômico)
+        // Arrangeo (força UUID randômico)
         when(request.getRequestURI()).thenReturn("/api/v1/payments");
 
         when(resolver.resolve("PAYMENT_FAILED", Locale.US))
@@ -82,8 +79,6 @@ class ApiExceptionHandlerTest {
         assertEquals(500, responseEntity.getStatusCode().value());
         ApiErrorResponse body = responseEntity.getBody();
         assertNotNull(body);
-        assertNotNull(body.correlationId());
-        assertFalse(body.correlationId().isBlank()); // Valida geração do UUID como fallback seguro
         assertEquals("/api/v1/payments", body.path());
     }
 

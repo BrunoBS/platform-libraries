@@ -1,7 +1,7 @@
 package com.empresa.platform.authorization.web;
 
-import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.AuthorizationPolicy;
+import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
@@ -55,12 +55,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 
         // Ajustado para ler usando a chave dinâmica configurada (ex: correlationId ou X-Correlation-Id)
-        String correlationIdKey = platformMessagingProperties.getMdcCorrelationKey();
-        String correlationId = request.getHeader(correlationIdKey);
-        if (correlationId == null || correlationId.isBlank()) {
-            correlationId = request.getHeader("correlationId"); // Fallback amigável
-        }
-
+        String correlationId = request.getHeader("correlationId"); // Fallback amigável
         String userAgent = request.getHeader("User-Agent");
         String authHeader = request.getHeader("Authorization");
         String accountId = null;
@@ -95,7 +90,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         UserContext.set(body);
 
         // Popula os metadados do MDC para auditoria e logs estruturados
-        MDC.put(correlationIdKey, body.getTraceId());
+        MDC.put("correlationId", body.getTraceId());
         MDC.put("username", body.getUserName());
         MDC.put("clientIp", request.getRemoteAddr());
         MDC.put("userAgent", userAgent != null ? userAgent : "unknown");

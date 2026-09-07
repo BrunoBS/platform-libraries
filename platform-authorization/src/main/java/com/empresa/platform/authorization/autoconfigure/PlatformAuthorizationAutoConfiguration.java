@@ -106,10 +106,10 @@ public class PlatformAuthorizationAutoConfiguration {
 
                         UserContext.set(mockSession);
 
-                        String correlationIdKey = messagingProperties.getMdcCorrelationKey();
                         String userAgent = request.getHeader("User-Agent");
 
-                        MDC.put(correlationIdKey, mockSession.getTraceId());
+
+                        MDC.put("correlationId", mockSession.getTraceId());
                         MDC.put("username", mockSession.getUserName());
                         MDC.put("clientIp", request.getRemoteAddr());
                         MDC.put("userAgent", userAgent != null ? userAgent : "mock-agent");
