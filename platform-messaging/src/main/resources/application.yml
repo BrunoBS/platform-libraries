@@ -2,7 +2,6 @@ platform:
   messaging:
     enabled: true
     default-locale: pt-BR
-    mdc-correlation-key: traceId
     datasource:
       view-name: vw_api_message
     cache:

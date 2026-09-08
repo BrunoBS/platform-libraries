@@ -10,6 +10,7 @@ import com.empresa.platform.messaging.util.MessageParameterResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -39,6 +40,7 @@ public class ApiExceptionHandler {
             log.warn("Exceção de negócio disparada sem causa raiz técnica para a chave '{}'.", e.getMessageKey());
         }
         try {
+            String correlationId = MDC.get("correlationId");
             ApiMessage m = resolver.resolve(e.getMessageKey(), locale);
             String messageResolved = MessageParameterResolver.resolve(m.message(), e.getParameters());
             String solutionResolved = MessageParameterResolver.resolve(m.solution(), e.getParameters());
@@ -48,7 +50,8 @@ public class ApiExceptionHandler {
                     messageResolved,
                     solutionResolved,
                     Instant.now(),
-                    request.getRequestURI()
+                    request.getRequestURI(),
+                    correlationId
             );
 
             return ResponseEntity.status(m.httpStatus()).body(response);
@@ -62,13 +65,14 @@ public class ApiExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleNotFound(ApiMessageNotFoundException e, HttpServletRequest request) {
         log.error("Catálogo de mensagens não encontrou uma definição para a chave '{}'.",
                 e.getMessageKey());
-
+        String correlationId = MDC.get("correlationId");
         ApiErrorResponse fallbackResponse = new ApiErrorResponse(
                 "ERR-9999",
                 "Mensagem de API não encontrada.",
                 "Verifique se a chave está cadastrada no catálogo de mensagens.",
                 Instant.now(),
-                request.getRequestURI()
+                request.getRequestURI(),
+                correlationId
         );
         return ResponseEntity.internalServerError().body(fallbackResponse);
     }
