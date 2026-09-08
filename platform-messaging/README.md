@@ -28,7 +28,7 @@ Java 21.
 
 # ✉️ Módulo Platform Messaging (`platform-messaging`)
 
-O **`platform-messaging`** é o módulo fundacional de governança de mensagens, tratamento de exceções e segurança de dados do nosso ecossistema corporativo, desenvolvido para **Spring Boot 4.0.0 e Java 21+**. Ele centraliza o pipeline de tratamento de erros HTTP, tradução de payloads internacionais e proteção proativa contra ataques de injeção de dados.
+O **`platform-messaging`** é o módulo fundacional de governança de mensagens, tratamento de exceções e segurança de dados do nosso ecossistema corporativo, desenvolvido para **Spring Boot 4.0.0 e Java 21+**. Ele centraliza o pipeline de tratamento de erros HTTP, tradução de payloads internacionais.
 
 ---
 
@@ -55,7 +55,6 @@ platform:
   messaging:
     enabled: true                 # Liga/desliga o Advice de exceções e filtros globais. Padrão: true
     default-locale: "pt-BR"       # Localidade padrão de fallback para internacionalização (i18n). Padrão: "pt-BR"
-    mdc-correlation-key: "traceId" # Chave unificada que conecta este módulo ao platform-logging. Padrão: "traceId"
 ```
 
 ---
