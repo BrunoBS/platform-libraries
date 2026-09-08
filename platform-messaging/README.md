@@ -55,7 +55,6 @@ platform:
   messaging:
     enabled: true                 # Liga/desliga o Advice de exceções e filtros globais. Padrão: true
     default-locale: "pt-BR"       # Localidade padrão de fallback para internacionalização (i18n). Padrão: "pt-BR"
-    mdc-correlation-key: "traceId" # Chave unificada que conecta este módulo ao platform-logging. Padrão: "traceId"
 ```
 
 ---
