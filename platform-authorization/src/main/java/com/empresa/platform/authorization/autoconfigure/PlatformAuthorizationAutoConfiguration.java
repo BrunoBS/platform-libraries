@@ -6,6 +6,7 @@ import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
+import com.empresa.platform.authorization.web.filter.PayloadErrorLoggingFilter;
 import com.empresa.platform.messaging.config.PlatformMessagingProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -129,5 +130,11 @@ public class PlatformAuthorizationAutoConfiguration {
                 }).addPathPatterns("/**");
             }
         };
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "true", matchIfMissing = true)
+    public PayloadErrorLoggingFilter payloadErrorLoggingFilter() {
+        return new PayloadErrorLoggingFilter();
     }
 }

@@ -1,0 +1,18 @@
+# Pasta de compilação do Maven
+**/target/
+*.jar
+*.war
+
+# Arquivos de configuração do IntelliJ IDEA
+.idea/
+*.iml
+out/
+gen/
+
+# Arquivos do VS Code
+.vscode/
+.factorypath
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
