@@ -26,6 +26,7 @@ class ApiExceptionHandlerLocaleTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Accept-Language", "en-US");
+        request.addPreferredLocale(Locale.US);
 
         handler.handle(new ApiException("test.message"), Locale.forLanguageTag("pt-BR"), request);
 
