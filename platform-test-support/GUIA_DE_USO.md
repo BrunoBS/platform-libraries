@@ -1000,3 +1000,144 @@ Executar somente um teste:
 ```bash
 mvn -Dtest=ProductControllerIT test
 ```
+
+## 22. Testes unitários
+
+Testes unitários não devem inicializar Spring, MySQL, Kafka, WireMock ou servidor HTTP. Utilize `@PlatformUnitTest` para configurar Mockito e o isolamento dos contextos comuns:
+
+```java
+package com.empresa.product.core;
+
+import com.empresa.platform.testing.annotation.PlatformUnitTest;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@PlatformUnitTest
+class ProductServiceTest {
+
+    @Mock
+    private ProductRepository repository;
+
+    @Mock
+    private ProductEventPublisher eventPublisher;
+
+    @InjectMocks
+    private ProductService productService;
+
+    @Test
+    void deveBuscarProduto() {
+        Product product = new Product(1L, "Notebook");
+        when(repository.findById(1L)).thenReturn(Optional.of(product));
+
+        Product result = productService.findById(1L);
+
+        assertThat(result).isEqualTo(product);
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void devePublicarEventoAoCriarProduto() {
+        Product product = new Product(1L, "Notebook");
+        when(repository.save(product)).thenReturn(product);
+
+        productService.create(product);
+
+        verify(repository).save(product);
+        verify(eventPublisher).publish(product);
+    }
+}
+```
+
+`@PlatformUnitTest` fornece:
+
+- `MockitoExtension`;
+- suporte a `@Mock`, `@Spy`, `@Captor` e `@InjectMocks`;
+- limpeza do `TestContext` antes e depois de cada teste;
+- limpeza do MDC antes e depois de cada teste;
+- nenhuma inicialização do contexto Spring.
+
+### Testar regras dependentes de data
+
+Quando a classe recebe um `Clock`, utilize `TestClock`:
+
+```java
+import com.empresa.platform.testing.fixture.TestClock;
+
+Clock clock = TestClock.fixed("2026-09-12T12:00:00Z");
+ExpirationService service = new ExpirationService(clock);
+
+assertThat(service.now())
+    .isEqualTo(Instant.parse("2026-09-12T12:00:00Z"));
+```
+
+Com fuso específico:
+
+```java
+Clock clock = TestClock.fixed(
+    "2026-09-12T12:00:00Z",
+    ZoneId.of("America/Sao_Paulo")
+);
+```
+
+Evite chamar `Instant.now()` ou `LocalDateTime.now()` diretamente nas regras que precisam ser testadas. Injete um `Clock` na classe de produção.
+
+### UUIDs previsíveis
+
+Use `TestIds` quando o cenário precisar de identificadores estáveis:
+
+```java
+import com.empresa.platform.testing.fixture.TestIds;
+
+UUID accountId = TestIds.uuid("account-1");
+UUID productId = TestIds.uuid("product-1");
+```
+
+A mesma seed sempre produz o mesmo UUID:
+
+```java
+assertThat(TestIds.uuid("product-1"))
+    .isEqualTo(TestIds.uuid("product-1"));
+```
+
+### Builders e factories nos testes unitários
+
+Os mesmos contratos de massa podem ser utilizados sem Spring:
+
+```java
+ProductRequest request = ProductRequestBuilder.builder()
+    .withName("Notebook")
+    .withPrice(new BigDecimal("4500.00"))
+    .build();
+
+ProductRequest validRequest = new ProductFactory().valid();
+```
+
+### Quando o teste deixa de ser unitário
+
+Se o teste precisar de qualquer item abaixo, utilize a estrutura de integração:
+
+- `@SpringBootTest`;
+- repository real;
+- banco de dados;
+- chamada HTTP;
+- RestAssured;
+- Kafka real;
+- WireMock;
+- Testcontainers.
+
+Resumo:
+
+| Objetivo | Anotação |
+|---|---|
+| Testar uma classe isoladamente | `@PlatformUnitTest` |
+| Testar a aplicação Spring e HTTP | `@PlatformIntegrationTest` |
+| Adicionar banco real | `@WithMySql` |
+| Adicionar mensageria real | `@WithKafka` |
+| Simular o autorizador | `@WithMockAuthorization` |

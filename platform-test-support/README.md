@@ -1,6 +1,6 @@
 # Platform Test Support
 
-O `platform-test-support` é a biblioteca compartilhada para padronização dos testes de integração dos microsserviços da plataforma.
+O `platform-test-support` é a biblioteca compartilhada para padronização dos testes unitários e de integração dos microsserviços da plataforma.
 
 Para uma adoção passo a passo, consulte o [Guia completo de uso](GUIA_DE_USO.md).
 
@@ -108,6 +108,57 @@ class AccountControllerIT {
 - fábrica de requests configurada com a porta HTTP do contexto;
 - novo correlation ID para cada teste;
 - limpeza do contexto do teste ao final da execução.
+
+## Testes unitários
+
+Use `@PlatformUnitTest` para testar services, validators, mappers e outras classes isoladas, sem inicializar o Spring:
+
+```java
+@PlatformUnitTest
+class ProductServiceTest {
+
+    @Mock
+    private ProductRepository repository;
+
+    @InjectMocks
+    private ProductService productService;
+
+    @Test
+    void deveBuscarProduto() {
+        when(repository.findById(1L)).thenReturn(Optional.of(product));
+
+        Product result = productService.findById(1L);
+
+        assertThat(result).isEqualTo(product);
+        verify(repository).findById(1L);
+    }
+}
+```
+
+A anotação configura o `MockitoExtension` e limpa o `TestContext` e o MDC antes e depois de cada teste. Ela não carrega Spring, banco, containers, WireMock ou servidor HTTP.
+
+### Relógio determinístico
+
+```java
+Clock clock = TestClock.fixed("2026-09-12T12:00:00Z");
+```
+
+Também é possível informar o fuso:
+
+```java
+Clock clock = TestClock.fixed(
+        "2026-09-12T12:00:00Z",
+        ZoneId.of("America/Sao_Paulo")
+);
+```
+
+### UUID determinístico
+
+```java
+UUID productId = TestIds.uuid("product-1");
+```
+
+A mesma seed sempre produz o mesmo UUID, facilitando fixtures e assertions previsíveis.
 
 ## MySQL
 
@@ -625,6 +676,7 @@ src/test/java/com/empresa/account
 
 | Responsabilidade | Local |
 |---|---|
+| Configuração dos testes unitários | `platform-test-support` |
 | Inicialização do Spring Boot | `platform-test-support` |
 | MySQL e Kafka Testcontainers | `platform-test-support` |
 | Mock do serviço de autorização | `platform-test-support` |

@@ -26,6 +26,10 @@ class AnnotationContractTest {
     static class DefaultAuthorizationTest {
     }
 
+    @PlatformUnitTest
+    static class DefaultUnitTest {
+    }
+
     @WithDatabaseScripts(
             setup = "classpath:sql/create-view.sql",
             cleanup = "classpath:sql/drop-view.sql"
@@ -64,6 +68,12 @@ class AnnotationContractTest {
                 .orElseThrow();
 
         assertThat(annotation.defaultResult()).isEqualTo(AuthorizationMockResult.ALLOWED);
+    }
+
+    @Test
+    void shouldExposePlatformUnitTestAnnotation() {
+        assertThat(AnnotationSupport.findAnnotation(DefaultUnitTest.class, PlatformUnitTest.class))
+                .isPresent();
     }
 
     @Test
