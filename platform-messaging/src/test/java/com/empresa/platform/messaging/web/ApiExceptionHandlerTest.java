@@ -4,8 +4,10 @@ import com.empresa.platform.messaging.config.PlatformMessagingProperties;
 import com.empresa.platform.messaging.exception.ApiException;
 import com.empresa.platform.messaging.exception.ApiMessageNotFoundException;
 import com.empresa.platform.messaging.exception.NotFoundException;
+import com.empresa.platform.messaging.exception.ValidationException;
 import com.empresa.platform.messaging.model.ApiErrorResponse;
 import com.empresa.platform.messaging.model.ApiMessage;
+import com.empresa.platform.messaging.model.ValidationDetail;
 import com.empresa.platform.messaging.resolver.ApiMessageResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -102,6 +105,76 @@ class ApiExceptionHandlerTest {
         assertEquals("ERR-9999", body.code());
         assertEquals("Mensagem de API não encontrada.", body.message());
         assertEquals("/api/v1/orders", body.path());
+    }
+
+    @Test
+    void shouldResolveValidationDetails() {
+        when(request.getRequestURI()).thenReturn("/api/v1/accounts");
+
+        Locale locale = Locale.of("pt", "BR");
+
+        when(resolver.resolve("global.validation.failed", locale))
+                .thenReturn(new ApiMessage(
+                        "GLOBAL-0001",
+                        "global.validation.failed",
+                        "pt-BR",
+                        "Um ou mais campos são inválidos.",
+                        "Corrija os campos.",
+                        400
+                ));
+
+        when(resolver.resolve("account.name.required", locale))
+                .thenReturn(new ApiMessage(
+                        "ACCOUNT-0101",
+                        "account.name.required",
+                        "pt-BR",
+                        "O nome da conta é obrigatório.",
+                        null,
+                        400
+                ));
+
+        when(resolver.resolve("account.email.invalid", locale))
+                .thenReturn(new ApiMessage(
+                        "ACCOUNT-0110",
+                        "account.email.invalid",
+                        "pt-BR",
+                        "O e-mail {0} está em um formato incorreto.",
+                        null,
+                        400
+                ));
+
+        ValidationException exception = new ValidationException(
+                "global.validation.failed",
+                List.of(
+                        new ValidationDetail(
+                                "name",
+                                "account.name.required"
+                        ),
+                        new ValidationDetail(
+                                "approvers[0].email",
+                                "account.email.invalid",
+                                Map.of("0", "invalido")
+                        )
+                )
+        );
+
+        ResponseEntity<ApiErrorResponse> responseEntity =
+                handler.handle(exception, locale, request);
+
+        assertEquals(400, responseEntity.getStatusCode().value());
+
+        ApiErrorResponse body = responseEntity.getBody();
+        assertNotNull(body);
+        assertEquals(2, body.details().size());
+        assertEquals("name", body.details().get(0).field());
+        assertEquals(
+                "O nome da conta é obrigatório.",
+                body.details().get(0).message()
+        );
+        assertEquals(
+                "O e-mail invalido está em um formato incorreto.",
+                body.details().get(1).message()
+        );
     }
 
     @Test
