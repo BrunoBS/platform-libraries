@@ -6,6 +6,7 @@ import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
+import com.empresa.platform.authorization.web.filter.AuthorizationContextCleanupFilter;
 import com.empresa.platform.authorization.web.filter.PayloadErrorLoggingFilter;
 import com.empresa.platform.messaging.config.PlatformMessagingProperties;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,14 +30,16 @@ import java.util.Set;
 @EnableConfigurationProperties(PlatformAuthorizationProperties.class)
 public class PlatformAuthorizationAutoConfiguration {
 
-    // =========================================================================
-    // Componentes Compartilhados que nascem no Boot
-    // =========================================================================
-
     @Bean
     @ConditionalOnMissingBean
     public AuthorizationMetadataRegistry authorizationMetadataRegistry(ApplicationContext context) {
         return new AuthorizationMetadataRegistry(context);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AuthorizationContextCleanupFilter authorizationContextCleanupFilter() {
+        return new AuthorizationContextCleanupFilter();
     }
 
     @Bean
@@ -65,13 +68,6 @@ public class PlatformAuthorizationAutoConfiguration {
         return new AuthorizationInterceptor(clientService, metadataRegistry, messagingProperties);
     }
 
-    // =========================================================================
-    // Registro Condicional do Pipeline Web MVC (Sem classes internas para evitar ciclos)
-    // =========================================================================
-
-    /**
-     * CENÁRIO REAL: Registra o interceptor de segurança real se habilitado
-     */
     @Bean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "true", matchIfMissing = true)
     public WebMvcConfigurer realInterceptorConfigurer(AuthorizationInterceptor realInterceptor) {
@@ -83,9 +79,6 @@ public class PlatformAuthorizationAutoConfiguration {
         };
     }
 
-    /**
-     * CENÁRIO MOCK GUEST: Registra o interceptor fake injetando perfil guest se desabilitado
-     */
     @Bean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "false")
     public WebMvcConfigurer mockInterceptorConfigurer(PlatformMessagingProperties messagingProperties) {
@@ -108,7 +101,6 @@ public class PlatformAuthorizationAutoConfiguration {
                         UserContext.set(mockSession);
 
                         String userAgent = request.getHeader("User-Agent");
-
 
                         MDC.put("correlationId", mockSession.getTraceId());
                         MDC.put("username", mockSession.getUserName());
