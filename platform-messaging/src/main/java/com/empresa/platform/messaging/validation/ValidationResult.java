@@ -60,6 +60,12 @@ public class ValidationResult {
         }
     }
 
+    public void mergeDetails(List<ValidationDetail> validationDetails) {
+        if (validationDetails != null && !validationDetails.isEmpty()) {
+            details.addAll(validationDetails);
+        }
+    }
+
     private boolean isMessageKey(String value) {
         return value != null && value.matches("^[a-z0-9._-]+$");
     }
