@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @PlatformIntegrationTest
 @WithMySql
 @ContextConfiguration(classes = MySqlScriptLifecycleTest.TestApplication.class)
+@TestPropertySource(properties = {
+        "platform.authorization.enabled=false",
+        "platform.messaging.enabled=false"
+})
 @WithDatabaseScripts(
         setup = "classpath:sql/mysql/create-catalog-view.sql",
         cleanup = "classpath:sql/mysql/drop-catalog-view.sql"

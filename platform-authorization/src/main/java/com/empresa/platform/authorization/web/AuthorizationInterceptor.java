@@ -5,7 +5,6 @@ import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
-import com.empresa.platform.messaging.config.PlatformMessagingProperties;
 import com.empresa.platform.messaging.exception.UnauthorizedException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,16 +23,13 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
     private final AuthorizationClientService authorizationClientService;
     private final AuthorizationMetadataRegistry authorizationMetadataRegistry;
-    private final PlatformMessagingProperties platformMessagingProperties;
 
     public AuthorizationInterceptor(
             AuthorizationClientService authorizationClientService,
-            AuthorizationMetadataRegistry authorizationMetadataRegistry,
-            PlatformMessagingProperties platformMessagingProperties
+            AuthorizationMetadataRegistry authorizationMetadataRegistry
     ) {
         this.authorizationClientService = authorizationClientService;
         this.authorizationMetadataRegistry = authorizationMetadataRegistry;
-        this.platformMessagingProperties = platformMessagingProperties;
     }
 
     @Override

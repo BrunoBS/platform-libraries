@@ -6,7 +6,6 @@ import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
-import com.empresa.platform.messaging.config.PlatformMessagingProperties;
 import com.empresa.platform.messaging.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,18 +44,13 @@ class AuthorizationInterceptorTest {
     @Mock
     private HandlerMethod handlerMethod;
 
-    private PlatformMessagingProperties messagingProperties;
-
     private AuthorizationInterceptor interceptor;
 
     @BeforeEach
     void setUp() {
-        messagingProperties = new PlatformMessagingProperties();
-
         interceptor = new AuthorizationInterceptor(
                 clientService,
-                registry,
-                messagingProperties
+                registry
         );
 
         MDC.clear();

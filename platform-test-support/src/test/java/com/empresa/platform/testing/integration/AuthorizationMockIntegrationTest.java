@@ -19,7 +19,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
         classes = AuthorizationMockIntegrationTest.TestApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.NONE
+        webEnvironment = SpringBootTest.WebEnvironment.NONE,
+        properties = {
+                "platform.messaging.enabled=false",
+                "spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration"
+        }
 )
 @WithMockAuthorization
 class AuthorizationMockIntegrationTest {

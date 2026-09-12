@@ -8,7 +8,6 @@ import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
 import com.empresa.platform.authorization.web.filter.AuthorizationContextCleanupFilter;
 import com.empresa.platform.authorization.web.filter.PayloadErrorLoggingFilter;
-import com.empresa.platform.messaging.config.PlatformMessagingProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
@@ -63,9 +62,8 @@ public class PlatformAuthorizationAutoConfiguration {
     @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "true", matchIfMissing = true)
     public AuthorizationInterceptor authorizationInterceptor(
             AuthorizationClientService clientService,
-            AuthorizationMetadataRegistry metadataRegistry,
-            PlatformMessagingProperties messagingProperties) {
-        return new AuthorizationInterceptor(clientService, metadataRegistry, messagingProperties);
+            AuthorizationMetadataRegistry metadataRegistry) {
+        return new AuthorizationInterceptor(clientService, metadataRegistry);
     }
 
     @Bean
@@ -81,7 +79,7 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "false")
-    public WebMvcConfigurer mockInterceptorConfigurer(PlatformMessagingProperties messagingProperties) {
+    public WebMvcConfigurer mockInterceptorConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
