@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class UserSession {
 
-    private static final String ADMIN_PORTAL_GROUP = "PM5_ORWER";
+    private static final String ADMIN_PORTAL_GROUP = "PM5_OWNER";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
             .withZone(ZoneId.systemDefault());
 
