@@ -269,63 +269,102 @@ Para a ação principal do teste, prefira validar o status HTTP exato. As valida
 
 ## Builders
 
-Para catálogos com estrutura semelhante, o projeto pode estender `BaseCatalogBuilder`:
+A biblioteca não define campos de negócio. O microsserviço cria seu builder estendendo `AbstractTestDataBuilder` e declara somente os atributos do próprio domínio:
 
 ```java
-public final class AccountTypeBuilder
-        extends BaseCatalogBuilder<AccountTypeDTO, AccountTypeBuilder> {
+public final class AccountBuilder
+        extends AbstractTestDataBuilder<AccountRequest, AccountBuilder> {
 
-    public static AccountTypeBuilder builder() {
-        return new AccountTypeBuilder();
+    private String name = "Conta de teste";
+    private String description = "Conta válida para teste de integração";
+    private boolean active = true;
+
+    public static AccountBuilder builder() {
+        return new AccountBuilder();
+    }
+
+    public AccountBuilder withName(String name) {
+        this.name = name;
+        return self();
+    }
+
+    public AccountBuilder withDescription(String description) {
+        this.description = description;
+        return self();
+    }
+
+    public AccountBuilder inactive() {
+        this.active = false;
+        return self();
     }
 
     @Override
-    public AccountTypeDTO build() {
-        return new AccountTypeDTO(
-                id,
-                name,
-                label,
-                description,
-                sortOrder,
-                settings
-        );
+    public AccountRequest build() {
+        return new AccountRequest(name, description, active);
     }
 }
 ```
 
+Também está disponível o contrato mínimo `TestDataBuilder<T>` quando o projeto preferir implementar uma interface em vez de herdar a classe abstrata.
+
 ## Factories
 
-As factories representam estados conhecidos de teste:
+`AbstractTestDataFactory` conhece apenas o contrato do builder. Estados inválidos ou especiais pertencem ao microsserviço:
 
 ```java
-public final class AccountTypeFactory
-        extends BaseCatalogFactory<AccountTypeDTO, AccountTypeBuilder> {
+public final class AccountFactory
+        extends AbstractTestDataFactory<AccountRequest, AccountBuilder> {
 
     @Override
-    protected AccountTypeBuilder builder() {
-        return AccountTypeBuilder.builder();
+    protected AccountBuilder builder() {
+        return AccountBuilder.builder();
     }
 
-    public AccountTypeDTO valid() {
+    public AccountRequest withoutName() {
         return builder()
-                .withName("ADMIN")
-                .withLabel("Administrador")
-                .withDescription("Perfil administrativo da plataforma")
-                .withSortOrder(1)
+                .withName(null)
+                .build();
+    }
+
+    public AccountRequest inactive() {
+        return builder()
+                .inactive()
                 .build();
     }
 }
 ```
 
-O `BaseCatalogFactory` já fornece estados comuns, como:
+A implementação herdada de `valid()` executa `builder().build()`. Nenhuma regra como `withoutName`, `withoutDescription` ou campos de catálogo é imposta pela biblioteca.
+
+## Scenarios
+
+Um cenário concreto pode implementar `TestScenario<R>`, em que `R` representa o contexto preparado:
 
 ```java
-factory.withoutName();
-factory.withoutLabel();
-factory.withoutDescription();
-factory.withEmptyName();
-factory.withLongDescription();
-factory.withSortOrderNegative();
+public record AccountScenarioResult(
+        Long accountTypeId,
+        Long environmentId
+) {
+}
+```
+
+```java
+public final class AccountScenario
+        implements TestScenario<AccountScenarioResult> {
+
+    @Override
+    public AccountScenarioResult setup() {
+        Long accountTypeId = createAccountType();
+        Long environmentId = createEnvironment();
+        return new AccountScenarioResult(accountTypeId, environmentId);
+    }
+}
+```
+
+Uso no teste:
+
+```java
+AccountScenarioResult scenario = new AccountScenario().setup();
 ```
 
 ## Organização recomendada no microsserviço
