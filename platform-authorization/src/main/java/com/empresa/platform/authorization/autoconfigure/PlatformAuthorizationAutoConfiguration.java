@@ -1,5 +1,6 @@
 package com.empresa.platform.authorization.autoconfigure;
 
+import com.empresa.platform.authorization.aspect.ResourceAuthorizationAspect;
 import com.empresa.platform.authorization.config.PlatformAuthorizationProperties;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
@@ -39,6 +40,12 @@ public class PlatformAuthorizationAutoConfiguration {
     @ConditionalOnMissingBean
     public AuthorizationContextCleanupFilter authorizationContextCleanupFilter() {
         return new AuthorizationContextCleanupFilter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ResourceAuthorizationAspect resourceAuthorizationAspect() {
+        return new ResourceAuthorizationAspect();
     }
 
     @Bean
