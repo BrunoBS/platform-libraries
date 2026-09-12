@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS catalogs (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    active BOOLEAN NOT NULL
+);
+
+CREATE OR REPLACE VIEW vw_active_catalogs AS
+SELECT id, name
+FROM catalogs
+WHERE active = TRUE;

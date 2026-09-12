@@ -82,9 +82,12 @@ import org.junit.jupiter.api.Test;
 @WithMySql
 class AccountControllerIT {
 
+    @Autowired
+    private AccountClient accountClient;
+
     @Test
     void deveCriarConta() {
-        AccountClient.client()
+        accountClient
                 .create(AccountFactory.valid())
                 .expectCreated()
                 .expectNotNull("id");
@@ -97,7 +100,7 @@ class AccountControllerIT {
 - contexto completo do Spring Boot;
 - servidor HTTP em porta aleatória;
 - profile `test` ativo;
-- porta do RestAssured configurada automaticamente;
+- fábrica de requests configurada com a porta HTTP do contexto;
 - novo correlation ID para cada teste;
 - limpeza do contexto do teste ao final da execução.
 
@@ -160,7 +163,7 @@ As tabelas informadas em `excludeTables` não são truncadas durante a limpeza.
 
 ### Scripts opcionais e views
 
-Use `@WithDatabaseScripts` junto com `@WithMySql` quando o teste precisar criar e remover views, procedures, triggers ou preparar dados por SQL:
+Use `@WithDatabaseScripts` quando o teste precisar criar e remover views, procedures, triggers ou preparar dados por SQL. A anotação utiliza o `DataSource` disponível no contexto Spring e não é acoplada ao MySQL:
 
 ```java
 @PlatformIntegrationTest
@@ -193,7 +196,7 @@ Exemplo de limpeza idempotente:
 DROP VIEW IF EXISTS vw_active_catalogs;
 ```
 
-Por padrão, o `setup` é executado antes da classe e o `cleanup` depois da classe. Para executar os scripts em cada cenário:
+Por padrão, o `setup` é executado antes da classe e o `cleanup` depois da classe. Para executar os mesmos scripts em cada cenário da classe:
 
 ```java
 @WithDatabaseScripts(
@@ -205,6 +208,20 @@ Por padrão, o `setup` é executado antes da classe e o `cleanup` depois da clas
 ```
 
 Quando a execução ocorre por método, a ordem é: limpeza genérica do MySQL, `setup`, teste, `cleanup` e, quando configurada, limpeza genérica posterior. O `DatabaseCleaner` continua truncando somente tabelas; a remoção de views e outros objetos é responsabilidade do script de `cleanup`.
+
+Também é possível declarar um script diretamente no método. Nesse caso, o setup e o cleanup sempre envolvem somente aquele teste:
+
+```java
+@Test
+@WithDatabaseScripts(
+        setup = "classpath:sql/scenarios/create-pending-account.sql",
+        cleanup = "classpath:sql/scenarios/delete-pending-account.sql"
+)
+void deveProcessarContaPendente() {
+}
+```
+
+A anotação é repetível e pode combinar scripts estruturais e scripts de cenário. Um caminho inexistente ou sem permissão de leitura interrompe imediatamente o teste com uma mensagem contendo o recurso inválido.
 
 Os scripts são opcionais. A biblioteca não tenta gerar automaticamente o SQL inverso, e interrompe o teste no primeiro erro por padrão. `continueOnError = true` deve ser usado somente quando o cenário aceitar falhas parciais.
 
@@ -294,6 +311,18 @@ authorizationMock.internalError();
 authorizationMock.expiredSession();
 ```
 
+Também é possível verificar se o microsserviço chamou o autorizador com o contrato esperado:
+
+```java
+authorizationMock.verifyCalled();
+authorizationMock.verifyCalled(1);
+authorizationMock.verifyNotCalled();
+authorizationMock.verifyCalledWithAccount("account-123");
+authorizationMock.verifyCalledWithEnvironment("DEV");
+authorizationMock.verifyCalledWithApplication("application-456");
+authorizationMock.verifyCalledWithPolicy("ADMIN");
+```
+
 ### Customizar a sessão autorizada
 
 ```java
@@ -361,25 +390,44 @@ authorizationMock.custom(
 
 ## Clients de teste
 
-O módulo fornece `BaseClient` para centralizar a configuração comum do RestAssured:
+O módulo fornece `PlatformRequestSpecificationFactory`. A fábrica resolve a porta do servidor para cada request e não altera o estado global do RestAssured, permitindo execução paralela de contextos HTTP diferentes.
+
+Por padrão, a especificação contém somente JSON e `X-Correlation-Id`:
 
 ```java
-public final class AccountClient extends BaseClient {
+RequestSpecification request = requests.create();
+```
+
+Os headers de autorização são adicionados explicitamente:
+
+```java
+RequestSpecification request = requests.createAuthorized(
+        AuthorizationRequestData.builder()
+                .token("token-valido")
+                .accountId("account-123")
+                .environment("DEV")
+                .applicationId("account-api")
+                .build()
+);
+```
+
+O client do domínio pode usar composição:
+
+```java
+@Component
+public final class AccountClient {
 
     private static final String BASE_PATH = "/api/v1/accounts";
+    private final PlatformRequestSpecificationFactory requests;
 
-    private AccountClient() {
-        super();
-    }
-
-    public static AccountClient client() {
-        return new AccountClient();
+    public AccountClient(PlatformRequestSpecificationFactory requests) {
+        this.requests = requests;
     }
 
     public AccountResponse create(AccountRequest request) {
         return new AccountResponse(
-                given()
-                        .spec(spec)
+                RestAssured.given()
+                        .spec(requests.createAuthorized())
                         .body(request)
                         .when()
                         .post(BASE_PATH)
@@ -389,7 +437,7 @@ public final class AccountClient extends BaseClient {
 }
 ```
 
-O client específico do domínio permanece no microsserviço. A biblioteca fornece somente a configuração HTTP compartilhada.
+`BaseClient` permanece disponível como conveniência, mas exige a fábrica no construtor; herança não é obrigatória. Customizações comuns podem ser declaradas como beans de `PlatformRequestSpecificationCustomizer`.
 
 ## Responses fluentes
 
@@ -411,7 +459,7 @@ public final class AccountResponse extends BaseResponse<AccountResponse> {
 Isso permite escrever validações fluentes:
 
 ```java
-AccountClient.client()
+accountClient
         .create(AccountFactory.valid())
         .expectCreated()
         .expectNotNull("id")
@@ -480,7 +528,19 @@ Também está disponível o contrato mínimo `TestDataBuilder<T>` quando o proje
 
 ## Factories
 
-`AbstractTestDataFactory` conhece apenas o contrato do builder. Estados inválidos ou especiais pertencem ao microsserviço:
+O contrato principal é `TestDataFactory<T>` e pode ser implementado sem herança:
+
+```java
+public final class AccountFactory implements TestDataFactory<AccountRequest> {
+
+    @Override
+    public AccountRequest valid() {
+        return AccountBuilder.builder().build();
+    }
+}
+```
+
+`AbstractTestDataFactory` permanece como conveniência e também implementa esse contrato. Estados inválidos ou especiais pertencem ao microsserviço:
 
 ```java
 public final class AccountFactory
@@ -564,7 +624,7 @@ src/test/java/com/empresa/account
 | MySQL e Kafka Testcontainers | `platform-test-support` |
 | Mock do serviço de autorização | `platform-test-support` |
 | Limpeza genérica do banco | `platform-test-support` |
-| Configuração do RestAssured | `platform-test-support` |
+| Fábrica de requests RestAssured | `platform-test-support` |
 | Validações HTTP genéricas | `platform-test-support` |
 | Clients de endpoints específicos | Microsserviço |
 | Builders e factories do domínio | Microsserviço |
@@ -596,6 +656,9 @@ mvn verify
 @WithKafka
 class AccountControllerIT {
 
+    @Autowired
+    private AccountClient accountClient;
+
     @Test
     void deveCriarContaValida() {
         CatalogScenario.builder()
@@ -603,7 +666,7 @@ class AccountControllerIT {
                 .withOnboardingPhases()
                 .setup();
 
-        AccountClient.client()
+        accountClient
                 .create(AccountFactory.valid())
                 .expectCreated()
                 .expectNotNull("id");

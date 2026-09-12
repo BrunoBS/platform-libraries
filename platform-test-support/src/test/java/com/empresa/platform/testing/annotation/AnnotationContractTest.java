@@ -7,6 +7,9 @@ import com.empresa.platform.testing.authorization.AuthorizationMockResult;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.AnnotationSupport;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AnnotationContractTest {
@@ -28,6 +31,14 @@ class AnnotationContractTest {
             cleanup = "classpath:sql/drop-view.sql"
     )
     static class DefaultDatabaseScriptsTest {
+    }
+
+    static class MethodDatabaseScriptsTest {
+
+        @WithDatabaseScripts(setup = "classpath:sql/first.sql")
+        @WithDatabaseScripts(setup = "classpath:sql/second.sql")
+        void scenario() {
+        }
     }
 
     @Test
@@ -66,5 +77,18 @@ class AnnotationContractTest {
         assertThat(annotation.setupPhase()).isEqualTo(DatabaseSetupPhase.BEFORE_TEST_CLASS);
         assertThat(annotation.cleanupPhase()).isEqualTo(DatabaseCleanupPhase.AFTER_TEST_CLASS);
         assertThat(annotation.continueOnError()).isFalse();
+    }
+
+    @Test
+    void shouldAllowRepeatableScriptsOnTestMethod() throws NoSuchMethodException {
+        Method method = MethodDatabaseScriptsTest.class.getDeclaredMethod("scenario");
+        List<WithDatabaseScripts> annotations = AnnotationSupport.findRepeatableAnnotations(
+                method,
+                WithDatabaseScripts.class
+        );
+
+        assertThat(annotations).hasSize(2);
+        assertThat(annotations.getFirst().setup()).containsExactly("classpath:sql/first.sql");
+        assertThat(annotations.getLast().setup()).containsExactly("classpath:sql/second.sql");
     }
 }

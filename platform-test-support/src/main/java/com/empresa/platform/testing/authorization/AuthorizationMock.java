@@ -5,7 +5,9 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.Json;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 public final class AuthorizationMock {
@@ -64,5 +66,37 @@ public final class AuthorizationMock {
 
     public String baseUrl() {
         return server.baseUrl();
+    }
+
+    public void verifyCalled() {
+        verifyCalled(1);
+    }
+
+    public void verifyCalled(int times) {
+        server.verify(times, postRequestedFor(urlEqualTo(AUTHORIZATION_PATH)));
+    }
+
+    public void verifyNotCalled() {
+        verifyCalled(0);
+    }
+
+    public void verifyCalledWithAccount(String accountId) {
+        server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
+                .withHeader("X-Account-Id", equalTo(accountId)));
+    }
+
+    public void verifyCalledWithEnvironment(String environment) {
+        server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
+                .withHeader("X-Environment", equalTo(environment)));
+    }
+
+    public void verifyCalledWithApplication(String applicationId) {
+        server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
+                .withHeader("X-Application-Id", equalTo(applicationId)));
+    }
+
+    public void verifyCalledWithPolicy(String policy) {
+        server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
+                .withHeader("X-Policy", equalTo(policy)));
     }
 }

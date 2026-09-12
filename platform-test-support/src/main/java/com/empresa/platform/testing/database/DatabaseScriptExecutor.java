@@ -32,8 +32,18 @@ public final class DatabaseScriptExecutor {
             return;
         }
 
+        Arrays.stream(resources).forEach(DatabaseScriptExecutor::validate);
+
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(resources);
         populator.setContinueOnError(continueOnError);
         populator.execute(dataSource);
+    }
+
+    private static void validate(Resource resource) {
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new IllegalArgumentException(
+                    "Database script does not exist or is not readable: " + resource.getDescription()
+            );
+        }
     }
 }

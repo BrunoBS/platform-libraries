@@ -1,22 +1,24 @@
 package com.empresa.platform.testing.client;
 
-import com.empresa.platform.testing.context.TestContext;
-import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 
 public abstract class BaseClient {
 
-    protected final RequestSpecification spec;
+    private final PlatformRequestSpecificationFactory requests;
 
-    protected BaseClient() {
-        this(new RequestSpecBuilder()
-                .setContentType("application/json")
-                .addHeader("Authorization", "Bearer token-valido")
-                .addHeader("correlationId", TestContext.correlationId())
-                .build());
+    protected BaseClient(PlatformRequestSpecificationFactory factory) {
+        this.requests = factory;
     }
 
-    protected BaseClient(RequestSpecification spec) {
-        this.spec = spec;
+    protected final RequestSpecification request() {
+        return requests.create();
+    }
+
+    protected final RequestSpecification authorizedRequest() {
+        return requests.createAuthorized();
+    }
+
+    protected final RequestSpecification authorizedRequest(AuthorizationRequestData authorization) {
+        return requests.createAuthorized(authorization);
     }
 }

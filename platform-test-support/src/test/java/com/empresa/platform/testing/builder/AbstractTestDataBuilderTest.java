@@ -1,6 +1,7 @@
 package com.empresa.platform.testing.builder;
 
 import com.empresa.platform.testing.factory.AbstractTestDataFactory;
+import com.empresa.platform.testing.factory.TestDataFactory;
 import com.empresa.platform.testing.scenario.TestScenario;
 import org.junit.jupiter.api.Test;
 
@@ -70,5 +71,12 @@ class AbstractTestDataBuilderTest {
         TestScenario<Long> scenario = () -> 42L;
 
         assertThat(scenario.setup()).isEqualTo(42L);
+    }
+
+    @Test
+    void shouldAllowFactoryCompositionWithoutInheritance() {
+        TestDataFactory<ExampleRequest> factory = () -> new ExampleBuilder().build();
+
+        assertThat(factory.valid()).isEqualTo(new ExampleRequest("valid-name", true));
     }
 }
