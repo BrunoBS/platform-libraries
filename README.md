@@ -106,5 +106,5 @@ mvn clean verify
 * **Java 25** (Suporte nativo a *Virtual Threads* e APIs modernas de Record)
 * **Spring Boot 4.1.1**
 * **Logstash Logback Encoder 9.0**
-* **Spring Retry**
+* **Retry nativo do Spring Framework 7**
 * **JUnit 5 / Mockito**
