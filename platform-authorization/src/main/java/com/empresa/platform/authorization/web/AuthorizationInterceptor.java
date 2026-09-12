@@ -1,5 +1,6 @@
 package com.empresa.platform.authorization.web;
 
+import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.AuthorizationPolicy;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
@@ -63,10 +64,10 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         String applicationId = null;
 
         if (correlationId == null || correlationId.isBlank()) {
-            throw new UnauthorizedException("CORRELATION_ID_MISSING");
+            throw new UnauthorizedException(AuthorizationMessageKeys.CORRELATION_ID_MISSING);
         }
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new UnauthorizedException("AUTHORIZATION_TOKEN_MISSING");
+            throw new UnauthorizedException(AuthorizationMessageKeys.TOKEN_MISSING);
         }
 
         if (pathVariables != null) {
