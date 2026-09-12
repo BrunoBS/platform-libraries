@@ -8,8 +8,8 @@ import com.empresa.platform.authorization.resource.AuthorizableResource;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import com.empresa.platform.messaging.exception.ForbiddenException;
+import com.empresa.platform.messaging.exception.UnauthorizedException;
 
 import java.util.List;
 import java.util.Set;
@@ -79,24 +79,24 @@ class ResourceAuthorizationAspectTest {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(new TestResource("A-TWO"));
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        ForbiddenException exception = assertThrows(
+                ForbiddenException.class,
                 () -> aspect.authorize(joinPoint, annotation)
         );
 
-        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        assertEquals("authorization.resource.access.denied", exception.getMessageKey());
     }
 
     @Test
     void shouldRejectWhenSessionIsMissing() {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        ForbiddenException exception = assertThrows(
+                ForbiddenException.class,
                 () -> aspect.authorize(joinPoint, annotation)
         );
 
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        assertEquals("authorization.session.not.found", exception.getMessageKey());
         verifyNoInteractions(joinPoint);
     }
 
