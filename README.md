@@ -9,7 +9,7 @@ O **`platform-libraries`** é o ecossistema central de bibliotecas e *starters* 
 O projeto é estruturado como um reator multimódulos homogêneo, garantindo o alinhamento estrito de versões, releases unificadas e alta performance de classpath:
 
 ```text
-platform-libraries/ (POM Pai - Gestão de Versões e Java 21)
+platform-libraries/ (POM agregador - versões internas; build herdado do platform-parent)
 ├── platform-messaging/      -> Catálogo de Mensagens, Exceções Globais e Anti-SQL Injection
 ├── platform-authorization/  -> Motor de Segurança Híbrido, Interceptação HTTP e Mock de Ambientes
 └── platform-logging/        -> Padronização Cloud-Native de Logs Estruturados em JSON (Logstash)
@@ -91,20 +91,20 @@ platform:
 
 ## 🧪 Qualidade de Código e Testes
 
-O projeto possui **cobertura rigorosa de testes unitários e de integração de contexto (superior a 99%)**, validada de forma estrita no Java 21/25 utilizando o `ApplicationContextRunner` do Spring e isolamento térmico de memória de Threads (`ThreadLocal`).
+O projeto possui **cobertura rigorosa de testes unitários e de integração de contexto (superior a 99%)**, validada de forma estrita no Java 25 utilizando o `ApplicationContextRunner` do Spring e isolamento térmico de memória de Threads (`ThreadLocal`).
 
 Para rodar a suíte completa de testes locais e extrair os relatórios do JaCoCo, execute na pasta raiz:
 
 ```bash
-mvn clean test
+mvn clean verify
 ```
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-* **Java 21 / 25** (Suporte nativo a *Virtual Threads* e APIs modernas de Record)
-* **Spring Boot 4.0.0** / **Spring Framework 7.0.1**
-* **Logstash Logback Encoder 7.4**
+* **Java 25** (Suporte nativo a *Virtual Threads* e APIs modernas de Record)
+* **Spring Boot 4.1.1**
+* **Logstash Logback Encoder 9.0**
 * **Spring Retry**
 * **JUnit 5 / Mockito**

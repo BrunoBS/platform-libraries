@@ -21,7 +21,6 @@
         <dependency>
             <groupId>com.empresa.platform</groupId>
             <artifactId>platform-authorization</artifactId>
-            <version>${project.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -54,8 +53,7 @@
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
-            <artifactId>wiremock-standalone</artifactId>
-            <version>3.12.0</version>
+            <artifactId>wiremock</artifactId>
         </dependency>
     </dependencies>
 </project>

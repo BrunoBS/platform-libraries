@@ -19,14 +19,35 @@
             <id>github-platform-build</id>
             <name>GitHub Packages - Platform Build</name>
             <url>https://maven.pkg.github.com/BrunoBS/platform-build</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
         </repository>
     </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.empresa.platform</groupId>
+                <artifactId>platform-messaging</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.empresa.platform</groupId>
+                <artifactId>platform-authorization</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.empresa.platform</groupId>
+                <artifactId>platform-logging</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.empresa.platform</groupId>
+                <artifactId>platform-test-support</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <modules>
         <module>platform-messaging</module>
