@@ -12,7 +12,7 @@ O projeto é estruturado como um reator multimódulos homogêneo, garantindo o a
 platform-libraries/ (POM agregador - versões internas; build herdado do platform-parent)
 ├── platform-messaging/      -> Catálogo de Mensagens, Exceções Globais e Anti-SQL Injection
 ├── platform-authorization/  -> Motor de Segurança Híbrido, Interceptação HTTP e Mock de Ambientes
-└── platform-logging/        -> Padronização Cloud-Native de Logs Estruturados em JSON (Logstash)
+├── platform-logging/        -> Padronização Cloud-Native de Logs Estruturados em JSON (Logstash)\n└── platform-test-support/   -> Suporte reutilizável para testes unitários e de integração
 ```
 
 ---
