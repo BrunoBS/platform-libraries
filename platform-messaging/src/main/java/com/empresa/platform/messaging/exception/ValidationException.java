@@ -1,6 +1,8 @@
 package com.empresa.platform.messaging.exception;
 
+import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.model.ValidationDetail;
+import com.empresa.platform.messaging.validation.ValidationResult;
 
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,13 @@ import java.util.Map;
 public class ValidationException extends ApiException {
 
     private final List<ValidationDetail> details;
+
+    public ValidationException(ValidationResult validationResult) {
+        this(
+                PlatformMessageKeys.VALIDATION_FAILED,
+                validationResult == null ? List.of() : validationResult.getDetails()
+        );
+    }
 
     public ValidationException(String messageKey) {
         this(messageKey, Map.of(), List.of(), null);
