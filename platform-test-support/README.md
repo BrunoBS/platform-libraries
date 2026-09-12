@@ -188,6 +188,91 @@ class AccountFlowIT {
 
 Os containers são independentes. O teste utiliza somente as anotações correspondentes à infraestrutura necessária.
 
+## Mock de autorização
+
+Use `@WithMockAuthorization` nos testes que consomem a `platform-authorization`:
+
+```java
+@PlatformIntegrationTest
+@WithMySql
+@WithMockAuthorization
+class AccountControllerIT {
+
+    @Autowired
+    private AuthorizationMock authorizationMock;
+}
+```
+
+A anotação inicia um WireMock em porta aleatória, configura automaticamente `platform.authorization.service-url` e registra uma autorização permitida antes de cada teste.
+
+### Comportamento padrão da classe
+
+```java
+@WithMockAuthorization
+```
+
+Equivale a:
+
+```java
+@WithMockAuthorization(
+        defaultResult = AuthorizationMockResult.ALLOWED
+)
+```
+
+Também é possível definir outro comportamento inicial:
+
+```java
+@WithMockAuthorization(
+        defaultResult = AuthorizationMockResult.DENIED
+)
+```
+
+Valores disponíveis:
+
+- `ALLOWED`;
+- `DENIED`;
+- `FORBIDDEN`;
+- `INTERNAL_ERROR`.
+
+### Alterar o comportamento dentro do teste
+
+```java
+authorizationMock.allow();
+authorizationMock.deny();
+authorizationMock.forbidden();
+authorizationMock.internalError();
+authorizationMock.expiredSession();
+```
+
+### Customizar a sessão autorizada
+
+```java
+authorizationMock.allow(session -> session
+        .userName("bruno.barbosa")
+        .email("bruno@empresa.com")
+        .accountId("account-123")
+        .applicationId("application-456")
+        .environmentId("environment-789")
+        .groups("PM5_OWNER", "ADMIN")
+        .addAuthorizerGroup(
+                "GRP_APP_DEV_ADMIN",
+                "ADMIN",
+                "DEV",
+                "APP"
+        ));
+```
+
+O `AuthorizationSessionBuilder` produz diretamente o `UserSession` da `platform-authorization`, mantendo o mock alinhado ao contrato utilizado em produção.
+
+### Resposta totalmente customizada
+
+```java
+authorizationMock.custom(
+        429,
+        "{\"message\":\"Limite excedido\"}"
+);
+```
+
 ## Clients de teste
 
 O módulo fornece `BaseClient` para centralizar a configuração comum do RestAssured:
@@ -391,6 +476,7 @@ src/test/java/com/empresa/account
 |---|---|
 | Inicialização do Spring Boot | `platform-test-support` |
 | MySQL e Kafka Testcontainers | `platform-test-support` |
+| Mock do serviço de autorização | `platform-test-support` |
 | Limpeza genérica do banco | `platform-test-support` |
 | Configuração do RestAssured | `platform-test-support` |
 | Validações HTTP genéricas | `platform-test-support` |

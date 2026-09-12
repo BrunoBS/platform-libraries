@@ -1,6 +1,7 @@
 package com.empresa.platform.testing.annotation;
 
 import com.empresa.platform.testing.database.CleanupMode;
+import com.empresa.platform.testing.authorization.AuthorizationMockResult;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.AnnotationSupport;
 
@@ -14,6 +15,10 @@ class AnnotationContractTest {
 
     @WithMySql(cleanup = CleanupMode.NONE, excludeTables = {"catalog"})
     static class CustomMySqlTest {
+    }
+
+    @WithMockAuthorization
+    static class DefaultAuthorizationTest {
     }
 
     @Test
@@ -30,5 +35,14 @@ class AnnotationContractTest {
 
         assertThat(annotation.cleanup()).isEqualTo(CleanupMode.NONE);
         assertThat(annotation.excludeTables()).containsExactly("catalog");
+    }
+
+    @Test
+    void shouldAllowAuthorizationByDefault() {
+        WithMockAuthorization annotation = AnnotationSupport
+                .findAnnotation(DefaultAuthorizationTest.class, WithMockAuthorization.class)
+                .orElseThrow();
+
+        assertThat(annotation.defaultResult()).isEqualTo(AuthorizationMockResult.ALLOWED);
     }
 }
