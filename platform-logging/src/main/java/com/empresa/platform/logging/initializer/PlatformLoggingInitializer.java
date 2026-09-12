@@ -6,6 +6,8 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.NopStatusListener;
+import com.empresa.platform.logging.converter.JsonMessageConverter;
+import com.empresa.platform.logging.converter.JsonThrowableConverter;
 import com.empresa.platform.logging.converter.MaskingConverter;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -67,6 +69,8 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         PatternLayoutEncoder encoder = new PatternLayoutEncoder() {
             @Override
             public void start() {
+                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMessage", JsonMessageConverter.class.getName());
+                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonThrowable", JsonThrowableConverter.class.getName());
                 if (maskingEnabled) {
                     ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("corporateLgpdMask", MaskingConverter.class.getName());
                 }
@@ -100,13 +104,13 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
      * Monta a String do template estruturado do JSON aplicando o envelopamento infinito em cascata.
      */
     private String buildJsonPattern(String serviceName, String appVersion, boolean maskingEnabled, Map<String, String> customConverters) {
-        String messageToken = maskingEnabled ? "%corporateLgpdMask" : "%message";
+        String messageToken = maskingEnabled ? "%corporateLgpdMask" : "%jsonMessage";
         for (String userTag : customConverters.keySet()) {
             messageToken = String.format("%%%s({%s})", userTag, messageToken);
         }
 
         return String.format(
-                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%%property{HOSTNAME:-unknown-host}\",\"context\":%%mdc}%%n",
+                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%%property{HOSTNAME:-unknown-host}\",\"context\":%%mdc,\"exception\":\"%%jsonThrowable\"}%%n",
                 messageToken, serviceName, appVersion
         );
     }
