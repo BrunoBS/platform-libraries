@@ -91,8 +91,8 @@ class ResourceAuthorizationAspectTest {
     void shouldRejectWhenSessionIsMissing() {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
 
-        ForbiddenException exception = assertThrows(
-                ForbiddenException.class,
+        UnauthorizedException exception = assertThrows(
+                UnauthorizedException.class,
                 () -> aspect.authorize(joinPoint, annotation)
         );
 
