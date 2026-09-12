@@ -52,10 +52,11 @@ class ApiExceptionHandlerLocaleTest {
     private static ApiMessage message() {
         return new ApiMessage(
                 "ERR-0001",
-                HttpStatus.BAD_REQUEST.value(),
+                "test.message",
+                "pt-BR",
                 "Mensagem",
                 "Solução",
-                "pt-BR"
+                HttpStatus.BAD_REQUEST.value()
         );
     }
 }
