@@ -13,36 +13,29 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Dependência interna da plataforma corporativa -->
         <dependency>
             <groupId>com.empresa.platform</groupId>
             <artifactId>platform-messaging</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Spring Boot Starter Web (Versão automática do Spring Boot 4) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Dependência do Spring AOP (Versão automática do Spring Boot 4) -->
-        <!-- Suporte nativo a AOP e Aspectos no Spring Boot 4 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aspectj</artifactId>
+            <artifactId>spring-boot-starter-aop</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Suporte a resiliência (A versão será injetada via dependencyManagement do pai) -->
         <dependency>
             <groupId>org.springframework.retry</groupId>
             <artifactId>spring-retry</artifactId>
         </dependency>
 
-
-        <!-- Dependências de Teste (Versão automática do Spring Boot 4) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
