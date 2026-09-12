@@ -136,6 +136,13 @@ public class ApiExceptionHandler {
             ValidationDetail detail,
             Locale locale
     ) {
+        if (detail.messageKey() == null || detail.messageKey().isBlank()) {
+            return new ApiValidationDetail(
+                    detail.field(),
+                    detail.defaultMessage()
+            );
+        }
+
         ApiMessage message = resolver.resolve(detail.messageKey(), locale);
 
         return new ApiValidationDetail(
