@@ -26,7 +26,7 @@ class ModelAndAnnotationTest {
     void testUserSessionLogic() {
         UserSession session = new UserSession();
         session.setUserName("bruno");
-        session.setGroups(Set.of("PM5_ORWER", "USER"));
+        session.setGroups(Set.of("PM5_OWNER", "USER"));
         
         ParsedGroup parsed = new ParsedGroup("full", "prof", "env", "PAYMENT_SERVICE");
         session.setAuthorizerGroups(Set.of(parsed));
