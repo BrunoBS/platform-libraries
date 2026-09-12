@@ -21,6 +21,9 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
+    public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+    public static final String LEGACY_CORRELATION_ID_HEADER = "correlationId";
+
     private final AuthorizationClientService authorizationClientService;
     private final AuthorizationMetadataRegistry authorizationMetadataRegistry;
 
@@ -48,17 +51,17 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
                 handlerMethod.getMethod()
         );
 
-        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
+                HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE
+        );
 
-        // Ajustado para ler usando a chave dinâmica configurada (ex: correlationId ou X-Correlation-Id)
-        String correlationId = request.getHeader("correlationId"); // Fallback amigável
+        String correlationId = resolveCorrelationId(request);
         String userAgent = request.getHeader("User-Agent");
         String authHeader = request.getHeader("Authorization");
         String accountId = null;
         String environmentId = null;
         String applicationId = null;
 
-        // VALIDAÇÕES: Disparam erros controlados do platform-messaging que acionam o catálogo automático
         if (correlationId == null || correlationId.isBlank()) {
             throw new UnauthorizedException("CORRELATION_ID_MISSING");
         }
@@ -72,7 +75,6 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             applicationId = pathVariables.get("applicationId");
         }
 
-        // Chamada oficial ao servidor central de autorização
         UserSession body = authorizationClientService.authorize(
                 correlationId,
                 authHeader,
@@ -85,7 +87,6 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
         UserContext.set(body);
 
-        // Popula os metadados do MDC para auditoria e logs estruturados
         MDC.put("correlationId", body.getTraceId());
         MDC.put("username", body.getUserName());
         MDC.put("clientIp", request.getRemoteAddr());
@@ -98,6 +99,14 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    private String resolveCorrelationId(HttpServletRequest request) {
+        String correlationId = request.getHeader(CORRELATION_ID_HEADER);
+        if (correlationId == null || correlationId.isBlank()) {
+            correlationId = request.getHeader(LEGACY_CORRELATION_ID_HEADER);
+        }
+        return correlationId;
+    }
+
     @Override
     public void afterCompletion(
             @Nonnull HttpServletRequest request,
@@ -105,7 +114,6 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             @Nonnull Object handler,
             Exception ex
     ) {
-        // SEGURANÇA MÁXIMA: Limpa o ThreadLocal e o MDC para evitar Memory Leaks e mistura de sessões de usuários
         UserContext.clear();
         MDC.clear();
     }
