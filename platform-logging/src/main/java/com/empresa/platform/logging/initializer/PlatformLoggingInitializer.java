@@ -100,7 +100,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
      * Monta a String do template estruturado do JSON aplicando o envelopamento infinito em cascata.
      */
     private String buildJsonPattern(String serviceName, String appVersion, boolean maskingEnabled, Map<String, String> customConverters) {
-        String messageToken = maskingEnabled ? "%%corporateLgpdMask" : "%%message";
+        String messageToken = maskingEnabled ? "%corporateLgpdMask" : "%message";
         for (String userTag : customConverters.keySet()) {
             messageToken = String.format("%%%s({%s})", userTag, messageToken);
         }
