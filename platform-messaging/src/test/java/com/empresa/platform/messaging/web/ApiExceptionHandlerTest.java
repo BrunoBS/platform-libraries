@@ -1,6 +1,5 @@
 package com.empresa.platform.messaging.web;
 
-import com.empresa.platform.messaging.config.PlatformMessagingProperties;
 import com.empresa.platform.messaging.exception.ApiException;
 import com.empresa.platform.messaging.exception.ApiMessageNotFoundException;
 import com.empresa.platform.messaging.exception.NotFoundException;
@@ -25,16 +24,14 @@ import static org.mockito.Mockito.*;
 class ApiExceptionHandlerTest {
 
     private ApiMessageResolver resolver;
-    private PlatformMessagingProperties properties;
     private HttpServletRequest request;
     private ApiExceptionHandler handler;
 
     @BeforeEach
     void setUp() {
         resolver = mock(ApiMessageResolver.class);
-        properties = new PlatformMessagingProperties();
         request = mock(HttpServletRequest.class);
-        handler = new ApiExceptionHandler(resolver, properties);
+        handler = new ApiExceptionHandler(resolver);
         MDC.clear(); // Garante isolamento limpando o MDC antes de cada teste
     }
 
