@@ -2,54 +2,35 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.empresa.platform</groupId>
+    <parent>
+        <groupId>com.empresa.platform</groupId>
+        <artifactId>platform-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
     <artifactId>platform-libraries</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>platform-libraries</name>
+
+    <repositories>
+        <repository>
+            <id>github-platform-build</id>
+            <name>GitHub Packages - Platform Build</name>
+            <url>https://maven.pkg.github.com/BrunoBS/platform-build</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <modules>
         <module>platform-messaging</module>
         <module>platform-authorization</module>
         <module>platform-logging</module>
     </modules>
-    <properties>
-        <java.version>21</java.version>
-        <maven.compiler.release>21</maven.compiler.release>
-        <spring-boot.version>4.0.0</spring-boot.version>
-        <spring-retry.version>2.0.13</spring-retry.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- BOM Oficial do Spring Boot 4 para gerenciar as versões filhas -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.retry</groupId>
-                <artifactId>spring-retry</artifactId>
-                <version>${spring-retry.version}</version>
-            </dependency>
-
-        </dependencies>
-    </dependencyManagement>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <release>${maven.compiler.release}</release>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>
