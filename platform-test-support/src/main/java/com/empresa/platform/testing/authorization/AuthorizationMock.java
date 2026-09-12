@@ -4,8 +4,6 @@ import com.empresa.platform.authorization.model.UserSession;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.Json;
 
-import java.util.function.Consumer;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -30,9 +28,9 @@ public final class AuthorizationMock {
         });
     }
 
-    public void allow(Consumer<AuthorizationSessionBuilder> customizer) {
+    public void allow(AuthorizationSessionCustomizer customizer) {
         AuthorizationSessionBuilder builder = AuthorizationSessionBuilder.builder();
-        customizer.accept(builder);
+        customizer.customize(builder);
         allow(builder.build());
     }
 

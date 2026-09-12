@@ -20,7 +20,10 @@ public final class AuthorizationMockExtension implements BeforeEachCallback {
         authorizationMock.reset();
 
         switch (configuration.defaultResult()) {
-            case ALLOWED -> authorizationMock.allow();
+            case ALLOWED -> authorizationMock.allow(session -> applicationContext
+                    .getBeanProvider(AuthorizationSessionCustomizer.class)
+                    .orderedStream()
+                    .forEach(customizer -> customizer.customize(session)));
             case DENIED -> authorizationMock.deny();
             case FORBIDDEN -> authorizationMock.forbidden();
             case INTERNAL_ERROR -> authorizationMock.internalError();

@@ -158,6 +158,56 @@ As tabelas informadas em `excludeTables` não são truncadas durante a limpeza.
 
 > Testes que compartilham o mesmo banco não devem ser executados em paralelo quando utilizam limpeza automática.
 
+### Scripts opcionais e views
+
+Use `@WithDatabaseScripts` junto com `@WithMySql` quando o teste precisar criar e remover views, procedures, triggers ou preparar dados por SQL:
+
+```java
+@PlatformIntegrationTest
+@WithMySql
+@WithDatabaseScripts(
+        setup = "classpath:sql/views/create-catalog-views.sql",
+        cleanup = "classpath:sql/views/drop-catalog-views.sql"
+)
+class CatalogRepositoryIT {
+}
+```
+
+Os arquivos pertencem ao microsserviço consumidor:
+
+```text
+src/test/resources/sql/views/create-catalog-views.sql
+src/test/resources/sql/views/drop-catalog-views.sql
+```
+
+Exemplo de criação:
+
+```sql
+CREATE OR REPLACE VIEW vw_active_catalogs AS
+SELECT * FROM catalogs WHERE active = true;
+```
+
+Exemplo de limpeza idempotente:
+
+```sql
+DROP VIEW IF EXISTS vw_active_catalogs;
+```
+
+Por padrão, o `setup` é executado antes da classe e o `cleanup` depois da classe. Para executar os scripts em cada cenário:
+
+```java
+@WithDatabaseScripts(
+        setup = "classpath:sql/scenarios/create-data.sql",
+        cleanup = "classpath:sql/scenarios/remove-data.sql",
+        setupPhase = DatabaseSetupPhase.BEFORE_EACH,
+        cleanupPhase = DatabaseCleanupPhase.AFTER_EACH
+)
+```
+
+Quando a execução ocorre por método, a ordem é: limpeza genérica do MySQL, `setup`, teste, `cleanup` e, quando configurada, limpeza genérica posterior. O `DatabaseCleaner` continua truncando somente tabelas; a remoção de views e outros objetos é responsabilidade do script de `cleanup`.
+
+Os scripts são opcionais. A biblioteca não tenta gerar automaticamente o SQL inverso, e interrompe o teste no primeiro erro por padrão. `continueOnError = true` deve ser usado somente quando o cenário aceitar falhas parciais.
+
 ## Kafka
 
 Adicione `@WithKafka` somente nos testes que necessitam do broker:
@@ -263,6 +313,42 @@ authorizationMock.allow(session -> session
 ```
 
 O `AuthorizationSessionBuilder` produz diretamente o `UserSession` da `platform-authorization`, mantendo o mock alinhado ao contrato utilizado em produção.
+
+Não é necessário herdar nem implementar um helper de autorização. O endpoint, os códigos de resposta, a serialização e a configuração do WireMock são fornecidos integralmente pela biblioteca; o microsserviço informa somente os dados variáveis da sessão.
+
+### Sessão padrão do microsserviço
+
+Quando vários testes utilizam a mesma sessão, o microsserviço pode declarar um customizador funcional:
+
+```java
+@TestConfiguration(proxyBeanMethods = false)
+class AccountAuthorizationTestConfiguration {
+
+    @Bean
+    AuthorizationSessionCustomizer accountTestSession() {
+        return session -> session
+                .userName("integration-account")
+                .accountId("account-123")
+                .applicationId("account-api")
+                .environmentId("DEV")
+                .groups("PM5_OWNER");
+    }
+}
+```
+
+Importe essa configuração no teste que utilizar o autorizador:
+
+```java
+@PlatformIntegrationTest
+@WithMockAuthorization
+@Import(AccountAuthorizationTestConfiguration.class)
+class AccountControllerIT {
+}
+```
+
+Todo teste com `@WithMockAuthorization` utilizará esse customizador para o resultado `ALLOWED`. É possível declarar mais de um customizador; o Spring aplica todos na ordem configurada. Um teste ainda pode substituir o comportamento do cenário chamando `authorizationMock.allow(session -> ...)`.
+
+O recurso é opcional: sem `@WithMockAuthorization`, nenhum WireMock, bean ou propriedade de autorização é criado. A dependência da `platform-authorization` também é marcada como opcional no `platform-test-support`; o microsserviço só precisa dela quando efetivamente utiliza o autorizador.
 
 ### Resposta totalmente customizada
 

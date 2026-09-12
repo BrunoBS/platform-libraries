@@ -1,6 +1,8 @@
 package com.empresa.platform.testing.annotation;
 
 import com.empresa.platform.testing.database.CleanupMode;
+import com.empresa.platform.testing.database.DatabaseCleanupPhase;
+import com.empresa.platform.testing.database.DatabaseSetupPhase;
 import com.empresa.platform.testing.authorization.AuthorizationMockResult;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.AnnotationSupport;
@@ -19,6 +21,13 @@ class AnnotationContractTest {
 
     @WithMockAuthorization
     static class DefaultAuthorizationTest {
+    }
+
+    @WithDatabaseScripts(
+            setup = "classpath:sql/create-view.sql",
+            cleanup = "classpath:sql/drop-view.sql"
+    )
+    static class DefaultDatabaseScriptsTest {
     }
 
     @Test
@@ -44,5 +53,18 @@ class AnnotationContractTest {
                 .orElseThrow();
 
         assertThat(annotation.defaultResult()).isEqualTo(AuthorizationMockResult.ALLOWED);
+    }
+
+    @Test
+    void shouldExposeDatabaseScriptLifecycle() {
+        WithDatabaseScripts annotation = AnnotationSupport
+                .findAnnotation(DefaultDatabaseScriptsTest.class, WithDatabaseScripts.class)
+                .orElseThrow();
+
+        assertThat(annotation.setup()).containsExactly("classpath:sql/create-view.sql");
+        assertThat(annotation.cleanup()).containsExactly("classpath:sql/drop-view.sql");
+        assertThat(annotation.setupPhase()).isEqualTo(DatabaseSetupPhase.BEFORE_TEST_CLASS);
+        assertThat(annotation.cleanupPhase()).isEqualTo(DatabaseCleanupPhase.AFTER_TEST_CLASS);
+        assertThat(annotation.continueOnError()).isFalse();
     }
 }
