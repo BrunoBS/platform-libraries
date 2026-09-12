@@ -42,6 +42,8 @@ class ApiExceptionHandlerTest {
         MDC.put(traceKey, "MDC-12345");
 
         when(request.getRequestURI()).thenReturn("/api/v1/users");
+        when(request.getHeader("Accept-Language")).thenReturn("pt-BR");
+        when(request.getLocale()).thenReturn(Locale.of("pt", "BR"));
         when(resolver.resolve("USER_NOT_FOUND", Locale.of("pt", "BR")))
                 .thenReturn(new ApiMessage("ERR-404", "USER_NOT_FOUND", "pt-BR", "Usuário {id} não achado", "Crie o usuário", 404));
 
@@ -65,6 +67,8 @@ class ApiExceptionHandlerTest {
     void shouldHandleApiExceptionWithCauseAndFallbackUuid() {
         // Arrangeo (força UUID randômico)
         when(request.getRequestURI()).thenReturn("/api/v1/payments");
+        when(request.getHeader("Accept-Language")).thenReturn("en-US");
+        when(request.getLocale()).thenReturn(Locale.US);
 
         when(resolver.resolve("PAYMENT_FAILED", Locale.US))
                 .thenReturn(new ApiMessage("ERR-500", "PAYMENT_FAILED", "en", "Payment failed", "Retry later", 500));
@@ -86,6 +90,8 @@ class ApiExceptionHandlerTest {
     void shouldHandleApiMessageNotFoundExceptionInsideTryBlock() {
         // Arrange
         when(request.getRequestURI()).thenReturn("/api/v1/orders");
+        when(request.getHeader("Accept-Language")).thenReturn("pt-BR");
+        when(request.getLocale()).thenReturn(Locale.of("pt", "BR"));
         // Força o resolver a estourar a exceção de chave inexistente dentro do handle principal
         when(resolver.resolve("UNKNOWN_KEY", Locale.of("pt", "BR")))
                 .thenThrow(new ApiMessageNotFoundException("UNKNOWN_KEY"));
@@ -109,6 +115,8 @@ class ApiExceptionHandlerTest {
         when(request.getRequestURI()).thenReturn("/api/v1/accounts");
 
         Locale locale = Locale.of("pt", "BR");
+        when(request.getHeader("Accept-Language")).thenReturn("pt-BR");
+        when(request.getLocale()).thenReturn(locale);
 
         when(resolver.resolve("global.validation.failed", locale))
                 .thenReturn(new ApiMessage(
