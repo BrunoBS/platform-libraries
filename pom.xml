@@ -32,5 +32,6 @@
         <module>platform-messaging</module>
         <module>platform-authorization</module>
         <module>platform-logging</module>
+        <module>platform-test-support</module>
     </modules>
 </project>
