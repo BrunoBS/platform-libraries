@@ -238,7 +238,8 @@ public class ApiExceptionHandler {
             HttpServletRequest request
     ) {
         try {
-            ApiMessage message = resolver.resolve(exception.getMessageKey(), locale);
+            Locale requestLocale = resolveRequestLocale(request, locale);
+            ApiMessage message = resolver.resolve(exception.getMessageKey(), requestLocale);
 
             ApiErrorResponse response = new ApiErrorResponse(
                     message.code(),
@@ -250,7 +251,7 @@ public class ApiExceptionHandler {
                             message.solution(),
                             exception.getParameters()
                     ),
-                    resolveValidationDetails(exception, locale),
+                    resolveValidationDetails(exception, requestLocale),
                     Instant.now(),
                     request.getRequestURI(),
                     MDC.get("correlationId")
@@ -260,6 +261,16 @@ public class ApiExceptionHandler {
         } catch (ApiMessageNotFoundException exceptionNotFound) {
             return handleNotFound(exceptionNotFound, request);
         }
+    }
+
+    private Locale resolveRequestLocale(HttpServletRequest request, Locale fallbackLocale) {
+        String acceptLanguage = request.getHeader("Accept-Language");
+        if (acceptLanguage == null || acceptLanguage.isBlank()) {
+            return null;
+        }
+
+        Locale requestLocale = request.getLocale();
+        return requestLocale != null ? requestLocale : fallbackLocale;
     }
 
     private List<ApiValidationDetail> resolveValidationDetails(
