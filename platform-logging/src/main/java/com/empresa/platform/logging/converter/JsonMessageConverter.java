@@ -17,7 +17,7 @@ public class JsonMessageConverter extends MessageConverter {
 
         return value
                 .replace("\\", "\\\\")
-                .replace(""", "\\"")
+                .replace("\"", "\\\"")
                 .replace("\r", "\\r")
                 .replace("\n", "\\n")
                 .replace("\t", "\\t");
