@@ -1,6 +1,7 @@
 package com.empresa.platform.authorization.aspect;
 
 import com.empresa.platform.authorization.annotation.ResourceAuthorization;
+import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.resource.AuthorizableResource;
@@ -9,8 +10,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import com.empresa.platform.messaging.exception.ForbiddenException;
+import com.empresa.platform.messaging.exception.UnauthorizedException;
 
 import java.util.Collection;
 
@@ -26,9 +27,8 @@ public class ResourceAuthorizationAspect {
     ) throws Throwable {
 
         UserSession session = UserContext.get()
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED,
-                        "Sessão inválida."
+                .orElseThrow(() -> new UnauthorizedException(
+                        AuthorizationMessageKeys.SESSION_NOT_FOUND
                 ));
 
         if (session.isOwner()) {
@@ -38,9 +38,8 @@ public class ResourceAuthorizationAspect {
 
         if (session.getGroups().isEmpty()) {
             log.warn("Tentativa de acesso a recurso sem grupos mapeados.");
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Sessão inválida."
+            throw new UnauthorizedException(
+                    AuthorizationMessageKeys.GROUPS_NOT_FOUND
             );
         }
 
@@ -59,9 +58,8 @@ public class ResourceAuthorizationAspect {
                     result.getClass().getSimpleName()
             );
 
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Acesso negado ao recurso."
+            throw new ForbiddenException(
+                    AuthorizationMessageKeys.RESOURCE_ACCESS_DENIED
             );
         }
 
