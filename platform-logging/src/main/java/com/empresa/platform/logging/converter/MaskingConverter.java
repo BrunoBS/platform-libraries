@@ -29,7 +29,7 @@ public class MaskingConverter extends MessageConverter {
         maskedMessage = maskCard(maskedMessage);
         maskedMessage = maskEmail(maskedMessage);
 
-        return maskedMessage;
+        return JsonMessageConverter.escapeJson(maskedMessage);
     }
 
     private String maskCpf(String text) {
