@@ -18,7 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
                 "platform.authorization.enabled=false",
-                "platform.messaging.enabled=false"
+                "platform.messaging.enabled=false",
+                "spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration"
         }
 )
 @WithKafka
