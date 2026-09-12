@@ -2,6 +2,8 @@
 
 O `platform-test-support` é a biblioteca compartilhada para padronização dos testes de integração dos microsserviços da plataforma.
 
+Para uma adoção passo a passo, consulte o [Guia completo de uso](GUIA_DE_USO.md).
+
 O módulo centraliza a inicialização do Spring Boot, Testcontainers, MySQL, Kafka, RestAssured, limpeza do banco e abstrações reutilizáveis para clients, responses, builders e factories de teste.
 
 ## Objetivo
@@ -85,10 +87,13 @@ class AccountControllerIT {
     @Autowired
     private AccountClient accountClient;
 
+    @Autowired
+    private AccountFactory accountFactory;
+
     @Test
     void deveCriarConta() {
         accountClient
-                .create(AccountFactory.valid())
+                .create(accountFactory.valid())
                 .expectCreated()
                 .expectNotNull("id");
     }
@@ -460,7 +465,7 @@ Isso permite escrever validações fluentes:
 
 ```java
 accountClient
-        .create(AccountFactory.valid())
+        .create(accountFactory.valid())
         .expectCreated()
         .expectNotNull("id")
         .expect("name", "Conta de teste");
@@ -659,6 +664,9 @@ class AccountControllerIT {
     @Autowired
     private AccountClient accountClient;
 
+    @Autowired
+    private AccountFactory accountFactory;
+
     @Test
     void deveCriarContaValida() {
         CatalogScenario.builder()
@@ -667,7 +675,7 @@ class AccountControllerIT {
                 .setup();
 
         accountClient
-                .create(AccountFactory.valid())
+                .create(accountFactory.valid())
                 .expectCreated()
                 .expectNotNull("id");
     }
