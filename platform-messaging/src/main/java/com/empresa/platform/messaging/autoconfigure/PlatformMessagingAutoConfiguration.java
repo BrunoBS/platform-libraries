@@ -48,7 +48,7 @@ public class PlatformMessagingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    ApiExceptionHandler apiExceptionHandler(ApiMessageResolver r, PlatformMessagingProperties p) {
-        return new ApiExceptionHandler(r, p);
+    ApiExceptionHandler apiExceptionHandler(ApiMessageResolver r) {
+        return new ApiExceptionHandler(r);
     }
 }
