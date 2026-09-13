@@ -7,20 +7,6 @@ import com.empresa.platform.messaging.validation.ValidationResult;
 public abstract class BaseCrudValidator<D, ID> {
 
     public void validateForCreate(D dto) {
-        validateCreate(dto);
-    }
-
-    public void validateForUpdate(ID id, D dto) {
-        validateUpdate(id, dto);
-    }
-
-    public void validateForDelete(ID id) {
-        ValidationResult result = new ValidationResult();
-        validateDelete(id, result);
-        throwIfInvalid(result);
-    }
-
-    protected void validateCreate(D dto) {
         ValidationResult result = new ValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
@@ -31,7 +17,7 @@ public abstract class BaseCrudValidator<D, ID> {
         throwIfInvalid(result);
     }
 
-    protected void validateUpdate(ID id, D dto) {
+    public void validateForUpdate(ID id, D dto) {
         ValidationResult result = new ValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
@@ -39,6 +25,12 @@ public abstract class BaseCrudValidator<D, ID> {
             validateUpdateIntegrity(id, dto, result);
             validateAdditionalUpdate(id, dto, result);
         }
+        throwIfInvalid(result);
+    }
+
+    public void validateForDelete(ID id) {
+        ValidationResult result = new ValidationResult();
+        validateDelete(id, result);
         throwIfInvalid(result);
     }
 
