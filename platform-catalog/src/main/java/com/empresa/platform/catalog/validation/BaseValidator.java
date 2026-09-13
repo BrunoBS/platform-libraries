@@ -1,9 +1,12 @@
 package com.empresa.platform.catalog.validation;
 
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
+import com.empresa.platform.catalog.exception.CatalogValidationException;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
-import com.empresa.platform.messaging.validation.ValidationResult;
+import com.empresa.platform.crud.validation.CrudValidationResult;
+
+import java.util.Map;
 
 public abstract class BaseValidator<D extends BaseCatalogDTO<D>>
         extends BaseCrudValidator<D, Long> {
@@ -14,30 +17,39 @@ public abstract class BaseValidator<D extends BaseCatalogDTO<D>>
     }
 
     @Override
-    protected void validateCreateIntegrity(D dto, ValidationResult result) {
+    protected void validateCreateIntegrity(D dto, CrudValidationResult result) {
         validateIntegrity(dto, result);
     }
 
     @Override
-    protected void validateUpdateIntegrity(Long id, D dto, ValidationResult result) {
+    protected void validateUpdateIntegrity(Long id, D dto, CrudValidationResult result) {
         validateIntegrity(dto, result);
     }
 
     @Override
-    protected void validateAdditionalCreate(D dto, ValidationResult result) {
+    protected void validateAdditionalCreate(D dto, CrudValidationResult result) {
         validateAdditionalFields(dto, result);
     }
 
     @Override
-    protected void validateAdditionalUpdate(Long id, D dto, ValidationResult result) {
+    protected void validateAdditionalUpdate(Long id, D dto, CrudValidationResult result) {
         validateAdditionalFields(dto, result);
     }
 
-    protected void validateAdditionalFields(D dto, ValidationResult result) {
+    @Override
+    protected RuntimeException validationException(CrudValidationResult result) {
+        return new CatalogValidationException(
+                CatalogMessageKeys.VALIDATION_FAILED,
+                result.getDetails(),
+                Map.of("0", entityName())
+        );
     }
 
-    protected abstract void validateIntegrity(D dto, ValidationResult result);
+    protected void validateAdditionalFields(D dto, CrudValidationResult result) {
+    }
+
+    protected abstract void validateIntegrity(D dto, CrudValidationResult result);
 
     @Override
-    protected abstract void validateAttributes(D dto, ValidationResult result);
+    protected abstract void validateAttributes(D dto, CrudValidationResult result);
 }
