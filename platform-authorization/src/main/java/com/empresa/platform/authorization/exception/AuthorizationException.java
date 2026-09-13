@@ -1,20 +1,21 @@
 package com.empresa.platform.authorization.exception;
 
-public abstract class AuthorizationException extends RuntimeException {
+import com.empresa.platform.messaging.exception.ApiException;
 
-    private final String code;
+public abstract class AuthorizationException extends ApiException {
 
-    protected AuthorizationException(String code) {
-        super(code);
-        this.code = code;
+    protected AuthorizationException(String messageKey) {
+        super(messageKey);
     }
 
-    protected AuthorizationException(String code, Throwable cause) {
-        super(code, cause);
-        this.code = code;
+    protected AuthorizationException(String messageKey, Throwable cause) {
+        super(messageKey, cause);
     }
 
+    /**
+     * Backward-compatible alias for the authorization message key.
+     */
     public String getCode() {
-        return code;
+        return getMessageKey();
     }
 }
