@@ -54,7 +54,7 @@ O serviço consumidor declara somente:
 
 As versões são gerenciadas pelo `platform-parent` e não precisam ser informadas pelo serviço consumidor.
 
-Quando `platform-starter` estiver declarado, o consumidor não deve declarar diretamente `platform-logging`, `platform-messaging` ou `platform-authorization`. O `platform-parent` aplica uma regra do Maven Enforcer que falha o build caso essa composição redundante seja detectada.
+Quando `platform-starter` estiver declarado, o consumidor **não deve declarar novamente** `platform-logging`, `platform-messaging` ou `platform-authorization`. Essa é uma convenção de composição da plataforma, documentada para evitar redundância no POM; não é tratada como erro técnico pelo Maven Enforcer.
 
 Capabilities específicas, como `platform-crud` e `platform-catalog`, continuam sendo declaradas somente quando necessárias.
 
