@@ -15,11 +15,11 @@ import java.util.Map;
  */
 public abstract class EnumCatalogValidator<
         E extends Enum<E> & CatalogEnum<E>,
-        D extends BaseCatalogDTO<D, Long>> extends BaseCatalogValidator<D> {
+        D extends BaseCatalogDTO<D>> extends BaseCatalogValidator<D> {
 
     private final Class<E> enumClass;
 
-    protected EnumCatalogValidator(BaseCatalogRepository<?, Long> repository, Class<E> enumClass) {
+    protected EnumCatalogValidator(BaseCatalogRepository<?> repository, Class<E> enumClass) {
         super(repository);
         this.enumClass = enumClass;
     }
