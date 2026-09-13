@@ -1,12 +1,12 @@
 package com.empresa.platform.authorization.web;
 
+import com.empresa.platform.authorization.exception.UnauthorizedAccessException;
 import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.AuthorizationPolicy;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
-import com.empresa.platform.messaging.exception.UnauthorizedException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -64,10 +64,10 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         String applicationId = null;
 
         if (correlationId == null || correlationId.isBlank()) {
-            throw new UnauthorizedException(AuthorizationMessageKeys.CORRELATION_ID_MISSING);
+            throw new UnauthorizedAccessException(AuthorizationMessageKeys.CORRELATION_ID_MISSING);
         }
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new UnauthorizedException(AuthorizationMessageKeys.TOKEN_MISSING);
+            throw new UnauthorizedAccessException(AuthorizationMessageKeys.TOKEN_MISSING);
         }
 
         if (pathVariables != null) {
