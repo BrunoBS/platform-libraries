@@ -1,6 +1,8 @@
 package com.empresa.platform.authorization.aspect;
 
 import com.empresa.platform.authorization.annotation.ResourceAuthorization;
+import com.empresa.platform.authorization.exception.ForbiddenAccessException;
+import com.empresa.platform.authorization.exception.UnauthorizedAccessException;
 import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
@@ -10,8 +12,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.empresa.platform.messaging.exception.ForbiddenException;
-import com.empresa.platform.messaging.exception.UnauthorizedException;
 
 import java.util.Collection;
 
@@ -27,7 +27,7 @@ public class ResourceAuthorizationAspect {
     ) throws Throwable {
 
         UserSession session = UserContext.get()
-                .orElseThrow(() -> new UnauthorizedException(
+                .orElseThrow(() -> new UnauthorizedAccessException(
                         AuthorizationMessageKeys.SESSION_NOT_FOUND
                 ));
 
@@ -38,7 +38,7 @@ public class ResourceAuthorizationAspect {
 
         if (session.getGroups().isEmpty()) {
             log.warn("Tentativa de acesso a recurso sem grupos mapeados.");
-            throw new UnauthorizedException(
+            throw new UnauthorizedAccessException(
                     AuthorizationMessageKeys.GROUPS_NOT_FOUND
             );
         }
@@ -58,7 +58,7 @@ public class ResourceAuthorizationAspect {
                     result.getClass().getSimpleName()
             );
 
-            throw new ForbiddenException(
+            throw new ForbiddenAccessException(
                     AuthorizationMessageKeys.RESOURCE_ACCESS_DENIED
             );
         }
