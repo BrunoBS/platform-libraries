@@ -5,11 +5,12 @@
     <parent>
         <groupId>com.empresa.platform</groupId>
         <artifactId>platform-libraries</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>platform-test-support</artifactId>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>platform-test-support</name>
 
@@ -21,6 +22,7 @@
         <dependency>
             <groupId>com.empresa.platform</groupId>
             <artifactId>platform-authorization</artifactId>
+            <version>1.0.0</version>
             <optional>true</optional>
         </dependency>
         <dependency>
