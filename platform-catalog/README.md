@@ -44,6 +44,21 @@ Catálogo persistido e administrável, mas com conjunto de nomes permitido contr
 
 Esse modelo atende catálogos que precisam de representação forte no código sem tornar `enum` uma dependência da abstração genérica.
 
+## Contratos da base
+
+Os catálogos persistidos da plataforma usam `Long` como identificador técnico. A API pública da biblioteca segue esse contrato de forma explícita em DTO, repository, validator, service e controller.
+
+A base também **não impõe unicidade global de `name` no mapeamento JPA**. A constraint física pertence ao serviço consumidor e deve refletir a identidade real do catálogo, por exemplo:
+
+```text
+name
+account_id + name
+application_id + name
+scope + name
+```
+
+`BaseCatalogValidator` fornece unicidade simples por nome como política padrão, mas o hook `validateUniqueness` pode ser sobrescrito para catálogos com escopo.
+
 ## Estrutura fornecida
 
 ```text
@@ -85,6 +100,7 @@ A abstração fornece:
 - ordenação (`sortOrder`);
 - busca por múltiplos nomes (`findByNames`);
 - validações comuns;
+- política padrão de unicidade por nome, extensível por hook;
 - filtros adicionais extensíveis pelo serviço concreto;
 - CRUD REST reutilizável.
 
@@ -94,9 +110,21 @@ A abstração fornece:
 
 Quando um catálogo precisar restringir seus nomes a valores conhecidos em código, o serviço pode estender `EnumCatalogValidator`. Assim, o vínculo com `enum` fica isolado na especialização e não contamina o modelo `MANAGED`.
 
+Quando a unicidade depender de um escopo, o validator concreto sobrescreve `validateUniqueness` e o serviço define a constraint equivalente em sua migration.
+
 Filtros particulares podem ser implementados sobrescrevendo `matchesAdditionalFilters` em `BaseCatalogService`.
 
 A autorização permanece responsabilidade do controller concreto; a biblioteca não impõe `OWNER` nem qualquer política de acesso.
+
+## Guia de implementação
+
+O passo a passo completo para integrar a lib em um microserviço está em:
+
+```text
+docs/USAGE.md
+```
+
+O guia cobre dependência Maven, entidade, DTO, repository, mapper, validator, service, controller, migration, catálogo restrito por enum, filtros adicionais e unicidade por escopo.
 
 ## Ownership
 
