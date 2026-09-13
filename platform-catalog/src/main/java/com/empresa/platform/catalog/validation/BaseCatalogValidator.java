@@ -3,7 +3,7 @@ package com.empresa.platform.catalog.validation;
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
-import com.empresa.platform.messaging.validation.ValidationResult;
+import com.empresa.platform.crud.validation.CrudValidationResult;
 
 import java.util.Map;
 
@@ -23,7 +23,7 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends 
     }
 
     @Override
-    protected void validateAttributes(D dto, ValidationResult result) {
+    protected void validateAttributes(D dto, CrudValidationResult result) {
         if (dto.name() == null || dto.name().isBlank()) {
             result.addError("name", CatalogMessageKeys.NAME_REQUIRED, Map.of("0", entityName()));
         }
@@ -41,7 +41,7 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends 
     }
 
     @Override
-    protected void validateIntegrity(D dto, ValidationResult result) {
+    protected void validateIntegrity(D dto, CrudValidationResult result) {
         validateUniqueness(dto, result);
         validateAdditionalIntegrity(dto, result);
     }
@@ -50,7 +50,7 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends 
      * Default uniqueness policy: name must be unique in the catalog table.
      * Override this hook when uniqueness depends on an additional scope.
      */
-    protected void validateUniqueness(D dto, ValidationResult result) {
+    protected void validateUniqueness(D dto, CrudValidationResult result) {
         long id = dto.id() == null ? 0L : dto.id();
         if (repository.existsByNameAndIdNot(dto.name(), id)) {
             result.addError("name", CatalogMessageKeys.NAME_DUPLICATE,
@@ -58,12 +58,12 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends 
         }
     }
 
-    protected void validateSettings(D dto, ValidationResult result) {
+    protected void validateSettings(D dto, CrudValidationResult result) {
     }
 
-    protected void validateAdditionalCatalogFields(D dto, ValidationResult result) {
+    protected void validateAdditionalCatalogFields(D dto, CrudValidationResult result) {
     }
 
-    protected void validateAdditionalIntegrity(D dto, ValidationResult result) {
+    protected void validateAdditionalIntegrity(D dto, CrudValidationResult result) {
     }
 }
