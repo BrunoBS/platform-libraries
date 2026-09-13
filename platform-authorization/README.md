@@ -1,10 +1,14 @@
 # 🛡️ Módulo Platform Authorization (`platform-authorization`)
 
-O **`platform-authorization`** é o módulo corporativo de governança de segurança, controle de acesso e gerenciamento de contexto de usuário, desenvolvido para **Spring Boot 4.0.0 e Java 21+**. Ele gerencia o pipeline de interceptação HTTP, validação de tokens e isolamento de escopo de execução em Threads seguras.
+O **`platform-authorization`** é o módulo corporativo de governança de segurança, controle de acesso e gerenciamento de contexto de usuário.
 
-## Independência entre capabilities
+## Integração com `platform-messaging`
 
-`platform-authorization` não depende de `platform-messaging`, `platform-logging` ou outras capabilities da plataforma. O módulo possui apenas a semântica que pertence à autorização e expõe exceptions próprias:
+`platform-authorization` depende diretamente de `platform-messaging`.
+
+A decisão é intencional: autorização, messaging/i18n e logging compõem o baseline obrigatório dos microsserviços da plataforma, e os erros de autorização devem entrar automaticamente no tratamento corporativo de mensagens.
+
+A hierarquia continua específica de autorização:
 
 ```text
 AuthorizationException
@@ -12,15 +16,43 @@ AuthorizationException
 └── ForbiddenAccessException
 ```
 
-As exceptions carregam um `code` de autorização. O serviço consumidor decide como esse erro será apresentado: HTTP 401/403, i18n, `ProblemDetail`, formato corporativo de erro ou integração com `platform-messaging`.
+`AuthorizationException` estende `ApiException` do `platform-messaging`. Com isso, o `ApiExceptionHandler` já consegue:
 
-Esse limite mantém a capability reutilizável sem obrigar outros módulos de plataforma no classpath.
+- resolver a chave de mensagem;
+- considerar o locale/`Accept-Language`;
+- aplicar parâmetros;
+- obter o HTTP status configurado no catálogo de mensagens;
+- devolver o response de erro padronizado.
+
+O consumidor não precisa criar `try/catch` ou `@RestControllerAdvice` específico para os erros emitidos pelo módulo.
+
+```text
+requisição
+   ↓
+platform-authorization
+   ↓
+UnauthorizedAccessException / ForbiddenAccessException
+   ↓
+platform-messaging
+   ↓
+i18n + status HTTP + response padronizado
+```
 
 ---
 
-## 🚀 Como Ativar no Microsserviço
+## 🚀 Como usar no microsserviço
 
-Para habilitar a camada de segurança e contexto unificado, adicione a dependência diretamente no seu arquivo `pom.xml`:
+Nos serviços que utilizam o `platform-service-parent`, o módulo faz parte do baseline e não precisa ser declarado individualmente no `pom.xml`.
+
+O baseline inclui:
+
+```text
+platform-logging
+platform-messaging
+platform-authorization
+```
+
+Para uso isolado fora desse parent, a dependência pode ser declarada diretamente:
 
 ```xml
 <dependency>
@@ -30,49 +62,51 @@ Para habilitar a camada de segurança e contexto unificado, adicione a dependên
 </dependency>
 ```
 
+`platform-messaging` será trazido transitivamente pelo módulo.
+
 ---
 
-## 🛠️ Todos os Parâmetros Disponíveis (`application.yml`)
-
-Abaixo estão listadas as chaves de controle sob o prefixo `platform.authorization` que comandam o comportamento do motor de segurança:
+## 🛠️ Configuração (`application.yml`)
 
 ```yaml
 platform:
   authorization:
-    enabled: true                 # Liga/desliga o motor real de segurança. Padrão: true
-    service-url: "https://empresa.com" # URL do servidor central de Identidade (obrigatório se enabled=true)
+    enabled: true
+    service-url: "https://empresa.com"
 ```
+
+- `enabled=true`: usa o fluxo real de autorização.
+- `enabled=false`: usa o modo local/mock disponibilizado pela autoconfiguração.
 
 ---
 
 ## 💎 Funcionalidades Core
 
-### 1. 🔑 Anotação Declarativa de Escopo (`@AuthorizationRequired`)
-Permite aos desenvolvedores proteger métodos de controladores (`@RestController`) injetando regras de nível de acesso diretamente sobre o método:
+### 1. Autorização declarativa
+
 ```java
 @GetMapping("/faturamento")
 @AuthorizationRequired(level = AuthorizationLevel.RESTRICTED)
 public ResponseEntity<Dados> buscarDados() { ... }
 ```
 
-### 🧵 2. Isolamento de Threads com `UserContext`
-Assim que o token do usuário é validado no pipeline do Tomcat, a biblioteca popula o `UserContext`, que utiliza um **`ThreadLocal`** encapsulado de forma segura em uma API de `Optional<UserSession>`.
-* **Prevenção de Memory Leaks:** A limpeza do contexto ocorre de forma automática e obrigatória através do método `afterCompletion` do interceptor, garantindo que os dados da requisição anterior sejam expurgados assim que a rota HTTP finaliza.
+### 2. `UserContext`
 
-### 🎭 3. Modo Híbrido Local (Mock Guest)
-Criado com foco na **Experiência do Desenvolvedor (DevEx)**. Quando a flag `platform.authorization.enabled` é definida como `false` em ambiente de desenvolvimento local, a autoconfiguração inteligente desativa o cliente HTTP real de segurança e injeta um interceptor alternativo que simula uma sessão real do tipo **`GUEST`**.
-* **Benefício:** O desenvolvedor consegue testar a API na máquina local sem a necessidade de obter tokens reais ou de que o servidor de identidade centralizado da empresa esteja online.
+Após a autorização, a sessão é disponibilizada no `UserContext` e limpa ao final da requisição.
 
-### 🔄 4. Resiliência Nativa com `RestClient` e Spring Retry
-A comunicação de validação de tokens contra o servidor centralizado foi desenhada utilizando o moderno **`RestClient`** do Spring Boot 4, acoplado a políticas de reativação automatizada com *exponential backoff* do **Spring Retry** para mitigar oscilações ou quedas parciais de rede.
+### 3. Modo local
+
+Com `platform.authorization.enabled=false`, o módulo permite desenvolvimento local sem depender do serviço central de autorização.
+
+### 4. Cliente resiliente
+
+A comunicação com o serviço de autorização utiliza `RestClient` e política de retry/backoff.
 
 ---
 
-## 📋 Comportamento das Flags e Componentes
+## 📋 Comportamento
 
-| Propriedade `enabled` | Interceptor Carregado | Comportamento do `UserContext` | Chamada de Rede Externa |
+| `enabled` | Interceptor | `UserContext` | Chamada externa |
 | :---: | :---: | :--- | :---: |
-| **`true`** *(Padrão)* | `AuthorizationInterceptor` | Populado com dados reais do Token Bearer | **Sim** (Ativa o `RestClient`) |
-| **`false`** | *Anônimo interno do Spring* | Populado automaticamente com o usuário `"guest"` | **Não** (Totalmente offline) |
-
----
+| `true` | `AuthorizationInterceptor` | sessão real | Sim |
+| `false` | interceptor local | sessão guest/local | Não |
