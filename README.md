@@ -1,35 +1,23 @@
 # Platform Libraries (Platform Engineering Core)
 
-O **`platform-libraries`** reúne bibliotecas reutilizáveis da plataforma corporativa. Cada módulo deve representar uma capability coesa e, por padrão, ser consumível de forma independente.
+O **`platform-libraries`** reúne bibliotecas reutilizáveis da plataforma corporativa.
 
 ## Regra de dependência entre módulos
 
-A regra arquitetural é:
+As dependências entre capabilities devem ser poucas, explícitas e direcionadas. Ciclos entre módulos não são permitidos.
+
+Dependências intencionais atuais:
 
 ```text
-capability de plataforma -> não depende de outra capability
+platform-authorization -> platform-messaging
+platform-catalog       -> platform-crud
 ```
 
-A exceção atual é uma relação explícita de especialização:
+`platform-authorization -> platform-messaging` existe porque autorização faz parte do baseline obrigatório dos microsserviços e seus erros precisam entrar diretamente no tratamento padronizado de mensagens/i18n da plataforma.
 
-```text
-platform-catalog -> platform-crud
-```
+`platform-catalog -> platform-crud` é uma relação de especialização: catálogo reutiliza o ciclo CRUD comum.
 
-`platform-test-support` possui integração opcional com `platform-authorization` porque fornece utilitários específicos para testes dessa capability. Essa dependência é de suporte de teste e não deve contaminar as bibliotecas de runtime.
-
-A composição das capabilities pertence ao microserviço consumidor:
-
-```text
-account-api
-├── platform-authorization
-├── platform-messaging
-├── platform-logging
-├── platform-crud
-└── platform-catalog
-```
-
-Assim uma biblioteca não precisa conhecer como outra biblioteca representa erros, mensagens, logs ou autorização.
+`platform-test-support` possui integração opcional com `platform-authorization` para utilitários de teste.
 
 ## Arquitetura multimódulos
 
@@ -43,65 +31,62 @@ platform-libraries/
 └── platform-catalog/        -> especialização de catálogos gerenciados sobre CRUD
 ```
 
+## Baseline obrigatório dos serviços
+
+Os microsserviços padrão da plataforma recebem automaticamente pelo `platform-service-parent`:
+
+```text
+platform-logging
+platform-messaging
+platform-authorization
+```
+
+Essas dependências não precisam ser declaradas individualmente pelo serviço.
+
+Capabilities específicas, como `platform-crud` e `platform-catalog`, continuam sendo adicionadas somente quando necessárias.
+
 ## Módulos
 
 ### Platform Authorization
 
-Motor de segurança e governança de contexto para microsserviços. Mantém exceptions próprias de autorização e não depende de `platform-messaging`; o consumidor decide como traduzi-las para HTTP, i18n ou outro formato de erro.
+Motor de segurança e governança de contexto. Depende de `platform-messaging` para que suas exceptions sejam tratadas automaticamente pelo pipeline corporativo de mensagens/i18n.
 
-### Platform Logging
+As exceptions próprias de autorização continuam expressando a semântica do módulo:
 
-Padronização de logs estruturados e contexto MDC sem dependência de outras capabilities da plataforma.
+```text
+AuthorizationException
+├── UnauthorizedAccessException
+└── ForbiddenAccessException
+```
+
+`AuthorizationException` é compatível com `ApiException`, portanto o `ApiExceptionHandler` do messaging resolve a chave da mensagem, o idioma solicitado e o HTTP status cadastrado no catálogo de mensagens.
 
 ### Platform Messaging
 
-Resolução de mensagens, internacionalização e tratamento de erros da aplicação. Pode ser usado pelo consumidor para traduzir exceptions de outras capabilities, sem que essas capabilities dependam dele.
+Resolução de mensagens, internacionalização e tratamento padronizado de erros HTTP.
+
+### Platform Logging
+
+Padronização de logs estruturados e contexto MDC.
 
 ### Platform CRUD
 
-Infraestrutura fortemente tipada para DTO, repository, mapper, validator, service e controller CRUD. Não conhece domínio nem `platform-messaging`.
+Infraestrutura fortemente tipada para DTO, repository, mapper, validator, service e controller CRUD. Continua independente de `platform-messaging`.
 
-Os pontos principais de inversão são:
+Os principais pontos de inversão permanecem:
 
 ```text
 notFoundException(id)
 validationException(result)
 ```
 
-O CRUD detecta a condição; o consumidor define a semântica da exception.
-
 ### Platform Catalog
 
-Especialização de `platform-crud` para catálogos persistidos, com `active`, restore, ordenação, filtros e validações de catálogo. A dependência `catalog -> crud` é intencional; não há dependência de `platform-messaging`.
+Especialização de `platform-crud` para catálogos persistidos, com `active`, restore, ordenação, filtros e validações de catálogo.
 
 ### Platform Test Support
 
 Utilitários para testes unitários e de integração, incluindo integrações especializadas como autorização, banco e Kafka.
-
-## Como utilizar
-
-O serviço deve declarar somente as capabilities necessárias:
-
-```xml
-<dependencies>
-    <dependency>
-        <groupId>com.empresa.platform</groupId>
-        <artifactId>platform-logging</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.empresa.platform</groupId>
-        <artifactId>platform-authorization</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.empresa.platform</groupId>
-        <artifactId>platform-messaging</artifactId>
-    </dependency>
-</dependencies>
-```
-
-As versões devem ser gerenciadas pelo `platform-parent`/`dependencyManagement` da plataforma.
 
 ## Qualidade
 
