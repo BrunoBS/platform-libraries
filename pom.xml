@@ -10,49 +10,9 @@
     </parent>
 
     <artifactId>platform-libraries</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>platform-libraries</name>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.empresa.platform</groupId>
-                <artifactId>platform-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.empresa.platform</groupId>
-                <artifactId>platform-messaging</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.empresa.platform</groupId>
-                <artifactId>platform-authorization</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.empresa.platform</groupId>
-                <artifactId>platform-logging</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.empresa.platform</groupId>
-                <artifactId>platform-test-support</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.empresa.platform</groupId>
-                <artifactId>platform-catalog</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.empresa.platform</groupId>
-                <artifactId>platform-crud</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <modules>
         <module>platform-messaging</module>
