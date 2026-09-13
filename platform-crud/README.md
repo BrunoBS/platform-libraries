@@ -15,7 +15,7 @@ Padronizar a estrutura comum de recursos CRUD nos serviços da plataforma:
 - Service
 - Controller
 
-O serviço consumidor continua responsável por suas entidades, atributos, constraints, regras de negócio, autorização e efeitos colaterais.
+O serviço consumidor continua responsável por suas entidades, atributos, constraints, regras de negócio, autorização, semântica de erros e efeitos colaterais.
 
 ## Dependência
 
@@ -155,11 +155,13 @@ public class CustomerService
     }
 
     @Override
-    public String resourceName() {
-        return "customer";
+    protected RuntimeException notFoundException(Long id) {
+        return new CustomerNotFoundException(id);
     }
 }
 ```
+
+A `platform-crud` detecta que o recurso não foi encontrado, mas não define qual exception deve representar essa condição. O consumidor fornece a exception adequada por meio de `notFoundException(ID id)`. Assim, mensagens, códigos, internacionalização e semântica da aplicação não vazam para a infraestrutura CRUD.
 
 O service base fornece:
 
@@ -237,6 +239,7 @@ Autorização continua sendo responsabilidade do controller concreto.
 - normalização de ID
 - integração genérica repository/mapper/validator
 - transações do fluxo básico
+- detecção de recurso ausente
 - hooks de ciclo de vida
 - controller HTTP básico
 
@@ -248,14 +251,13 @@ Autorização continua sendo responsabilidade do controller concreto.
 - consultas adicionais
 - autorização
 - soft delete, quando necessário
-- integrações e efeitos colaterais
+- exception e semântica de recurso não encontrado
 - mensagens específicas
+- integrações e efeitos colaterais
 
-## Relação futura com platform-catalog
+## Relação com platform-catalog
 
-A `platform-catalog` continua independente nesta primeira etapa.
-
-Depois que o contrato da `platform-crud` estiver validado, podemos avaliar uma refatoração para que as bases de catálogo reutilizem este módulo. Essa mudança deve ocorrer somente se reduzir duplicação sem piorar o contrato público da `platform-catalog`.
+A `platform-catalog` pode especializar a `platform-crud` preservando seu contrato público. O CRUD fornece o fluxo comum; catálogo acrescenta semânticas como `active`, restore, ordenação e filtros.
 
 ## Princípio
 
