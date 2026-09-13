@@ -32,6 +32,28 @@ platform-libraries/
 └── platform-catalog/        -> especialização de catálogos gerenciados sobre CRUD
 ```
 
+## Versionamento
+
+Cada biblioteca possui versão própria e pode evoluir de forma independente das demais.
+
+Versões iniciais:
+
+```text
+platform-starter        1.0.0
+platform-logging        1.0.0
+platform-messaging      1.0.0
+platform-authorization  1.0.0
+platform-crud           1.0.0
+platform-catalog        1.0.0
+platform-test-support   1.0.0
+```
+
+Uma breaking change em uma capability não obriga os demais módulos a adotarem o mesmo major. Por exemplo, `platform-catalog` pode evoluir para `2.0.0` enquanto `platform-logging` permanece em `1.x`.
+
+O POM raiz `platform-libraries` atua como agregador do reactor. Ele não define uma versão única para todas as bibliotecas. Cada módulo declara sua própria versão e suas dependências internas declaram explicitamente a versão compatível.
+
+O `platform-parent`, mantido no repositório `platform-build`, define o conjunto de versões homologadas para os serviços consumidores. Assim, os serviços continuam declarando as capabilities sem versão enquanto a plataforma controla centralmente a combinação suportada.
+
 ## Baseline obrigatório dos serviços
 
 O baseline padrão dos microsserviços é exposto pelo `platform-starter`:
