@@ -10,12 +10,15 @@ import java.util.Map;
 /**
  * Generic validator for managed catalogs. It does not assume a Java enum or
  * any fixed set of allowed names; the database may be the source of truth.
+ *
+ * Name uniqueness is provided as the default policy but may be overridden by
+ * scoped catalogs, for example account + name or application + name.
  */
-public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D, Long>> extends BaseValidator<D, Long> {
+public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends BaseValidator<D> {
 
-    protected final BaseCatalogRepository<?, Long> repository;
+    protected final BaseCatalogRepository<?> repository;
 
-    protected BaseCatalogValidator(BaseCatalogRepository<?, Long> repository) {
+    protected BaseCatalogValidator(BaseCatalogRepository<?> repository) {
         this.repository = repository;
     }
 
@@ -39,12 +42,20 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D, Long>> ex
 
     @Override
     protected void validateIntegrity(D dto, ValidationResult result) {
+        validateUniqueness(dto, result);
+        validateAdditionalIntegrity(dto, result);
+    }
+
+    /**
+     * Default uniqueness policy: name must be unique in the catalog table.
+     * Override this hook when uniqueness depends on an additional scope.
+     */
+    protected void validateUniqueness(D dto, ValidationResult result) {
         long id = dto.id() == null ? 0L : dto.id();
         if (repository.existsByNameAndIdNot(dto.name(), id)) {
             result.addError("name", CatalogMessageKeys.NAME_DUPLICATE,
                     Map.of("0", entityName(), "1", dto.name()));
         }
-        validateAdditionalIntegrity(dto, result);
     }
 
     protected void validateSettings(D dto, ValidationResult result) {
