@@ -1,11 +1,16 @@
 package com.empresa.platform.authorization.service;
 
+import com.empresa.platform.authorization.exception.ForbiddenAccessException;
+import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.AuthorizationLevel;
-import com.empresa.platform.messaging.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class AuthorizationClientServiceTest {
 
@@ -19,12 +24,22 @@ class AuthorizationClientServiceTest {
         AuthorizationClientService service = new AuthorizationClientService(builder, "http://localhost:8080");
 
         RuntimeException exception = new RuntimeException("Network timeout");
-        
-        ForbiddenException thrown = assertThrows(ForbiddenException.class, () -> 
-            service.recover(exception, "trace-1", "Bearer token", "acc", "env", "app", "GET", AuthorizationLevel.ADM)
+
+        ForbiddenAccessException thrown = assertThrows(
+                ForbiddenAccessException.class,
+                () -> service.recover(
+                        exception,
+                        "trace-1",
+                        "Bearer token",
+                        "acc",
+                        "env",
+                        "app",
+                        "GET",
+                        AuthorizationLevel.ADM
+                )
         );
 
-        assertEquals("PLATFORM_ACCESS_DENIED", thrown.getMessageKey());
+        assertEquals(AuthorizationMessageKeys.PLATFORM_ACCESS_DENIED, thrown.getCode());
         assertEquals(exception, thrown.getCause());
     }
 }
