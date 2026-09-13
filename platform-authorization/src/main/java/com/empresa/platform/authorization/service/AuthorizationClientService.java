@@ -1,8 +1,9 @@
 package com.empresa.platform.authorization.service;
 
+import com.empresa.platform.authorization.exception.ForbiddenAccessException;
+import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.AuthorizationLevel;
 import com.empresa.platform.authorization.model.UserSession;
-import com.empresa.platform.messaging.exception.ForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.retry.RetryPolicy;
@@ -118,6 +119,6 @@ public class AuthorizationClientService {
                 correlationId,
                 exception
         );
-        throw new ForbiddenException("PLATFORM_ACCESS_DENIED", exception);
+        throw new ForbiddenAccessException(AuthorizationMessageKeys.PLATFORM_ACCESS_DENIED, exception);
     }
 }
