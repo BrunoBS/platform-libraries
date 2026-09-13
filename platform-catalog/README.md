@@ -6,7 +6,9 @@ Infraestrutura reutilizável para catálogos persistidos e administráveis pelos
 
 A biblioteca define **como** um catálogo gerenciado funciona; cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio.
 
-A infraestrutura comum de ciclo de vida CRUD é fornecida pela `platform-crud`. A `platform-catalog` especializa essa base com comportamento próprio de catálogo, preservando seus contratos públicos para os consumidores.
+A infraestrutura comum de ciclo de vida CRUD é fornecida pela `platform-crud`. Essa é a única dependência interna intencional da `platform-catalog`.
+
+A `platform-catalog` não depende de `platform-messaging`, `platform-authorization` ou `platform-logging`. Ela possui sua própria semântica de erro e permite que o consumidor adapte essa semântica para HTTP, i18n, `ProblemDetail` ou qualquer outro padrão da aplicação.
 
 A abstração base é totalmente independente de `enum`. O banco pode ser a fonte de verdade do catálogo. O suporte a `enum` existe apenas como especialização opcional para catálogos que precisam restringir os nomes permitidos.
 
@@ -34,8 +36,6 @@ Catálogo persistido e administrável em runtime.
 - novos valores podem ser criados sem recompilar o serviço;
 - usa `BaseCatalogEntity`, `BaseCatalogDTO`, `BaseCatalogRepository`, `BaseCatalogValidator`, `BaseCatalogService` e `BaseCatalogController`.
 
-Exemplo: `OperationType` administrável pelo `event-api`.
-
 ### MANAGED_CONSTRAINED
 
 Catálogo persistido e administrável, mas com conjunto de nomes permitido controlado em código.
@@ -43,8 +43,6 @@ Catálogo persistido e administrável, mas com conjunto de nomes permitido contr
 - mantém CRUD, `active`, `restore`, `sortOrder` e `settings`;
 - usa a mesma infraestrutura de `MANAGED`;
 - adiciona `CatalogEnum` e `EnumCatalogValidator` para restringir os nomes aceitos.
-
-Esse modelo atende catálogos que precisam de representação forte no código sem tornar `enum` uma dependência da abstração genérica.
 
 ## Contratos da base
 
@@ -66,7 +64,7 @@ scope + name
 ```text
 model/
   BaseCatalogEntity
-  CatalogEnum                  # opcional
+  CatalogEnum
 
 dto/
   BaseCatalogDTO
@@ -81,7 +79,13 @@ mapper/
 validation/
   BaseValidator
   BaseCatalogValidator
-  EnumCatalogValidator         # opcional
+  EnumCatalogValidator
+
+exception/
+  CatalogException
+  CatalogNotFoundException
+  CatalogRestoreException
+  CatalogValidationException
 
 service/
   BaseCatalogService
@@ -90,7 +94,22 @@ web/
   BaseCatalogController
 ```
 
-Internamente, os contratos de DTO, repository, mapper, validator e service reutilizam `platform-crud`. O controller de catálogo permanece especializado porque seu contrato HTTP inclui listagem com filtros, criação em lote e `restore`, comportamentos que não pertencem ao CRUD genérico.
+Internamente, DTO, repository, mapper, validator e service reutilizam `platform-crud`. O controller de catálogo permanece especializado porque seu contrato HTTP inclui listagem com filtros, criação em lote e `restore`, comportamentos que não pertencem ao CRUD genérico.
+
+## Semântica de erros
+
+A lib fornece exceptions próprias de catálogo como defaults, sem conhecer o mecanismo de apresentação do consumidor.
+
+`BaseCatalogService` mantém pontos de extensão para que o serviço consumidor substitua a semântica quando necessário:
+
+```text
+notFoundException(id)
+restoreException(id)
+```
+
+Na validação, `BaseValidator` usa o modelo neutro `CrudValidationResult` da `platform-crud` e converte o resultado para `CatalogValidationException`. O validator concreto pode sobrescrever `validationException(...)` se quiser outro contrato.
+
+Assim, por exemplo, a `account-api` pode traduzir essas exceptions para o padrão de erro de `platform-messaging` sem criar dependência entre as duas bibliotecas.
 
 ## Comportamento padrão de catálogos gerenciados
 
@@ -128,8 +147,6 @@ O passo a passo completo para integrar a lib em um microserviço está em:
 docs/USAGE.md
 ```
 
-O guia cobre dependência Maven, entidade, DTO, repository, mapper, validator, service, controller, migration, catálogo restrito por enum, filtros adicionais e unicidade por escopo.
-
 ## Ownership
 
 A biblioteca fornece comportamento e infraestrutura. Ela não deve concentrar os valores de negócio dos microserviços.
@@ -144,6 +161,10 @@ event-api    -> seus próprios catálogos
 route-api    -> seus próprios catálogos
 ```
 
-## Migração
+## Regra de dependência
 
-A integração com `platform-crud` é interna à `platform-catalog`: consumidores existentes continuam usando os contratos `BaseCatalog*`. A migração da `account-api` para `platform-catalog` permanece uma etapa separada.
+```text
+platform-catalog → platform-crud
+```
+
+Nenhuma outra capability da plataforma é necessária para usar catálogo.
