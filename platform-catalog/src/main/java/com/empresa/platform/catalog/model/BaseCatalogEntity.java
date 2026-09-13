@@ -13,7 +13,7 @@ public abstract class BaseCatalogEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
 
-    @Column(name = "name", nullable = false, unique = true, length = 50)
+    @Column(name = "name", nullable = false, length = 50)
     protected String name;
 
     @Column(name = "label", nullable = false, length = 100)
