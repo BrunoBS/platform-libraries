@@ -1,12 +1,12 @@
 package com.empresa.platform.authorization.web;
 
+import com.empresa.platform.authorization.exception.UnauthorizedAccessException;
 import com.empresa.platform.authorization.model.AuthorizationLevel;
 import com.empresa.platform.authorization.model.AuthorizationPolicy;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
-import com.empresa.platform.messaging.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -73,7 +73,7 @@ class AuthorizationInterceptorTest {
                 .thenReturn(null);
 
         assertThrows(
-                UnauthorizedException.class,
+                UnauthorizedAccessException.class,
                 () -> interceptor.preHandle(
                         request,
                         response,
@@ -100,7 +100,7 @@ class AuthorizationInterceptorTest {
                 .thenReturn(null);
 
         assertThrows(
-                UnauthorizedException.class,
+                UnauthorizedAccessException.class,
                 () -> interceptor.preHandle(
                         request,
                         response,
@@ -127,7 +127,7 @@ class AuthorizationInterceptorTest {
                 .thenReturn(null);
 
         assertThrows(
-                UnauthorizedException.class,
+                UnauthorizedAccessException.class,
                 () -> interceptor.preHandle(
                         request,
                         response,
