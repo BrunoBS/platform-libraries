@@ -28,6 +28,11 @@
         <dependencies>
             <dependency>
                 <groupId>com.empresa.platform</groupId>
+                <artifactId>platform-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.empresa.platform</groupId>
                 <artifactId>platform-messaging</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -63,6 +68,7 @@
         <module>platform-messaging</module>
         <module>platform-authorization</module>
         <module>platform-logging</module>
+        <module>platform-starter</module>
         <module>platform-test-support</module>
         <module>platform-catalog</module>
         <module>platform-crud</module>
