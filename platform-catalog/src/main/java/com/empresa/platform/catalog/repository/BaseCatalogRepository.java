@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 @NoRepositoryBean
-public interface BaseCatalogRepository<E extends BaseCatalogEntity, ID> extends JpaRepository<E, ID> {
+public interface BaseCatalogRepository<E extends BaseCatalogEntity> extends JpaRepository<E, Long> {
     Optional<E> findByNameAndActiveTrue(String name);
-    Optional<E> findByIdAndActiveTrue(ID id);
-    Optional<E> findByIdAndActiveFalse(ID id);
+    Optional<E> findByIdAndActiveTrue(Long id);
+    Optional<E> findByIdAndActiveFalse(Long id);
     List<E> findByActive(boolean active);
-    boolean existsByNameAndIdNot(String name, ID id);
+    boolean existsByNameAndIdNot(String name, Long id);
     Optional<E> findFirstByOrderBySortOrderDesc();
-    Optional<E> findFirstByIdNotOrderBySortOrderDesc(ID id);
+    Optional<E> findFirstByIdNotOrderBySortOrderDesc(Long id);
     List<E> findByNameInAndActiveTrue(List<String> names);
 }
