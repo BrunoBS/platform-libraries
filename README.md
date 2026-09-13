@@ -1,52 +1,86 @@
 # Platform Libraries (Platform Engineering Core)
 
-O **`platform-libraries`** é o ecossistema central de bibliotecas e *starters* reutilizáveis da nossa plataforma corporativa. Desenvolvido sob os pilares de **Platform Engineering**, o projeto abstrai complexidades de infraestrutura, segurança, auditoria e mensageria, fornecendo para os times de desenvolvimento uma experiência de **Configuração Zero (Plug-and-Play)**.
+O **`platform-libraries`** reúne bibliotecas reutilizáveis da plataforma corporativa. Cada módulo deve representar uma capability coesa e, por padrão, ser consumível de forma independente.
 
----
+## Regra de dependência entre módulos
 
-## 🏗️ Arquitetura Multimódulos (Maven Reactor)
-
-O projeto é estruturado como um reator multimódulos homogêneo, garantindo o alinhamento estrito de versões, releases unificadas e alta performance de classpath:
+A regra arquitetural é:
 
 ```text
-platform-libraries/ (POM agregador - versões internas; build herdado do platform-parent)
-├── platform-messaging/      -> Catálogo de Mensagens, Exceções Globais e Anti-SQL Injection
-├── platform-authorization/  -> Motor de Segurança Híbrido, Interceptação HTTP e Mock de Ambientes
-├── platform-logging/        -> Padronização Cloud-Native de Logs Estruturados em JSON (Logstash)\n└── platform-test-support/   -> Suporte reutilizável para testes unitários e de integração
+capability de plataforma -> não depende de outra capability
 ```
 
----
+A exceção atual é uma relação explícita de especialização:
 
-## 📦 Detalhamento dos Módulos
+```text
+platform-catalog -> platform-crud
+```
 
-### 1. 🛡️ Platform Authorization (`platform-authorization`)
-Motor de segurança e governança de contexto para microsserviços.
-* **Interceptação Inteligente:** Extração e validação automática de cabeçalhos (`Authorization` Bearer, `traceId`) e mapeamento dinâmico de permissões via `@AuthorizationRequired`.
-* **Segurança de Threads:** Isolamento total do contexto do usuário logado via `UserContext` (`ThreadLocal`), blindado contra *memory leaks* no pipeline do Tomcat.
-* **Ambiente Híbrido Local (Mock Guest):** Quando desativado em ambientes de testes locais (`platform.authorization.enabled=false`), injeta automaticamente um perfil simulado de `guest`, eliminando a necessidade de subir o servidor de identidade centralizado localmente.
-* **Resiliência:** Cliente HTTP reescrito utilizando o moderno `RestClient` do Spring Boot 4 integrado ao **Spring Retry** com políticas de *exponential backoff*.
+`platform-test-support` possui integração opcional com `platform-authorization` porque fornece utilitários específicos para testes dessa capability. Essa dependência é de suporte de teste e não deve contaminar as bibliotecas de runtime.
 
-### 📊 2. 📝 Platform Logging (`platform-logging`)
-Centralização e padronização absoluta de observabilidade corporativa **100% transparente**.
-* **Zero Configuração:** Os microsserviços não precisam de arquivos `logback-spring.xml`. A ativação ocorre via código nativo no instante zero do boot (`ApplicationContextInitializer`).
-* **Logs Estruturados JSON:** Saída padrão em linha única em conformidade com o **Logstash Encoder**, injetando chaves ricas na raiz do JSON (`service`, `version`, `host`) prontas para indexação no Kibana, Grafana Loki ou Datadog.
-* **Correlação MDC:** Envelopamento automático de todo o contexto injetado pela segurança (`traceId`, `username`, `accountId`, `uri`) no bloco `"context"` de cada linha de log.
-* **Silenciamento Agressivo Dinâmico:** Limpa o console de produção atenuando ruídos de frameworks (`Spring`, `Hibernate`, `Kafka`), mantendo total autonomia de sobrescritas locais e suporte a pacotes customizados via `application.yml`.
+A composição das capabilities pertence ao microserviço consumidor:
 
-### ✉️ 3. Platform Messaging (`platform-messaging`)
-Módulo fundacional de tratamento de mensagens e tratamento global de erros.
-* **Catálogo Resiliente:** Tradução automática e centralizada de mensagens de erro.
-* **Segurança Preventiva:** Validação contra ataques de injeção de SQL diretamente nas requisições.
-* **Handler de Exceções Global:** Captura de falhas e exposição padronizada de payloads de erro (`ApiError`) para o cliente final.
+```text
+account-api
+├── platform-authorization
+├── platform-messaging
+├── platform-logging
+├── platform-crud
+└── platform-catalog
+```
 
----
+Assim uma biblioteca não precisa conhecer como outra biblioteca representa erros, mensagens, logs ou autorização.
 
-## 🚀 Como Utilizar (Guia do Desenvolvedor)
+## Arquitetura multimódulos
 
-Toda a suite de bibliotecas foi desenhada sob o conceito de **Convenção sobre Configuração**. Para ativar os recursos em um microsserviço, basta seguir dois passos:
+```text
+platform-libraries/
+├── platform-messaging/      -> mensagens, i18n e tratamento padronizado de erros
+├── platform-authorization/  -> autorização e contexto do usuário
+├── platform-logging/        -> logging estruturado
+├── platform-test-support/   -> suporte reutilizável de testes
+├── platform-crud/           -> infraestrutura genérica de ciclo CRUD
+└── platform-catalog/        -> especialização de catálogos gerenciados sobre CRUD
+```
 
-### 1. Adicionar as Dependências no seu `pom.xml`
-Se o seu microsserviço consome a suite inteira, basta importar os artefatos (as versões são herdadas automaticamente caso utilize a gestão corporativa):
+## Módulos
+
+### Platform Authorization
+
+Motor de segurança e governança de contexto para microsserviços. Mantém exceptions próprias de autorização e não depende de `platform-messaging`; o consumidor decide como traduzi-las para HTTP, i18n ou outro formato de erro.
+
+### Platform Logging
+
+Padronização de logs estruturados e contexto MDC sem dependência de outras capabilities da plataforma.
+
+### Platform Messaging
+
+Resolução de mensagens, internacionalização e tratamento de erros da aplicação. Pode ser usado pelo consumidor para traduzir exceptions de outras capabilities, sem que essas capabilities dependam dele.
+
+### Platform CRUD
+
+Infraestrutura fortemente tipada para DTO, repository, mapper, validator, service e controller CRUD. Não conhece domínio nem `platform-messaging`.
+
+Os pontos principais de inversão são:
+
+```text
+notFoundException(id)
+validationException(result)
+```
+
+O CRUD detecta a condição; o consumidor define a semântica da exception.
+
+### Platform Catalog
+
+Especialização de `platform-crud` para catálogos persistidos, com `active`, restore, ordenação, filtros e validações de catálogo. A dependência `catalog -> crud` é intencional; não há dependência de `platform-messaging`.
+
+### Platform Test Support
+
+Utilitários para testes unitários e de integração, incluindo integrações especializadas como autorização, banco e Kafka.
+
+## Como utilizar
+
+O serviço deve declarar somente as capabilities necessárias:
 
 ```xml
 <dependencies>
@@ -54,57 +88,34 @@ Se o seu microsserviço consome a suite inteira, basta importar os artefatos (as
         <groupId>com.empresa.platform</groupId>
         <artifactId>platform-logging</artifactId>
     </dependency>
+
     <dependency>
         <groupId>com.empresa.platform</groupId>
         <artifactId>platform-authorization</artifactId>
     </dependency>
+
+    <dependency>
+        <groupId>com.empresa.platform</groupId>
+        <artifactId>platform-messaging</artifactId>
+    </dependency>
 </dependencies>
 ```
 
-### 2. Configurar o seu `application.yml`
-Configure o comportamento das plataformas de forma simplificada:
+As versões devem ser gerenciadas pelo `platform-parent`/`dependencyManagement` da plataforma.
 
-```yaml
-spring:
-  application:
-    name: "api-vendas-checkout" # Injetado automaticamente nos metadados do JSON de log
+## Qualidade
 
-info:
-  build:
-    version: "@project.version@" # Versionamento semântico automatizado via Maven
-
-platform:
-  messaging:
-    enabled: true
-    mdc-correlation-key: "traceId" # Chave unificada de rastreabilidade
-  
-  authorization:
-    enabled: true # Em ambiente local, altere para false para ativar o modo "Guest Mock"
-    service-url: "https://empresa.com"
-  
-  logging:
-    levels:
-      com.novaequipe.vendas: DEBUG # Adiciona ou altera o comportamento de pacotes dinamicamente
-```
-
----
-
-## 🧪 Qualidade de Código e Testes
-
-O projeto possui **cobertura rigorosa de testes unitários e de integração de contexto (superior a 99%)**, validada de forma estrita no Java 25 utilizando o `ApplicationContextRunner` do Spring e isolamento térmico de memória de Threads (`ThreadLocal`).
-
-Para rodar a suíte completa de testes locais e extrair os relatórios do JaCoCo, execute na pasta raiz:
+Para validar todo o reactor:
 
 ```bash
 mvn clean verify
 ```
 
----
+## Tecnologias
 
-## 🛠️ Tecnologias Utilizadas
-
-* **Java 25** (Suporte nativo a *Virtual Threads* e APIs modernas de Record)
-* **Spring Boot 4.1.1**
-* **Logstash Logback Encoder 9.0**
-* **Retry nativo do Spring Framework 7**
-* **JUnit 5 / Mockito**
+- Java 25
+- Spring Boot 4.1.1
+- Spring Data JPA
+- Spring Web
+- Spring Retry
+- JUnit 5 / Mockito
