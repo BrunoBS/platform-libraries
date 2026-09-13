@@ -32,6 +32,14 @@ public abstract class BaseCatalogService<
         this.validator = validator;
     }
 
+    /**
+     * Keeps catalog default semantics: generic listing returns active records only.
+     */
+    @Override
+    public List<D> findAll() {
+        return findAll(true, null, Map.of());
+    }
+
     public List<D> findAll(boolean active, String name, Map<String, String> filters) {
         return repository.findByActive(active).stream()
                 .map(mapper::toDTO)
