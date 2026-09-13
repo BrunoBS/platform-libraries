@@ -23,6 +23,7 @@ platform-catalog       -> platform-crud
 
 ```text
 platform-libraries/
+├── platform-starter/        -> agregador do baseline obrigatório dos serviços
 ├── platform-messaging/      -> mensagens, i18n e tratamento padronizado de erros
 ├── platform-authorization/  -> autorização e contexto do usuário
 ├── platform-logging/        -> logging estruturado
@@ -33,19 +34,51 @@ platform-libraries/
 
 ## Baseline obrigatório dos serviços
 
-Os microsserviços padrão da plataforma recebem automaticamente pelo `platform-service-parent`:
+O baseline padrão dos microsserviços é exposto pelo `platform-starter`:
 
 ```text
-platform-logging
-platform-messaging
-platform-authorization
+platform-starter
+├── platform-logging
+├── platform-messaging
+└── platform-authorization
 ```
 
-Essas dependências não precisam ser declaradas individualmente pelo serviço.
+O serviço consumidor declara somente:
 
-Capabilities específicas, como `platform-crud` e `platform-catalog`, continuam sendo adicionadas somente quando necessárias.
+```xml
+<dependency>
+    <groupId>com.empresa.platform</groupId>
+    <artifactId>platform-starter</artifactId>
+</dependency>
+```
+
+As versões são gerenciadas pelo `platform-parent` e não precisam ser informadas pelo serviço consumidor.
+
+Quando `platform-starter` estiver declarado, o consumidor não deve declarar diretamente `platform-logging`, `platform-messaging` ou `platform-authorization`. O `platform-parent` aplica uma regra do Maven Enforcer que falha o build caso essa composição redundante seja detectada.
+
+Capabilities específicas, como `platform-crud` e `platform-catalog`, continuam sendo declaradas somente quando necessárias.
+
+Exemplo:
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.empresa.platform</groupId>
+        <artifactId>platform-starter</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>com.empresa.platform</groupId>
+        <artifactId>platform-catalog</artifactId>
+    </dependency>
+</dependencies>
+```
 
 ## Módulos
+
+### Platform Starter
+
+Agregador sem código de negócio responsável por carregar o baseline comum dos serviços: logging, messaging e authorization.
 
 ### Platform Authorization
 
