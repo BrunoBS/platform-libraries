@@ -3,7 +3,7 @@ package com.empresa.platform.catalog.mapper;
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.model.BaseCatalogEntity;
 
-public abstract class BaseCatalogMapper<D extends BaseCatalogDTO<D, ID>, E extends BaseCatalogEntity, ID>
+public abstract class BaseCatalogMapper<D extends BaseCatalogDTO<D>, E extends BaseCatalogEntity>
         implements BaseMapper<D, E> {
 
     private final Class<E> entityClass;
