@@ -23,7 +23,7 @@ platform-catalog       -> platform-crud
 
 ```text
 platform-libraries/
-├── platform-starter/        -> agregador do baseline obrigatório dos serviços
+├── platform-starter/        -> starter JAR do baseline obrigatório dos serviços
 ├── platform-messaging/      -> mensagens, i18n e tratamento padronizado de erros
 ├── platform-authorization/  -> autorização e contexto do usuário
 ├── platform-logging/        -> logging estruturado
@@ -65,6 +65,8 @@ platform-starter
 └── platform-authorization
 ```
 
+O `platform-starter` é publicado como um **JAR Maven normal**, mesmo sem código de negócio próprio. Isso permite que os serviços o consumam diretamente como dependência e recebam transitivamente logging, messaging e authorization.
+
 O serviço consumidor declara somente:
 
 ```xml
@@ -100,7 +102,7 @@ Exemplo:
 
 ### Platform Starter
 
-Agregador sem código de negócio responsável por carregar o baseline comum dos serviços: logging, messaging e authorization.
+Starter JAR sem código de negócio responsável por carregar o baseline comum dos serviços: logging, messaging e authorization.
 
 ### Platform Authorization
 
