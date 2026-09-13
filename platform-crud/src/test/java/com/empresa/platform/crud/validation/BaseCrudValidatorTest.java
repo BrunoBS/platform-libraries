@@ -1,7 +1,5 @@
 package com.empresa.platform.crud.validation;
 
-import com.empresa.platform.messaging.exception.ValidationException;
-import com.empresa.platform.messaging.validation.ValidationResult;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,11 +36,16 @@ class BaseCrudValidatorTest {
     }
 
     @Test
-    void shouldStopValidationWhenDtoIsRequired() {
+    void shouldDelegateValidationExceptionToConsumer() {
         TestValidator validator = new TestValidator();
 
         assertThatThrownBy(() -> validator.validateForCreate(null))
-                .isInstanceOf(ValidationException.class);
+                .isInstanceOf(TestValidationException.class)
+                .satisfies(exception -> {
+                    TestValidationException validationException = (TestValidationException) exception;
+                    assertThat(validationException.result().getDetails()).hasSize(1);
+                    assertThat(validationException.result().getDetails().getFirst().field()).isEqualTo("test");
+                });
 
         assertThat(validator.attributesCalled).isFalse();
         assertThat(validator.createIntegrityCalled).isFalse();
@@ -60,33 +63,50 @@ class BaseCrudValidatorTest {
         private boolean additionalUpdateCalled;
 
         @Override
-        protected void validateAttributes(TestDTO dto, ValidationResult result) {
+        protected void validateAttributes(TestDTO dto, CrudValidationResult result) {
             attributesCalled = true;
         }
 
         @Override
-        protected void validateCreateIntegrity(TestDTO dto, ValidationResult result) {
+        protected void validateCreateIntegrity(TestDTO dto, CrudValidationResult result) {
             createIntegrityCalled = true;
         }
 
         @Override
-        protected void validateUpdateIntegrity(Long id, TestDTO dto, ValidationResult result) {
+        protected void validateUpdateIntegrity(Long id, TestDTO dto, CrudValidationResult result) {
             updateIntegrityCalled = true;
         }
 
         @Override
-        protected void validateAdditionalCreate(TestDTO dto, ValidationResult result) {
+        protected void validateAdditionalCreate(TestDTO dto, CrudValidationResult result) {
             additionalCreateCalled = true;
         }
 
         @Override
-        protected void validateAdditionalUpdate(Long id, TestDTO dto, ValidationResult result) {
+        protected void validateAdditionalUpdate(Long id, TestDTO dto, CrudValidationResult result) {
             additionalUpdateCalled = true;
+        }
+
+        @Override
+        protected RuntimeException validationException(CrudValidationResult result) {
+            return new TestValidationException(result);
         }
 
         @Override
         public String entityName() {
             return "test";
+        }
+    }
+
+    static class TestValidationException extends RuntimeException {
+        private final CrudValidationResult result;
+
+        TestValidationException(CrudValidationResult result) {
+            this.result = result;
+        }
+
+        CrudValidationResult result() {
+            return result;
         }
     }
 }
