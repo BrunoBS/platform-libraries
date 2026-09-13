@@ -51,6 +51,11 @@
                 <artifactId>platform-catalog</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.empresa.platform</groupId>
+                <artifactId>platform-crud</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -60,5 +65,6 @@
         <module>platform-logging</module>
         <module>platform-test-support</module>
         <module>platform-catalog</module>
+        <module>platform-crud</module>
     </modules>
 </project>
