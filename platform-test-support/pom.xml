@@ -75,5 +75,9 @@
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+        </dependency>
     </dependencies>
 </project>
