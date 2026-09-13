@@ -2,17 +2,14 @@ package com.empresa.platform.catalog.mapper;
 
 import com.empresa.platform.catalog.dto.BaseTypeDTO;
 import com.empresa.platform.catalog.model.BaseType;
-import tools.jackson.databind.ObjectMapper;
 
 public abstract class BaseTypeMapper<D extends BaseTypeDTO<D, ID>, E extends BaseType, ID>
         implements BaseMapper<D, E> {
 
     private final Class<E> entityClass;
-    private final ObjectMapper objectMapper;
 
-    protected BaseTypeMapper(Class<E> entityClass, ObjectMapper objectMapper) {
+    protected BaseTypeMapper(Class<E> entityClass) {
         this.entityClass = entityClass;
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -37,7 +34,7 @@ public abstract class BaseTypeMapper<D extends BaseTypeDTO<D, ID>, E extends Bas
         entity.setLabel(dto.label());
         entity.setDescription(dto.description());
         entity.setSortOrder(dto.sortOrder());
-        entity.setSettings(dto.settings() == null ? "{}" : objectMapper.writeValueAsString(dto.settings()));
+        entity.setSettings(dto.settings() == null ? "{}" : dto.settings().toString());
         entity.setActive(true);
     }
 
