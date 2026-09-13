@@ -4,7 +4,7 @@ import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.catalog.model.CatalogEnum;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
-import com.empresa.platform.messaging.validation.ValidationResult;
+import com.empresa.platform.crud.validation.CrudValidationResult;
 
 import java.util.Map;
 
@@ -25,7 +25,7 @@ public abstract class EnumCatalogValidator<
     }
 
     @Override
-    protected void validateAdditionalCatalogFields(D dto, ValidationResult result) {
+    protected void validateAdditionalCatalogFields(D dto, CrudValidationResult result) {
         super.validateAdditionalCatalogFields(dto, result);
         if (dto.name() != null && !dto.name().isBlank() && CatalogEnum.from(enumClass, dto.name()) == null) {
             result.addError(
@@ -37,6 +37,6 @@ public abstract class EnumCatalogValidator<
         validateEnumCatalogFields(dto, result);
     }
 
-    protected void validateEnumCatalogFields(D dto, ValidationResult result) {
+    protected void validateEnumCatalogFields(D dto, CrudValidationResult result) {
     }
 }
