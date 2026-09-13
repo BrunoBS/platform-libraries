@@ -1,7 +1,6 @@
 package com.empresa.platform.crud.service;
 
 import com.empresa.platform.crud.dto.BaseCrudDTO;
-import com.empresa.platform.crud.exception.CrudResourceNotFoundException;
 import com.empresa.platform.crud.mapper.BaseCrudMapper;
 import com.empresa.platform.crud.repository.BaseCrudRepository;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
@@ -81,8 +80,14 @@ public abstract class BaseCrudService<
 
     protected E getEntity(ID id) {
         return repository.findById(id)
-                .orElseThrow(() -> new CrudResourceNotFoundException(resourceName(), id));
+                .orElseThrow(() -> notFoundException(id));
     }
+
+    /**
+     * Defines how the consuming module represents a missing resource.
+     * The CRUD layer detects the condition but does not own domain/application error semantics.
+     */
+    protected abstract RuntimeException notFoundException(ID id);
 
     protected void deleteEntity(E entity) {
         repository.delete(entity);
@@ -123,6 +128,4 @@ public abstract class BaseCrudService<
     protected BaseCrudValidator<D, ID> validator() {
         return validator;
     }
-
-    public abstract String resourceName();
 }
