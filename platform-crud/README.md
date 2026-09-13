@@ -17,6 +17,8 @@ Padronizar a estrutura comum de recursos CRUD nos serviços da plataforma:
 
 O serviço consumidor continua responsável por suas entidades, atributos, constraints, regras de negócio, autorização, semântica de erros e efeitos colaterais.
 
+A `platform-crud` não depende de outras capabilities da plataforma. Em especial, não conhece `platform-messaging`: ela detecta falhas e entrega ao consumidor os pontos de extensão para decidir como representá-las.
+
 ## Dependência
 
 ```xml
@@ -116,10 +118,16 @@ public class CustomerValidator
     @Override
     protected void validateAttributes(
             CustomerDTO dto,
-            ValidationResult result) {
+            CrudValidationResult result) {
         if (dto.name() == null || dto.name().isBlank()) {
             result.addError("name", "customer.name.required");
         }
+    }
+
+    @Override
+    protected RuntimeException validationException(
+            CrudValidationResult result) {
+        return new CustomerValidationException(result);
     }
 
     @Override
@@ -149,6 +157,8 @@ validateAdditionalCreate
 validateAdditionalUpdate
 requiredMessageKey
 ```
+
+O CRUD fornece `CrudValidationResult` e `CrudValidationDetail` apenas como modelo neutro para acumular erros. A exception final é responsabilidade do consumidor através de `validationException(CrudValidationResult)`. Assim o CRUD não conhece HTTP, i18n, `platform-messaging` nem o formato de erro da aplicação.
 
 Se um recurso realmente precisar substituir todo o fluxo de uma operação, ele ainda pode sobrescrever `validateForCreate`, `validateForUpdate` ou `validateForDelete`. A recomendação é preferir os hooks quando a customização for parcial.
 
@@ -256,6 +266,7 @@ Quando um módulo precisar de um contrato HTTP diferente, ele deve declarar seu 
 - integração genérica repository/mapper/validator
 - transações do fluxo básico
 - detecção de recurso ausente
+- modelo neutro de validação
 - hooks de ciclo de vida
 - controller HTTP CRUD padrão
 
@@ -268,6 +279,7 @@ Quando um módulo precisar de um contrato HTTP diferente, ele deve declarar seu 
 - autorização
 - soft delete, quando necessário
 - exception e semântica de recurso não encontrado
+- exception e apresentação de erros de validação
 - mensagens específicas
 - integrações e efeitos colaterais
 
