@@ -200,6 +200,18 @@ protected void deleteEntity(Customer entity) {
 
 ## 6. Controller
 
+A camada web possui duas abstrações complementares:
+
+```text
+CrudControllerSupport
+        ↑
+BaseCrudController
+```
+
+`CrudControllerSupport` reutiliza as operações CRUD sem declarar endpoints HTTP. Isso permite que abstrações especializadas, como `platform-catalog`, reaproveitem o fluxo comum mantendo seu próprio contrato REST.
+
+`BaseCrudController` fornece o contrato HTTP CRUD padrão:
+
 ```java
 @RestController
 @RequestMapping("/api/v1/customers")
@@ -231,6 +243,8 @@ DELETE /{id}
 
 Autorização continua sendo responsabilidade do controller concreto.
 
+Quando um módulo precisar de um contrato HTTP diferente, ele pode herdar de `CrudControllerSupport` e declarar suas próprias annotations e payloads sem duplicar a delegação para o service.
+
 ## Responsabilidades
 
 ### platform-crud
@@ -241,7 +255,8 @@ Autorização continua sendo responsabilidade do controller concreto.
 - transações do fluxo básico
 - detecção de recurso ausente
 - hooks de ciclo de vida
-- controller HTTP básico
+- suporte reutilizável de controller sem contrato HTTP
+- controller HTTP CRUD padrão
 
 ### serviço consumidor
 
@@ -257,7 +272,7 @@ Autorização continua sendo responsabilidade do controller concreto.
 
 ## Relação com platform-catalog
 
-A `platform-catalog` pode especializar a `platform-crud` preservando seu contrato público. O CRUD fornece o fluxo comum; catálogo acrescenta semânticas como `active`, restore, ordenação e filtros.
+A `platform-catalog` especializa a `platform-crud` preservando seu contrato público. O CRUD fornece o fluxo comum; catálogo acrescenta semânticas como `active`, restore, ordenação e filtros. Na camada web, `BaseCatalogController` reutiliza `CrudControllerSupport` em vez de herdar do contrato REST padrão do CRUD, evitando colisões de mappings e mantendo criação em lote, filtros e restore transparentes para os consumidores atuais.
 
 ## Princípio
 
