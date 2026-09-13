@@ -1,13 +1,9 @@
 package com.empresa.platform.crud.validation;
 
-import com.empresa.platform.messaging.exception.ValidationException;
-import com.empresa.platform.messaging.message.PlatformMessageKeys;
-import com.empresa.platform.messaging.validation.ValidationResult;
-
 public abstract class BaseCrudValidator<D, ID> {
 
     public void validateForCreate(D dto) {
-        ValidationResult result = new ValidationResult();
+        CrudValidationResult result = new CrudValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
             validateAttributes(dto, result);
@@ -18,7 +14,7 @@ public abstract class BaseCrudValidator<D, ID> {
     }
 
     public void validateForUpdate(ID id, D dto) {
-        ValidationResult result = new ValidationResult();
+        CrudValidationResult result = new CrudValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
             validateAttributes(dto, result);
@@ -29,44 +25,50 @@ public abstract class BaseCrudValidator<D, ID> {
     }
 
     public void validateForDelete(ID id) {
-        ValidationResult result = new ValidationResult();
+        CrudValidationResult result = new CrudValidationResult();
         validateDelete(id, result);
         throwIfInvalid(result);
     }
 
-    protected void validateRequired(D dto, ValidationResult result) {
+    protected void validateRequired(D dto, CrudValidationResult result) {
         if (dto == null) {
             result.addError(entityName(), requiredMessageKey());
         }
     }
 
-    protected void validateAttributes(D dto, ValidationResult result) {
+    protected void validateAttributes(D dto, CrudValidationResult result) {
     }
 
-    protected void validateCreateIntegrity(D dto, ValidationResult result) {
+    protected void validateCreateIntegrity(D dto, CrudValidationResult result) {
     }
 
-    protected void validateUpdateIntegrity(ID id, D dto, ValidationResult result) {
+    protected void validateUpdateIntegrity(ID id, D dto, CrudValidationResult result) {
     }
 
-    protected void validateDelete(ID id, ValidationResult result) {
+    protected void validateDelete(ID id, CrudValidationResult result) {
     }
 
-    protected void validateAdditionalCreate(D dto, ValidationResult result) {
+    protected void validateAdditionalCreate(D dto, CrudValidationResult result) {
     }
 
-    protected void validateAdditionalUpdate(ID id, D dto, ValidationResult result) {
+    protected void validateAdditionalUpdate(ID id, D dto, CrudValidationResult result) {
     }
 
     protected String requiredMessageKey() {
         return "validation.required";
     }
 
-    protected void throwIfInvalid(ValidationResult result) {
+    protected void throwIfInvalid(CrudValidationResult result) {
         if (result.hasErrors()) {
-            throw new ValidationException(PlatformMessageKeys.VALIDATION_FAILED, result.getDetails());
+            throw validationException(result);
         }
     }
+
+    /**
+     * The CRUD module detects validation failures but does not own the
+     * application's exception, HTTP or messaging semantics.
+     */
+    protected abstract RuntimeException validationException(CrudValidationResult result);
 
     public abstract String entityName();
 }
