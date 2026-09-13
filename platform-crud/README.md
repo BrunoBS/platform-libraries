@@ -129,16 +129,28 @@ public class CustomerValidator
 }
 ```
 
-Hooks disponíveis:
+Os métodos públicos são o contrato das operações:
 
 ```text
+validateForCreate
+validateForUpdate
+validateForDelete
+```
+
+Eles executam diretamente o fluxo padrão. Para customizações pontuais, sobrescreva somente os hooks necessários:
+
+```text
+validateRequired
 validateAttributes
 validateCreateIntegrity
 validateUpdateIntegrity
 validateDelete
 validateAdditionalCreate
 validateAdditionalUpdate
+requiredMessageKey
 ```
+
+Se um recurso realmente precisar substituir todo o fluxo de uma operação, ele ainda pode sobrescrever `validateForCreate`, `validateForUpdate` ou `validateForDelete`. A recomendação é preferir os hooks quando a customização for parcial.
 
 ## 5. Service
 
@@ -186,7 +198,7 @@ beforeDelete
 afterDelete
 ```
 
-O delete padrão é físico. Para soft delete, sobrescreva `deleteEntity` no service concreto.
+Esses hooks existem para customizar pontos reais do ciclo sem obrigar o consumidor a reimplementar a operação inteira. O delete padrão é físico. Para soft delete, sobrescreva `deleteEntity` no service concreto.
 
 Exemplo:
 
@@ -200,17 +212,7 @@ protected void deleteEntity(Customer entity) {
 
 ## 6. Controller
 
-A camada web possui duas abstrações complementares:
-
-```text
-CrudControllerSupport
-        ↑
-BaseCrudController
-```
-
-`CrudControllerSupport` reutiliza as operações CRUD sem declarar endpoints HTTP. Isso permite que abstrações especializadas, como `platform-catalog`, reaproveitem o fluxo comum mantendo seu próprio contrato REST.
-
-`BaseCrudController` fornece o contrato HTTP CRUD padrão:
+`BaseCrudController` fornece diretamente o contrato HTTP CRUD padrão e delega ao service concreto, sem camadas intermediárias de delegação.
 
 ```java
 @RestController
@@ -243,7 +245,7 @@ DELETE /{id}
 
 Autorização continua sendo responsabilidade do controller concreto.
 
-Quando um módulo precisar de um contrato HTTP diferente, ele pode herdar de `CrudControllerSupport` e declarar suas próprias annotations e payloads sem duplicar a delegação para o service.
+Quando um módulo precisar de um contrato HTTP diferente, ele deve declarar seu próprio controller e delegar ao seu service. A `platform-crud` não cria uma abstração adicional apenas para encapsular chamadas simples de delegação.
 
 ## Responsabilidades
 
@@ -255,7 +257,6 @@ Quando um módulo precisar de um contrato HTTP diferente, ele pode herdar de `Cr
 - transações do fluxo básico
 - detecção de recurso ausente
 - hooks de ciclo de vida
-- suporte reutilizável de controller sem contrato HTTP
 - controller HTTP CRUD padrão
 
 ### serviço consumidor
@@ -272,10 +273,10 @@ Quando um módulo precisar de um contrato HTTP diferente, ele pode herdar de `Cr
 
 ## Relação com platform-catalog
 
-A `platform-catalog` especializa a `platform-crud` preservando seu contrato público. O CRUD fornece o fluxo comum; catálogo acrescenta semânticas como `active`, restore, ordenação e filtros. Na camada web, `BaseCatalogController` reutiliza `CrudControllerSupport` em vez de herdar do contrato REST padrão do CRUD, evitando colisões de mappings e mantendo criação em lote, filtros e restore transparentes para os consumidores atuais.
+A `platform-catalog` especializa a `platform-crud` preservando seu contrato público. DTO, repository, mapper, validator e service reutilizam os contratos genéricos. O `BaseCatalogController` permanece especializado porque possui filtros, criação em lote e restore; ele delega diretamente ao `BaseCatalogService`, evitando abstrações intermediárias sem comportamento próprio.
 
 ## Princípio
 
-A biblioteca abstrai o comportamento do CRUD, não o domínio.
+A biblioteca abstrai comportamento comum real, não simples delegações e não o domínio.
 
-Não usar `Map<String, Object>`, `JsonNode` ou reflection como mecanismo para representar entidades arbitrárias. O objetivo é preservar tipagem forte e deixar cada serviço dono do seu modelo.
+Pontos de extensão devem existir apenas quando permitem customizar uma etapa concreta do fluxo. Não usar `Map<String, Object>`, `JsonNode` ou reflection como mecanismo para representar entidades arbitrárias. O objetivo é preservar tipagem forte e deixar cada serviço dono do seu modelo.
