@@ -13,10 +13,10 @@
 
     <artifactId>platform-starter</artifactId>
     <version>1.0.0</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>Starter da Plataforma</name>
-    <description>Agregador do baseline obrigatório dos serviços da plataforma: logging, messaging e authorization.</description>
+    <description>Starter JAR do baseline obrigatório dos serviços da plataforma: logging, messaging e authorization.</description>
 
     <dependencies>
         <dependency>
