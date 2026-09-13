@@ -57,13 +57,6 @@ public abstract class BaseCatalogService<
                 .orElseThrow(() -> notFoundException(null));
     }
 
-    /**
-     * Preserves the original catalog update contract used by existing clients.
-     */
-    public D update(D dto) {
-        return super.update(dto == null ? null : dto.id(), dto);
-    }
-
     public D restore(Long id) {
         E entity = repository.findByIdAndActiveFalse(id)
                 .orElseThrow(() -> new ValidationException(
