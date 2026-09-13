@@ -16,9 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class BaseCatalogController<D extends BaseCatalogDTO<D, ID>, E extends BaseCatalogEntity, ID> {
+public abstract class BaseCatalogController<D extends BaseCatalogDTO<D>, E extends BaseCatalogEntity> {
 
-    protected abstract BaseCatalogService<E, D, ID> getService();
+    protected abstract BaseCatalogService<E, D> getService();
 
     @GetMapping
     public ResponseEntity<List<D>> findAll(
@@ -32,7 +32,7 @@ public abstract class BaseCatalogController<D extends BaseCatalogDTO<D, ID>, E e
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<D> findById(@PathVariable ID id) { return ResponseEntity.ok(getService().findById(id)); }
+    public ResponseEntity<D> findById(@PathVariable Long id) { return ResponseEntity.ok(getService().findById(id)); }
 
     @PostMapping
     public ResponseEntity<List<D>> create(@RequestBody List<D> dtos) {
@@ -40,11 +40,11 @@ public abstract class BaseCatalogController<D extends BaseCatalogDTO<D, ID>, E e
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<D> update(@PathVariable ID id, @RequestBody D dto) { return ResponseEntity.ok(getService().update(dto.withId(id))); }
+    public ResponseEntity<D> update(@PathVariable Long id, @RequestBody D dto) { return ResponseEntity.ok(getService().update(dto.withId(id))); }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable ID id) { getService().delete(id); return ResponseEntity.noContent().build(); }
+    public ResponseEntity<Void> delete(@PathVariable Long id) { getService().delete(id); return ResponseEntity.noContent().build(); }
 
     @PostMapping("/{id}/restore")
-    public ResponseEntity<D> restore(@PathVariable ID id) { return ResponseEntity.ok(getService().restore(id)); }
+    public ResponseEntity<D> restore(@PathVariable Long id) { return ResponseEntity.ok(getService().restore(id)); }
 }
