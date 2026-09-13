@@ -2,6 +2,20 @@
 
 O **`platform-authorization`** é o módulo corporativo de governança de segurança, controle de acesso e gerenciamento de contexto de usuário, desenvolvido para **Spring Boot 4.0.0 e Java 21+**. Ele gerencia o pipeline de interceptação HTTP, validação de tokens e isolamento de escopo de execução em Threads seguras.
 
+## Independência entre capabilities
+
+`platform-authorization` não depende de `platform-messaging`, `platform-logging` ou outras capabilities da plataforma. O módulo possui apenas a semântica que pertence à autorização e expõe exceptions próprias:
+
+```text
+AuthorizationException
+├── UnauthorizedAccessException
+└── ForbiddenAccessException
+```
+
+As exceptions carregam um `code` de autorização. O serviço consumidor decide como esse erro será apresentado: HTTP 401/403, i18n, `ProblemDetail`, formato corporativo de erro ou integração com `platform-messaging`.
+
+Esse limite mantém a capability reutilizável sem obrigar outros módulos de plataforma no classpath.
+
 ---
 
 ## 🚀 Como Ativar no Microsserviço
