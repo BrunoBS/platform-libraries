@@ -1,6 +1,7 @@
 package com.empresa.platform.crud.web;
 
 import com.empresa.platform.crud.dto.BaseCrudDTO;
+import com.empresa.platform.crud.service.BaseCrudService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +16,9 @@ import java.util.List;
 public abstract class BaseCrudController<
         E,
         D extends BaseCrudDTO<ID, D>,
-        ID>
-        extends CrudControllerSupport<E, D, ID> {
+        ID> {
+
+    protected abstract BaseCrudService<E, D, ID> service();
 
     @GetMapping
     public List<D> findAll() {
@@ -25,23 +27,23 @@ public abstract class BaseCrudController<
 
     @GetMapping("/{id}")
     public D findById(@PathVariable ID id) {
-        return findByIdInternal(id);
+        return service().findById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public D create(@RequestBody D dto) {
-        return createInternal(dto);
+        return service().create(dto);
     }
 
     @PutMapping("/{id}")
     public D update(@PathVariable ID id, @RequestBody D dto) {
-        return updateInternal(id, dto);
+        return service().update(id, dto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable ID id) {
-        deleteInternal(id);
+        service().delete(id);
     }
 }
