@@ -1,14 +1,14 @@
 package com.empresa.platform.catalog.service;
 
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
+import com.empresa.platform.catalog.exception.CatalogNotFoundException;
+import com.empresa.platform.catalog.exception.CatalogRestoreException;
 import com.empresa.platform.catalog.mapper.BaseMapper;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.catalog.model.BaseCatalogEntity;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
 import com.empresa.platform.catalog.validation.BaseValidator;
 import com.empresa.platform.crud.service.BaseCrudService;
-import com.empresa.platform.messaging.exception.NotFoundException;
-import com.empresa.platform.messaging.exception.ValidationException;
 
 import java.util.List;
 import java.util.Map;
@@ -59,9 +59,7 @@ public abstract class BaseCatalogService<
 
     public D restore(Long id) {
         E entity = repository.findByIdAndActiveFalse(id)
-                .orElseThrow(() -> new ValidationException(
-                        CatalogMessageKeys.RESTORE_INVALID,
-                        Map.of("0", validator.entityName())));
+                .orElseThrow(() -> restoreException(id));
         entity.setActive(true);
         return mapper.toDTO(repository.save(entity));
     }
@@ -78,9 +76,15 @@ public abstract class BaseCatalogService<
 
     @Override
     protected RuntimeException notFoundException(Long id) {
-        return new NotFoundException(
+        return new CatalogNotFoundException(
                 CatalogMessageKeys.NOT_FOUND,
                 Map.of("0", validator.entityName()));
+    }
+
+    protected RuntimeException restoreException(Long id) {
+        return new CatalogRestoreException(
+                CatalogMessageKeys.RESTORE_INVALID,
+                Map.of("0", validator.entityName(), "1", id));
     }
 
     @Override
