@@ -6,6 +6,8 @@ Infraestrutura reutilizável para catálogos persistidos e administráveis pelos
 
 A biblioteca define **como** um catálogo gerenciado funciona; cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio.
 
+A infraestrutura comum de ciclo de vida CRUD é fornecida pela `platform-crud`. A `platform-catalog` especializa essa base com comportamento próprio de catálogo, preservando seus contratos públicos para os consumidores.
+
 A abstração base é totalmente independente de `enum`. O banco pode ser a fonte de verdade do catálogo. O suporte a `enum` existe apenas como especialização opcional para catálogos que precisam restringir os nomes permitidos.
 
 Exemplos:
@@ -88,6 +90,8 @@ web/
   BaseCatalogController
 ```
 
+Internamente, os contratos de DTO, repository, mapper, validator e service reutilizam `platform-crud`. O controller de catálogo permanece especializado porque seu contrato HTTP inclui listagem com filtros, criação em lote e `restore`, comportamentos que não pertencem ao CRUD genérico.
+
 ## Comportamento padrão de catálogos gerenciados
 
 A abstração fornece:
@@ -131,8 +135,10 @@ O guia cobre dependência Maven, entidade, DTO, repository, mapper, validator, s
 A biblioteca fornece comportamento e infraestrutura. Ela não deve concentrar os valores de negócio dos microserviços.
 
 ```text
+platform-crud
+      ↓ infraestrutura CRUD
 platform-catalog
-      ↓ infraestrutura
+      ↓ especialização de catálogo
 account-api  -> seus próprios catálogos
 event-api    -> seus próprios catálogos
 route-api    -> seus próprios catálogos
@@ -140,4 +146,4 @@ route-api    -> seus próprios catálogos
 
 ## Migração
 
-Nesta etapa, a estrutura equivalente permanece dentro da `account-api`. A migração daquele serviço para `platform-catalog` será feita separadamente, após validação da abstração e dos contratos públicos da lib.
+A integração com `platform-crud` é interna à `platform-catalog`: consumidores existentes continuam usando os contratos `BaseCatalog*`. A migração da `account-api` para `platform-catalog` permanece uma etapa separada.

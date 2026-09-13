@@ -1,7 +1,12 @@
 package com.empresa.platform.catalog.mapper;
 
-public interface BaseMapper<D, E> {
-    E toEntity(D dto);
-    D toDTO(E entity);
-    void updateEntity(E entity, D dto);
+import com.empresa.platform.crud.mapper.BaseCrudMapper;
+
+/**
+ * Backward-compatible catalog mapper contract.
+ *
+ * @param <D> catalog DTO type
+ * @param <E> catalog entity type
+ */
+public interface BaseMapper<D, E> extends BaseCrudMapper<E, D> {
 }
