@@ -1,12 +1,12 @@
 package com.empresa.platform.catalog.validation;
 
-import com.empresa.platform.catalog.dto.BaseTypeDTO;
+import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.messaging.exception.ValidationException;
 import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.validation.ValidationResult;
 
-public abstract class BaseValidator<D extends BaseTypeDTO<D, ID>, ID> {
+public abstract class BaseValidator<D extends BaseCatalogDTO<D, ID>, ID> {
 
     public void validateForCreate(D dto) {
         validate(dto);
