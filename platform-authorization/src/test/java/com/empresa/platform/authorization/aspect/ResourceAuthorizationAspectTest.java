@@ -1,6 +1,9 @@
 package com.empresa.platform.authorization.aspect;
 
 import com.empresa.platform.authorization.annotation.ResourceAuthorization;
+import com.empresa.platform.authorization.exception.ForbiddenAccessException;
+import com.empresa.platform.authorization.exception.UnauthorizedAccessException;
+import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.ParsedGroup;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
@@ -8,14 +11,18 @@ import com.empresa.platform.authorization.resource.AuthorizableResource;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import com.empresa.platform.messaging.exception.ForbiddenException;
-import com.empresa.platform.messaging.exception.UnauthorizedException;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 class ResourceAuthorizationAspectTest {
 
@@ -79,24 +86,24 @@ class ResourceAuthorizationAspectTest {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(new TestResource("A-TWO"));
 
-        ForbiddenException exception = assertThrows(
-                ForbiddenException.class,
+        ForbiddenAccessException exception = assertThrows(
+                ForbiddenAccessException.class,
                 () -> aspect.authorize(joinPoint, annotation)
         );
 
-        assertEquals("authorization.resource.access.denied", exception.getMessageKey());
+        assertEquals(AuthorizationMessageKeys.RESOURCE_ACCESS_DENIED, exception.getCode());
     }
 
     @Test
     void shouldRejectWhenSessionIsMissing() {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
 
-        UnauthorizedException exception = assertThrows(
-                UnauthorizedException.class,
+        UnauthorizedAccessException exception = assertThrows(
+                UnauthorizedAccessException.class,
                 () -> aspect.authorize(joinPoint, annotation)
         );
 
-        assertEquals("authorization.session.not.found", exception.getMessageKey());
+        assertEquals(AuthorizationMessageKeys.SESSION_NOT_FOUND, exception.getCode());
         verifyNoInteractions(joinPoint);
     }
 
