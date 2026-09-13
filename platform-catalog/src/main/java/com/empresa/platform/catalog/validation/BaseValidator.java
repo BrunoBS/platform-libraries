@@ -6,7 +6,7 @@ import com.empresa.platform.messaging.exception.ValidationException;
 import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.validation.ValidationResult;
 
-public abstract class BaseValidator<D extends BaseCatalogDTO<D, ID>, ID> {
+public abstract class BaseValidator<D extends BaseCatalogDTO<D>> {
 
     public void validateForCreate(D dto) {
         validate(dto);
@@ -32,7 +32,7 @@ public abstract class BaseValidator<D extends BaseCatalogDTO<D, ID>, ID> {
         }
     }
 
-    public void validateForDelete(ID id) {
+    public void validateForDelete(Long id) {
     }
 
     protected void validateAdditionalFields(D dto, ValidationResult result) {
