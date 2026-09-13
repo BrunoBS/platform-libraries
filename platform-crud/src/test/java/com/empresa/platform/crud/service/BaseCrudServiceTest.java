@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,6 +72,15 @@ class BaseCrudServiceTest {
         verify(repository).delete(entity);
     }
 
+    @Test
+    void shouldDelegateMissingResourceExceptionToConsumer() {
+        when(repository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findById(10L))
+                .isInstanceOf(TestNotFoundException.class)
+                .hasMessage("test resource 10 not found");
+    }
+
     record TestDTO(Long id, String name) implements BaseCrudDTO<Long, TestDTO> {
         @Override
         public TestDTO withId(Long id) {
@@ -97,8 +107,14 @@ class BaseCrudServiceTest {
         }
 
         @Override
-        public String resourceName() {
-            return "test";
+        protected RuntimeException notFoundException(Long id) {
+            return new TestNotFoundException("test resource " + id + " not found");
+        }
+    }
+
+    static class TestNotFoundException extends RuntimeException {
+        TestNotFoundException(String message) {
+            super(message);
         }
     }
 }
