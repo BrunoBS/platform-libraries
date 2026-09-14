@@ -3,15 +3,14 @@ package com.empresa.platform.catalog.validation;
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.catalog.model.CatalogEnum;
-import com.empresa.platform.catalog.model.CatalogManagementMode;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
 import com.empresa.platform.crud.validation.CrudValidationResult;
 
 import java.util.Map;
 
 /**
- * Validator specialization for MANAGED_CONSTRAINED catalogs whose allowed
- * semantic names are constrained by a Java enum.
+ * Validator specialization for catalogs whose allowed names are defined by a
+ * Java enum implementing CatalogEnum.
  */
 public abstract class EnumCatalogValidator<
         E extends Enum<E> & CatalogEnum<E>,
@@ -22,11 +21,6 @@ public abstract class EnumCatalogValidator<
     protected EnumCatalogValidator(BaseCatalogRepository<?> repository, Class<E> enumClass) {
         super(repository);
         this.enumClass = enumClass;
-    }
-
-    @Override
-    public CatalogManagementMode managementMode() {
-        return CatalogManagementMode.MANAGED_CONSTRAINED;
     }
 
     @Override
