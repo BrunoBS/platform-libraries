@@ -57,8 +57,8 @@ class BaseCrudServiceTest {
         when(repository.save(entity)).thenReturn(entity);
         when(mapper.toDTO(entity)).thenReturn(normalized);
 
-        assertThat(service.update(10L, input)).isEqualTo(normalized);
-        verify(validator).validateForUpdate(10L, normalized);
+        assertThat(service.update(normalized)).isEqualTo(normalized);
+        verify(validator).validateForUpdate(normalized);
         verify(mapper).updateEntity(entity, normalized);
     }
 
@@ -67,9 +67,10 @@ class BaseCrudServiceTest {
         TestEntity entity = new TestEntity(10L, "name");
         when(repository.findById(10L)).thenReturn(Optional.of(entity));
 
-        service.delete(10L);
+        TestDTO reference = new TestDTO(10L, null);
+        service.delete(reference);
 
-        verify(validator).validateForDelete(10L);
+        verify(validator).validateForDelete(reference);
         verify(repository).delete(entity);
     }
 
@@ -77,7 +78,9 @@ class BaseCrudServiceTest {
     void shouldDelegateMissingResourceExceptionToConsumer() {
         when(repository.findById(10L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.findById(10L))
+        TestDTO reference = new TestDTO(10L, null);
+
+        assertThatThrownBy(() -> service.findById(reference))
                 .isInstanceOf(TestNotFoundException.class)
                 .hasMessage("test resource 10 not found");
     }
