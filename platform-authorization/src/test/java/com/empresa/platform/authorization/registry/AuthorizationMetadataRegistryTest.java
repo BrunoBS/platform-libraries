@@ -1,5 +1,6 @@
 package com.empresa.platform.authorization.registry;
 
+import com.empresa.platform.authorization.annotation.AuthorizationAccessPolicy;
 import com.empresa.platform.authorization.annotation.AuthorizationRequired;
 import com.empresa.platform.authorization.model.AuthorizationLevel;
 import com.empresa.platform.authorization.model.AuthorizationPolicy;
@@ -16,7 +17,7 @@ class AuthorizationMetadataRegistryTest {
         public void create() {}
     }
 
-    @com.empresa.platform.authorization.annotation.AuthorizationPolicy(
+    @AuthorizationAccessPolicy(
             read = AuthorizationLevel.OPEN,
             write = AuthorizationLevel.OWNER
     )
