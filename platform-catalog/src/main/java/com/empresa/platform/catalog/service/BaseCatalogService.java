@@ -13,6 +13,7 @@ import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.model.ValidationDetail;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,11 +42,30 @@ public abstract class BaseCatalogService<
      */
     @Override
     public List<D> findAll() {
-        return findAll(true, null, Map.of());
+        return findAll(Map.of());
+    }
+
+    /**
+     * Standard CRUD filter contract. Catalog consumes the common filters
+     * "active" and "name" and forwards the remaining entries to
+     * catalog-specific specifications.
+     */
+    @Override
+    public List<D> findAll(Map<String, String> filters) {
+        Map<String, String> resolved = filters == null ? Map.of() : Map.copyOf(filters);
+        boolean active = Boolean.parseBoolean(resolved.getOrDefault("active", "true"));
+        String name = resolved.get("name");
+
+        Map<String, String> additionalFilters = new HashMap<>(resolved);
+        additionalFilters.remove("active");
+        additionalFilters.remove("name");
+
+        return findAll(active, name, Map.copyOf(additionalFilters));
     }
 
     /**
      * Executes standard and catalog-specific filters in the database.
+     * Kept as an overload for existing consumers.
      */
     public List<D> findAll(boolean active, String name, Map<String, String> filters) {
         Specification<E> specification = (root, query, cb) -> cb.equal(root.get("active"), active);
