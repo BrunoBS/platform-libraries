@@ -18,7 +18,7 @@ import java.util.Map;
  * scoped catalogs, for example account + name or application + name.
  */
 public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>>
-        extends BaseCrudValidator<D, Long> {
+        extends BaseCrudValidator<D> {
 
     protected final BaseCatalogRepository<?> repository;
 
