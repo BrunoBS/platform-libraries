@@ -1,12 +1,12 @@
 package com.empresa.platform.catalog.validation;
 
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
-import com.empresa.platform.catalog.exception.CatalogValidationException;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
 import com.empresa.platform.crud.validation.CrudValidationResult;
-
-import java.util.Map;
+import com.empresa.platform.messaging.exception.ValidationException;
+import com.empresa.platform.messaging.message.PlatformMessageKeys;
+import com.empresa.platform.messaging.model.ValidationDetail;
 
 public abstract class BaseValidator<D extends BaseCatalogDTO<D>>
         extends BaseCrudValidator<D, Long> {
@@ -38,10 +38,15 @@ public abstract class BaseValidator<D extends BaseCatalogDTO<D>>
 
     @Override
     protected RuntimeException validationException(CrudValidationResult result) {
-        return new CatalogValidationException(
-                CatalogMessageKeys.VALIDATION_FAILED,
-                result.getDetails(),
-                Map.of("0", entityName())
+        return new ValidationException(
+                PlatformMessageKeys.VALIDATION_FAILED,
+                result.getDetails().stream()
+                        .map(detail -> new ValidationDetail(
+                                detail.field(),
+                                detail.messageKey(),
+                                detail.parameters()
+                        ))
+                        .toList()
         );
     }
 
