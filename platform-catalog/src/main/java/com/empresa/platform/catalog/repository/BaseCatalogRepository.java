@@ -2,6 +2,7 @@ package com.empresa.platform.catalog.repository;
 
 import com.empresa.platform.catalog.model.BaseCatalogEntity;
 import com.empresa.platform.crud.repository.BaseCrudRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Optional;
 
 @NoRepositoryBean
 public interface BaseCatalogRepository<E extends BaseCatalogEntity>
-        extends BaseCrudRepository<E, Long> {
+        extends BaseCrudRepository<E, Long>, JpaSpecificationExecutor<E> {
 
     Optional<E> findByNameAndActiveTrue(String name);
     Optional<E> findByIdAndActiveTrue(Long id);
