@@ -86,8 +86,9 @@ public abstract class BaseCrudService<
     protected abstract RuntimeException invalidFilterException(String name, String value);
 
     @Transactional(readOnly = true)
-    public D findById(ID id) {
-        return mapper.toDTO(getEntity(id));
+    public D findById(D dto) {
+        validator.validateForFind(dto);
+        return mapper.toDTO(getEntity(dto));
     }
 
     @Transactional
@@ -103,22 +104,21 @@ public abstract class BaseCrudService<
     }
 
     @Transactional
-    public D update(ID id, D dto) {
-        D updateDto = normalizeUpdate(id, dto);
-        validator.validateForUpdate(id, updateDto);
-        E entity = getEntity(id);
-        beforeUpdate(entity, updateDto);
-        mapper.updateEntity(entity, updateDto);
-        applyUpdate(entity, updateDto);
+    public D update(D dto) {
+        validator.validateForUpdate(dto);
+        E entity = getEntity(dto);
+        beforeUpdate(entity, dto);
+        mapper.updateEntity(entity, dto);
+        applyUpdate(entity, dto);
         E saved = repository.save(entity);
-        afterUpdate(saved, updateDto);
+        afterUpdate(saved, dto);
         return mapper.toDTO(saved);
     }
 
     @Transactional
-    public void delete(ID id) {
-        validator.validateForDelete(id);
-        E entity = getEntity(id);
+    public void delete(D dto) {
+        validator.validateForDelete(dto);
+        E entity = getEntity(dto);
         beforeDelete(entity);
         deleteEntity(entity);
         afterDelete(entity);
@@ -128,8 +128,8 @@ public abstract class BaseCrudService<
         return dto == null ? null : dto.withId(null);
     }
 
-    protected D normalizeUpdate(ID id, D dto) {
-        return dto == null ? null : dto.withId(id);
+    protected E getEntity(D dto) {
+        return getEntity(dto.id());
     }
 
     protected E getEntity(ID id) {
