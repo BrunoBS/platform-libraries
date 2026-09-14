@@ -1,11 +1,11 @@
 package com.empresa.platform.catalog.service;
 
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
-import com.empresa.platform.catalog.mapper.BaseMapper;
+import com.empresa.platform.catalog.mapper.BaseCatalogMapper;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.catalog.model.BaseCatalogEntity;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
-import com.empresa.platform.catalog.validation.BaseValidator;
+import com.empresa.platform.catalog.validation.BaseCatalogValidator;
 import com.empresa.platform.crud.service.BaseCrudService;
 import com.empresa.platform.messaging.exception.NotFoundException;
 import com.empresa.platform.messaging.exception.ValidationException;
@@ -23,13 +23,13 @@ public abstract class BaseCatalogService<
         extends BaseCrudService<E, D, Long> {
 
     protected final BaseCatalogRepository<E> repository;
-    protected final BaseMapper<D, E> mapper;
-    protected final BaseValidator<D> validator;
+    protected final BaseCatalogMapper<D, E> mapper;
+    protected final BaseCatalogValidator<D> validator;
 
     protected BaseCatalogService(
             BaseCatalogRepository<E> repository,
-            BaseMapper<D, E> mapper,
-            BaseValidator<D> validator) {
+            BaseCatalogMapper<D, E> mapper,
+            BaseCatalogValidator<D> validator) {
         super(repository, mapper, validator);
         this.repository = repository;
         this.mapper = mapper;
@@ -83,8 +83,6 @@ public abstract class BaseCatalogService<
         E entity = repository.findByIdAndActiveFalse(id)
                 .orElseThrow(() -> restoreException(id));
 
-        // Revalidate before restoring so an inactive record cannot re-enter the
-        // active set with an invalid enum value, inactive parent or duplicated identity.
         validator.validateForUpdate(id, mapper.toDTO(entity));
         entity.setActive(true);
         return mapper.toDTO(repository.save(entity));
@@ -121,7 +119,8 @@ public abstract class BaseCatalogService<
                     List.of(new ValidationDetail(
                             "name",
                             CatalogMessageKeys.NAME_IMMUTABLE,
-                            Map.of("0", validator.entityName(), "1", entity.getName())
+                            Map.of("0", validator.entityName(), "1", entity.getName()),
+                            null
                     ))
             );
         }
