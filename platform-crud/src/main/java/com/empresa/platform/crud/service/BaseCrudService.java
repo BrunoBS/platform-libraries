@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class BaseCrudService<
         E,
@@ -36,6 +37,7 @@ public abstract class BaseCrudService<
     @Transactional(readOnly = true)
     public List<D> findAll(Map<String, String> filters) {
         Map<String, String> resolvedFilters = filters == null ? Map.of() : Map.copyOf(filters);
+        validateAllowedFilters(resolvedFilters);
         return findAllEntities(resolvedFilters).stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -43,6 +45,24 @@ public abstract class BaseCrudService<
 
     protected List<E> findAllEntities(Map<String, String> filters) {
         return repository.findAll();
+    }
+
+    protected Set<String> allowedFilters() {
+        return Set.of();
+    }
+
+    private void validateAllowedFilters(Map<String, String> filters) {
+        Set<String> allowed = allowedFilters();
+
+        filters.forEach((name, value) -> {
+            if (!allowed.contains(name)) {
+                throw unsupportedFilterException(name, value);
+            }
+        });
+    }
+
+    protected RuntimeException unsupportedFilterException(String name, String value) {
+        return invalidFilterException(name, value);
     }
 
     protected boolean booleanFilter(
