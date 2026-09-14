@@ -81,6 +81,26 @@ public abstract class BaseCatalogService<
     }
 
     @Transactional(readOnly = true)
+    public D findById(Long id) {
+        return mapper().toDTO(getEntity(id));
+    }
+
+    @Transactional
+    public D update(Long id, D dto) {
+        return super.update(dto.withId(id));
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        E entity = getEntity(id);
+        D dto = mapper().toDTO(entity);
+        validator().validateForDelete(dto);
+        beforeDelete(entity);
+        deleteEntity(entity);
+        afterDelete(entity);
+    }
+
+    @Transactional(readOnly = true)
     public E findByName(String name) {
         return repository().findByNameAndActiveTrue(name)
                 .orElseThrow(() -> notFoundException(null));
@@ -91,7 +111,7 @@ public abstract class BaseCatalogService<
         E entity = repository().findByIdAndActiveFalse(id)
                 .orElseThrow(() -> restoreException(id));
 
-        validator().validateForUpdate(id, mapper().toDTO(entity));
+        validator().validateForUpdate(mapper().toDTO(entity));
         entity.setActive(true);
         return mapper().toDTO(repository().save(entity));
     }
