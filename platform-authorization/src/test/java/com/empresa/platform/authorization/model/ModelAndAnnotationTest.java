@@ -1,5 +1,6 @@
 package com.empresa.platform.authorization.model;
 
+import com.empresa.platform.authorization.annotation.AuthorizationAccessPolicy;
 import com.empresa.platform.authorization.annotation.AuthorizationRequired;
 import org.junit.jupiter.api.Test;
 
@@ -54,17 +55,15 @@ class ModelAndAnnotationTest {
     }
 
     @Test
-    void testClassAuthorizationPolicyAnnotation() {
-        var ann = PolicySample.class.getAnnotation(
-                com.empresa.platform.authorization.annotation.AuthorizationPolicy.class
-        );
+    void testClassAuthorizationAccessPolicyAnnotation() {
+        var ann = PolicySample.class.getAnnotation(AuthorizationAccessPolicy.class);
 
         assertNotNull(ann);
         assertEquals(AuthorizationLevel.OPEN, ann.read());
         assertEquals(AuthorizationLevel.OWNER, ann.write());
     }
 
-    @com.empresa.platform.authorization.annotation.AuthorizationPolicy(
+    @AuthorizationAccessPolicy(
             read = AuthorizationLevel.OPEN,
             write = AuthorizationLevel.OWNER
     )
