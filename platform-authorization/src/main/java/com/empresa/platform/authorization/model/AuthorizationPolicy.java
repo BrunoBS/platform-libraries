@@ -14,6 +14,7 @@ public record AuthorizationPolicy(
 
     public enum Source {
         METHOD,
+        CLASS_POLICY,
         CLASS,
         DEFAULT
     }
