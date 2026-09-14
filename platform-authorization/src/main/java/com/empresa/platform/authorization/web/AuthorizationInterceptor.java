@@ -49,7 +49,8 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
         AuthorizationPolicy policy = authorizationMetadataRegistry.resolve(
                 handlerMethod.getBeanType(),
-                handlerMethod.getMethod()
+                handlerMethod.getMethod(),
+                request.getMethod()
         );
 
         Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
