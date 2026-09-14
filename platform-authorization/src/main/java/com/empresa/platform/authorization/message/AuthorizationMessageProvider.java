@@ -7,11 +7,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Built-in fallback messages for platform-authorization.
- * They are used only when platform-messaging does not find a definition
- * in cache/repository for the requested key/locale.
- */
 public class AuthorizationMessageProvider implements ApiMessageProvider {
 
     private static final String PT_BR = "pt-BR";
