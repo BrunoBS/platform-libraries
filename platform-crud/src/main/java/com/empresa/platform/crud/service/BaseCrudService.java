@@ -18,12 +18,12 @@ public abstract class BaseCrudService<
 
     private final R repository;
     private final BaseCrudMapper<E, D> mapper;
-    private final BaseCrudValidator<D, ID> validator;
+    private final BaseCrudValidator<D> validator;
 
     protected BaseCrudService(
             R repository,
             BaseCrudMapper<E, D> mapper,
-            BaseCrudValidator<D, ID> validator) {
+            BaseCrudValidator<D> validator) {
         this.repository = repository;
         this.mapper = mapper;
         this.validator = validator;
@@ -129,12 +129,8 @@ public abstract class BaseCrudService<
     }
 
     protected E getEntity(D dto) {
-        return getEntity(dto.id());
-    }
-
-    protected E getEntity(ID id) {
-        return repository.findById(id)
-                .orElseThrow(() -> notFoundException(id));
+        return repository.findById(dto.id())
+                .orElseThrow(() -> notFoundException(dto.id()));
     }
 
     protected abstract RuntimeException notFoundException(ID id);
@@ -175,7 +171,7 @@ public abstract class BaseCrudService<
         return mapper;
     }
 
-    protected BaseCrudValidator<D, ID> validator() {
+    protected BaseCrudValidator<D> validator() {
         return validator;
     }
 }
