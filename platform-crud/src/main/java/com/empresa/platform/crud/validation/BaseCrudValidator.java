@@ -1,6 +1,6 @@
 package com.empresa.platform.crud.validation;
 
-public abstract class BaseCrudValidator<D, ID> {
+public abstract class BaseCrudValidator<D> {
 
     public void validateForFind(D dto) {
         CrudValidationResult result = new CrudValidationResult();
