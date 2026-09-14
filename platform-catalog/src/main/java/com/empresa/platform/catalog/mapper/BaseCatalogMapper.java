@@ -19,6 +19,7 @@ public abstract class BaseCatalogMapper<D extends BaseCatalogDTO<D>, E extends B
         }
         E entity = createEntityInstance();
         mapCommonFields(entity, dto);
+        entity.setActive(true);
         return entity;
     }
 
@@ -35,7 +36,6 @@ public abstract class BaseCatalogMapper<D extends BaseCatalogDTO<D>, E extends B
         entity.setDescription(dto.description());
         entity.setSortOrder(dto.sortOrder());
         entity.setSettings(dto.settings() == null ? "{}" : dto.settings().toString());
-        entity.setActive(true);
     }
 
     private E createEntityInstance() {
