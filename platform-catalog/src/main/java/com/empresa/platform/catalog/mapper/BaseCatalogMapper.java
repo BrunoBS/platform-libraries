@@ -2,9 +2,15 @@ package com.empresa.platform.catalog.mapper;
 
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.model.BaseCatalogEntity;
+import com.empresa.platform.crud.mapper.BaseCrudMapper;
 
+/**
+ * Base mapper for catalogs that need a custom DTO or mapping rules.
+ * Standard catalogs should use CatalogMapper through DynamicCatalogService
+ * or EnumCatalogService instead.
+ */
 public abstract class BaseCatalogMapper<D extends BaseCatalogDTO<D>, E extends BaseCatalogEntity>
-        implements BaseMapper<D, E> {
+        implements BaseCrudMapper<E, D> {
 
     private final Class<E> entityClass;
 
