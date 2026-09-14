@@ -2,7 +2,9 @@ package com.empresa.platform.authorization.model;
 
 import com.empresa.platform.authorization.annotation.AuthorizationRequired;
 import org.junit.jupiter.api.Test;
+
 import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ModelAndAnnotationTest {
@@ -27,14 +29,14 @@ class ModelAndAnnotationTest {
         UserSession session = new UserSession();
         session.setUserName("bruno");
         session.setGroups(Set.of("PM5_OWNER", "USER"));
-        
+
         ParsedGroup parsed = new ParsedGroup("full", "prof", "env", "PAYMENT_SERVICE");
         session.setAuthorizerGroups(Set.of(parsed));
 
         assertTrue(session.isOwner());
         assertTrue(session.hasGroup("USER"));
         assertFalse(session.hasGroup("ADMIN"));
-        
+
         assertTrue(session.hasAuthorizer("payment_service"));
         assertFalse(session.hasAuthorizer("unknown"));
         assertFalse(session.hasAuthorizer(null));
@@ -49,5 +51,23 @@ class ModelAndAnnotationTest {
         var ann = method.getAnnotation(AuthorizationRequired.class);
         assertNotNull(ann);
         assertEquals(AuthorizationLevel.ADM, ann.level());
+    }
+
+    @Test
+    void testClassAuthorizationPolicyAnnotation() {
+        var ann = PolicySample.class.getAnnotation(
+                com.empresa.platform.authorization.annotation.AuthorizationPolicy.class
+        );
+
+        assertNotNull(ann);
+        assertEquals(AuthorizationLevel.OPEN, ann.read());
+        assertEquals(AuthorizationLevel.OWNER, ann.write());
+    }
+
+    @com.empresa.platform.authorization.annotation.AuthorizationPolicy(
+            read = AuthorizationLevel.OPEN,
+            write = AuthorizationLevel.OWNER
+    )
+    static class PolicySample {
     }
 }
