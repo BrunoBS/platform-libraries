@@ -1,6 +1,7 @@
 package com.empresa.platform.crud.web;
 
 import com.empresa.platform.crud.dto.BaseCrudDTO;
+import com.empresa.platform.crud.repository.BaseCrudRepository;
 import com.empresa.platform.crud.service.BaseCrudService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,7 +21,7 @@ public abstract class BaseCrudController<
         D extends BaseCrudDTO<ID, D>,
         ID> {
 
-    protected abstract BaseCrudService<E, D, ID> service();
+    protected abstract BaseCrudService<E, D, ID, ? extends BaseCrudRepository<E, ID>> service();
 
     @GetMapping
     public List<D> findAll(@RequestParam Map<String, String> filters) {
