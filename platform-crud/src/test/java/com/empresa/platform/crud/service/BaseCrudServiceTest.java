@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -97,6 +98,16 @@ class BaseCrudServiceTest {
     }
 
     @Test
+    void shouldRejectUnsupportedFilterBeforeQueryExecution() {
+        assertThatThrownBy(() ->
+                service.findAll(Map.of("unknown", "value")))
+                .isInstanceOf(TestInvalidFilterException.class)
+                .hasMessage("unsupported filter unknown=value");
+
+        assertThat(service.filters).isEmpty();
+    }
+
+    @Test
     void shouldParseBooleanFilterStrictly() {
         assertThat(service.readBoolean(Map.of(), "active", true)).isTrue();
         assertThat(service.readBoolean(Map.of("active", "false"), "active", true)).isFalse();
@@ -142,6 +153,11 @@ class BaseCrudServiceTest {
         }
 
         @Override
+        protected Set<String> allowedFilters() {
+            return Set.of("active");
+        }
+
+        @Override
         protected List<TestEntity> findAllEntities(Map<String, String> filters) {
             this.filters = filters;
             return entities;
@@ -152,6 +168,11 @@ class BaseCrudServiceTest {
                 String name,
                 boolean defaultValue) {
             return booleanFilter(filters, name, defaultValue);
+        }
+
+        @Override
+        protected RuntimeException unsupportedFilterException(String name, String value) {
+            return new TestInvalidFilterException("unsupported filter " + name + "=" + value);
         }
 
         @Override
