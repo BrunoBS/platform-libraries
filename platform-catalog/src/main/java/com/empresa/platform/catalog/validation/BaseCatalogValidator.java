@@ -2,20 +2,23 @@ package com.empresa.platform.catalog.validation;
 
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
-import com.empresa.platform.catalog.model.CatalogManagementMode;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
+import com.empresa.platform.crud.validation.BaseCrudValidator;
 import com.empresa.platform.crud.validation.CrudValidationResult;
+import com.empresa.platform.messaging.exception.ValidationException;
+import com.empresa.platform.messaging.message.PlatformMessageKeys;
+import com.empresa.platform.messaging.model.ValidationDetail;
 
 import java.util.Map;
 
 /**
- * Generic validator for MANAGED catalogs. It does not assume a Java enum or
- * any fixed set of allowed names; the database may be the source of truth.
+ * Base validator for catalogs that need custom validation rules.
  *
  * Name uniqueness is provided as the default policy but may be overridden by
  * scoped catalogs, for example account + name or application + name.
  */
-public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends BaseValidator<D> {
+public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>>
+        extends BaseCrudValidator<D, Long> {
 
     protected final BaseCatalogRepository<?> repository;
 
@@ -23,8 +26,9 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends 
         this.repository = repository;
     }
 
-    public CatalogManagementMode managementMode() {
-        return CatalogManagementMode.MANAGED;
+    @Override
+    protected String requiredMessageKey() {
+        return CatalogMessageKeys.REQUIRED;
     }
 
     @Override
@@ -46,6 +50,39 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends 
     }
 
     @Override
+    protected void validateCreateIntegrity(D dto, CrudValidationResult result) {
+        validateIntegrity(dto, result);
+    }
+
+    @Override
+    protected void validateUpdateIntegrity(Long id, D dto, CrudValidationResult result) {
+        validateIntegrity(dto, result);
+    }
+
+    @Override
+    protected void validateAdditionalCreate(D dto, CrudValidationResult result) {
+        validateAdditionalFields(dto, result);
+    }
+
+    @Override
+    protected void validateAdditionalUpdate(Long id, D dto, CrudValidationResult result) {
+        validateAdditionalFields(dto, result);
+    }
+
+    @Override
+    protected RuntimeException validationException(CrudValidationResult result) {
+        return new ValidationException(
+                PlatformMessageKeys.VALIDATION_FAILED,
+                result.getDetails().stream()
+                        .map(detail -> new ValidationDetail(
+                                detail.field(),
+                                detail.messageKey(),
+                                detail.parameters()
+                        ))
+                        .toList()
+        );
+    }
+
     protected void validateIntegrity(D dto, CrudValidationResult result) {
         validateUniqueness(dto, result);
         validateAdditionalIntegrity(dto, result);
@@ -64,6 +101,9 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends 
     }
 
     protected void validateSettings(D dto, CrudValidationResult result) {
+    }
+
+    protected void validateAdditionalFields(D dto, CrudValidationResult result) {
     }
 
     protected void validateAdditionalCatalogFields(D dto, CrudValidationResult result) {
