@@ -1,19 +1,16 @@
 # Como usar o `platform-catalog`
 
-Este guia mostra como um microserviço pode reutilizar o módulo `platform-catalog` para implementar catálogos persistidos e administráveis sem duplicar infraestrutura de CRUD, ordenação, ativação/desativação, restore e validações comuns.
+Este guia apresenta o caminho simples para novos catálogos e o caminho extensível para catálogos com regras próprias.
 
-## 1. Quando usar
+## 1. Classifique o catálogo
 
-O módulo foi desenhado para dois tipos de catálogo persistido:
+Use um destes modelos:
 
-- **MANAGED**: o banco é a fonte de verdade e novos valores podem ser cadastrados em runtime.
-- **MANAGED_CONSTRAINED**: o catálogo continua persistido e administrável, mas o campo `name` é limitado a valores conhecidos no código por meio de um `enum`.
+- `STATIC`: apenas enum, sem tabela e sem CRUD;
+- `MANAGED`: persistido, banco como fonte de verdade;
+- `MANAGED_CONSTRAINED`: persistido, mas `name` limitado por `CatalogEnum`.
 
-Catálogos **STATIC**, representados apenas por `enum` e sem tabela/CRUD, não precisam desta infraestrutura.
-
-## 2. Adicionar a dependência
-
-Quando o serviço usa o parent/dependency management da plataforma, basta adicionar:
+## 2. Dependência
 
 ```xml
 <dependency>
@@ -22,466 +19,210 @@ Quando o serviço usa o parent/dependency management da plataforma, basta adicio
 </dependency>
 ```
 
-A versão deve ser controlada pela infraestrutura Maven da plataforma. O serviço consumidor não deve fixar uma versão diferente daquela gerenciada pelo `platform-parent`/dependency management.
+A versão deve vir do dependency management da plataforma.
 
-O módulo já depende das abstrações necessárias de Spring Data JPA, Spring Web e `platform-messaging`.
+---
 
-## 3. Estrutura recomendada no serviço
+# Happy path
 
-O microserviço continua sendo dono do catálogo concreto. Para um catálogo `OperationType`, por exemplo:
+Use este caminho quando o catálogo possui apenas os campos padrão:
 
 ```text
-core/
-└── catalog/
-    └── operation/
-        ├── OperationType.java
-        ├── OperationTypeDTO.java
-        ├── OperationTypeRepository.java
-        ├── OperationTypeMapper.java
-        ├── OperationTypeValidator.java
-        └── OperationTypeService.java
-
-entrypoint/
-└── web/
-    └── catalog/
-        └── OperationTypeController.java
+id
+name
+label
+description
+sortOrder
+active
+settings
 ```
 
-A lib fornece apenas a infraestrutura base. A entidade, tabela, regras específicas, autorização e ownership continuam no serviço.
+Nesse caso você **não precisa criar DTO, mapper ou validator próprios**.
 
-## 4. Criar a entidade
+## 3. MANAGED_CONSTRAINED em cinco classes
 
-A entidade concreta deve estender `BaseCatalogEntity`.
+### 3.1 Entidade
 
 ```java
-package com.empresa.event.core.catalog.operation;
-
-import com.empresa.platform.catalog.model.BaseCatalogEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-
 @Entity
 @Table(
-        name = "operation_type",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_operation_type_name",
-                columnNames = "name"
-        )
+    name = "type_languages",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_type_languages_name",
+        columnNames = "name"
+    )
 )
-public class OperationType extends BaseCatalogEntity {
+public class LanguageType extends BaseCatalogEntity {
 }
 ```
 
-`BaseCatalogEntity` fornece:
-
-```text
-id          Long
-name        String
-label       String
-description String
-sortOrder   Integer
-active      boolean
-settings    String
-```
-
-### Importante: unicidade
-
-A lib **não impõe mais `unique = true` no campo `name`**. A restrição física deve refletir a regra real do catálogo e ser definida pelo serviço, preferencialmente também na migration.
-
-Para um catálogo global por tabela:
-
-```sql
-CREATE UNIQUE INDEX uk_operation_type_name
-    ON operation_type (name);
-```
-
-Para um catálogo cuja unicidade seja por conta:
-
-```sql
-CREATE UNIQUE INDEX uk_operation_type_account_name
-    ON operation_type (account_id, name);
-```
-
-Assim a infraestrutura não força uma regra de domínio que pode variar entre serviços.
-
-## 5. Criar o DTO
-
-O identificador padrão da biblioteca é `Long`.
+### 3.2 Enum
 
 ```java
-package com.empresa.event.core.catalog.operation;
+public enum LanguageTypeEnum implements CatalogEnum<LanguageTypeEnum> {
+    JAVA,
+    DOTNET,
+    GO,
+    PYTHON
+}
+```
 
-import com.empresa.platform.catalog.dto.BaseCatalogDTO;
-import tools.jackson.databind.JsonNode;
+### 3.3 Repository
 
-public record OperationTypeDTO(
-        Long id,
-        String name,
-        String label,
-        String description,
-        Integer sortOrder,
-        JsonNode settings
-) implements BaseCatalogDTO<OperationTypeDTO> {
+```java
+public interface LanguageTypeRepository
+        extends BaseCatalogRepository<LanguageType> {
+}
+```
 
-    @Override
-    public OperationTypeDTO withId(Long id) {
-        return new OperationTypeDTO(
-                id,
-                name,
-                label,
-                description,
-                sortOrder,
-                settings
-        );
+### 3.4 Service
+
+```java
+@Service
+public class LanguageTypeService
+        extends DefaultConstrainedCatalogService<LanguageType, LanguageTypeEnum> {
+
+    public LanguageTypeService(
+            LanguageTypeRepository repository,
+            ObjectMapper objectMapper) {
+        super(repository, objectMapper, LanguageType.class, LanguageTypeEnum.class);
     }
 }
 ```
 
-Toda a API pública do `platform-catalog` usa `Long` como identificador. Isso é intencional e acompanha o identificador técnico de `BaseCatalogEntity`.
-
-## 6. Criar o repository
-
-```java
-package com.empresa.event.core.catalog.operation;
-
-import com.empresa.platform.catalog.repository.BaseCatalogRepository;
-
-public interface OperationTypeRepository
-        extends BaseCatalogRepository<OperationType> {
-}
-```
-
-O repository base já fornece operações como:
-
-```text
-findByNameAndActiveTrue
-findByIdAndActiveTrue
-findByIdAndActiveFalse
-findByActive
-existsByNameAndIdNot
-findFirstByOrderBySortOrderDesc
-findFirstByIdNotOrderBySortOrderDesc
-findByNameInAndActiveTrue
-```
-
-O serviço pode adicionar queries específicas normalmente.
-
-## 7. Criar o mapper
-
-```java
-package com.empresa.event.core.catalog.operation;
-
-import com.empresa.platform.catalog.mapper.BaseCatalogMapper;
-import tools.jackson.databind.ObjectMapper;
-
-import static java.util.Objects.isNull;
-
-public class OperationTypeMapper
-        extends BaseCatalogMapper<OperationTypeDTO, OperationType> {
-
-    private final ObjectMapper objectMapper;
-
-    public OperationTypeMapper(ObjectMapper objectMapper) {
-        super(OperationType.class);
-        this.objectMapper = objectMapper;
-    }
-
-    @Override
-    public OperationTypeDTO toDTO(OperationType entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        return new OperationTypeDTO(
-                entity.getId(),
-                entity.getName(),
-                entity.getLabel(),
-                entity.getDescription(),
-                entity.getSortOrder(),
-                isNull(entity.getSettings())
-                        ? null
-                        : objectMapper.readTree(entity.getSettings())
-        );
-    }
-}
-```
-
-A base implementa `toEntity` e `updateEntity` para os campos comuns. O mapper concreto continua responsável pela conversão de saída e por campos adicionais do catálogo.
-
-## 8. Criar o validator para um catálogo MANAGED
-
-Para um catálogo dinâmico, estenda `BaseCatalogValidator`.
-
-```java
-package com.empresa.event.core.catalog.operation;
-
-import com.empresa.platform.catalog.validation.BaseCatalogValidator;
-
-public class OperationTypeValidator
-        extends BaseCatalogValidator<OperationTypeDTO> {
-
-    public OperationTypeValidator(OperationTypeRepository repository) {
-        super(repository);
-    }
-
-    @Override
-    public String entityName() {
-        return "OperationType";
-    }
-}
-```
-
-A validação base já cobre os atributos comuns e, por padrão, considera `name` único na tabela.
-
-## 9. Customizar a unicidade
-
-Quando a identidade lógica depende de um escopo, o serviço deve sobrescrever `validateUniqueness`.
-
-Exemplo: `(account_id, name)`.
-
-Repository:
-
-```java
-public interface OperationTypeRepository
-        extends BaseCatalogRepository<OperationType> {
-
-    boolean existsByAccountIdAndNameAndIdNot(
-            Long accountId,
-            String name,
-            Long id
-    );
-}
-```
-
-DTO concreto pode possuir o campo adicional:
-
-```java
-Long accountId
-```
-
-Validator:
-
-```java
-public class OperationTypeValidator
-        extends BaseCatalogValidator<OperationTypeDTO> {
-
-    private final OperationTypeRepository operationTypeRepository;
-
-    public OperationTypeValidator(OperationTypeRepository repository) {
-        super(repository);
-        this.operationTypeRepository = repository;
-    }
-
-    @Override
-    protected void validateUniqueness(
-            OperationTypeDTO dto,
-            ValidationResult result
-    ) {
-        long id = dto.id() == null ? 0L : dto.id();
-
-        if (operationTypeRepository.existsByAccountIdAndNameAndIdNot(
-                dto.accountId(),
-                dto.name(),
-                id
-        )) {
-            result.addError(
-                    "name",
-                    CatalogMessageKeys.NAME_DUPLICATE,
-                    Map.of("0", entityName(), "1", dto.name())
-            );
-        }
-    }
-
-    @Override
-    public String entityName() {
-        return "OperationType";
-    }
-}
-```
-
-A constraint no banco deve usar a mesma regra. A validação Java melhora a resposta ao consumidor, mas não substitui a constraint de integridade no banco.
-
-## 10. Criar o service
-
-```java
-package com.empresa.event.core.catalog.operation;
-
-import com.empresa.platform.catalog.service.BaseCatalogService;
-
-public class OperationTypeService
-        extends BaseCatalogService<OperationType, OperationTypeDTO> {
-
-    public OperationTypeService(
-            OperationTypeRepository repository,
-            OperationTypeMapper mapper,
-            OperationTypeValidator validator
-    ) {
-        super(repository, mapper, validator);
-    }
-}
-```
-
-A implementação recebe automaticamente:
+O service recebe automaticamente:
 
 ```text
 findAll
 findById
 findByName
+findByNames
 create
 update
 delete
 restore
-findByNames
 ```
 
-Campos adicionais podem ser tratados sobrescrevendo `applyAdditionalFields`.
-
-Filtros adicionais da listagem podem ser tratados sobrescrevendo `matchesAdditionalFilters`.
-
-## 11. Criar o controller
+### 3.5 Controller
 
 ```java
-package com.empresa.event.entrypoint.web.catalog;
-
-import com.empresa.event.core.catalog.operation.OperationType;
-import com.empresa.event.core.catalog.operation.OperationTypeDTO;
-import com.empresa.event.core.catalog.operation.OperationTypeService;
-import com.empresa.platform.catalog.service.BaseCatalogService;
-import com.empresa.platform.catalog.web.BaseCatalogController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 @RestController
-@RequestMapping("/api/v1/catalogs/operation-types")
-public class OperationTypeController
-        extends BaseCatalogController<OperationTypeDTO, OperationType> {
+@RequestMapping("/api/v1/language-type")
+public class LanguageTypeController
+        extends DefaultCatalogController<LanguageType> {
 
-    private final OperationTypeService service;
-
-    public OperationTypeController(OperationTypeService service) {
-        this.service = service;
-    }
-
-    @Override
-    protected BaseCatalogService<OperationType, OperationTypeDTO> getService() {
-        return service;
+    public LanguageTypeController(LanguageTypeService service) {
+        super(service);
     }
 }
 ```
 
-O controller base expõe:
+O controller expõe:
 
 ```text
-GET    /api/v1/catalogs/operation-types
-GET    /api/v1/catalogs/operation-types/{id}
-POST   /api/v1/catalogs/operation-types
-PUT    /api/v1/catalogs/operation-types/{id}
-DELETE /api/v1/catalogs/operation-types/{id}
-POST   /api/v1/catalogs/operation-types/{id}/restore
+GET    /api/v1/language-type
+GET    /api/v1/language-type/{id}
+POST   /api/v1/language-type
+PUT    /api/v1/language-type/{id}
+DELETE /api/v1/language-type/{id}
+POST   /api/v1/language-type/{id}/restore
 ```
 
-A autorização continua sendo responsabilidade do serviço consumidor. Por exemplo, a aplicação pode colocar sua anotação de autorização no controller concreto sem que a biblioteca imponha `OWNER` ou qualquer papel específico.
+A autorização continua no controller concreto.
 
-## 12. Usar MANAGED_CONSTRAINED
+## 4. MANAGED em quatro classes
 
-Quando o catálogo precisa continuar limitado a valores conhecidos no código, declare um enum:
-
-```java
-public enum OperationTypeEnum implements CatalogEnum<OperationTypeEnum> {
-    CREATE,
-    UPDATE,
-    DELETE,
-    PUBLISH
-}
-```
-
-E substitua o validator base por `EnumCatalogValidator`:
+Para um catálogo totalmente dinâmico, remova o enum e use `DefaultManagedCatalogService`:
 
 ```java
-public class OperationTypeValidator
-        extends EnumCatalogValidator<OperationTypeEnum, OperationTypeDTO> {
+@Service
+public class SegmentTypeService
+        extends DefaultManagedCatalogService<SegmentType> {
 
-    public OperationTypeValidator(OperationTypeRepository repository) {
-        super(repository, OperationTypeEnum.class);
-    }
-
-    @Override
-    public String entityName() {
-        return "OperationType";
+    public SegmentTypeService(
+            SegmentTypeRepository repository,
+            ObjectMapper objectMapper) {
+        super(repository, objectMapper, SegmentType.class);
     }
 }
 ```
 
-Nesse modelo, a tabela continua existindo e o catálogo continua administrável, mas um `name` fora do enum é rejeitado.
-
-## 13. Campos adicionais
-
-Um catálogo pode possuir campos próprios além dos campos da base.
-
-Exemplo:
+A estrutura fica:
 
 ```text
-FeatureType
-- id
-- name
-- label
-- description
-- sortOrder
-- active
-- settings
-- scope
+SegmentType.java
+SegmentTypeRepository.java
+SegmentTypeService.java
+SegmentTypeController.java
 ```
 
-A entidade e o DTO concretos adicionam `scope`, e o service pode preencher o campo:
+## 5. DTO padrão
+
+O happy path usa `DefaultCatalogDTO`:
+
+```text
+Long id
+String name
+String label
+String description
+Integer sortOrder
+JsonNode settings
+```
+
+O JSON público continua simples e independente da entidade JPA.
+
+## 6. Validação de `settings` sem criar Validator
+
+Se o serviço possui uma validação padrão para `settings`, injete-a diretamente no construtor do service:
 
 ```java
-@Override
-protected void applyAdditionalFields(FeatureType entity, FeatureTypeDTO dto) {
-    entity.setScope(dto.scope());
+@Service
+public class LanguageTypeService
+        extends DefaultConstrainedCatalogService<LanguageType, LanguageTypeEnum> {
+
+    public LanguageTypeService(
+            LanguageTypeRepository repository,
+            ObjectMapper objectMapper,
+            SchemaValidator schemaValidator) {
+        super(
+            repository,
+            objectMapper,
+            LanguageType.class,
+            LanguageTypeEnum.class,
+            (dto, result) -> schemaValidator.validateJson(
+                DEFAULT_JSON_SCHEMA,
+                dto.settings(),
+                "settings",
+                result
+            )
+        );
+    }
 }
 ```
 
-Validações podem ser adicionadas usando os hooks:
+Isso preserva o happy path sem obrigar a criação de uma classe `Validator` apenas para uma regra simples.
 
-```text
-validateSettings
-validateAdditionalCatalogFields
-validateAdditionalIntegrity
-validateUniqueness
-```
+## 7. Regras padrão
 
-## 14. Filtros adicionais
+No happy path:
 
-O controller base encaminha parâmetros extras para o service. Um catálogo que suporte `scope`, por exemplo, pode sobrescrever:
+- `name`, `label` e `description` são obrigatórios;
+- `description` segue os limites comuns da lib;
+- `name` deve ser único por padrão;
+- em `MANAGED_CONSTRAINED`, `name` também precisa existir no enum;
+- `name` é imutável depois da criação;
+- `active=false` representa soft delete;
+- restore revalida o registro antes de ativá-lo;
+- `sortOrder` é calculado quando ausente ou inválido;
+- `active=true` é aplicado apenas na criação e não é forçado durante update;
+- filtros padrão são executados no banco.
 
-```java
-@Override
-protected boolean matchesAdditionalFilters(
-        FeatureTypeDTO dto,
-        Map<String, String> filters
-) {
-    String scope = filters.get("scope");
-    return scope == null || scope.equals(dto.scope());
-}
-```
+## 8. Migration continua sendo do serviço
 
-Assim uma chamada como:
-
-```text
-GET /api/v1/catalogs/feature-types?active=true&scope=ACCOUNT
-```
-
-continua usando a infraestrutura comum sem adicionar conhecimento de `scope` na biblioteca.
-
-## 15. Migration da tabela
-
-A biblioteca não cria tabelas de catálogo automaticamente. O serviço consumidor continua responsável pela migration.
-
-Exemplo mínimo:
+A lib não cria tabelas automaticamente.
 
 ```sql
-CREATE TABLE operation_type (
+CREATE TABLE type_languages (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
     label VARCHAR(100) NOT NULL,
@@ -490,52 +231,159 @@ CREATE TABLE operation_type (
     is_active BIT NOT NULL,
     settings TEXT NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT uk_operation_type_name UNIQUE (name)
+    CONSTRAINT uk_type_languages_name UNIQUE (name)
 );
 ```
 
-A migration deve ser ajustada quando houver colunas ou escopos adicionais.
+A constraint física deve representar a identidade real do catálogo.
 
-## 16. Checklist de implementação
+---
 
-Para um novo catálogo persistido:
+# Caminho extensível
 
-1. classifique o catálogo como `MANAGED` ou `MANAGED_CONSTRAINED`;
-2. adicione `platform-catalog` ao `pom.xml`;
-3. crie a migration e defina explicitamente a regra de unicidade;
-4. crie a entidade estendendo `BaseCatalogEntity`;
-5. crie o DTO implementando `BaseCatalogDTO<DTO>`;
-6. crie o repository estendendo `BaseCatalogRepository<Entity>`;
-7. crie o mapper estendendo `BaseCatalogMapper<DTO, Entity>`;
-8. crie o validator usando `BaseCatalogValidator` ou `EnumCatalogValidator`;
-9. sobrescreva `validateUniqueness` se a unicidade depender de escopo;
-10. crie o service estendendo `BaseCatalogService<Entity, DTO>`;
-11. crie o controller estendendo `BaseCatalogController<DTO, Entity>`;
-12. aplique no controller concreto a autorização exigida pelo serviço;
-13. adicione testes do catálogo concreto, principalmente regras específicas e constraints;
-14. execute `mvn clean verify` no serviço consumidor.
+Use as classes completas quando o catálogo possuir algum destes requisitos:
 
-## 17. O que não deve ir para a lib
+```text
+campos adicionais
+DTO específico
+relacionamento com outro catálogo
+unicidade composta
+filtros específicos
+mapper específico
+validações complexas
+semântica de service própria
+```
 
-O `platform-catalog` não deve conhecer:
+## 9. Estrutura completa
+
+```text
+MyType.java
+MyTypeDTO.java
+MyTypeRepository.java
+MyTypeMapper.java
+MyTypeValidator.java
+MyTypeService.java
+MyTypeController.java
+```
+
+As abstrações disponíveis são:
+
+```text
+BaseCatalogDTO
+BaseCatalogMapper
+BaseCatalogValidator
+EnumCatalogValidator
+BaseRelatedCatalogValidator
+BaseCatalogService
+BaseCatalogController
+```
+
+## 10. Catálogo relacionado
+
+Para identidade como `(scope, name)`, use `BaseRelatedCatalogValidator`.
+
+Ele padroniza:
+
+```text
+relação obrigatória
+        ↓
+registro relacionado existe e está ativo
+        ↓
+unicidade (relação + name)
+```
+
+Exemplos:
+
+```text
+FeatureScopeType -> FeatureType
+SchemaScopeType  -> SchemaType
+```
+
+O repository concreto continua declarando a query específica de unicidade.
+
+## 11. Filtros específicos
+
+`BaseCatalogService` usa `Specification`.
+
+Sobrescreva:
+
+```java
+@Override
+protected Specification<MyType> additionalSpecification(
+        Map<String, String> filters) {
+    ...
+}
+```
+
+Os filtros são aplicados no banco, não depois da materialização dos DTOs.
+
+## 12. DTO próprio
+
+Crie um DTO próprio somente quando houver campos além do contrato padrão.
+
+```java
+public record FeatureTypeDTO(
+    Long id,
+    String name,
+    String label,
+    String description,
+    Integer sortOrder,
+    Long featureScopeId,
+    String featureScopeName,
+    Boolean available,
+    JsonNode settings
+) implements BaseCatalogDTO<FeatureTypeDTO> {
+    ...
+}
+```
+
+Nesse caso use também mapper, validator e service concretos conforme necessário.
+
+## 13. Regra de ownership
+
+A lib conhece comportamento de catálogo, não catálogo de negócio.
+
+```text
+platform-catalog = COMO um catálogo funciona
+microserviço     = QUAL catálogo existe
+```
+
+Não devem entrar na lib:
 
 ```text
 AccountType
 EnvironmentType
 FeatureType
-OperationType
-scope
+SchemaType
 accountId
 applicationId
-roles/grupos de autorização específicos
-valores de negócio de enums concretos
+regras específicas de autorização
+valores concretos dos enums consumidores
 ```
 
-Regra de ownership:
+## 14. Checklist rápido
 
-```text
-platform-catalog = COMO um catálogo administrável funciona
-microserviço     = QUAL catálogo existe e quais são suas regras de domínio
-```
+### Catálogo padrão MANAGED
 
-Esse limite é o que permite que a mesma infraestrutura seja reutilizada por `account-api`, `event-api`, `route-api` e outros serviços sem transformar a biblioteca em um repositório central de regras de negócio.
+1. migration;
+2. entity;
+3. repository;
+4. service com `DefaultManagedCatalogService`;
+5. controller com `DefaultCatalogController`;
+6. autorização;
+7. testes.
+
+### Catálogo padrão MANAGED_CONSTRAINED
+
+1. migration;
+2. entity;
+3. enum;
+4. repository;
+5. service com `DefaultConstrainedCatalogService`;
+6. controller com `DefaultCatalogController`;
+7. autorização;
+8. testes.
+
+### Catálogo avançado
+
+Comece pelo happy path e migre para as classes-base específicas apenas quando surgir uma regra que realmente exija isso.
