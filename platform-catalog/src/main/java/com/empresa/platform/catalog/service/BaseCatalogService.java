@@ -9,9 +9,13 @@ import com.empresa.platform.catalog.validation.BaseValidator;
 import com.empresa.platform.crud.service.BaseCrudService;
 import com.empresa.platform.messaging.exception.NotFoundException;
 import com.empresa.platform.messaging.exception.ValidationException;
+import com.empresa.platform.messaging.message.PlatformMessageKeys;
+import com.empresa.platform.messaging.model.ValidationDetail;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class BaseCatalogService<
         E extends BaseCatalogEntity,
@@ -40,16 +44,34 @@ public abstract class BaseCatalogService<
         return findAll(true, null, Map.of());
     }
 
+    /**
+     * Executes standard and catalog-specific filters in the database.
+     */
     public List<D> findAll(boolean active, String name, Map<String, String> filters) {
-        return repository.findByActive(active).stream()
+        Specification<E> specification = (root, query, cb) -> cb.equal(root.get("active"), active);
+
+        if (name != null && !name.isBlank()) {
+            String contains = "%" + name.toLowerCase() + "%";
+            specification = specification.and(
+                    (root, query, cb) -> cb.like(cb.lower(root.get("name")), contains)
+            );
+        }
+
+        Specification<E> additional = additionalSpecification(filters == null ? Map.of() : filters);
+        if (additional != null) {
+            specification = specification.and(additional);
+        }
+
+        return repository.findAll(specification).stream()
                 .map(mapper::toDTO)
-                .filter(dto -> name == null || dto.name().contains(name))
-                .filter(dto -> matchesAdditionalFilters(dto, filters))
                 .toList();
     }
 
-    protected boolean matchesAdditionalFilters(D dto, Map<String, String> filters) {
-        return true;
+    /**
+     * Hook for catalog-specific database filters.
+     */
+    protected Specification<E> additionalSpecification(Map<String, String> filters) {
+        return null;
     }
 
     public E findByName(String name) {
@@ -60,6 +82,10 @@ public abstract class BaseCatalogService<
     public D restore(Long id) {
         E entity = repository.findByIdAndActiveFalse(id)
                 .orElseThrow(() -> restoreException(id));
+
+        // Revalidate before restoring so an inactive record cannot re-enter the
+        // active set with an invalid enum value, inactive parent or duplicated identity.
+        validator.validateForUpdate(id, mapper.toDTO(entity));
         entity.setActive(true);
         return mapper.toDTO(repository.save(entity));
     }
@@ -85,6 +111,28 @@ public abstract class BaseCatalogService<
         return new ValidationException(
                 CatalogMessageKeys.RESTORE_INVALID,
                 Map.of("0", validator.entityName(), "1", id));
+    }
+
+    @Override
+    protected void beforeUpdate(E entity, D dto) {
+        if (!isNameMutable() && !Objects.equals(entity.getName(), dto.name())) {
+            throw new ValidationException(
+                    PlatformMessageKeys.VALIDATION_FAILED,
+                    List.of(new ValidationDetail(
+                            "name",
+                            CatalogMessageKeys.NAME_IMMUTABLE,
+                            Map.of("0", validator.entityName(), "1", entity.getName())
+                    ))
+            );
+        }
+    }
+
+    /**
+     * Catalog names are semantic keys by default and therefore immutable.
+     * Override only for a catalog whose name is explicitly descriptive rather than semantic.
+     */
+    protected boolean isNameMutable() {
+        return false;
     }
 
     @Override
