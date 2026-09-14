@@ -1,5 +1,6 @@
 package com.empresa.platform.authorization.registry;
 
+import com.empresa.platform.authorization.annotation.AuthorizationAccessPolicy;
 import com.empresa.platform.authorization.annotation.AuthorizationRequired;
 import com.empresa.platform.authorization.model.AuthorizationLevel;
 import com.empresa.platform.authorization.model.AuthorizationPolicy;
@@ -40,10 +41,10 @@ public class AuthorizationMetadataRegistry {
             );
         }
 
-        com.empresa.platform.authorization.annotation.AuthorizationPolicy classPolicy =
+        AuthorizationAccessPolicy classPolicy =
                 AnnotatedElementUtils.findMergedAnnotation(
                         targetClass,
-                        com.empresa.platform.authorization.annotation.AuthorizationPolicy.class
+                        AuthorizationAccessPolicy.class
                 );
 
         if (classPolicy != null) {
@@ -70,7 +71,7 @@ public class AuthorizationMetadataRegistry {
     }
 
     private AuthorizationLevel resolveClassPolicy(
-            com.empresa.platform.authorization.annotation.AuthorizationPolicy policy,
+            AuthorizationAccessPolicy policy,
             String httpMethod) {
 
         if (httpMethod == null) {
