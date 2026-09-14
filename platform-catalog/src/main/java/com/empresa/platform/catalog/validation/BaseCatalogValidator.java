@@ -55,7 +55,7 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>>
     }
 
     @Override
-    protected void validateUpdateIntegrity(Long id, D dto, CrudValidationResult result) {
+    protected void validateUpdateIntegrity(D dto, CrudValidationResult result) {
         validateIntegrity(dto, result);
     }
 
@@ -65,7 +65,7 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>>
     }
 
     @Override
-    protected void validateAdditionalUpdate(Long id, D dto, CrudValidationResult result) {
+    protected void validateAdditionalUpdate(D dto, CrudValidationResult result) {
         validateAdditionalFields(dto, result);
     }
 
