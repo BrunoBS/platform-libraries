@@ -2,13 +2,14 @@ package com.empresa.platform.catalog.validation;
 
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
+import com.empresa.platform.catalog.model.CatalogManagementMode;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
 import com.empresa.platform.crud.validation.CrudValidationResult;
 
 import java.util.Map;
 
 /**
- * Generic validator for managed catalogs. It does not assume a Java enum or
+ * Generic validator for MANAGED catalogs. It does not assume a Java enum or
  * any fixed set of allowed names; the database may be the source of truth.
  *
  * Name uniqueness is provided as the default policy but may be overridden by
@@ -20,6 +21,10 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> extends 
 
     protected BaseCatalogValidator(BaseCatalogRepository<?> repository) {
         this.repository = repository;
+    }
+
+    public CatalogManagementMode managementMode() {
+        return CatalogManagementMode.MANAGED;
     }
 
     @Override
