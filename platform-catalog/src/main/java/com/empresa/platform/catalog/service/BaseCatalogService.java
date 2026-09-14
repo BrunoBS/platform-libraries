@@ -23,18 +23,11 @@ public abstract class BaseCatalogService<
         D extends BaseCatalogDTO<D>>
         extends BaseCrudService<E, D, Long, BaseCatalogRepository<E>> {
 
-    protected final BaseCatalogRepository<E> repository;
-    protected final BaseCatalogMapper<D, E> mapper;
-    protected final BaseCatalogValidator<D> validator;
-
     protected BaseCatalogService(
             BaseCatalogRepository<E> repository,
             BaseCatalogMapper<D, E> mapper,
             BaseCatalogValidator<D> validator) {
         super(repository, mapper, validator);
-        this.repository = repository;
-        this.mapper = mapper;
-        this.validator = validator;
     }
 
     @Override
@@ -63,7 +56,7 @@ public abstract class BaseCatalogService<
             specification = specification.and(additional);
         }
 
-        return repository.findAll(specification);
+        return repository().findAll(specification);
     }
 
     protected Specification<E> additionalSpecification(Map<String, String> filters) {
@@ -71,26 +64,26 @@ public abstract class BaseCatalogService<
     }
 
     public E findByName(String name) {
-        return repository.findByNameAndActiveTrue(name)
+        return repository().findByNameAndActiveTrue(name)
                 .orElseThrow(() -> notFoundException(null));
     }
 
     public D restore(Long id) {
-        E entity = repository.findByIdAndActiveFalse(id)
+        E entity = repository().findByIdAndActiveFalse(id)
                 .orElseThrow(() -> restoreException(id));
 
-        validator.validateForUpdate(id, mapper.toDTO(entity));
+        validator().validateForUpdate(id, mapper().toDTO(entity));
         entity.setActive(true);
-        return mapper.toDTO(repository.save(entity));
+        return mapper().toDTO(repository().save(entity));
     }
 
     public List<E> findByNames(List<String> names) {
-        return repository.findByNameInAndActiveTrue(names);
+        return repository().findByNameInAndActiveTrue(names);
     }
 
     @Override
     protected E getEntity(Long id) {
-        return repository.findByIdAndActiveTrue(id)
+        return repository().findByIdAndActiveTrue(id)
                 .orElseThrow(() -> notFoundException(id));
     }
 
@@ -98,13 +91,13 @@ public abstract class BaseCatalogService<
     protected RuntimeException notFoundException(Long id) {
         return new NotFoundException(
                 CatalogMessageKeys.NOT_FOUND,
-                Map.of("0", validator.entityName()));
+                Map.of("0", validator().entityName()));
     }
 
     protected RuntimeException restoreException(Long id) {
         return new ValidationException(
                 CatalogMessageKeys.RESTORE_INVALID,
-                Map.of("0", validator.entityName(), "1", id));
+                Map.of("0", validator().entityName(), "1", id));
     }
 
     @Override
@@ -115,7 +108,7 @@ public abstract class BaseCatalogService<
                     List.of(new ValidationDetail(
                             "name",
                             CatalogMessageKeys.NAME_IMMUTABLE,
-                            Map.of("0", validator.entityName(), "1", entity.getName()),
+                            Map.of("0", validator().entityName(), "1", entity.getName()),
                             null
                     ))
             );
@@ -141,20 +134,20 @@ public abstract class BaseCatalogService<
     @Override
     protected void deleteEntity(E entity) {
         entity.setActive(false);
-        repository.save(entity);
+        repository().save(entity);
     }
 
     protected void applyAdditionalFields(E entity, D dto) {
     }
 
     private Integer nextSortOrder() {
-        return repository.findFirstByOrderBySortOrderDesc()
+        return repository().findFirstByOrderBySortOrderDesc()
                 .map(last -> last.getSortOrder() + 1)
                 .orElse(1);
     }
 
     private Integer nextSortOrderExcluding(Long id) {
-        return repository.findFirstByIdNotOrderBySortOrderDesc(id)
+        return repository().findFirstByIdNotOrderBySortOrderDesc(id)
                 .map(last -> last.getSortOrder() + 1)
                 .orElse(1);
     }
