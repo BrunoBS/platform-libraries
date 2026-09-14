@@ -12,14 +12,15 @@ import java.util.Map;
 public abstract class BaseCrudService<
         E,
         D extends BaseCrudDTO<ID, D>,
-        ID> {
+        ID,
+        R extends BaseCrudRepository<E, ID>> {
 
-    private final BaseCrudRepository<E, ID> repository;
+    private final R repository;
     private final BaseCrudMapper<E, D> mapper;
     private final BaseCrudValidator<D, ID> validator;
 
     protected BaseCrudService(
-            BaseCrudRepository<E, ID> repository,
+            R repository,
             BaseCrudMapper<E, D> mapper,
             BaseCrudValidator<D, ID> validator) {
         this.repository = repository;
@@ -42,6 +43,30 @@ public abstract class BaseCrudService<
 
     protected List<E> findAllEntities(Map<String, String> filters) {
         return repository.findAll();
+    }
+
+    protected boolean booleanFilter(
+            Map<String, String> filters,
+            String name,
+            boolean defaultValue) {
+
+        String value = filters.get(name);
+        if (value == null || value.isBlank()) {
+            return defaultValue;
+        }
+        if ("true".equalsIgnoreCase(value)) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return false;
+        }
+        throw invalidFilterException(name, value);
+    }
+
+    protected RuntimeException invalidFilterException(String name, String value) {
+        return new IllegalArgumentException(
+                "Invalid boolean filter '%s': '%s'".formatted(name, value)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -96,10 +121,6 @@ public abstract class BaseCrudService<
                 .orElseThrow(() -> notFoundException(id));
     }
 
-    /**
-     * Defines how the consuming module represents a missing resource.
-     * The CRUD layer detects the condition but does not own domain/application error semantics.
-     */
     protected abstract RuntimeException notFoundException(ID id);
 
     protected void deleteEntity(E entity) {
@@ -130,7 +151,7 @@ public abstract class BaseCrudService<
     protected void afterDelete(E entity) {
     }
 
-    protected BaseCrudRepository<E, ID> repository() {
+    protected R repository() {
         return repository;
     }
 
