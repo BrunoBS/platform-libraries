@@ -20,7 +20,7 @@ class BaseCrudServiceTest {
 
     private BaseCrudRepository<TestEntity, Long> repository;
     private BaseCrudMapper<TestEntity, TestDTO> mapper;
-    private BaseCrudValidator<TestDTO, Long> validator;
+    private BaseCrudValidator<TestDTO> validator;
     private TestService service;
 
     @BeforeEach
@@ -152,7 +152,7 @@ class BaseCrudServiceTest {
         TestService(
                 BaseCrudRepository<TestEntity, Long> repository,
                 BaseCrudMapper<TestEntity, TestDTO> mapper,
-                BaseCrudValidator<TestDTO, Long> validator) {
+                BaseCrudValidator<TestDTO> validator) {
             super(repository, mapper, validator);
         }
 
