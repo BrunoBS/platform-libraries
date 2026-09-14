@@ -2,53 +2,177 @@
 
 Infraestrutura reutilizável para catálogos persistidos e administráveis pelos microserviços da plataforma.
 
-## Princípio
+## Objetivo
 
-A biblioteca define **como** um catálogo gerenciado funciona; cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio.
+A biblioteca define **como** um catálogo gerenciado funciona. Cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio, das migrations, das regras específicas e da autorização.
 
-A infraestrutura comum de ciclo de vida CRUD é fornecida pela `platform-crud`. Essa é a única dependência interna intencional da `platform-catalog`.
+A infraestrutura de CRUD é reutilizada de `platform-crud` e a semântica padrão de erro usa `platform-messaging`.
 
-A `platform-catalog` não depende de `platform-messaging`, `platform-authorization` ou `platform-logging`. Ela possui sua própria semântica de erro e permite que o consumidor adapte essa semântica para HTTP, i18n, `ProblemDetail` ou qualquer outro padrão da aplicação.
-
-A abstração base é totalmente independente de `enum`. O banco pode ser a fonte de verdade do catálogo. O suporte a `enum` existe apenas como especialização opcional para catálogos que precisam restringir os nomes permitidos.
-
-Exemplos:
-
-- `account-api` continua dono de `AccountType`, `EnvironmentType`, `LanguageType`, etc.;
-- `event-api` pode ser dono de `OperationType`;
-- nenhum catálogo de negócio deve ser centralizado nesta biblioteca.
-
-## Modelos de catálogo
+## Modelos
 
 ### STATIC
 
-Catálogo fixo representado somente em código, normalmente por `enum`.
+Catálogo apenas em código, normalmente por `enum`.
 
-- não precisa tabela;
-- não precisa CRUD;
-- não usa a infraestrutura persistida desta lib.
+- não possui tabela;
+- não possui CRUD;
+- não usa a infraestrutura persistida da lib.
 
 ### MANAGED
 
 Catálogo persistido e administrável em runtime.
 
 - banco é a fonte de verdade;
-- novos valores podem ser criados sem recompilar o serviço;
-- usa `BaseCatalogEntity`, `BaseCatalogDTO`, `BaseCatalogRepository`, `BaseCatalogValidator`, `BaseCatalogService` e `BaseCatalogController`.
+- novos valores podem ser criados sem recompilar;
+- usa a infraestrutura base de catálogo.
 
 ### MANAGED_CONSTRAINED
 
-Catálogo persistido e administrável, mas com conjunto de nomes permitido controlado em código.
+Catálogo persistido, porém com `name` limitado por `CatalogEnum`.
 
 - mantém CRUD, `active`, `restore`, `sortOrder` e `settings`;
-- usa a mesma infraestrutura de `MANAGED`;
-- adiciona `CatalogEnum` e `EnumCatalogValidator` para restringir os nomes aceitos.
+- o banco continua persistindo os registros;
+- o enum define os nomes permitidos.
 
-## Contratos da base
+## Developer experience
 
-Os catálogos persistidos da plataforma usam `Long` como identificador técnico. A API pública da biblioteca segue esse contrato de forma explícita em DTO, repository, validator, service e controller.
+Existem dois caminhos de uso.
 
-A base também **não impõe unicidade global de `name` no mapeamento JPA**. A constraint física pertence ao serviço consumidor e deve refletir a identidade real do catálogo, por exemplo:
+### Happy path — catálogo padrão
+
+Quando o catálogo só possui os campos padrão da lib, **não é necessário criar DTO, mapper ou validator próprios**.
+
+A lib fornece:
+
+```text
+DefaultCatalogDTO
+DefaultCatalogMapper
+DefaultCatalogValidator
+DefaultEnumCatalogValidator
+DefaultManagedCatalogService
+DefaultConstrainedCatalogService
+DefaultCatalogController
+```
+
+Para um `MANAGED_CONSTRAINED`, o consumidor normalmente cria somente:
+
+```text
+LanguageType.java
+LanguageTypeEnum.java
+LanguageTypeRepository.java
+LanguageTypeService.java
+LanguageTypeController.java
+```
+
+Exemplo:
+
+```java
+@Entity
+@Table(name = "type_languages")
+public class LanguageType extends BaseCatalogEntity {
+}
+```
+
+```java
+public enum LanguageTypeEnum implements CatalogEnum<LanguageTypeEnum> {
+    JAVA,
+    DOTNET,
+    GO,
+    PYTHON
+}
+```
+
+```java
+public interface LanguageTypeRepository
+        extends BaseCatalogRepository<LanguageType> {
+}
+```
+
+```java
+@Service
+public class LanguageTypeService
+        extends DefaultConstrainedCatalogService<LanguageType, LanguageTypeEnum> {
+
+    public LanguageTypeService(
+            LanguageTypeRepository repository,
+            ObjectMapper objectMapper) {
+        super(repository, objectMapper, LanguageType.class, LanguageTypeEnum.class);
+    }
+}
+```
+
+```java
+@RestController
+@RequestMapping("/api/v1/language-type")
+public class LanguageTypeController
+        extends DefaultCatalogController<LanguageType> {
+
+    public LanguageTypeController(LanguageTypeService service) {
+        super(service);
+    }
+}
+```
+
+Para `MANAGED`, troque `DefaultConstrainedCatalogService` por `DefaultManagedCatalogService` e remova o enum.
+
+### Caminho extensível — catálogo com regras próprias
+
+Quando o catálogo possui campos adicionais, relacionamento, unicidade composta, filtros específicos ou contrato próprio de DTO, use as abstrações completas:
+
+```text
+BaseCatalogDTO
+BaseCatalogMapper
+BaseCatalogValidator
+EnumCatalogValidator
+BaseRelatedCatalogValidator
+BaseCatalogService
+BaseCatalogController
+```
+
+Exemplos atuais de necessidade do caminho extensível:
+
+```text
+FeatureScopeType -> FeatureType
+SchemaScopeType  -> SchemaType
+```
+
+## Comportamento padrão
+
+A infraestrutura fornece:
+
+- CRUD;
+- listagem de ativos/inativos;
+- busca por nome e id;
+- criação em lote no controller;
+- soft delete por `active=false`;
+- restore com revalidação;
+- `sortOrder` automático quando não informado;
+- `name` imutável por padrão;
+- filtro padrão por `active` e `name` no banco;
+- filtros adicionais por `Specification`;
+- unicidade simples por `name` como default;
+- suporte a unicidade relacionada por `BaseRelatedCatalogValidator`;
+- suporte opcional a validação de `settings` por callback.
+
+## Campos padrão
+
+`BaseCatalogEntity` fornece:
+
+```text
+id          Long
+name        String
+label       String
+description String
+sortOrder   Integer
+active      boolean
+settings    String
+```
+
+`DefaultCatalogDTO` expõe os mesmos dados de API, com `settings` como `JsonNode`.
+
+## Identidade e unicidade
+
+A lib não impõe `unique=true` em `name` no mapeamento base. A constraint física pertence ao microserviço e deve refletir a identidade real do catálogo:
 
 ```text
 name
@@ -57,114 +181,69 @@ application_id + name
 scope + name
 ```
 
-`BaseCatalogValidator` fornece unicidade simples por nome como política padrão, mas o hook `validateUniqueness` pode ser sobrescrito para catálogos com escopo.
+A validação Java melhora a resposta ao consumidor, mas não substitui a constraint no banco.
 
-## Estrutura fornecida
+## Relacionamentos
 
-```text
-model/
-  BaseCatalogEntity
-  CatalogEnum
-
-dto/
-  BaseCatalogDTO
-
-repository/
-  BaseCatalogRepository
-
-mapper/
-  BaseMapper
-  BaseCatalogMapper
-
-validation/
-  BaseValidator
-  BaseCatalogValidator
-  EnumCatalogValidator
-
-exception/
-  CatalogException
-  CatalogNotFoundException
-  CatalogRestoreException
-  CatalogValidationException
-
-service/
-  BaseCatalogService
-
-web/
-  BaseCatalogController
-```
-
-Internamente, DTO, repository, mapper, validator e service reutilizam `platform-crud`. O controller de catálogo permanece especializado porque seu contrato HTTP inclui listagem com filtros, criação em lote e `restore`, comportamentos que não pertencem ao CRUD genérico.
-
-## Semântica de erros
-
-A lib fornece exceptions próprias de catálogo como defaults, sem conhecer o mecanismo de apresentação do consumidor.
-
-`BaseCatalogService` mantém pontos de extensão para que o serviço consumidor substitua a semântica quando necessário:
+`BaseRelatedCatalogValidator` padroniza catálogos cuja identidade depende de outro catálogo:
 
 ```text
-notFoundException(id)
-restoreException(id)
+relação obrigatória
+        ↓
+registro relacionado existe e está ativo
+        ↓
+unicidade (relação + name)
 ```
 
-Na validação, `BaseValidator` usa o modelo neutro `CrudValidationResult` da `platform-crud` e converte o resultado para `CatalogValidationException`. O validator concreto pode sobrescrever `validationException(...)` se quiser outro contrato.
+## `settings`
 
-Assim, por exemplo, a `account-api` pode traduzir essas exceptions para o padrão de erro de `platform-messaging` sem criar dependência entre as duas bibliotecas.
+No happy path, o service pode receber uma validação adicional sem exigir uma classe `Validator` dedicada:
 
-## Comportamento padrão de catálogos gerenciados
+```java
+super(
+    repository,
+    objectMapper,
+    LanguageType.class,
+    LanguageTypeEnum.class,
+    (dto, result) -> schemaValidator.validateJson(
+        DEFAULT_SCHEMA,
+        dto.settings(),
+        "settings",
+        result
+    )
+);
+```
 
-A abstração fornece:
-
-- listagem por ativo/inativo;
-- busca por nome e identificador;
-- criação e atualização;
-- soft delete;
-- restore;
-- ordenação (`sortOrder`);
-- busca por múltiplos nomes (`findByNames`);
-- validações comuns;
-- política padrão de unicidade por nome, extensível por hook;
-- filtros adicionais extensíveis pelo serviço concreto;
-- CRUD REST reutilizável.
+Se não houver regra adicional, use o construtor simples.
 
 ## Extensibilidade
 
-`BaseCatalogValidator` não conhece `enum`, `FeatureType`, `scope` ou qualquer catálogo concreto. Validações específicas devem ser adicionadas pelos hooks disponíveis no validator concreto.
+O happy path é opcional. Assim que o catálogo precisar de comportamento específico, o consumidor pode voltar para as classes-base sem abandonar a infraestrutura.
 
-Quando um catálogo precisar restringir seus nomes a valores conhecidos em código, o serviço pode estender `EnumCatalogValidator`. Assim, o vínculo com `enum` fica isolado na especialização e não contamina o modelo `MANAGED`.
-
-Quando a unicidade depender de um escopo, o validator concreto sobrescreve `validateUniqueness` e o serviço define a constraint equivalente em sua migration.
-
-Filtros particulares podem ser implementados sobrescrevendo `matchesAdditionalFilters` em `BaseCatalogService`.
-
-A autorização permanece responsabilidade do controller concreto; a biblioteca não impõe `OWNER` nem qualquer política de acesso.
-
-## Guia de implementação
-
-O passo a passo completo para integrar a lib em um microserviço está em:
+A lib não deve conhecer regras como:
 
 ```text
-docs/USAGE.md
+AccountType
+EnvironmentType
+FeatureType
+SchemaType
+accountId
+applicationId
+políticas específicas de autorização
+valores concretos dos enums dos serviços
 ```
 
 ## Ownership
 
-A biblioteca fornece comportamento e infraestrutura. Ela não deve concentrar os valores de negócio dos microserviços.
-
 ```text
-platform-crud
-      ↓ infraestrutura CRUD
-platform-catalog
-      ↓ especialização de catálogo
-account-api  -> seus próprios catálogos
-event-api    -> seus próprios catálogos
-route-api    -> seus próprios catálogos
+platform-catalog = COMO um catálogo administrável funciona
+microserviço     = QUAL catálogo existe e suas regras de domínio
 ```
 
-## Regra de dependência
+## Guia completo
+
+Veja:
 
 ```text
-platform-catalog → platform-crud
+docs/USAGE.md
 ```
-
-Nenhuma outra capability da plataforma é necessária para usar catálogo.
