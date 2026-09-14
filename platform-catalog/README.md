@@ -4,11 +4,13 @@ Infraestrutura reutilizável para catálogos persistidos e administráveis pelos
 
 ## Objetivo
 
-A biblioteca define **como** um catálogo gerenciado funciona. Cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio, das migrations, das regras específicas e da autorização.
+A biblioteca define **como** um catálogo funciona. Cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio, das migrations, das regras específicas e da autorização.
 
 A infraestrutura de CRUD é reutilizada de `platform-crud` e a semântica padrão de erro usa `platform-messaging`.
 
-## Modelos
+## Modelos arquiteturais
+
+Os nomes abaixo servem para classificação e documentação. No código, a API usa nomes mais diretos.
 
 ### STATIC
 
@@ -24,37 +26,33 @@ Catálogo persistido e administrável em runtime.
 
 - banco é a fonte de verdade;
 - novos valores podem ser criados sem recompilar;
-- usa a infraestrutura base de catálogo.
+- no código, use `DynamicCatalogService`.
 
 ### MANAGED_CONSTRAINED
 
-Catálogo persistido, porém com `name` limitado por `CatalogEnum`.
+Catálogo persistido cujo `name` é limitado por `CatalogEnum`.
 
 - mantém CRUD, `active`, `restore`, `sortOrder` e `settings`;
 - o banco continua persistindo os registros;
-- o enum define os nomes permitidos.
+- o enum define os nomes permitidos;
+- no código, use `EnumCatalogService`.
 
 ## Developer experience
 
-Existem dois caminhos de uso.
-
-### Happy path — catálogo padrão
+### Caminho simples
 
 Quando o catálogo só possui os campos padrão da lib, **não é necessário criar DTO, mapper ou validator próprios**.
 
-A lib fornece:
+A API principal para o desenvolvedor é:
 
 ```text
-DefaultCatalogDTO
-DefaultCatalogMapper
-DefaultCatalogValidator
-DefaultEnumCatalogValidator
-DefaultManagedCatalogService
-DefaultConstrainedCatalogService
-DefaultCatalogController
+CatalogDTO
+DynamicCatalogService
+EnumCatalogService
+CatalogController
 ```
 
-Para um `MANAGED_CONSTRAINED`, o consumidor normalmente cria somente:
+Para um catálogo controlado por enum, o consumidor normalmente cria somente:
 
 ```text
 LanguageType.java
@@ -91,7 +89,7 @@ public interface LanguageTypeRepository
 ```java
 @Service
 public class LanguageTypeService
-        extends DefaultConstrainedCatalogService<LanguageType, LanguageTypeEnum> {
+        extends EnumCatalogService<LanguageType, LanguageTypeEnum> {
 
     public LanguageTypeService(
             LanguageTypeRepository repository,
@@ -105,7 +103,7 @@ public class LanguageTypeService
 @RestController
 @RequestMapping("/api/v1/language-type")
 public class LanguageTypeController
-        extends DefaultCatalogController<LanguageType> {
+        extends CatalogController<LanguageType> {
 
     public LanguageTypeController(LanguageTypeService service) {
         super(service);
@@ -113,9 +111,9 @@ public class LanguageTypeController
 }
 ```
 
-Para `MANAGED`, troque `DefaultConstrainedCatalogService` por `DefaultManagedCatalogService` e remova o enum.
+Para um catálogo totalmente dinâmico, use `DynamicCatalogService` e não crie enum.
 
-### Caminho extensível — catálogo com regras próprias
+### Caminho extensível
 
 Quando o catálogo possui campos adicionais, relacionamento, unicidade composta, filtros específicos ou contrato próprio de DTO, use as abstrações completas:
 
@@ -129,7 +127,7 @@ BaseCatalogService
 BaseCatalogController
 ```
 
-Exemplos atuais de necessidade do caminho extensível:
+Exemplos atuais:
 
 ```text
 FeatureScopeType -> FeatureType
@@ -150,9 +148,9 @@ A infraestrutura fornece:
 - `name` imutável por padrão;
 - filtro padrão por `active` e `name` no banco;
 - filtros adicionais por `Specification`;
-- unicidade simples por `name` como default;
+- unicidade simples por `name` como padrão;
 - suporte a unicidade relacionada por `BaseRelatedCatalogValidator`;
-- suporte opcional a validação de `settings` por callback.
+- suporte opcional a validação de `settings` por `CatalogSettingsValidator`.
 
 ## Campos padrão
 
@@ -168,7 +166,7 @@ active      boolean
 settings    String
 ```
 
-`DefaultCatalogDTO` expõe os mesmos dados de API, com `settings` como `JsonNode`.
+`CatalogDTO` expõe o contrato padrão de API, com `settings` como `JsonNode`.
 
 ## Identidade e unicidade
 
@@ -197,7 +195,7 @@ unicidade (relação + name)
 
 ## `settings`
 
-No happy path, o service pode receber uma validação adicional sem exigir uma classe `Validator` dedicada:
+No caminho simples, o service pode receber uma validação adicional sem exigir uma classe `Validator` dedicada:
 
 ```java
 super(
@@ -214,24 +212,18 @@ super(
 );
 ```
 
-Se não houver regra adicional, use o construtor simples.
+## Regra de simplicidade
 
-## Extensibilidade
-
-O happy path é opcional. Assim que o catálogo precisar de comportamento específico, o consumidor pode voltar para as classes-base sem abandonar a infraestrutura.
-
-A lib não deve conhecer regras como:
+A API pública privilegia nomes que expliquem o comportamento:
 
 ```text
-AccountType
-EnvironmentType
-FeatureType
-SchemaType
-accountId
-applicationId
-políticas específicas de autorização
-valores concretos dos enums dos serviços
+DynamicCatalogService  = nomes definidos em runtime/banco
+EnumCatalogService     = nomes permitidos pelo enum
+CatalogController      = controller para o contrato padrão
+CatalogDTO             = DTO padrão
 ```
+
+Os nomes `MANAGED` e `MANAGED_CONSTRAINED` permanecem apenas como classificação arquitetural.
 
 ## Ownership
 
