@@ -7,6 +7,7 @@ import com.empresa.platform.crud.validation.BaseCrudValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class BaseCrudService<
         E,
@@ -28,7 +29,19 @@ public abstract class BaseCrudService<
 
     @Transactional(readOnly = true)
     public List<D> findAll() {
-        return repository.findAll().stream().map(mapper::toDTO).toList();
+        return findAll(Map.of());
+    }
+
+    @Transactional(readOnly = true)
+    public List<D> findAll(Map<String, String> filters) {
+        Map<String, String> resolvedFilters = filters == null ? Map.of() : Map.copyOf(filters);
+        return findAllEntities(resolvedFilters).stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
+
+    protected List<E> findAllEntities(Map<String, String> filters) {
+        return repository.findAll();
     }
 
     @Transactional(readOnly = true)
