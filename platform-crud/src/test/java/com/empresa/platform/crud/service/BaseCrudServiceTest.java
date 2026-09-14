@@ -48,8 +48,7 @@ class BaseCrudServiceTest {
     }
 
     @Test
-    void shouldNormalizePathIdOnUpdate() {
-        TestDTO input = new TestDTO(99L, "updated");
+    void shouldUseContextualDtoOnUpdate() {
         TestDTO normalized = new TestDTO(10L, "updated");
         TestEntity entity = new TestEntity(10L, "old");
 
@@ -60,6 +59,7 @@ class BaseCrudServiceTest {
         assertThat(service.update(normalized)).isEqualTo(normalized);
         verify(validator).validateForUpdate(normalized);
         verify(mapper).updateEntity(entity, normalized);
+        assertThat(service.entityContext).isEqualTo(normalized);
     }
 
     @Test
@@ -147,6 +147,7 @@ class BaseCrudServiceTest {
 
         private List<TestEntity> entities = List.of();
         private Map<String, String> filters = Map.of();
+        private TestDTO entityContext;
 
         TestService(
                 BaseCrudRepository<TestEntity, Long> repository,
@@ -164,6 +165,12 @@ class BaseCrudServiceTest {
         protected List<TestEntity> findAllEntities(Map<String, String> filters) {
             this.filters = filters;
             return entities;
+        }
+
+        @Override
+        protected TestEntity getEntity(TestDTO dto) {
+            this.entityContext = dto;
+            return super.getEntity(dto);
         }
 
         boolean readBoolean(
