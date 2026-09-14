@@ -82,7 +82,7 @@ public abstract class BaseCatalogService<
 
     @Transactional(readOnly = true)
     public D findById(Long id) {
-        return mapper().toDTO(getEntity(id));
+        return mapper().toDTO(findActiveById(id));
     }
 
     @Transactional
@@ -92,7 +92,7 @@ public abstract class BaseCatalogService<
 
     @Transactional
     public void delete(Long id) {
-        E entity = getEntity(id);
+        E entity = findActiveById(id);
         D dto = mapper().toDTO(entity);
         validator().validateForDelete(dto);
         beforeDelete(entity);
@@ -122,7 +122,11 @@ public abstract class BaseCatalogService<
     }
 
     @Override
-    protected E getEntity(Long id) {
+    protected E getEntity(D dto) {
+        return findActiveById(dto.id());
+    }
+
+    private E findActiveById(Long id) {
         return repository().findByIdAndActiveTrue(id)
                 .orElseThrow(() -> notFoundException(id));
     }
