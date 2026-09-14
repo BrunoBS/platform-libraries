@@ -1,6 +1,7 @@
 package com.empresa.platform.authorization.service;
 
 import com.empresa.platform.authorization.exception.ForbiddenAccessException;
+import com.empresa.platform.authorization.exception.UnauthorizedAccessException;
 import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.AuthorizationLevel;
 import com.empresa.platform.authorization.model.UserSession;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.retry.RetryTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -91,6 +93,12 @@ public class AuthorizationClientService {
                 .retrieve()
                 .onStatus(status -> status.is5xxServerError(), (request, response) -> {
                     throw new HttpServerErrorException(response.getStatusCode());
+                })
+                .onStatus(status -> status.value() == HttpStatus.UNAUTHORIZED.value(), (request, response) -> {
+                    throw new UnauthorizedAccessException(AuthorizationMessageKeys.PLATFORM_ACCESS_DENIED);
+                })
+                .onStatus(status -> status.value() == HttpStatus.FORBIDDEN.value(), (request, response) -> {
+                    throw new ForbiddenAccessException(AuthorizationMessageKeys.RESOURCE_ACCESS_DENIED);
                 })
                 .onStatus(status -> status.is4xxClientError(), (request, response) -> {
                     throw new HttpClientErrorException(response.getStatusCode());
