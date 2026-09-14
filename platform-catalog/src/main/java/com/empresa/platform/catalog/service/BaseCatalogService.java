@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class BaseCatalogService<
         E extends BaseCatalogEntity,
@@ -29,6 +32,19 @@ public abstract class BaseCatalogService<
             BaseCatalogMapper<D, E> mapper,
             BaseCatalogValidator<D> validator) {
         super(repository, mapper, validator);
+    }
+
+    @Override
+    protected Set<String> allowedFilters() {
+        return Stream.concat(
+                        Stream.of("active", "name"),
+                        additionalAllowedFilters().stream()
+                )
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    protected Set<String> additionalAllowedFilters() {
+        return Set.of();
     }
 
     @Override
@@ -89,6 +105,19 @@ public abstract class BaseCatalogService<
     protected E getEntity(Long id) {
         return repository().findByIdAndActiveTrue(id)
                 .orElseThrow(() -> notFoundException(id));
+    }
+
+    @Override
+    protected RuntimeException unsupportedFilterException(String name, String value) {
+        return new ValidationException(
+                PlatformMessageKeys.VALIDATION_FAILED,
+                List.of(new ValidationDetail(
+                        name,
+                        null,
+                        Map.of(),
+                        "Unsupported filter: " + name
+                ))
+        );
     }
 
     @Override
