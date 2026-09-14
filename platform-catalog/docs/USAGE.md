@@ -4,11 +4,18 @@ Este guia apresenta o caminho simples para novos catálogos e o caminho extensí
 
 ## 1. Classifique o catálogo
 
-Use um destes modelos:
+Use um destes modelos arquiteturais:
 
 - `STATIC`: apenas enum, sem tabela e sem CRUD;
 - `MANAGED`: persistido, banco como fonte de verdade;
 - `MANAGED_CONSTRAINED`: persistido, mas `name` limitado por `CatalogEnum`.
+
+No código, use nomes mais diretos:
+
+```text
+MANAGED             -> DynamicCatalogService
+MANAGED_CONSTRAINED -> EnumCatalogService
+```
 
 ## 2. Dependência
 
@@ -23,9 +30,9 @@ A versão deve vir do dependency management da plataforma.
 
 ---
 
-# Happy path
+# Caminho simples
 
-Use este caminho quando o catálogo possui apenas os campos padrão:
+Use quando o catálogo possui apenas:
 
 ```text
 id
@@ -39,9 +46,9 @@ settings
 
 Nesse caso você **não precisa criar DTO, mapper ou validator próprios**.
 
-## 3. MANAGED_CONSTRAINED em cinco classes
+## 3. Catálogo controlado por enum em cinco classes
 
-### 3.1 Entidade
+### Entidade
 
 ```java
 @Entity
@@ -56,7 +63,7 @@ public class LanguageType extends BaseCatalogEntity {
 }
 ```
 
-### 3.2 Enum
+### Enum
 
 ```java
 public enum LanguageTypeEnum implements CatalogEnum<LanguageTypeEnum> {
@@ -67,7 +74,7 @@ public enum LanguageTypeEnum implements CatalogEnum<LanguageTypeEnum> {
 }
 ```
 
-### 3.3 Repository
+### Repository
 
 ```java
 public interface LanguageTypeRepository
@@ -75,12 +82,12 @@ public interface LanguageTypeRepository
 }
 ```
 
-### 3.4 Service
+### Service
 
 ```java
 @Service
 public class LanguageTypeService
-        extends DefaultConstrainedCatalogService<LanguageType, LanguageTypeEnum> {
+        extends EnumCatalogService<LanguageType, LanguageTypeEnum> {
 
     public LanguageTypeService(
             LanguageTypeRepository repository,
@@ -90,26 +97,13 @@ public class LanguageTypeService
 }
 ```
 
-O service recebe automaticamente:
-
-```text
-findAll
-findById
-findByName
-findByNames
-create
-update
-delete
-restore
-```
-
-### 3.5 Controller
+### Controller
 
 ```java
 @RestController
 @RequestMapping("/api/v1/language-type")
 public class LanguageTypeController
-        extends DefaultCatalogController<LanguageType> {
+        extends CatalogController<LanguageType> {
 
     public LanguageTypeController(LanguageTypeService service) {
         super(service);
@@ -128,16 +122,14 @@ DELETE /api/v1/language-type/{id}
 POST   /api/v1/language-type/{id}/restore
 ```
 
-A autorização continua no controller concreto.
+## 4. Catálogo dinâmico em quatro classes
 
-## 4. MANAGED em quatro classes
-
-Para um catálogo totalmente dinâmico, remova o enum e use `DefaultManagedCatalogService`:
+Quando os nomes podem ser criados em runtime, não crie enum:
 
 ```java
 @Service
 public class SegmentTypeService
-        extends DefaultManagedCatalogService<SegmentType> {
+        extends DynamicCatalogService<SegmentType> {
 
     public SegmentTypeService(
             SegmentTypeRepository repository,
@@ -147,7 +139,7 @@ public class SegmentTypeService
 }
 ```
 
-A estrutura fica:
+Estrutura:
 
 ```text
 SegmentType.java
@@ -158,7 +150,7 @@ SegmentTypeController.java
 
 ## 5. DTO padrão
 
-O happy path usa `DefaultCatalogDTO`:
+O caminho simples usa `CatalogDTO`:
 
 ```text
 Long id
@@ -169,16 +161,14 @@ Integer sortOrder
 JsonNode settings
 ```
 
-O JSON público continua simples e independente da entidade JPA.
+## 6. Validação de `settings`
 
-## 6. Validação de `settings` sem criar Validator
-
-Se o serviço possui uma validação padrão para `settings`, injete-a diretamente no construtor do service:
+Se houver uma regra simples para `settings`, passe-a no construtor do service:
 
 ```java
 @Service
 public class LanguageTypeService
-        extends DefaultConstrainedCatalogService<LanguageType, LanguageTypeEnum> {
+        extends EnumCatalogService<LanguageType, LanguageTypeEnum> {
 
     public LanguageTypeService(
             LanguageTypeRepository repository,
@@ -200,48 +190,26 @@ public class LanguageTypeService
 }
 ```
 
-Isso preserva o happy path sem obrigar a criação de uma classe `Validator` apenas para uma regra simples.
+A interface usada nesse callback é `CatalogSettingsValidator`.
 
 ## 7. Regras padrão
-
-No happy path:
 
 - `name`, `label` e `description` são obrigatórios;
 - `description` segue os limites comuns da lib;
 - `name` deve ser único por padrão;
-- em `MANAGED_CONSTRAINED`, `name` também precisa existir no enum;
+- no `EnumCatalogService`, `name` também precisa existir no enum;
 - `name` é imutável depois da criação;
 - `active=false` representa soft delete;
 - restore revalida o registro antes de ativá-lo;
 - `sortOrder` é calculado quando ausente ou inválido;
-- `active=true` é aplicado apenas na criação e não é forçado durante update;
+- `active=true` é aplicado apenas na criação;
 - filtros padrão são executados no banco.
-
-## 8. Migration continua sendo do serviço
-
-A lib não cria tabelas automaticamente.
-
-```sql
-CREATE TABLE type_languages (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL,
-    label VARCHAR(100) NOT NULL,
-    description TEXT,
-    sort_order INT NOT NULL,
-    is_active BIT NOT NULL,
-    settings TEXT NOT NULL,
-    PRIMARY KEY (id),
-    CONSTRAINT uk_type_languages_name UNIQUE (name)
-);
-```
-
-A constraint física deve representar a identidade real do catálogo.
 
 ---
 
 # Caminho extensível
 
-Use as classes completas quando o catálogo possuir algum destes requisitos:
+Use quando houver:
 
 ```text
 campos adicionais
@@ -254,19 +222,7 @@ validações complexas
 semântica de service própria
 ```
 
-## 9. Estrutura completa
-
-```text
-MyType.java
-MyTypeDTO.java
-MyTypeRepository.java
-MyTypeMapper.java
-MyTypeValidator.java
-MyTypeService.java
-MyTypeController.java
-```
-
-As abstrações disponíveis são:
+As abstrações são:
 
 ```text
 BaseCatalogDTO
@@ -278,7 +234,7 @@ BaseCatalogService
 BaseCatalogController
 ```
 
-## 10. Catálogo relacionado
+## 8. Catálogo relacionado
 
 Para identidade como `(scope, name)`, use `BaseRelatedCatalogValidator`.
 
@@ -292,16 +248,7 @@ registro relacionado existe e está ativo
 unicidade (relação + name)
 ```
 
-Exemplos:
-
-```text
-FeatureScopeType -> FeatureType
-SchemaScopeType  -> SchemaType
-```
-
-O repository concreto continua declarando a query específica de unicidade.
-
-## 11. Filtros específicos
+## 9. Filtros específicos
 
 `BaseCatalogService` usa `Specification`.
 
@@ -315,75 +262,47 @@ protected Specification<MyType> additionalSpecification(
 }
 ```
 
-Os filtros são aplicados no banco, não depois da materialização dos DTOs.
-
-## 12. DTO próprio
+## 10. DTO próprio
 
 Crie um DTO próprio somente quando houver campos além do contrato padrão.
 
-```java
-public record FeatureTypeDTO(
-    Long id,
-    String name,
-    String label,
-    String description,
-    Integer sortOrder,
-    Long featureScopeId,
-    String featureScopeName,
-    Boolean available,
-    JsonNode settings
-) implements BaseCatalogDTO<FeatureTypeDTO> {
-    ...
-}
-```
-
-Nesse caso use também mapper, validator e service concretos conforme necessário.
-
-## 13. Regra de ownership
-
-A lib conhece comportamento de catálogo, não catálogo de negócio.
+## 11. Como escolher rapidamente
 
 ```text
-platform-catalog = COMO um catálogo funciona
-microserviço     = QUAL catálogo existe
+Precisa tabela?
+  não -> STATIC
+  sim -> os nomes podem nascer em runtime?
+           sim -> DynamicCatalogService
+           não -> EnumCatalogService
+
+Tem campos/regras extras?
+  não -> CatalogDTO + CatalogController
+  sim -> classes Base* do caminho extensível
 ```
 
-Não devem entrar na lib:
+## 12. Checklist
 
-```text
-AccountType
-EnvironmentType
-FeatureType
-SchemaType
-accountId
-applicationId
-regras específicas de autorização
-valores concretos dos enums consumidores
-```
-
-## 14. Checklist rápido
-
-### Catálogo padrão MANAGED
+### Dinâmico
 
 1. migration;
 2. entity;
 3. repository;
-4. service com `DefaultManagedCatalogService`;
-5. controller com `DefaultCatalogController`;
+4. service com `DynamicCatalogService`;
+5. controller com `CatalogController`;
 6. autorização;
 7. testes.
 
-### Catálogo padrão MANAGED_CONSTRAINED
+### Controlado por enum
 
 1. migration;
 2. entity;
 3. enum;
 4. repository;
-5. service com `DefaultConstrainedCatalogService`;
-6. controller com `DefaultCatalogController`;
+5. service com `EnumCatalogService`;
+6. controller com `CatalogController`;
 7. autorização;
 8. testes.
 
-### Catálogo avançado
+### Avançado
 
-Comece pelo happy path e migre para as classes-base específicas apenas quando surgir uma regra que realmente exija isso.
+Comece pelo caminho simples e use as classes `Base*` apenas quando surgir uma regra que realmente exija customização.
