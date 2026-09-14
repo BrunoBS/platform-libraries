@@ -3,20 +3,43 @@ package com.empresa.platform.catalog.web;
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.model.BaseCatalogEntity;
 import com.empresa.platform.catalog.service.BaseCatalogService;
-import com.empresa.platform.crud.web.BaseCrudController;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 public abstract class BaseCatalogController<
         D extends BaseCatalogDTO<D>,
-        E extends BaseCatalogEntity>
-        extends BaseCrudController<E, D, Long> {
+        E extends BaseCatalogEntity> {
 
     protected abstract BaseCatalogService<E, D> getService();
 
-    @Override
-    protected final BaseCatalogService<E, D> service() {
-        return getService();
+    @GetMapping
+    public List<D> findAll(@RequestParam Map<String, String> filters) {
+        return getService().findAll(filters);
+    }
+
+    @GetMapping("/{id}")
+    public D findById(@PathVariable Long id) {
+        return getService().findById(id);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public D create(@RequestBody D dto) {
+        return getService().create(dto);
+    }
+
+    @PutMapping("/{id}")
+    public D update(@PathVariable Long id, @RequestBody D dto) {
+        return getService().update(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        getService().delete(id);
     }
 
     @PostMapping("/{id}/restore")
