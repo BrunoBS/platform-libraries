@@ -26,7 +26,7 @@ class BaseCrudValidatorTest {
         TestValidator validator = new TestValidator();
         TestDTO dto = new TestDTO("name");
 
-        validator.validateForUpdate(10L, dto);
+        validator.validateForUpdate(dto);
 
         assertThat(validator.attributesCalled).isTrue();
         assertThat(validator.updateIntegrityCalled).isTrue();
@@ -73,7 +73,7 @@ class BaseCrudValidatorTest {
         }
 
         @Override
-        protected void validateUpdateIntegrity(Long id, TestDTO dto, CrudValidationResult result) {
+        protected void validateUpdateIntegrity(TestDTO dto, CrudValidationResult result) {
             updateIntegrityCalled = true;
         }
 
@@ -83,7 +83,7 @@ class BaseCrudValidatorTest {
         }
 
         @Override
-        protected void validateAdditionalUpdate(Long id, TestDTO dto, CrudValidationResult result) {
+        protected void validateAdditionalUpdate(TestDTO dto, CrudValidationResult result) {
             additionalUpdateCalled = true;
         }
 
