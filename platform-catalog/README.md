@@ -4,38 +4,57 @@ Infraestrutura reutilizável para catálogos persistidos e administráveis pelos
 
 ## Objetivo
 
-A biblioteca define **como** um catálogo funciona. Cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio, das migrations, das regras específicas e da autorização.
+A biblioteca define **como** um catálogo persistido funciona. Cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio, das migrations, das regras específicas e da autorização.
 
 A infraestrutura de CRUD é reutilizada de `platform-crud` e a semântica padrão de erro usa `platform-messaging`.
 
-## Modelos arquiteturais
+## Tipos de catálogo
 
-Os nomes abaixo servem para classificação e documentação. No código, a API usa nomes mais diretos.
+Para quem usa a `platform-catalog`, existem somente dois tipos.
 
-### STATIC
+### Dynamic Catalog
 
-Catálogo apenas em código, normalmente por `enum`.
+Use `DynamicCatalogService` quando o banco é a fonte de verdade para os valores do catálogo.
 
-- não possui tabela;
-- não possui CRUD;
-- não usa a infraestrutura persistida da lib.
+- novos `name` podem ser criados em runtime;
+- não exige enum;
+- novos valores não exigem alteração de código ou deploy;
+- mantém CRUD, `active`, `restore`, `sortOrder` e `settings`.
 
-### MANAGED
+### Enum Catalog
 
-Catálogo persistido e administrável em runtime.
+Use `EnumCatalogService` quando os valores permitidos precisam ser conhecidos pelo código.
 
-- banco é a fonte de verdade;
-- novos valores podem ser criados sem recompilar;
-- no código, use `DynamicCatalogService`.
+- o catálogo continua persistido e administrável;
+- `name` precisa existir em um enum que implementa `CatalogEnum`;
+- um novo `name` exige alteração do enum e deploy;
+- `label`, `description`, `settings`, ordenação e ativação continuam administráveis no banco.
 
-### MANAGED_CONSTRAINED
+> Se algo existe somente como enum Java e não precisa de persistência ou administração, ele está fora do escopo desta biblioteca.
 
-Catálogo persistido cujo `name` é limitado por `CatalogEnum`.
+## Como escolher
 
-- mantém CRUD, `active`, `restore`, `sortOrder` e `settings`;
-- o banco continua persistindo os registros;
-- o enum define os nomes permitidos;
-- no código, use `EnumCatalogService`.
+```text
+Os names podem ser criados em runtime?
+│
+├── SIM
+│   └── DynamicCatalogService
+│
+└── NÃO, o código define os valores permitidos
+    └── EnumCatalogService
+```
+
+Depois disso, faça uma segunda pergunta:
+
+```text
+O catálogo possui campos ou regras específicas?
+│
+├── NÃO
+│   └── caminho simples
+│
+└── SIM
+    └── caminho extensível com Base*
+```
 
 ## Developer experience
 
@@ -43,7 +62,7 @@ Catálogo persistido cujo `name` é limitado por `CatalogEnum`.
 
 Quando o catálogo só possui os campos padrão da lib, **não é necessário criar DTO, mapper ou validator próprios**.
 
-A API principal para o desenvolvedor é:
+A API principal é:
 
 ```text
 CatalogDTO
@@ -52,7 +71,7 @@ EnumCatalogService
 CatalogController
 ```
 
-Para um catálogo controlado por enum, o consumidor normalmente cria somente:
+Para um Enum Catalog, o consumidor normalmente cria somente:
 
 ```text
 LanguageType.java
@@ -111,7 +130,7 @@ public class LanguageTypeController
 }
 ```
 
-Para um catálogo totalmente dinâmico, use `DynamicCatalogService` e não crie enum.
+Para um Dynamic Catalog, use `DynamicCatalogService` e não crie enum.
 
 ### Caminho extensível
 
@@ -214,21 +233,19 @@ super(
 
 ## Regra de simplicidade
 
-A API pública privilegia nomes que expliquem o comportamento:
+A API pública usa nomes que explicam diretamente o comportamento:
 
 ```text
-DynamicCatalogService  = nomes definidos em runtime/banco
-EnumCatalogService     = nomes permitidos pelo enum
-CatalogController      = controller para o contrato padrão
-CatalogDTO             = DTO padrão
+DynamicCatalogService = valores definidos em runtime/banco
+EnumCatalogService    = valores permitidos pelo enum
+CatalogController     = controller para o contrato padrão
+CatalogDTO            = DTO padrão
 ```
-
-Os nomes `MANAGED` e `MANAGED_CONSTRAINED` permanecem apenas como classificação arquitetural.
 
 ## Ownership
 
 ```text
-platform-catalog = COMO um catálogo administrável funciona
+platform-catalog = COMO um catálogo persistido e administrável funciona
 microserviço     = QUAL catálogo existe e suas regras de domínio
 ```
 
