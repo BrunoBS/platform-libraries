@@ -7,13 +7,13 @@ import com.empresa.platform.crud.validation.BaseCrudValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class BaseCrudServiceTest {
 
@@ -81,6 +81,32 @@ class BaseCrudServiceTest {
                 .hasMessage("test resource 10 not found");
     }
 
+    @Test
+    void shouldUseFindAllEntitiesHookAndMapResults() {
+        TestEntity entity = new TestEntity(1L, "one");
+        TestDTO dto = new TestDTO(1L, "one");
+
+        when(mapper.toDTO(entity)).thenReturn(dto);
+        service.entities = List.of(entity);
+
+        assertThat(service.findAll(Map.of("active", "true")))
+                .containsExactly(dto);
+
+        assertThat(service.filters)
+                .containsEntry("active", "true");
+    }
+
+    @Test
+    void shouldParseBooleanFilterStrictly() {
+        assertThat(service.readBoolean(Map.of(), "active", true)).isTrue();
+        assertThat(service.readBoolean(Map.of("active", "false"), "active", true)).isFalse();
+        assertThat(service.readBoolean(Map.of("active", "TRUE"), "active", false)).isTrue();
+
+        assertThatThrownBy(() ->
+                service.readBoolean(Map.of("active", "invalid"), "active", true))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
     record TestDTO(Long id, String name) implements BaseCrudDTO<Long, TestDTO> {
         @Override
         public TestDTO withId(Long id) {
@@ -98,12 +124,33 @@ class BaseCrudServiceTest {
         }
     }
 
-    static class TestService extends BaseCrudService<TestEntity, TestDTO, Long> {
+    static class TestService extends BaseCrudService<
+            TestEntity,
+            TestDTO,
+            Long,
+            BaseCrudRepository<TestEntity, Long>> {
+
+        private List<TestEntity> entities = List.of();
+        private Map<String, String> filters = Map.of();
+
         TestService(
                 BaseCrudRepository<TestEntity, Long> repository,
                 BaseCrudMapper<TestEntity, TestDTO> mapper,
                 BaseCrudValidator<TestDTO, Long> validator) {
             super(repository, mapper, validator);
+        }
+
+        @Override
+        protected List<TestEntity> findAllEntities(Map<String, String> filters) {
+            this.filters = filters;
+            return entities;
+        }
+
+        boolean readBoolean(
+                Map<String, String> filters,
+                String name,
+                boolean defaultValue) {
+            return booleanFilter(filters, name, defaultValue);
         }
 
         @Override
