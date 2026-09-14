@@ -55,7 +55,7 @@ class BaseCrudValidatorTest {
     record TestDTO(String name) {
     }
 
-    static class TestValidator extends BaseCrudValidator<TestDTO, Long> {
+    static class TestValidator extends BaseCrudValidator<TestDTO> {
         private boolean attributesCalled;
         private boolean createIntegrityCalled;
         private boolean updateIntegrityCalled;
