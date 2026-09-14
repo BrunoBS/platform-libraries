@@ -6,7 +6,7 @@ import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.catalog.model.BaseCatalogEntity;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
 import com.empresa.platform.catalog.validation.BaseCatalogValidator;
-import com.empresa.platform.crud.service.BaseCrudService;
+import com.empresa.platform.crud.service.BaseListCrudService;
 import com.empresa.platform.messaging.exception.NotFoundException;
 import com.empresa.platform.messaging.exception.ValidationException;
 import com.empresa.platform.messaging.message.PlatformMessageKeys;
@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 public abstract class BaseCatalogService<
         E extends BaseCatalogEntity,
         D extends BaseCatalogDTO<D>>
-        extends BaseCrudService<E, D, Long, BaseCatalogRepository<E>> {
+        extends BaseListCrudService<E, D, Long, BaseCatalogRepository<E>> {
 
     protected BaseCatalogService(
             BaseCatalogRepository<E> repository,
