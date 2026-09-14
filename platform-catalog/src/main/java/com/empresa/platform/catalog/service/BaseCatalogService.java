@@ -21,7 +21,7 @@ import java.util.Objects;
 public abstract class BaseCatalogService<
         E extends BaseCatalogEntity,
         D extends BaseCatalogDTO<D>>
-        extends BaseCrudService<E, D, Long> {
+        extends BaseCrudService<E, D, Long, BaseCatalogRepository<E>> {
 
     protected final BaseCatalogRepository<E> repository;
     protected final BaseCatalogMapper<D, E> mapper;
@@ -37,38 +37,17 @@ public abstract class BaseCatalogService<
         this.validator = validator;
     }
 
-    /**
-     * Keeps catalog default semantics: generic listing returns active records only.
-     */
     @Override
-    public List<D> findAll() {
-        return findAll(Map.of());
-    }
+    protected List<E> findAllEntities(Map<String, String> filters) {
+        boolean active = booleanFilter(filters, "active", true);
+        String name = filters.get("name");
 
-    /**
-     * Standard CRUD filter contract. Catalog consumes the common filters
-     * "active" and "name" and forwards the remaining entries to
-     * catalog-specific specifications.
-     */
-    @Override
-    public List<D> findAll(Map<String, String> filters) {
-        Map<String, String> resolved = filters == null ? Map.of() : Map.copyOf(filters);
-        boolean active = Boolean.parseBoolean(resolved.getOrDefault("active", "true"));
-        String name = resolved.get("name");
-
-        Map<String, String> additionalFilters = new HashMap<>(resolved);
+        Map<String, String> additionalFilters = new HashMap<>(filters);
         additionalFilters.remove("active");
         additionalFilters.remove("name");
 
-        return findAll(active, name, Map.copyOf(additionalFilters));
-    }
-
-    /**
-     * Executes standard and catalog-specific filters in the database.
-     * Kept as an overload for existing consumers.
-     */
-    public List<D> findAll(boolean active, String name, Map<String, String> filters) {
-        Specification<E> specification = (root, query, cb) -> cb.equal(root.get("active"), active);
+        Specification<E> specification =
+                (root, query, cb) -> cb.equal(root.get("active"), active);
 
         if (name != null && !name.isBlank()) {
             String contains = "%" + name.toLowerCase() + "%";
@@ -77,19 +56,16 @@ public abstract class BaseCatalogService<
             );
         }
 
-        Specification<E> additional = additionalSpecification(filters == null ? Map.of() : filters);
+        Specification<E> additional =
+                additionalSpecification(Map.copyOf(additionalFilters));
+
         if (additional != null) {
             specification = specification.and(additional);
         }
 
-        return repository.findAll(specification).stream()
-                .map(mapper::toDTO)
-                .toList();
+        return repository.findAll(specification);
     }
 
-    /**
-     * Hook for catalog-specific database filters.
-     */
     protected Specification<E> additionalSpecification(Map<String, String> filters) {
         return null;
     }
@@ -146,10 +122,6 @@ public abstract class BaseCatalogService<
         }
     }
 
-    /**
-     * Catalog names are semantic keys by default and therefore immutable.
-     * Override only for a catalog whose name is explicitly descriptive rather than semantic.
-     */
     protected boolean isNameMutable() {
         return false;
     }
