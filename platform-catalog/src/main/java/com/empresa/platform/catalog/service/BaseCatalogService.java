@@ -12,6 +12,7 @@ import com.empresa.platform.messaging.exception.ValidationException;
 import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.model.ValidationDetail;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -63,11 +64,13 @@ public abstract class BaseCatalogService<
         return null;
     }
 
+    @Transactional(readOnly = true)
     public E findByName(String name) {
         return repository().findByNameAndActiveTrue(name)
                 .orElseThrow(() -> notFoundException(null));
     }
 
+    @Transactional
     public D restore(Long id) {
         E entity = repository().findByIdAndActiveFalse(id)
                 .orElseThrow(() -> restoreException(id));
@@ -77,6 +80,7 @@ public abstract class BaseCatalogService<
         return mapper().toDTO(repository().save(entity));
     }
 
+    @Transactional(readOnly = true)
     public List<E> findByNames(List<String> names) {
         return repository().findByNameInAndActiveTrue(names);
     }
@@ -85,6 +89,18 @@ public abstract class BaseCatalogService<
     protected E getEntity(Long id) {
         return repository().findByIdAndActiveTrue(id)
                 .orElseThrow(() -> notFoundException(id));
+    }
+
+    @Override
+    protected RuntimeException invalidFilterException(String name, String value) {
+        return new ValidationException(
+                PlatformMessageKeys.VALIDATION_FAILED,
+                List.of(new ValidationDetail(
+                        name,
+                        PlatformMessageKeys.TYPE_MISMATCH,
+                        Map.of("0", name, "1", "boolean")
+                ))
+        );
     }
 
     @Override
