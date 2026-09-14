@@ -63,11 +63,7 @@ public abstract class BaseCrudService<
         throw invalidFilterException(name, value);
     }
 
-    protected RuntimeException invalidFilterException(String name, String value) {
-        return new IllegalArgumentException(
-                "Invalid boolean filter '%s': '%s'".formatted(name, value)
-        );
-    }
+    protected abstract RuntimeException invalidFilterException(String name, String value);
 
     @Transactional(readOnly = true)
     public D findById(ID id) {
