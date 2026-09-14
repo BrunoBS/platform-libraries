@@ -1,20 +1,45 @@
 # Como usar o `platform-catalog`
 
-Este guia apresenta o caminho simples para novos catálogos e o caminho extensível para catálogos com regras próprias.
+Este guia apresenta o caminho simples para novos catálogos persistidos e o caminho extensível para catálogos com regras próprias.
 
-## 1. Classifique o catálogo
+## 1. Escolha o tipo de catálogo
 
-Use um destes modelos arquiteturais:
+A `platform-catalog` trabalha com dois tipos.
 
-- `STATIC`: apenas enum, sem tabela e sem CRUD;
-- `MANAGED`: persistido, banco como fonte de verdade;
-- `MANAGED_CONSTRAINED`: persistido, mas `name` limitado por `CatalogEnum`.
+### Dynamic Catalog
 
-No código, use nomes mais diretos:
+Use `DynamicCatalogService` quando os valores podem ser criados em runtime e o banco é a fonte de verdade.
 
 ```text
-MANAGED             -> DynamicCatalogService
-MANAGED_CONSTRAINED -> EnumCatalogService
+Novo name sem alteração de código
+Sem enum
+Banco define os valores existentes
+```
+
+### Enum Catalog
+
+Use `EnumCatalogService` quando o código precisa definir quais valores são permitidos.
+
+```text
+name precisa existir no enum
+Novo name exige alteração do enum e deploy
+Banco mantém os dados administrativos do catálogo
+```
+
+O enum deve implementar `CatalogEnum`.
+
+Se um enum Java não precisa ser persistido ou administrado, ele não é um caso de uso da `platform-catalog`.
+
+### Decisão rápida
+
+```text
+Os names podem ser criados em runtime?
+│
+├── SIM
+│   └── DynamicCatalogService
+│
+└── NÃO, os valores são definidos pelo código
+    └── EnumCatalogService
 ```
 
 ## 2. Dependência
@@ -46,7 +71,7 @@ settings
 
 Nesse caso você **não precisa criar DTO, mapper ou validator próprios**.
 
-## 3. Catálogo controlado por enum em cinco classes
+## 3. Enum Catalog em cinco classes
 
 ### Entidade
 
@@ -122,7 +147,7 @@ DELETE /api/v1/language-type/{id}
 POST   /api/v1/language-type/{id}/restore
 ```
 
-## 4. Catálogo dinâmico em quatro classes
+## 4. Dynamic Catalog em quatro classes
 
 Quando os nomes podem ser criados em runtime, não crie enum:
 
@@ -266,23 +291,24 @@ protected Specification<MyType> additionalSpecification(
 
 Crie um DTO próprio somente quando houver campos além do contrato padrão.
 
-## 11. Como escolher rapidamente
+## 11. Como escolher o caminho de implementação
+
+Depois de escolher entre Dynamic e Enum:
 
 ```text
-Precisa tabela?
-  não -> STATIC
-  sim -> os nomes podem nascer em runtime?
-           sim -> DynamicCatalogService
-           não -> EnumCatalogService
-
-Tem campos/regras extras?
-  não -> CatalogDTO + CatalogController
-  sim -> classes Base* do caminho extensível
+O catálogo possui campos ou regras extras?
+│
+├── NÃO
+│   └── CatalogDTO + CatalogController
+│       + DynamicCatalogService ou EnumCatalogService
+│
+└── SIM
+    └── use as classes Base* necessárias
 ```
 
 ## 12. Checklist
 
-### Dinâmico
+### Dynamic Catalog
 
 1. migration;
 2. entity;
@@ -292,17 +318,17 @@ Tem campos/regras extras?
 6. autorização;
 7. testes.
 
-### Controlado por enum
+### Enum Catalog
 
 1. migration;
 2. entity;
-3. enum;
+3. enum implementando `CatalogEnum`;
 4. repository;
 5. service com `EnumCatalogService`;
 6. controller com `CatalogController`;
 7. autorização;
 8. testes.
 
-### Avançado
+### Catálogo avançado
 
 Comece pelo caminho simples e use as classes `Base*` apenas quando surgir uma regra que realmente exija customização.
