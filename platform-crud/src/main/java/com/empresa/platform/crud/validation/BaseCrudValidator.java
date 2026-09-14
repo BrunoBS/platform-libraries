@@ -2,6 +2,15 @@ package com.empresa.platform.crud.validation;
 
 public abstract class BaseCrudValidator<D, ID> {
 
+    public void validateForFind(D dto) {
+        CrudValidationResult result = new CrudValidationResult();
+        validateRequired(dto, result);
+        if (!result.hasErrors()) {
+            validateFind(dto, result);
+        }
+        throwIfInvalid(result);
+    }
+
     public void validateForCreate(D dto) {
         CrudValidationResult result = new CrudValidationResult();
         validateRequired(dto, result);
@@ -13,20 +22,23 @@ public abstract class BaseCrudValidator<D, ID> {
         throwIfInvalid(result);
     }
 
-    public void validateForUpdate(ID id, D dto) {
+    public void validateForUpdate(D dto) {
         CrudValidationResult result = new CrudValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
             validateAttributes(dto, result);
-            validateUpdateIntegrity(id, dto, result);
-            validateAdditionalUpdate(id, dto, result);
+            validateUpdateIntegrity(dto, result);
+            validateAdditionalUpdate(dto, result);
         }
         throwIfInvalid(result);
     }
 
-    public void validateForDelete(ID id) {
+    public void validateForDelete(D dto) {
         CrudValidationResult result = new CrudValidationResult();
-        validateDelete(id, result);
+        validateRequired(dto, result);
+        if (!result.hasErrors()) {
+            validateDelete(dto, result);
+        }
         throwIfInvalid(result);
     }
 
@@ -36,22 +48,25 @@ public abstract class BaseCrudValidator<D, ID> {
         }
     }
 
+    protected void validateFind(D dto, CrudValidationResult result) {
+    }
+
     protected void validateAttributes(D dto, CrudValidationResult result) {
     }
 
     protected void validateCreateIntegrity(D dto, CrudValidationResult result) {
     }
 
-    protected void validateUpdateIntegrity(ID id, D dto, CrudValidationResult result) {
+    protected void validateUpdateIntegrity(D dto, CrudValidationResult result) {
     }
 
-    protected void validateDelete(ID id, CrudValidationResult result) {
+    protected void validateDelete(D dto, CrudValidationResult result) {
     }
 
     protected void validateAdditionalCreate(D dto, CrudValidationResult result) {
     }
 
-    protected void validateAdditionalUpdate(ID id, D dto, CrudValidationResult result) {
+    protected void validateAdditionalUpdate(D dto, CrudValidationResult result) {
     }
 
     protected String requiredMessageKey() {
