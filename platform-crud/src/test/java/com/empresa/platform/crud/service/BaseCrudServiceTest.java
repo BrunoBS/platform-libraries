@@ -104,7 +104,8 @@ class BaseCrudServiceTest {
 
         assertThatThrownBy(() ->
                 service.readBoolean(Map.of("active", "invalid"), "active", true))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(TestInvalidFilterException.class)
+                .hasMessage("invalid filter active=invalid");
     }
 
     record TestDTO(Long id, String name) implements BaseCrudDTO<Long, TestDTO> {
@@ -154,8 +155,19 @@ class BaseCrudServiceTest {
         }
 
         @Override
+        protected RuntimeException invalidFilterException(String name, String value) {
+            return new TestInvalidFilterException("invalid filter " + name + "=" + value);
+        }
+
+        @Override
         protected RuntimeException notFoundException(Long id) {
             return new TestNotFoundException("test resource " + id + " not found");
+        }
+    }
+
+    static class TestInvalidFilterException extends RuntimeException {
+        TestInvalidFilterException(String message) {
+            super(message);
         }
     }
 
