@@ -114,10 +114,12 @@ public abstract class BaseCrudValidator<D extends BaseCrudDTO<?>> {
     }
 
     /**
-     * The CRUD module detects validation failures but does not own the
-     * application's exception, HTTP or messaging semantics.
+     * Default validation failure for consumers that do not need a custom
+     * exception strategy. Applications may still override this method.
      */
-    protected abstract RuntimeException validationException(CrudValidationResult result);
+    protected RuntimeException validationException(CrudValidationResult result) {
+        return new CrudValidationException(result);
+    }
 
     public abstract String entityName();
 }
