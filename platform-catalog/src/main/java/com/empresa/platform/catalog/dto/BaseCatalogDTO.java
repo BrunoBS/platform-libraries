@@ -4,7 +4,7 @@ import com.empresa.platform.crud.dto.BaseCrudDTO;
 import tools.jackson.databind.JsonNode;
 
 public interface BaseCatalogDTO<T extends BaseCatalogDTO<T>>
-        extends BaseCrudDTO<Long, T> {
+        extends BaseCrudDTO<Long> {
 
     @Override
     Long id();
@@ -15,6 +15,5 @@ public interface BaseCatalogDTO<T extends BaseCatalogDTO<T>>
     Integer sortOrder();
     JsonNode settings();
 
-    @Override
     T withId(Long id);
 }
