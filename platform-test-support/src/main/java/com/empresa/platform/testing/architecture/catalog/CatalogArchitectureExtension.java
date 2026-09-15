@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Detects platform-catalog customizations and requires a specific consumer-side test.
@@ -55,7 +56,7 @@ public final class CatalogArchitectureExtension implements BeforeAllCallback {
         String[] basePackages = resolveBasePackages(annotation, architectureTestClass);
         JavaClasses classes = new ClassFileImporter().importPackages(basePackages);
 
-        List<Violation> violations = classes.stream()
+        List<Violation> violations = StreamSupport.stream(classes.spliterator(), false)
                 .map(JavaClass::reflect)
                 .filter(this::isConcreteClass)
                 .filter(this::extendsCatalogBaseType)
@@ -120,7 +121,7 @@ public final class CatalogArchitectureExtension implements BeforeAllCallback {
     private boolean hasSpecificTest(Class<?> customizedType, JavaClasses classes) {
         Set<String> acceptedSimpleNames = acceptedTestNames(customizedType.getSimpleName());
 
-        return classes.stream()
+        return StreamSupport.stream(classes.spliterator(), false)
                 .map(JavaClass::getSimpleName)
                 .anyMatch(acceptedSimpleNames::contains);
     }
