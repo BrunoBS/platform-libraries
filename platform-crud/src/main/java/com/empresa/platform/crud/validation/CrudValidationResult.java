@@ -9,7 +9,11 @@ public class CrudValidationResult {
     private final List<CrudValidationDetail> details = new ArrayList<>();
 
     public void addError(String field, String messageKey) {
-        details.add(new CrudValidationDetail(field, messageKey));
+        if (isMessageKey(messageKey)) {
+            details.add(new CrudValidationDetail(field, messageKey));
+            return;
+        }
+        details.add(CrudValidationDetail.literal(field, messageKey));
     }
 
     public void addError(
@@ -32,4 +36,9 @@ public class CrudValidationResult {
             details.addAll(other.details);
         }
     }
+
+    private boolean isMessageKey(String value) {
+        return value != null && value.matches("^[a-z0-9._-]+$");
+    }
 }
+
