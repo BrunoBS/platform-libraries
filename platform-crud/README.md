@@ -1,294 +1,152 @@
 # platform-crud
 
-Infraestrutura CRUD genérica, fortemente tipada e sem conhecimento de atributos de domínio.
-
-A biblioteca abstrai o ciclo de vida básico de CRUD sem impor campos como `name`, `description`, `active`, `accountId` ou qualquer outro atributo de negócio.
+Infraestrutura CRUD genérica, tipada e sem conhecimento de domínio.
 
 ## Objetivo
 
-Padronizar a estrutura comum de recursos CRUD nos serviços da plataforma:
+Padronizar o fluxo repetitivo de CRUD sem impor `name`, `active`, `accountId`, lifecycle, autorização, auditoria ou soft delete.
 
-- DTO
-- Repository
-- Mapper
-- Validator
-- Service
-- Controller
+O microserviço continua responsável por entidade, constraints/migrations, autorização, regras de negócio, restore, integrações e semântica de erros.
 
-O serviço consumidor continua responsável por suas entidades, atributos, constraints, regras de negócio, autorização, semântica de erros e efeitos colaterais.
+## Contrato mínimo
 
-A `platform-crud` não depende de outras capabilities da plataforma. Em especial, não conhece `platform-messaging`: ela detecta falhas e entrega ao consumidor os pontos de extensão para decidir como representá-las.
+`BaseCrudDTO<ID>` exige somente `ID id()`.
 
-## Dependência
+A lib não recria nem normaliza DTOs.
 
-```xml
-<dependency>
-    <groupId>com.empresa.platform</groupId>
-    <artifactId>platform-crud</artifactId>
-</dependency>
-```
-
-A versão deve ser gerenciada pelo `platform-parent`/`dependencyManagement` da plataforma.
-
-## Estrutura recomendada no serviço
+### Contrato de ID
 
 ```text
-core/customer/
-├── Customer.java
-├── CustomerDTO.java
-├── CustomerRepository.java
-├── CustomerMapper.java
-├── CustomerValidator.java
-└── CustomerService.java
-
-entrypoint/web/customer/
-└── CustomerController.java
+CREATE  -> id deve ser null
+FIND    -> id deve ser informado
+UPDATE  -> id deve ser informado
+DELETE  -> id deve ser informado
 ```
 
-## 1. DTO
+O `BaseCrudValidator` aplica esse contrato automaticamente.
 
-O contrato base exige somente um identificador e a capacidade de devolver uma cópia com outro ID.
+Chaves padrão:
 
-```java
-public record CustomerDTO(
-        Long id,
-        String name,
-        String email
-) implements BaseCrudDTO<Long, CustomerDTO> {
-
-    @Override
-    public CustomerDTO withId(Long id) {
-        return new CustomerDTO(id, name, email);
-    }
-}
+```text
+validation.id.required
+validation.id.must-be-absent
 ```
 
-O framework usa `withId(null)` no create e `withId(pathId)` no update. Assim, o ID do body nunca prevalece sobre o contrato da operação.
+O consumidor deve disponibilizar essas mensagens no seu i18n ou sobrescrever `idRequiredMessageKey()` / `idMustBeAbsentMessageKey()`.
 
-## 2. Repository
+## Componentes
 
-```java
-public interface CustomerRepository
-        extends BaseCrudRepository<Customer, Long> {
-}
+### Repository
+
+`BaseCrudRepository<E, ID>` estende `JpaRepository`. Consultas específicas permanecem no repository concreto.
+
+### Mapper
+
+`BaseCrudMapper<E, D>` define:
+
+```text
+toEntity
+toDTO
+updateEntity
 ```
 
-Consultas específicas continuam no repository concreto.
+O mapper transfere dados. Evite repository/service dentro dele.
 
-## 3. Mapper
+### Validator
 
-```java
-@Component
-public class CustomerMapper
-        implements BaseCrudMapper<Customer, CustomerDTO> {
+`BaseCrudValidator<D>` concentra validação de operação, atributos e integridade.
 
-    @Override
-    public Customer toEntity(CustomerDTO dto) {
-        Customer entity = new Customer();
-        entity.setName(dto.name());
-        entity.setEmail(dto.email());
-        return entity;
-    }
+Fluxos:
 
-    @Override
-    public CustomerDTO toDTO(Customer entity) {
-        return new CustomerDTO(
-                entity.getId(),
-                entity.getName(),
-                entity.getEmail());
-    }
-
-    @Override
-    public void updateEntity(Customer entity, CustomerDTO dto) {
-        entity.setName(dto.name());
-        entity.setEmail(dto.email());
-    }
-}
+```text
+CREATE: required -> id absent -> attributes -> create integrity -> additional create
+UPDATE: required -> id required -> attributes -> update integrity -> additional update
+FIND:   required -> id required -> find validation
+DELETE: required -> id required -> delete validation
 ```
 
-A base não usa reflection e não conhece atributos da entidade.
+Validação Java melhora a resposta ao usuário, mas não substitui constraint física do banco para concorrência.
 
-## 4. Validator
+## BaseCrudService
 
-```java
-@Component
-public class CustomerValidator
-        extends BaseCrudValidator<CustomerDTO, Long> {
-
-    @Override
-    protected void validateAttributes(
-            CustomerDTO dto,
-            CrudValidationResult result) {
-        if (dto.name() == null || dto.name().isBlank()) {
-            result.addError("name", "customer.name.required");
-        }
-    }
-
-    @Override
-    protected RuntimeException validationException(
-            CrudValidationResult result) {
-        return new CustomerValidationException(result);
-    }
-
-    @Override
-    public String entityName() {
-        return "customer";
-    }
-}
-```
-
-Os métodos públicos são o contrato das operações:
+### Create
 
 ```text
 validateForCreate
+-> mapper.toEntity
+-> beforeCreate
+-> repository.save
+-> afterCreate
+-> mapper.toDTO
+```
+
+### Update
+
+```text
 validateForUpdate
+-> getEntity
+-> mapper.updateEntity
+-> beforeUpdate
+-> repository.save
+-> afterUpdate
+-> mapper.toDTO
+```
+
+`beforeUpdate` recebe a entidade já atualizada pelo mapper. Regras que precisam comparar com o estado persistido anterior devem ficar no validator.
+
+### Delete
+
+```text
 validateForDelete
+-> getEntity
+-> beforeDelete
+-> deleteEntity
+-> afterDelete
 ```
 
-Eles executam diretamente o fluxo padrão. Para customizações pontuais, sobrescreva somente os hooks necessários:
+O delete padrão é físico. Soft delete deve sobrescrever `deleteEntity`.
+
+## Hooks
 
 ```text
-validateRequired
-validateAttributes
-validateCreateIntegrity
-validateUpdateIntegrity
-validateDelete
-validateAdditionalCreate
-validateAdditionalUpdate
-requiredMessageKey
+beforeCreate / afterCreate
+beforeUpdate / afterUpdate
+beforeDelete / afterDelete
+deleteEntity
+getEntity
+notFoundException
 ```
 
-O CRUD fornece `CrudValidationResult` e `CrudValidationDetail` apenas como modelo neutro para acumular erros. A exception final é responsabilidade do consumidor através de `validationException(CrudValidationResult)`. Assim o CRUD não conhece HTTP, i18n, `platform-messaging` nem o formato de erro da aplicação.
+`create`, `update` e `delete` são transacionais. Os hooks `after*` executam após save/delete, mas ainda dentro da mesma transação; não significam AFTER_COMMIT.
 
-Se um recurso realmente precisar substituir todo o fluxo de uma operação, ele ainda pode sobrescrever `validateForCreate`, `validateForUpdate` ou `validateForDelete`. A recomendação é preferir os hooks quando a customização for parcial.
+Para ações realmente pós-commit, use evento transacional/outbox.
 
-## 5. Service
+## BaseListCrudService
 
-```java
-@Service
-public class CustomerService
-        extends BaseCrudService<Customer, CustomerDTO, Long> {
+Adiciona listagem e filtros simples com `Map<String, String>`.
 
-    public CustomerService(
-            CustomerRepository repository,
-            CustomerMapper mapper,
-            CustomerValidator validator) {
-        super(repository, mapper, validator);
-    }
+É indicado para coleções pequenas/controladas. Para alto volume, use paginação específica no consumer; não transforme a base em uma abstração universal.
 
-    @Override
-    protected RuntimeException notFoundException(Long id) {
-        return new CustomerNotFoundException(id);
-    }
-}
-```
+## Controller
 
-A `platform-crud` detecta que o recurso não foi encontrado, mas não define qual exception deve representar essa condição. O consumidor fornece a exception adequada por meio de `notFoundException(ID id)`. Assim, mensagens, códigos, internacionalização e semântica da aplicação não vazam para a infraestrutura CRUD.
+A `platform-crud` não fornece controller HTTP genérico.
 
-O service base fornece:
+O controller consumidor define path variables, autorização, status HTTP e composição de contexto. Helpers como `withId` ou `withContext` são conveniências locais do DTO e não fazem parte de `BaseCrudDTO`.
+
+## O que não pertence à base
 
 ```text
-findAll
-findById
-create
-update
-delete
+restore
+soft delete obrigatório
+lifecycle
+accountId/environmentId/applicationId
+autorização
+auditoria
+Kafka/eventos
+timestamps
+UUID
 ```
-
-Hooks de ciclo de vida:
-
-```text
-beforeCreate
-applyCreate
-afterCreate
-beforeUpdate
-applyUpdate
-afterUpdate
-beforeDelete
-afterDelete
-```
-
-Esses hooks existem para customizar pontos reais do ciclo sem obrigar o consumidor a reimplementar a operação inteira. O delete padrão é físico. Para soft delete, sobrescreva `deleteEntity` no service concreto.
-
-Exemplo:
-
-```java
-@Override
-protected void deleteEntity(Customer entity) {
-    entity.setActive(false);
-    repository().save(entity);
-}
-```
-
-## 6. Controller
-
-`BaseCrudController` fornece diretamente o contrato HTTP CRUD padrão e delega ao service concreto, sem camadas intermediárias de delegação.
-
-```java
-@RestController
-@RequestMapping("/api/v1/customers")
-public class CustomerController
-        extends BaseCrudController<Customer, CustomerDTO, Long> {
-
-    private final CustomerService service;
-
-    public CustomerController(CustomerService service) {
-        this.service = service;
-    }
-
-    @Override
-    protected CustomerService service() {
-        return service;
-    }
-}
-```
-
-Endpoints fornecidos:
-
-```text
-GET    /
-GET    /{id}
-POST   /
-PUT    /{id}
-DELETE /{id}
-```
-
-Autorização continua sendo responsabilidade do controller concreto.
-
-Quando um módulo precisar de um contrato HTTP diferente, ele deve declarar seu próprio controller e delegar ao seu service. A `platform-crud` não cria uma abstração adicional apenas para encapsular chamadas simples de delegação.
-
-## Responsabilidades
-
-### platform-crud
-
-- fluxo CRUD comum
-- normalização de ID
-- integração genérica repository/mapper/validator
-- transações do fluxo básico
-- detecção de recurso ausente
-- modelo neutro de validação
-- hooks de ciclo de vida
-- controller HTTP CRUD padrão
-
-### serviço consumidor
-
-- entidade e seus atributos
-- migrations e constraints
-- regras de negócio
-- consultas adicionais
-- autorização
-- soft delete, quando necessário
-- exception e semântica de recurso não encontrado
-- exception e apresentação de erros de validação
-- mensagens específicas
-- integrações e efeitos colaterais
-
-## Relação com platform-catalog
-
-A `platform-catalog` especializa a `platform-crud` preservando seu contrato público. DTO, repository, mapper, validator e service reutilizam os contratos genéricos. O `BaseCatalogController` permanece especializado porque possui filtros, criação em lote e restore; ele delega diretamente ao `BaseCatalogService`, evitando abstrações intermediárias sem comportamento próprio.
 
 ## Princípio
 
-A biblioteca abstrai comportamento comum real, não simples delegações e não o domínio.
-
-Pontos de extensão devem existir apenas quando permitem customizar uma etapa concreta do fluxo. Não usar `Map<String, Object>`, `JsonNode` ou reflection como mecanismo para representar entidades arbitrárias. O objetivo é preservar tipagem forte e deixar cada serviço dono do seu modelo.
+A lib abstrai comportamento repetitivo real sem esconder o domínio. Se um consumer precisa lutar contra a base, a regra provavelmente não pertence à base.
