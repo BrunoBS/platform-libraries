@@ -2,7 +2,9 @@
 
 O `platform-test-support` é a biblioteca compartilhada para padronização dos testes unitários e de integração dos microsserviços da plataforma.
 
-Para uma adoção passo a passo, consulte o [Guia completo de uso](GUIA_DE_USO.md).
+Se você está utilizando a biblioteca pela primeira vez, comece pelo [Comece aqui — Testes com platform-test-support](COMECE_AQUI_TESTES.md).
+
+Para referência completa de recursos e configurações, consulte o [Guia completo de uso](GUIA_DE_USO.md).
 
 O módulo centraliza a inicialização do Spring Boot, Testcontainers, MySQL, Kafka, RestAssured, limpeza do banco e abstrações reutilizáveis para clients, responses, builders e factories de teste.
 
