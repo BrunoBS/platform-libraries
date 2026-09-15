@@ -231,6 +231,14 @@ super(
 );
 ```
 
+## Integridade operacional
+
+- Restore revalida o DTO antes de reativar o registro.
+- JSON inválido persistido em `settings` é tratado como corrupção de dados e falha explicitamente; não é convertido silenciosamente para `{}`.
+- `sortOrder` automático usa o maior valor atual quando o valor recebido é ausente ou menor que 1.
+- Se o domínio exigir `sortOrder` estritamente único sob concorrência, deve fornecer constraint/locking próprio.
+- Validação Java não substitui constraints físicas do banco.
+
 ## Regra de simplicidade
 
 A API pública usa nomes que explicam diretamente o comportamento:
