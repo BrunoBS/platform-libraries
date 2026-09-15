@@ -106,7 +106,7 @@ class BaseCatalogValidatorContractTest {
 
     private static TestEntity entity(Long id, String name, Integer sortOrder) {
         TestEntity entity = new TestEntity();
-        entity.id = id;
+        entity.setTestId(id);
         entity.setName(name);
         entity.setLabel(name);
         entity.setDescription("Descrição válida");
@@ -120,7 +120,11 @@ class BaseCatalogValidatorContractTest {
     }
 
     private static final class TestEntity extends BaseCatalogEntity {
-        private TestEntity() {
+        public TestEntity() {
+        }
+
+        void setTestId(Long id) {
+            this.id = id;
         }
     }
 
