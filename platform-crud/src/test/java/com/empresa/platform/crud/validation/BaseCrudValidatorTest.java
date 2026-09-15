@@ -8,6 +8,27 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class BaseCrudValidatorTest {
 
+
+    @Test
+    void shouldUseDefaultCrudValidationException() {
+        DefaultTestValidator validator = new DefaultTestValidator();
+
+        assertThatThrownBy(() -> validator.validateForCreate(null))
+                .isInstanceOf(CrudValidationException.class)
+                .satisfies(exception -> {
+                    CrudValidationException validationException =
+                            (CrudValidationException) exception;
+
+                    assertThat(validationException.getDetails())
+                            .singleElement()
+                            .satisfies(detail -> {
+                                assertThat(detail.field()).isEqualTo("default-test");
+                                assertThat(detail.messageKey())
+                                        .isEqualTo("validation.required");
+                            });
+                });
+    }
+
     @Test
     void shouldExecuteCreateValidationFlowDirectly() {
         TestValidator validator = new TestValidator();
@@ -104,6 +125,13 @@ class BaseCrudValidatorTest {
     }
 
     record TestDTO(Long id, String name) implements BaseCrudDTO<Long> {
+    }
+
+    static class DefaultTestValidator extends BaseCrudValidator<TestDTO> {
+        @Override
+        public String entityName() {
+            return "default-test";
+        }
     }
 
     static class TestValidator extends BaseCrudValidator<TestDTO> {
