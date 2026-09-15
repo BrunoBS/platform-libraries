@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -177,24 +176,8 @@ public abstract class BaseCatalogService<
 
     @Override
     protected void beforeUpdate(E entity, D dto) {
-        if (!isNameMutable() && !Objects.equals(entity.getName(), dto.name())) {
-            throw new ValidationException(
-                    PlatformMessageKeys.VALIDATION_FAILED,
-                    List.of(new ValidationDetail(
-                            "name",
-                            CatalogMessageKeys.NAME_IMMUTABLE,
-                            Map.of("0", validator().entityName(), "1", entity.getName()),
-                            null
-                    ))
-            );
-        }
-
         applyAdditionalFields(entity, dto);
         adjustSortOrder(entity, nextSortOrderExcluding(dto.id()));
-    }
-
-    protected boolean isNameMutable() {
-        return false;
     }
 
     @Override
