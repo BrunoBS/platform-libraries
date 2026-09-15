@@ -12,7 +12,7 @@ import java.util.Set;
 
 public abstract class BaseListCrudService<
         E,
-        D extends BaseCrudDTO<ID, D>,
+        D extends BaseCrudDTO<ID>,
         ID,
         R extends BaseCrudRepository<E, ID>>
         extends BaseCrudService<E, D, ID, R> {
