@@ -170,6 +170,12 @@ public abstract class BaseCatalogService<
     }
 
     @Override
+    protected void beforeCreate(E entity, D dto) {
+        applyAdditionalFields(entity, dto);
+        adjustSortOrder(entity, nextSortOrder());
+    }
+
+    @Override
     protected void beforeUpdate(E entity, D dto) {
         if (!isNameMutable() && !Objects.equals(entity.getName(), dto.name())) {
             throw new ValidationException(
@@ -182,22 +188,13 @@ public abstract class BaseCatalogService<
                     ))
             );
         }
+
+        applyAdditionalFields(entity, dto);
+        adjustSortOrder(entity, nextSortOrderExcluding(dto.id()));
     }
 
     protected boolean isNameMutable() {
         return false;
-    }
-
-    @Override
-    protected void applyCreate(E entity, D dto) {
-        applyAdditionalFields(entity, dto);
-        adjustSortOrder(entity, nextSortOrder());
-    }
-
-    @Override
-    protected void applyUpdate(E entity, D dto) {
-        applyAdditionalFields(entity, dto);
-        adjustSortOrder(entity, nextSortOrderExcluding(dto.id()));
     }
 
     @Override
