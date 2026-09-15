@@ -29,19 +29,19 @@ class BaseCrudServiceTest {
     }
 
     @Test
-    void shouldNormalizeIdOnCreate() {
-        TestDTO input = new TestDTO(99L, "name");
-        TestDTO normalized = new TestDTO(null, "name");
+    void shouldUseReceivedDtoOnCreate() {
+        TestDTO input = new TestDTO(null, "name");
         TestEntity entity = new TestEntity(null, "name");
         TestEntity saved = new TestEntity(1L, "name");
         TestDTO response = new TestDTO(1L, "name");
 
-        when(mapper.toEntity(normalized)).thenReturn(entity);
+        when(mapper.toEntity(input)).thenReturn(entity);
         when(repository.save(entity)).thenReturn(saved);
         when(mapper.toDTO(saved)).thenReturn(response);
 
         assertThat(service.create(input)).isEqualTo(response);
-        verify(validator).validateForCreate(normalized);
+        verify(validator).validateForCreate(input);
+        verify(mapper).toEntity(input);
     }
 
     @Test
