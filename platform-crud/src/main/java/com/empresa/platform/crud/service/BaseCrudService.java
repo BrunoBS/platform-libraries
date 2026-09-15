@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public abstract class BaseCrudService<
         E,
-        D extends BaseCrudDTO<ID, D>,
+        D extends BaseCrudDTO<ID>,
         ID,
         R extends BaseCrudRepository<E, ID>> {
 
