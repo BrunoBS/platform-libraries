@@ -1,6 +1,7 @@
 package com.empresa.platform.testing.annotation;
 
 import com.empresa.platform.testing.extension.PlatformIntegrationExtension;
+import com.empresa.platform.testing.extension.TestPerformanceExtension;
 import com.empresa.platform.testing.client.PlatformHttpTestConfiguration;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +20,6 @@ import java.lang.annotation.Target;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(PlatformHttpTestConfiguration.class)
-@ExtendWith(PlatformIntegrationExtension.class)
+@ExtendWith({PlatformIntegrationExtension.class, TestPerformanceExtension.class})
 public @interface PlatformIntegrationTest {
 }
