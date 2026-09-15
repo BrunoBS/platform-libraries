@@ -11,6 +11,7 @@ import com.empresa.platform.messaging.exception.NotFoundException;
 import com.empresa.platform.messaging.exception.ValidationException;
 import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.model.ValidationDetail;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,7 +73,10 @@ public abstract class BaseCatalogService<
             specification = specification.and(additional);
         }
 
-        return repository().findAll(specification);
+        return repository().findAll(
+                specification,
+                Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("id"))
+        );
     }
 
     protected Specification<E> additionalSpecification(Map<String, String> filters) {
@@ -145,12 +149,19 @@ public abstract class BaseCatalogService<
 
     @Override
     protected RuntimeException invalidFilterException(String name, String value) {
+        return invalidFilterException(name, value, "boolean");
+    }
+
+    protected RuntimeException invalidFilterException(
+            String name,
+            String value,
+            String expectedType) {
         return new ValidationException(
                 PlatformMessageKeys.VALIDATION_FAILED,
                 List.of(new ValidationDetail(
                         name,
                         PlatformMessageKeys.TYPE_MISMATCH,
-                        Map.of("0", name, "1", "boolean")
+                        Map.of("0", name, "1", expectedType)
                 ))
         );
     }
