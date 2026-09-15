@@ -33,13 +33,12 @@ public abstract class BaseCrudService<
 
     @Transactional
     public D create(D dto) {
-        D createDto = normalizeCreate(dto);
-        validator.validateForCreate(createDto);
-        beforeCreate(createDto);
-        E entity = mapper.toEntity(createDto);
-        applyCreate(entity, createDto);
+        validator.validateForCreate(dto);
+        beforeCreate(dto);
+        E entity = mapper.toEntity(dto);
+        applyCreate(entity, dto);
         E saved = repository.save(entity);
-        afterCreate(saved, createDto);
+        afterCreate(saved, dto);
         return mapper.toDTO(saved);
     }
 
@@ -64,9 +63,6 @@ public abstract class BaseCrudService<
         afterDelete(entity);
     }
 
-    protected D normalizeCreate(D dto) {
-        return dto == null ? null : dto.withId(null);
-    }
 
     protected E getEntity(D dto) {
         return repository.findById(dto.id())
