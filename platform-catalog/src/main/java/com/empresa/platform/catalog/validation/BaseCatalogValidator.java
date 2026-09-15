@@ -2,6 +2,7 @@ package com.empresa.platform.catalog.validation;
 
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
+import com.empresa.platform.catalog.model.BaseCatalogEntity;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
 import com.empresa.platform.crud.validation.CrudValidationResult;
@@ -10,6 +11,7 @@ import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.model.ValidationDetail;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Base validator for catalogs that need custom validation rules.
@@ -56,6 +58,7 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>>
 
     @Override
     protected void validateUpdateIntegrity(D dto, CrudValidationResult result) {
+        validateNameMutability(dto, result);
         validateIntegrity(dto, result);
     }
 
@@ -98,6 +101,31 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>>
             result.addError("name", CatalogMessageKeys.NAME_DUPLICATE,
                     Map.of("0", entityName(), "1", dto.name()));
         }
+    }
+
+    protected void validateNameMutability(D dto, CrudValidationResult result) {
+        if (isNameMutable() || dto.id() == null) {
+            return;
+        }
+
+        repository.findById(dto.id())
+                .map(BaseCatalogEntity.class::cast)
+                .ifPresent(entity -> {
+                    if (!Objects.equals(entity.getName(), dto.name())) {
+                        result.addError(
+                                "name",
+                                CatalogMessageKeys.NAME_IMMUTABLE,
+                                Map.of(
+                                        "0", entityName(),
+                                        "1", entity.getName()
+                                )
+                        );
+                    }
+                });
+    }
+
+    protected boolean isNameMutable() {
+        return false;
     }
 
     protected void validateSettings(D dto, CrudValidationResult result) {
