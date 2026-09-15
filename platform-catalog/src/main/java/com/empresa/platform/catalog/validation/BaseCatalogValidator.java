@@ -80,7 +80,8 @@ public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>>
                         .map(detail -> new ValidationDetail(
                                 detail.field(),
                                 detail.messageKey(),
-                                detail.parameters()
+                                detail.parameters(),
+                                detail.defaultMessage()
                         ))
                         .toList()
         );
