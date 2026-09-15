@@ -2,6 +2,7 @@ package com.empresa.platform.messaging.autoconfigure;
 
 import com.empresa.platform.messaging.cache.ApiMessageCache;
 import com.empresa.platform.messaging.cache.NoOpApiMessageCache;
+import com.empresa.platform.messaging.message.PlatformDefaultMessageProvider;
 import com.empresa.platform.messaging.config.PlatformMessagingProperties;
 import com.empresa.platform.messaging.config.SqlIdentifierValidator;
 import com.empresa.platform.messaging.provider.ApiMessageProvider;
@@ -38,6 +39,11 @@ public class PlatformMessagingAutoConfiguration {
     @ConditionalOnProperty(prefix = "platform.messaging.cache", name = "enabled", havingValue = "false", matchIfMissing = true)
     ApiMessageCache noOpApiMessageCache() {
         return new NoOpApiMessageCache();
+    }
+
+    @Bean
+    PlatformDefaultMessageProvider platformDefaultMessageProvider() {
+        return new PlatformDefaultMessageProvider();
     }
 
     @Bean
