@@ -754,48 +754,57 @@ Quando `@WithDatabaseScripts` executa scripts SQL, o cache de metadados do banco
 A recomendação continua sendo manter os testes HTTP isolados e evitar execução paralela quando diferentes testes compartilham o mesmo banco com limpeza automática.
 
 
-## Validação arquitetural de catálogos
+## Validação arquitetural genérica
 
-A validação é opt-in. O serviço consumidor ativa a regra com uma única classe de teste:
+A validação é opt-in. O serviço consumidor ativa a regra uma única vez:
 
 ```java
-@CatalogArchitectureTest(basePackages = "com.minhaempresa.meuservico")
-class CatalogArchitectureTest {
+@PlatformArchitectureTest(basePackages = "com.minhaempresa.meuservico")
+class ArchitectureTest {
 
     @Test
-    void catalogCustomizationsMustHaveSpecificTests() {
+    void customizedPlatformBehaviorMustHaveTests() {
     }
 }
 ```
 
-A annotation usa ArchUnit internamente para importar o bytecode do serviço e detectar classes concretas que customizam hooks do `platform-catalog`, como:
+Por padrão, a regra observa classes-base dos pacotes `com.empresa.platform`. Qualquer classe concreta da aplicação que sobrescreva comportamento declarado por uma classe ou interface da plataforma precisa ter cobertura específica.
+
+A cobertura pode ser reconhecida por convenção:
 
 ```text
-additionalAllowedFilters
-additionalSpecification
-applyAdditionalFields
-isNameMutable
-validateSettings
-validateAdditionalFields
-validateAdditionalCatalogFields
-validateAdditionalIntegrity
-validateUniqueness
-relatedValue
-relatedField
-relatedEntityName
-relatedExistsAndIsActive
-existsByNameAndRelatedValue
+MinhaClasseTest
+MinhaClasseIntegrationTest
+MinhaClasseIT
 ```
 
-Quando uma customização é encontrada, o serviço deve possuir um teste específico por convenção. Por exemplo, para `FeatureTypeService` ou `FeatureTypeValidator`, são aceitos nomes como:
+ou explicitamente quando um único teste cobre várias classes:
 
-```text
-FeatureTypeServiceTest
-FeatureTypeServiceIntegrationTest
-FeatureTypeTest
-FeatureTypeIntegrationTest
+```java
+@CoversClasses({
+    MeuService.class,
+    MeuValidator.class
+})
+class MeuFluxoIntegrationTest {
+}
 ```
 
-Se não houver teste correspondente, o build falha mostrando a classe, os hooks sobrescritos e os nomes de teste esperados.
+O mecanismo é genérico e não conhece catálogo, CRUD, autorização, messaging ou qualquer domínio específico. Ele apenas detecta sobrescritas de comportamento herdado das bibliotecas observadas.
+
+Também é possível customizar os pacotes-base observados:
+
+```java
+@PlatformArchitectureTest(
+    basePackages = "com.minhaempresa.meuservico",
+    observedBasePackages = {
+        "com.empresa.platform",
+        "com.minhaempresa.framework"
+    }
+)
+class ArchitectureTest {
+}
+```
+
+Quando uma classe customiza comportamento e não possui cobertura reconhecida, o build falha mostrando a classe, o método sobrescrito e a classe/interface onde o comportamento foi originalmente declarado.
 
 A regra não é habilitada automaticamente pelo `platform-test-support`; cada serviço decide explicitamente se quer adotá-la.
