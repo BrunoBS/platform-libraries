@@ -749,10 +749,6 @@ mvn verify -Dplatform.testing.performance.slow-test-ms=3000
 
 O `DatabaseCleaner` também mede o tempo de limpeza em nível `DEBUG`. A descoberta de tabelas no `INFORMATION_SCHEMA` é cacheada por URL JDBC e catálogo durante a JVM de testes. A limpeza continua ocorrendo em cada cenário conforme o `CleanupMode`; apenas a descoberta repetitiva da estrutura é eliminada.
 
-Quando um teste criar ou remover tabelas de forma dinâmica depois da primeira limpeza, é possível invalidar explicitamente o cache:
-
-```java
-DatabaseCleaner.clearTableCache();
-```
+Quando `@WithDatabaseScripts` executa scripts SQL, o cache de metadados do banco é invalidado automaticamente. O consumidor não precisa conhecer nem gerenciar esse cache no fluxo normal.
 
 A recomendação continua sendo manter os testes HTTP isolados e evitar execução paralela quando diferentes testes compartilham o mesmo banco com limpeza automática.
