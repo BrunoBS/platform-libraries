@@ -1,5 +1,6 @@
 package com.empresa.platform.crud.validation;
 
+import com.empresa.platform.crud.dto.BaseCrudDTO;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,7 +11,7 @@ class BaseCrudValidatorTest {
     @Test
     void shouldExecuteCreateValidationFlowDirectly() {
         TestValidator validator = new TestValidator();
-        TestDTO dto = new TestDTO("name");
+        TestDTO dto = new TestDTO(null, "name");
 
         validator.validateForCreate(dto);
 
@@ -24,7 +25,7 @@ class BaseCrudValidatorTest {
     @Test
     void shouldExecuteUpdateValidationFlowDirectly() {
         TestValidator validator = new TestValidator();
-        TestDTO dto = new TestDTO("name");
+        TestDTO dto = new TestDTO(1L, "name");
 
         validator.validateForUpdate(dto);
 
@@ -36,15 +37,46 @@ class BaseCrudValidatorTest {
     }
 
     @Test
+    void shouldRejectIdentifierOnCreate() {
+        TestValidator validator = new TestValidator();
+
+        assertThatThrownBy(() ->
+                validator.validateForCreate(new TestDTO(1L, "name")))
+                .isInstanceOf(TestValidationException.class)
+                .satisfies(exception -> {
+                    TestValidationException validationException =
+                            (TestValidationException) exception;
+                    assertThat(validationException.result().getDetails())
+                            .anySatisfy(detail -> {
+                                assertThat(detail.field()).isEqualTo("id");
+                                assertThat(detail.messageKey())
+                                        .isEqualTo("validation.id.must-be-absent");
+                            });
+                });
+    }
+
+    @Test
+    void shouldRequireIdentifierForFindUpdateAndDelete() {
+        TestValidator validator = new TestValidator();
+        TestDTO dto = new TestDTO(null, "name");
+
+        assertMissingId(() -> validator.validateForFind(dto));
+        assertMissingId(() -> validator.validateForUpdate(dto));
+        assertMissingId(() -> validator.validateForDelete(dto));
+    }
+
+    @Test
     void shouldDelegateValidationExceptionToConsumer() {
         TestValidator validator = new TestValidator();
 
         assertThatThrownBy(() -> validator.validateForCreate(null))
                 .isInstanceOf(TestValidationException.class)
                 .satisfies(exception -> {
-                    TestValidationException validationException = (TestValidationException) exception;
+                    TestValidationException validationException =
+                            (TestValidationException) exception;
                     assertThat(validationException.result().getDetails()).hasSize(1);
-                    assertThat(validationException.result().getDetails().getFirst().field()).isEqualTo("test");
+                    assertThat(validationException.result().getDetails().getFirst().field())
+                            .isEqualTo("test");
                 });
 
         assertThat(validator.attributesCalled).isFalse();
@@ -52,7 +84,22 @@ class BaseCrudValidatorTest {
         assertThat(validator.additionalCreateCalled).isFalse();
     }
 
-    record TestDTO(String name) {
+    private static void assertMissingId(Runnable validation) {
+        assertThatThrownBy(validation::run)
+                .isInstanceOf(TestValidationException.class)
+                .satisfies(exception -> {
+                    TestValidationException validationException =
+                            (TestValidationException) exception;
+                    assertThat(validationException.result().getDetails())
+                            .anySatisfy(detail -> {
+                                assertThat(detail.field()).isEqualTo("id");
+                                assertThat(detail.messageKey())
+                                        .isEqualTo("validation.id.required");
+                            });
+                });
+    }
+
+    record TestDTO(Long id, String name) implements BaseCrudDTO<Long> {
     }
 
     static class TestValidator extends BaseCrudValidator<TestDTO> {
