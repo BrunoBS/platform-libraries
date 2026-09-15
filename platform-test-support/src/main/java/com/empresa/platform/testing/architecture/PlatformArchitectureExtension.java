@@ -124,17 +124,18 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
                 continue;
             }
 
-            Class<?> inheritedOwner = findInheritedDeclaration(
+            Method inheritedMethod = findInheritedDeclaration(
                     type,
                     method.getName(),
                     method.getParameterTypes()
             );
 
-            if (inheritedOwner != null
-                    && matchesAnyPackage(inheritedOwner, observedBasePackages)) {
+            if (inheritedMethod != null
+                    && !Modifier.isAbstract(inheritedMethod.getModifiers())
+                    && matchesAnyPackage(inheritedMethod.getDeclaringClass(), observedBasePackages)) {
                 overriddenMethods.put(
                         methodSignature(method),
-                        inheritedOwner.getName()
+                        inheritedMethod.getDeclaringClass().getName()
                 );
             }
         }
@@ -150,7 +151,7 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
                 && !method.isBridge();
     }
 
-    private Class<?> findInheritedDeclaration(
+    private Method findInheritedDeclaration(
             Class<?> type,
             String methodName,
             Class<?>[] parameterTypes
@@ -159,10 +160,10 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
         while (superclass != null && superclass != Object.class) {
             Method declared = declaredMethod(superclass, methodName, parameterTypes);
             if (declared != null && !Modifier.isPrivate(declared.getModifiers())) {
-                return superclass;
+                return declared;
             }
 
-            Class<?> fromInterfaces = findInInterfaces(
+            Method fromInterfaces = findInInterfaces(
                     superclass.getInterfaces(),
                     methodName,
                     parameterTypes
@@ -181,7 +182,7 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
         );
     }
 
-    private Class<?> findInInterfaces(
+    private Method findInInterfaces(
             Class<?>[] interfaces,
             String methodName,
             Class<?>[] parameterTypes
@@ -189,10 +190,10 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
         for (Class<?> contract : interfaces) {
             Method declared = declaredMethod(contract, methodName, parameterTypes);
             if (declared != null) {
-                return contract;
+                return declared;
             }
 
-            Class<?> nested = findInInterfaces(
+            Method nested = findInInterfaces(
                     contract.getInterfaces(),
                     methodName,
                     parameterTypes
