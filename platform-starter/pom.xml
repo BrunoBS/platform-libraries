@@ -34,5 +34,10 @@
             <artifactId>platform-authorization</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.empresa.platform</groupId>
+            <artifactId>platform-crud</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 </project>
