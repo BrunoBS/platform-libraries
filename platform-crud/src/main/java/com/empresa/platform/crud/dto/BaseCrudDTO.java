@@ -1,8 +1,6 @@
 package com.empresa.platform.crud.dto;
 
-public interface BaseCrudDTO<ID, D extends BaseCrudDTO<ID, D>> {
+public interface BaseCrudDTO<ID> {
 
     ID id();
-
-    D withId(ID id);
 }
