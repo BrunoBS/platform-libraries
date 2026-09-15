@@ -88,12 +88,7 @@ class BaseListCrudServiceTest {
     }
 
     record TestDTO(Long id, String name)
-            implements BaseCrudDTO<Long, TestDTO> {
-
-        @Override
-        public TestDTO withId(Long id) {
-            return new TestDTO(id, name);
-        }
+            implements BaseCrudDTO<Long> {
     }
 
     record TestEntity(Long id, String name) {
