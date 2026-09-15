@@ -20,6 +20,10 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.empresa.platform</groupId>
             <artifactId>platform-authorization</artifactId>
             <version>1.0.0</version>
