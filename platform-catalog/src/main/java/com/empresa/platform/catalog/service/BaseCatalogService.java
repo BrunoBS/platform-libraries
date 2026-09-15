@@ -88,9 +88,31 @@ public abstract class BaseCatalogService<
         return mapper().toDTO(findActiveById(id));
     }
 
+    @Override
+    @Transactional
+    public D update(D dto) {
+        validator().validateForUpdate(dto);
+
+        E entity = getEntity(dto);
+        Integer nextOrder = dto.sortOrder() == null || dto.sortOrder() < 1
+                ? nextSortOrderExcluding(dto.id())
+                : null;
+
+        mapper().updateEntity(entity, dto);
+        applyAdditionalFields(entity, dto);
+
+        if (nextOrder != null) {
+            entity.setSortOrder(nextOrder);
+        }
+
+        E saved = repository().save(entity);
+        afterUpdate(saved, dto);
+        return mapper().toDTO(saved);
+    }
+
     @Transactional
     public D update(Long id, D dto) {
-        return super.update(dto.withId(id));
+        return update(dto.withId(id));
     }
 
     @Transactional
@@ -183,12 +205,6 @@ public abstract class BaseCatalogService<
     protected void beforeCreate(E entity, D dto) {
         applyAdditionalFields(entity, dto);
         adjustSortOrder(entity, nextSortOrder());
-    }
-
-    @Override
-    protected void beforeUpdate(E entity, D dto) {
-        applyAdditionalFields(entity, dto);
-        adjustSortOrder(entity, nextSortOrderExcluding(dto.id()));
     }
 
     @Override
