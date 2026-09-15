@@ -34,9 +34,8 @@ public abstract class BaseCrudService<
     @Transactional
     public D create(D dto) {
         validator.validateForCreate(dto);
-        beforeCreate(dto);
         E entity = mapper.toEntity(dto);
-        applyCreate(entity, dto);
+        beforeCreate(entity, dto);
         E saved = repository.save(entity);
         afterCreate(saved, dto);
         return mapper.toDTO(saved);
@@ -46,9 +45,8 @@ public abstract class BaseCrudService<
     public D update(D dto) {
         validator.validateForUpdate(dto);
         E entity = getEntity(dto);
-        beforeUpdate(entity, dto);
         mapper.updateEntity(entity, dto);
-        applyUpdate(entity, dto);
+        beforeUpdate(entity, dto);
         E saved = repository.save(entity);
         afterUpdate(saved, dto);
         return mapper.toDTO(saved);
@@ -75,19 +73,13 @@ public abstract class BaseCrudService<
         repository.delete(entity);
     }
 
-    protected void beforeCreate(D dto) {
-    }
-
-    protected void applyCreate(E entity, D dto) {
+    protected void beforeCreate(E entity, D dto) {
     }
 
     protected void afterCreate(E entity, D dto) {
     }
 
     protected void beforeUpdate(E entity, D dto) {
-    }
-
-    protected void applyUpdate(E entity, D dto) {
     }
 
     protected void afterUpdate(E entity, D dto) {
