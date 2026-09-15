@@ -752,3 +752,50 @@ O `DatabaseCleaner` também mede o tempo de limpeza em nível `DEBUG`. A descobe
 Quando `@WithDatabaseScripts` executa scripts SQL, o cache de metadados do banco é invalidado automaticamente. O consumidor não precisa conhecer nem gerenciar esse cache no fluxo normal.
 
 A recomendação continua sendo manter os testes HTTP isolados e evitar execução paralela quando diferentes testes compartilham o mesmo banco com limpeza automática.
+
+
+## Validação arquitetural de catálogos
+
+A validação é opt-in. O serviço consumidor ativa a regra com uma única classe de teste:
+
+```java
+@CatalogArchitectureTest(basePackages = "com.minhaempresa.meuservico")
+class CatalogArchitectureTest {
+
+    @Test
+    void catalogCustomizationsMustHaveSpecificTests() {
+    }
+}
+```
+
+A annotation usa ArchUnit internamente para importar o bytecode do serviço e detectar classes concretas que customizam hooks do `platform-catalog`, como:
+
+```text
+additionalAllowedFilters
+additionalSpecification
+applyAdditionalFields
+isNameMutable
+validateSettings
+validateAdditionalFields
+validateAdditionalCatalogFields
+validateAdditionalIntegrity
+validateUniqueness
+relatedValue
+relatedField
+relatedEntityName
+relatedExistsAndIsActive
+existsByNameAndRelatedValue
+```
+
+Quando uma customização é encontrada, o serviço deve possuir um teste específico por convenção. Por exemplo, para `FeatureTypeService` ou `FeatureTypeValidator`, são aceitos nomes como:
+
+```text
+FeatureTypeServiceTest
+FeatureTypeServiceIntegrationTest
+FeatureTypeTest
+FeatureTypeIntegrationTest
+```
+
+Se não houver teste correspondente, o build falha mostrando a classe, os hooks sobrescritos e os nomes de teste esperados.
+
+A regra não é habilitada automaticamente pelo `platform-test-support`; cada serviço decide explicitamente se quer adotá-la.
