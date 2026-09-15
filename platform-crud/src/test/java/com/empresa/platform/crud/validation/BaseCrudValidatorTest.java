@@ -63,6 +63,10 @@ class BaseCrudValidatorTest {
         assertMissingId(() -> validator.validateForFind(dto));
         assertMissingId(() -> validator.validateForUpdate(dto));
         assertMissingId(() -> validator.validateForDelete(dto));
+
+        assertThat(validator.attributesCalled).isFalse();
+        assertThat(validator.updateIntegrityCalled).isFalse();
+        assertThat(validator.additionalUpdateCalled).isFalse();
     }
 
     @Test
