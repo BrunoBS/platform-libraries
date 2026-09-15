@@ -150,7 +150,7 @@ class BaseCatalogServiceContractTest {
     private interface TestRepository extends BaseCatalogRepository<TestEntity> {
     }
 
-    private static final class TestEntity extends BaseCatalogEntity {
+    public static final class TestEntity extends BaseCatalogEntity {
         public TestEntity() {
         }
 
