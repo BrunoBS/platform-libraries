@@ -166,6 +166,17 @@ class BaseCatalogServiceContractTest {
         }
 
         @Override
+        public TestEntity toEntity(CatalogDTO dto) {
+            if (dto == null) {
+                return null;
+            }
+            TestEntity entity = new TestEntity();
+            mapCommonFields(entity, dto);
+            entity.setActive(true);
+            return entity;
+        }
+
+        @Override
         public CatalogDTO toDTO(TestEntity entity) {
             if (entity == null) {
                 return null;
