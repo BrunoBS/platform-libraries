@@ -71,6 +71,10 @@ public final class DatabaseScriptExtension implements
                 locations,
                 continueOnError
         );
+
+        if (locations != null && locations.length > 0) {
+            DatabaseCleaner.clearTableCache();
+        }
     }
 
     private List<WithDatabaseScripts> annotations(AnnotatedElement element) {
