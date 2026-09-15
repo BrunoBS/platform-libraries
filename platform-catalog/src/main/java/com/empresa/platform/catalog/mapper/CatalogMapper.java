@@ -41,7 +41,10 @@ public class CatalogMapper<E extends BaseCatalogEntity>
                     ? objectMapper.createObjectNode()
                     : objectMapper.readTree(settings);
         } catch (JacksonException exception) {
-            return objectMapper.createObjectNode();
+            throw new IllegalStateException(
+                    "Invalid catalog settings JSON stored in database",
+                    exception
+            );
         }
     }
 }
