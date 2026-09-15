@@ -94,3 +94,23 @@ Quando uma exceção é interceptada pela biblioteca (ex: um erro `ForbiddenExce
 2. **`traceId` (Integração Nativa com `platform-logging`):** O ID de correlação capturado é exatamente a chave definida em `mdc-correlation-key` [MDC]. Se o cliente reportar o erro ao suporte informando este número, o engenheiro conseguirá localizar o histórico completo da falha indexado no Kibana ou Datadog em um clique [MDC].
 
 ---
+
+
+## Mensagens padrão da plataforma
+
+O módulo fornece um `PlatformDefaultMessageProvider` com fallback para mensagens transversais da plataforma, incluindo:
+
+- `global.*`;
+- `validation.*` utilizadas pelo CRUD base.
+
+A resolução preserva esta precedência:
+
+```text
+cache
+→ repositório/view do microsserviço
+→ providers das bibliotecas
+```
+
+Com isso, um microsserviço não precisa cadastrar novamente mensagens transversais apenas para que validações da plataforma funcionem. Quando uma mesma chave existir no banco do serviço, a definição externa continua prevalecendo sobre o fallback da biblioteca.
+
+Módulos especializados podem expor seus próprios `ApiMessageProvider`, como já ocorre com autorização e catálogo. Mensagens específicas de negócio continuam pertencendo ao microsserviço consumidor.
