@@ -10,9 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class TestPerformanceExtension implements
         BeforeAllCallback,
@@ -24,14 +26,17 @@ public final class TestPerformanceExtension implements
     private static final ExtensionContext.Namespace NAMESPACE =
             ExtensionContext.Namespace.create(TestPerformanceExtension.class);
 
-    private static final String CLASS_START = "class-start";
     private static final String TEST_START = "test-start";
-    private static final String TEST_TIMINGS = "test-timings";
+
+    private static final ConcurrentMap<Class<?>, ClassTiming> CLASS_TIMINGS =
+            new ConcurrentHashMap<>();
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        context.getStore(NAMESPACE).put(CLASS_START, Instant.now());
-        context.getStore(NAMESPACE).put(TEST_TIMINGS, new ArrayList<TestTiming>());
+        CLASS_TIMINGS.put(
+                context.getRequiredTestClass(),
+                new ClassTiming(Instant.now(), new CopyOnWriteArrayList<>())
+        );
     }
 
     @Override
@@ -40,7 +45,6 @@ public final class TestPerformanceExtension implements
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void afterTestExecution(ExtensionContext context) {
         Instant startedAt = context.getStore(NAMESPACE).remove(TEST_START, Instant.class);
         if (startedAt == null) {
@@ -48,11 +52,10 @@ public final class TestPerformanceExtension implements
         }
 
         long elapsedMs = Duration.between(startedAt, Instant.now()).toMillis();
-        List<TestTiming> timings = (List<TestTiming>) context.getStore(NAMESPACE)
-                .get(TEST_TIMINGS, List.class);
+        ClassTiming classTiming = CLASS_TIMINGS.get(context.getRequiredTestClass());
 
-        if (timings != null) {
-            timings.add(new TestTiming(context.getDisplayName(), elapsedMs));
+        if (classTiming != null) {
+            classTiming.tests().add(new TestTiming(context.getDisplayName(), elapsedMs));
         }
 
         long slowThresholdMs = slowThresholdMs();
@@ -67,38 +70,31 @@ public final class TestPerformanceExtension implements
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void afterAll(ExtensionContext context) {
-        Instant startedAt = context.getStore(NAMESPACE).remove(CLASS_START, Instant.class);
-        List<TestTiming> timings = (List<TestTiming>) context.getStore(NAMESPACE)
-                .remove(TEST_TIMINGS, List.class);
-
-        if (startedAt == null) {
+        Class<?> testClass = context.getRequiredTestClass();
+        ClassTiming timing = CLASS_TIMINGS.remove(testClass);
+        if (timing == null) {
             return;
         }
 
-        long totalMs = Duration.between(startedAt, Instant.now()).toMillis();
-        String className = context.getRequiredTestClass().getSimpleName();
+        long totalMs = Duration.between(timing.startedAt(), Instant.now()).toMillis();
+        List<TestTiming> tests = timing.tests();
 
         log.info(
                 "[TEST-PERF] class={} total={}ms tests={}",
-                className,
+                testClass.getSimpleName(),
                 totalMs,
-                timings == null ? 0 : timings.size()
+                tests.size()
         );
 
-        if (timings == null || timings.isEmpty()) {
-            return;
-        }
-
-        timings.stream()
+        tests.stream()
                 .sorted(Comparator.comparingLong(TestTiming::durationMs).reversed())
                 .limit(5)
-                .forEach(timing -> log.info(
+                .forEach(test -> log.info(
                         "[TEST-PERF] class={} slowest-test={} duration={}ms",
-                        className,
-                        timing.name(),
-                        timing.durationMs()
+                        testClass.getSimpleName(),
+                        test.name(),
+                        test.durationMs()
                 ));
     }
 
@@ -109,6 +105,15 @@ public final class TestPerformanceExtension implements
         );
     }
 
-    private record TestTiming(String name, long durationMs) {
+    private record ClassTiming(
+            Instant startedAt,
+            List<TestTiming> tests
+    ) {
+    }
+
+    private record TestTiming(
+            String name,
+            long durationMs
+    ) {
     }
 }
