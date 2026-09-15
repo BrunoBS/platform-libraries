@@ -1,11 +1,14 @@
 package com.empresa.platform.crud.validation;
 
-public abstract class BaseCrudValidator<D> {
+import com.empresa.platform.crud.dto.BaseCrudDTO;
+
+public abstract class BaseCrudValidator<D extends BaseCrudDTO<?>> {
 
     public void validateForFind(D dto) {
         CrudValidationResult result = new CrudValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
+            validateIdRequired(dto, result);
             validateFind(dto, result);
         }
         throwIfInvalid(result);
@@ -15,6 +18,7 @@ public abstract class BaseCrudValidator<D> {
         CrudValidationResult result = new CrudValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
+            validateIdAbsent(dto, result);
             validateAttributes(dto, result);
             validateCreateIntegrity(dto, result);
             validateAdditionalCreate(dto, result);
@@ -26,6 +30,7 @@ public abstract class BaseCrudValidator<D> {
         CrudValidationResult result = new CrudValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
+            validateIdRequired(dto, result);
             validateAttributes(dto, result);
             validateUpdateIntegrity(dto, result);
             validateAdditionalUpdate(dto, result);
@@ -37,6 +42,7 @@ public abstract class BaseCrudValidator<D> {
         CrudValidationResult result = new CrudValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
+            validateIdRequired(dto, result);
             validateDelete(dto, result);
         }
         throwIfInvalid(result);
@@ -45,6 +51,18 @@ public abstract class BaseCrudValidator<D> {
     protected void validateRequired(D dto, CrudValidationResult result) {
         if (dto == null) {
             result.addError(entityName(), requiredMessageKey());
+        }
+    }
+
+    protected void validateIdRequired(D dto, CrudValidationResult result) {
+        if (dto.id() == null) {
+            result.addError("id", idRequiredMessageKey());
+        }
+    }
+
+    protected void validateIdAbsent(D dto, CrudValidationResult result) {
+        if (dto.id() != null) {
+            result.addError("id", idMustBeAbsentMessageKey());
         }
     }
 
@@ -71,6 +89,14 @@ public abstract class BaseCrudValidator<D> {
 
     protected String requiredMessageKey() {
         return "validation.required";
+    }
+
+    protected String idRequiredMessageKey() {
+        return "validation.id.required";
+    }
+
+    protected String idMustBeAbsentMessageKey() {
+        return "validation.id.must-be-absent";
     }
 
     protected void throwIfInvalid(CrudValidationResult result) {
