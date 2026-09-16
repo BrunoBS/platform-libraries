@@ -3,6 +3,7 @@ package com.empresa.platform.audit.autoconfigure;
 import com.empresa.platform.audit.aspect.AuditAspect;
 import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.client.RestAuditEventClient;
+import com.empresa.platform.audit.config.AuditFallbackConfigurationValidator;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
 import com.empresa.platform.audit.context.AuditContextProvider;
 import com.empresa.platform.audit.context.HttpAuditContextProvider;
@@ -67,6 +68,14 @@ public class PlatformAuditAutoConfiguration {
                 properties,
                 fallbackStoreProvider
         );
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "platform.audit.fallback", name = "enabled", havingValue = "true")
+    AuditFallbackConfigurationValidator auditFallbackConfigurationValidator(
+            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
+    ) {
+        return new AuditFallbackConfigurationValidator(fallbackStoreProvider);
     }
 
     @Bean
