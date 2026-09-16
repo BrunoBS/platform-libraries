@@ -3,7 +3,9 @@ package com.empresa.platform.audit.autoconfigure;
 import com.empresa.platform.audit.aspect.AuditAspect;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
 import com.empresa.platform.audit.context.AuditAuthorizationContextResolver;
+import com.empresa.platform.audit.exception.AuditException;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
+import com.empresa.platform.audit.message.AuditMessageKeys;
 import com.empresa.platform.audit.publisher.AuditPublisher;
 import com.empresa.platform.audit.publisher.RestAuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,9 +48,7 @@ public class PlatformAuditAutoConfiguration {
             ObjectProvider<AuditFallbackStore> fallbackStoreProvider
     ) {
         if (properties.getServiceUrl() == null || properties.getServiceUrl().isBlank()) {
-            throw new IllegalArgumentException(
-                    "A propriedade [platform.audit.service-url] e obrigatoria quando o modulo de auditoria esta ativo."
-            );
+            throw new AuditException(AuditMessageKeys.SERVICE_URL_REQUIRED);
         }
 
         return new RestAuditPublisher(
@@ -66,10 +66,7 @@ public class PlatformAuditAutoConfiguration {
     ) {
         return () -> {
             if (fallbackStoreProvider.getIfAvailable() == null) {
-                throw new IllegalStateException(
-                        "platform.audit.fallback.enabled=true requires an AuditFallbackStore. "
-                                + "Configure Redis support or provide a custom AuditFallbackStore bean."
-                );
+                throw new AuditException(AuditMessageKeys.FALLBACK_STORE_MISSING);
             }
         };
     }
