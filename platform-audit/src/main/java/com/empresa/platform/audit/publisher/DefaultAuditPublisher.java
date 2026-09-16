@@ -32,18 +32,28 @@ public final class DefaultAuditPublisher implements AuditPublisher {
             return;
         }
 
-        taskExecutor.execute(() -> {
-            try {
-                client.publish(event);
-            } catch (Exception exception) {
-                log.error(
-                        "Failed to publish audit event | resource={} | resourceId={} | action={}",
-                        event.resource(),
-                        event.resourceId(),
-                        event.action(),
-                        exception
-                );
-            }
-        });
+        try {
+            taskExecutor.execute(() -> {
+                try {
+                    client.publish(event);
+                } catch (Exception exception) {
+                    log.error(
+                            "Failed to publish audit event | resource={} | resourceId={} | action={}",
+                            event.resource(),
+                            event.resourceId(),
+                            event.action(),
+                            exception
+                    );
+                }
+            });
+        } catch (Exception exception) {
+            log.error(
+                    "Failed to schedule audit event | resource={} | resourceId={} | action={}",
+                    event.resource(),
+                    event.resourceId(),
+                    event.action(),
+                    exception
+            );
+        }
     }
 }
