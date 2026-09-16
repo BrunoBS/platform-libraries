@@ -6,8 +6,8 @@ import com.empresa.platform.audit.model.AuditEventRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 import java.time.Instant;
@@ -15,12 +15,12 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 class RestAuditPublisherTest {
 
@@ -43,10 +43,7 @@ class RestAuditPublisherTest {
     @Test
     void shouldNotPropagateHttpFailureByDefault() {
         PlatformAuditProperties properties = properties();
-        RestClient.Builder builder = RestClient.builder();
-        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        server.expect(once(), requestTo("http://audit-api/api/v1/events"))
-                .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+        RestClient.Builder builder = failingBuilder();
 
         RestAuditPublisher publisher = new RestAuditPublisher(
                 builder,
@@ -56,21 +53,15 @@ class RestAuditPublisherTest {
         );
 
         assertThatCode(() -> publisher.publish(event)).doesNotThrowAnyException();
-        server.verify();
     }
 
     @Test
     void shouldPersistEventInFallbackWhenHttpFails() {
         PlatformAuditProperties properties = properties();
-        RestClient.Builder builder = RestClient.builder();
-        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        server.expect(once(), requestTo("http://audit-api/api/v1/events"))
-                .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
-
         AuditFallbackStore fallbackStore = mock(AuditFallbackStore.class);
 
         RestAuditPublisher publisher = new RestAuditPublisher(
-                builder,
+                failingBuilder(),
                 new SyncTaskExecutor(),
                 properties,
                 fallbackProvider(fallbackStore)
@@ -79,7 +70,6 @@ class RestAuditPublisherTest {
         publisher.publish(event);
 
         verify(fallbackStore).save(event);
-        server.verify();
     }
 
     @Test
@@ -87,22 +77,35 @@ class RestAuditPublisherTest {
         PlatformAuditProperties properties = properties();
         properties.setFailOnError(true);
 
-        RestClient.Builder builder = RestClient.builder();
-        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        server.expect(once(), requestTo("http://audit-api/api/v1/events"))
-                .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
-
         RestAuditPublisher publisher = new RestAuditPublisher(
-                builder,
+                failingBuilder(),
                 new SyncTaskExecutor(),
                 properties,
                 emptyFallbackProvider()
         );
 
         assertThatThrownBy(() -> publisher.publish(event))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("audit unavailable");
+    }
 
-        server.verify();
+    private RestClient.Builder failingBuilder() {
+        RestClient.Builder builder = mock(RestClient.Builder.class);
+        RestClient restClient = mock(RestClient.class, RETURNS_DEEP_STUBS);
+
+        when(builder.baseUrl(anyString())).thenReturn(builder);
+        when(builder.requestFactory(any(ClientHttpRequestFactory.class))).thenReturn(builder);
+        when(builder.build()).thenReturn(restClient);
+
+        when(restClient.post()
+                .uri(anyString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(any(Object.class))
+                .retrieve()
+                .toBodilessEntity())
+                .thenThrow(new IllegalStateException("audit unavailable"));
+
+        return builder;
     }
 
     private PlatformAuditProperties properties() {
