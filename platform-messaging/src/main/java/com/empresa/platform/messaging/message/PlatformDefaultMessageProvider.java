@@ -11,17 +11,24 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class PlatformDefaultMessageProvider implements ApiMessageProvider {
 
     private static final String RESOURCE_PATTERN =
-            "classpath*:META-INF/platform-messages/*_%s.properties";
+            "classpath*:META-INF/platform-messages/*.properties";
 
-    private final PathMatchingResourcePatternResolver resourceResolver;
+    private static final Pattern BUNDLE_FILENAME_PATTERN =
+            Pattern.compile("^.+_([a-z]{2}(?:_[A-Z]{2})?)\\.properties$");
+
     private final ApiMessageDefinitionParser parser;
+    private final Map<String, Map<String, String>> definitionsByLocale;
 
     public PlatformDefaultMessageProvider() {
         this(new PathMatchingResourcePatternResolver(), new ApiMessageDefinitionParser());
@@ -31,8 +38,8 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
             PathMatchingResourcePatternResolver resourceResolver,
             ApiMessageDefinitionParser parser
     ) {
-        this.resourceResolver = resourceResolver;
         this.parser = parser;
+        this.definitionsByLocale = loadAndValidate(resourceResolver);
     }
 
     @Override
@@ -41,39 +48,95 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
             return Optional.empty();
         }
 
-        String suffix = locale.toString();
-        if (suffix.isBlank()) {
+        Map<String, String> definitions = definitionsByLocale.get(locale.toString());
+        if (definitions == null) {
             return Optional.empty();
         }
 
-        try {
-            Resource[] resources = resourceResolver.getResources(
-                    RESOURCE_PATTERN.formatted(suffix)
-            );
-
-            return Arrays.stream(resources)
-                    .sorted(Comparator.comparing(this::resourceName))
-                    .map(resource -> findInResource(resource, key))
-                    .flatMap(Optional::stream)
-                    .findFirst()
-                    .map(definition -> parser.parse(key, locale, definition));
-        } catch (IOException exception) {
+        String definition = definitions.get(key);
+        if (definition == null || definition.isBlank()) {
             return Optional.empty();
+        }
+
+        return Optional.of(parser.parse(key, locale, definition));
+    }
+
+    private Map<String, Map<String, String>> loadAndValidate(
+            PathMatchingResourcePatternResolver resourceResolver
+    ) {
+        try {
+            Resource[] resources = resourceResolver.getResources(RESOURCE_PATTERN);
+            Arrays.sort(resources, Comparator.comparing(this::resourceName));
+
+            Map<String, Map<String, String>> definitions = new HashMap<>();
+            Map<String, Map<String, String>> owners = new HashMap<>();
+
+            for (Resource resource : resources) {
+                String locale = extractLocale(resource);
+                if (locale == null) {
+                    continue;
+                }
+
+                Properties properties = loadProperties(resource);
+                Map<String, String> localeDefinitions =
+                        definitions.computeIfAbsent(locale, ignored -> new HashMap<>());
+                Map<String, String> localeOwners =
+                        owners.computeIfAbsent(locale, ignored -> new HashMap<>());
+
+                for (String key : properties.stringPropertyNames()) {
+                    String currentOwner = localeOwners.putIfAbsent(key, resourceName(resource));
+                    if (currentOwner != null) {
+                        throw duplicateKeyException(
+                                key,
+                                locale,
+                                currentOwner,
+                                resourceName(resource)
+                        );
+                    }
+
+                    localeDefinitions.put(key, properties.getProperty(key));
+                }
+            }
+
+            Map<String, Map<String, String>> immutableDefinitions = new HashMap<>();
+            definitions.forEach((locale, values) ->
+                    immutableDefinitions.put(locale, Map.copyOf(values)));
+
+            return Map.copyOf(immutableDefinitions);
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Could not load platform message bundles from " + RESOURCE_PATTERN,
+                    exception
+            );
         }
     }
 
-    private Optional<String> findInResource(Resource resource, String key) {
-        try {
-            Properties properties = PropertiesLoaderUtils.loadProperties(
-                    new EncodedResource(resource, StandardCharsets.UTF_8)
-            );
-            String definition = properties.getProperty(key);
-            return definition == null || definition.isBlank()
-                    ? Optional.empty()
-                    : Optional.of(definition);
-        } catch (IOException exception) {
-            return Optional.empty();
+    private Properties loadProperties(Resource resource) throws IOException {
+        return PropertiesLoaderUtils.loadProperties(
+                new EncodedResource(resource, StandardCharsets.UTF_8)
+        );
+    }
+
+    private String extractLocale(Resource resource) {
+        String filename = resource.getFilename();
+        if (filename == null) {
+            return null;
         }
+
+        Matcher matcher = BUNDLE_FILENAME_PATTERN.matcher(filename);
+        return matcher.matches() ? matcher.group(1) : null;
+    }
+
+    private IllegalStateException duplicateKeyException(
+            String key,
+            String locale,
+            String firstResource,
+            String secondResource
+    ) {
+        return new IllegalStateException(
+                "Duplicate platform message key detected: key='%s', locale='%s', bundles=['%s', '%s']"
+                        .formatted(key, locale, firstResource, secondResource)
+        );
     }
 
     private String resourceName(Resource resource) {
