@@ -17,15 +17,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout platform-libraries
+        uses: actions/checkout@v5
+        with:
+          path: platform-libraries
+
+      - name: Checkout platform-build
+        uses: actions/checkout@v5
+        with:
+          repository: BrunoBS/platform-build
+          path: platform-build
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Java 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '25'
           cache: maven
+          cache-dependency-path: |
+            platform-build/**/pom.xml
+            platform-libraries/**/pom.xml
+
+      - name: Install platform build
+        working-directory: platform-build
+        run: mvn -B -ntp clean install -DskipTests
 
       - name: Run Maven verify
+        working-directory: platform-libraries
         run: mvn -B -ntp clean verify
