@@ -20,6 +20,14 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
     public DefaultApiMessageResolver(
             ApiMessageRepository repository,
             ApiMessageCache cache,
+            Locale defaultLocale
+    ) {
+        this(repository, cache, defaultLocale, null);
+    }
+
+    public DefaultApiMessageResolver(
+            ApiMessageRepository repository,
+            ApiMessageCache cache,
             Locale defaultLocale,
             ApiMessageProvider provider
     ) {
