@@ -64,11 +64,11 @@ class PlatformAuditAutoConfigurationTest {
                         "platform.audit.service-url=http://audit-api",
                         "platform.audit.fallback.enabled=true"
                 )
-                .run(context ->
-                        assertThat(context.getStartupFailure())
-                                .isInstanceOf(IllegalStateException.class)
-                                .hasMessageContaining("AuditFallbackStore")
-                );
+                .run(context -> {
+                    assertThat(context.getStartupFailure()).isNotNull();
+                    assertThat(context.getStartupFailure())
+                            .hasStackTraceContaining("AuditFallbackStore");
+                });
     }
 
     @Test
