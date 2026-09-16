@@ -2,6 +2,7 @@ package com.empresa.platform.audit.autoconfigure;
 
 import com.empresa.platform.audit.aspect.AuditAspect;
 import com.empresa.platform.audit.context.AuditAuthorizationContextResolver;
+import com.empresa.platform.audit.message.AuditMessageKeys;
 import com.empresa.platform.audit.publisher.AuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,21 @@ class PlatformAuditAutoConfigurationTest {
                 });
     }
 
+
+    @Test
+    void shouldFailStartupWhenServiceUrlIsMissing() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.audit.enabled=true",
+                        "platform.audit.service-name=account"
+                )
+                .run(context -> {
+                    assertThat(context.getStartupFailure()).isNotNull();
+                    assertThat(context.getStartupFailure())
+                            .hasStackTraceContaining(AuditMessageKeys.SERVICE_URL_REQUIRED);
+                });
+    }
+
     @Test
     void shouldFailStartupWhenFallbackIsEnabledWithoutStore() {
         contextRunner
@@ -67,7 +83,7 @@ class PlatformAuditAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context.getStartupFailure()).isNotNull();
                     assertThat(context.getStartupFailure())
-                            .hasStackTraceContaining("AuditFallbackStore");
+                            .hasStackTraceContaining(AuditMessageKeys.FALLBACK_STORE_MISSING);
                 });
     }
 
