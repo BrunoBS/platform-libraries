@@ -41,8 +41,7 @@ public class PlatformMessagingAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(JdbcTemplate.class)
-    @ConditionalOnMissingBean(ApiMessageRepository.class)
+    @ConditionalOnMissingBean({JdbcTemplate.class, ApiMessageRepository.class})
     ApiMessageRepository noOpApiMessageRepository() {
         return new NoOpApiMessageRepository();
     }
