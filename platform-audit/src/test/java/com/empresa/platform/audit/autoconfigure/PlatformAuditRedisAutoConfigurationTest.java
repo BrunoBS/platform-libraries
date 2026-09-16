@@ -2,6 +2,7 @@ package com.empresa.platform.audit.autoconfigure;
 
 import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
+import com.empresa.platform.audit.recovery.AuditRecoveryLock;
 import com.empresa.platform.audit.recovery.AuditRecoveryScheduler;
 import com.empresa.platform.audit.recovery.AuditRecoveryWorker;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,7 @@ class PlatformAuditRedisAutoConfigurationTest {
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(AuditFallbackStore.class);
+                    assertThat(context).hasSingleBean(AuditRecoveryLock.class);
                     assertThat(context).hasSingleBean(AuditRecoveryWorker.class);
                     assertThat(context).hasSingleBean(AuditRecoveryScheduler.class);
                     assertThat(context).hasBean("platformAuditRecoveryTaskScheduler");
@@ -67,6 +69,7 @@ class PlatformAuditRedisAutoConfigurationTest {
                 )
                 .run(context -> {
                     assertThat(context).doesNotHaveBean(AuditFallbackStore.class);
+                    assertThat(context).doesNotHaveBean(AuditRecoveryLock.class);
                     assertThat(context).doesNotHaveBean(AuditRecoveryWorker.class);
                     assertThat(context).doesNotHaveBean(AuditRecoveryScheduler.class);
                     assertThat(context).doesNotHaveBean("platformAuditRecoveryTaskScheduler");
