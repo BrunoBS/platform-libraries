@@ -2,6 +2,8 @@ package com.empresa.platform.audit.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.time.Duration;
+
 @ConfigurationProperties(prefix = "platform.audit")
 public class PlatformAuditProperties {
 
@@ -13,6 +15,7 @@ public class PlatformAuditProperties {
     private int corePoolSize = 2;
     private int maxPoolSize = 4;
     private int queueCapacity = 500;
+    private final Fallback fallback = new Fallback();
 
     public boolean isEnabled() {
         return enabled;
@@ -76,5 +79,49 @@ public class PlatformAuditProperties {
 
     public void setQueueCapacity(int queueCapacity) {
         this.queueCapacity = queueCapacity;
+    }
+
+    public Fallback getFallback() {
+        return fallback;
+    }
+
+    public static class Fallback {
+
+        private boolean enabled = false;
+        private String keyPrefix = "platform:audit:pending:";
+        private Duration recoveryInterval = Duration.ofMinutes(5);
+        private int batchSize = 50;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getKeyPrefix() {
+            return keyPrefix;
+        }
+
+        public void setKeyPrefix(String keyPrefix) {
+            this.keyPrefix = keyPrefix;
+        }
+
+        public Duration getRecoveryInterval() {
+            return recoveryInterval;
+        }
+
+        public void setRecoveryInterval(Duration recoveryInterval) {
+            this.recoveryInterval = recoveryInterval;
+        }
+
+        public int getBatchSize() {
+            return batchSize;
+        }
+
+        public void setBatchSize(int batchSize) {
+            this.batchSize = batchSize;
+        }
     }
 }
