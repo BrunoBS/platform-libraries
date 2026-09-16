@@ -48,6 +48,9 @@ platform:
     service-name: account
     publish-path: /api/v1/events
     fail-on-error: false
+    http:
+      connect-timeout: 5s
+      read-timeout: 5s
     fallback:
       enabled: false
 ```
@@ -81,12 +84,18 @@ platform:
     service-name: account
     publish-path: /api/v1/events
     fail-on-error: false
+    http:
+      connect-timeout: 5s
+      read-timeout: 5s
 
     fallback:
       enabled: true
       key-prefix: platform:audit:pending:
       recovery-interval: 5m
       batch-size: 50
+      lock:
+        key-prefix: platform:audit:recovery:lock:
+        ttl: 2m
 ```
 
 Como o suporte Redis é opcional na biblioteca, o serviço consumidor também deve
@@ -142,22 +151,36 @@ reenviado com sucesso ou removido administrativamente.
 
 Quando o fallback está habilitado, o módulo cria um scheduler dedicado.
 
+Antes de drenar a fila, cada instância tenta adquirir um lock distribuído no Redis:
+
+```text
+platform:audit:recovery:lock:<service-name>
+```
+
+O lock usa `SET NX` com TTL. Apenas a instância que adquiriu o lock executa
+o recovery. A liberação usa comparação do token do proprietário + `DEL` em
+script Redis atômico, evitando que uma instância remova o lock de outra.
+
 Por padrão:
 
 ```text
 a cada 5 minutos
     ↓
-existem eventos pendentes?
-    ├─ não → encerra o ciclo
-    └─ sim
+tenta adquirir lock
+    ├─ não conseguiu → encerra o ciclo
+    └─ conseguiu
          ↓
-       tenta o primeiro
-         ├─ falhou → encerra o ciclo
-         └─ sucesso
+       existem eventos pendentes?
+         ├─ não → libera lock e encerra
+         └─ sim
               ↓
-            remove do Redis
-              ↓
-            continua até batch-size
+            tenta o primeiro
+              ├─ falhou → encerra e libera lock
+              └─ sucesso
+                   ↓
+                 remove do Redis
+                   ↓
+                 continua até batch-size
 ```
 
 O primeiro evento funciona como teste real de disponibilidade da Audit API.
@@ -172,6 +195,8 @@ platform:
       enabled: true
       recovery-interval: 5m
       batch-size: 20
+      lock:
+        ttl: 2m
 ```
 
 Nesse caso, cada ciclo recupera no máximo 20 eventos.
@@ -183,7 +208,7 @@ Com fallback desabilitado:
 ```text
 AuditEventClient
 AuditPublisher
-AuditContextProvider
+AuditAuthorizationContextResolver
 AuditAspect
 platformAuditTaskExecutor
 ```
@@ -195,6 +220,8 @@ Com fallback habilitado:
 ```text
 AuditFallbackStore
 RedisAuditFallbackStore
+AuditRecoveryLock
+RedisAuditRecoveryLock
 AuditRecoveryWorker
 AuditRecoveryScheduler
 platformAuditRecoveryTaskScheduler
@@ -218,18 +245,40 @@ public ResponseEntity<AccountResponse> update(String accountId, ...) {
 }
 ```
 
-## Contexto
+## Contexto de autorização
 
-O `AuditContextProvider` é substituível. A implementação padrão lê:
+`platform-audit` depende diretamente de `platform-authorization`.
 
-- `X-Account-Id`
-- `X-Application-Id`
-- `X-Environment`
-- `X-Correlation-Id`
-- `HttpServletRequest.getUserPrincipal()`
+Toda publicação auditável usa o `UserContext` já validado pela autorização.
+O `AuditAuthorizationContextResolver` transforma o `UserSession` em contexto
+de auditoria usando:
 
-Aplicações que usam outro mecanismo de contexto podem registrar seu próprio
-`AuditContextProvider`.
+- `userName` → actor;
+- `accountId` → accountId;
+- `applicationId` → applicationId;
+- `environmentId` → environmentId;
+- `traceId` → correlationId.
+
+A biblioteca não relê esses dados dos headers para montar o contexto do evento.
+
+Se não existir `UserContext`:
+- com `fail-on-error=false`, o evento é descartado e o erro é registrado;
+- com `fail-on-error=true`, a ausência de contexto é propagada como erro.
+
+## Timeouts HTTP
+
+A chamada para a Audit API possui limites explícitos:
+
+```yaml
+platform:
+  audit:
+    http:
+      connect-timeout: 5s
+      read-timeout: 5s
+```
+
+Os dois valores são máximos. Se conexão ou resposta ocorrerem antes, o fluxo
+continua imediatamente. O consumidor pode sobrescrever ambos.
 
 ## Propriedades
 
@@ -240,6 +289,8 @@ Aplicações que usam outro mecanismo de contexto podem registrar seu próprio
 | `platform.audit.service-name` | `unknown` | Nome lógico do serviço consumidor |
 | `platform.audit.publish-path` | `/api/v1/events` | Endpoint de publicação |
 | `platform.audit.fail-on-error` | `false` | Propaga falha da auditoria quando habilitado |
+| `platform.audit.http.connect-timeout` | `5s` | Tempo máximo para estabelecer conexão HTTP |
+| `platform.audit.http.read-timeout` | `5s` | Tempo máximo para aguardar leitura da resposta |
 | `platform.audit.core-pool-size` | `2` | Threads mínimas da publicação assíncrona |
 | `platform.audit.max-pool-size` | `4` | Threads máximas da publicação assíncrona |
 | `platform.audit.queue-capacity` | `500` | Capacidade da fila assíncrona local |
@@ -247,6 +298,8 @@ Aplicações que usam outro mecanismo de contexto podem registrar seu próprio
 | `platform.audit.fallback.key-prefix` | `platform:audit:pending:` | Prefixo da lista no Redis |
 | `platform.audit.fallback.recovery-interval` | `5m` | Intervalo entre ciclos de recovery |
 | `platform.audit.fallback.batch-size` | `50` | Máximo recuperado por ciclo |
+| `platform.audit.fallback.lock.key-prefix` | `platform:audit:recovery:lock:` | Prefixo do lock distribuído |
+| `platform.audit.fallback.lock.ttl` | `2m` | TTL do lock de recovery |
 
 ## Limites atuais
 
