@@ -2,6 +2,7 @@ package com.empresa.platform.messaging.resolver;
 
 import com.empresa.platform.messaging.cache.NoOpApiMessageCache;
 import com.empresa.platform.messaging.exception.ApiMessageNotFoundException;
+import com.empresa.platform.messaging.message.PlatformDefaultMessageProvider;
 import com.empresa.platform.messaging.model.ApiMessage;
 import com.empresa.platform.messaging.provider.ApiMessageProvider;
 import com.empresa.platform.messaging.repository.ApiMessageRepository;
@@ -120,6 +121,27 @@ class DefaultApiMessageResolverTest {
         assertEquals("Database override", result.message());
         assertEquals("CUSTOM-404", result.code());
         assertEquals("en", result.locale());
+    }
+
+    @Test
+    void shouldUseConfiguredDefaultLocaleWhenRequestedPropertiesLocaleDoesNotExist() {
+        ApiMessageRepository repository = (k, l) -> Optional.empty();
+
+        var resolver = new DefaultApiMessageResolver(
+                repository,
+                new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"),
+                List.of(new PlatformDefaultMessageProvider())
+        );
+
+        var result = resolver.resolve(
+                "validation.id.required",
+                Locale.forLanguageTag("fr-FR")
+        );
+
+        assertEquals("pt-BR", result.locale());
+        assertEquals("O identificador é obrigatório.", result.message());
+        assertEquals("VALIDATION-0002", result.code());
     }
 
     @Test
