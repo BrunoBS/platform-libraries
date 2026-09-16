@@ -18,62 +18,42 @@ A biblioteca lê uma VIEW existente no banco do consumidor. Contrato:
 `code`, `message_key`, `locale`, `message`, `solution`, `http_status`.
 
 Redis é opcional e funciona como cache apenas das mensagens encontradas no repositório/view.
-Mensagens padrão da biblioteca são resolvidas localmente via Spring `MessageSource`.
+Mensagens padrão são resolvidas localmente pelo `PlatformDefaultMessageProvider`.
 
-Fallback de locale: `en-US -> en -> pt-BR`.
+Fallback de locale: `en-US -> en -> default-locale -> pt-BR`.
 
-A biblioteca não possui migrations e não inclui driver MySQL; usa o DataSource/JdbcTemplate do consumidor.
-
-Java 21.
-
-# ✉️ Módulo Platform Messaging (`platform-messaging`)
-
-O **`platform-messaging`** é o módulo fundacional de governança de mensagens, tratamento de exceções e internacionalização das APIs da plataforma.
-
-## 🚀 Como ativar
-
-```xml
-<dependency>
-    <groupId>com.empresa.platform</groupId>
-    <artifactId>platform-messaging</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-</dependency>
-```
-
-## 🛠️ Configuração
-
-```yaml
-platform:
-  messaging:
-    enabled: true
-    default-locale: "pt-BR"
-```
-
-## 🌍 Resolução de mensagens
-
-A resolução segue duas etapas. Primeiro são procurados overrides externos em todos os candidatos de locale; somente depois são consultados os providers locais:
+## Resolução
 
 ```text
 Redis
   ↓ miss
 Banco / VIEW
   ↓ miss em todos os locales
-Spring MessageSource / ApiMessageProvider
+PlatformDefaultMessageProvider
+  ↓
+bundles dos módulos no classpath
 ```
 
-Assim, uma mensagem cadastrada no banco sempre prevalece sobre a definição padrão empacotada na biblioteca, inclusive quando o override existe apenas em um locale de fallback.
+Existe uma única implementação oficial de `ApiMessageProvider`: `PlatformDefaultMessageProvider`.
 
-### Mensagens padrão
-
-As mensagens padrão do módulo ficam em:
+Cada módulo que precisa publicar mensagens padrão adiciona seus próprios bundles seguindo a convenção:
 
 ```text
-src/main/resources/messages/platform-messages.properties
-src/main/resources/messages/platform-messages_pt_BR.properties
-src/main/resources/messages/platform-messages_en.properties
+src/main/resources/META-INF/platform-messages/<module>_pt_BR.properties
+src/main/resources/META-INF/platform-messages/<module>_en.properties
 ```
 
-Cada entrada usa o contrato:
+Exemplos:
+
+```text
+platform-messaging    -> platform_pt_BR.properties
+platform-authorization -> authorization_pt_BR.properties
+platform-catalog       -> catalog_pt_BR.properties
+```
+
+O provider descobre automaticamente todos os arquivos compatíveis presentes no classpath. Portanto, o módulo de messaging não precisa conhecer os nomes dos módulos consumidores.
+
+Cada entrada segue o contrato:
 
 ```text
 messageKey=code|httpStatus|message|solution
@@ -85,20 +65,110 @@ Exemplo:
 validation.id.required=VALIDATION-0002|400|O identificador é obrigatório.|Informe um identificador válido.
 ```
 
-O `PlatformDefaultMessageProvider` resolve a propriedade pelo `MessageSource`, converte a definição para `ApiMessage` e a devolve ao resolver.
+O caractere `|` é reservado como delimitador.
 
-O caractere `|` é reservado como delimitador da definição e não deve ser usado nos campos.
+## Redis
 
-### Redis
-
-O Redis continua sendo utilizado apenas como cache de mensagens originadas do banco:
+O Redis armazena apenas mensagens originadas do banco:
 
 ```text
 platform:message:{messageKey}:{locale}
 ```
 
-Mensagens oriundas dos arquivos `.properties` não são armazenadas no Redis porque já estão disponíveis localmente na aplicação.
+Mensagens dos bundles não são armazenadas no Redis.
 
-## Providers especializados
+## Configuração
 
-Módulos como autorização e catálogo podem continuar expondo seus próprios `ApiMessageProvider`. O `PlatformDefaultMessageProvider` representa apenas o catálogo padrão do `platform-messaging`.
+```yaml
+platform:
+  messaging:
+    enabled: true
+    default-locale: "pt-BR"
+```
+
+
+## Validação de unicidade no startup
+
+Ao criar o `PlatformDefaultMessageProvider`, todos os bundles em
+`META-INF/platform-messages/*.properties` são carregados e indexados.
+
+A combinação abaixo deve ser única:
+
+```text
+locale + messageKey
+```
+
+Se dois módulos publicarem a mesma chave para o mesmo locale, a aplicação falha
+durante a inicialização com uma mensagem indicando a chave, o locale e os dois
+bundles conflitantes.
+
+Exemplo inválido:
+
+```text
+audit_pt_BR.properties -> event.not.found
+crud_pt_BR.properties  -> event.not.found
+```
+
+A mesma chave em idiomas diferentes é permitida:
+
+```text
+audit_pt_BR.properties -> audit.event.not.found
+audit_en.properties    -> audit.event.not.found
+```
+
+Por convenção, cada módulo deve usar seu próprio namespace, por exemplo
+`audit.*`, `crud.*`, `routing.*`, `authorization.*` e `catalog.*`.
+
+
+## Namespace automático por bundle
+
+O nome do bundle define o namespace global das mensagens.
+
+Formato obrigatório:
+
+```text
+<service>_<locale>.properties
+```
+
+Exemplo:
+
+```text
+catalog_pt_BR.properties
+```
+
+Conteúdo do arquivo usa apenas a chave local:
+
+```properties
+not.found=CAT-404-001|404|Catálogo não encontrado.|Verifique o identificador informado.
+name.required=CAT-400-003|400|Nome obrigatório.|Informe o nome do catálogo.
+```
+
+Durante o startup, o provider transforma automaticamente:
+
+```text
+catalog + not.found      -> catalog.not.found
+catalog + name.required  -> catalog.name.required
+```
+
+A chave completa é a identidade usada no Java, no banco e no Redis:
+
+```text
+Java:   catalog.not.found
+Banco:  catalog.not.found
+Redis:  platform:message:catalog.not.found:pt-BR
+Bundle: not.found
+```
+
+Uma chave já prefixada dentro do bundle, por exemplo
+`catalog.not.found` dentro de `catalog_pt_BR.properties`, é rejeitada no startup.
+
+Dois serviços podem ter a mesma chave local sem colisão:
+
+```text
+audit_pt_BR.properties -> event.not.found -> audit.event.not.found
+crud_pt_BR.properties  -> event.not.found -> crud.event.not.found
+```
+
+A colisão ocorre apenas quando a mesma chave global é publicada duas vezes
+para o mesmo locale, por exemplo dois bundles `catalog_pt_BR.properties`
+contendo `not.found`.

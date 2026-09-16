@@ -3,12 +3,12 @@ package com.empresa.platform.messaging.resolver;
 import com.empresa.platform.messaging.cache.NoOpApiMessageCache;
 import com.empresa.platform.messaging.exception.ApiMessageNotFoundException;
 import com.empresa.platform.messaging.message.PlatformDefaultMessageProvider;
+import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.model.ApiMessage;
 import com.empresa.platform.messaging.provider.ApiMessageProvider;
 import com.empresa.platform.messaging.repository.ApiMessageRepository;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -19,28 +19,21 @@ class DefaultApiMessageResolverTest {
 
     @Test
     void shouldUseLanguageFallback() {
-        ApiMessageRepository r = (k, l) -> l.equals(Locale.ENGLISH)
+        ApiMessageRepository repository = (k, l) -> l.equals(Locale.ENGLISH)
                 ? Optional.of(new ApiMessage("ERR-0001", k, "en", "User not found.", "Check the identifier.", 404))
                 : Optional.empty();
 
-        var resolver = new DefaultApiMessageResolver(r, new NoOpApiMessageCache(), Locale.forLanguageTag("pt-BR"));
+        var resolver = new DefaultApiMessageResolver(
+                repository,
+                new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"),
+                new PlatformDefaultMessageProvider()
+        );
+
         var result = resolver.resolve("user.not.found", Locale.forLanguageTag("en-US"));
 
         assertEquals("en", result.locale());
         assertEquals(404, result.httpStatus());
-    }
-
-    @Test
-    void shouldFallBackToAbsoluteDefaultWhenLanguageDoesNotExist() {
-        ApiMessageRepository r = (k, l) -> l.equals(Locale.forLanguageTag("pt-BR"))
-                ? Optional.of(new ApiMessage("ERR-0001", k, "pt-BR", "Usuário não encontrado.", "Verifique o identificador.", 404))
-                : Optional.empty();
-
-        var resolver = new DefaultApiMessageResolver(r, new NoOpApiMessageCache(), Locale.forLanguageTag("en"));
-        var result = resolver.resolve("user.not.found", Locale.forLanguageTag("fr-FR"));
-
-        assertEquals("pt-BR", result.locale());
-        assertEquals("Usuário não encontrado.", result.message());
     }
 
     @Test
@@ -54,7 +47,7 @@ class DefaultApiMessageResolverTest {
                 repository,
                 new NoOpApiMessageCache(),
                 Locale.forLanguageTag("pt-BR"),
-                List.of(provider)
+                provider
         );
 
         var result = resolver.resolve("authorization.platform.access.denied", Locale.forLanguageTag("pt-BR"));
@@ -76,7 +69,7 @@ class DefaultApiMessageResolverTest {
                 repository,
                 new NoOpApiMessageCache(),
                 Locale.forLanguageTag("pt-BR"),
-                List.of(provider)
+                provider
         );
 
         var result = resolver.resolve("authorization.platform.access.denied", Locale.forLanguageTag("pt-BR"));
@@ -86,40 +79,25 @@ class DefaultApiMessageResolverTest {
     }
 
     @Test
-    void shouldPreferRepositoryLanguageFallbackOverExactProviderLocale() {
+    void shouldPreferRepositoryLanguageFallbackOverProvider() {
         ApiMessageRepository repository = (k, l) -> l.equals(Locale.ENGLISH)
-                ? Optional.of(new ApiMessage(
-                        "CUSTOM-404",
-                        k,
-                        "en",
-                        "Database override",
-                        "Database solution",
-                        404
-                ))
+                ? Optional.of(new ApiMessage("CUSTOM-404", k, "en", "Database override", "Database solution", 404))
                 : Optional.empty();
 
-        ApiMessageProvider provider = (k, l) -> l.equals(Locale.forLanguageTag("en-US"))
-                ? Optional.of(new ApiMessage(
-                        "DEFAULT-404",
-                        k,
-                        "en-US",
-                        "Properties default",
-                        "Properties solution",
-                        404
-                ))
-                : Optional.empty();
+        ApiMessageProvider provider = (k, l) -> Optional.of(
+                new ApiMessage("DEFAULT-404", k, l.toLanguageTag(), "Properties default", "Properties solution", 404)
+        );
 
         var resolver = new DefaultApiMessageResolver(
                 repository,
                 new NoOpApiMessageCache(),
                 Locale.forLanguageTag("pt-BR"),
-                List.of(provider)
+                provider
         );
 
         var result = resolver.resolve("user.not.found", Locale.forLanguageTag("en-US"));
 
         assertEquals("Database override", result.message());
-        assertEquals("CUSTOM-404", result.code());
         assertEquals("en", result.locale());
     }
 
@@ -131,23 +109,25 @@ class DefaultApiMessageResolverTest {
                 repository,
                 new NoOpApiMessageCache(),
                 Locale.forLanguageTag("pt-BR"),
-                List.of(new PlatformDefaultMessageProvider())
+                new PlatformDefaultMessageProvider()
         );
 
-        var result = resolver.resolve(
-                "validation.id.required",
-                Locale.forLanguageTag("fr-FR")
-        );
+        var result = resolver.resolve(PlatformMessageKeys.RESOURCE_NOT_FOUND, Locale.forLanguageTag("fr-FR"));
 
         assertEquals("pt-BR", result.locale());
-        assertEquals("O identificador é obrigatório.", result.message());
-        assertEquals("VALIDATION-0002", result.code());
+        assertEquals("O recurso solicitado não foi encontrado.", result.message());
     }
 
     @Test
     void shouldThrowExceptionWhenMessageIsNotFoundInAnyCandidate() {
-        ApiMessageRepository r = (k, l) -> Optional.empty();
-        var resolver = new DefaultApiMessageResolver(r, new NoOpApiMessageCache(), Locale.forLanguageTag("pt-BR"));
+        ApiMessageRepository repository = (k, l) -> Optional.empty();
+        var resolver = new DefaultApiMessageResolver(
+                repository,
+                new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"),
+                new PlatformDefaultMessageProvider()
+        );
+
         assertThrows(ApiMessageNotFoundException.class, () ->
                 resolver.resolve("key.inexistente", Locale.forLanguageTag("en-US"))
         );

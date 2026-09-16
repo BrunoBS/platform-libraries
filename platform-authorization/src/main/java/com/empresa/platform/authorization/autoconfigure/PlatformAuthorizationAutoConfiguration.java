@@ -2,7 +2,6 @@ package com.empresa.platform.authorization.autoconfigure;
 
 import com.empresa.platform.authorization.aspect.ResourceAuthorizationAspect;
 import com.empresa.platform.authorization.config.PlatformAuthorizationProperties;
-import com.empresa.platform.authorization.message.AuthorizationMessageProvider;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
@@ -29,12 +28,6 @@ import java.util.Set;
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformAuthorizationProperties.class)
 public class PlatformAuthorizationAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    public AuthorizationMessageProvider authorizationMessageProvider() {
-        return new AuthorizationMessageProvider();
-    }
 
     @Bean
     @ConditionalOnMissingBean

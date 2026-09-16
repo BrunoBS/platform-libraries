@@ -24,7 +24,7 @@ class BaseCrudValidatorTest {
                             .satisfies(detail -> {
                                 assertThat(detail.field()).isEqualTo("default-test");
                                 assertThat(detail.messageKey())
-                                        .isEqualTo("validation.required");
+                                        .isEqualTo(CrudMessageKeys.REQUIRED);
                             });
                 });
     }
@@ -71,7 +71,7 @@ class BaseCrudValidatorTest {
                             .anySatisfy(detail -> {
                                 assertThat(detail.field()).isEqualTo("id");
                                 assertThat(detail.messageKey())
-                                        .isEqualTo("validation.id.must-be-absent");
+                                        .isEqualTo(CrudMessageKeys.ID_MUST_BE_ABSENT);
                             });
                 });
     }
@@ -119,7 +119,7 @@ class BaseCrudValidatorTest {
                             .anySatisfy(detail -> {
                                 assertThat(detail.field()).isEqualTo("id");
                                 assertThat(detail.messageKey())
-                                        .isEqualTo("validation.id.required");
+                                        .isEqualTo(CrudMessageKeys.ID_REQUIRED);
                             });
                 });
     }
