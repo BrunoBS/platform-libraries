@@ -35,6 +35,28 @@ class AuditRecoveryWorkerTest {
     }
 
     @Test
+    void shouldSkipRecoveryWhenDistributedLockIsUnavailable() {
+        PlatformAuditProperties properties = properties(10);
+        InMemoryFallbackStore store = new InMemoryFallbackStore();
+        store.save(event("1"));
+
+        AtomicInteger published = new AtomicInteger();
+        AuditEventClient client = ignored -> published.incrementAndGet();
+
+        AuditRecoveryWorker worker = new AuditRecoveryWorker(
+                client,
+                store,
+                new UnavailableLock(),
+                properties
+        );
+
+        worker.recover();
+
+        assertThat(published).hasValue(0);
+        assertThat(store.size()).isEqualTo(1);
+    }
+
+    @Test
     void shouldRecoverUpToConfiguredBatchSize() {
         PlatformAuditProperties properties = properties(2);
         InMemoryFallbackStore store = new InMemoryFallbackStore();
@@ -75,6 +97,17 @@ class AuditRecoveryWorkerTest {
                 Map.of("id", id),
                 Map.of()
         );
+    }
+
+    private static final class UnavailableLock implements AuditRecoveryLock {
+        @Override
+        public Optional<String> tryAcquire() {
+            return Optional.empty();
+        }
+
+        @Override
+        public void release(String token) {
+        }
     }
 
     private static final class AlwaysAvailableLock implements AuditRecoveryLock {
