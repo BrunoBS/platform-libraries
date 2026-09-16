@@ -96,15 +96,15 @@ public abstract class BaseCrudValidator<D extends BaseCrudDTO<?>> {
     }
 
     protected String requiredMessageKey() {
-        return "validation.required";
+        return CrudMessageKeys.REQUIRED;
     }
 
     protected String idRequiredMessageKey() {
-        return "validation.id.required";
+        return CrudMessageKeys.ID_REQUIRED;
     }
 
     protected String idMustBeAbsentMessageKey() {
-        return "validation.id.must-be-absent";
+        return CrudMessageKeys.ID_MUST_BE_ABSENT;
     }
 
     protected void throwIfInvalid(CrudValidationResult result) {
