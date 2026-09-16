@@ -1,8 +1,10 @@
 package com.empresa.platform.audit.autoconfigure;
 
 import com.empresa.platform.audit.config.PlatformAuditProperties;
+import com.empresa.platform.audit.exception.AuditException;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
 import com.empresa.platform.audit.fallback.RedisAuditFallbackStore;
+import com.empresa.platform.audit.message.AuditMessageKeys;
 import com.empresa.platform.audit.publisher.AuditPublisher;
 import com.empresa.platform.audit.recovery.AuditRecoveryLock;
 import com.empresa.platform.audit.recovery.AuditRecoveryService;
@@ -35,9 +37,7 @@ public class PlatformAuditRedisAutoConfiguration {
     ) {
         StringRedisTemplate redisTemplate = redisTemplateProvider.getIfAvailable();
         if (redisTemplate == null) {
-            throw new IllegalStateException(
-                    "platform.audit.fallback.enabled=true requires a configured StringRedisTemplate."
-            );
+            throw new AuditException(AuditMessageKeys.REDIS_NOT_CONFIGURED);
         }
         return new RedisAuditFallbackStore(redisTemplate, objectMapper, properties);
     }
@@ -50,9 +50,7 @@ public class PlatformAuditRedisAutoConfiguration {
     ) {
         StringRedisTemplate redisTemplate = redisTemplateProvider.getIfAvailable();
         if (redisTemplate == null) {
-            throw new IllegalStateException(
-                    "platform.audit.fallback.enabled=true requires a configured StringRedisTemplate."
-            );
+            throw new AuditException(AuditMessageKeys.REDIS_NOT_CONFIGURED);
         }
         return new RedisAuditRecoveryLock(redisTemplate, properties);
     }
