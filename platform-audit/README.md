@@ -21,7 +21,7 @@ AuditAspect
     ↓
 AuditPublisher
     ↓
-AuditEventClient
+AuditPublisher
     ↓
 Audit API
 ```
@@ -206,7 +206,7 @@ Nesse caso, cada ciclo recupera no máximo 20 eventos.
 Com fallback desabilitado:
 
 ```text
-AuditEventClient
+AuditPublisher
 AuditPublisher
 AuditAuthorizationContextResolver
 AuditAspect
@@ -222,8 +222,8 @@ AuditFallbackStore
 RedisAuditFallbackStore
 AuditRecoveryLock
 RedisAuditRecoveryLock
-AuditRecoveryWorker
-AuditRecoveryScheduler
+AuditRecoveryService
+AuditRecoveryService
 platformAuditRecoveryTaskScheduler
 ```
 
