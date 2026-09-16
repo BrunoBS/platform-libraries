@@ -39,10 +39,24 @@ jobs:
             platform-build/**/pom.xml
             platform-libraries/**/pom.xml
 
-      - name: Install platform build
-        working-directory: platform-build
-        run: mvn -B -ntp clean install -DskipTests
+      - name: Create CI reactor
+        run: |
+          cat > ci-pom.xml <<'EOF'
+          <project xmlns="http://maven.apache.org/POM/4.0.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+              <modelVersion>4.0.0</modelVersion>
+              <groupId>com.empresa.platform.ci</groupId>
+              <artifactId>platform-ci-reactor</artifactId>
+              <version>1.0.0</version>
+              <packaging>pom</packaging>
+              <modules>
+                  <module>platform-build/platform-dependencies</module>
+                  <module>platform-build/platform-parent</module>
+                  <module>platform-libraries</module>
+              </modules>
+          </project>
+          EOF
 
       - name: Run Maven verify
-        working-directory: platform-libraries
-        run: mvn -B -ntp clean verify
+        run: mvn -B -ntp -f ci-pom.xml clean verify
