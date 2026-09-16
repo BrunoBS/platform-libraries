@@ -22,62 +22,34 @@ class PlatformDefaultMessageProviderTest {
             new PlatformDefaultMessageProvider();
 
     @Test
-    void deveFornecerMensagensGlobaisSemBanco() {
+    void shouldResolveMessageUsingBundleNameAsNamespace() {
         var message = provider.find(
                 PlatformMessageKeys.VALIDATION_FAILED,
                 Locale.forLanguageTag("pt-BR")
         );
 
         assertThat(message).isPresent();
+        assertThat(message.orElseThrow().messageKey())
+                .isEqualTo("platform.global.validation.failed");
         assertThat(message.orElseThrow().code()).isEqualTo("GLOBAL-0001");
         assertThat(message.orElseThrow().httpStatus()).isEqualTo(400);
-        assertThat(message.orElseThrow().message())
-                .isEqualTo("Um ou mais campos informados são inválidos. Verifique os detalhes.");
     }
 
     @Test
-    void deveFornecerMensagensBaseDoCrud() {
-        var ptBr = provider.find(
-                "validation.id.must-be-absent",
-                Locale.forLanguageTag("pt-BR")
-        );
-
-        var en = provider.find(
-                "validation.id.required",
-                Locale.ENGLISH
-        );
-
-        assertThat(ptBr).isPresent();
-        assertThat(ptBr.orElseThrow().code()).isEqualTo("VALIDATION-0003");
-
-        assertThat(en).isPresent();
-        assertThat(en.orElseThrow().message()).isEqualTo("The identifier is required.");
-        assertThat(en.orElseThrow().httpStatus()).isEqualTo(400);
-    }
-
-    @Test
-    void naoDeveFazerFallbackInternoParaOutroBundle() {
+    void shouldNotFallbackInternallyToAnotherLocale() {
         assertThat(provider.find(
-                "validation.id.required",
+                PlatformMessageKeys.VALIDATION_FAILED,
                 Locale.forLanguageTag("fr-FR")
         )).isEmpty();
 
         assertThat(provider.find(
-                "validation.id.required",
+                PlatformMessageKeys.VALIDATION_FAILED,
                 Locale.forLanguageTag("en-US")
         )).isEmpty();
     }
 
     @Test
-    void deveIgnorarMensagemQueNaoPertenceAoProvider() {
-        assertThat(provider.find(
-                "account.name.invalid",
-                Locale.forLanguageTag("pt-BR")
-        )).isEmpty();
-    }
-
-    @Test
-    void deveFalharNaInicializacaoQuandoExistirChaveDuplicadaNoMesmoLocale() throws Exception {
+    void shouldAllowSameLocalKeyForDifferentServices() throws Exception {
         PathMatchingResourcePatternResolver resolver =
                 mock(PathMatchingResourcePatternResolver.class);
 
@@ -94,38 +66,6 @@ class PlatformDefaultMessageProviderTest {
         when(resolver.getResources(anyString()))
                 .thenReturn(new Resource[]{audit, crud});
 
-        assertThatThrownBy(() ->
-                new PlatformDefaultMessageProvider(
-                        resolver,
-                        new ApiMessageDefinitionParser()
-                )
-        )
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Duplicate platform message key detected")
-                .hasMessageContaining("event.not.found")
-                .hasMessageContaining("pt_BR")
-                .hasMessageContaining("audit_pt_BR.properties")
-                .hasMessageContaining("crud_pt_BR.properties");
-    }
-
-    @Test
-    void devePermitirMesmaChaveEmLocalesDiferentes() throws Exception {
-        PathMatchingResourcePatternResolver resolver =
-                mock(PathMatchingResourcePatternResolver.class);
-
-        Resource ptBr = new NamedByteArrayResource(
-                "audit_pt_BR.properties",
-                "audit.event.not.found=AUDIT-404|404|Evento não encontrado.|Verifique o evento."
-        );
-
-        Resource en = new NamedByteArrayResource(
-                "audit_en.properties",
-                "audit.event.not.found=AUDIT-404|404|Event not found.|Check the event."
-        );
-
-        when(resolver.getResources(anyString()))
-                .thenReturn(new Resource[]{ptBr, en});
-
         PlatformDefaultMessageProvider customProvider =
                 new PlatformDefaultMessageProvider(
                         resolver,
@@ -138,9 +78,86 @@ class PlatformDefaultMessageProviderTest {
         )).isPresent();
 
         assertThat(customProvider.find(
-                "audit.event.not.found",
-                Locale.ENGLISH
+                "crud.event.not.found",
+                Locale.forLanguageTag("pt-BR")
         )).isPresent();
+    }
+
+    @Test
+    void shouldFailStartupWhenSameGlobalKeyExistsTwice() throws Exception {
+        PathMatchingResourcePatternResolver resolver =
+                mock(PathMatchingResourcePatternResolver.class);
+
+        Resource first = new NamedByteArrayResource(
+                "catalog_pt_BR.properties",
+                "not.found=CAT-404|404|Catálogo não encontrado.|Verifique o identificador."
+        );
+
+        Resource second = new NamedByteArrayResource(
+                "catalog_pt_BR.properties",
+                "not.found=CAT-404-2|404|Outro catálogo.|Verifique."
+        );
+
+        when(resolver.getResources(anyString()))
+                .thenReturn(new Resource[]{first, second});
+
+        assertThatThrownBy(() ->
+                new PlatformDefaultMessageProvider(
+                        resolver,
+                        new ApiMessageDefinitionParser()
+                )
+        )
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Duplicate platform message key detected")
+                .hasMessageContaining("catalog.not.found")
+                .hasMessageContaining("pt_BR");
+    }
+
+    @Test
+    void shouldRejectAlreadyPrefixedLocalKey() throws Exception {
+        PathMatchingResourcePatternResolver resolver =
+                mock(PathMatchingResourcePatternResolver.class);
+
+        Resource catalog = new NamedByteArrayResource(
+                "catalog_pt_BR.properties",
+                "catalog.not.found=CAT-404|404|Catálogo não encontrado.|Verifique."
+        );
+
+        when(resolver.getResources(anyString()))
+                .thenReturn(new Resource[]{catalog});
+
+        assertThatThrownBy(() ->
+                new PlatformDefaultMessageProvider(
+                        resolver,
+                        new ApiMessageDefinitionParser()
+                )
+        )
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("must be local to its bundle")
+                .hasMessageContaining("catalog.not.found");
+    }
+
+    @Test
+    void shouldRejectInvalidBundleName() throws Exception {
+        PathMatchingResourcePatternResolver resolver =
+                mock(PathMatchingResourcePatternResolver.class);
+
+        Resource invalid = new NamedByteArrayResource(
+                "catalog.properties",
+                "not.found=CAT-404|404|Catálogo não encontrado.|Verifique."
+        );
+
+        when(resolver.getResources(anyString()))
+                .thenReturn(new Resource[]{invalid});
+
+        assertThatThrownBy(() ->
+                new PlatformDefaultMessageProvider(
+                        resolver,
+                        new ApiMessageDefinitionParser()
+                )
+        )
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Invalid platform message bundle name");
     }
 
     private static final class NamedByteArrayResource extends ByteArrayResource {
