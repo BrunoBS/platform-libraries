@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +28,7 @@ class AuditRecoveryWorkerTest {
             throw new IllegalStateException("audit unavailable");
         };
 
-        AuditRecoveryWorker worker = new AuditRecoveryWorker(client, store, properties);
+        AuditRecoveryWorker worker = new AuditRecoveryWorker(client, store, new AlwaysAvailableLock(), properties);
         worker.recover();
 
         assertThat(store.size()).isEqualTo(2);
@@ -44,7 +45,7 @@ class AuditRecoveryWorkerTest {
         AtomicInteger published = new AtomicInteger();
         AuditEventClient client = ignored -> published.incrementAndGet();
 
-        AuditRecoveryWorker worker = new AuditRecoveryWorker(client, store, properties);
+        AuditRecoveryWorker worker = new AuditRecoveryWorker(client, store, new AlwaysAvailableLock(), properties);
         worker.recover();
 
         assertThat(published).hasValue(2);
@@ -74,6 +75,17 @@ class AuditRecoveryWorkerTest {
                 Map.of("id", id),
                 Map.of()
         );
+    }
+
+    private static final class AlwaysAvailableLock implements AuditRecoveryLock {
+        @Override
+        public Optional<String> tryAcquire() {
+            return Optional.of("test-token");
+        }
+
+        @Override
+        public void release(String token) {
+        }
     }
 
     private static final class InMemoryFallbackStore implements AuditFallbackStore {
