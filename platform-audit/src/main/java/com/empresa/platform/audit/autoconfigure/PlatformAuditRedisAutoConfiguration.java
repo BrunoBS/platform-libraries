@@ -4,8 +4,10 @@ import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
 import com.empresa.platform.audit.fallback.RedisAuditFallbackStore;
+import com.empresa.platform.audit.recovery.AuditRecoveryLock;
 import com.empresa.platform.audit.recovery.AuditRecoveryScheduler;
 import com.empresa.platform.audit.recovery.AuditRecoveryWorker;
+import com.empresa.platform.audit.recovery.RedisAuditRecoveryLock;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,13 +44,29 @@ public class PlatformAuditRedisAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(AuditRecoveryLock.class)
+    AuditRecoveryLock auditRecoveryLock(
+            ObjectProvider<StringRedisTemplate> redisTemplateProvider,
+            PlatformAuditProperties properties
+    ) {
+        StringRedisTemplate redisTemplate = redisTemplateProvider.getIfAvailable();
+        if (redisTemplate == null) {
+            throw new IllegalStateException(
+                    "platform.audit.fallback.enabled=true requires a configured StringRedisTemplate."
+            );
+        }
+        return new RedisAuditRecoveryLock(redisTemplate, properties);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(AuditRecoveryWorker.class)
     AuditRecoveryWorker auditRecoveryWorker(
             AuditEventClient client,
             AuditFallbackStore fallbackStore,
+            AuditRecoveryLock recoveryLock,
             PlatformAuditProperties properties
     ) {
-        return new AuditRecoveryWorker(client, fallbackStore, properties);
+        return new AuditRecoveryWorker(client, fallbackStore, recoveryLock, properties);
     }
 
     @Bean(name = "platformAuditRecoveryTaskScheduler")
