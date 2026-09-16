@@ -56,6 +56,20 @@ class PlatformAuditAutoConfigurationTest {
     }
 
     @Test
+    void shouldFailStartupWhenFallbackIsEnabledWithoutStore() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.audit.enabled=true",
+                        "platform.audit.fallback.enabled=true"
+                )
+                .run(context ->
+                        assertThat(context.getStartupFailure())
+                                .isInstanceOf(IllegalStateException.class)
+                                .hasMessageContaining("AuditFallbackStore")
+                );
+    }
+
+    @Test
     void shouldNotLoadAuditInfrastructureWhenDisabled() {
         contextRunner
                 .withPropertyValues("platform.audit.enabled=false")
