@@ -1,5 +1,7 @@
 package com.empresa.platform.audit.context;
 
+import com.empresa.platform.audit.exception.AuditException;
+import com.empresa.platform.audit.message.AuditMessageKeys;
 import com.empresa.platform.audit.model.AuditContext;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
@@ -41,7 +43,8 @@ class AuditAuthorizationContextResolverTest {
     @Test
     void shouldFailWhenAuthorizedUserContextIsMissing() {
         assertThatThrownBy(resolver::resolve)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("UserContext");
+                .isInstanceOf(AuditException.class)
+                .extracting(exception -> ((AuditException) exception).getMessageKey())
+                .isEqualTo(AuditMessageKeys.USER_CONTEXT_MISSING);
     }
 }
