@@ -21,7 +21,7 @@ AuditAspect
     ↓
 AuditPublisher
     ↓
-AuditPublisher
+RestAuditPublisher
     ↓
 Audit API
 ```
@@ -207,7 +207,7 @@ Com fallback desabilitado:
 
 ```text
 AuditPublisher
-AuditPublisher
+RestAuditPublisher
 AuditAuthorizationContextResolver
 AuditAspect
 platformAuditTaskExecutor
@@ -222,7 +222,6 @@ AuditFallbackStore
 RedisAuditFallbackStore
 AuditRecoveryLock
 RedisAuditRecoveryLock
-AuditRecoveryService
 AuditRecoveryService
 platformAuditRecoveryTaskScheduler
 ```
