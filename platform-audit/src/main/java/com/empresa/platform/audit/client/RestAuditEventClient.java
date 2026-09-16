@@ -13,8 +13,8 @@ public final class RestAuditEventClient implements AuditEventClient {
 
     public RestAuditEventClient(RestClient.Builder builder, PlatformAuditProperties properties) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(properties.getHttp().getConnectTimeout());
-        requestFactory.setReadTimeout(properties.getHttp().getReadTimeout());
+        requestFactory.setConnectTimeout(Math.toIntExact(properties.getHttp().getConnectTimeout().toMillis()));
+        requestFactory.setReadTimeout(Math.toIntExact(properties.getHttp().getReadTimeout().toMillis()));
 
         this.restClient = builder
                 .baseUrl(properties.getServiceUrl())
