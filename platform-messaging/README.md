@@ -14,10 +14,11 @@ throw new ApiException("user.not.found", Map.of("userId", userId));
 
 A aplicação usa `messageKey`; o código técnico (`ERR-0001`) fica no catálogo.
 
-A biblioteca lê somente uma VIEW existente no banco do consumidor. Contrato:
+A biblioteca lê uma VIEW existente no banco do consumidor. Contrato:
 `code`, `message_key`, `locale`, `message`, `solution`, `http_status`.
 
-Redis é opcional e somente cache. Sem Redis, consulta a VIEW diretamente.
+Redis é opcional e funciona como cache apenas das mensagens encontradas no repositório/view.
+Mensagens padrão da biblioteca são resolvidas localmente via Spring `MessageSource`.
 
 Fallback de locale: `en-US -> en -> pt-BR`.
 
@@ -25,16 +26,11 @@ A biblioteca não possui migrations e não inclui driver MySQL; usa o DataSource
 
 Java 21.
 
-
 # ✉️ Módulo Platform Messaging (`platform-messaging`)
 
-O **`platform-messaging`** é o módulo fundacional de governança de mensagens, tratamento de exceções e segurança de dados do nosso ecossistema corporativo, desenvolvido para **Spring Boot 4.0.0 e Java 21+**. Ele centraliza o pipeline de tratamento de erros HTTP, tradução de payloads internacionais.
+O **`platform-messaging`** é o módulo fundacional de governança de mensagens, tratamento de exceções e internacionalização das APIs da plataforma.
 
----
-
-## 🚀 Como Ativar no Microsserviço
-
-Para habilitar o catálogo de mensagens corporativas, adicione a dependência diretamente no seu arquivo `pom.xml`:
+## 🚀 Como ativar
 
 ```xml
 <dependency>
@@ -44,73 +40,65 @@ Para habilitar o catálogo de mensagens corporativas, adicione a dependência di
 </dependency>
 ```
 
----
-
-## 🛠️ Todos os Parâmetros Disponíveis (`application.yml`)
-
-As propriedades abaixo controlam o comportamento global de tradução de chaves e os parâmetros de auditoria unificada entre os módulos:
+## 🛠️ Configuração
 
 ```yaml
 platform:
   messaging:
-    enabled: true                 # Liga/desliga o Advice de exceções e filtros globais. Padrão: true
-    default-locale: "pt-BR"       # Localidade padrão de fallback para internacionalização (i18n). Padrão: "pt-BR"
+    enabled: true
+    default-locale: "pt-BR"
 ```
 
----
+## 🌍 Resolução de mensagens
 
-## 💎 Funcionalidades Core
-
-### 1. 🎯 Handler de Exceções Global (`ControllerAdvice`)
-Captura todas as falhas de infraestrutura e de negócio lançadas na Thread da requisição, padronizando a saída para o cliente final. Evita que *stack traces* internas vazem para o front-end, transformando-as no payload unificado `ApiError`.
-
-### 🌍 2. Catálogo e Internacionalização (i18n)
-O módulo possui um barramento de tradução dinâmico que lê o cabeçalho HTTP `Accept-Language`. Ele converte chaves abstratas de mensagens em textos amigáveis de forma automatizada.
-* **Fallbacks integrados:** Caso o microsserviço ou a biblioteca não possuam tradução para um idioma solicitado (ex: `fr-FR`), o sistema aplica uma cascata inteligente recorrendo ao `default-locale` configurado no YAML.
-
-### 🛡️ 3. Filtro Preventivo de Dados (Anti-SQL Injection)
-Um filtro de servlet intercepta os parâmetros de URL, cabeçalhos e payloads de entrada da requisição antes que eles cheguem às camadas de banco de dados (`JPA/Hibernate`), aplicando regras de limpeza estruturada contra caracteres de escape e tentativas de injeção maliciosa.
-
----
-
-## 📝 Anatomia do Payload de Erro Padronizado (`ApiError`)
-
-Quando uma exceção é interceptada pela biblioteca (ex: um erro `ForbiddenException` ou `UnauthorizedException`), o payload devolvido no corpo da resposta HTTP segue estritamente este contrato:
-
-```json
-{
-  "timestamp": "2026-09-07T22:21:40.123Z",
-  "status": 403,
-  "error": "Forbidden",
-  "messageKey": "PLATFORM_ACCESS_DENIED",
-  "message": "Acesso negado. Seu usuário não possui nível de autorização suficiente para este recurso.",
-  "path": "/api/v1/pedidos",
-  "traceId": "trace-uuid-123456"
-}
-```
-
-### 🔍 Destaques do Contrato de Falha:
-1. **`messageKey`:** Uma chave de erro abstrata e imutável de TI. Ela permite que sistemas integrados ou aplicativos de front-end tomem decisões de fluxo automatizadas com base no código do erro, independentemente do idioma traduzido no campo `message`.
-2. **`traceId` (Integração Nativa com `platform-logging`):** O ID de correlação capturado é exatamente a chave definida em `mdc-correlation-key` [MDC]. Se o cliente reportar o erro ao suporte informando este número, o engenheiro conseguirá localizar o histórico completo da falha indexado no Kibana ou Datadog em um clique [MDC].
-
----
-
-
-## Mensagens padrão da plataforma
-
-O módulo fornece um `PlatformDefaultMessageProvider` com fallback para mensagens transversais da plataforma, incluindo:
-
-- `global.*`;
-- `validation.*` utilizadas pelo CRUD base.
-
-A resolução preserva esta precedência:
+A resolução segue duas etapas. Primeiro são procurados overrides externos em todos os candidatos de locale; somente depois são consultados os providers locais:
 
 ```text
-cache
-→ repositório/view do microsserviço
-→ providers das bibliotecas
+Redis
+  ↓ miss
+Banco / VIEW
+  ↓ miss em todos os locales
+Spring MessageSource / ApiMessageProvider
 ```
 
-Com isso, um microsserviço não precisa cadastrar novamente mensagens transversais apenas para que validações da plataforma funcionem. Quando uma mesma chave existir no banco do serviço, a definição externa continua prevalecendo sobre o fallback da biblioteca.
+Assim, uma mensagem cadastrada no banco sempre prevalece sobre a definição padrão empacotada na biblioteca, inclusive quando o override existe apenas em um locale de fallback.
 
-Módulos especializados podem expor seus próprios `ApiMessageProvider`, como já ocorre com autorização e catálogo. Mensagens específicas de negócio continuam pertencendo ao microsserviço consumidor.
+### Mensagens padrão
+
+As mensagens padrão do módulo ficam em:
+
+```text
+src/main/resources/messages/platform-messages.properties
+src/main/resources/messages/platform-messages_pt_BR.properties
+src/main/resources/messages/platform-messages_en.properties
+```
+
+Cada entrada usa o contrato:
+
+```text
+messageKey=code|httpStatus|message|solution
+```
+
+Exemplo:
+
+```properties
+validation.id.required=VALIDATION-0002|400|O identificador é obrigatório.|Informe um identificador válido.
+```
+
+O `PlatformDefaultMessageProvider` resolve a propriedade pelo `MessageSource`, converte a definição para `ApiMessage` e a devolve ao resolver.
+
+O caractere `|` é reservado como delimitador da definição e não deve ser usado nos campos.
+
+### Redis
+
+O Redis continua sendo utilizado apenas como cache de mensagens originadas do banco:
+
+```text
+platform:message:{messageKey}:{locale}
+```
+
+Mensagens oriundas dos arquivos `.properties` não são armazenadas no Redis porque já estão disponíveis localmente na aplicação.
+
+## Providers especializados
+
+Módulos como autorização e catálogo podem continuar expondo seus próprios `ApiMessageProvider`. O `PlatformDefaultMessageProvider` representa apenas o catálogo padrão do `platform-messaging`.
