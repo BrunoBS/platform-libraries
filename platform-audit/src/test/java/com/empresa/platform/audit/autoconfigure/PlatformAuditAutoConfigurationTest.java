@@ -2,7 +2,7 @@ package com.empresa.platform.audit.autoconfigure;
 
 import com.empresa.platform.audit.aspect.AuditAspect;
 import com.empresa.platform.audit.client.AuditEventClient;
-import com.empresa.platform.audit.context.AuditContextProvider;
+import com.empresa.platform.audit.context.AuditAuthorizationContextResolver;
 import com.empresa.platform.audit.publisher.AuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class PlatformAuditAutoConfigurationTest {
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(AuditPublisher.class);
-                    assertThat(context).hasSingleBean(AuditContextProvider.class);
+                    assertThat(context).hasSingleBean(AuditAuthorizationContextResolver.class);
                     assertThat(context).hasSingleBean(AuditAspect.class);
                     assertThat(context).hasBean("platformAuditTaskExecutor");
                 });
@@ -75,7 +75,7 @@ class PlatformAuditAutoConfigurationTest {
                 .withPropertyValues("platform.audit.enabled=false")
                 .run(context -> {
                     assertThat(context).doesNotHaveBean(AuditPublisher.class);
-                    assertThat(context).doesNotHaveBean(AuditContextProvider.class);
+                    assertThat(context).doesNotHaveBean(AuditAuthorizationContextResolver.class);
                     assertThat(context).doesNotHaveBean(AuditAspect.class);
                 });
     }
