@@ -1,33 +1,49 @@
 package com.empresa.platform.audit.recovery;
 
-import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
 import com.empresa.platform.audit.model.AuditEventRequest;
+import com.empresa.platform.audit.publisher.AuditPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
 
-public final class AuditRecoveryWorker {
+public final class AuditRecoveryService implements InitializingBean, DisposableBean {
 
-    private static final Logger log = LoggerFactory.getLogger(AuditRecoveryWorker.class);
+    private static final Logger log = LoggerFactory.getLogger(AuditRecoveryService.class);
 
-    private final AuditEventClient client;
+    private final AuditPublisher publisher;
     private final AuditFallbackStore fallbackStore;
     private final AuditRecoveryLock recoveryLock;
+    private final ThreadPoolTaskScheduler scheduler;
     private final PlatformAuditProperties properties;
+    private ScheduledFuture<?> future;
 
-    public AuditRecoveryWorker(
-            AuditEventClient client,
+    public AuditRecoveryService(
+            AuditPublisher publisher,
             AuditFallbackStore fallbackStore,
             AuditRecoveryLock recoveryLock,
+            ThreadPoolTaskScheduler scheduler,
             PlatformAuditProperties properties
     ) {
-        this.client = client;
+        this.publisher = publisher;
         this.fallbackStore = fallbackStore;
         this.recoveryLock = recoveryLock;
+        this.scheduler = scheduler;
         this.properties = properties;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        future = scheduler.scheduleWithFixedDelay(
+                this::recover,
+                properties.getFallback().getRecoveryInterval()
+        );
     }
 
     public void recover() {
@@ -47,14 +63,6 @@ public final class AuditRecoveryWorker {
         }
     }
 
-    private void releaseLock(String token) {
-        try {
-            recoveryLock.release(token);
-        } catch (Exception exception) {
-            log.warn("Failed to release audit recovery lock", exception);
-        }
-    }
-
     private void recoverBatch() {
         if (!fallbackStore.hasPending()) {
             return;
@@ -70,7 +78,7 @@ public final class AuditRecoveryWorker {
             }
 
             try {
-                client.publish(event);
+                publisher.publishDirect(event);
                 fallbackStore.removeHead();
                 recovered++;
             } catch (Exception exception) {
@@ -88,6 +96,21 @@ public final class AuditRecoveryWorker {
 
         if (recovered > 0) {
             log.info("Audit recovery cycle completed | recovered={}", recovered);
+        }
+    }
+
+    private void releaseLock(String token) {
+        try {
+            recoveryLock.release(token);
+        } catch (Exception exception) {
+            log.warn("Failed to release audit recovery lock", exception);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        if (future != null) {
+            future.cancel(false);
         }
     }
 }

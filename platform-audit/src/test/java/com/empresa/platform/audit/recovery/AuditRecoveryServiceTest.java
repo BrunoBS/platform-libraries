@@ -1,10 +1,11 @@
 package com.empresa.platform.audit.recovery;
 
-import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
 import com.empresa.platform.audit.model.AuditEventRequest;
+import com.empresa.platform.audit.publisher.AuditPublisher;
 import org.junit.jupiter.api.Test;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.time.Instant;
 import java.util.ArrayDeque;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AuditRecoveryWorkerTest {
+class AuditRecoveryServiceTest {
 
     @Test
     void shouldStopCycleWhenFirstPendingEventStillFails() {
@@ -24,12 +25,12 @@ class AuditRecoveryWorkerTest {
         store.save(event("1"));
         store.save(event("2"));
 
-        AuditEventClient client = ignored -> {
+        AuditPublisher publisher = ignored -> {
             throw new IllegalStateException("audit unavailable");
         };
 
-        AuditRecoveryWorker worker = new AuditRecoveryWorker(client, store, new AlwaysAvailableLock(), properties);
-        worker.recover();
+        AuditRecoveryService recovery = recoveryService(publisher, store, new AlwaysAvailableLock(), properties);
+        recovery.recover();
 
         assertThat(store.size()).isEqualTo(2);
     }
@@ -41,16 +42,10 @@ class AuditRecoveryWorkerTest {
         store.save(event("1"));
 
         AtomicInteger published = new AtomicInteger();
-        AuditEventClient client = ignored -> published.incrementAndGet();
+        AuditPublisher publisher = ignored -> published.incrementAndGet();
 
-        AuditRecoveryWorker worker = new AuditRecoveryWorker(
-                client,
-                store,
-                new UnavailableLock(),
-                properties
-        );
-
-        worker.recover();
+        AuditRecoveryService recovery = recoveryService(publisher, store, new UnavailableLock(), properties);
+        recovery.recover();
 
         assertThat(published).hasValue(0);
         assertThat(store.size()).isEqualTo(1);
@@ -65,14 +60,29 @@ class AuditRecoveryWorkerTest {
         store.save(event("3"));
 
         AtomicInteger published = new AtomicInteger();
-        AuditEventClient client = ignored -> published.incrementAndGet();
+        AuditPublisher publisher = ignored -> published.incrementAndGet();
 
-        AuditRecoveryWorker worker = new AuditRecoveryWorker(client, store, new AlwaysAvailableLock(), properties);
-        worker.recover();
+        AuditRecoveryService recovery = recoveryService(publisher, store, new AlwaysAvailableLock(), properties);
+        recovery.recover();
 
         assertThat(published).hasValue(2);
         assertThat(store.size()).isEqualTo(1);
         assertThat(store.peek().resourceId()).isEqualTo("3");
+    }
+
+    private AuditRecoveryService recoveryService(
+            AuditPublisher publisher,
+            AuditFallbackStore store,
+            AuditRecoveryLock lock,
+            PlatformAuditProperties properties
+    ) {
+        return new AuditRecoveryService(
+                publisher,
+                store,
+                lock,
+                new ThreadPoolTaskScheduler(),
+                properties
+        );
     }
 
     private PlatformAuditProperties properties(int batchSize) {

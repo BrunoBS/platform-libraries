@@ -1,23 +1,28 @@
 package com.empresa.platform.audit.publisher;
 
-import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
 import com.empresa.platform.audit.model.AuditEventRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 
 import java.time.Instant;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class DefaultAuditPublisherTest {
+class RestAuditPublisherTest {
 
     private final AuditEventRequest event = new AuditEventRequest(
             Instant.now(),
@@ -36,14 +41,12 @@ class DefaultAuditPublisherTest {
     );
 
     @Test
-    void shouldNotPropagateClientFailureByDefault() {
-        PlatformAuditProperties properties = new PlatformAuditProperties();
-        AuditEventClient client = ignored -> {
-            throw new IllegalStateException("audit unavailable");
-        };
+    void shouldNotPropagateHttpFailureByDefault() {
+        PlatformAuditProperties properties = properties();
+        RestClient.Builder builder = failingBuilder();
 
-        DefaultAuditPublisher publisher = new DefaultAuditPublisher(
-                client,
+        RestAuditPublisher publisher = new RestAuditPublisher(
+                builder,
                 new SyncTaskExecutor(),
                 properties,
                 emptyFallbackProvider()
@@ -53,20 +56,15 @@ class DefaultAuditPublisherTest {
     }
 
     @Test
-    void shouldPersistEventInFallbackWhenClientFails() {
-        PlatformAuditProperties properties = new PlatformAuditProperties();
-        AuditEventClient client = ignored -> {
-            throw new IllegalStateException("audit unavailable");
-        };
-
+    void shouldPersistEventInFallbackWhenHttpFails() {
+        PlatformAuditProperties properties = properties();
         AuditFallbackStore fallbackStore = mock(AuditFallbackStore.class);
-        ObjectProvider<AuditFallbackStore> provider = fallbackProvider(fallbackStore);
 
-        DefaultAuditPublisher publisher = new DefaultAuditPublisher(
-                client,
+        RestAuditPublisher publisher = new RestAuditPublisher(
+                failingBuilder(),
                 new SyncTaskExecutor(),
                 properties,
-                provider
+                fallbackProvider(fallbackStore)
         );
 
         publisher.publish(event);
@@ -75,16 +73,12 @@ class DefaultAuditPublisherTest {
     }
 
     @Test
-    void shouldPropagateClientFailureWhenFailOnErrorIsEnabled() {
-        PlatformAuditProperties properties = new PlatformAuditProperties();
+    void shouldPropagateHttpFailureWhenFailOnErrorIsEnabled() {
+        PlatformAuditProperties properties = properties();
         properties.setFailOnError(true);
 
-        AuditEventClient client = ignored -> {
-            throw new IllegalStateException("audit unavailable");
-        };
-
-        DefaultAuditPublisher publisher = new DefaultAuditPublisher(
-                client,
+        RestAuditPublisher publisher = new RestAuditPublisher(
+                failingBuilder(),
                 new SyncTaskExecutor(),
                 properties,
                 emptyFallbackProvider()
@@ -93,6 +87,31 @@ class DefaultAuditPublisherTest {
         assertThatThrownBy(() -> publisher.publish(event))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("audit unavailable");
+    }
+
+    private RestClient.Builder failingBuilder() {
+        RestClient.Builder builder = mock(RestClient.Builder.class);
+        RestClient restClient = mock(RestClient.class, RETURNS_DEEP_STUBS);
+
+        when(builder.baseUrl(anyString())).thenReturn(builder);
+        when(builder.requestFactory(any(ClientHttpRequestFactory.class))).thenReturn(builder);
+        when(builder.build()).thenReturn(restClient);
+
+        when(restClient.post()
+                .uri(anyString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(any(Object.class))
+                .retrieve()
+                .toBodilessEntity())
+                .thenThrow(new IllegalStateException("audit unavailable"));
+
+        return builder;
+    }
+
+    private PlatformAuditProperties properties() {
+        PlatformAuditProperties properties = new PlatformAuditProperties();
+        properties.setServiceUrl("http://audit-api");
+        return properties;
     }
 
     @SuppressWarnings("unchecked")

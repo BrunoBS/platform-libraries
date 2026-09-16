@@ -1,10 +1,9 @@
 package com.empresa.platform.audit.autoconfigure;
 
-import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
+import com.empresa.platform.audit.publisher.AuditPublisher;
 import com.empresa.platform.audit.recovery.AuditRecoveryLock;
-import com.empresa.platform.audit.recovery.AuditRecoveryScheduler;
-import com.empresa.platform.audit.recovery.AuditRecoveryWorker;
+import com.empresa.platform.audit.recovery.AuditRecoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -31,8 +30,8 @@ class PlatformAuditRedisAutoConfigurationTest {
         }
 
         @Bean
-        AuditEventClient auditEventClient() {
-            return mock(AuditEventClient.class);
+        AuditPublisher auditPublisher() {
+            return mock(AuditPublisher.class);
         }
 
         @Bean
@@ -54,8 +53,7 @@ class PlatformAuditRedisAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasSingleBean(AuditFallbackStore.class);
                     assertThat(context).hasSingleBean(AuditRecoveryLock.class);
-                    assertThat(context).hasSingleBean(AuditRecoveryWorker.class);
-                    assertThat(context).hasSingleBean(AuditRecoveryScheduler.class);
+                    assertThat(context).hasSingleBean(AuditRecoveryService.class);
                     assertThat(context).hasBean("platformAuditRecoveryTaskScheduler");
                 });
     }
@@ -70,8 +68,7 @@ class PlatformAuditRedisAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).doesNotHaveBean(AuditFallbackStore.class);
                     assertThat(context).doesNotHaveBean(AuditRecoveryLock.class);
-                    assertThat(context).doesNotHaveBean(AuditRecoveryWorker.class);
-                    assertThat(context).doesNotHaveBean(AuditRecoveryScheduler.class);
+                    assertThat(context).doesNotHaveBean(AuditRecoveryService.class);
                     assertThat(context).doesNotHaveBean("platformAuditRecoveryTaskScheduler");
                 });
     }
