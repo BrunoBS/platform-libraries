@@ -15,29 +15,24 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
     private final ApiMessageRepository repository;
     private final ApiMessageCache cache;
     private final Locale defaultLocale;
-    private final List<ApiMessageProvider> providers;
-
-    public DefaultApiMessageResolver(ApiMessageRepository repository, ApiMessageCache cache, Locale defaultLocale) {
-        this(repository, cache, defaultLocale, List.of());
-    }
+    private final ApiMessageProvider provider;
 
     public DefaultApiMessageResolver(
             ApiMessageRepository repository,
             ApiMessageCache cache,
             Locale defaultLocale,
-            List<ApiMessageProvider> providers
+            ApiMessageProvider provider
     ) {
         this.repository = repository;
         this.cache = cache;
         this.defaultLocale = defaultLocale;
-        this.providers = providers == null ? List.of() : List.copyOf(providers);
+        this.provider = provider;
     }
 
     @Override
     public ApiMessage resolve(String key, Locale locale) {
         List<Locale> candidates = getCandidates(locale);
 
-        // External overrides always win, including locale fallback candidates.
         for (Locale candidate : candidates) {
             Optional<ApiMessage> externalMessage = tryGetFromCache(key, candidate)
                     .or(() -> tryGetFromRepositoryAndCache(key, candidate));
@@ -46,9 +41,8 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
             }
         }
 
-        // Built-in providers (for example Spring properties) are local fallbacks.
         for (Locale candidate : candidates) {
-            Optional<ApiMessage> fallbackMessage = tryGetFromProviders(key, candidate);
+            Optional<ApiMessage> fallbackMessage = tryGetFromProvider(key, candidate);
             if (fallbackMessage.isPresent()) {
                 return fallbackMessage.get();
             }
@@ -75,18 +69,15 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
         });
     }
 
-    private Optional<ApiMessage> tryGetFromProviders(String key, Locale locale) {
-        for (ApiMessageProvider provider : providers) {
-            try {
-                Optional<ApiMessage> message = provider.find(key, locale);
-                if (message.isPresent()) {
-                    return message;
-                }
-            } catch (Exception ignored) {
-                // Um provider de fallback não pode derrubar o fluxo de resolução.
-            }
+    private Optional<ApiMessage> tryGetFromProvider(String key, Locale locale) {
+        if (provider == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        try {
+            return provider.find(key, locale);
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
     }
 
     private List<Locale> getCandidates(Locale locale) {
