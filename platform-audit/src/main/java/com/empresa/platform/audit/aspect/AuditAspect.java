@@ -4,7 +4,7 @@ import com.empresa.platform.audit.annotation.AuditField;
 import com.empresa.platform.audit.annotation.AuditFieldSource;
 import com.empresa.platform.audit.annotation.Auditable;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
-import com.empresa.platform.audit.context.AuditContextProvider;
+import com.empresa.platform.audit.context.AuditAuthorizationContextResolver;
 import com.empresa.platform.audit.model.AuditContext;
 import com.empresa.platform.audit.model.AuditEventRequest;
 import com.empresa.platform.audit.publisher.AuditPublisher;
@@ -13,6 +13,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import tools.jackson.databind.JsonNode;
@@ -27,22 +29,24 @@ import java.util.Map;
 @Aspect
 public final class AuditAspect {
 
+    private static final Logger log = LoggerFactory.getLogger(AuditAspect.class);
+
     private final PlatformAuditProperties properties;
     private final AuditPublisher publisher;
-    private final AuditContextProvider contextProvider;
+    private final AuditAuthorizationContextResolver contextResolver;
     private final ObjectMapper objectMapper;
     private final HttpServletRequest request;
 
     public AuditAspect(
             PlatformAuditProperties properties,
             AuditPublisher publisher,
-            AuditContextProvider contextProvider,
+            AuditAuthorizationContextResolver contextResolver,
             ObjectMapper objectMapper,
             HttpServletRequest request
     ) {
         this.properties = properties;
         this.publisher = publisher;
-        this.contextProvider = contextProvider;
+        this.contextResolver = contextResolver;
         this.objectMapper = objectMapper;
         this.request = request;
     }
@@ -89,7 +93,23 @@ public final class AuditAspect {
             return;
         }
 
-        AuditContext context = contextProvider.currentContext();
+        AuditContext context;
+        try {
+            context = contextResolver.resolve();
+        } catch (RuntimeException exception) {
+            if (properties.isFailOnError()) {
+                throw exception;
+            }
+            log.error(
+                    "Audit event skipped because no authorized UserContext is available | resource={} | resourceId={} | action={}",
+                    auditable.resource(),
+                    resourceId,
+                    auditable.action(),
+                    exception
+            );
+            return;
+        }
+
         String environmentId = stringify(
                 resolveField(joinPoint, responseBody, auditable.environment())
         );
