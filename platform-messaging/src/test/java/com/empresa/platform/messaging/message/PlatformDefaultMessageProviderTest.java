@@ -21,20 +21,30 @@ class PlatformDefaultMessageProviderTest {
         );
 
         assertThat(message).isPresent();
+        assertThat(message.orElseThrow().code()).isEqualTo("GLOBAL-0001");
         assertThat(message.orElseThrow().httpStatus()).isEqualTo(400);
+        assertThat(message.orElseThrow().message())
+                .isEqualTo("Um ou mais campos informados são inválidos. Verifique os detalhes.");
     }
 
     @Test
     void deveFornecerMensagensBaseDoCrud() {
-        assertThat(provider.find(
+        var ptBr = provider.find(
                 "validation.id.must-be-absent",
                 Locale.forLanguageTag("pt-BR")
-        )).isPresent();
+        );
 
-        assertThat(provider.find(
+        var en = provider.find(
                 "validation.id.required",
                 Locale.forLanguageTag("en-US")
-        )).isPresent();
+        );
+
+        assertThat(ptBr).isPresent();
+        assertThat(ptBr.orElseThrow().code()).isEqualTo("VALIDATION-0003");
+
+        assertThat(en).isPresent();
+        assertThat(en.orElseThrow().message()).isEqualTo("The identifier is required.");
+        assertThat(en.orElseThrow().httpStatus()).isEqualTo(400);
     }
 
     @Test
