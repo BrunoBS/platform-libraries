@@ -6,6 +6,7 @@ import com.empresa.platform.audit.client.RestAuditEventClient;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
 import com.empresa.platform.audit.context.AuditContextProvider;
 import com.empresa.platform.audit.context.HttpAuditContextProvider;
+import com.empresa.platform.audit.fallback.AuditFallbackStore;
 import com.empresa.platform.audit.publisher.AuditPublisher;
 import com.empresa.platform.audit.publisher.DefaultAuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
@@ -56,9 +58,15 @@ public class PlatformAuditAutoConfiguration {
     AuditPublisher auditPublisher(
             AuditEventClient client,
             @Qualifier("platformAuditTaskExecutor") TaskExecutor platformAuditTaskExecutor,
-            PlatformAuditProperties properties
+            PlatformAuditProperties properties,
+            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
     ) {
-        return new DefaultAuditPublisher(client, platformAuditTaskExecutor, properties);
+        return new DefaultAuditPublisher(
+                client,
+                platformAuditTaskExecutor,
+                properties,
+                fallbackStoreProvider
+        );
     }
 
     @Bean
