@@ -14,6 +14,8 @@ import com.empresa.platform.messaging.resolver.DefaultApiMessageResolver;
 import com.empresa.platform.messaging.web.ApiExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,7 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Locale;
 
-@AutoConfiguration
+@AutoConfiguration(after = {DataSourceAutoConfiguration.class, JdbcTemplateAutoConfiguration.class})
 @EnableConfigurationProperties(PlatformMessagingProperties.class)
 @ConditionalOnProperty(prefix = "platform.messaging", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlatformMessagingAutoConfiguration {
