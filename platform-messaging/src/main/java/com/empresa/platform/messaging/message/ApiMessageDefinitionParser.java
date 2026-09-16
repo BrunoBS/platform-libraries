@@ -1,0 +1,55 @@
+package com.empresa.platform.messaging.message;
+
+import com.empresa.platform.messaging.model.ApiMessage;
+
+import java.util.Locale;
+
+final class ApiMessageDefinitionParser {
+
+    private static final String DELIMITER_REGEX = "\\|";
+    private static final int EXPECTED_FIELDS = 4;
+
+    ApiMessage parse(String key, Locale locale, String definition) {
+        String[] fields = definition.split(DELIMITER_REGEX, -1);
+        if (fields.length != EXPECTED_FIELDS) {
+            throw new IllegalArgumentException(
+                    "Invalid message definition for key '" + key
+                            + "'. Expected format: code|httpStatus|message|solution"
+            );
+        }
+
+        String code = requireValue(fields[0], key, "code");
+        int httpStatus = parseHttpStatus(fields[1], key);
+        String message = requireValue(fields[2], key, "message");
+        String solution = fields[3].isBlank() ? null : fields[3].trim();
+
+        return new ApiMessage(
+                code,
+                key,
+                locale.toLanguageTag(),
+                message,
+                solution,
+                httpStatus
+        );
+    }
+
+    private String requireValue(String value, String key, String field) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Invalid message definition for key '" + key + "': " + field + " is required"
+            );
+        }
+        return value.trim();
+    }
+
+    private int parseHttpStatus(String value, String key) {
+        try {
+            return Integer.parseInt(requireValue(value, key, "httpStatus"));
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(
+                    "Invalid message definition for key '" + key + "': httpStatus must be numeric",
+                    exception
+            );
+        }
+    }
+}

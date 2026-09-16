@@ -35,14 +35,25 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
 
     @Override
     public ApiMessage resolve(String key, Locale locale) {
-        for (Locale candidate : getCandidates(locale)) {
-            Optional<ApiMessage> messageOpt = tryGetFromCache(key, candidate)
-                    .or(() -> tryGetFromRepositoryAndCache(key, candidate))
-                    .or(() -> tryGetFromProviders(key, candidate));
-            if (messageOpt.isPresent()) {
-                return messageOpt.get();
+        List<Locale> candidates = getCandidates(locale);
+
+        // External overrides always win, including locale fallback candidates.
+        for (Locale candidate : candidates) {
+            Optional<ApiMessage> externalMessage = tryGetFromCache(key, candidate)
+                    .or(() -> tryGetFromRepositoryAndCache(key, candidate));
+            if (externalMessage.isPresent()) {
+                return externalMessage.get();
             }
         }
+
+        // Built-in providers (for example Spring properties) are local fallbacks.
+        for (Locale candidate : candidates) {
+            Optional<ApiMessage> fallbackMessage = tryGetFromProviders(key, candidate);
+            if (fallbackMessage.isPresent()) {
+                return fallbackMessage.get();
+            }
+        }
+
         throw new ApiMessageNotFoundException(key);
     }
 
