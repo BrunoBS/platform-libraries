@@ -5,8 +5,7 @@ import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.client.RestAuditEventClient;
 import com.empresa.platform.audit.config.AuditFallbackConfigurationValidator;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
-import com.empresa.platform.audit.context.AuditContextProvider;
-import com.empresa.platform.audit.context.HttpAuditContextProvider;
+import com.empresa.platform.audit.context.AuditAuthorizationContextResolver;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
 import com.empresa.platform.audit.publisher.AuditPublisher;
 import com.empresa.platform.audit.publisher.DefaultAuditPublisher;
@@ -79,9 +78,9 @@ public class PlatformAuditAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuditContextProvider.class)
-    AuditContextProvider auditContextProvider(HttpServletRequest request) {
-        return new HttpAuditContextProvider(request);
+    @ConditionalOnMissingBean(AuditAuthorizationContextResolver.class)
+    AuditAuthorizationContextResolver auditAuthorizationContextResolver() {
+        return new AuditAuthorizationContextResolver();
     }
 
     @Bean
@@ -89,10 +88,10 @@ public class PlatformAuditAutoConfiguration {
     AuditAspect auditAspect(
             PlatformAuditProperties properties,
             AuditPublisher publisher,
-            AuditContextProvider contextProvider,
+            AuditAuthorizationContextResolver contextResolver,
             ObjectMapper objectMapper,
             HttpServletRequest request
     ) {
-        return new AuditAspect(properties, publisher, contextProvider, objectMapper, request);
+        return new AuditAspect(properties, publisher, contextResolver, objectMapper, request);
     }
 }
