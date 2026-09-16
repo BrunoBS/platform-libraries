@@ -1,20 +1,19 @@
 package com.empresa.platform.audit.autoconfigure;
 
-import com.empresa.platform.audit.client.AuditEventClient;
 import com.empresa.platform.audit.config.PlatformAuditProperties;
 import com.empresa.platform.audit.fallback.AuditFallbackStore;
 import com.empresa.platform.audit.fallback.RedisAuditFallbackStore;
+import com.empresa.platform.audit.publisher.AuditPublisher;
 import com.empresa.platform.audit.recovery.AuditRecoveryLock;
-import com.empresa.platform.audit.recovery.AuditRecoveryScheduler;
-import com.empresa.platform.audit.recovery.AuditRecoveryWorker;
+import com.empresa.platform.audit.recovery.AuditRecoveryService;
 import com.empresa.platform.audit.recovery.RedisAuditRecoveryLock;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -58,38 +57,32 @@ public class PlatformAuditRedisAutoConfiguration {
         return new RedisAuditRecoveryLock(redisTemplate, properties);
     }
 
-    @Bean
-    @ConditionalOnMissingBean(AuditRecoveryWorker.class)
-    AuditRecoveryWorker auditRecoveryWorker(
-            AuditEventClient client,
-            AuditFallbackStore fallbackStore,
-            AuditRecoveryLock recoveryLock,
-            PlatformAuditProperties properties
-    ) {
-        return new AuditRecoveryWorker(client, fallbackStore, recoveryLock, properties);
-    }
-
     @Bean(name = "platformAuditRecoveryTaskScheduler")
     @ConditionalOnMissingBean(name = "platformAuditRecoveryTaskScheduler")
     ThreadPoolTaskScheduler platformAuditRecoveryTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(1);
         scheduler.setThreadNamePrefix("platform-audit-recovery-");
+        scheduler.initialize();
         return scheduler;
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuditRecoveryScheduler.class)
-    AuditRecoveryScheduler auditRecoveryScheduler(
-            AuditRecoveryWorker worker,
+    @ConditionalOnMissingBean(AuditRecoveryService.class)
+    AuditRecoveryService auditRecoveryService(
+            AuditPublisher publisher,
+            AuditFallbackStore fallbackStore,
+            AuditRecoveryLock recoveryLock,
             @Qualifier("platformAuditRecoveryTaskScheduler")
             ThreadPoolTaskScheduler platformAuditRecoveryTaskScheduler,
             PlatformAuditProperties properties
     ) {
-        return new AuditRecoveryScheduler(
-                worker,
+        return new AuditRecoveryService(
+                publisher,
+                fallbackStore,
+                recoveryLock,
                 platformAuditRecoveryTaskScheduler,
-                properties.getFallback().getRecoveryInterval()
+                properties
         );
     }
 }
