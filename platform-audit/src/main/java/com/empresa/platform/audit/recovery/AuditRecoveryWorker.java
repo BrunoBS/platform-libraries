@@ -26,6 +26,14 @@ public final class AuditRecoveryWorker {
     }
 
     public void recover() {
+        try {
+            recoverBatch();
+        } catch (Exception exception) {
+            log.warn("Audit recovery cycle failed before completion", exception);
+        }
+    }
+
+    private void recoverBatch() {
         if (!fallbackStore.hasPending()) {
             return;
         }
