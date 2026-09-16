@@ -7,29 +7,51 @@ import com.empresa.platform.audit.model.AuditEventRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 public final class AuditRecoveryWorker {
 
     private static final Logger log = LoggerFactory.getLogger(AuditRecoveryWorker.class);
 
     private final AuditEventClient client;
     private final AuditFallbackStore fallbackStore;
+    private final AuditRecoveryLock recoveryLock;
     private final PlatformAuditProperties properties;
 
     public AuditRecoveryWorker(
             AuditEventClient client,
             AuditFallbackStore fallbackStore,
+            AuditRecoveryLock recoveryLock,
             PlatformAuditProperties properties
     ) {
         this.client = client;
         this.fallbackStore = fallbackStore;
+        this.recoveryLock = recoveryLock;
         this.properties = properties;
     }
 
     public void recover() {
+        Optional<String> token = Optional.empty();
+
         try {
+            token = recoveryLock.tryAcquire();
+            if (token.isEmpty()) {
+                return;
+            }
+
             recoverBatch();
         } catch (Exception exception) {
             log.warn("Audit recovery cycle failed before completion", exception);
+        } finally {
+            token.ifPresent(this::releaseLock);
+        }
+    }
+
+    private void releaseLock(String token) {
+        try {
+            recoveryLock.release(token);
+        } catch (Exception exception) {
+            log.warn("Failed to release audit recovery lock", exception);
         }
     }
 
