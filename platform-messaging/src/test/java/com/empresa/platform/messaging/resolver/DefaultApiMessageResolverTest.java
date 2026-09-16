@@ -3,6 +3,7 @@ package com.empresa.platform.messaging.resolver;
 import com.empresa.platform.messaging.cache.NoOpApiMessageCache;
 import com.empresa.platform.messaging.exception.ApiMessageNotFoundException;
 import com.empresa.platform.messaging.message.PlatformDefaultMessageProvider;
+import com.empresa.platform.messaging.message.PlatformMessageKeys;
 import com.empresa.platform.messaging.model.ApiMessage;
 import com.empresa.platform.messaging.provider.ApiMessageProvider;
 import com.empresa.platform.messaging.repository.ApiMessageRepository;
@@ -111,10 +112,10 @@ class DefaultApiMessageResolverTest {
                 new PlatformDefaultMessageProvider()
         );
 
-        var result = resolver.resolve("validation.id.required", Locale.forLanguageTag("fr-FR"));
+        var result = resolver.resolve(PlatformMessageKeys.RESOURCE_NOT_FOUND, Locale.forLanguageTag("fr-FR"));
 
         assertEquals("pt-BR", result.locale());
-        assertEquals("O identificador é obrigatório.", result.message());
+        assertEquals("O recurso solicitado não foi encontrado.", result.message());
     }
 
     @Test
