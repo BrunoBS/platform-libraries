@@ -126,8 +126,8 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
 
         if (localKey.startsWith(service + ".")) {
             throw new IllegalStateException(
-                    "Platform message key must be local to its bundle: key='%s', bundle='%s'. "
-                            + "Remove the '%s.' prefix."
+                    ("Platform message key must be local to its bundle: key='%s', bundle='%s'. "
+                            + "Remove the '%s.' prefix.")
                             .formatted(localKey, resourceName(resource), service)
             );
         }
