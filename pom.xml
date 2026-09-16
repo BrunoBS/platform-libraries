@@ -15,6 +15,7 @@
     <name>platform-libraries</name>
 
     <modules>
+        <module>platform-audit</module>
         <module>platform-messaging</module>
         <module>platform-authorization</module>
         <module>platform-logging</module>
