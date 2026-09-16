@@ -46,7 +46,7 @@ class DefaultApiMessageResolverTest {
     void shouldUseProviderWhenRepositoryDoesNotContainMessage() {
         ApiMessageRepository repository = (k, l) -> Optional.empty();
         ApiMessageProvider provider = (k, l) -> Optional.of(
-                new ApiMessage("AUTH-401", k, "pt-BR", "Acesso não permitido", "Verifique suas credenciais.", 401)
+                new ApiMessage("AUTH-401", k, l.toLanguageTag(), "Acesso não permitido", "Verifique suas credenciais.", 401)
         );
 
         var resolver = new DefaultApiMessageResolver(
@@ -68,7 +68,7 @@ class DefaultApiMessageResolverTest {
                 new ApiMessage("CUSTOM-401", k, l.toLanguageTag(), "Mensagem customizada", "Custom solution", 401)
         );
         ApiMessageProvider provider = (k, l) -> Optional.of(
-                new ApiMessage("AUTH-401", k, "pt-BR", "Acesso não permitido", "Verifique suas credenciais.", 401)
+                new ApiMessage("AUTH-401", k, l.toLanguageTag(), "Acesso não permitido", "Verifique suas credenciais.", 401)
         );
 
         var resolver = new DefaultApiMessageResolver(
@@ -82,6 +82,44 @@ class DefaultApiMessageResolverTest {
 
         assertEquals("Mensagem customizada", result.message());
         assertEquals("CUSTOM-401", result.code());
+    }
+
+    @Test
+    void shouldPreferRepositoryLanguageFallbackOverExactProviderLocale() {
+        ApiMessageRepository repository = (k, l) -> l.equals(Locale.ENGLISH)
+                ? Optional.of(new ApiMessage(
+                        "CUSTOM-404",
+                        k,
+                        "en",
+                        "Database override",
+                        "Database solution",
+                        404
+                ))
+                : Optional.empty();
+
+        ApiMessageProvider provider = (k, l) -> l.equals(Locale.forLanguageTag("en-US"))
+                ? Optional.of(new ApiMessage(
+                        "DEFAULT-404",
+                        k,
+                        "en-US",
+                        "Properties default",
+                        "Properties solution",
+                        404
+                ))
+                : Optional.empty();
+
+        var resolver = new DefaultApiMessageResolver(
+                repository,
+                new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"),
+                List.of(provider)
+        );
+
+        var result = resolver.resolve("user.not.found", Locale.forLanguageTag("en-US"));
+
+        assertEquals("Database override", result.message());
+        assertEquals("CUSTOM-404", result.code());
+        assertEquals("en", result.locale());
     }
 
     @Test
