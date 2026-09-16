@@ -118,3 +118,57 @@ audit_en.properties    -> audit.event.not.found
 
 Por convenção, cada módulo deve usar seu próprio namespace, por exemplo
 `audit.*`, `crud.*`, `routing.*`, `authorization.*` e `catalog.*`.
+
+
+## Namespace automático por bundle
+
+O nome do bundle define o namespace global das mensagens.
+
+Formato obrigatório:
+
+```text
+<service>_<locale>.properties
+```
+
+Exemplo:
+
+```text
+catalog_pt_BR.properties
+```
+
+Conteúdo do arquivo usa apenas a chave local:
+
+```properties
+not.found=CAT-404-001|404|Catálogo não encontrado.|Verifique o identificador informado.
+name.required=CAT-400-003|400|Nome obrigatório.|Informe o nome do catálogo.
+```
+
+Durante o startup, o provider transforma automaticamente:
+
+```text
+catalog + not.found      -> catalog.not.found
+catalog + name.required  -> catalog.name.required
+```
+
+A chave completa é a identidade usada no Java, no banco e no Redis:
+
+```text
+Java:   catalog.not.found
+Banco:  catalog.not.found
+Redis:  platform:message:catalog.not.found:pt-BR
+Bundle: not.found
+```
+
+Uma chave já prefixada dentro do bundle, por exemplo
+`catalog.not.found` dentro de `catalog_pt_BR.properties`, é rejeitada no startup.
+
+Dois serviços podem ter a mesma chave local sem colisão:
+
+```text
+audit_pt_BR.properties -> event.not.found -> audit.event.not.found
+crud_pt_BR.properties  -> event.not.found -> crud.event.not.found
+```
+
+A colisão ocorre apenas quando a mesma chave global é publicada duas vezes
+para o mesmo locale, por exemplo dois bundles `catalog_pt_BR.properties`
+contendo `not.found`.
