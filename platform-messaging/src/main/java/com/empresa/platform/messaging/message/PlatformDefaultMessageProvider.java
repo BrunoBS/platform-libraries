@@ -25,7 +25,7 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
             "classpath*:META-INF/platform-messages/*.properties";
 
     private static final Pattern BUNDLE_FILENAME_PATTERN =
-            Pattern.compile("^.+_([a-z]{2}(?:_[A-Z]{2})?)\\.properties$");
+            Pattern.compile("^([a-z0-9-]+)_([a-z]{2}(?:_[A-Z]{2})?)\\.properties$");
 
     private final ApiMessageDefinitionParser parser;
     private final Map<String, Map<String, String>> definitionsByLocale;
@@ -72,29 +72,35 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
             Map<String, Map<String, String>> owners = new HashMap<>();
 
             for (Resource resource : resources) {
-                String locale = extractLocale(resource);
-                if (locale == null) {
-                    continue;
+                BundleDescriptor bundle = extractBundleDescriptor(resource);
+                if (bundle == null) {
+                    throw new IllegalStateException(
+                            "Invalid platform message bundle name: '%s'. Expected: <service>_<locale>.properties"
+                                    .formatted(resourceName(resource))
+                    );
                 }
 
                 Properties properties = loadProperties(resource);
                 Map<String, String> localeDefinitions =
-                        definitions.computeIfAbsent(locale, ignored -> new HashMap<>());
+                        definitions.computeIfAbsent(bundle.locale(), ignored -> new HashMap<>());
                 Map<String, String> localeOwners =
-                        owners.computeIfAbsent(locale, ignored -> new HashMap<>());
+                        owners.computeIfAbsent(bundle.locale(), ignored -> new HashMap<>());
 
-                for (String key : properties.stringPropertyNames()) {
-                    String currentOwner = localeOwners.putIfAbsent(key, resourceName(resource));
+                for (String localKey : properties.stringPropertyNames()) {
+                    validateLocalKey(bundle.service(), localKey, resource);
+
+                    String globalKey = bundle.service() + "." + localKey;
+                    String currentOwner = localeOwners.putIfAbsent(globalKey, resourceName(resource));
                     if (currentOwner != null) {
                         throw duplicateKeyException(
-                                key,
-                                locale,
+                                globalKey,
+                                bundle.locale(),
                                 currentOwner,
                                 resourceName(resource)
                         );
                     }
 
-                    localeDefinitions.put(key, properties.getProperty(key));
+                    localeDefinitions.put(globalKey, properties.getProperty(localKey));
                 }
             }
 
@@ -111,20 +117,40 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
         }
     }
 
+    private void validateLocalKey(String service, String localKey, Resource resource) {
+        if (localKey == null || localKey.isBlank()) {
+            throw new IllegalStateException(
+                    "Blank platform message key in bundle '%s'".formatted(resourceName(resource))
+            );
+        }
+
+        if (localKey.startsWith(service + ".")) {
+            throw new IllegalStateException(
+                    "Platform message key must be local to its bundle: key='%s', bundle='%s'. "
+                            + "Remove the '%s.' prefix."
+                            .formatted(localKey, resourceName(resource), service)
+            );
+        }
+    }
+
     private Properties loadProperties(Resource resource) throws IOException {
         return PropertiesLoaderUtils.loadProperties(
                 new EncodedResource(resource, StandardCharsets.UTF_8)
         );
     }
 
-    private String extractLocale(Resource resource) {
+    private BundleDescriptor extractBundleDescriptor(Resource resource) {
         String filename = resource.getFilename();
         if (filename == null) {
             return null;
         }
 
         Matcher matcher = BUNDLE_FILENAME_PATTERN.matcher(filename);
-        return matcher.matches() ? matcher.group(1) : null;
+        if (!matcher.matches()) {
+            return null;
+        }
+
+        return new BundleDescriptor(matcher.group(1), matcher.group(2));
     }
 
     private IllegalStateException duplicateKeyException(
@@ -142,5 +168,8 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
     private String resourceName(Resource resource) {
         String filename = resource.getFilename();
         return filename == null ? resource.getDescription() : filename;
+    }
+
+    private record BundleDescriptor(String service, String locale) {
     }
 }
