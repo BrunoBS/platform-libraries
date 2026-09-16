@@ -22,5 +22,6 @@
         <module>platform-test-support</module>
         <module>platform-catalog</module>
         <module>platform-crud</module>
+        <module>platform-audit</module>
     </modules>
 </project>
