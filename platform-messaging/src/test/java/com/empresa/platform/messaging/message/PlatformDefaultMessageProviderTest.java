@@ -36,7 +36,7 @@ class PlatformDefaultMessageProviderTest {
 
         var en = provider.find(
                 "validation.id.required",
-                Locale.forLanguageTag("en-US")
+                Locale.ENGLISH
         );
 
         assertThat(ptBr).isPresent();
@@ -45,6 +45,19 @@ class PlatformDefaultMessageProviderTest {
         assertThat(en).isPresent();
         assertThat(en.orElseThrow().message()).isEqualTo("The identifier is required.");
         assertThat(en.orElseThrow().httpStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void naoDeveFazerFallbackInternoParaOutroBundle() {
+        assertThat(provider.find(
+                "validation.id.required",
+                Locale.forLanguageTag("fr-FR")
+        )).isEmpty();
+
+        assertThat(provider.find(
+                "validation.id.required",
+                Locale.forLanguageTag("en-US")
+        )).isEmpty();
     }
 
     @Test
