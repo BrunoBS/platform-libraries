@@ -8,10 +8,12 @@ import com.empresa.platform.messaging.message.PlatformDefaultMessageProvider;
 import com.empresa.platform.messaging.provider.ApiMessageProvider;
 import com.empresa.platform.messaging.repository.ApiMessageRepository;
 import com.empresa.platform.messaging.repository.JdbcApiMessageRepository;
+import com.empresa.platform.messaging.repository.NoOpApiMessageRepository;
 import com.empresa.platform.messaging.resolver.ApiMessageResolver;
 import com.empresa.platform.messaging.resolver.DefaultApiMessageResolver;
 import com.empresa.platform.messaging.web.ApiExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,10 +28,21 @@ import java.util.Locale;
 public class PlatformMessagingAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
-    ApiMessageRepository apiMessageRepository(JdbcTemplate jdbc, PlatformMessagingProperties p) {
-        SqlIdentifierValidator.validate(p.getDatasource().getViewName());
-        return new JdbcApiMessageRepository(jdbc, p);
+    @ConditionalOnBean(JdbcTemplate.class)
+    @ConditionalOnMissingBean(ApiMessageRepository.class)
+    ApiMessageRepository jdbcApiMessageRepository(
+            JdbcTemplate jdbc,
+            PlatformMessagingProperties properties
+    ) {
+        SqlIdentifierValidator.validate(properties.getDatasource().getViewName());
+        return new JdbcApiMessageRepository(jdbc, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(JdbcTemplate.class)
+    @ConditionalOnMissingBean(ApiMessageRepository.class)
+    ApiMessageRepository noOpApiMessageRepository() {
+        return new NoOpApiMessageRepository();
     }
 
     @Bean
