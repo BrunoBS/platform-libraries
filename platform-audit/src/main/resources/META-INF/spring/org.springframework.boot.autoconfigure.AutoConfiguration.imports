@@ -1,1 +1,2 @@
 com.empresa.platform.audit.autoconfigure.PlatformAuditAutoConfiguration
+com.empresa.platform.audit.autoconfigure.PlatformAuditRedisAutoConfiguration
