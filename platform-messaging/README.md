@@ -85,3 +85,36 @@ platform:
     enabled: true
     default-locale: "pt-BR"
 ```
+
+
+## Validação de unicidade no startup
+
+Ao criar o `PlatformDefaultMessageProvider`, todos os bundles em
+`META-INF/platform-messages/*.properties` são carregados e indexados.
+
+A combinação abaixo deve ser única:
+
+```text
+locale + messageKey
+```
+
+Se dois módulos publicarem a mesma chave para o mesmo locale, a aplicação falha
+durante a inicialização com uma mensagem indicando a chave, o locale e os dois
+bundles conflitantes.
+
+Exemplo inválido:
+
+```text
+audit_pt_BR.properties -> event.not.found
+crud_pt_BR.properties  -> event.not.found
+```
+
+A mesma chave em idiomas diferentes é permitida:
+
+```text
+audit_pt_BR.properties -> audit.event.not.found
+audit_en.properties    -> audit.event.not.found
+```
+
+Por convenção, cada módulo deve usar seu próprio namespace, por exemplo
+`audit.*`, `crud.*`, `routing.*`, `authorization.*` e `catalog.*`.
