@@ -1,5 +1,8 @@
 package com.empresa.platform.messaging.autoconfigure;
 
+import com.empresa.platform.messaging.repository.ApiMessageRepository;
+import com.empresa.platform.messaging.repository.JdbcApiMessageRepository;
+import com.empresa.platform.messaging.repository.NoOpApiMessageRepository;
 import com.empresa.platform.messaging.resolver.ApiMessageResolver;
 import com.empresa.platform.messaging.web.ApiExceptionHandler;
 import org.junit.jupiter.api.Test;
@@ -8,6 +11,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -18,7 +22,10 @@ class PlatformMessagingAutoConfigurationTest {
 
     @Configuration
     static class MockInfrastructureConfiguration {
-        @Bean JdbcTemplate jdbcTemplate() { return mock(JdbcTemplate.class); }
+        @Bean
+        JdbcTemplate jdbcTemplate() {
+            return mock(JdbcTemplate.class);
+        }
     }
 
     @Test
@@ -29,15 +36,38 @@ class PlatformMessagingAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).doesNotHaveBean(ApiMessageResolver.class);
                     assertThat(context).doesNotHaveBean(ApiExceptionHandler.class);
+                    assertThat(context).doesNotHaveBean(ApiMessageRepository.class);
                 });
     }
 
     @Test
-    void shouldLoadBeansByParameters() {
+    void shouldUseJdbcRepositoryWhenJdbcTemplateExists() {
         this.contextRunner
                 .withUserConfiguration(MockInfrastructureConfiguration.class)
-                .withPropertyValues("platform.messaging.enabled=true", "platform.messaging.default-locale=pt-BR")
+                .withPropertyValues(
+                        "platform.messaging.enabled=true",
+                        "platform.messaging.default-locale=pt-BR"
+                )
                 .run(context -> {
+                    assertThat(context).hasSingleBean(ApiMessageRepository.class);
+                    assertThat(context.getBean(ApiMessageRepository.class))
+                            .isInstanceOf(JdbcApiMessageRepository.class);
+                    assertThat(context).hasSingleBean(ApiMessageResolver.class);
+                    assertThat(context).hasSingleBean(ApiExceptionHandler.class);
+                });
+    }
+
+    @Test
+    void shouldUseNoOpRepositoryWhenJdbcTemplateDoesNotExist() {
+        this.contextRunner
+                .withPropertyValues(
+                        "platform.messaging.enabled=true",
+                        "platform.messaging.default-locale=pt-BR"
+                )
+                .run(context -> {
+                    assertThat(context).hasSingleBean(ApiMessageRepository.class);
+                    assertThat(context.getBean(ApiMessageRepository.class))
+                            .isInstanceOf(NoOpApiMessageRepository.class);
                     assertThat(context).hasSingleBean(ApiMessageResolver.class);
                     assertThat(context).hasSingleBean(ApiExceptionHandler.class);
                 });

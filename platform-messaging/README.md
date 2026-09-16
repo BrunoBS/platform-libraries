@@ -105,8 +105,8 @@ bundles conflitantes.
 Exemplo inválido:
 
 ```text
-audit_pt_BR.properties -> event.not.found
-crud_pt_BR.properties  -> event.not.found
+catalog_pt_BR.properties -> not.found
+catalog_pt_BR.properties -> not.found
 ```
 
 A mesma chave em idiomas diferentes é permitida:
@@ -172,3 +172,25 @@ crud_pt_BR.properties  -> event.not.found -> crud.event.not.found
 A colisão ocorre apenas quando a mesma chave global é publicada duas vezes
 para o mesmo locale, por exemplo dois bundles `catalog_pt_BR.properties`
 contendo `not.found`.
+
+
+## Serviços sem DataSource
+
+O módulo também funciona em serviços que não possuem banco de dados.
+
+Quando existe um `JdbcTemplate` no contexto, o módulo cria
+`JdbcApiMessageRepository` e mantém o fluxo:
+
+```text
+Redis -> Banco / VIEW -> Bundle
+```
+
+Quando não existe `JdbcTemplate`, o módulo cria automaticamente
+`NoOpApiMessageRepository`. Nesse modo, o repositório sempre retorna vazio e
+a resolução segue para os bundles locais:
+
+```text
+NoOp repository -> PlatformDefaultMessageProvider -> Bundle
+```
+
+Não é necessário configurar DataSource apenas para utilizar mensagens locais.
