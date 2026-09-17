@@ -9,6 +9,13 @@ public final class OptimisticLockSupport {
     private OptimisticLockSupport() {
     }
 
+    public static void validateCreate(Object resource) {
+        if (resource instanceof VersionedResource versionedResource
+                && versionedResource.version() != null) {
+            throw new ResourceVersionConflictException();
+        }
+    }
+
     public static void validate(Object entity, Object resource) {
         if (entity instanceof OptimisticLockable lockable
                 && resource instanceof VersionedResource versionedResource) {

@@ -36,6 +36,7 @@ public abstract class BaseCrudService<
     @Transactional
     public D create(D dto) {
         validator.validateForCreate(dto);
+        OptimisticLockSupport.validateCreate(dto);
         E entity = mapper.toEntity(dto);
         beforeCreate(entity, dto);
         E saved = repository.save(entity);
