@@ -2,6 +2,7 @@ package com.empresa.platform.crud.service;
 
 import com.empresa.platform.crud.dto.BaseCrudDTO;
 import com.empresa.platform.crud.mapper.BaseCrudMapper;
+import com.empresa.platform.crud.normalization.CrudNormalizer;
 import com.empresa.platform.crud.repository.BaseCrudRepository;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
 import com.empresa.platform.crud.version.OptimisticLockSupport;
@@ -29,12 +30,14 @@ public abstract class BaseCrudService<
 
     @Transactional(readOnly = true)
     public D findById(D dto) {
+        dto = normalize(dto);
         validator.validateForFind(dto);
         return mapper.toDTO(getEntity(dto));
     }
 
     @Transactional
     public D create(D dto) {
+        dto = normalize(dto);
         validator.validateForCreate(dto);
         OptimisticLockSupport.validateCreate(dto);
         E entity = mapper.toEntity(dto);
@@ -47,6 +50,7 @@ public abstract class BaseCrudService<
 
     @Transactional
     public D update(D dto) {
+        dto = normalize(dto);
         validator.validateForUpdate(dto);
         E entity = getEntity(dto);
         OptimisticLockSupport.validate(entity, dto);
@@ -60,11 +64,20 @@ public abstract class BaseCrudService<
 
     @Transactional
     public void delete(D dto) {
+        dto = normalize(dto);
         validator.validateForDelete(dto);
         E entity = getEntity(dto);
         beforeDelete(entity);
         deleteEntity(entity);
         afterDelete(entity);
+    }
+
+    @SuppressWarnings("unchecked")
+    private D normalize(D dto) {
+        if (this instanceof CrudNormalizer<?> normalizer) {
+            return ((CrudNormalizer<D>) normalizer).normalize(dto);
+        }
+        return dto;
     }
 
     protected E getEntity(D dto) {
