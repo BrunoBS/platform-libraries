@@ -9,6 +9,7 @@ import com.empresa.platform.crud.version.OptimisticLockable;
 import com.empresa.platform.messaging.exception.ResourceVersionConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 
 import java.util.Optional;
 
@@ -45,6 +46,7 @@ class BaseCrudServiceTest {
         assertThat(service.create(input)).isEqualTo(response);
         verify(validator).validateForCreate(input);
         verify(mapper).toEntity(input);
+        verify(repository, never()).flush();
     }
 
     @Test
@@ -59,7 +61,36 @@ class BaseCrudServiceTest {
         assertThat(service.update(dto)).isEqualTo(dto);
         verify(validator).validateForUpdate(dto);
         verify(mapper).updateEntity(entity, dto);
+        verify(repository, never()).flush();
         assertThat(service.entityContext).isEqualTo(dto);
+    }
+
+    @Test
+    void shouldFlushVersionedCreateBeforeMappingResponse() {
+        BaseCrudRepository<VersionedTestEntity, Long> versionedRepository = mock(BaseCrudRepository.class);
+        BaseCrudMapper<VersionedTestEntity, VersionedTestDTO> versionedMapper = mock(BaseCrudMapper.class);
+        BaseCrudValidator<VersionedTestDTO> versionedValidator = mock(BaseCrudValidator.class);
+        VersionedTestService versionedService = new VersionedTestService(
+                versionedRepository,
+                versionedMapper,
+                versionedValidator
+        );
+
+        VersionedTestDTO input = new VersionedTestDTO(null, null, "name");
+        VersionedTestEntity entity = new VersionedTestEntity(null, null, "name");
+        VersionedTestEntity saved = new VersionedTestEntity(1L, 0L, "name");
+        VersionedTestDTO response = new VersionedTestDTO(1L, 0L, "name");
+
+        when(versionedMapper.toEntity(input)).thenReturn(entity);
+        when(versionedRepository.save(entity)).thenReturn(saved);
+        when(versionedMapper.toDTO(saved)).thenReturn(response);
+
+        assertThat(versionedService.create(input)).isEqualTo(response);
+
+        InOrder order = inOrder(versionedRepository, versionedMapper);
+        order.verify(versionedRepository).save(entity);
+        order.verify(versionedRepository).flush();
+        order.verify(versionedMapper).toDTO(saved);
     }
 
     @Test
@@ -82,7 +113,11 @@ class BaseCrudServiceTest {
 
         assertThat(versionedService.update(dto)).isEqualTo(dto);
         verify(versionedMapper).updateEntity(entity, dto);
-        verify(versionedRepository).save(entity);
+
+        InOrder order = inOrder(versionedRepository, versionedMapper);
+        order.verify(versionedRepository).save(entity);
+        order.verify(versionedRepository).flush();
+        order.verify(versionedMapper).toDTO(entity);
     }
 
     @Test
@@ -106,6 +141,7 @@ class BaseCrudServiceTest {
 
         verify(versionedMapper, never()).updateEntity(any(), any());
         verify(versionedRepository, never()).save(any());
+        verify(versionedRepository, never()).flush();
     }
 
     @Test
@@ -129,6 +165,7 @@ class BaseCrudServiceTest {
 
         verify(versionedMapper, never()).updateEntity(any(), any());
         verify(versionedRepository, never()).save(any());
+        verify(versionedRepository, never()).flush();
     }
 
     @Test
@@ -228,7 +265,12 @@ class BaseCrudServiceTest {
                 BaseCrudRepository<VersionedTestEntity, Long> repository,
                 BaseCrudMapper<VersionedTestEntity, VersionedTestDTO> mapper,
                 BaseCrudValidator<VersionedTestDTO> validator) {
-            super(repository, mapper, validator);
+            super(versionedRepository(repository), mapper, validator);
+        }
+
+        private static BaseCrudRepository<VersionedTestEntity, Long> versionedRepository(
+                BaseCrudRepository<VersionedTestEntity, Long> repository) {
+            return repository;
         }
 
         @Override

@@ -5,6 +5,7 @@ import com.empresa.platform.crud.mapper.BaseCrudMapper;
 import com.empresa.platform.crud.repository.BaseCrudRepository;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
 import com.empresa.platform.crud.version.OptimisticLockSupport;
+import com.empresa.platform.crud.version.OptimisticLockable;
 import org.springframework.transaction.annotation.Transactional;
 
 public abstract class BaseCrudService<
@@ -39,6 +40,7 @@ public abstract class BaseCrudService<
         beforeCreate(entity, dto);
         E saved = repository.save(entity);
         afterCreate(saved, dto);
+        flushIfVersioned(saved);
         return mapper.toDTO(saved);
     }
 
@@ -51,6 +53,7 @@ public abstract class BaseCrudService<
         beforeUpdate(entity, dto);
         E saved = repository.save(entity);
         afterUpdate(saved, dto);
+        flushIfVersioned(saved);
         return mapper.toDTO(saved);
     }
 
@@ -62,7 +65,6 @@ public abstract class BaseCrudService<
         deleteEntity(entity);
         afterDelete(entity);
     }
-
 
     protected E getEntity(D dto) {
         return repository.findById(dto.id())
@@ -103,5 +105,11 @@ public abstract class BaseCrudService<
 
     protected BaseCrudValidator<D> validator() {
         return validator;
+    }
+
+    private void flushIfVersioned(E entity) {
+        if (entity instanceof OptimisticLockable) {
+            repository.flush();
+        }
     }
 }
