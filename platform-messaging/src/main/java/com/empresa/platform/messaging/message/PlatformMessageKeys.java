@@ -13,6 +13,7 @@ public final class PlatformMessageKeys {
     public static final String TYPE_MISMATCH = PREFIX + "global.validation.type.mismatch";
     public static final String INVALID_ENUM = PREFIX + "validation.invalid.enum";
     public static final String UNEXPECTED_ERROR = PREFIX + "global.unexpected.error";
+    public static final String RESOURCE_VERSION_CONFLICT = PREFIX + "global.resource.version.conflict";
 
     private PlatformMessageKeys() {
     }

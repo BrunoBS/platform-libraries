@@ -4,6 +4,7 @@ import com.empresa.platform.crud.dto.BaseCrudDTO;
 import com.empresa.platform.crud.mapper.BaseCrudMapper;
 import com.empresa.platform.crud.repository.BaseCrudRepository;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
+import com.empresa.platform.crud.version.OptimisticLockSupport;
 import org.springframework.transaction.annotation.Transactional;
 
 public abstract class BaseCrudService<
@@ -45,6 +46,7 @@ public abstract class BaseCrudService<
     public D update(D dto) {
         validator.validateForUpdate(dto);
         E entity = getEntity(dto);
+        OptimisticLockSupport.validate(entity, dto);
         mapper.updateEntity(entity, dto);
         beforeUpdate(entity, dto);
         E saved = repository.save(entity);
