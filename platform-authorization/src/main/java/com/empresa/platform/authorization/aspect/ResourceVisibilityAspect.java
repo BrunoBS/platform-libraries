@@ -1,6 +1,6 @@
 package com.empresa.platform.authorization.aspect;
 
-import com.empresa.platform.authorization.annotation.ResourceAuthorization;
+import com.empresa.platform.authorization.annotation.ResourceVisibility;
 import com.empresa.platform.authorization.exception.ForbiddenAccessException;
 import com.empresa.platform.authorization.exception.UnauthorizedAccessException;
 import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 
 @Aspect
-public class ResourceAuthorizationAspect {
+public class ResourceVisibilityAspect {
 
-    private static final Logger log = LoggerFactory.getLogger(ResourceAuthorizationAspect.class);
+    private static final Logger log = LoggerFactory.getLogger(ResourceVisibilityAspect.class);
 
-    @Around("@annotation(resourceAuthorization)")
-    public Object authorize(
+    @Around("@annotation(resourceVisibility)")
+    public Object applyVisibility(
             ProceedingJoinPoint joinPoint,
-            ResourceAuthorization resourceAuthorization
+            ResourceVisibility resourceVisibility
     ) throws Throwable {
 
         UserSession session = UserContext.get()
@@ -32,12 +32,12 @@ public class ResourceAuthorizationAspect {
                 ));
 
         if (session.isOwner()) {
-            log.debug("Usuário OWNER ignorou validação de autorização de recurso.");
+            log.debug("Usuário OWNER ignorou filtro de visibilidade de recurso.");
             return joinPoint.proceed();
         }
 
         if (session.getGroups().isEmpty()) {
-            log.warn("Tentativa de acesso a recurso sem grupos mapeados.");
+            log.warn("Tentativa de avaliar visibilidade de recurso sem grupos mapeados.");
             throw new UnauthorizedAccessException(
                     AuthorizationMessageKeys.GROUPS_NOT_FOUND
             );
@@ -47,13 +47,13 @@ public class ResourceAuthorizationAspect {
 
         if (result instanceof Collection<?> collection) {
             return collection.stream()
-                    .filter(item -> hasAccess(item, session))
+                    .filter(item -> isVisible(item, session))
                     .toList();
         }
 
-        if (result != null && !hasAccess(result, session)) {
+        if (result != null && !isVisible(result, session)) {
             log.warn(
-                    "Acesso negado ao recurso. gruposUsuario={} recurso={}",
+                    "Recurso não visível para o usuário. gruposUsuario={} recurso={}",
                     session.getGroups(),
                     result.getClass().getSimpleName()
             );
@@ -66,7 +66,7 @@ public class ResourceAuthorizationAspect {
         return result;
     }
 
-    private boolean hasAccess(Object resource, UserSession session) {
+    private boolean isVisible(Object resource, UserSession session) {
         if (resource instanceof AuthorizableResource authorizable) {
             return session.hasAuthorizer(authorizable.getAuthorizerGroup());
         }

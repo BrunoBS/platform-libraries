@@ -1,6 +1,6 @@
 package com.empresa.platform.authorization.aspect;
 
-import com.empresa.platform.authorization.annotation.ResourceAuthorization;
+import com.empresa.platform.authorization.annotation.ResourceVisibility;
 import com.empresa.platform.authorization.exception.ForbiddenAccessException;
 import com.empresa.platform.authorization.exception.UnauthorizedAccessException;
 import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
@@ -24,10 +24,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-class ResourceAuthorizationAspectTest {
+class ResourceVisibilityAspectTest {
 
-    private final ResourceAuthorizationAspect aspect = new ResourceAuthorizationAspect();
-    private final ResourceAuthorization annotation = mock(ResourceAuthorization.class);
+    private final ResourceVisibilityAspect aspect = new ResourceVisibilityAspect();
+    private final ResourceVisibility annotation = mock(ResourceVisibility.class);
 
     @AfterEach
     void tearDown() {
@@ -47,7 +47,7 @@ class ResourceAuthorizationAspectTest {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(resources);
 
-        Object result = aspect.authorize(joinPoint, annotation);
+        Object result = aspect.applyVisibility(joinPoint, annotation);
 
         assertSame(resources, result);
         verify(joinPoint).proceed();
@@ -67,7 +67,7 @@ class ResourceAuthorizationAspectTest {
                 new TestResource("A-TWO")
         ));
 
-        Object result = aspect.authorize(joinPoint, annotation);
+        Object result = aspect.applyVisibility(joinPoint, annotation);
 
         assertInstanceOf(List.class, result);
         List<?> filtered = (List<?>) result;
@@ -88,7 +88,7 @@ class ResourceAuthorizationAspectTest {
 
         ForbiddenAccessException exception = assertThrows(
                 ForbiddenAccessException.class,
-                () -> aspect.authorize(joinPoint, annotation)
+                () -> aspect.applyVisibility(joinPoint, annotation)
         );
 
         assertEquals(AuthorizationMessageKeys.RESOURCE_ACCESS_DENIED, exception.getCode());
@@ -100,7 +100,7 @@ class ResourceAuthorizationAspectTest {
 
         UnauthorizedAccessException exception = assertThrows(
                 UnauthorizedAccessException.class,
-                () -> aspect.authorize(joinPoint, annotation)
+                () -> aspect.applyVisibility(joinPoint, annotation)
         );
 
         assertEquals(AuthorizationMessageKeys.SESSION_NOT_FOUND, exception.getCode());

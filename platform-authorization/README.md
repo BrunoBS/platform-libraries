@@ -82,7 +82,9 @@ platform:
 
 ## 💎 Funcionalidades Core
 
-### 1. Autorização declarativa
+### 1. Autorização declarativa de endpoint
+
+`@AuthorizationRequired` decide se o usuário pode executar o endpoint conforme o nível de autorização exigido pela operação.
 
 ```java
 @GetMapping("/faturamento")
@@ -90,15 +92,61 @@ platform:
 public ResponseEntity<Dados> buscarDados() { ... }
 ```
 
-### 2. `UserContext`
+### 2. Visibilidade de recursos retornados
+
+`@ResourceVisibility` não autoriza a execução do endpoint. O objetivo é limitar os recursos retornados de acordo com os grupos autorizadores presentes na sessão do usuário.
+
+A separação de responsabilidades é intencional:
+
+```text
+@AuthorizationRequired
+→ o usuário pode executar este endpoint?
+
+@ResourceVisibility
+→ quais recursos retornados por este endpoint o usuário pode enxergar?
+```
+
+A annotation deve ser aplicada em métodos cujo retorno contenha objetos que implementem `AuthorizableResource`.
+
+Para coleções, os itens cujo `authorizerGroup` não pertence ao usuário são removidos da resposta:
+
+```java
+@ResourceVisibility
+public List<AccountDTO> findAll() {
+    return repository.findAll();
+}
+```
+
+Exemplo de comportamento:
+
+```text
+Conta A → usuário possui o authorizerGroup → retorna
+Conta B → usuário não possui o authorizerGroup → filtrada
+Conta C → usuário possui o authorizerGroup → retorna
+```
+
+Para um recurso único, se o usuário não possuir o `authorizerGroup`, o recurso não é retornado e a operação resulta em `ForbiddenAccessException`:
+
+```java
+@ResourceVisibility
+public AccountDTO findById(Long id) {
+    return repository.findById(id);
+}
+```
+
+Usuários OWNER ignoram o filtro de visibilidade. Objetos que não implementam `AuthorizableResource` não são filtrados pela annotation.
+
+`@ResourceVisibility` não deve ser usada como substituta de `@AuthorizationRequired` e não deve ser interpretada como autorização de escrita. Regras de permissão para criar, alterar, excluir ou restaurar recursos continuam sendo definidas pelo nível exigido no endpoint e pelas regras específicas do domínio.
+
+### 3. `UserContext`
 
 Após a autorização, a sessão é disponibilizada no `UserContext` e limpa ao final da requisição.
 
-### 3. Modo local
+### 4. Modo local
 
 Com `platform.authorization.enabled=false`, o módulo permite desenvolvimento local sem depender do serviço central de autorização.
 
-### 4. Cliente resiliente
+### 5. Cliente resiliente
 
 A comunicação com o serviço de autorização utiliza `RestClient` e política de retry/backoff.
 

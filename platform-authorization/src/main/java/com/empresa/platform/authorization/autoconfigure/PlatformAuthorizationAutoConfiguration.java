@@ -1,6 +1,6 @@
 package com.empresa.platform.authorization.autoconfigure;
 
-import com.empresa.platform.authorization.aspect.ResourceAuthorizationAspect;
+import com.empresa.platform.authorization.aspect.ResourceVisibilityAspect;
 import com.empresa.platform.authorization.config.PlatformAuthorizationProperties;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
@@ -43,8 +43,8 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceAuthorizationAspect resourceAuthorizationAspect() {
-        return new ResourceAuthorizationAspect();
+    public ResourceVisibilityAspect resourceVisibilityAspect() {
+        return new ResourceVisibilityAspect();
     }
 
     @Bean
