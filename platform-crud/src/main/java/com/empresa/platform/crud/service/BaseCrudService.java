@@ -50,6 +50,7 @@ public abstract class BaseCrudService<
         validator.validateForUpdate(dto);
         E entity = getEntity(dto);
         OptimisticLockSupport.validate(entity, dto);
+        beforeUpdateMapping(entity, dto);
         mapper.updateEntity(entity, dto);
         beforeUpdate(entity, dto);
         E saved = repository.save(entity);
@@ -82,6 +83,9 @@ public abstract class BaseCrudService<
     }
 
     protected void afterCreate(E entity, D dto) {
+    }
+
+    protected void beforeUpdateMapping(E entity, D dto) {
     }
 
     protected void beforeUpdate(E entity, D dto) {
