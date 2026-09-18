@@ -1,11 +1,15 @@
 package com.empresa.platform.crud.service;
 
 import com.empresa.platform.crud.dto.BaseCrudDTO;
+import com.empresa.platform.crud.dto.VersionedCrudDTO;
 import com.empresa.platform.crud.mapper.BaseCrudMapper;
 import com.empresa.platform.crud.repository.BaseCrudRepository;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
+import com.empresa.platform.crud.version.OptimisticLockable;
+import com.empresa.platform.messaging.exception.ResourceVersionConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 
 import java.util.Optional;
 
@@ -42,6 +46,7 @@ class BaseCrudServiceTest {
         assertThat(service.create(input)).isEqualTo(response);
         verify(validator).validateForCreate(input);
         verify(mapper).toEntity(input);
+        verify(repository, never()).flush();
     }
 
     @Test
@@ -56,7 +61,111 @@ class BaseCrudServiceTest {
         assertThat(service.update(dto)).isEqualTo(dto);
         verify(validator).validateForUpdate(dto);
         verify(mapper).updateEntity(entity, dto);
+        verify(repository, never()).flush();
         assertThat(service.entityContext).isEqualTo(dto);
+    }
+
+    @Test
+    void shouldFlushVersionedCreateBeforeMappingResponse() {
+        BaseCrudRepository<VersionedTestEntity, Long> versionedRepository = mock(BaseCrudRepository.class);
+        BaseCrudMapper<VersionedTestEntity, VersionedTestDTO> versionedMapper = mock(BaseCrudMapper.class);
+        BaseCrudValidator<VersionedTestDTO> versionedValidator = mock(BaseCrudValidator.class);
+        VersionedTestService versionedService = new VersionedTestService(
+                versionedRepository,
+                versionedMapper,
+                versionedValidator
+        );
+
+        VersionedTestDTO input = new VersionedTestDTO(null, null, "name");
+        VersionedTestEntity entity = new VersionedTestEntity(null, null, "name");
+        VersionedTestEntity saved = new VersionedTestEntity(1L, 0L, "name");
+        VersionedTestDTO response = new VersionedTestDTO(1L, 0L, "name");
+
+        when(versionedMapper.toEntity(input)).thenReturn(entity);
+        when(versionedRepository.save(entity)).thenReturn(saved);
+        when(versionedMapper.toDTO(saved)).thenReturn(response);
+
+        assertThat(versionedService.create(input)).isEqualTo(response);
+
+        InOrder order = inOrder(versionedRepository, versionedMapper);
+        order.verify(versionedRepository).save(entity);
+        order.verify(versionedRepository).flush();
+        order.verify(versionedMapper).toDTO(saved);
+    }
+
+    @Test
+    void shouldAcceptMatchingVersionOnUpdate() {
+        BaseCrudRepository<VersionedTestEntity, Long> versionedRepository = mock(BaseCrudRepository.class);
+        BaseCrudMapper<VersionedTestEntity, VersionedTestDTO> versionedMapper = mock(BaseCrudMapper.class);
+        BaseCrudValidator<VersionedTestDTO> versionedValidator = mock(BaseCrudValidator.class);
+        VersionedTestService versionedService = new VersionedTestService(
+                versionedRepository,
+                versionedMapper,
+                versionedValidator
+        );
+
+        VersionedTestDTO dto = new VersionedTestDTO(10L, 3L, "updated");
+        VersionedTestEntity entity = new VersionedTestEntity(10L, 3L, "old");
+
+        when(versionedRepository.findById(10L)).thenReturn(Optional.of(entity));
+        when(versionedRepository.save(entity)).thenReturn(entity);
+        when(versionedMapper.toDTO(entity)).thenReturn(dto);
+
+        assertThat(versionedService.update(dto)).isEqualTo(dto);
+        verify(versionedMapper).updateEntity(entity, dto);
+
+        InOrder order = inOrder(versionedRepository, versionedMapper);
+        order.verify(versionedRepository).save(entity);
+        order.verify(versionedRepository).flush();
+        order.verify(versionedMapper).toDTO(entity);
+    }
+
+    @Test
+    void shouldRejectStaleVersionBeforeMappingEntity() {
+        BaseCrudRepository<VersionedTestEntity, Long> versionedRepository = mock(BaseCrudRepository.class);
+        BaseCrudMapper<VersionedTestEntity, VersionedTestDTO> versionedMapper = mock(BaseCrudMapper.class);
+        BaseCrudValidator<VersionedTestDTO> versionedValidator = mock(BaseCrudValidator.class);
+        VersionedTestService versionedService = new VersionedTestService(
+                versionedRepository,
+                versionedMapper,
+                versionedValidator
+        );
+
+        VersionedTestDTO dto = new VersionedTestDTO(10L, 2L, "updated");
+        VersionedTestEntity entity = new VersionedTestEntity(10L, 3L, "old");
+
+        when(versionedRepository.findById(10L)).thenReturn(Optional.of(entity));
+
+        assertThatThrownBy(() -> versionedService.update(dto))
+                .isInstanceOf(ResourceVersionConflictException.class);
+
+        verify(versionedMapper, never()).updateEntity(any(), any());
+        verify(versionedRepository, never()).save(any());
+        verify(versionedRepository, never()).flush();
+    }
+
+    @Test
+    void shouldRejectMissingVersionForVersionedResource() {
+        BaseCrudRepository<VersionedTestEntity, Long> versionedRepository = mock(BaseCrudRepository.class);
+        BaseCrudMapper<VersionedTestEntity, VersionedTestDTO> versionedMapper = mock(BaseCrudMapper.class);
+        BaseCrudValidator<VersionedTestDTO> versionedValidator = mock(BaseCrudValidator.class);
+        VersionedTestService versionedService = new VersionedTestService(
+                versionedRepository,
+                versionedMapper,
+                versionedValidator
+        );
+
+        VersionedTestDTO dto = new VersionedTestDTO(10L, null, "updated");
+        VersionedTestEntity entity = new VersionedTestEntity(10L, 3L, "old");
+
+        when(versionedRepository.findById(10L)).thenReturn(Optional.of(entity));
+
+        assertThatThrownBy(() -> versionedService.update(dto))
+                .isInstanceOf(ResourceVersionConflictException.class);
+
+        verify(versionedMapper, never()).updateEntity(any(), any());
+        verify(versionedRepository, never()).save(any());
+        verify(versionedRepository, never()).flush();
     }
 
     @Test
@@ -86,6 +195,10 @@ class BaseCrudServiceTest {
             implements BaseCrudDTO<Long> {
     }
 
+    record VersionedTestDTO(Long id, Long version, String name)
+            implements VersionedCrudDTO<Long> {
+    }
+
     static class TestEntity {
         private final Long id;
         private final String name;
@@ -93,6 +206,23 @@ class BaseCrudServiceTest {
         TestEntity(Long id, String name) {
             this.id = id;
             this.name = name;
+        }
+    }
+
+    static class VersionedTestEntity implements OptimisticLockable {
+        private final Long id;
+        private final Long version;
+        private final String name;
+
+        VersionedTestEntity(Long id, Long version, String name) {
+            this.id = id;
+            this.version = version;
+            this.name = name;
+        }
+
+        @Override
+        public Long getVersion() {
+            return version;
         }
     }
 
@@ -122,6 +252,30 @@ class BaseCrudServiceTest {
             return new TestNotFoundException(
                     "test resource " + id + " not found"
             );
+        }
+    }
+
+    static class VersionedTestService extends BaseCrudService<
+            VersionedTestEntity,
+            VersionedTestDTO,
+            Long,
+            BaseCrudRepository<VersionedTestEntity, Long>> {
+
+        VersionedTestService(
+                BaseCrudRepository<VersionedTestEntity, Long> repository,
+                BaseCrudMapper<VersionedTestEntity, VersionedTestDTO> mapper,
+                BaseCrudValidator<VersionedTestDTO> validator) {
+            super(versionedRepository(repository), mapper, validator);
+        }
+
+        private static BaseCrudRepository<VersionedTestEntity, Long> versionedRepository(
+                BaseCrudRepository<VersionedTestEntity, Long> repository) {
+            return repository;
+        }
+
+        @Override
+        protected RuntimeException notFoundException(Long id) {
+            return new TestNotFoundException("test resource " + id + " not found");
         }
     }
 

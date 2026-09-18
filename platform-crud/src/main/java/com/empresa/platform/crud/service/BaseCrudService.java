@@ -2,8 +2,11 @@ package com.empresa.platform.crud.service;
 
 import com.empresa.platform.crud.dto.BaseCrudDTO;
 import com.empresa.platform.crud.mapper.BaseCrudMapper;
+import com.empresa.platform.crud.normalization.CrudNormalizer;
 import com.empresa.platform.crud.repository.BaseCrudRepository;
 import com.empresa.platform.crud.validation.BaseCrudValidator;
+import com.empresa.platform.crud.version.OptimisticLockSupport;
+import com.empresa.platform.crud.version.OptimisticLockable;
 import org.springframework.transaction.annotation.Transactional;
 
 public abstract class BaseCrudService<
@@ -27,33 +30,41 @@ public abstract class BaseCrudService<
 
     @Transactional(readOnly = true)
     public D findById(D dto) {
+        dto = normalize(dto);
         validator.validateForFind(dto);
         return mapper.toDTO(getEntity(dto));
     }
 
     @Transactional
     public D create(D dto) {
+        dto = normalize(dto);
         validator.validateForCreate(dto);
+        OptimisticLockSupport.validateCreate(dto);
         E entity = mapper.toEntity(dto);
         beforeCreate(entity, dto);
         E saved = repository.save(entity);
         afterCreate(saved, dto);
+        flushIfVersioned(saved);
         return mapper.toDTO(saved);
     }
 
     @Transactional
     public D update(D dto) {
+        dto = normalize(dto);
         validator.validateForUpdate(dto);
         E entity = getEntity(dto);
+        OptimisticLockSupport.validate(entity, dto);
         mapper.updateEntity(entity, dto);
         beforeUpdate(entity, dto);
         E saved = repository.save(entity);
         afterUpdate(saved, dto);
+        flushIfVersioned(saved);
         return mapper.toDTO(saved);
     }
 
     @Transactional
     public void delete(D dto) {
+        dto = normalize(dto);
         validator.validateForDelete(dto);
         E entity = getEntity(dto);
         beforeDelete(entity);
@@ -61,6 +72,13 @@ public abstract class BaseCrudService<
         afterDelete(entity);
     }
 
+    @SuppressWarnings("unchecked")
+    private D normalize(D dto) {
+        if (this instanceof CrudNormalizer<?> normalizer) {
+            return ((CrudNormalizer<D>) normalizer).normalize(dto);
+        }
+        return dto;
+    }
 
     protected E getEntity(D dto) {
         return repository.findById(dto.id())
@@ -101,5 +119,11 @@ public abstract class BaseCrudService<
 
     protected BaseCrudValidator<D> validator() {
         return validator;
+    }
+
+    private void flushIfVersioned(E entity) {
+        if (entity instanceof OptimisticLockable) {
+            repository.flush();
+        }
     }
 }
