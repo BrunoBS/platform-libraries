@@ -11,7 +11,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class ResourceVisibilityFilterManagerTest {
@@ -36,6 +35,7 @@ class ResourceVisibilityFilterManagerTest {
         Session session = mock(Session.class);
         Filter filter = mock(Filter.class);
         when(entityManager.unwrap(Session.class)).thenReturn(session);
+        doAnswer(invocation -> null).when(session).doWork(any());
         when(session.enableFilter(ResourceVisibilityFilterManager.FILTER_NAME)).thenReturn(filter);
         when(session.getEnabledFilter(ResourceVisibilityFilterManager.FILTER_NAME)).thenReturn(filter);
 
@@ -62,6 +62,7 @@ class ResourceVisibilityFilterManagerTest {
         EntityManager entityManager = mock(EntityManager.class);
         Session session = mock(Session.class);
         when(entityManager.unwrap(Session.class)).thenReturn(session);
+        doAnswer(invocation -> null).when(session).doWork(any());
         when(session.enableFilter(ResourceVisibilityFilterManager.FILTER_NAME))
                 .thenThrow(new IllegalStateException("filter setup failed"));
 
