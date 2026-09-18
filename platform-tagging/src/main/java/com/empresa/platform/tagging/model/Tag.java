@@ -53,6 +53,10 @@ public class Tag {
         this.originType = Objects.requireNonNull(originType, "originType");
     }
 
+    public void changeOrigin(TagOriginType originType) {
+        this.originType = Objects.requireNonNull(originType, "originType");
+    }
+
     public String getId() { return id; }
     public String getOwnerType() { return ownerType; }
     public String getOwnerId() { return ownerId; }
