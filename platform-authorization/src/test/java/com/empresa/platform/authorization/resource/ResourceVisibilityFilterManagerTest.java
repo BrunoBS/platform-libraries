@@ -77,6 +77,31 @@ class ResourceVisibilityFilterManagerTest {
         assertThat(context.isActive()).isFalse();
     }
 
+    @Test
+    void cleanupFailureShouldBeSuppressedAndPreserveOriginalSetupFailure() {
+        EntityManager entityManager = mock(EntityManager.class);
+        Session session = mock(Session.class);
+        when(entityManager.unwrap(Session.class)).thenReturn(session);
+        doAnswer(invocation -> null)
+                .doThrow(new IllegalStateException("cleanup failed"))
+                .when(session).doWork(any());
+        when(session.enableFilter(ResourceVisibilityFilterManager.FILTER_NAME))
+                .thenThrow(new IllegalStateException("filter setup failed"));
+
+        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+        ResourceVisibilityFilterManager manager =
+                new ResourceVisibilityFilterManager(entityManager, context);
+
+        assertThatThrownBy(() -> manager.enable(userSession("INVESTIMENTOS")))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("filter setup failed")
+                .satisfies(exception -> assertThat(exception.getSuppressed())
+                        .singleElement()
+                        .hasMessage("cleanup failed"));
+
+        assertThat(context.isActive()).isFalse();
+    }
+
     private UserSession userSession(String authorizer) {
         UserSession session = new UserSession();
         session.setGroups(Set.of("RESOURCE_VISIBILITY"));
