@@ -6,12 +6,10 @@ import com.empresa.platform.tagging.repository.TagRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 
 @AutoConfiguration
-@EntityScan(basePackages = {"com.empresa.platform.tagging.model", "com.brunobs"})
 public class PlatformTaggingAutoConfiguration {
 
     @Bean
