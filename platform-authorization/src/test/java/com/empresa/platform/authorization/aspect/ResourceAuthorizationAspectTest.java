@@ -8,6 +8,7 @@ import com.empresa.platform.authorization.model.ParsedGroup;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.resource.AuthorizableResource;
+import com.empresa.platform.authorization.resource.ResourceAuthorizationFilterManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,30 @@ class ResourceAuthorizationAspectTest {
         List<?> filtered = (List<?>) result;
         assertEquals(1, filtered.size());
         assertEquals("A-ONE", ((TestResource) filtered.getFirst()).getAuthorizerGroup());
+    }
+
+    @Test
+    void shouldEnableAndDisableQueryFilterAroundMethodExecution() throws Throwable {
+        UserSession session = session(
+                Set.of("USER"),
+                Set.of(new ParsedGroup("full", "profile", "env", "A-ONE"))
+        );
+        UserContext.set(session);
+
+        ResourceAuthorizationFilterManager filterManager = mock(ResourceAuthorizationFilterManager.class);
+        when(filterManager.enable(session)).thenReturn(true);
+
+        ResourceAuthorizationAspect filteredAspect =
+                new ResourceAuthorizationAspect(filterManager);
+
+        ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
+        when(joinPoint.proceed()).thenReturn(List.of(new TestResource("A-ONE")));
+
+        filteredAspect.authorize(joinPoint, annotation);
+
+        verify(filterManager).enable(session);
+        verify(joinPoint).proceed();
+        verify(filterManager).disable();
     }
 
     @Test
