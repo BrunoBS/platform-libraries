@@ -141,6 +141,42 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     }
 
     @Test
+    void shouldFailClosedWhenWhereReferencesProtectedJoinedResource() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id WHERE app.name = 'secret'"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("WHERE");
+    }
+
+    @Test
+    void shouldFailClosedWhenHavingReferencesProtectedJoinedResource() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id GROUP BY a.id HAVING COUNT(app.id) > 0"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("HAVING");
+    }
+
+    @Test
+    void shouldFailClosedWhenOrderByReferencesProtectedJoinedResource() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id ORDER BY app.name"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("ORDER BY");
+    }
+
+    @Test
+    void shouldFailClosedWhenGroupByReferencesProtectedJoinedResource() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id GROUP BY a.id, app.name"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("GROUP BY");
+    }
+
+    @Test
     void shouldPreserveParametersOrderByAndLimit() {
         String rewritten = strategy.apply(
                 "SELECT a.id FROM accounts a WHERE a.name = :name ORDER BY a.id DESC LIMIT 10"
