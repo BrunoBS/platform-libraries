@@ -106,11 +106,13 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
         for (SelectItem<?> selectItem : select.getSelectItems()) {
             Expression expression = selectItem.getExpression();
 
-            if (expression instanceof AllTableColumns allTableColumns
-                    && isProtectedQualifier(allTableColumns.getTable(), protectedJoinedQualifiers)) {
-                throw unsupported(
-                        "Protected joined resource projection is not supported with root-only visibility"
-                );
+            if (expression instanceof AllTableColumns allTableColumns) {
+                if (isProtectedQualifier(allTableColumns.getTable(), protectedJoinedQualifiers)) {
+                    throw unsupported(
+                            "Protected joined resource projection is not supported with root-only visibility"
+                    );
+                }
+                continue;
             }
 
             if (expression instanceof AllColumns) {
