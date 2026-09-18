@@ -2,7 +2,6 @@ package com.empresa.platform.authorization.resource;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
@@ -50,7 +49,7 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
             }
 
             ProtectedTable protectedTable = findRootProtectedTable(plainSelect);
-            rejectProtectedJoinedResourceReferences(plainSelect);
+            rejectProtectedJoinedResourceProjection(plainSelect);
             Expression visibility = visibilityPredicate(protectedTable);
 
             plainSelect.setWhere(plainSelect.getWhere() == null
@@ -81,7 +80,7 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
         return new ProtectedTable(table, metadata);
     }
 
-    private void rejectProtectedJoinedResourceReferences(PlainSelect select) {
+    private void rejectProtectedJoinedResourceProjection(PlainSelect select) {
         if (select.getJoins() == null || select.getJoins().isEmpty()) {
             return;
         }
@@ -105,74 +104,34 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
         }
 
         for (SelectItem<?> selectItem : select.getSelectItems()) {
-            rejectProtectedJoinedReference(
-                    selectItem.getExpression(), protectedJoinedQualifiers, "projection");
-        }
+            Expression expression = selectItem.getExpression();
 
-        rejectProtectedJoinedReference(select.getWhere(), protectedJoinedQualifiers, "WHERE");
-        rejectProtectedJoinedReference(select.getHaving(), protectedJoinedQualifiers, "HAVING");
-        rejectProtectedJoinedReference(select.getQualify(), protectedJoinedQualifiers, "QUALIFY");
+            if (expression instanceof AllColumns) {
+                throw unsupported(
+                        "Protected joined resource projection is not supported with root-only visibility"
+                );
+            }
 
-        if (select.getOrderByElements() != null) {
-            select.getOrderByElements().forEach(orderBy ->
-                    rejectProtectedJoinedReference(
-                            orderBy.getExpression(), protectedJoinedQualifiers, "ORDER BY"));
-        }
+            if (expression instanceof AllTableColumns allTableColumns
+                    && isProtectedQualifier(allTableColumns.getTable(), protectedJoinedQualifiers)) {
+                throw unsupported(
+                        "Protected joined resource projection is not supported with root-only visibility"
+                );
+            }
 
-        if (select.getGroupBy() != null && select.getGroupBy().getGroupByExpressionList() != null) {
-            select.getGroupBy().getGroupByExpressionList().forEach(expression ->
-                    rejectProtectedJoinedReference(
-                            expression, protectedJoinedQualifiers, "GROUP BY"));
+            if (expression instanceof Column column
+                    && isProtectedQualifier(column.getTable(), protectedJoinedQualifiers)) {
+                throw unsupported(
+                        "Protected joined resource projection is not supported with root-only visibility"
+                );
+            }
         }
     }
 
-    private void rejectProtectedJoinedReference(
-            Expression expression,
-            Set<String> protectedJoinedQualifiers,
-            String clause) {
-        if (expression != null
-                && referencesProtectedJoinedResource(expression, protectedJoinedQualifiers)) {
-            throw unsupported(
-                    "Protected joined resource reference in " + clause
-                            + " is not supported with root-only visibility"
-            );
-        }
-    }
-
-    private boolean referencesProtectedJoinedResource(
-            Expression expression,
-            Set<String> protectedJoinedQualifiers) {
-        boolean[] protectedReference = {false};
-
-        expression.accept(new ExpressionVisitorAdapter<Void>() {
-            @Override
-            public <S> Void visit(Column column, S context) {
-                Table table = column.getTable();
-                if (table != null && table.getName() != null
-                        && protectedJoinedQualifiers.contains(table.getName().toLowerCase(Locale.ROOT))) {
-                    protectedReference[0] = true;
-                }
-                return null;
-            }
-
-            @Override
-            public <S> Void visit(AllColumns allColumns, S context) {
-                protectedReference[0] = true;
-                return null;
-            }
-
-            @Override
-            public <S> Void visit(AllTableColumns allTableColumns, S context) {
-                Table table = allTableColumns.getTable();
-                if (table != null && table.getName() != null
-                        && protectedJoinedQualifiers.contains(table.getName().toLowerCase(Locale.ROOT))) {
-                    protectedReference[0] = true;
-                }
-                return null;
-            }
-        }, null);
-
-        return protectedReference[0];
+    private boolean isProtectedQualifier(Table table, Set<String> protectedJoinedQualifiers) {
+        return table != null
+                && table.getName() != null
+                && protectedJoinedQualifiers.contains(table.getName().toLowerCase(Locale.ROOT));
     }
 
     private String normalizedQualifier(Table table) {
