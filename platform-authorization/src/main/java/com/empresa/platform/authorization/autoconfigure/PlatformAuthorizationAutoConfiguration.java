@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import org.hibernate.Session;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
 import com.empresa.platform.authorization.web.filter.AuthorizationContextCleanupFilter;
@@ -56,6 +57,7 @@ public class PlatformAuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass({EntityManager.class, Session.class})
+    @ConditionalOnBean(EntityManager.class)
     public ResourceVisibilityFilterManager resourceVisibilityFilterManager(EntityManager entityManager) {
         return new ResourceVisibilityFilterManager(entityManager);
     }
