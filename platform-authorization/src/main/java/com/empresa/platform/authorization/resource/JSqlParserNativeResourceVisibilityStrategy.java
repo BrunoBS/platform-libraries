@@ -50,7 +50,7 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
             }
 
             ProtectedTable protectedTable = findRootProtectedTable(plainSelect);
-            rejectProtectedJoinedResourceProjection(plainSelect, protectedTable);
+            rejectProtectedJoinedResourceReferences(plainSelect);
             Expression visibility = visibilityPredicate(protectedTable);
 
             plainSelect.setWhere(plainSelect.getWhere() == null
@@ -81,7 +81,7 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
         return new ProtectedTable(table, metadata);
     }
 
-    private void rejectProtectedJoinedResourceProjection(PlainSelect select, ProtectedTable root) {
+    private void rejectProtectedJoinedResourceReferences(PlainSelect select) {
         if (select.getJoins() == null || select.getJoins().isEmpty()) {
             return;
         }
@@ -105,11 +105,37 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
         }
 
         for (SelectItem<?> selectItem : select.getSelectItems()) {
-            if (referencesProtectedJoinedResource(selectItem.getExpression(), protectedJoinedQualifiers)) {
-                throw unsupported(
-                        "Protected joined resource projection is not supported with root-only visibility"
-                );
-            }
+            rejectProtectedJoinedReference(
+                    selectItem.getExpression(), protectedJoinedQualifiers, "projection");
+        }
+
+        rejectProtectedJoinedReference(select.getWhere(), protectedJoinedQualifiers, "WHERE");
+        rejectProtectedJoinedReference(select.getHaving(), protectedJoinedQualifiers, "HAVING");
+        rejectProtectedJoinedReference(select.getQualify(), protectedJoinedQualifiers, "QUALIFY");
+
+        if (select.getOrderByElements() != null) {
+            select.getOrderByElements().forEach(orderBy ->
+                    rejectProtectedJoinedReference(
+                            orderBy.getExpression(), protectedJoinedQualifiers, "ORDER BY"));
+        }
+
+        if (select.getGroupBy() != null && select.getGroupBy().getGroupByExpressionList() != null) {
+            select.getGroupBy().getGroupByExpressionList().forEach(expression ->
+                    rejectProtectedJoinedReference(
+                            expression, protectedJoinedQualifiers, "GROUP BY"));
+        }
+    }
+
+    private void rejectProtectedJoinedReference(
+            Expression expression,
+            Set<String> protectedJoinedQualifiers,
+            String clause) {
+        if (expression != null
+                && referencesProtectedJoinedResource(expression, protectedJoinedQualifiers)) {
+            throw unsupported(
+                    "Protected joined resource reference in " + clause
+                            + " is not supported with root-only visibility"
+            );
         }
     }
 
