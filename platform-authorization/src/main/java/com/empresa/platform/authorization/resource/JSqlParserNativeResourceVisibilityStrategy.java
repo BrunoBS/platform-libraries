@@ -11,6 +11,8 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.FromItem;
+import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
@@ -42,6 +44,7 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
             }
 
             ProtectedTable protectedTable = findRootProtectedTable(plainSelect);
+            rejectProtectedJoinedResourceProjection(plainSelect, protectedTable);
             Expression visibility = visibilityPredicate(protectedTable);
 
             plainSelect.setWhere(plainSelect.getWhere() == null
@@ -70,6 +73,41 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
                 ));
 
         return new ProtectedTable(table, metadata);
+    }
+
+    private void rejectProtectedJoinedResourceProjection(PlainSelect select, ProtectedTable root) {
+        if (select.getJoins() == null || select.getJoins().isEmpty()) {
+            return;
+        }
+
+        for (Join join : select.getJoins()) {
+            FromItem rightItem = join.getRightItem();
+            if (!(rightItem instanceof Table joinedTable)) {
+                throw unsupported("Complex JOIN items are not supported yet");
+            }
+
+            ResourceVisibilityMetadata joinedMetadata = metadataRegistry.findByTableName(joinedTable.getName())
+                    .orElse(null);
+            if (joinedMetadata == null) {
+                continue;
+            }
+
+            String joinedQualifier = joinedTable.getAlias() != null
+                    ? joinedTable.getAlias().getName()
+                    : joinedTable.getName();
+
+            boolean projectsJoinedResource = select.getSelectItems().stream()
+                    .map(SelectItem::toString)
+                    .map(String::trim)
+                    .anyMatch(item -> item.equals("*")
+                            || item.regionMatches(true, 0, joinedQualifier + ".", 0, joinedQualifier.length() + 1));
+
+            if (projectsJoinedResource) {
+                throw unsupported(
+                        "Protected joined resource projection is not supported with root-only visibility"
+                );
+            }
+        }
     }
 
     private Expression visibilityPredicate(ProtectedTable protectedTable) {
