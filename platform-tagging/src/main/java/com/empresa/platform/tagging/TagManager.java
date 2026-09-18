@@ -8,8 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -30,25 +32,45 @@ public class TagManager {
 
         String resolvedOwnerType = requireOwnerType(ownerType);
         String resolvedOwnerId = requireOwnerId(ownerId);
-
         TagOwnerType normalizedOwnerType = () -> resolvedOwnerType;
 
-        Set<String> manual = normalize(manualTags);
-        Set<String> system = normalize(systemTags);
-        system.removeAll(manual);
+        Map<String, TagOriginType> desired = desiredTags(manualTags, systemTags);
+        List<Tag> current = repository.findByOwnerTypeAndOwnerIdOrderByNameAsc(
+                resolvedOwnerType, resolvedOwnerId);
 
-        repository.deleteByOwnerTypeAndOwnerId(resolvedOwnerType, resolvedOwnerId);
-        repository.flush();
+        List<Tag> obsolete = new ArrayList<>();
+        List<Tag> result = new ArrayList<>(desired.size());
 
-        List<Tag> tags = new ArrayList<>(manual.size() + system.size());
-        manual.stream()
-                .map(name -> new Tag(normalizedOwnerType, resolvedOwnerId, name, TagOriginType.MANUAL))
-                .forEach(tags::add);
-        system.stream()
-                .map(name -> new Tag(normalizedOwnerType, resolvedOwnerId, name, TagOriginType.SYSTEM))
-                .forEach(tags::add);
+        for (Tag tag : current) {
+            TagOriginType desiredOrigin = desired.remove(tag.getName());
+            if (desiredOrigin == null) {
+                obsolete.add(tag);
+                continue;
+            }
+            if (tag.getOriginType() != desiredOrigin) {
+                tag.changeOrigin(desiredOrigin);
+            }
+            result.add(tag);
+        }
 
-        return repository.saveAll(tags);
+        if (!obsolete.isEmpty()) {
+            repository.deleteAll(obsolete);
+        }
+
+        List<Tag> created = desired.entrySet().stream()
+                .map(entry -> new Tag(
+                        normalizedOwnerType,
+                        resolvedOwnerId,
+                        entry.getKey(),
+                        entry.getValue()))
+                .toList();
+
+        if (!created.isEmpty()) {
+            repository.saveAll(created);
+            result.addAll(created);
+        }
+
+        return result;
     }
 
     @Transactional(readOnly = true)
@@ -61,6 +83,16 @@ public class TagManager {
     @Transactional
     public void deleteAll(TagOwnerType ownerType, Object ownerId) {
         repository.deleteByOwnerTypeAndOwnerId(requireOwnerType(ownerType), requireOwnerId(ownerId));
+    }
+
+    private static Map<String, TagOriginType> desiredTags(
+            Collection<String> manualTags,
+            Collection<String> systemTags) {
+
+        Map<String, TagOriginType> desired = new LinkedHashMap<>();
+        normalize(manualTags).forEach(name -> desired.put(name, TagOriginType.MANUAL));
+        normalize(systemTags).forEach(name -> desired.putIfAbsent(name, TagOriginType.SYSTEM));
+        return desired;
     }
 
     private static Set<String> normalize(Collection<String> values) {
