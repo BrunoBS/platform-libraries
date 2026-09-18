@@ -62,7 +62,7 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     @Test
     void shouldProtectOnlyRootResourceWhenJoinedTableIsAlsoRegistered() {
         String rewritten = strategy.apply(
-                "SELECT a.id, app.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
+                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
         );
 
         assertThat(rewritten)
@@ -73,7 +73,7 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     @Test
     void shouldProtectOnlyRootResourceWithInnerJoinToAnotherRegisteredResource() {
         String rewritten = strategy.apply(
-                "SELECT a.id, app.id FROM accounts a INNER JOIN applications app ON app.account_id = a.id"
+                "SELECT a.id FROM accounts a INNER JOIN applications app ON app.account_id = a.id"
         );
 
         assertThat(rewritten)
@@ -217,7 +217,7 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     @Test
     void shouldProtectOnlyRootAliasInSelfJoin() {
         String rewritten = strategy.apply(
-                "SELECT parent.id, child.id FROM accounts parent JOIN accounts child ON child.id = parent.id"
+                "SELECT parent.id FROM accounts parent JOIN accounts child ON child.id = parent.id"
         );
 
         assertThat(rewritten)
