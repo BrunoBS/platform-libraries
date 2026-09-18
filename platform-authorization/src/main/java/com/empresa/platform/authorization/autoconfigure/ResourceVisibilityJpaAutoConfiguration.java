@@ -39,11 +39,9 @@ public class ResourceVisibilityJpaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceVisibilityMetadataRegistry resourceVisibilityMetadataRegistry() {
-        return new ResourceVisibilityMetadataRegistry(List.of(
-                new ResourceVisibilityMetadata("accounts", "authorizer_group"),
-                new ResourceVisibilityMetadata("applications", "authorizer_group")
-        ));
+    public ResourceVisibilityMetadataRegistry resourceVisibilityMetadataRegistry(
+            List<ResourceVisibilityMetadata> metadata) {
+        return new ResourceVisibilityMetadataRegistry(metadata);
     }
 
     @Bean
