@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.query.JpaQueryMethod;
 import org.springframework.data.jpa.repository.query.QueryRewriterProvider;
 
 /**
- * Selects the platform native visibility rewriter for native queries that did
- * not explicitly opt into another rewriter.
+ * Applies platform visibility to every declared native query. When an application
+ * declares a custom QueryRewriter, its transformation runs first and visibility
+ * is applied to the resulting SQL.
  */
 public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterProvider {
 
@@ -21,14 +22,17 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
 
     @Override
     public QueryRewriter getQueryRewriter(JpaQueryMethod method) {
-        if (method.getQueryRewriter() != QueryRewriter.IdentityQueryRewriter.class) {
-            return delegate.getQueryRewriter(method);
+        QueryRewriter applicationRewriter = delegate.getQueryRewriter(method);
+
+        if (method.getAnnotatedQuery() == null || !method.getRequiredDeclaredQuery().isNative()) {
+            return applicationRewriter;
         }
 
-        if (method.getAnnotatedQuery() != null && method.getRequiredDeclaredQuery().isNative()) {
+        if (method.getQueryRewriter() == QueryRewriter.IdentityQueryRewriter.class) {
             return visibilityRewriter;
         }
 
-        return delegate.getQueryRewriter(method);
+        return (query, sort) ->
+                visibilityRewriter.rewrite(applicationRewriter.rewrite(query, sort), sort);
     }
 }
