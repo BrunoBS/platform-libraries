@@ -83,6 +83,26 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     }
 
     @Test
+    void shouldFailClosedWhenProjectionReadsJoinedProtectedResource() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT a.id, app.name FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("joined resource projection");
+    }
+
+    @Test
+    void shouldAllowJoinToProtectedResourceWhenProjectionUsesOnlyRootResource() {
+        String rewritten = strategy.apply(
+                "SELECT a.id, a.name FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
+        );
+
+        assertThat(rewritten)
+                .containsIgnoringCase("LOWER(a.authorizer_group)")
+                .doesNotContainIgnoringCase("LOWER(app.authorizer_group)");
+    }
+
+    @Test
     void shouldPreserveParametersOrderByAndLimit() {
         String rewritten = strategy.apply(
                 "SELECT a.id FROM accounts a WHERE a.name = :name ORDER BY a.id DESC LIMIT 10"
