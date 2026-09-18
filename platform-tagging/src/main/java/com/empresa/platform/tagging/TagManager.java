@@ -31,7 +31,9 @@ public class TagManager {
         String resolvedOwnerType = requireOwnerType(ownerType);
         String resolvedOwnerId = requireOwnerId(ownerId);
 
-        TagOwnerType normalizedOwnerType = () -> resolvedOwnerType;\n\n        Set<String> manual = normalize(manualTags);
+        TagOwnerType normalizedOwnerType = () -> resolvedOwnerType;
+
+        Set<String> manual = normalize(manualTags);
         Set<String> system = normalize(systemTags);
         system.removeAll(manual);
 
