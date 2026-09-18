@@ -24,7 +24,9 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
     public QueryRewriter getQueryRewriter(JpaQueryMethod method) {
         QueryRewriter applicationRewriter = delegate.getQueryRewriter(method);
 
-        if (method.getAnnotatedQuery() == null || !method.getRequiredDeclaredQuery().isNative()) {
+        if (method.getAnnotatedQuery() == null
+                || method.getQueryAnnotation() == null
+                || !method.getQueryAnnotation().nativeQuery()) {
             return applicationRewriter;
         }
 
