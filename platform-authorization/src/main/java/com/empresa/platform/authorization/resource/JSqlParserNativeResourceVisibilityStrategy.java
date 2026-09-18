@@ -2,6 +2,7 @@ package com.empresa.platform.authorization.resource;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
@@ -10,12 +11,17 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * PoC AST strategy for simple native SELECTs. It injects the visibility predicate
@@ -80,34 +86,72 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
             return;
         }
 
+        Set<String> protectedJoinedQualifiers = new HashSet<>();
         for (Join join : select.getJoins()) {
             FromItem rightItem = join.getRightItem();
             if (!(rightItem instanceof Table joinedTable)) {
                 throw unsupported("Complex JOIN items are not supported yet");
             }
 
-            ResourceVisibilityMetadata joinedMetadata = metadataRegistry.findByTableName(joinedTable.getName())
-                    .orElse(null);
-            if (joinedMetadata == null) {
+            if (metadataRegistry.findByTableName(joinedTable.getName()).isEmpty()) {
                 continue;
             }
 
-            String joinedQualifier = joinedTable.getAlias() != null
-                    ? joinedTable.getAlias().getName()
-                    : joinedTable.getName();
+            protectedJoinedQualifiers.add(normalizedQualifier(joinedTable));
+        }
 
-            boolean projectsJoinedResource = select.getSelectItems().stream()
-                    .map(SelectItem::toString)
-                    .map(String::trim)
-                    .anyMatch(item -> item.equals("*")
-                            || item.regionMatches(true, 0, joinedQualifier + ".", 0, joinedQualifier.length() + 1));
+        if (protectedJoinedQualifiers.isEmpty()) {
+            return;
+        }
 
-            if (projectsJoinedResource) {
+        for (SelectItem<?> selectItem : select.getSelectItems()) {
+            if (referencesProtectedJoinedResource(selectItem.getExpression(), protectedJoinedQualifiers)) {
                 throw unsupported(
                         "Protected joined resource projection is not supported with root-only visibility"
                 );
             }
         }
+    }
+
+    private boolean referencesProtectedJoinedResource(
+            Expression expression,
+            Set<String> protectedJoinedQualifiers) {
+        boolean[] protectedReference = {false};
+
+        expression.accept(new ExpressionVisitorAdapter<Void>() {
+            @Override
+            public <S> Void visit(Column column, S context) {
+                Table table = column.getTable();
+                if (table != null && table.getName() != null
+                        && protectedJoinedQualifiers.contains(table.getName().toLowerCase(Locale.ROOT))) {
+                    protectedReference[0] = true;
+                }
+                return null;
+            }
+
+            @Override
+            public <S> Void visit(AllColumns allColumns, S context) {
+                protectedReference[0] = true;
+                return null;
+            }
+
+            @Override
+            public <S> Void visit(AllTableColumns allTableColumns, S context) {
+                Table table = allTableColumns.getTable();
+                if (table != null && table.getName() != null
+                        && protectedJoinedQualifiers.contains(table.getName().toLowerCase(Locale.ROOT))) {
+                    protectedReference[0] = true;
+                }
+                return null;
+            }
+        }, null);
+
+        return protectedReference[0];
+    }
+
+    private String normalizedQualifier(Table table) {
+        String qualifier = table.getAlias() != null ? table.getAlias().getName() : table.getName();
+        return qualifier.toLowerCase(Locale.ROOT);
     }
 
     private Expression visibilityPredicate(ProtectedTable protectedTable) {
