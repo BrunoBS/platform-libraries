@@ -2,10 +2,10 @@ package com.empresa.platform.authorization.resource;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryRewriter;
 import org.springframework.data.jpa.repository.query.JpaQueryMethod;
 import org.springframework.data.jpa.repository.query.QueryRewriterProvider;
+import org.springframework.data.repository.query.DeclaredQuery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -15,11 +15,11 @@ class ResourceVisibilityQueryRewriterProviderTest {
 
     @Test
     void shouldComposeCustomNativeRewriterBeforeVisibility() {
-        JpaQueryMethod method = nativeMethod(CustomQueryRewriter.class);
-        QueryRewriter custom = (query, sort) -> query + " custom";
-        QueryRewriterProvider delegate = ignored -> custom;
         NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
-        ResourceVisibilityQueryRewriterProvider provider = provider(delegate, context);
+        JpaQueryMethod method = queryMethod(true, CustomQueryRewriter.class);
+        QueryRewriter custom = (query, sort) -> query + " custom";
+        ResourceVisibilityQueryRewriterProvider provider = provider(ignored -> custom, context);
+
         context.enter();
         try {
             assertThat(provider.getQueryRewriter(method).rewrite("SELECT 1", Sort.unsorted()))
@@ -31,13 +31,10 @@ class ResourceVisibilityQueryRewriterProviderTest {
 
     @Test
     void shouldUseVisibilityRewriterForDefaultNativeQuery() {
-        JpaQueryMethod method = nativeMethod(QueryRewriter.IdentityQueryRewriter.class);
-        QueryRewriterProvider delegate = ignored -> QueryRewriter.IdentityQueryRewriter.INSTANCE;
         NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
-        ResourceVisibilityNativeQueryRewriter visibility =
-                new ResourceVisibilityNativeQueryRewriter(context, sql -> sql + " visibility");
+        JpaQueryMethod method = queryMethod(true, QueryRewriter.IdentityQueryRewriter.class);
         ResourceVisibilityQueryRewriterProvider provider =
-                new ResourceVisibilityQueryRewriterProvider(delegate, visibility);
+                provider(ignored -> QueryRewriter.IdentityQueryRewriter.INSTANCE, context);
 
         context.enter();
         try {
@@ -50,12 +47,7 @@ class ResourceVisibilityQueryRewriterProviderTest {
 
     @Test
     void shouldLeaveNonNativeQueryWithDelegate() {
-        JpaQueryMethod method = mock(JpaQueryMethod.class);
-        Query query = mock(Query.class);
-        when(query.nativeQuery()).thenReturn(false);
-        when(method.getAnnotatedQuery()).thenReturn("SELECT a FROM Account a");
-        when(method.getQueryAnnotation()).thenReturn(query);
-
+        JpaQueryMethod method = queryMethod(false, QueryRewriter.IdentityQueryRewriter.class);
         QueryRewriter delegated = (sql, sort) -> sql + " delegated";
         ResourceVisibilityQueryRewriterProvider provider =
                 provider(ignored -> delegated, new NativeResourceVisibilityContext());
@@ -64,12 +56,12 @@ class ResourceVisibilityQueryRewriterProviderTest {
                 .isEqualTo("SELECT 1 delegated");
     }
 
-    private JpaQueryMethod nativeMethod(Class<? extends QueryRewriter> rewriterType) {
+    private JpaQueryMethod queryMethod(boolean nativeQuery, Class<? extends QueryRewriter> rewriterType) {
         JpaQueryMethod method = mock(JpaQueryMethod.class);
-        Query query = mock(Query.class);
-        when(query.nativeQuery()).thenReturn(true);
-        when(method.getAnnotatedQuery()).thenReturn("SELECT a.id FROM accounts a");
-        when(method.getQueryAnnotation()).thenReturn(query);
+        DeclaredQuery declaredQuery = mock(DeclaredQuery.class);
+        when(declaredQuery.isNative()).thenReturn(nativeQuery);
+        when(method.getAnnotatedQuery()).thenReturn("SELECT 1");
+        when(method.getRequiredDeclaredQuery()).thenReturn(declaredQuery);
         when(method.getQueryRewriter()).thenReturn(rewriterType);
         return method;
     }
