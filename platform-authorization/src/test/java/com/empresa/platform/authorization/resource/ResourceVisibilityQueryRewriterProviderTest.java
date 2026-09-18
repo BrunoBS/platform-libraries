@@ -18,9 +18,8 @@ class ResourceVisibilityQueryRewriterProviderTest {
         JpaQueryMethod method = nativeMethod(CustomQueryRewriter.class);
         QueryRewriter custom = (query, sort) -> query + " custom";
         QueryRewriterProvider delegate = ignored -> custom;
-        ResourceVisibilityQueryRewriterProvider provider = provider(delegate);
-
-        NativeResourceVisibilityContext context = context(provider);
+        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+        ResourceVisibilityQueryRewriterProvider provider = provider(delegate, context);
         context.enter();
         try {
             assertThat(provider.getQueryRewriter(method).rewrite("SELECT 1", Sort.unsorted()))
@@ -59,7 +58,7 @@ class ResourceVisibilityQueryRewriterProviderTest {
 
         QueryRewriter delegated = (sql, sort) -> sql + " delegated";
         ResourceVisibilityQueryRewriterProvider provider =
-                provider(ignored -> delegated);
+                provider(ignored -> delegated, new NativeResourceVisibilityContext());
 
         assertThat(provider.getQueryRewriter(method).rewrite("SELECT 1", Sort.unsorted()))
                 .isEqualTo("SELECT 1 delegated");
@@ -75,25 +74,12 @@ class ResourceVisibilityQueryRewriterProviderTest {
         return method;
     }
 
-    private ResourceVisibilityQueryRewriterProvider provider(QueryRewriterProvider delegate) {
-        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+    private ResourceVisibilityQueryRewriterProvider provider(
+            QueryRewriterProvider delegate,
+            NativeResourceVisibilityContext context) {
         ResourceVisibilityNativeQueryRewriter visibility =
                 new ResourceVisibilityNativeQueryRewriter(context, sql -> sql + " visibility");
         return new ResourceVisibilityQueryRewriterProvider(delegate, visibility);
-    }
-
-    private NativeResourceVisibilityContext context(ResourceVisibilityQueryRewriterProvider provider) {
-        try {
-            var field = ResourceVisibilityQueryRewriterProvider.class.getDeclaredField("visibilityRewriter");
-            field.setAccessible(true);
-            ResourceVisibilityNativeQueryRewriter rewriter =
-                    (ResourceVisibilityNativeQueryRewriter) field.get(provider);
-            var contextField = ResourceVisibilityNativeQueryRewriter.class.getDeclaredField("context");
-            contextField.setAccessible(true);
-            return (NativeResourceVisibilityContext) contextField.get(rewriter);
-        } catch (ReflectiveOperationException exception) {
-            throw new AssertionError(exception);
-        }
     }
 
     static class CustomQueryRewriter implements QueryRewriter {
