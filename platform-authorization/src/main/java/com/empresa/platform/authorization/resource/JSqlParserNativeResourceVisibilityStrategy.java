@@ -3,10 +3,9 @@ package com.empresa.platform.authorization.resource;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -113,9 +112,9 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
                 jsonQuote
         ));
 
-        MinorThanEquals truthy = new MinorThanEquals();
-        truthy.setLeftExpression(new net.sf.jsqlparser.expression.LongValue(1));
-        truthy.setRightExpression(jsonContains);
+        EqualsTo truthy = new EqualsTo();
+        truthy.setLeftExpression(jsonContains);
+        truthy.setRightExpression(new net.sf.jsqlparser.expression.LongValue(1));
         return truthy;
     }
 
