@@ -10,9 +10,13 @@ import org.springframework.data.jpa.repository.QueryRewriter;
 public class ResourceVisibilityNativeQueryRewriter implements QueryRewriter {
 
     private final NativeResourceVisibilityContext context;
+    private final NativeResourceVisibilityStrategy strategy;
 
-    public ResourceVisibilityNativeQueryRewriter(NativeResourceVisibilityContext context) {
+    public ResourceVisibilityNativeQueryRewriter(
+            NativeResourceVisibilityContext context,
+            NativeResourceVisibilityStrategy strategy) {
         this.context = context;
+        this.strategy = strategy;
     }
 
     @Override
@@ -21,30 +25,6 @@ public class ResourceVisibilityNativeQueryRewriter implements QueryRewriter {
             return query;
         }
 
-        String normalized = query == null ? "" : query.trim();
-        if (normalized.isEmpty()) {
-            throw new ResourceVisibilityNativeQueryException("Protected native query must not be empty");
-        }
-
-        if (!exposesVisibilityColumn(normalized)) {
-            throw new ResourceVisibilityNativeQueryException(
-                    "Protected native query must expose authorizerGroup for resource visibility"
-            );
-        }
-
-        return """
-                SELECT platform_visibility.*
-                FROM (
-                %s
-                ) platform_visibility
-                WHERE JSON_CONTAINS(
-                    %s,
-                    JSON_QUOTE(LOWER(platform_visibility.authorizerGroup))
-                )
-                """.formatted(normalized, ResourceVisibilityFilterManager.NATIVE_SESSION_VARIABLE);
-    }
-
-    private boolean exposesVisibilityColumn(String query) {
-        return query.toLowerCase(java.util.Locale.ROOT).contains("authorizergroup");
+        return strategy.apply(query);
     }
 }
