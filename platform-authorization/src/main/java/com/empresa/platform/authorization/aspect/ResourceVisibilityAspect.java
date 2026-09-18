@@ -7,6 +7,7 @@ import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.resource.AuthorizableResource;
+import com.empresa.platform.authorization.resource.ResourceVisibilityFilterManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,6 +20,16 @@ import java.util.Collection;
 public class ResourceVisibilityAspect {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceVisibilityAspect.class);
+
+    private final ResourceVisibilityFilterManager filterManager;
+
+    public ResourceVisibilityAspect() {
+        this(null);
+    }
+
+    public ResourceVisibilityAspect(ResourceVisibilityFilterManager filterManager) {
+        this.filterManager = filterManager;
+    }
 
     @Around("@annotation(resourceVisibility)")
     public Object applyVisibility(
@@ -43,7 +54,18 @@ public class ResourceVisibilityAspect {
             );
         }
 
-        Object result = joinPoint.proceed();
+        boolean filterEnabled = false;
+        Object result;
+        try {
+            if (filterManager != null) {
+                filterEnabled = filterManager.enable(session);
+            }
+            result = joinPoint.proceed();
+        } finally {
+            if (filterEnabled) {
+                filterManager.disable();
+            }
+        }
 
         if (result instanceof Collection<?> collection) {
             return collection.stream()
