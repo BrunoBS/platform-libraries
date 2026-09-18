@@ -22,10 +22,13 @@ public class ResourceVisibilityFilterManager {
     public static final String NATIVE_SESSION_VARIABLE = "@platform_resource_visibility_authorizers";
 
     private final EntityManager entityManager;
+    private final NativeResourceVisibilityContext nativeContext;
     private final ThreadLocal<Integer> visibilityDepth = ThreadLocal.withInitial(() -> 0);
 
-    public ResourceVisibilityFilterManager(EntityManager entityManager) {
+    public ResourceVisibilityFilterManager(EntityManager entityManager,
+                                             NativeResourceVisibilityContext nativeContext) {
         this.entityManager = entityManager;
+        this.nativeContext = nativeContext;
     }
 
     public boolean enable(UserSession userSession) {
@@ -36,6 +39,7 @@ public class ResourceVisibilityFilterManager {
         int depth = visibilityDepth.get();
         if (depth > 0) {
             visibilityDepth.set(depth + 1);
+            nativeContext.enter();
             log.debug("[RESOURCE-VISIBILITY-POC] nested visibility depth={}", depth + 1);
             return true;
         }
@@ -61,6 +65,7 @@ public class ResourceVisibilityFilterManager {
             log.info("[RESOURCE-VISIBILITY-POC] enabled session={} filterPresent={}",
                     System.identityHashCode(session), session.getEnabledFilter(FILTER_NAME) != null);
             visibilityDepth.set(1);
+            nativeContext.enter();
             return true;
         } catch (UnknownFilterException exception) {
             log.warn("[RESOURCE-VISIBILITY-POC] filter definition not found session={}", System.identityHashCode(session));
@@ -72,6 +77,7 @@ public class ResourceVisibilityFilterManager {
         int depth = visibilityDepth.get();
         if (depth > 1) {
             visibilityDepth.set(depth - 1);
+            nativeContext.exit();
             log.debug("[RESOURCE-VISIBILITY-POC] nested visibility exit depth={}", depth - 1);
             return;
         }
@@ -87,6 +93,7 @@ public class ResourceVisibilityFilterManager {
             clearNativeAuthorizers(session);
         } finally {
             visibilityDepth.remove();
+            nativeContext.exit();
         }
     }
 
