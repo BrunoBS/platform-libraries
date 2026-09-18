@@ -11,12 +11,9 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.FromItem;
-import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * PoC AST strategy for simple native SELECTs. It injects the visibility predicate
@@ -44,15 +41,8 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
                 throw unsupported("Only simple SELECT statements are supported by native resource visibility");
             }
 
-            List<ProtectedTable> protectedTables = findProtectedTables(plainSelect);
-            if (protectedTables.isEmpty()) {
-                throw unsupported("Protected native query does not reference a registered visibility resource");
-            }
-
-            Expression visibility = protectedTables.stream()
-                    .map(this::visibilityPredicate)
-                    .reduce(AndExpression::new)
-                    .orElseThrow();
+            ProtectedTable protectedTable = findRootProtectedTable(plainSelect);
+            Expression visibility = visibilityPredicate(protectedTable);
 
             plainSelect.setWhere(plainSelect.getWhere() == null
                     ? visibility
@@ -68,24 +58,18 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
         }
     }
 
-    private List<ProtectedTable> findProtectedTables(PlainSelect select) {
-        List<ProtectedTable> result = new ArrayList<>();
-        collectProtectedTable(select.getFromItem(), result);
-        if (select.getJoins() != null) {
-            for (Join join : select.getJoins()) {
-                collectProtectedTable(join.getRightItem(), result);
-            }
-        }
-        return result;
-    }
-
-    private void collectProtectedTable(FromItem fromItem, List<ProtectedTable> result) {
+    private ProtectedTable findRootProtectedTable(PlainSelect select) {
+        FromItem fromItem = select.getFromItem();
         if (!(fromItem instanceof Table table)) {
             throw unsupported("Subqueries and complex FROM items are not supported yet");
         }
 
-        metadataRegistry.findByTableName(table.getName())
-                .ifPresent(metadata -> result.add(new ProtectedTable(table, metadata)));
+        ResourceVisibilityMetadata metadata = metadataRegistry.findByTableName(table.getName())
+                .orElseThrow(() -> unsupported(
+                        "Protected native query root resource is not registered for visibility"
+                ));
+
+        return new ProtectedTable(table, metadata);
     }
 
     private Expression visibilityPredicate(ProtectedTable protectedTable) {
