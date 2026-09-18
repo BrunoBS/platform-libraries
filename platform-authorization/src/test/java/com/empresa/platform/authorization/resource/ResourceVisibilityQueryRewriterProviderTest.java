@@ -5,11 +5,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.QueryRewriter;
 import org.springframework.data.jpa.repository.query.JpaQueryMethod;
 import org.springframework.data.jpa.repository.query.QueryRewriterProvider;
-import org.springframework.data.repository.query.DeclaredQuery;
+import org.springframework.data.jpa.repository.query.DeclaredQuery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 
 class ResourceVisibilityQueryRewriterProviderTest {
 
@@ -62,7 +63,7 @@ class ResourceVisibilityQueryRewriterProviderTest {
         when(declaredQuery.isNative()).thenReturn(nativeQuery);
         when(method.getAnnotatedQuery()).thenReturn("SELECT 1");
         when(method.getRequiredDeclaredQuery()).thenReturn(declaredQuery);
-        when(method.getQueryRewriter()).thenReturn(rewriterType);
+        doReturn(rewriterType).when(method).getQueryRewriter();
         return method;
     }
 
