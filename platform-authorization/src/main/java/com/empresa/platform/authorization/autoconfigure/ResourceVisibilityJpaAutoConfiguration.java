@@ -2,6 +2,7 @@ package com.empresa.platform.authorization.autoconfigure;
 
 import com.empresa.platform.authorization.resource.ResourceVisibilityFilterManager;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.Session;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -15,7 +16,7 @@ public class ResourceVisibilityJpaAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnBean(EntityManager.class)
+    @ConditionalOnBean(EntityManagerFactory.class)
     public ResourceVisibilityFilterManager resourceVisibilityFilterManager(EntityManager entityManager) {
         return new ResourceVisibilityFilterManager(entityManager);
     }
