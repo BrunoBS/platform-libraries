@@ -4,19 +4,24 @@ import com.empresa.platform.authorization.aspect.ResourceAuthorizationAspect;
 import com.empresa.platform.authorization.config.PlatformAuthorizationProperties;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
-import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;\nimport com.empresa.platform.authorization.resource.ResourceAuthorizationFilterManager;
+import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
+import com.empresa.platform.authorization.resource.ResourceAuthorizationFilterManager;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
 import com.empresa.platform.authorization.web.filter.AuthorizationContextCleanupFilter;
 import com.empresa.platform.authorization.web.filter.PayloadErrorLoggingFilter;
-import jakarta.persistence.EntityManager;\nimport jakarta.servlet.http.HttpServletRequest;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;\nimport org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.hibernate.Session;\nimport org.springframework.beans.factory.ObjectProvider;\nimport org.springframework.context.annotation.Bean;
+import org.hibernate.Session;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -43,8 +48,16 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceAuthorizationAspect resourceAuthorizationAspect() {
-        return new ResourceAuthorizationAspect();
+    public ResourceAuthorizationAspect resourceAuthorizationAspect(
+            ObjectProvider<ResourceAuthorizationFilterManager> filterManagerProvider) {
+        return new ResourceAuthorizationAspect(filterManagerProvider.getIfAvailable());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass({EntityManager.class, Session.class})
+    public ResourceAuthorizationFilterManager resourceAuthorizationFilterManager(EntityManager entityManager) {
+        return new ResourceAuthorizationFilterManager(entityManager);
     }
 
     @Bean
