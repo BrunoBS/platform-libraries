@@ -6,6 +6,7 @@ import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.resource.ResourceVisibilityFilterManager;
+import com.empresa.platform.authorization.resource.ResourceVisibilityQueryContext;
 import org.springframework.beans.factory.ObjectProvider;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
@@ -43,6 +44,12 @@ public class PlatformAuthorizationAutoConfiguration {
     @ConditionalOnMissingBean
     public AuthorizationContextCleanupFilter authorizationContextCleanupFilter() {
         return new AuthorizationContextCleanupFilter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ResourceVisibilityQueryContext resourceVisibilityQueryContext() {
+        return new ResourceVisibilityQueryContext();
     }
 
     @Bean
