@@ -51,22 +51,23 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     }
 
     @Test
-    void shouldProtectRegisteredTableInJoin() {
-        String rewritten = strategy.apply("SELECT x.id FROM auxiliary x JOIN accounts a ON a.id = x.account_id");
-
-        assertThat(rewritten).containsIgnoringCase("LOWER(a.authorizer_group)");
+    void shouldFailClosedWhenOnlyJoinedTableIsProtected() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT x.id FROM auxiliary x JOIN accounts a ON a.id = x.account_id"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("root resource");
     }
 
     @Test
-    void shouldProtectMultipleRegisteredTablesUsingTheirAliases() {
+    void shouldProtectOnlyRootResourceWhenJoinedTableIsAlsoRegistered() {
         String rewritten = strategy.apply(
-                "SELECT a.id, app.id FROM accounts a JOIN applications app ON app.account_id = a.id"
+                "SELECT a.id, app.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
         );
 
         assertThat(rewritten)
                 .containsIgnoringCase("LOWER(a.authorizer_group)")
-                .containsIgnoringCase("LOWER(app.authorizer_group)")
-                .containsIgnoringCase(" AND ");
+                .doesNotContainIgnoringCase("LOWER(app.authorizer_group)");
     }
 
     @Test
@@ -108,14 +109,14 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     }
 
     @Test
-    void shouldProtectSelfJoinUsingBothAliases() {
+    void shouldProtectOnlyRootAliasInSelfJoin() {
         String rewritten = strategy.apply(
                 "SELECT parent.id, child.id FROM accounts parent JOIN accounts child ON child.id = parent.id"
         );
 
         assertThat(rewritten)
                 .containsIgnoringCase("LOWER(parent.authorizer_group)")
-                .containsIgnoringCase("LOWER(child.authorizer_group)");
+                .doesNotContainIgnoringCase("LOWER(child.authorizer_group)");
     }
 
     @Test
@@ -139,7 +140,7 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     void shouldFailClosedWhenNoProtectedResourceIsPresent() {
         assertThatThrownBy(() -> strategy.apply("SELECT x.id FROM auxiliary x"))
                 .isInstanceOf(ResourceVisibilityNativeQueryException.class)
-                .hasMessageContaining("registered visibility resource");
+                .hasMessageContaining("root resource");
     }
 
     @Test
