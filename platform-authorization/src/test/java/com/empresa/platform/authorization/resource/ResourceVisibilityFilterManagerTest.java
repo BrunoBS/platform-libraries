@@ -137,6 +137,37 @@ class ResourceVisibilityFilterManagerTest {
         verify(session, times(1)).disableFilter(ResourceVisibilityFilterManager.FILTER_NAME);
     }
 
+    @Test
+    void unwrapFailureDuringDisableShouldStillClearInternalVisibilityState() {
+        EntityManager entityManager = mock(EntityManager.class);
+        Session session = mock(Session.class);
+        Filter filter = mock(Filter.class);
+        when(entityManager.unwrap(Session.class))
+                .thenReturn(session)
+                .thenThrow(new IllegalStateException("session unwrap failed"));
+        doAnswer(invocation -> null).when(session).doWork(any());
+        when(session.enableFilter(ResourceVisibilityFilterManager.FILTER_NAME)).thenReturn(filter);
+        when(session.getEnabledFilter(ResourceVisibilityFilterManager.FILTER_NAME)).thenReturn(filter);
+
+        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+        ResourceVisibilityFilterManager manager =
+                new ResourceVisibilityFilterManager(entityManager, context);
+
+        assertThat(manager.enable(userSession("INVESTIMENTOS"))).isTrue();
+        assertThat(context.isActive()).isTrue();
+
+        assertThatThrownBy(manager::disable)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("session unwrap failed");
+
+        assertThat(context.isActive()).isFalse();
+
+        manager.disable();
+
+        verify(entityManager, times(2)).unwrap(Session.class);
+        verify(session, never()).disableFilter(ResourceVisibilityFilterManager.FILTER_NAME);
+    }
+
     private UserSession userSession(String authorizer) {
         UserSession session = new UserSession();
         session.setGroups(Set.of("RESOURCE_VISIBILITY"));
