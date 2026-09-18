@@ -7,6 +7,7 @@ import com.empresa.platform.authorization.message.AuthorizationMessageKeys;
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.resource.AuthorizableResource;
+import com.empresa.platform.authorization.resource.ResourceAuthorizationFilterManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,6 +20,16 @@ import java.util.Collection;
 public class ResourceAuthorizationAspect {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceAuthorizationAspect.class);
+
+    private final ResourceAuthorizationFilterManager filterManager;
+
+    public ResourceAuthorizationAspect() {
+        this(null);
+    }
+
+    public ResourceAuthorizationAspect(ResourceAuthorizationFilterManager filterManager) {
+        this.filterManager = filterManager;
+    }
 
     @Around("@annotation(resourceAuthorization)")
     public Object authorize(
@@ -43,8 +54,21 @@ public class ResourceAuthorizationAspect {
             );
         }
 
-        Object result = joinPoint.proceed();
+        boolean filterEnabled = false;
+        Object result;
 
+        try {
+            if (filterManager != null) {
+                filterEnabled = filterManager.enable(session);
+            }
+            result = joinPoint.proceed();
+        } finally {
+            if (filterEnabled) {
+                filterManager.disable();
+            }
+        }
+
+        // Defense in depth and fallback for non-JPA/native-query results.
         if (result instanceof Collection<?> collection) {
             return collection.stream()
                     .filter(item -> hasAccess(item, session))
