@@ -68,9 +68,12 @@ public class ResourceVisibilityFilterManager {
             nativeContext.enter();
             return true;
         } catch (UnknownFilterException exception) {
-            clearNativeAuthorizers(session);
+            cleanupFailedEnable(session);
             log.warn("[RESOURCE-VISIBILITY-POC] filter definition not found session={}", System.identityHashCode(session));
             return false;
+        } catch (RuntimeException exception) {
+            cleanupFailedEnable(session);
+            throw exception;
         }
     }
 
@@ -95,6 +98,19 @@ public class ResourceVisibilityFilterManager {
         } finally {
             visibilityDepth.remove();
             nativeContext.exit();
+        }
+    }
+
+    private void cleanupFailedEnable(Session session) {
+        try {
+            if (session.getEnabledFilter(FILTER_NAME) != null) {
+                session.disableFilter(FILTER_NAME);
+            }
+        } catch (UnknownFilterException ignored) {
+            // Filter definition itself is unavailable; native state still must be cleared.
+        } finally {
+            clearNativeAuthorizers(session);
+            visibilityDepth.remove();
         }
     }
 
