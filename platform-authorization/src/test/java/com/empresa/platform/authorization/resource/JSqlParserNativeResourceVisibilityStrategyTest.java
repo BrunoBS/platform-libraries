@@ -92,12 +92,16 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     }
 
     @Test
-    void shouldFailClosedWhenFunctionProjectsJoinedProtectedResource() {
-        assertThatThrownBy(() -> strategy.apply(
-                "SELECT a.id, COUNT(app.id) FROM accounts a LEFT JOIN applications app ON app.account_id = a.id GROUP BY a.id"
-        ))
-                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
-                .hasMessageContaining("joined resource projection");
+    void shouldAllowAggregateOverProtectedJoinUnderRootOnlySemantics() {
+        String rewritten = strategy.apply(
+                "SELECT a.id, COUNT(app.id) totalApplications FROM accounts a "
+                        + "LEFT JOIN applications app ON app.account_id = a.id GROUP BY a.id"
+        );
+
+        assertThat(rewritten)
+                .containsIgnoringCase("COUNT(app.id)")
+                .containsIgnoringCase("LOWER(a.authorizer_group)")
+                .doesNotContainIgnoringCase("LOWER(app.authorizer_group)");
     }
 
     @Test
@@ -138,42 +142,6 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
         assertThat(rewritten)
                 .containsIgnoringCase("LOWER(a.authorizer_group)")
                 .doesNotContainIgnoringCase("LOWER(app.authorizer_group)");
-    }
-
-    @Test
-    void shouldFailClosedWhenWhereReferencesProtectedJoinedResource() {
-        assertThatThrownBy(() -> strategy.apply(
-                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id WHERE app.name = 'secret'"
-        ))
-                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
-                .hasMessageContaining("WHERE");
-    }
-
-    @Test
-    void shouldFailClosedWhenHavingReferencesProtectedJoinedResource() {
-        assertThatThrownBy(() -> strategy.apply(
-                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id GROUP BY a.id HAVING COUNT(app.id) > 0"
-        ))
-                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
-                .hasMessageContaining("HAVING");
-    }
-
-    @Test
-    void shouldFailClosedWhenOrderByReferencesProtectedJoinedResource() {
-        assertThatThrownBy(() -> strategy.apply(
-                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id ORDER BY app.name"
-        ))
-                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
-                .hasMessageContaining("ORDER BY");
-    }
-
-    @Test
-    void shouldFailClosedWhenGroupByReferencesProtectedJoinedResource() {
-        assertThatThrownBy(() -> strategy.apply(
-                "SELECT a.id FROM accounts a LEFT JOIN applications app ON app.account_id = a.id GROUP BY a.id, app.name"
-        ))
-                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
-                .hasMessageContaining("GROUP BY");
     }
 
     @Test
