@@ -5,6 +5,7 @@ import com.empresa.platform.authorization.model.UserSession;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Filter;
 import org.hibernate.Session;
+import org.hibernate.UnknownFilterException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ public class ResourceAuthorizationFilterManager {
             Filter filter = hibernateSession.enableFilter(FILTER_NAME);
             filter.setParameterList(PARAMETER_NAME, authorizers);
             return true;
-        } catch (IllegalArgumentException exception) {
+        } catch (UnknownFilterException exception) {
             log.debug(
                     "Filtro Hibernate [{}] não está mapeado neste persistence unit; mantendo validação pós-consulta.",
                     FILTER_NAME
