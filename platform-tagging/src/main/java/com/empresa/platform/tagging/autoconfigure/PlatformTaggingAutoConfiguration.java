@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 
 @AutoConfiguration
-@EntityScan(basePackageClasses = Tag.class)
+@EntityScan(basePackages = {"com.empresa.platform.tagging.model", "com.brunobs"})
 public class PlatformTaggingAutoConfiguration {
 
     @Bean
