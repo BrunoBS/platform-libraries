@@ -93,9 +93,10 @@ public class ResourceVisibilityFilterManager {
             return;
         }
 
-        Session session = entityManager.unwrap(Session.class);
         RuntimeException disableFailure = null;
+        Session session = null;
         try {
+            session = entityManager.unwrap(Session.class);
             log.debug("Disabling resource visibility session={} filterPresentBefore={}",
                     System.identityHashCode(session), session.getEnabledFilter(FILTER_NAME) != null);
             session.disableFilter(FILTER_NAME);
@@ -103,18 +104,20 @@ public class ResourceVisibilityFilterManager {
             disableFailure = exception;
         }
 
-        try {
-            clearNativeAuthorizers(session);
-        } catch (RuntimeException exception) {
-            if (disableFailure == null) {
-                disableFailure = exception;
-            } else {
-                disableFailure.addSuppressed(exception);
+        if (session != null) {
+            try {
+                clearNativeAuthorizers(session);
+            } catch (RuntimeException exception) {
+                if (disableFailure == null) {
+                    disableFailure = exception;
+                } else {
+                    disableFailure.addSuppressed(exception);
+                }
             }
-        } finally {
-            visibilityDepth.remove();
-            nativeContext.exit();
         }
+
+        visibilityDepth.remove();
+        nativeContext.exit();
 
         if (disableFailure != null) {
             throw disableFailure;
