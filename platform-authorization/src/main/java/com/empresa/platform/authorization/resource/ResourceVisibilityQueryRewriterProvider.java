@@ -25,7 +25,7 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
             return delegate.getQueryRewriter(method);
         }
 
-        if (method.getRequiredDeclaredQuery().isNative()) {
+        if (method.getAnnotatedQuery() != null && method.getRequiredDeclaredQuery().isNative()) {
             return visibilityRewriter;
         }
 
