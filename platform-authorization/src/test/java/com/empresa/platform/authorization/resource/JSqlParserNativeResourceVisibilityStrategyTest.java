@@ -71,6 +71,18 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     }
 
     @Test
+    void shouldProtectOnlyRootResourceWithInnerJoinToAnotherRegisteredResource() {
+        String rewritten = strategy.apply(
+                "SELECT a.id, app.id FROM accounts a INNER JOIN applications app ON app.account_id = a.id"
+        );
+
+        assertThat(rewritten)
+                .containsIgnoringCase("LOWER(a.authorizer_group)")
+                .doesNotContainIgnoringCase("LOWER(app.authorizer_group)")
+                .containsIgnoringCase("INNER JOIN applications app");
+    }
+
+    @Test
     void shouldPreserveParametersOrderByAndLimit() {
         String rewritten = strategy.apply(
                 "SELECT a.id FROM accounts a WHERE a.name = :name ORDER BY a.id DESC LIMIT 10"
