@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ResourceVisibilityFilterManager {
 
@@ -22,6 +23,7 @@ public class ResourceVisibilityFilterManager {
     public static final String NATIVE_SESSION_VARIABLE = "@platform_resource_visibility_authorizers";
 
     private final EntityManager entityManager;
+    private final ThreadLocal<Integer> visibilityDepth = ThreadLocal.withInitial(() -> 0);
 
     public ResourceVisibilityFilterManager(EntityManager entityManager) {
         this.entityManager = entityManager;
@@ -30,6 +32,13 @@ public class ResourceVisibilityFilterManager {
     public boolean enable(UserSession userSession) {
         if (userSession.isOwner()) {
             return false;
+        }
+
+        int depth = visibilityDepth.get();
+        if (depth > 0) {
+            visibilityDepth.set(depth + 1);
+            log.debug("[RESOURCE-VISIBILITY-POC] nested visibility depth={}", depth + 1);
+            return true;
         }
 
         List<String> authorizers = userSession.getAuthorizerGroups().stream()
@@ -52,6 +61,7 @@ public class ResourceVisibilityFilterManager {
             filter.setParameterList(PARAMETER_NAME, authorizers);
             log.info("[RESOURCE-VISIBILITY-POC] enabled session={} filterPresent={}",
                     System.identityHashCode(session), session.getEnabledFilter(FILTER_NAME) != null);
+            visibilityDepth.set(1);
             return true;
         } catch (UnknownFilterException exception) {
             log.warn("[RESOURCE-VISIBILITY-POC] filter definition not found session={}", System.identityHashCode(session));
@@ -60,11 +70,25 @@ public class ResourceVisibilityFilterManager {
     }
 
     public void disable() {
+        int depth = visibilityDepth.get();
+        if (depth > 1) {
+            visibilityDepth.set(depth - 1);
+            log.debug("[RESOURCE-VISIBILITY-POC] nested visibility exit depth={}", depth - 1);
+            return;
+        }
+        if (depth == 0) {
+            return;
+        }
+
         Session session = entityManager.unwrap(Session.class);
         log.info("[RESOURCE-VISIBILITY-POC] disable session={} filterPresentBefore={}",
                 System.identityHashCode(session), session.getEnabledFilter(FILTER_NAME) != null);
         session.disableFilter(FILTER_NAME);
-        clearNativeAuthorizers(session);
+        try {
+            clearNativeAuthorizers(session);
+        } finally {
+            visibilityDepth.remove();
+        }
     }
 
     private void bindNativeAuthorizers(Session session, List<String> authorizers) {
