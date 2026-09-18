@@ -40,7 +40,7 @@ public class ResourceVisibilityFilterManager {
         if (depth > 0) {
             visibilityDepth.set(depth + 1);
             nativeContext.enter();
-            log.debug("[RESOURCE-VISIBILITY-POC] nested visibility depth={}", depth + 1);
+            log.debug("Nested resource visibility depth={}", depth + 1);
             return true;
         }
 
@@ -57,19 +57,19 @@ public class ResourceVisibilityFilterManager {
 
         Session session = entityManager.unwrap(Session.class);
         bindNativeAuthorizers(session, authorizers);
-        log.info("[RESOURCE-VISIBILITY-POC] enable session={} open={} joinedTx={} authorizers={}",
-                System.identityHashCode(session), session.isOpen(), entityManager.isJoinedToTransaction(), authorizers);
+        log.debug("Enabling resource visibility session={} open={} joinedTx={} authorizerCount={}",
+                System.identityHashCode(session), session.isOpen(), entityManager.isJoinedToTransaction(), authorizers.size());
         try {
             Filter filter = session.enableFilter(FILTER_NAME);
             filter.setParameterList(PARAMETER_NAME, authorizers);
-            log.info("[RESOURCE-VISIBILITY-POC] enabled session={} filterPresent={}",
+            log.debug("Resource visibility enabled session={} filterPresent={}",
                     System.identityHashCode(session), session.getEnabledFilter(FILTER_NAME) != null);
             visibilityDepth.set(1);
             nativeContext.enter();
             return true;
         } catch (UnknownFilterException exception) {
             cleanupFailedEnable(session);
-            log.warn("[RESOURCE-VISIBILITY-POC] filter definition not found session={}", System.identityHashCode(session));
+            log.warn("Resource visibility filter definition not found session={}", System.identityHashCode(session));
             return false;
         } catch (RuntimeException exception) {
             try {
@@ -86,7 +86,7 @@ public class ResourceVisibilityFilterManager {
         if (depth > 1) {
             visibilityDepth.set(depth - 1);
             nativeContext.exit();
-            log.debug("[RESOURCE-VISIBILITY-POC] nested visibility exit depth={}", depth - 1);
+            log.debug("Nested resource visibility exit depth={}", depth - 1);
             return;
         }
         if (depth == 0) {
@@ -94,7 +94,7 @@ public class ResourceVisibilityFilterManager {
         }
 
         Session session = entityManager.unwrap(Session.class);
-        log.info("[RESOURCE-VISIBILITY-POC] disable session={} filterPresentBefore={}",
+        log.debug("Disabling resource visibility session={} filterPresentBefore={}",
                 System.identityHashCode(session), session.getEnabledFilter(FILTER_NAME) != null);
         session.disableFilter(FILTER_NAME);
         try {
@@ -145,7 +145,7 @@ public class ResourceVisibilityFilterManager {
                 statement.execute();
             }
         });
-        log.info("[RESOURCE-VISIBILITY-POC] native authorizers bound session={} count={}",
+        log.debug("Native resource visibility authorizers bound session={} count={}",
                 System.identityHashCode(session), authorizers.size());
     }
 
@@ -156,7 +156,7 @@ public class ResourceVisibilityFilterManager {
                 statement.execute();
             }
         });
-        log.info("[RESOURCE-VISIBILITY-POC] native authorizers cleared session={}",
+        log.debug("Native resource visibility authorizers cleared session={}",
                 System.identityHashCode(session));
     }
 }
