@@ -93,6 +93,49 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     }
 
     @Test
+    void shouldPreserveGroupByHavingOrderByAndLimit() {
+        String rewritten = strategy.apply(
+                "SELECT a.authorizer_group, COUNT(*) total FROM accounts a " +
+                        "GROUP BY a.authorizer_group HAVING COUNT(*) > 0 ORDER BY total DESC LIMIT 5"
+        );
+
+        assertThat(rewritten)
+                .containsIgnoringCase("LOWER(a.authorizer_group)")
+                .containsIgnoringCase("GROUP BY a.authorizer_group")
+                .containsIgnoringCase("HAVING COUNT(*) > 0")
+                .containsIgnoringCase("ORDER BY total DESC")
+                .containsIgnoringCase("LIMIT 5");
+    }
+
+    @Test
+    void shouldProtectSelfJoinUsingBothAliases() {
+        String rewritten = strategy.apply(
+                "SELECT parent.id, child.id FROM accounts parent JOIN accounts child ON child.id = parent.id"
+        );
+
+        assertThat(rewritten)
+                .containsIgnoringCase("LOWER(parent.authorizer_group)")
+                .containsIgnoringCase("LOWER(child.authorizer_group)");
+    }
+
+    @Test
+    void shouldFailClosedForUnionUntilExplicitlySupported() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT a.id FROM accounts a UNION SELECT app.id FROM applications app"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("Only simple SELECT");
+    }
+
+    @Test
+    void shouldFailClosedForCteUntilExplicitlySupported() {
+        assertThatThrownBy(() -> strategy.apply(
+                "WITH visible AS (SELECT a.id FROM accounts a) SELECT visible.id FROM visible"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class);
+    }
+
+    @Test
     void shouldFailClosedWhenNoProtectedResourceIsPresent() {
         assertThatThrownBy(() -> strategy.apply("SELECT x.id FROM auxiliary x"))
                 .isInstanceOf(ResourceVisibilityNativeQueryException.class)
