@@ -31,7 +31,7 @@ public class TagManager {
         String resolvedOwnerType = requireOwnerType(ownerType);
         String resolvedOwnerId = requireOwnerId(ownerId);
 
-        Set<String> manual = normalize(manualTags);
+        TagOwnerType normalizedOwnerType = () -> resolvedOwnerType;\n\n        Set<String> manual = normalize(manualTags);
         Set<String> system = normalize(systemTags);
         system.removeAll(manual);
 
@@ -40,10 +40,10 @@ public class TagManager {
 
         List<Tag> tags = new ArrayList<>(manual.size() + system.size());
         manual.stream()
-                .map(name -> new Tag(ownerType, resolvedOwnerId, name, TagOriginType.MANUAL))
+                .map(name -> new Tag(normalizedOwnerType, resolvedOwnerId, name, TagOriginType.MANUAL))
                 .forEach(tags::add);
         system.stream()
-                .map(name -> new Tag(ownerType, resolvedOwnerId, name, TagOriginType.SYSTEM))
+                .map(name -> new Tag(normalizedOwnerType, resolvedOwnerId, name, TagOriginType.SYSTEM))
                 .forEach(tags::add);
 
         return repository.saveAll(tags);
