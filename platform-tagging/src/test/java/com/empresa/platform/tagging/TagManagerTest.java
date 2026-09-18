@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -141,6 +142,47 @@ class TagManagerTest {
             assertThat(tag.getName()).isEqualTo("minha-tag");
             assertThat(tag.getOriginType()).isEqualTo(TagOriginType.MANUAL);
         });
+    }
+
+    @Test
+    void shouldReadOnlyManualTagNames() {
+        TagRepository repository = repositoryWith();
+        when(repository.findByOwnerTypeAndOwnerIdAndOriginTypeOrderByNameAsc(
+                "ACCOUNT", "10", TagOriginType.MANUAL))
+                .thenReturn(List.of(tag("manual-a", TagOriginType.MANUAL), tag("manual-b", TagOriginType.MANUAL)));
+
+        TagManager manager = new TagManager(repository);
+
+        assertThat(manager.findManual(ACCOUNT, 10L)).containsExactly("manual-a", "manual-b");
+    }
+
+    @Test
+    void shouldReadOnlySystemTagNames() {
+        TagRepository repository = repositoryWith();
+        when(repository.findByOwnerTypeAndOwnerIdAndOriginTypeOrderByNameAsc(
+                "ACCOUNT", "10", TagOriginType.SYSTEM))
+                .thenReturn(List.of(tag("system", TagOriginType.SYSTEM)));
+
+        TagManager manager = new TagManager(repository);
+
+        assertThat(manager.findSystem(ACCOUNT, 10L)).containsExactly("system");
+    }
+
+    @Test
+    void shouldReadManualTagsForMultipleOwnersInOneQuery() {
+        TagRepository repository = repositoryWith();
+        Tag first = new Tag(ACCOUNT, "10", "first", TagOriginType.MANUAL);
+        Tag second = new Tag(ACCOUNT, "20", "second", TagOriginType.MANUAL);
+        when(repository.findByOwnerTypeAndOwnerIdInAndOriginTypeOrderByOwnerIdAscNameAsc(
+                "ACCOUNT", java.util.Set.of("10", "20"), TagOriginType.MANUAL))
+                .thenReturn(List.of(first, second));
+
+        TagManager manager = new TagManager(repository);
+
+        Map<String, List<String>> result = manager.findManualByOwners(ACCOUNT, List.of(10L, 20L));
+
+        assertThat(result.get("10")).containsExactly("first");
+        assertThat(result.get("20")).containsExactly("second");
     }
 
     private static TagRepository repositoryWith(Tag... tags) {
