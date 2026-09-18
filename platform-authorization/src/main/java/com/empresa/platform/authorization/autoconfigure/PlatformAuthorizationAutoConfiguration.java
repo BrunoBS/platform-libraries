@@ -5,6 +5,11 @@ import com.empresa.platform.authorization.config.PlatformAuthorizationProperties
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
+import com.empresa.platform.authorization.resource.ResourceVisibilityFilterManager;
+import jakarta.persistence.EntityManager;
+import org.hibernate.Session;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
 import com.empresa.platform.authorization.web.filter.AuthorizationContextCleanupFilter;
@@ -43,8 +48,16 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceVisibilityAspect resourceVisibilityAspect() {
-        return new ResourceVisibilityAspect();
+    public ResourceVisibilityAspect resourceVisibilityAspect(
+            ObjectProvider<ResourceVisibilityFilterManager> filterManagerProvider) {
+        return new ResourceVisibilityAspect(filterManagerProvider.getIfAvailable());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass({EntityManager.class, Session.class})
+    public ResourceVisibilityFilterManager resourceVisibilityFilterManager(EntityManager entityManager) {
+        return new ResourceVisibilityFilterManager(entityManager);
     }
 
     @Bean
