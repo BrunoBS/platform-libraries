@@ -57,6 +57,18 @@ class ResourceVisibilityQueryRewriterProviderTest {
                 .isEqualTo("SELECT 1 delegated");
     }
 
+    @Test
+    void shouldLeaveUndeclaredQueryWithDelegateWithoutInspectingDeclaredQuery() {
+        JpaQueryMethod method = mock(JpaQueryMethod.class);
+        when(method.getAnnotatedQuery()).thenReturn(null);
+        QueryRewriter delegated = (sql, sort) -> sql + " delegated";
+        ResourceVisibilityQueryRewriterProvider provider =
+                provider(ignored -> delegated, new NativeResourceVisibilityContext());
+
+        assertThat(provider.getQueryRewriter(method).rewrite("SELECT 1", Sort.unsorted()))
+                .isEqualTo("SELECT 1 delegated");
+    }
+
     private JpaQueryMethod queryMethod(boolean nativeQuery, Class<? extends QueryRewriter> rewriterType) {
         JpaQueryMethod method = mock(JpaQueryMethod.class);
         DeclaredQuery declaredQuery = mock(DeclaredQuery.class);
