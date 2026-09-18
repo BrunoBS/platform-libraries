@@ -14,7 +14,10 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     void setUp() {
         strategy = new JSqlParserNativeResourceVisibilityStrategy(
                 new ResourceVisibilityMetadataRegistry(
-                        java.util.List.of(new ResourceVisibilityMetadata("accounts", "authorizer_group"))
+                        java.util.List.of(
+                                new ResourceVisibilityMetadata("accounts", "authorizer_group"),
+                                new ResourceVisibilityMetadata("applications", "authorizer_group")
+                        )
                 )
         );
     }
@@ -52,6 +55,41 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
         String rewritten = strategy.apply("SELECT x.id FROM auxiliary x JOIN accounts a ON a.id = x.account_id");
 
         assertThat(rewritten).containsIgnoringCase("LOWER(a.authorizer_group)");
+    }
+
+    @Test
+    void shouldProtectMultipleRegisteredTablesUsingTheirAliases() {
+        String rewritten = strategy.apply(
+                "SELECT a.id, app.id FROM accounts a JOIN applications app ON app.account_id = a.id"
+        );
+
+        assertThat(rewritten)
+                .containsIgnoringCase("LOWER(a.authorizer_group)")
+                .containsIgnoringCase("LOWER(app.authorizer_group)")
+                .containsIgnoringCase(" AND ");
+    }
+
+    @Test
+    void shouldPreserveParametersOrderByAndLimit() {
+        String rewritten = strategy.apply(
+                "SELECT a.id FROM accounts a WHERE a.name = :name ORDER BY a.id DESC LIMIT 10"
+        );
+
+        assertThat(rewritten)
+                .contains(":name")
+                .containsIgnoringCase("LOWER(a.authorizer_group)")
+                .containsIgnoringCase("ORDER BY a.id DESC")
+                .containsIgnoringCase("LIMIT 10");
+    }
+
+    @Test
+    void shouldGenerateExplicitTruthyJsonContainsPredicate() {
+        String rewritten = strategy.apply("SELECT a.id FROM accounts a");
+
+        assertThat(rewritten)
+                .containsIgnoringCase("JSON_CONTAINS")
+                .contains("= 1")
+                .doesNotContain("1 <= JSON_CONTAINS");
     }
 
     @Test
