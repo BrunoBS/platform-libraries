@@ -92,6 +92,44 @@ class JSqlParserNativeResourceVisibilityStrategyTest {
     }
 
     @Test
+    void shouldFailClosedWhenFunctionProjectsJoinedProtectedResource() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT a.id, COUNT(app.id) FROM accounts a LEFT JOIN applications app ON app.account_id = a.id GROUP BY a.id"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("joined resource projection");
+    }
+
+    @Test
+    void shouldFailClosedWhenWildcardProjectsProtectedJoinedResource() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT * FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("joined resource projection");
+    }
+
+    @Test
+    void shouldFailClosedWhenJoinedProtectedWildcardIsProjected() {
+        assertThatThrownBy(() -> strategy.apply(
+                "SELECT a.id, app.* FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
+        ))
+                .isInstanceOf(ResourceVisibilityNativeQueryException.class)
+                .hasMessageContaining("joined resource projection");
+    }
+
+    @Test
+    void shouldAllowRootWildcardWithProtectedJoin() {
+        String rewritten = strategy.apply(
+                "SELECT a.* FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
+        );
+
+        assertThat(rewritten)
+                .containsIgnoringCase("LOWER(a.authorizer_group)")
+                .doesNotContainIgnoringCase("LOWER(app.authorizer_group)");
+    }
+
+    @Test
     void shouldAllowJoinToProtectedResourceWhenProjectionUsesOnlyRootResource() {
         String rewritten = strategy.apply(
                 "SELECT a.id, a.name FROM accounts a LEFT JOIN applications app ON app.account_id = a.id"
