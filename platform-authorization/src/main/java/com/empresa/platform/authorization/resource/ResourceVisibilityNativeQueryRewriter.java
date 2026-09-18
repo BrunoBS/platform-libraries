@@ -23,7 +23,13 @@ public class ResourceVisibilityNativeQueryRewriter implements QueryRewriter {
 
         String normalized = query == null ? "" : query.trim();
         if (normalized.isEmpty()) {
-            throw new IllegalArgumentException("Protected native query must not be empty");
+            throw new ResourceVisibilityNativeQueryException("Protected native query must not be empty");
+        }
+
+        if (!exposesVisibilityColumn(normalized)) {
+            throw new ResourceVisibilityNativeQueryException(
+                    "Protected native query must expose authorizerGroup for resource visibility"
+            );
         }
 
         return """
@@ -36,5 +42,9 @@ public class ResourceVisibilityNativeQueryRewriter implements QueryRewriter {
                     JSON_QUOTE(LOWER(platform_visibility.authorizerGroup))
                 )
                 """.formatted(normalized, ResourceVisibilityFilterManager.NATIVE_SESSION_VARIABLE);
+    }
+
+    private boolean exposesVisibilityColumn(String query) {
+        return query.toLowerCase(java.util.Locale.ROOT).contains("authorizergroup");
     }
 }
