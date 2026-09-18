@@ -19,6 +19,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -44,6 +46,7 @@ public class PlatformAuthorizationAutoConfiguration {
     }
 
     @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
     @ConditionalOnMissingBean
     public ResourceVisibilityAspect resourceVisibilityAspect(
             ObjectProvider<ResourceVisibilityFilterManager> filterManagerProvider) {
