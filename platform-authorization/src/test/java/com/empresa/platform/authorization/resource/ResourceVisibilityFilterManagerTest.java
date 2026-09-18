@@ -97,7 +97,8 @@ class ResourceVisibilityFilterManagerTest {
                 .hasMessage("filter setup failed")
                 .satisfies(exception -> assertThat(exception.getSuppressed())
                         .singleElement()
-                        .hasMessage("cleanup failed"));
+                        .satisfies(suppressed -> assertThat(suppressed.getMessage())
+                                .isEqualTo("cleanup failed")));
 
         assertThat(context.isActive()).isFalse();
     }
@@ -128,7 +129,8 @@ class ResourceVisibilityFilterManagerTest {
                 .hasMessage("filter disable failed")
                 .satisfies(exception -> assertThat(exception.getSuppressed())
                         .singleElement()
-                        .hasMessage("native cleanup failed"));
+                        .satisfies(suppressed -> assertThat(suppressed.getMessage())
+                                .isEqualTo("native cleanup failed")));
 
         assertThat(context.isActive()).isFalse();
         manager.disable();
