@@ -6,6 +6,7 @@ import com.empresa.platform.authorization.resource.ResourceVisibilityFilterManag
 import com.empresa.platform.authorization.resource.ResourceVisibilityMetadata;
 import com.empresa.platform.authorization.resource.ResourceVisibilityMetadataRegistry;
 import com.empresa.platform.authorization.resource.ResourceVisibilityNativeQueryRewriter;
+import com.empresa.platform.authorization.resource.ResourceVisibilityRepositoryFactoryBeanPostProcessor;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -32,6 +33,7 @@ class ResourceVisibilityJpaAutoConfigurationTest {
             assertThat(context).hasSingleBean(ResourceVisibilityMetadataRegistry.class);
             assertThat(context).hasSingleBean(NativeResourceVisibilityStrategy.class);
             assertThat(context).hasSingleBean(ResourceVisibilityNativeQueryRewriter.class);
+            assertThat(context).hasSingleBean(ResourceVisibilityRepositoryFactoryBeanPostProcessor.class);
         });
     }
 
