@@ -84,9 +84,7 @@ public class JSqlParserNativeResourceVisibilityStrategy implements NativeResourc
             throw unsupported("Subqueries and complex FROM items are not supported yet");
         }
 
-        metadataRegistry.resources().stream()
-                .filter(metadata -> metadata.tableName().equalsIgnoreCase(table.getName()))
-                .findFirst()
+        metadataRegistry.findByTableName(table.getName())
                 .ifPresent(metadata -> result.add(new ProtectedTable(table, metadata)));
     }
 
