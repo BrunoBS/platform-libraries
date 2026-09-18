@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -73,7 +74,7 @@ class ResourceAuthorizationFilterManagerTest {
 
         verify(filter).setParameterList(
                 ResourceAuthorizationFilterManager.PARAMETER_NAME,
-                Set.of(ResourceAuthorizationFilterManager.NO_AUTHORIZER)
+                List.of(ResourceAuthorizationFilterManager.NO_AUTHORIZER)
         );
     }
 
