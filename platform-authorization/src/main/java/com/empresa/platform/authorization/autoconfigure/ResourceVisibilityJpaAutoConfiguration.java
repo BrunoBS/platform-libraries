@@ -6,13 +6,9 @@ import org.hibernate.Session;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
-@AutoConfiguration(after = {
-        PlatformAuthorizationAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class
-})
+@AutoConfiguration(after = PlatformAuthorizationAutoConfiguration.class, afterName = "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration")
 @ConditionalOnClass({EntityManager.class, Session.class})
 public class ResourceVisibilityJpaAutoConfiguration {
 
