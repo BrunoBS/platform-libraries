@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ResourceVisibilityFilterManager {
 
