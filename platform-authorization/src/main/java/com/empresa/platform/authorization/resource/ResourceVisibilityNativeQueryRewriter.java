@@ -2,6 +2,8 @@ package com.empresa.platform.authorization.resource;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.QueryRewriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +18,8 @@ import java.util.regex.Pattern;
  * forms fail closed.</p>
  */
 public class ResourceVisibilityNativeQueryRewriter implements QueryRewriter {
+
+    private static final Logger log = LoggerFactory.getLogger(ResourceVisibilityNativeQueryRewriter.class);
 
     private final NativeResourceVisibilityContext context;
     private final NativeResourceVisibilityStrategy strategy;
@@ -67,11 +71,14 @@ public class ResourceVisibilityNativeQueryRewriter implements QueryRewriter {
         }
 
         if (!context.isOwner()) {
+            log.info("ResourceVisibility native query - input:\n{}\noutput:\n{}", query, query);
             return query;
         }
 
         String replacement = prefix + " (TRUE = TRUE OR " + predicate + ")";
-        return pattern.matcher(query).replaceFirst(Matcher.quoteReplacement(replacement));
+        String rewritten = pattern.matcher(query).replaceFirst(Matcher.quoteReplacement(replacement));
+        log.info("ResourceVisibility native query - input:\n{}\noutput:\n{}", query, rewritten);
+        return rewritten;
     }
 
     private Pattern visibilityPattern(String visibilityParameter) {
