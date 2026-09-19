@@ -134,7 +134,7 @@ class ResourceVisibilityNativeQueryRewriterTest {
         try {
             assertThatThrownBy(() -> rewriter.rewrite(sql, Sort.unsorted(), "authorizerGroups"))
                     .isInstanceOf(ResourceVisibilityNativeQueryException.class)
-                    .hasMessageContaining("mandatory WHERE/AND predicate");
+                    .hasMessageContaining("mandatory AND-only IN predicate");
         } finally {
             context.exit();
         }
@@ -172,7 +172,7 @@ class ResourceVisibilityNativeQueryRewriterTest {
         try {
             assertThatThrownBy(() -> rewriter.rewrite(sql, Sort.unsorted(), "authorizerGroups"))
                     .isInstanceOf(ResourceVisibilityNativeQueryException.class)
-                    .hasMessageContaining("exactly one");
+                    .hasMessageContaining("exactly once");
         } finally {
             context.exit();
         }
