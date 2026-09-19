@@ -8,6 +8,7 @@ import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.resource.AuthorizableResource;
 import com.empresa.platform.authorization.resource.ResourceVisibilityFilterManager;
+import com.empresa.platform.authorization.resource.NativeResourceVisibilityContext;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,13 +23,20 @@ public class ResourceVisibilityAspect {
     private static final Logger log = LoggerFactory.getLogger(ResourceVisibilityAspect.class);
 
     private final ResourceVisibilityFilterManager filterManager;
+    private final NativeResourceVisibilityContext nativeContext;
 
     public ResourceVisibilityAspect() {
-        this(null);
+        this(null, null);
     }
 
     public ResourceVisibilityAspect(ResourceVisibilityFilterManager filterManager) {
+        this(filterManager, null);
+    }
+
+    public ResourceVisibilityAspect(ResourceVisibilityFilterManager filterManager,
+                                    NativeResourceVisibilityContext nativeContext) {
         this.filterManager = filterManager;
+        this.nativeContext = nativeContext;
     }
 
     @Around("@annotation(resourceVisibility)")
@@ -43,8 +51,16 @@ public class ResourceVisibilityAspect {
                 ));
 
         if (session.isOwner()) {
-            log.debug("Usuário OWNER ignorou filtro de visibilidade de recurso.");
-            return joinPoint.proceed();
+            log.debug("Usuário OWNER ignorou filtro ORM e ativou bypass de native visibility.");
+            if (nativeContext == null) {
+                return joinPoint.proceed();
+            }
+            nativeContext.enter(true);
+            try {
+                return joinPoint.proceed();
+            } finally {
+                nativeContext.exit();
+            }
         }
 
         if (session.getGroups().isEmpty()) {
