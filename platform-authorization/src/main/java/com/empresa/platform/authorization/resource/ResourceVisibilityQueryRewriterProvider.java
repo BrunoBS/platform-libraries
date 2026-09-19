@@ -35,7 +35,7 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
             return applicationRewriter;
         }
 
-        String visibilityParameter = visibilityParameter(method.getMethod());
+        String visibilityParameter = visibilityParameter(method);
         if (visibilityParameter == null) {
             return applicationRewriter;
         }
@@ -51,7 +51,8 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
                 platformRewriter.rewrite(applicationRewriter.rewrite(query, sort), sort);
     }
 
-    private String visibilityParameter(Method method) {
+    private String visibilityParameter(JpaQueryMethod queryMethod) {
+        Method method = queryMethod.getRequiredMethod();
         Annotation[][] annotations = method.getParameterAnnotations();
         String result = null;
 
