@@ -278,6 +278,73 @@ class ResourceVisibilityNativeQueryRewriterTest {
     }
 
     @Test
+    void shouldFailClosedForUnionQuery() {
+        assertUnsafeNativeQuery("""
+                SELECT id FROM applications
+                WHERE authorizer_group IN (:authorizerGroups)
+                UNION
+                SELECT id FROM applications
+                WHERE active = true
+                """);
+    }
+
+    @Test
+    void shouldFailClosedWhenVisibilityIsOnlyInsideSubquery() {
+        assertUnsafeNativeQuery("""
+                SELECT *
+                FROM accounts acc
+                WHERE EXISTS (
+                    SELECT 1 FROM applications app
+                    WHERE app.authorizer_group IN (:authorizerGroups)
+                )
+                """);
+    }
+
+    @Test
+    void shouldFailClosedWhenVisibilityIsInHaving() {
+        assertUnsafeNativeQuery("""
+                SELECT app.account_id, COUNT(*)
+                FROM applications app
+                WHERE app.active = true
+                GROUP BY app.account_id, app.authorizer_group
+                HAVING app.authorizer_group IN (:authorizerGroups)
+                """);
+    }
+
+    @Test
+    void shouldFailClosedWhenVisibilityIsInJoinOn() {
+        assertUnsafeNativeQuery("""
+                SELECT acc.id
+                FROM accounts acc
+                JOIN applications app
+                  ON app.account_id = acc.id
+                 AND app.authorizer_group IN (:authorizerGroups)
+                WHERE acc.active = true
+                """);
+    }
+
+    @Test
+    void shouldFailClosedWhenVisibilityIsNegated() {
+        assertUnsafeNativeQuery("""
+                SELECT *
+                FROM applications app
+                WHERE NOT (app.authorizer_group IN (:authorizerGroups))
+                """);
+    }
+
+    private void assertUnsafeNativeQuery(String sql) {
+        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+        ResourceVisibilityNativeQueryRewriter rewriter = rewriter(context);
+        context.enter(false);
+        try {
+            assertThatThrownBy(() -> rewriter.rewrite(sql, Sort.unsorted(), "authorizerGroups"))
+                    .isInstanceOf(ResourceVisibilityNativeQueryException.class);
+        } finally {
+            context.exit();
+        }
+    }
+
+    @Test
     void nestedScopeShouldRemainActiveUntilOuterScopeExits() {
         NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
 
