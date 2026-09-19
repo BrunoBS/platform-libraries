@@ -10,9 +10,10 @@ import java.util.regex.Pattern;
  * Applies database-side visibility to native Spring Data queries while a
  * {@code @ResourceVisibility} scope is active.
  *
- * The annotated repository parameter is the anchor. This PoC intentionally
- * supports only a simple IN (:parameter) predicate and fails closed for
- * ambiguous or unsupported shapes.
+ * <p>The repository parameter annotated with {@code @ResourceVisibilityGroups}
+ * is the anchor. The PoC deliberately supports one mandatory predicate in the
+ * form {@code WHERE|AND <expression> IN (:parameter)}. Unsupported or ambiguous
+ * forms fail closed.</p>
  */
 public class ResourceVisibilityNativeQueryRewriter implements QueryRewriter {
 
@@ -45,26 +46,51 @@ public class ResourceVisibilityNativeQueryRewriter implements QueryRewriter {
             throw new ResourceVisibilityNativeQueryException("Native visibility parameter must not be blank");
         }
 
-        Pattern parameter = Pattern.compile(
-                "(?i)([^\\s()]+(?:\\([^)]*\\))?\\s+IN\\s*\\(\\s*:" +
-                        Pattern.quote(visibilityParameter) + "\\s*\\))"
-        );
-        Matcher matcher = parameter.matcher(query);
+        Pattern pattern = visibilityPattern(visibilityParameter);
+        Matcher matcher = pattern.matcher(query);
 
         if (!matcher.find()) {
             throw new ResourceVisibilityNativeQueryException(
-                    "Native visibility query must contain an IN (:" + visibilityParameter + ") predicate"
-            );
-        }
-        if (matcher.find()) {
-            throw new ResourceVisibilityNativeQueryException(
-                    "Native visibility parameter :" + visibilityParameter +
-                            " must occur in exactly one supported IN predicate"
+                    "Native visibility query must contain a mandatory WHERE/AND predicate using IN (:" +
+                            visibilityParameter + ")"
             );
         }
 
-        // For now normal users keep the explicit predicate. OWNER bypass will be
-        // driven by the visibility execution context in the next PoC step.
-        return query;
+        String prefix = matcher.group("prefix");
+        String predicate = matcher.group("predicate");
+
+        if (matcher.find()) {
+            throw new ResourceVisibilityNativeQueryException(
+                    "Native visibility parameter :" + visibilityParameter +
+                            " must occur in exactly one supported mandatory predicate"
+            );
+        }
+
+        if (!context.isOwner()) {
+            return query;
+        }
+
+        String replacement = prefix + " (TRUE = TRUE OR " + predicate + ")";
+        return pattern.matcher(query).replaceFirst(Matcher.quoteReplacement(replacement));
+    }
+
+    private Pattern visibilityPattern(String visibilityParameter) {
+        String parameter = Pattern.quote(visibilityParameter);
+
+        // Intentionally narrow convention:
+        //   WHERE LOWER(alias.column) IN (:groups)
+        //   AND   LOWER(alias.column) IN (:groups)
+        //   WHERE alias.column IN (:groups)
+        //   AND   alias.column IN (:groups)
+        //
+        // OR is not accepted as a prefix because resource visibility is mandatory.
+        String expression =
+                "(?:LOWER\\s*\\(\\s*[A-Za-z0-9_$.]+\\s*\\)|[A-Za-z0-9_$.]+)";
+
+        return Pattern.compile(
+                "(?i)(?<prefix>\\b(?:WHERE|AND)\\b)\\s+" +
+                        "(?<predicate>" + expression +
+                        "\\s+IN\\s*\\(\\s*:" + parameter + "\\s*\\))"
+        );
     }
 }
