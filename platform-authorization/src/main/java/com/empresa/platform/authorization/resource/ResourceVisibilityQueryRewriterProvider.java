@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.query.JpaQueryMethod;
 import org.springframework.data.jpa.repository.query.QueryRewriterProvider;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 
 /**
  * Applies platform visibility to declared native queries.
@@ -55,7 +57,13 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
         for (var parameter : queryMethod.getParameters()) {
             Optional<String> name = parameter.getName();
 
-            if (!parameter.hasParameterAnnotation(ResourceVisibilityGroups.class)) {
+            // JpaParameter intentionally does not expose arbitrary method-parameter
+            // annotations in the public Spring Data API. The PoC therefore uses
+            // the explicit @Param name as the stable native-query contract here;
+            // @ResourceVisibilityGroups remains the repository-facing marker and
+            // will be enforced by repository proxy validation.
+            if (!parameter.isExplicitlyNamed()
+                    || parameter.getName().filter("authorizerGroups"::equals).isEmpty()) {
                 continue;
             }
             if (result != null) {
