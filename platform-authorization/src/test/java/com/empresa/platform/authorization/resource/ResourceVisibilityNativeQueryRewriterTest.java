@@ -200,6 +200,83 @@ class ResourceVisibilityNativeQueryRewriterTest {
         }
     }
 
+
+    @Test
+    void shouldFailClosedWhenVisibilityIsInsideParenthesizedOrAfterAnd() {
+        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+        ResourceVisibilityNativeQueryRewriter rewriter = rewriter(context);
+        String sql = """
+                SELECT *
+                FROM applications app
+                WHERE app.account_id = :accountId
+                  AND (app.active = true
+                       OR LOWER(app.authorizer_group) IN (:authorizerGroups))
+                """;
+
+        context.enter(false);
+        try {
+            assertThatThrownBy(() -> rewriter.rewrite(sql, Sort.unsorted(), "authorizerGroups"))
+                    .isInstanceOf(ResourceVisibilityNativeQueryException.class);
+        } finally {
+            context.exit();
+        }
+    }
+
+    @Test
+    void shouldFailClosedWhenOrAppearsAfterVisibilityPredicate() {
+        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+        ResourceVisibilityNativeQueryRewriter rewriter = rewriter(context);
+        String sql = """
+                SELECT *
+                FROM applications app
+                WHERE app.account_id = :accountId
+                  AND LOWER(app.authorizer_group) IN (:authorizerGroups)
+                   OR app.is_public = true
+                """;
+
+        context.enter(false);
+        try {
+            assertThatThrownBy(() -> rewriter.rewrite(sql, Sort.unsorted(), "authorizerGroups"))
+                    .isInstanceOf(ResourceVisibilityNativeQueryException.class);
+        } finally {
+            context.exit();
+        }
+    }
+
+    @Test
+    void shouldFailClosedWhenParameterAppearsOnlyInCommentOrLiteral() {
+        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+        ResourceVisibilityNativeQueryRewriter rewriter = rewriter(context);
+
+        context.enter(false);
+        try {
+            assertThatThrownBy(() -> rewriter.rewrite(
+                    "SELECT ':authorizerGroups' AS marker FROM applications app WHERE app.active = true /* LOWER(app.authorizer_group) IN (:authorizerGroups) */",
+                    Sort.unsorted(),
+                    "authorizerGroups"))
+                    .isInstanceOf(ResourceVisibilityNativeQueryException.class);
+        } finally {
+            context.exit();
+        }
+    }
+
+    @Test
+    void shouldFailClosedForNotInVisibilityPredicate() {
+        NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
+        ResourceVisibilityNativeQueryRewriter rewriter = rewriter(context);
+
+        context.enter(false);
+        try {
+            assertThatThrownBy(() -> rewriter.rewrite(
+                    "SELECT * FROM applications app WHERE app.authorizer_group NOT IN (:authorizerGroups)",
+                    Sort.unsorted(),
+                    "authorizerGroups"))
+                    .isInstanceOf(ResourceVisibilityNativeQueryException.class);
+        } finally {
+            context.exit();
+        }
+    }
+
     @Test
     void nestedScopeShouldRemainActiveUntilOuterScopeExits() {
         NativeResourceVisibilityContext context = new NativeResourceVisibilityContext();
