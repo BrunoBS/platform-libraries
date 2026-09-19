@@ -6,8 +6,7 @@ import org.springframework.data.jpa.repository.query.JpaQueryMethod;
 import org.springframework.data.jpa.repository.query.QueryRewriterProvider;
 import org.springframework.data.repository.query.Param;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * Applies platform visibility to declared native queries.
@@ -52,23 +51,12 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
     }
 
     private String visibilityParameter(JpaQueryMethod queryMethod) {
-        Method method = queryMethod.getRequiredMethod();
-        Annotation[][] annotations = method.getParameterAnnotations();
         String result = null;
 
-        for (Annotation[] parameterAnnotations : annotations) {
-            ResourceVisibilityGroups visibility = null;
-            Param param = null;
+        for (var parameter : queryMethod.getParameters()) {
+            Optional<String> name = parameter.getName();
 
-            for (Annotation annotation : parameterAnnotations) {
-                if (annotation instanceof ResourceVisibilityGroups resourceVisibilityGroups) {
-                    visibility = resourceVisibilityGroups;
-                } else if (annotation instanceof Param repositoryParam) {
-                    param = repositoryParam;
-                }
-            }
-
-            if (visibility == null) {
+            if (parameter.getParameter().getAnnotation(ResourceVisibilityGroups.class) == null) {
                 continue;
             }
             if (result != null) {
@@ -76,14 +64,15 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
                         "Native visibility query must declare exactly one @ResourceVisibilityGroups parameter"
                 );
             }
-            if (param == null || param.value().isBlank()) {
+            if (name.isEmpty() || name.get().isBlank()) {
                 throw new ResourceVisibilityNativeQueryException(
                         "@ResourceVisibilityGroups must also declare a named @Param"
                 );
             }
-            result = param.value();
+            result = name.get();
         }
 
         return result;
     }
 }
+
