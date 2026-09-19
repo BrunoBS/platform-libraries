@@ -1,30 +1,48 @@
 package com.empresa.platform.authorization.resource;
 
 /**
- * Thread-bound marker used by Spring Data native query rewriting.
+ * Thread-bound state used by native resource-visibility rewriting.
  *
- * <p>The context is active only while a non-OWNER {@code @ResourceVisibility}
- * invocation is executing. Nesting is reference-counted so inner annotated
- * calls cannot clear an outer visibility scope.</p>
+ * <p>The scope is reference-counted so nested {@code @ResourceVisibility}
+ * invocations cannot clear the outer state. OWNER is retained in the context
+ * because native queries need to preserve the visibility parameter while
+ * bypassing only its mandatory predicate.</p>
  */
 public class NativeResourceVisibilityContext {
 
-    private final ThreadLocal<Integer> depth = ThreadLocal.withInitial(() -> 0);
+    private final ThreadLocal<State> state = new ThreadLocal<>();
+
+    public void enter(boolean owner) {
+        State current = state.get();
+        if (current == null) {
+            state.set(new State(1, owner));
+            return;
+        }
+        state.set(new State(current.depth() + 1, current.owner() || owner));
+    }
 
     public void enter() {
-        depth.set(depth.get() + 1);
+        enter(false);
     }
 
     public void exit() {
-        int current = depth.get();
-        if (current <= 1) {
-            depth.remove();
+        State current = state.get();
+        if (current == null || current.depth() <= 1) {
+            state.remove();
             return;
         }
-        depth.set(current - 1);
+        state.set(new State(current.depth() - 1, current.owner()));
     }
 
     public boolean isActive() {
-        return depth.get() > 0;
+        return state.get() != null;
+    }
+
+    public boolean isOwner() {
+        State current = state.get();
+        return current != null && current.owner();
+    }
+
+    private record State(int depth, boolean owner) {
     }
 }
