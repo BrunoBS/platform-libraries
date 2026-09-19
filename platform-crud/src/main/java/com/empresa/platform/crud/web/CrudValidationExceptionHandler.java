@@ -1,4 +1,4 @@
-package com.empresa.platform.starter.web;
+package com.empresa.platform.crud.web;
 
 import com.empresa.platform.crud.validation.CrudValidationException;
 import com.empresa.platform.messaging.exception.ValidationException;
