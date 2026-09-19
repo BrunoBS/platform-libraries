@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.query.JpaQueryMethod;
 import org.springframework.data.jpa.repository.query.QueryRewriterProvider;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
 
 /**
  * Applies platform visibility to declared native queries.
@@ -56,7 +55,7 @@ public class ResourceVisibilityQueryRewriterProvider implements QueryRewriterPro
         for (var parameter : queryMethod.getParameters()) {
             Optional<String> name = parameter.getName();
 
-            if (parameter.getParameter().getAnnotation(ResourceVisibilityGroups.class) == null) {
+            if (!parameter.hasParameterAnnotation(ResourceVisibilityGroups.class)) {
                 continue;
             }
             if (result != null) {
