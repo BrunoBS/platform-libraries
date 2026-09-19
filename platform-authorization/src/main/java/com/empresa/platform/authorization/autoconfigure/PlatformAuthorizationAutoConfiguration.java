@@ -7,6 +7,7 @@ import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
 import com.empresa.platform.authorization.resource.ResourceVisibilityFilterManager;
 import com.empresa.platform.authorization.resource.ResourceVisibilityQueryContext;
+import com.empresa.platform.authorization.resource.NativeResourceVisibilityContext;
 import org.springframework.beans.factory.ObjectProvider;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
@@ -56,8 +57,12 @@ public class PlatformAuthorizationAutoConfiguration {
     @Order(Ordered.LOWEST_PRECEDENCE)
     @ConditionalOnMissingBean
     public ResourceVisibilityAspect resourceVisibilityAspect(
-            ObjectProvider<ResourceVisibilityFilterManager> filterManagerProvider) {
-        return new ResourceVisibilityAspect(filterManagerProvider.getIfAvailable());
+            ObjectProvider<ResourceVisibilityFilterManager> filterManagerProvider,
+            ObjectProvider<NativeResourceVisibilityContext> nativeContextProvider) {
+        return new ResourceVisibilityAspect(
+                filterManagerProvider.getIfAvailable(),
+                nativeContextProvider.getIfAvailable()
+        );
     }
 
 
