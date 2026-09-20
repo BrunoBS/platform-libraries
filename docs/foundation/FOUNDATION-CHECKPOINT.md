@@ -194,3 +194,86 @@ platform-build
   -> GitHub Packages / platform-libraries
   -> Golden consumer
 ```
+
+
+## Correção pós-checkpoint — infraestrutura de teste opt-in
+
+A G1 da Golden Reference revelou um segundo gap da Foundation: `platform-test-support:1.0.0` exportava transitivamente infraestrutura JDBC/MySQL/Kafka/Testcontainers mesmo para consumidores que não usavam essas capacidades.
+
+No `BrunoBS/account-service`, um simples `@PlatformIntegrationTest` sem persistência passou a conter JDBC no classpath e o Spring Boot tentou ativar `DataSourceAutoConfiguration`.
+
+O workaround temporário de excluir `DataSourceAutoConfiguration` no consumidor foi rejeitado como padrão.
+
+### Contrato corrigido
+
+A release `platform-test-support:1.0.1` torna opcionais:
+
+- `spring-boot-starter-jdbc`;
+- `mysql-connector-j`;
+- `spring-boot-testcontainers`;
+- `spring-boot-starter-kafka`;
+- Testcontainers MySQL;
+- Testcontainers Kafka;
+- Testcontainers JUnit Jupiter.
+
+O contrato passa a ser:
+
+```text
+infraestrutura não declarada
+→ não entra transitivamente
+→ não ativa auto-configuração correspondente
+```
+
+As capacidades `@WithMySql` e `@WithKafka` permanecem disponíveis e explícitas. Serviços que as utilizam devem declarar as dependências de infraestrutura correspondentes no escopo de teste.
+
+Foi adicionado `InfrastructureDependencyOptionalityTest` para impedir regressão do contrato Maven.
+
+### Versionamento
+
+Como as releases anteriores já estavam publicadas, nenhuma versão foi sobrescrita:
+
+```text
+platform-parent/platform-dependencies: 1.0.2
+platform-libraries release train:       1.0.1
+```
+
+Todos os módulos sobreviventes de `platform-libraries` foram publicados na release train `1.0.1`.
+
+### Evidência
+
+Commit funcional das Libraries:
+
+`729f6acee1443b660680c5670fb5b995f5f1a854`
+
+GitHub Actions Verify #50, run `35536158485`:
+
+- `InfrastructureDependencyOptionalityTest`: sucesso;
+- `platform-test-support`: 35 testes, 0 falhas, 0 erros;
+- reactor `platform-libraries 1.0.1`: `BUILD SUCCESS`.
+
+GitHub Actions Publish Maven packages #3, run `35536158484`:
+
+- reactor completo `1.0.1`;
+- `BUILD SUCCESS`;
+- publicação remota no GitHub Packages.
+
+O workflow de publicação foi restaurado para `workflow_dispatch` após o release.
+
+### Evidência downstream
+
+No `BrunoBS/account-service`, commit `ba2b7fcdd90fa9a35b5e0ff01a14a0b38423fbf8`:
+
+- parent `1.0.2`;
+- starter/test-support `1.0.1` via dependency management;
+- nenhum JDBC/MySQL adicionado;
+- nenhum exclude de `DataSourceAutoConfiguration`.
+
+GitHub Actions Verify #11, run `35536464540`:
+
+- `AccountServiceApplicationIT`: 1 teste, 0 falhas, 0 erros;
+- Maven Enforcer e dependency convergence: sucesso;
+- `mvn clean verify`: `BUILD SUCCESS`.
+
+### Estado
+
+O gap está resolvido. A Foundation não exige configuração negativa para impedir infraestrutura ausente; capacidades de teste pesadas são opt-in.
