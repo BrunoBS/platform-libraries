@@ -9,4 +9,22 @@
             <password>${env.GITHUB_PUBLISH_TOKEN}</password>
         </server>
     </servers>
+
+    <profiles>
+        <profile>
+            <id>github-platform-libraries</id>
+            <repositories>
+                <repository>
+                    <id>github-platform-libraries</id>
+                    <url>https://maven.pkg.github.com/brunobs/platform-libraries</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>false</enabled></snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>github-platform-libraries</activeProfile>
+    </activeProfiles>
 </settings>
