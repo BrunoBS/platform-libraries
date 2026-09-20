@@ -6,7 +6,7 @@ Infraestrutura reutilizável para catálogos persistidos e administráveis pelos
 
 A biblioteca define **como** um catálogo persistido funciona. Cada microserviço continua dono de **quais** catálogos pertencem ao seu domínio, das migrations, das regras específicas e da autorização.
 
-A infraestrutura de CRUD é reutilizada de `platform-crud` e a semântica padrão de erro usa `platform-messaging`.
+A infraestrutura de catálogo é autocontida no `platform-catalog` e a semântica padrão de erro usa `platform-messaging`. O módulo não depende de uma abstração genérica de CRUD.
 
 ## Tipos de catálogo
 
