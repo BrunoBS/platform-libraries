@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -8,7 +6,6 @@
     <artifactId>platform-libraries</artifactId>
     <version>1.1.0</version>
     <packaging>pom</packaging>
-
     <name>platform-libraries</name>
     <description>Reactor da Foundation consolidada da Golden Platform.</description>
 
@@ -16,14 +13,14 @@
         <module>platform-dependencies</module>
         <module>platform-parent</module>
         <module>platform-libraries-bom</module>
-        <module>platform-audit</module>
+        <module>platform-logging</module>
         <module>platform-messaging</module>
         <module>platform-authorization</module>
-        <module>platform-logging</module>
-        <module>platform-starter</module>
-        <module>platform-test-support</module>
+        <module>platform-audit</module>
         <module>platform-catalog</module>
         <module>platform-tagging</module>
+        <module>platform-starter</module>
+        <module>platform-test-support</module>
     </modules>
 
     <distributionManagement>

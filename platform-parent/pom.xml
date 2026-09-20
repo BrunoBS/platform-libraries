@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <name>Parent de Build da Plataforma</name>
-    <description>Parent Maven responsável pelas convenções de build, gerenciamento de dependências, regras de qualidade e padrões Java da plataforma. As dependências de runtime devem ser declaradas explicitamente pelos projetos consumidores.</description>
+    <description>Governança Maven da Golden Platform: baseline Java, plugins, testes e gates de build. Não gerencia versões das capabilities.</description>
 
     <properties>
         <java.version>25</java.version>
@@ -118,9 +118,7 @@
                 <executions>
                     <execution>
                         <id>resolve-test-agent-paths</id>
-                        <goals>
-                            <goal>properties</goal>
-                        </goals>
+                        <goals><goal>properties</goal></goals>
                     </execution>
                 </executions>
             </plugin>
@@ -133,10 +131,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <executions>
                     <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
+                        <goals><goal>integration-test</goal><goal>verify</goal></goals>
                     </execution>
                 </executions>
             </plugin>
@@ -144,19 +139,8 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
+                    <execution><id>prepare-agent</id><goals><goal>prepare-agent</goal></goals></execution>
+                    <execution><id>report</id><phase>verify</phase><goals><goal>report</goal></goals></execution>
                 </executions>
             </plugin>
             <plugin>
@@ -166,17 +150,11 @@
                     <execution>
                         <id>enforce-platform-build</id>
                         <phase>validate</phase>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
+                        <goals><goal>enforce</goal></goals>
                         <configuration>
                             <rules>
-                                <requireJavaVersion>
-                                    <version>${java.runtime.version.range}</version>
-                                </requireJavaVersion>
-                                <requireMavenVersion>
-                                    <version>[${maven.minimum.version},4)</version>
-                                </requireMavenVersion>
+                                <requireJavaVersion><version>${java.runtime.version.range}</version></requireJavaVersion>
+                                <requireMavenVersion><version>[${maven.minimum.version},4)</version></requireMavenVersion>
                                 <requireProperty>
                                     <property>maven.compiler.release</property>
                                     <regex>^25$</regex>
@@ -191,10 +169,11 @@
             </plugin>
         </plugins>
     </build>
+
     <distributionManagement>
         <repository>
             <id>github-platform-libraries</id>
-            <name>GitHub Packages</name>
+            <name>GitHub Packages - Platform Libraries</name>
             <url>https://maven.pkg.github.com/brunobs/platform-libraries</url>
         </repository>
     </distributionManagement>

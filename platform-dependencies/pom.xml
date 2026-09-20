@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <name>Gerenciamento de Dependências da Plataforma</name>
-    <description>BOM central responsável pelo gerenciamento das versões das dependências utilizadas pelas bibliotecas e serviços da plataforma. As dependências devem ser declaradas explicitamente pelos projetos consumidores.</description>
+    <description>BOM tecnológico externo da Golden Platform. Não gerencia capabilities próprias da plataforma.</description>
 
     <properties>
         <spring-boot.version>4.1.1</spring-boot.version>
@@ -32,7 +32,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
@@ -40,7 +39,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
@@ -78,10 +76,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <distributionManagement>
         <repository>
             <id>github-platform-libraries</id>
-            <name>GitHub Packages</name>
+            <name>GitHub Packages - Platform Libraries</name>
             <url>https://maven.pkg.github.com/brunobs/platform-libraries</url>
         </repository>
     </distributionManagement>

@@ -22,7 +22,5 @@
             </repositories>
         </profile>
     </profiles>
-    <activeProfiles>
-        <activeProfile>github-platform-libraries</activeProfile>
-    </activeProfiles>
+    <activeProfiles><activeProfile>github-platform-libraries</activeProfile></activeProfiles>
 </settings>
