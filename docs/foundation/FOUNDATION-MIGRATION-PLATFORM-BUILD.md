@@ -65,7 +65,7 @@ br.com.portalmanager.core
 
 A mudança abrange `groupId`, packages Java, imports e paths de código. Os `artifactId` permanecem `platform-*`.
 
-## Baseline oficial preparado
+## Versões próprias preparadas para publicação
 
 ```text
 platform-dependencies   1.0.0
@@ -135,7 +135,7 @@ Após o checkpoint, poderá ser marcado como legado/obsoleto e arquivado manualm
 
 A investigação intermediária passou por probes com `platform-dependencies:1.0.3`, `platform-parent:1.1.0` e release train `1.1.0`. Esses probes expuseram a associação antiga de packages Maven e retornaram HTTP 422 no cutover inicial. Eles são preservados em `FOUNDATION-PUBLISHING.md` como histórico.
 
-Após a limpeza manual dos packages experimentais, o run `35542606756`, attempt 3, publicou com sucesso o baseline `1.0.0` ainda sob `com.empresa.platform`.
+Após a limpeza manual dos packages experimentais, o run `35542606756`, attempt 3, publicou com sucesso as coordenadas próprias em `1.0.0` ainda sob `com.empresa.platform`.
 
 Em seguida, a Foundation adotou `br.com.portalmanager.core`. O Verify #85, run `35544899150`, validou o reactor consolidado no namespace definitivo.
 
