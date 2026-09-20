@@ -95,3 +95,19 @@ O root reactor, `platform-libraries-bom` e as capabilities usam essa `revision`.
 Como o baseline é Maven 3.9.9, os artifacts da release train usam `flatten-maven-plugin` em `resolveCiFriendliesOnly`. O CI verifica que os POMs achatados existem, contêm a versão concreta da release e não deixam `${revision}` sem resolução antes de qualquer publicação.
 
 `platform-parent` e `platform-dependencies` permanecem fora da release train e mantêm suas próprias versões.
+
+
+## Reset de baseline para 1.0.0
+
+Por decisão do projeto, após a limpeza manual das versões/packages experimentais no GitHub Packages, a próxima publicação da topologia consolidada parte de um baseline limpo:
+
+```text
+platform-dependencies   1.0.0
+platform-parent         1.0.0
+platform-libraries-bom  1.0.0
+capabilities            1.0.0
+```
+
+A release train continua usando a propriedade Maven 3 CI-friendly `revision`, definida em `.mvn/maven.config` como `-Drevision=1.0.0`. O nome `revision` é mantido por compatibilidade com Maven 3.9.9; propriedades arbitrárias como `${platform-libraries.version}` no campo `project.version` não fazem parte do suporte CI-friendly do Maven 3.
+
+Os runs e versões 1.0.3/1.1.0 documentados acima permanecem somente como evidência histórica da investigação de cutover e não representam o novo baseline de publicação.

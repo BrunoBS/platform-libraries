@@ -67,7 +67,7 @@ A versão da release train é definida uma única vez em:
 
 ```text
 .mvn/maven.config
--Drevision=1.1.0
+-Drevision=1.0.0
 ```
 
 Usam essa mesma `revision`:
@@ -84,19 +84,21 @@ Como o baseline oficial continua em Maven 3.9.9, o build usa `flatten-maven-plug
 
 Para iniciar uma nova release train, altera-se somente `-Drevision=<nova-versão>` em `.mvn/maven.config`, seguido de `mvn clean verify` e da publicação remota.
 
-## Versões preparadas nesta migração
+## Baseline preparado para publicação limpa
 
-- `platform-dependencies:1.0.3`;
-- `platform-parent:1.1.0`;
-- `platform-libraries-bom:1.1.0`;
-- capabilities: `1.1.0`;
-- root reactor: `platform-libraries:1.1.0`.
+Após a decisão de limpar as versões/packages experimentais no GitHub Packages, o baseline de publicação da Foundation consolidada reinicia em `1.0.0`:
 
-Estado de publicação nesta migração:
+- `platform-dependencies:1.0.0`;
+- `platform-parent:1.0.0`;
+- `platform-libraries-bom:1.0.0`;
+- capabilities: `1.0.0`;
+- root reactor: `platform-libraries:1.0.0`.
+
+Estado de publicação anterior permanece apenas como evidência histórica dos probes de consolidação. O novo baseline `1.0.0` ainda precisa ser publicado e validado remotamente:
 
 - release train das capabilities `1.1.0`: publicada no registry de `platform-libraries` pelo run `35538290455`;
-- `platform-dependencies:1.0.3`: preparado no código, porém não comprovado como consumível no registry novo;
-- `platform-parent:1.1.0`: preparado no código, porém não consumível pelo `account-service` exclusivamente no registry novo;
-- `platform-libraries-bom:1.1.0`: preparado para o novo modelo, mas o checkpoint depende do cutover completo dos artifacts estruturais.
+- `platform-dependencies:1.0.0`: preparado no código, porém não comprovado como consumível no registry novo;
+- `platform-parent:1.0.0`: preparado no código, porém não consumível pelo `account-service` exclusivamente no registry novo;
+- `platform-libraries-bom:1.0.0`: preparado para o novo modelo, mas o checkpoint depende do cutover completo dos artifacts estruturais.
 
 Nenhuma versão será marcada como baseline consolidado final antes do consumo remoto verde pelo consumidor de prova.

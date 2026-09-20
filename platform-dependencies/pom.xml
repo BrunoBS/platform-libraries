@@ -6,7 +6,7 @@
 
     <groupId>com.empresa.platform</groupId>
     <artifactId>platform-dependencies</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>Gerenciamento de Dependências da Plataforma</name>

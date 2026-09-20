@@ -63,19 +63,19 @@ O root POM será apenas aggregator e ponto de publicação do reactor. Não conc
 
 Os eixos são independentes.
 
-- `platform-dependencies:1.0.3`: nova publicação/topologia do mesmo baseline tecnológico, sem alteração de Spring Boot.
-- `platform-parent:1.1.0`: mudança de contrato do parent ao remover dependency management das capabilities e migrar o contexto oficial.
-- `platform-libraries-bom:1.1.0` e capabilities `1.1.0`: release train coerente da Foundation consolidada.
-- root aggregator `platform-libraries:1.1.0`: versão operacional do reactor; não é um eixo de consumo.
+- `platform-dependencies:1.0.0`: baseline inicial da topologia consolidada.
+- `platform-parent:1.0.0`: baseline inicial do parent de build na topologia consolidada.
+- `platform-libraries-bom:1.0.0` e capabilities `1.0.0`: release train inicial coerente da Foundation consolidada.
+- root aggregator `platform-libraries:1.0.0`: versão operacional do reactor; não é um eixo de consumo.
 
-A coincidência entre `platform-parent:1.1.0` e release train `1.1.0` não implica versionamento acoplado.
+A coincidência entre `platform-parent:1.0.0` e release train `1.0.0` não implica versionamento acoplado.
 
 ### Single source of truth da release train
 
 A versão da release train de capabilities passa a ter uma única fonte em `.mvn/maven.config`:
 
 ```text
--Drevision=1.1.0
+-Drevision=1.0.0
 ```
 
 O root reactor, `platform-libraries-bom` e as oito capabilities usam `${revision}` como versão do próprio artifact. Dependências internas entre capabilities usam `${project.version}`, preservando o release train sem repetir números de versão nos POMs.
