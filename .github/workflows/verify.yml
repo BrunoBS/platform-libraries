@@ -43,8 +43,17 @@ jobs:
             echo "Legacy Maven/Java namespace found outside historical documentation."
             exit 1
           fi
-          if git ls-files | grep -q 'com/empresa/platform'; then
+          if git ls-files | grep -Eq 'com/empresa/platform|com\.empresa\.platform'; then
             echo "Legacy Java package path found."
+            exit 1
+          fi
+
+      - name: Verify repository hygiene
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -Eq '(^|/)\.flattened-pom\.xml$'; then
+            echo "Generated flattened POM must not be tracked by Git."
             exit 1
           fi
 
