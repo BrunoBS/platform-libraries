@@ -96,3 +96,101 @@ Como o POM usa `<relativePath/>`, o parent 1.0.1 não é resolvido do workspace 
 Com F0–F6 concluídas e a integração remota oficial validada, o checkpoint `FOUNDATION-GOLDEN-V1` está tecnicamente concluído.
 
 A próxima fase arquitetural permitida pelo roadmap é a nova Golden Reference. Nenhum trabalho dessa fase é iniciado por este documento.
+
+
+## Correção pós-checkpoint — distribuição das Libraries para consumidores Golden
+
+A G1 da Golden Reference revelou um gap de distribuição que não havia sido exercitado pela F6 original.
+
+A F6 provou corretamente:
+
+```text
+platform-build
+  -> publish
+GitHub Packages / platform-build
+  -> resolve
+platform-libraries
+  -> mvn clean verify
+```
+
+Porém o primeiro consumidor downstream da Foundation também exige:
+
+```text
+platform-libraries
+  -> publish
+GitHub Packages / platform-libraries
+  -> resolve
+Golden consumer
+```
+
+### Evidência do gap
+
+No `BrunoBS/account-service`, após autenticação válida e configuração dos dois registries, o GitHub Actions Verify #6, run `35534805355`, attempt 1, resolveu `platform-parent:1.0.1` remotamente, mas confirmou ausência de:
+
+- `com.empresa.platform:platform-starter:1.0.0`;
+- `com.empresa.platform:platform-test-support:1.0.0`;
+
+tanto no registry de `platform-build` quanto no registry correto de `platform-libraries`.
+
+A inspeção do reactor confirmou que todas as libraries permaneciam em `1.0.0` e que não existia workflow de publicação das Libraries. O POM raiz também não possuía `distributionManagement` próprio, portanto herdava o destino do `platform-parent`, pertencente ao `platform-build`.
+
+Como o probe autenticado confirmou que os artefatos `1.0.0` não existiam no registry correto, a versão não foi alterada.
+
+### Correção
+
+No commit `9bcf1e0bf6efa58dd1141e75e8e8a9f8ffd2a44c`:
+
+- `platform-libraries` passou a declarar `distributionManagement` para `https://maven.pkg.github.com/brunobs/platform-libraries`;
+- foi criado settings de publicação separado;
+- leitura do parent continua autenticada por `PLATFORM_PACKAGES_TOKEN`;
+- publicação no package do próprio repositório usa o `GITHUB_TOKEN` efêmero com `packages: write`, seguindo o padrão de publicação do `platform-build`;
+- o workflow de publicação executa `mvn clean deploy` e não utiliza instalação local como evidência.
+
+### Evidência da Foundation após a correção
+
+GitHub Actions Verify #48, run `35534990434`:
+
+- branch `refactor/golden-foundation`;
+- commit `9bcf1e0bf6efa58dd1141e75e8e8a9f8ffd2a44c`;
+- `mvn clean verify`;
+- resultado: sucesso.
+
+GitHub Actions Publish Maven packages #2, run `35534990418`:
+
+- branch `refactor/golden-foundation`;
+- commit `9bcf1e0bf6efa58dd1141e75e8e8a9f8ffd2a44c`;
+- `mvn --settings .github/maven-publish-settings.xml --batch-mode --no-transfer-progress clean deploy`;
+- reactor completo `1.0.0` publicado com sucesso;
+- `platform-starter`: sucesso;
+- `platform-test-support`: sucesso;
+- `platform-messaging`: sucesso;
+- `platform-authorization`: sucesso;
+- `platform-audit`: sucesso;
+- `platform-logging`: sucesso;
+- `platform-catalog`: sucesso;
+- `platform-tagging`: sucesso;
+- resultado final: `BUILD SUCCESS`.
+
+### Evidência do consumidor downstream
+
+GitHub Actions Verify #7 do `BrunoBS/account-service`, run `35535402633`:
+
+- resolve a Foundation pelos registries remotos de `platform-build` e `platform-libraries`;
+- Maven Enforcer: RequireJavaVersion, RequireMavenVersion e DependencyConvergence verdes;
+- `AccountServiceApplicationIT`: 1 teste, 0 falhas, 0 erros;
+- contexto Spring Boot iniciado com Java 25;
+- `mvn clean verify`: `BUILD SUCCESS`.
+
+Não foi utilizado `mvn install` local entre os repositórios.
+
+### Estado
+
+O gap de distribuição downstream da Foundation está corrigido. A topologia remota efetivamente validada passa a ser:
+
+```text
+platform-build
+  -> GitHub Packages / platform-build
+  -> platform-libraries
+  -> GitHub Packages / platform-libraries
+  -> Golden consumer
+```
