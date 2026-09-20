@@ -23,11 +23,11 @@ class PlatformStarterMinimalConsumerTest {
 
         try (ConfigurableApplicationContext context = application.run()) {
             assertThat(context.isActive()).isTrue();
-            assertThat(context).hasSingleBean(AuthorizationMetadataRegistry.class);
-            assertThat(context).hasSingleBean(ApiMessageRepository.class);
+            assertThat(context.getBeansOfType(AuthorizationMetadataRegistry.class)).hasSize(1);
+            assertThat(context.getBeansOfType(ApiMessageRepository.class)).hasSize(1);
             assertThat(context.getBean(ApiMessageRepository.class))
                     .isInstanceOf(NoOpApiMessageRepository.class);
-            assertThat(context).hasSingleBean(ApiMessageResolver.class);
+            assertThat(context.getBeansOfType(ApiMessageResolver.class)).hasSize(1);
 
             assertThat(isPresent("com.empresa.platform.catalog.autoconfigure.PlatformCatalogAutoConfiguration")).isFalse();
             assertThat(isPresent("com.empresa.platform.audit.autoconfigure.PlatformAuditAutoConfiguration")).isFalse();
