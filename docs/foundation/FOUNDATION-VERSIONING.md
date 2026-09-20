@@ -84,6 +84,16 @@ Como o baseline oficial continua em Maven 3.9.9, o build usa `flatten-maven-plug
 
 Para iniciar uma nova release train, altera-se somente `-Drevision=<nova-versão>` em `.mvn/maven.config`, seguido de `mvn clean verify` e da publicação remota.
 
+## Namespace oficial
+
+A partir da ADR-002, todos os artifacts próprios da Foundation usam o groupId:
+
+```text
+br.com.portalmanager.core
+```
+
+O namespace Java raiz também é `br.com.portalmanager.core`. Os `artifactId` permanecem `platform-*`.
+
 ## Baseline preparado para publicação limpa
 
 Após a decisão de limpar as versões/packages experimentais no GitHub Packages, o baseline de publicação da Foundation consolidada reinicia em `1.0.0`:

@@ -22,7 +22,7 @@ O reactor resolveu `platform-dependencies`, `platform-parent`, `platform-librari
 
 Foi executado um probe controlado de `clean deploy` no GitHub Actions Publish Maven packages #4, run `35537303423`.
 
-O primeiro artifact a publicar foi `br.com.portalmanager.core:platform-dependencies:1.0.3`.
+O primeiro artifact a publicar foi `com.empresa.platform:platform-dependencies:1.0.3`.
 
 Resultado:
 
@@ -60,7 +60,7 @@ Essa publicação parcial não fecha o checkpoint: os POMs das capabilities depe
 
 O run `35538856486` utilizou um POM Maven standalone fora do reactor, repositório local isolado e `-U`. A resolução de:
 
-`br.com.portalmanager.core:platform-dependencies:pom:1.0.3`
+`com.empresa.platform:platform-dependencies:pom:1.0.3`
 
 no endpoint:
 
@@ -111,3 +111,10 @@ capabilities            1.0.0
 A release train continua usando a propriedade Maven 3 CI-friendly `revision`, definida em `.mvn/maven.config` como `-Drevision=1.0.0`. O nome `revision` é mantido por compatibilidade com Maven 3.9.9; propriedades arbitrárias como `${platform-libraries.version}` no campo `project.version` não fazem parte do suporte CI-friendly do Maven 3.
 
 Os runs e versões 1.0.3/1.1.0 documentados acima permanecem somente como evidência histórica da investigação de cutover e não representam o novo baseline de publicação.
+
+
+## Publicação limpa anterior ao namespace oficial
+
+Após a limpeza manual dos packages experimentais, o run `35542606756`, attempt 3, concluiu com sucesso a publicação do baseline `1.0.0` ainda sob o namespace Maven anterior `com.empresa.platform`.
+
+Essa publicação é evidência operacional de que o fluxo consolidado de deploy funciona, mas não é o baseline oficial final. Antes do checkpoint, a Foundation adotou o namespace definitivo `br.com.portalmanager.core` conforme ADR-002. Portanto os artifacts em `com.empresa.platform` passam a ser considerados experimentais/obsoletos e o baseline `1.0.0` deverá ser republicado sob as novas coordenadas, seguido de nova prova de consumo remoto.
