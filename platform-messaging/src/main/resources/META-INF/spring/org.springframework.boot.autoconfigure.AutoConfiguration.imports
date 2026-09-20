@@ -1,2 +1,3 @@
+com.empresa.platform.messaging.autoconfigure.PlatformMessagingJdbcAutoConfiguration
 com.empresa.platform.messaging.autoconfigure.PlatformMessagingAutoConfiguration
 com.empresa.platform.messaging.autoconfigure.PlatformMessagingRedisAutoConfiguration
