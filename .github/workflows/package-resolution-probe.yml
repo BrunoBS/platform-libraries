@@ -10,7 +10,7 @@ permissions:
   packages: read
 
 jobs:
-  resolve-platform-dependencies:
+  resolve-consolidated-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,8 +23,21 @@ jobs:
           java-version: '25'
           cache: maven
 
-      - name: Resolve platform-dependencies 1.0.3 from consolidated registry
+      - name: Resolve consolidated Foundation from platform-libraries registry
         env:
           GITHUB_PACKAGES_USERNAME: BrunoBS
           GITHUB_PACKAGES_TOKEN: ${{ secrets.PLATFORM_PACKAGES_TOKEN }}
-        run: mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-dependencies:1.0.3:pom -Dtransitive=false
+        run: |
+          set -e
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-dependencies:1.0.3:pom -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-parent:1.1.0:pom -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-libraries-bom:1.1.0:pom -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-starter:1.1.0 -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-logging:1.1.0 -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-messaging:1.1.0 -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-authorization:1.1.0 -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-audit:1.1.0 -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-catalog:1.1.0 -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-tagging:1.1.0 -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-test-support:1.1.0 -Dtransitive=false
+          mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress dependency:get -Dartifact=com.empresa.platform:platform-libraries:1.1.0:pom -Dtransitive=false
