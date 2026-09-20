@@ -277,3 +277,57 @@ GitHub Actions Verify #11, run `35536464540`:
 ### Estado
 
 O gap está resolvido. A Foundation não exige configuração negativa para impedir infraestrutura ausente; capacidades de teste pesadas são opt-in.
+
+
+## Refatoração controlada pós-checkpoint — consolidação build + libraries
+
+### Estado
+
+A consolidação foi implementada na branch `refactor/consolidate-foundation-repositories`, mas o novo checkpoint **não está fechado**.
+
+### Estrutura implementada
+
+```text
+platform-libraries
+├── platform-dependencies
+├── platform-parent
+├── platform-libraries-bom
+└── capabilities
+```
+
+O parent não gerencia mais versões das capabilities.
+
+### Evidência de build
+
+GitHub Actions Verify #54, run `35537087703`:
+
+- Java 25;
+- Maven Enforcer verde;
+- dependency convergence verde;
+- platform-dependencies e platform-parent resolvidos no mesmo reactor;
+- platform-libraries-bom incluído;
+- suites unitárias e de integração verdes;
+- `BUILD SUCCESS`.
+
+### Evidência de publicação — bloqueio encontrado
+
+GitHub Actions Publish Maven packages #4, run `35537303423`:
+
+- tentativa de deploy para o registry de `platform-libraries`;
+- primeiro artifact: `platform-dependencies:1.0.3`;
+- resposta do registry: HTTP 422;
+- `BUILD FAILURE`.
+
+A última publicação no antigo repository contém `platform-dependencies:1.0.2` e `platform-parent:1.0.2`; a versão `1.0.3` não havia sido publicada por aquele fluxo.
+
+Nenhum package foi apagado ou alterado destrutivamente.
+
+### Pendência de checkpoint
+
+Antes de declarar a consolidação concluída é necessário resolver a migração dos packages Maven `platform-dependencies` e `platform-parent` para o contexto de `platform-libraries`, publicar o reactor completo e validar o `account-service` consumindo exclusivamente o novo registry.
+
+Até isso ocorrer:
+
+- `account-service` não deve avançar para G2;
+- o antigo registry continua necessário para consumidores publicados;
+- `platform-build` não deve ser arquivado.

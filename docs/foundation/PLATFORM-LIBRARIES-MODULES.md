@@ -1,5 +1,15 @@
 # Platform Libraries — módulos da Foundation
 
+## Estrutura consolidada
+
+Além das capabilities, o mesmo repositório passa a conter três artifacts estruturais com responsabilidades separadas:
+
+- `platform-parent`: governança de build;
+- `platform-dependencies`: baseline tecnológico externo;
+- `platform-libraries-bom`: versões das capabilities.
+
+O root `platform-libraries` é somente reactor/aggregator.
+
 ## Baseline obrigatório
 
 O `platform-starter` agrega somente:
@@ -40,7 +50,7 @@ Capacidade transversal explícita de tagging persistido, com isolamento de owner
 
 Infraestrutura reutilizável de testes. Contém suporte unitário, integração Spring, Testcontainers, MySQL, Kafka, WireMock, RestAssured, builders/factories/scenarios genéricos e validação arquitetural opt-in. Authorization e web são opcionais quando aplicável. JDBC, driver MySQL, Kafka e Testcontainers também são dependências Maven opcionais: consumir `platform-test-support` sozinho não adiciona infraestrutura e não deve disparar auto-configuração de DataSource/Kafka. Casos explícitos como `@WithMySql` e `@WithKafka` exigem que a aplicação de teste declare as dependências correspondentes. É biblioteca de teste e não faz parte do starter de runtime.
 
-## Estrutura após F4
+## Capabilities sobreviventes
 
 O reactor contém:
 
@@ -73,3 +83,12 @@ Nenhum módulo sobrevivente exige remoção ou grande reescrita para o checkpoin
 Durante a revisão foram corrigidas referências documentais residuais ao `platform-crud` nos READMEs de Catalog e Messaging.
 
 A validação Maven completa deve permanecer verde após estas correções documentais antes do fechamento da F5.
+
+
+## Release train da consolidação
+
+As capabilities estão preparadas como release train `1.1.0`. Dependências internas da plataforma também referenciam `1.1.0`.
+
+O `platform-parent` não conhece essas versões; elas pertencem ao `platform-libraries-bom`.
+
+A publicação dessa release train permanece pendente enquanto a migração dos packages Maven de parent/dependencies não for resolvida.
