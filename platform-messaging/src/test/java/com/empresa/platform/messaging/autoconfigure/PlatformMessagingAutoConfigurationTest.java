@@ -18,7 +18,7 @@ import static org.mockito.Mockito.mock;
 class PlatformMessagingAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(PlatformMessagingAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(PlatformMessagingJdbcAutoConfiguration.class, PlatformMessagingAutoConfiguration.class));
 
     @Configuration
     static class MockInfrastructureConfiguration {
