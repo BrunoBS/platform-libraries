@@ -22,7 +22,6 @@
         <module>platform-starter</module>
         <module>platform-test-support</module>
         <module>platform-catalog</module>
-        <module>platform-crud</module>
         <module>platform-tagging</module>
     </modules>
 </project>
