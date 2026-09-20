@@ -1,10 +1,10 @@
 # Foundation Architecture
 
-## Estado da refatoração de consolidação
+## Estado atual
 
-A Foundation está sendo consolidada em um único repositório oficial: `BrunoBS/platform-libraries`.
+A Foundation está consolidada no repositório oficial `BrunoBS/platform-libraries`.
 
-A arquitetura alvo e já implementada na branch `refactor/consolidate-foundation-repositories` é:
+A topologia física em `main` é:
 
 ```text
 platform-libraries/
@@ -23,7 +23,15 @@ platform-libraries/
     └── platform-test-support/
 ```
 
-O root POM é somente aggregator/reactor. Não concentra regras de build. As capabilities ficam agrupadas fisicamente em `modules/`; a organização de diretórios não altera seus coordinates Maven.
+O root POM é somente aggregator/reactor. Não concentra regras de build.
+
+O namespace Maven e Java oficial é:
+
+```text
+br.com.portalmanager.core
+```
+
+Os `artifactId` `platform-*` permanecem estáveis.
 
 ## Responsabilidades
 
@@ -54,13 +62,17 @@ Representa o baseline das capabilities e gerencia:
 - platform-tagging;
 - platform-test-support.
 
+As capabilities seguem inicialmente uma release train coerente controlada por `.mvn/maven.config`.
+
 ## Capabilities
 
-O starter obrigatório continua agregando somente logging, messaging e authorization.
+O starter obrigatório agrega somente logging, messaging e authorization.
 
 Audit, catalog e tagging permanecem explícitos. Test-support permanece capability de testes.
 
 `platform-crud` continua removido e não participa do reactor.
+
+`platform-catalog` permanece independente de CRUD genérico.
 
 ## Dependências internas relevantes
 
@@ -74,33 +86,61 @@ audit -> messaging
 catalog -> messaging
 ```
 
-Nenhum comportamento funcional aprovado das capabilities foi alterado nesta consolidação.
+## Coordenadas próprias preparadas
 
-## Distribuição alvo
+As versões atuais dos artifacts próprios da Foundation preparadas para publicação são:
 
-Após o checkpoint desta refatoração, o único registry oficial deverá ser:
+```text
+br.com.portalmanager.core:platform-dependencies:1.0.0
+br.com.portalmanager.core:platform-parent:1.0.0
+br.com.portalmanager.core:platform-libraries-bom:1.0.0
+br.com.portalmanager.core:platform-*:1.0.0
+```
+
+A igualdade em `1.0.0` vale somente para as coordenadas dos artifacts próprios da Foundation. O `platform-dependencies:1.0.0` continua gerenciando versões tecnológicas independentes, como Spring Boot `4.1.1` e Testcontainers `1.21.4`.
+
+## Distribuição oficial
+
+O único registry oficial alvo é:
 
 `https://maven.pkg.github.com/brunobs/platform-libraries`
 
-O fluxo alvo é:
+O fluxo de saída da Foundation é:
 
 ```text
 platform-libraries
   -> clean verify
   -> deploy
 GitHub Packages / platform-libraries
-  -> account-service
+  -> resolve remoto
+consumer
   -> clean verify
 ```
 
-O registry de `platform-build` não fará parte do fluxo oficial.
+O registry de `platform-build` não faz parte do fluxo oficial alvo.
 
-## Estado atual
+## Evidência atual
 
-A estrutura alvo está implementada e foi validada no GitHub Actions Verify #60, run `35537837948`, com `BUILD SUCCESS`.
+O `main` foi validado no Verify #85, run `35544899150`, após:
 
-As oito capabilities `1.1.0` foram publicadas no registry de `platform-libraries` no run `35538290455`.
+- consolidação de `platform-parent` e `platform-dependencies`;
+- criação do `platform-libraries-bom`;
+- remoção do gerenciamento de capabilities do parent;
+- migração Maven e Java para `br.com.portalmanager.core`;
+- limpeza dos POMs gerados pelo Flatten Plugin;
+- gates de CI contra regressão de namespace e higiene do repositório.
 
-O cutover remoto dos artifacts estruturais permanece pendente: um probe Maven standalone, fora do reactor e com repositório local isolado, falhou no run `35538856486` ao resolver `platform-dependencies:1.0.3` pelo registry novo. O `account-service` também não resolve `platform-parent:1.1.0` exclusivamente desse registry.
+O reactor concluiu com `BUILD SUCCESS`.
 
-Até esse ponto ser resolvido, a arquitetura alvo está implementada no código, mas a topologia de distribuição não pode ser declarada concluída.
+A publicação anterior das coordenadas próprias em `1.0.0` no run `35542606756` usou o namespace provisório `com.empresa.platform`. Ela permanece apenas como evidência operacional histórica do fluxo de deploy e não representa o baseline oficial final.
+
+## Condição para fechamento
+
+A arquitetura local está consolidada. O fechamento do checkpoint ainda depende de:
+
+1. publicar `br.com.portalmanager.core:*:1.0.0` no registry de `platform-libraries`;
+2. validar resolução remota dessas coordenadas por um consumidor;
+3. executar `mvn clean verify` verde no consumidor sem depender de `platform-build` ou `mvn install` local;
+4. registrar as evidências finais em `FOUNDATION-PUBLISHING.md` e `FOUNDATION-CHECKPOINT.md`.
+
+Até essas provas remotas, o checkpoint de consolidação permanece aberto.

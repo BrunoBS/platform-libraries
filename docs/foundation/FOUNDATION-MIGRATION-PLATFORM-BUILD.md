@@ -1,5 +1,9 @@
 # Foundation Migration — platform-build
 
+## Objetivo
+
+Consolidar as responsabilidades antes mantidas em `BrunoBS/platform-build` no repositório oficial `BrunoBS/platform-libraries`, sem criar um substituto e sem manter dois registries no fluxo final.
+
 ## Antes
 
 ```text
@@ -12,9 +16,9 @@ platform-libraries
 consumers
 ```
 
-Havia dois package repositories no fluxo oficial.
+Havia dois contextos de publicação no fluxo da Foundation.
 
-## Depois — estrutura alvo
+## Depois — estrutura consolidada
 
 ```text
 platform-libraries
@@ -22,84 +26,117 @@ platform-libraries
 ├── platform-dependencies
 ├── platform-libraries-bom
 └── modules/
-    └── capabilities
+    └── platform-*
         ↓
 consumers
 ```
 
-## Arquivos migrados
+## Conteúdo migrado
 
-Do conteúdo de `BrunoBS/platform-build` foram migrados para `BrunoBS/platform-libraries`:
+Do `platform-build` foram incorporados ao `platform-libraries`:
 
 - `platform-parent/pom.xml`;
 - `platform-dependencies/pom.xml`.
 
-A governança de build foi preservada e o destino de publicação alterado para o repository de `platform-libraries`.
+A governança de build foi preservada, enquanto o parent deixou de gerenciar versões das capabilities.
 
-## Arquivos adicionados
+Foram adicionados:
 
 - `platform-libraries-bom/pom.xml`;
-- `docs/foundation/FOUNDATION-CONSOLIDATION-INVENTORY.md`;
-- `docs/foundation/FOUNDATION-VERSIONING.md`;
-- `docs/foundation/FOUNDATION-PUBLISHING.md`;
-- `docs/foundation/FOUNDATION-MIGRATION-PLATFORM-BUILD.md`;
-- `docs/adr/ADR-001-CONSOLIDATE-FOUNDATION-REPOSITORIES.md`.
+- documentação de consolidação, versionamento, publicação e migração;
+- ADR-001 para a consolidação;
+- ADR-002 para o namespace oficial `br.com.portalmanager.core`.
 
-## Arquivos modificados
+As oito capabilities foram agrupadas fisicamente sob `modules/`.
 
-- root `pom.xml`;
-- POMs das oito capabilities, movidas fisicamente para `modules/`;
-- `.github/maven-settings.xml`;
-- `.github/maven-publish-settings.xml`;
-- workflows verify/publish;
-- documentação arquitetural da Foundation.
+## Namespace oficial
 
-## Versões planejadas
+Durante o fechamento da Foundation, o namespace provisório:
 
-- platform-dependencies: `1.0.3`;
-- platform-parent: `1.1.0`;
-- platform-libraries-bom: `1.1.0`;
-- release train das capabilities: `1.1.0`.
+```text
+com.empresa.platform
+```
 
-Nenhuma dessas versões deve ser registrada como publicada enquanto o deploy remoto não concluir.
+foi substituído por:
+
+```text
+br.com.portalmanager.core
+```
+
+A mudança abrange `groupId`, packages Java, imports e paths de código. Os `artifactId` permanecem `platform-*`.
+
+## Versões próprias preparadas para publicação
+
+```text
+platform-dependencies   1.0.0
+platform-parent         1.0.0
+platform-libraries-bom  1.0.0
+capabilities            1.0.0
+```
+
+As versões experimentais `1.0.3/1.1.0` usadas durante a investigação do cutover permanecem apenas como evidência histórica e não representam o baseline alvo.
 
 ## Registry
 
-Alvo oficial:
+Registry oficial alvo:
 
 `https://maven.pkg.github.com/brunobs/platform-libraries`
 
-Registry a remover do fluxo oficial após o checkpoint:
+Registry legado, fora do fluxo oficial final:
 
 `https://maven.pkg.github.com/brunobs/platform-build`
 
 ## Migração de consumidor — após publicação
 
-Consumidores existentes deverão:
+Consumidores deverão:
 
-1. usar `platform-parent:1.1.0`;
-2. importar `platform-libraries-bom:1.1.0`;
-3. declarar capabilities sem versão;
-4. configurar apenas o registry de `platform-libraries`;
-5. executar `mvn clean verify` em checkout limpo.
+1. usar `br.com.portalmanager.core:platform-parent:1.0.0`;
+2. importar `br.com.portalmanager.core:platform-libraries-bom:1.0.0`;
+3. declarar capabilities `br.com.portalmanager.core:platform-*` sem versão;
+4. configurar o registry de `platform-libraries` como fonte da Foundation;
+5. executar `mvn clean verify` em checkout limpo, idealmente com repositório Maven local vazio ou isolado.
+
+Exemplo:
+
+```xml
+<parent>
+    <groupId>br.com.portalmanager.core</groupId>
+    <artifactId>platform-parent</artifactId>
+    <version>1.0.0</version>
+    <relativePath/>
+</parent>
+
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>br.com.portalmanager.core</groupId>
+            <artifactId>platform-libraries-bom</artifactId>
+            <version>1.0.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
 
 ## Estado do platform-build
 
-O repositório ainda não é obsoleto operacionalmente porque seus packages Maven existentes continuam necessários para consumidores atuais.
+`platform-build` não pertence à arquitetura alvo nem deve voltar ao fluxo oficial.
 
-Ele não deve ser apagado nem arquivado antes da conclusão do deploy consolidado e do teste remoto do `account-service`.
+Por segurança operacional, ele não deve ser apagado ou arquivado antes de:
 
-Após o checkpoint, deverá ser marcado como legado/obsoleto e arquivado manualmente.
+1. publicar o baseline definitivo no registry de `platform-libraries`;
+2. provar consumo remoto por um serviço;
+3. fechar documentalmente `FOUNDATION-GOLDEN-V1`.
 
+Após o checkpoint, poderá ser marcado como legado/obsoleto e arquivado manualmente.
 
-## Evidência de migração — estado atual
+## Evidências da migração
 
-O reactor consolidado foi validado no Verify #60, run `35537837948`.
+A investigação intermediária passou por probes com `platform-dependencies:1.0.3`, `platform-parent:1.1.0` e release train `1.1.0`. Esses probes expuseram a associação antiga de packages Maven e retornaram HTTP 422 no cutover inicial. Eles são preservados em `FOUNDATION-PUBLISHING.md` como histórico.
 
-As capabilities `1.1.0` foram publicadas no registry alvo no run `35538290455`.
+Após a limpeza manual dos packages experimentais, o run `35542606756`, attempt 3, publicou com sucesso as coordenadas próprias em `1.0.0` ainda sob `com.empresa.platform`.
 
-Os artifacts estruturais ainda não completaram o cutover. Um probe Maven standalone no run `35538856486` confirmou que `platform-dependencies:1.0.3` não é resolvido a partir de `platform-libraries`, enquanto a tentativa de deploy para esse destino retorna HTTP 422.
+Em seguida, a Foundation adotou `br.com.portalmanager.core`. O Verify #85, run `35544899150`, validou o reactor consolidado no namespace definitivo.
 
-O `account-service` já possui uma branch de prova com o POM alvo, mas os runs `35538639721` e `35538758316` falham em `platform-parent:1.1.0`. Portanto essa branch não representa ainda uma migração consumível.
-
-Nenhum package legado foi removido. `BrunoBS/platform-build` continua necessário operacionalmente até a decisão e execução do cutover dos packages Maven estruturais.
+A etapa restante desta migração é publicar e consumir remotamente `br.com.portalmanager.core:*:1.0.0`. Somente essa evidência fecha o cutover.

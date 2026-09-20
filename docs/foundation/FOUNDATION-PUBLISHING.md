@@ -1,120 +1,161 @@
 # Foundation Publishing
 
-## Registry oficial alvo
+## Estado atual
 
-O único registry oficial após a consolidação será:
+A Foundation consolidada está pronta para a publicação definitiva das coordenadas próprias em `1.0.0` sob o namespace oficial:
+
+```text
+br.com.portalmanager.core
+```
+
+O código em `main` passou no Verify #85, run `35544899150`.
+
+A publicação definitiva dessas novas coordenadas ainda deve ser executada e, em seguida, validada por um consumidor remoto antes do fechamento do checkpoint.
+
+## Registry oficial
+
+O único registry oficial alvo é:
 
 `https://maven.pkg.github.com/brunobs/platform-libraries`
 
-Os POMs estruturais, capabilities, settings e workflow da branch de consolidação já apontam para esse destino.
+Todos os POMs estruturais, capabilities, settings e o workflow de publicação apontam para esse destino.
 
-## Build limpo
+O registry de `platform-build` não pertence ao fluxo oficial alvo.
 
-A Foundation consolidada passou no GitHub Actions Verify #54, run `35537087703`.
+## Coordenadas próprias a publicar
 
-O comando executado foi:
+```text
+br.com.portalmanager.core:platform-dependencies:1.0.0
+br.com.portalmanager.core:platform-parent:1.0.0
+br.com.portalmanager.core:platform-libraries-bom:1.0.0
+br.com.portalmanager.core:platform-starter:1.0.0
+br.com.portalmanager.core:platform-logging:1.0.0
+br.com.portalmanager.core:platform-messaging:1.0.0
+br.com.portalmanager.core:platform-authorization:1.0.0
+br.com.portalmanager.core:platform-audit:1.0.0
+br.com.portalmanager.core:platform-catalog:1.0.0
+br.com.portalmanager.core:platform-tagging:1.0.0
+br.com.portalmanager.core:platform-test-support:1.0.0
+```
 
-`mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean verify`
+O root reactor `br.com.portalmanager.core:platform-libraries:1.0.0` é operacional e não é um eixo de consumo da Foundation.
 
-O reactor resolveu `platform-dependencies`, `platform-parent`, `platform-libraries-bom` e todas as capabilities no mesmo checkout, sem necessidade do package repository de `platform-build`.
+Esses `1.0.0` são versões dos artifacts próprios. O BOM `platform-dependencies:1.0.0` continua gerenciando tecnologias com versões independentes, como Spring Boot `4.1.1`, Testcontainers `1.21.4` e os demais componentes do baseline tecnológico.
 
-## Probe de publicação
+## Release train
 
-Foi executado um probe controlado de `clean deploy` no GitHub Actions Publish Maven packages #4, run `35537303423`.
+A release train das capabilities possui uma única fonte:
 
-O primeiro artifact a publicar foi `com.empresa.platform:platform-dependencies:1.0.3`.
+```text
+.mvn/maven.config
+-Drevision=1.0.0
+```
 
-Resultado:
+Usam essa `revision`:
+
+- root reactor;
+- `platform-libraries-bom`;
+- as oito capabilities.
+
+Dependências internas usam `${project.version}`.
+
+Como o Maven mínimo suportado é 3.9.9, os artifacts da release train usam `flatten-maven-plugin` em `resolveCiFriendliesOnly`. Os `.flattened-pom.xml` são gerados durante o build, verificados pelo CI e não são versionados no Git.
+
+`platform-parent` e `platform-dependencies` permanecem fora da release train e mantêm eixos de versão independentes.
+
+## Build e publicação
+
+Validação:
+
+```bash
+mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean verify
+```
+
+Publicação oficial:
+
+```bash
+mvn --settings .github/maven-publish-settings.xml --batch-mode --no-transfer-progress clean deploy
+```
+
+O workflow `Publish Maven packages` utiliza `workflow_dispatch`, Java 25 e o `GITHUB_TOKEN` efêmero com `packages: write`.
+
+Não usar `mvn install` local como substituto de publicação ou prova de resolução remota.
+
+## Evidência local consolidada
+
+O Verify #85, run `35544899150`, validou o `main` após:
+
+- consolidação de parent e technology BOM;
+- release train centralizada;
+- namespace `br.com.portalmanager.core`;
+- remoção de paths legados;
+- higiene dos artifacts gerados pelo Flatten Plugin;
+- metadata da release train.
+
+Resultado: `BUILD SUCCESS`.
+
+## Histórico do cutover Maven
+
+### Probe inicial
+
+Durante a consolidação foi executado o Publish Maven packages #4, run `35537303423`.
+
+O primeiro artifact era:
+
+`com.empresa.platform:platform-dependencies:1.0.3`
+
+O GitHub Packages respondeu:
 
 ```text
 HTTP 422 Unprocessable Entity
 BUILD FAILURE
 ```
 
-A última publicação conhecida de `platform-build` contém `platform-dependencies:1.0.2` e `platform-parent:1.0.2`; portanto o erro não corresponde a sobrescrita da versão `1.0.3`.
+Naquele momento os artifacts estruturais ainda estavam associados ao contexto antigo de `platform-build`.
 
-O artifact Maven `platform-dependencies` já existe associado ao contexto de repository do `platform-build`. A migração dessa identidade de package precisa ser tratada antes do deploy pelo novo repository.
+### Release train experimental
 
-## Segurança operacional
+Durante a investigação também foram usados:
 
-O workflow foi restaurado para `workflow_dispatch` após o probe. Nenhum package existente foi apagado, sobrescrito ou desassociado.
+- `platform-dependencies:1.0.3`;
+- `platform-parent:1.1.0`;
+- `platform-libraries-bom:1.1.0`;
+- capabilities `1.1.0`.
 
-Não usar `mvn install` como substituto da prova remota.
+Essas versões são somente evidência histórica e não representam o baseline oficial final.
+
+### Reset para 1.0.0
+
+Após a limpeza manual dos packages experimentais, as versões das coordenadas próprias foram reiniciadas em `1.0.0`.
+
+O run `35542606756`, attempt 3, publicou com sucesso o reactor completo com as coordenadas próprias em `1.0.0`, ainda no namespace provisório `com.empresa.platform`.
+
+Essa publicação provou o funcionamento operacional do fluxo consolidado de deploy, mas deixou de representar as coordenadas oficiais quando a ADR-002 adotou `br.com.portalmanager.core`.
+
+## Publicação definitiva pendente
+
+A próxima publicação deve usar exclusivamente:
+
+```text
+br.com.portalmanager.core:*:1.0.0
+```
+
+Depois do deploy, a evidência deve registrar:
+
+- run/attempt da publicação;
+- reactor completo com `BUILD SUCCESS`;
+- packages estruturais e capabilities publicados;
+- resolução remota sem cache local previamente instalado.
 
 ## Condição de saída
 
-A publicação só será considerada concluída quando o reactor completo for publicado no registry de `platform-libraries`, seguido de consumo remoto verde pelo `account-service`.
+A publicação da Foundation só será considerada concluída quando:
 
+1. o reactor completo `br.com.portalmanager.core:*:1.0.0` for publicado no registry de `platform-libraries`;
+2. um consumidor resolver `platform-parent:1.0.0` e `platform-libraries-bom:1.0.0` remotamente;
+3. o consumidor declarar capabilities sem versão;
+4. o consumidor executar `mvn clean verify` com sucesso;
+5. o consumidor não depender do registry `platform-build`;
+6. as evidências finais forem registradas em `FOUNDATION-CHECKPOINT.md`.
 
-## Evidência atualizada da consolidação
-
-A implementação estrutural atual foi validada no GitHub Actions Verify #60, run `35537837948`, commit `e055c5a1088ec96c94ae96493d13d58cd7f73135`.
-
-O reactor contém `platform-dependencies:1.0.3`, `platform-parent:1.1.0`, `platform-libraries-bom:1.1.0` e as oito capabilities `1.1.0`; Enforcer, dependency convergence e todas as suítes concluíram com `BUILD SUCCESS`.
-
-As oito capabilities da release train `1.1.0` foram publicadas no registry de `platform-libraries` pelo run `35538290455` com `BUILD SUCCESS`.
-
-Essa publicação parcial não fecha o checkpoint: os POMs das capabilities dependem do `platform-parent:1.1.0`.
-
-### Probe remoto isolado
-
-O run `35538856486` utilizou um POM Maven standalone fora do reactor, repositório local isolado e `-U`. A resolução de:
-
-`com.empresa.platform:platform-dependencies:pom:1.0.3`
-
-no endpoint:
-
-`https://maven.pkg.github.com/brunobs/platform-libraries`
-
-falhou. Portanto as resoluções anteriores executadas dentro do checkout do reactor não são aceitas como evidência remota para os artifacts estruturais.
-
-A tentativa de deploy do mesmo artifact para o novo repository já havia retornado HTTP 422 no run `35537303423`.
-
-Nenhum package foi apagado, sobrescrito ou transferido.
-
-### Consumidor
-
-O `BrunoBS/account-service` foi preparado em branch separada para usar somente o registry consolidado, com `platform-parent:1.1.0` e `platform-libraries-bom:1.1.0`.
-
-O Verify #13, run `35538639721`, e o probe com repositório Maven vazio, run `35538758316`, falharam ao resolver `platform-parent:1.1.0` exclusivamente do registry de `platform-libraries`.
-
-Essa falha é a evidência downstream que impede o fechamento do checkpoint.
-
-
-## Release train centralizada
-
-A release train das capabilities possui uma única fonte de versão:
-
-```text
-.mvn/maven.config
--Drevision=1.1.0
-```
-
-O root reactor, `platform-libraries-bom` e as capabilities usam essa `revision`. Dependências internas usam `${project.version}`.
-
-Como o baseline é Maven 3.9.9, os artifacts da release train usam `flatten-maven-plugin` em `resolveCiFriendliesOnly`. O CI verifica que os POMs achatados existem, contêm a versão concreta da release e não deixam `${revision}` sem resolução antes de qualquer publicação.
-
-`platform-parent` e `platform-dependencies` permanecem fora da release train e mantêm suas próprias versões.
-
-
-## Reset de baseline para 1.0.0
-
-Por decisão do projeto, após a limpeza manual das versões/packages experimentais no GitHub Packages, a próxima publicação da topologia consolidada parte de um baseline limpo:
-
-```text
-platform-dependencies   1.0.0
-platform-parent         1.0.0
-platform-libraries-bom  1.0.0
-capabilities            1.0.0
-```
-
-A release train continua usando a propriedade Maven 3 CI-friendly `revision`, definida em `.mvn/maven.config` como `-Drevision=1.0.0`. O nome `revision` é mantido por compatibilidade com Maven 3.9.9; propriedades arbitrárias como `${platform-libraries.version}` no campo `project.version` não fazem parte do suporte CI-friendly do Maven 3.
-
-Os runs e versões 1.0.3/1.1.0 documentados acima permanecem somente como evidência histórica da investigação de cutover e não representam o novo baseline de publicação.
-
-
-## Publicação limpa anterior ao namespace oficial
-
-Após a limpeza manual dos packages experimentais, o run `35542606756`, attempt 3, concluiu com sucesso a publicação do baseline `1.0.0` ainda sob o namespace Maven anterior `com.empresa.platform`.
-
-Essa publicação é evidência operacional de que o fluxo consolidado de deploy funciona, mas não é o baseline oficial final. Antes do checkpoint, a Foundation adotou o namespace definitivo `br.com.portalmanager.core` conforme ADR-002. Portanto os artifacts em `com.empresa.platform` passam a ser considerados experimentais/obsoletos e o baseline `1.0.0` deverá ser republicado sob as novas coordenadas, seguido de nova prova de consumo remoto.
+Até lá, `FOUNDATION-GOLDEN-V1` permanece aberto.
