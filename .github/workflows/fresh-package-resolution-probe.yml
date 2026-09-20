@@ -43,7 +43,7 @@ jobs:
           set -e
           FRESH_REPO="${RUNNER_TEMP}/foundation-m2"
           rm -rf "${FRESH_REPO}"
-          MVN="mvn -f ${RUNNER_TEMP}/probe-pom.xml --settings .github/maven-settings.xml -Dmaven.repo.local=${FRESH_REPO} --batch-mode --no-transfer-progress"
+          MVN="mvn -U -f ${RUNNER_TEMP}/probe-pom.xml --settings .github/maven-settings.xml -Dmaven.repo.local=${FRESH_REPO} --batch-mode --no-transfer-progress"
           ${MVN} dependency:get -Dartifact=com.empresa.platform:platform-dependencies:1.0.3:pom -Dtransitive=false
           ${MVN} dependency:get -Dartifact=com.empresa.platform:platform-parent:1.1.0:pom -Dtransitive=false
           ${MVN} dependency:get -Dartifact=com.empresa.platform:platform-libraries-bom:1.1.0:pom -Dtransitive=false
