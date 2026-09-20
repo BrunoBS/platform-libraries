@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-A Foundation consolidada está pronta para a publicação definitiva do baseline `1.0.0` sob o namespace oficial:
+A Foundation consolidada está pronta para a publicação definitiva das coordenadas próprias em `1.0.0` sob o namespace oficial:
 
 ```text
 br.com.portalmanager.core
@@ -22,7 +22,7 @@ Todos os POMs estruturais, capabilities, settings e o workflow de publicação a
 
 O registry de `platform-build` não pertence ao fluxo oficial alvo.
 
-## Baseline a publicar
+## Coordenadas próprias a publicar
 
 ```text
 br.com.portalmanager.core:platform-dependencies:1.0.0
@@ -39,6 +39,8 @@ br.com.portalmanager.core:platform-test-support:1.0.0
 ```
 
 O root reactor `br.com.portalmanager.core:platform-libraries:1.0.0` é operacional e não é um eixo de consumo da Foundation.
+
+Esses `1.0.0` são versões dos artifacts próprios. O BOM `platform-dependencies:1.0.0` continua gerenciando tecnologias com versões independentes, como Spring Boot `4.1.1`, Testcontainers `1.21.4` e os demais componentes do baseline tecnológico.
 
 ## Release train
 
@@ -57,7 +59,7 @@ Usam essa `revision`:
 
 Dependências internas usam `${project.version}`.
 
-Como o baseline Maven é 3.9.9, os artifacts da release train usam `flatten-maven-plugin` em `resolveCiFriendliesOnly`. Os `.flattened-pom.xml` são gerados durante o build, verificados pelo CI e não são versionados no Git.
+Como o Maven mínimo suportado é 3.9.9, os artifacts da release train usam `flatten-maven-plugin` em `resolveCiFriendliesOnly`. Os `.flattened-pom.xml` são gerados durante o build, verificados pelo CI e não são versionados no Git.
 
 `platform-parent` e `platform-dependencies` permanecem fora da release train e mantêm eixos de versão independentes.
 
@@ -124,11 +126,11 @@ Essas versões são somente evidência histórica e não representam o baseline 
 
 ### Reset para 1.0.0
 
-Após a limpeza manual dos packages experimentais, o baseline foi reiniciado em `1.0.0`.
+Após a limpeza manual dos packages experimentais, as versões das coordenadas próprias foram reiniciadas em `1.0.0`.
 
-O run `35542606756`, attempt 3, publicou com sucesso o reactor completo ainda no namespace provisório `com.empresa.platform`.
+O run `35542606756`, attempt 3, publicou com sucesso o reactor completo com as coordenadas próprias em `1.0.0`, ainda no namespace provisório `com.empresa.platform`.
 
-Essa publicação provou o funcionamento operacional do fluxo consolidado de deploy, mas deixou de representar o baseline oficial quando a ADR-002 adotou `br.com.portalmanager.core`.
+Essa publicação provou o funcionamento operacional do fluxo consolidado de deploy, mas deixou de representar as coordenadas oficiais quando a ADR-002 adotou `br.com.portalmanager.core`.
 
 ## Publicação definitiva pendente
 
