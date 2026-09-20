@@ -30,4 +30,5 @@ jobs:
         env:
           GITHUB_PACKAGES_USERNAME: BrunoBS
           GITHUB_PACKAGES_TOKEN: ${{ secrets.PLATFORM_PACKAGES_TOKEN }}
-        run: mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean deploy
+          GITHUB_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn --settings .github/maven-publish-settings.xml --batch-mode --no-transfer-progress clean deploy
