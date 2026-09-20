@@ -1,73 +1,99 @@
-# Platform Libraries (Platform Engineering Core)
+# Platform Libraries — Golden Platform Foundation
 
-O **`platform-libraries`** reúne bibliotecas reutilizáveis da plataforma corporativa.
+O `platform-libraries` é o repositório consolidado da Foundation da Golden Platform.
 
-## Regra de dependência entre módulos
-
-As dependências entre capabilities devem ser poucas, explícitas e direcionadas. Ciclos entre módulos não são permitidos.
-
-Dependências intencionais atuais:
-
-```text
-platform-authorization -> platform-messaging
-platform-catalog       -> platform-crud
-```
-
-`platform-authorization -> platform-messaging` existe porque autorização faz parte do baseline obrigatório dos microsserviços e seus erros precisam entrar diretamente no tratamento padronizado de mensagens/i18n da plataforma.
-
-`platform-catalog -> platform-crud` é uma relação de especialização: catálogo reutiliza o ciclo CRUD comum.
-
-`platform-test-support` possui integração opcional com `platform-authorization` para utilitários de teste.
-
-## Arquitetura multimódulos
+## Estrutura
 
 ```text
 platform-libraries/
-├── platform-starter/        -> starter JAR do baseline obrigatório dos serviços
-├── platform-messaging/      -> mensagens, i18n e tratamento padronizado de erros
-├── platform-authorization/  -> autorização e contexto do usuário
-├── platform-logging/        -> logging estruturado
-├── platform-test-support/   -> suporte reutilizável de testes
-├── platform-crud/           -> infraestrutura genérica de ciclo CRUD
-└── platform-catalog/        -> especialização de catálogos gerenciados sobre CRUD
+├── platform-parent/           -> governança de build
+├── platform-dependencies/     -> BOM tecnológico externo
+├── platform-libraries-bom/    -> BOM das capabilities
+├── platform-starter/
+├── platform-logging/
+├── platform-messaging/
+├── platform-authorization/
+├── platform-audit/
+├── platform-catalog/
+├── platform-tagging/
+└── platform-test-support/
 ```
 
-## Versionamento
+O POM raiz é somente reactor/aggregator.
 
-Cada biblioteca possui versão própria e pode evoluir de forma independente das demais.
+`platform-crud` foi removido da Foundation e não deve ser recriado.
 
-Versões iniciais:
+## Responsabilidades Maven
 
-```text
-platform-starter        1.0.0
-platform-logging        1.0.0
-platform-messaging      1.0.0
-platform-authorization  1.0.0
-platform-crud           1.0.0
-platform-catalog        1.0.0
-platform-test-support   1.0.0
-```
+`platform-parent` define Java 25, Maven mínimo, plugins, Enforcer, dependency convergence e regras comuns de build. Ele importa o `platform-dependencies`, mas não conhece versões de capabilities.
 
-Uma breaking change em uma capability não obriga os demais módulos a adotarem o mesmo major. Por exemplo, `platform-catalog` pode evoluir para `2.0.0` enquanto `platform-logging` permanece em `1.x`.
+`platform-dependencies` gerencia somente o baseline tecnológico externo, incluindo Spring Boot 4.1.1 e dependências de teste/infraestrutura compartilhadas.
 
-O POM raiz `platform-libraries` atua como agregador do reactor. Ele não define uma versão única para todas as bibliotecas. Cada módulo declara sua própria versão e suas dependências internas declaram explicitamente a versão compatível.
+`platform-libraries-bom` gerencia as versões das capabilities da plataforma.
 
-O `platform-parent`, mantido no repositório `platform-build`, define o conjunto de versões homologadas para os serviços consumidores. Assim, os serviços continuam declarando as capabilities sem versão enquanto a plataforma controla centralmente a combinação suportada.
-
-## Baseline obrigatório dos serviços
-
-O baseline padrão dos microsserviços é exposto pelo `platform-starter`:
+## Dependências intencionais entre capabilities
 
 ```text
+platform-authorization -> platform-messaging
+platform-audit         -> platform-authorization
+platform-audit         -> platform-messaging
+platform-catalog       -> platform-messaging
+
 platform-starter
 ├── platform-logging
 ├── platform-messaging
 └── platform-authorization
 ```
 
-O `platform-starter` é publicado como um **JAR Maven normal**, mesmo sem código de negócio próprio. Isso permite que os serviços o consumam diretamente como dependência e recebam transitivamente logging, messaging e authorization.
+`platform-test-support` possui integrações opcionais e não deve introduzir JDBC/MySQL/Kafka/Testcontainers transitivamente quando essas capacidades não forem declaradas.
 
-O serviço consumidor declara somente:
+## Versionamento
+
+Os eixos são independentes:
+
+```text
+platform-parent          -> baseline de build
+platform-dependencies    -> baseline tecnológico
+platform-libraries-bom   -> baseline das capabilities
+```
+
+As capabilities seguem inicialmente um release train coerente para reduzir a matriz de compatibilidade.
+
+Na consolidação atual estão preparados:
+
+- `platform-dependencies:1.0.3`;
+- `platform-parent:1.1.0`;
+- `platform-libraries-bom:1.1.0`;
+- capabilities `1.1.0`.
+
+Essas versões só serão consideradas publicadas após o checkpoint remoto documentado em `docs/foundation/FOUNDATION-CHECKPOINT.md`.
+
+## Consumo alvo
+
+Após a publicação consolidada, um serviço consumidor deverá usar o parent separadamente do BOM das capabilities:
+
+```xml
+<parent>
+    <groupId>com.empresa.platform</groupId>
+    <artifactId>platform-parent</artifactId>
+    <version>1.1.0</version>
+    <relativePath/>
+</parent>
+
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.empresa.platform</groupId>
+            <artifactId>platform-libraries-bom</artifactId>
+            <version>1.1.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+Capabilities podem então ser declaradas sem versão:
 
 ```xml
 <dependency>
@@ -76,88 +102,20 @@ O serviço consumidor declara somente:
 </dependency>
 ```
 
-As versões são gerenciadas pelo `platform-parent` e não precisam ser informadas pelo serviço consumidor.
+## Registry alvo
 
-Quando `platform-starter` estiver declarado, o consumidor **não deve declarar novamente** `platform-logging`, `platform-messaging` ou `platform-authorization`. Essa é uma convenção de composição da plataforma, documentada para evitar redundância no POM; não é tratada como erro técnico pelo Maven Enforcer.
+O único registry oficial após o fechamento do checkpoint será:
 
-Capabilities específicas, como `platform-crud` e `platform-catalog`, continuam sendo declaradas somente quando necessárias.
+`https://maven.pkg.github.com/brunobs/platform-libraries`
 
-Exemplo:
-
-```xml
-<dependencies>
-    <dependency>
-        <groupId>com.empresa.platform</groupId>
-        <artifactId>platform-starter</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.empresa.platform</groupId>
-        <artifactId>platform-catalog</artifactId>
-    </dependency>
-</dependencies>
-```
-
-## Módulos
-
-### Platform Starter
-
-Starter JAR sem código de negócio responsável por carregar o baseline comum dos serviços: logging, messaging e authorization.
-
-### Platform Authorization
-
-Motor de segurança e governança de contexto. Depende de `platform-messaging` para que suas exceptions sejam tratadas automaticamente pelo pipeline corporativo de mensagens/i18n.
-
-As exceptions próprias de autorização continuam expressando a semântica do módulo:
-
-```text
-AuthorizationException
-├── UnauthorizedAccessException
-└── ForbiddenAccessException
-```
-
-`AuthorizationException` é compatível com `ApiException`, portanto o `ApiExceptionHandler` do messaging resolve a chave da mensagem, o idioma solicitado e o HTTP status cadastrado no catálogo de mensagens.
-
-### Platform Messaging
-
-Resolução de mensagens, internacionalização e tratamento padronizado de erros HTTP.
-
-### Platform Logging
-
-Padronização de logs estruturados e contexto MDC.
-
-### Platform CRUD
-
-Infraestrutura fortemente tipada para DTO, repository, mapper, validator, service e controller CRUD. Continua independente de `platform-messaging`.
-
-Os principais pontos de inversão permanecem:
-
-```text
-notFoundException(id)
-validationException(result)
-```
-
-### Platform Catalog
-
-Especialização de `platform-crud` para catálogos persistidos, com `active`, restore, ordenação, filtros e validações de catálogo.
-
-### Platform Test Support
-
-Utilitários para testes unitários e de integração, incluindo integrações especializadas como autorização, banco e Kafka.
+O repositório `platform-build` permanece temporariamente necessário apenas enquanto a migração de packages Maven não for concluída.
 
 ## Qualidade
 
-Para validar todo o reactor:
+A validação do reactor é:
 
 ```bash
-mvn clean verify
+mvn --settings .github/maven-settings.xml clean verify
 ```
 
-## Tecnologias
-
-- Java 25
-- Spring Boot 4.1.1
-- Spring Data JPA
-- Spring Web
-- Spring Retry
-- JUnit 5 / Mockito
+O checkpoint exige também publicação remota e validação de um consumidor limpo; `mvn install` local não substitui essa evidência.
