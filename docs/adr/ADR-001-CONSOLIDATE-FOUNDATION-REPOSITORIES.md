@@ -70,6 +70,20 @@ Os eixos são independentes.
 
 A coincidência entre `platform-parent:1.1.0` e release train `1.1.0` não implica versionamento acoplado.
 
+### Single source of truth da release train
+
+A versão da release train de capabilities passa a ter uma única fonte em `.mvn/maven.config`:
+
+```text
+-Drevision=1.1.0
+```
+
+O root reactor, `platform-libraries-bom` e as oito capabilities usam `${revision}` como versão do próprio artifact. Dependências internas entre capabilities usam `${project.version}`, preservando o release train sem repetir números de versão nos POMs.
+
+Como o baseline Maven permanece 3.9.9, os artifacts que usam CI-friendly versions são publicados com `flatten-maven-plugin` em modo `resolveCiFriendliesOnly`, garantindo POM consumidor com versão resolvida.
+
+`platform-parent` e `platform-dependencies` permanecem fora dessa `revision` e mantêm versionamento independente. O parent apenas gerencia a configuração do Flatten Plugin; capabilities o ativam explicitamente, evitando impor esse comportamento aos serviços consumidores.
+
 ## Publishing
 
 Todos os artefatos serão publicados em:

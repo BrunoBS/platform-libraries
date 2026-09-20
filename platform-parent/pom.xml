@@ -28,6 +28,7 @@
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
         <spring-boot-maven-plugin.version>4.1.1</spring-boot-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+        <flatten-maven-plugin.version>1.8.0</flatten-maven-plugin.version>
 
         <platform-dependencies.version>1.0.3</platform-dependencies.version>
     </properties>
@@ -103,6 +104,27 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${flatten-maven-plugin.version}</version>
+                    <configuration>
+                        <updatePomFile>true</updatePomFile>
+                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                            <goals><goal>flatten</goal></goals>
+                        </execution>
+                        <execution>
+                            <id>flatten.clean</id>
+                            <phase>clean</phase>
+                            <goals><goal>clean</goal></goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

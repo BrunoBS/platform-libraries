@@ -9,13 +9,13 @@
         <relativePath>../../platform-parent/pom.xml</relativePath>
     </parent>
     <artifactId>platform-test-support</artifactId>
-    <version>1.1.0</version>
+    <version>${revision}</version>
     <packaging>jar</packaging>
     <name>platform-test-support</name>
     <dependencies>
         <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
         <dependency><groupId>com.tngtech.archunit</groupId><artifactId>archunit</artifactId></dependency>
-        <dependency><groupId>com.empresa.platform</groupId><artifactId>platform-authorization</artifactId><version>1.1.0</version><optional>true</optional></dependency>
+        <dependency><groupId>com.empresa.platform</groupId><artifactId>platform-authorization</artifactId><version>${project.version}</version><optional>true</optional></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId><optional>true</optional></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-jdbc</artifactId><optional>true</optional></dependency>
@@ -30,4 +30,12 @@
         <dependency><groupId>org.wiremock</groupId><artifactId>wiremock-standalone</artifactId></dependency>
         <dependency><groupId>net.datafaker</groupId><artifactId>datafaker</artifactId></dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
