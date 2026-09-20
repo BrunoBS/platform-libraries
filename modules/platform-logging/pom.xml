@@ -6,15 +6,15 @@
         <groupId>com.empresa.platform</groupId>
         <artifactId>platform-parent</artifactId>
         <version>1.1.0</version>
-        <relativePath>../platform-parent/pom.xml</relativePath>
+        <relativePath>../../platform-parent/pom.xml</relativePath>
     </parent>
-    <artifactId>platform-tagging</artifactId>
+    <artifactId>platform-logging</artifactId>
     <version>1.1.0</version>
     <packaging>jar</packaging>
-    <name>platform-tagging</name>
+    <name>platform-logging</name>
     <dependencies>
-        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot</artifactId></dependency>
-        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-jpa</artifactId></dependency>
+        <dependency><groupId>net.logstash.logback</groupId><artifactId>logstash-logback-encoder</artifactId></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId><optional>true</optional></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>

@@ -37,10 +37,10 @@ pom.xml                    reactor/aggregator
 platform-parent            governança de build
 platform-dependencies      BOM tecnológico externo
 platform-libraries-bom     BOM das capabilities
-platform-*                 capabilities independentes
+modules/platform-*         capabilities independentes
 ```
 
-O root POM será apenas aggregator e ponto de publicação do reactor. Não concentrará regras de build.
+O root POM será apenas aggregator e ponto de publicação do reactor. Não concentrará regras de build. As capabilities ficam agrupadas fisicamente sob `modules/`, sem alterar `groupId`, `artifactId` ou contrato de consumo.
 
 `platform-parent` conterá Java 25, Maven mínimo, plugins, testes, Enforcer, convergence e importará apenas o baseline tecnológico via `platform-dependencies`.
 

@@ -12,17 +12,18 @@ platform-libraries/
 ├── platform-parent/           governança de build
 ├── platform-dependencies/     BOM tecnológico externo
 ├── platform-libraries-bom/    BOM das capabilities
-├── platform-starter/
-├── platform-logging/
-├── platform-messaging/
-├── platform-authorization/
-├── platform-audit/
-├── platform-catalog/
-├── platform-tagging/
-└── platform-test-support/
+└── modules/
+    ├── platform-starter/
+    ├── platform-logging/
+    ├── platform-messaging/
+    ├── platform-authorization/
+    ├── platform-audit/
+    ├── platform-catalog/
+    ├── platform-tagging/
+    └── platform-test-support/
 ```
 
-O root POM é somente aggregator/reactor. Não concentra regras de build.
+O root POM é somente aggregator/reactor. Não concentra regras de build. As capabilities ficam agrupadas fisicamente em `modules/`; a organização de diretórios não altera seus coordinates Maven.
 
 ## Responsabilidades
 

@@ -6,16 +6,15 @@
         <groupId>com.empresa.platform</groupId>
         <artifactId>platform-parent</artifactId>
         <version>1.1.0</version>
-        <relativePath>../platform-parent/pom.xml</relativePath>
+        <relativePath>../../platform-parent/pom.xml</relativePath>
     </parent>
-    <artifactId>platform-catalog</artifactId>
+    <artifactId>platform-tagging</artifactId>
     <version>1.1.0</version>
     <packaging>jar</packaging>
-    <name>platform-catalog</name>
+    <name>platform-tagging</name>
     <dependencies>
-        <dependency><groupId>com.empresa.platform</groupId><artifactId>platform-messaging</artifactId><version>1.1.0</version></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-jpa</artifactId></dependency>
-        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
     </dependencies>
 </project>

@@ -21,7 +21,8 @@ platform-libraries
 ├── platform-parent
 ├── platform-dependencies
 ├── platform-libraries-bom
-└── capabilities
+└── modules/
+    └── capabilities
         ↓
 consumers
 ```
@@ -47,7 +48,7 @@ A governança de build foi preservada e o destino de publicação alterado para 
 ## Arquivos modificados
 
 - root `pom.xml`;
-- POMs das oito capabilities;
+- POMs das oito capabilities, movidas fisicamente para `modules/`;
 - `.github/maven-settings.xml`;
 - `.github/maven-publish-settings.xml`;
 - workflows verify/publish;
