@@ -1,0 +1,33 @@
+name: Publish consolidated capabilities
+
+on:
+  push:
+    branches:
+      - refactor/consolidate-foundation-repositories
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish-capabilities:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Verify and publish capability release train 1.1.0
+        env:
+          GITHUB_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          mvn --settings .github/maven-publish-settings.xml
+          --batch-mode --no-transfer-progress
+          -pl platform-logging,platform-messaging,platform-authorization,platform-audit,platform-catalog,platform-tagging,platform-starter,platform-test-support
+          clean deploy
