@@ -45,7 +45,7 @@ Versiona o conjunto compatível de capabilities.
 
 As capabilities seguem inicialmente uma release train coerente para evitar matriz de compatibilidade por módulo.
 
-No baseline preparado atual:
+Na release train preparada atualmente:
 
 ```text
 platform-libraries-bom 1.0.0
@@ -80,7 +80,7 @@ Os POMs das capabilities não repetem o número da release train. Dependências 
 
 `platform-parent` e `platform-dependencies` não usam `${revision}`; seus eixos permanecem independentes.
 
-Como o baseline oficial continua em Maven 3.9.9, o build usa `flatten-maven-plugin` para transformar as CI-friendly versions em versões concretas nos POMs instalados/publicados. O plugin é ativado explicitamente pelos artifacts da release train e não é imposto aos serviços consumidores pelo parent.
+Como o Maven mínimo suportado continua em 3.9.9, o build usa `flatten-maven-plugin` para transformar as CI-friendly versions em versões concretas nos POMs instalados/publicados. O plugin é ativado explicitamente pelos artifacts da release train e não é imposto aos serviços consumidores pelo parent.
 
 Os `.flattened-pom.xml` são artifacts gerados pelo build: devem existir durante a validação, mas não são versionados no Git.
 
@@ -96,11 +96,11 @@ br.com.portalmanager.core
 
 O namespace Java raiz também é `br.com.portalmanager.core`. Os `artifactId` permanecem `platform-*`.
 
-As coordenadas anteriores em `com.empresa.platform` são históricas/experimentais e não pertencem ao baseline oficial final.
+As coordenadas anteriores em `com.empresa.platform` são históricas/experimentais e não pertencem às coordenadas oficiais finais.
 
-## Baseline preparado para publicação
+## Versões próprias preparadas para publicação
 
-O baseline oficial preparado é:
+As coordenadas próprias preparadas para publicação são:
 
 - `br.com.portalmanager.core:platform-dependencies:1.0.0`;
 - `br.com.portalmanager.core:platform-parent:1.0.0`;
@@ -108,7 +108,9 @@ O baseline oficial preparado é:
 - capabilities `br.com.portalmanager.core:platform-*:1.0.0`;
 - root reactor `br.com.portalmanager.core:platform-libraries:1.0.0`.
 
-A coincidência de `1.0.0` entre os eixos neste baseline inicial é operacional, não semântica.
+A coincidência de `1.0.0` entre os artifacts próprios é operacional, não semântica.
+
+Em particular, `platform-dependencies:1.0.0` é a versão do BOM tecnológico, não a versão das tecnologias contidas nele. O BOM gerencia Spring Boot `4.1.1`, Testcontainers `1.21.4` e demais dependências externas em suas versões próprias.
 
 ## Histórico de versões experimentais
 
