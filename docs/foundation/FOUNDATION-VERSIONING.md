@@ -69,4 +69,11 @@ Mesmo uma alteração localizada em uma capability pode gerar nova release train
 - capabilities: `1.1.0`;
 - root reactor: `platform-libraries:1.1.0`.
 
-Estas versões só serão consideradas publicadas após evidência de deploy remoto bem-sucedido.
+Estado de publicação nesta migração:
+
+- release train das capabilities `1.1.0`: publicada no registry de `platform-libraries` pelo run `35538290455`;
+- `platform-dependencies:1.0.3`: preparado no código, porém não comprovado como consumível no registry novo;
+- `platform-parent:1.1.0`: preparado no código, porém não consumível pelo `account-service` exclusivamente no registry novo;
+- `platform-libraries-bom:1.1.0`: preparado para o novo modelo, mas o checkpoint depende do cutover completo dos artifacts estruturais.
+
+Nenhuma versão será marcada como baseline consolidado final antes do consumo remoto verde pelo consumidor de prova.

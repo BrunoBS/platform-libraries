@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for implementation.
+Accepted for structural implementation. Package cutover pending human decision.
 
 ## Context
 
@@ -106,3 +106,26 @@ O repositório antigo não será apagado nem arquivado durante a implementação
 ## Rollback
 
 Enquanto o checkpoint novo não for declarado, o fluxo publicado anterior permanece disponível nos packages de `platform-build` e `platform-libraries`. Um rollback pode restaurar o consumo das versões 1.0.x sem apagar repositórios ou packages.
+
+
+## Implementation finding — GitHub Packages Maven cutover
+
+A estrutura decidida por este ADR compila e testa no mesmo reactor. O Verify #60, run `35537837948`, concluiu com sucesso.
+
+Durante a publicação foi encontrado um limite operacional que não altera a separação arquitetural decidida acima:
+
+- deploy de `platform-dependencies:1.0.3` para o repository de `platform-libraries` retorna HTTP 422;
+- um probe Maven standalone no run `35538856486` confirma que esse artifact não é resolvido remotamente pelo novo endpoint;
+- `account-service` também não resolve `platform-parent:1.1.0` exclusivamente pelo novo endpoint.
+
+As capabilities `1.1.0` foram publicadas no novo registry, mas não formam ainda um baseline consumível sem o parent estrutural.
+
+O registry Maven do GitHub usa escopo por repository. A migração dos artifacts estruturais existentes exige uma decisão operacional explícita; ela não será inferida silenciosamente.
+
+### Alternatives pending decision
+
+1. migrar destrutivamente os packages estruturais existentes para o contexto de `platform-libraries`, preservando as coordenadas;
+2. adotar novas coordenadas Maven para os artifacts estruturais e migrar consumidores;
+3. manter os artifacts estruturais no registry de `platform-build`, o que preserva compatibilidade mas não atende ao objetivo deste ADR de eliminar o repository antigo do fluxo oficial.
+
+Nenhuma dessas alternativas é aprovada automaticamente por este ADR. Até a decisão, `platform-build` não deve ser arquivado.

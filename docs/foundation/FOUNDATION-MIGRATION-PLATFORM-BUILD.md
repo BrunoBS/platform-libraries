@@ -89,3 +89,16 @@ O repositório ainda não é obsoleto operacionalmente porque seus packages Mave
 Ele não deve ser apagado nem arquivado antes da conclusão do deploy consolidado e do teste remoto do `account-service`.
 
 Após o checkpoint, deverá ser marcado como legado/obsoleto e arquivado manualmente.
+
+
+## Evidência de migração — estado atual
+
+O reactor consolidado foi validado no Verify #60, run `35537837948`.
+
+As capabilities `1.1.0` foram publicadas no registry alvo no run `35538290455`.
+
+Os artifacts estruturais ainda não completaram o cutover. Um probe Maven standalone no run `35538856486` confirmou que `platform-dependencies:1.0.3` não é resolvido a partir de `platform-libraries`, enquanto a tentativa de deploy para esse destino retorna HTTP 422.
+
+O `account-service` já possui uma branch de prova com o POM alvo, mas os runs `35538639721` e `35538758316` falham em `platform-parent:1.1.0`. Portanto essa branch não representa ainda uma migração consumível.
+
+Nenhum package legado foi removido. `BrunoBS/platform-build` continua necessário operacionalmente até a decisão e execução do cutover dos packages Maven estruturais.

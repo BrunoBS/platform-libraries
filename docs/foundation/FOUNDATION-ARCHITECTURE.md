@@ -96,6 +96,10 @@ O registry de `platform-build` não fará parte do fluxo oficial.
 
 ## Estado atual
 
-O reactor consolidado foi validado no GitHub Actions Verify #54, run `35537087703`, com `BUILD SUCCESS`.
+A estrutura alvo está implementada e foi validada no GitHub Actions Verify #60, run `35537837948`, com `BUILD SUCCESS`.
 
-A publicação remota ainda não está concluída porque o primeiro deploy de `platform-dependencies:1.0.3` para o novo repository retornou HTTP 422. A migração de packages existentes precisa ser resolvida antes de atualizar consumidores ou declarar o novo checkpoint.
+As oito capabilities `1.1.0` foram publicadas no registry de `platform-libraries` no run `35538290455`.
+
+O cutover remoto dos artifacts estruturais permanece pendente: um probe Maven standalone, fora do reactor e com repositório local isolado, falhou no run `35538856486` ao resolver `platform-dependencies:1.0.3` pelo registry novo. O `account-service` também não resolve `platform-parent:1.1.0` exclusivamente desse registry.
+
+Até esse ponto ser resolvido, a arquitetura alvo está implementada no código, mas a topologia de distribuição não pode ser declarada concluída.

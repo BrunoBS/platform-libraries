@@ -44,3 +44,38 @@ Não usar `mvn install` como substituto da prova remota.
 ## Condição de saída
 
 A publicação só será considerada concluída quando o reactor completo for publicado no registry de `platform-libraries`, seguido de consumo remoto verde pelo `account-service`.
+
+
+## Evidência atualizada da consolidação
+
+A implementação estrutural atual foi validada no GitHub Actions Verify #60, run `35537837948`, commit `e055c5a1088ec96c94ae96493d13d58cd7f73135`.
+
+O reactor contém `platform-dependencies:1.0.3`, `platform-parent:1.1.0`, `platform-libraries-bom:1.1.0` e as oito capabilities `1.1.0`; Enforcer, dependency convergence e todas as suítes concluíram com `BUILD SUCCESS`.
+
+As oito capabilities da release train `1.1.0` foram publicadas no registry de `platform-libraries` pelo run `35538290455` com `BUILD SUCCESS`.
+
+Essa publicação parcial não fecha o checkpoint: os POMs das capabilities dependem do `platform-parent:1.1.0`.
+
+### Probe remoto isolado
+
+O run `35538856486` utilizou um POM Maven standalone fora do reactor, repositório local isolado e `-U`. A resolução de:
+
+`com.empresa.platform:platform-dependencies:pom:1.0.3`
+
+no endpoint:
+
+`https://maven.pkg.github.com/brunobs/platform-libraries`
+
+falhou. Portanto as resoluções anteriores executadas dentro do checkout do reactor não são aceitas como evidência remota para os artifacts estruturais.
+
+A tentativa de deploy do mesmo artifact para o novo repository já havia retornado HTTP 422 no run `35537303423`.
+
+Nenhum package foi apagado, sobrescrito ou transferido.
+
+### Consumidor
+
+O `BrunoBS/account-service` foi preparado em branch separada para usar somente o registry consolidado, com `platform-parent:1.1.0` e `platform-libraries-bom:1.1.0`.
+
+O Verify #13, run `35538639721`, e o probe com repositório Maven vazio, run `35538758316`, falharam ao resolver `platform-parent:1.1.0` exclusivamente do registry de `platform-libraries`.
+
+Essa falha é a evidência downstream que impede o fechamento do checkpoint.

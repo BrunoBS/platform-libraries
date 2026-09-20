@@ -331,3 +331,22 @@ Até isso ocorrer:
 - `account-service` não deve avançar para G2;
 - o antigo registry continua necessário para consumidores publicados;
 - `platform-build` não deve ser arquivado.
+
+
+## Atualização da consolidação — gate de publicação
+
+A estrutura consolidada passou no GitHub Actions Verify #60, run `35537837948`, com `BUILD SUCCESS`.
+
+A release train das capabilities `1.1.0` foi publicada com sucesso no run `35538290455`.
+
+Entretanto o probe remoto isolado run `35538856486` confirmou que `platform-dependencies:1.0.3` não é resolvido no registry de `platform-libraries`. A tentativa de deploy desse artifact no novo repository retorna HTTP 422.
+
+No consumidor `BrunoBS/account-service`, o Verify #13, run `35538639721`, e o probe sem cache, run `35538758316`, falham ao resolver `platform-parent:1.1.0` usando somente o registry consolidado.
+
+### Estado do checkpoint
+
+A refatoração estrutural está implementada e verde, mas o **novo checkpoint de consolidação permanece aberto**.
+
+Não declarar o `platform-build` obsoleto operacionalmente e não arquivá-lo até resolver a migração dos packages Maven estruturais e obter `mvn clean verify` verde no `account-service` usando exclusivamente `platform-libraries`.
+
+A G2 do `account-service` permanece bloqueada.
