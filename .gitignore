@@ -3,6 +3,9 @@
 *.jar
 *.war
 
+# POMs de consumo gerados pelo Flatten Maven Plugin
+**/.flattened-pom.xml
+
 # Arquivos de configuração do IntelliJ IDEA
 .idea/
 *.iml
