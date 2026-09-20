@@ -61,6 +61,29 @@ platform-test-support  1.1.0
 
 Mesmo uma alteração localizada em uma capability pode gerar nova release train, sem alterar `platform-parent`.
 
+### Fonte única da versão da release train
+
+A versão da release train é definida uma única vez em:
+
+```text
+.mvn/maven.config
+-Drevision=1.1.0
+```
+
+Usam essa mesma `revision`:
+
+- root reactor `platform-libraries`;
+- `platform-libraries-bom`;
+- as oito capabilities em `modules/`.
+
+Os POMs das capabilities não repetem mais o número da release train. Dependências internas entre capabilities usam `${project.version}`.
+
+`platform-parent` e `platform-dependencies` não usam `${revision}`; seus eixos permanecem independentes.
+
+Como o baseline oficial continua em Maven 3.9.9, o build usa `flatten-maven-plugin` para transformar as CI-friendly versions em versões concretas nos POMs instalados/publicados. O plugin é ativado explicitamente pelos artifacts da release train e não é imposto aos serviços consumidores pelo parent.
+
+Para iniciar uma nova release train, altera-se somente `-Drevision=<nova-versão>` em `.mvn/maven.config`, seguido de `mvn clean verify` e da publicação remota.
+
 ## Versões preparadas nesta migração
 
 - `platform-dependencies:1.0.3`;

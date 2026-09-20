@@ -79,3 +79,19 @@ O `BrunoBS/account-service` foi preparado em branch separada para usar somente o
 O Verify #13, run `35538639721`, e o probe com repositório Maven vazio, run `35538758316`, falharam ao resolver `platform-parent:1.1.0` exclusivamente do registry de `platform-libraries`.
 
 Essa falha é a evidência downstream que impede o fechamento do checkpoint.
+
+
+## Release train centralizada
+
+A release train das capabilities possui uma única fonte de versão:
+
+```text
+.mvn/maven.config
+-Drevision=1.1.0
+```
+
+O root reactor, `platform-libraries-bom` e as capabilities usam essa `revision`. Dependências internas usam `${project.version}`.
+
+Como o baseline é Maven 3.9.9, os artifacts da release train usam `flatten-maven-plugin` em `resolveCiFriendliesOnly`. O CI verifica que os POMs achatados existem, contêm a versão concreta da release e não deixam `${revision}` sem resolução antes de qualquer publicação.
+
+`platform-parent` e `platform-dependencies` permanecem fora da release train e mantêm suas próprias versões.
