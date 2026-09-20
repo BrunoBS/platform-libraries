@@ -10,7 +10,7 @@ A Foundation fornece capacidades reutilizáveis e governança técnica. A Golden
 - Spring Boot 4.1.1;
 - Maven 3.9.9 ou superior dentro da faixa suportada pelo parent;
 - namespace Maven e Java oficial: `br.com.portalmanager.core`;
-- baseline preparado para publicação: `1.0.0`.
+- versão preparada das coordenadas próprias da Foundation: `1.0.0`.
 
 `platform-crud` foi removido da Foundation e não deve ser recriado.
 
@@ -51,7 +51,9 @@ platform-dependencies    -> baseline tecnológico
 platform-libraries-bom   -> baseline das capabilities
 ```
 
-A coincidência atual em `1.0.0` não cria acoplamento de versionamento entre esses eixos.
+A coincidência atual em `1.0.0` refere-se somente às versões dos artifacts próprios da Foundation e não cria acoplamento entre esses eixos.
+
+O `platform-dependencies:1.0.0` representa uma versão do BOM tecnológico; as tecnologias que ele gerencia possuem suas próprias versões, por exemplo Spring Boot `4.1.1` e Testcontainers `1.21.4`.
 
 ## Release train das capabilities
 
@@ -88,7 +90,7 @@ platform-starter
 
 ## Consumo alvo
 
-Após a publicação definitiva do baseline, um serviço consumidor deve combinar explicitamente o parent de build e o BOM das capabilities:
+Após a publicação definitiva das coordenadas da Foundation, um serviço consumidor deve combinar explicitamente o parent de build e o BOM das capabilities:
 
 ```xml
 <parent>
