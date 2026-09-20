@@ -86,9 +86,9 @@ audit -> messaging
 catalog -> messaging
 ```
 
-## Baseline preparado
+## Coordenadas próprias preparadas
 
-O baseline atual preparado para publicação é:
+As versões atuais dos artifacts próprios da Foundation preparadas para publicação são:
 
 ```text
 br.com.portalmanager.core:platform-dependencies:1.0.0
@@ -97,7 +97,7 @@ br.com.portalmanager.core:platform-libraries-bom:1.0.0
 br.com.portalmanager.core:platform-*:1.0.0
 ```
 
-A igualdade das versões neste baseline inicial não altera a independência conceitual dos eixos de build, tecnologia e capabilities.
+A igualdade em `1.0.0` vale somente para as coordenadas dos artifacts próprios da Foundation. O `platform-dependencies:1.0.0` continua gerenciando versões tecnológicas independentes, como Spring Boot `4.1.1` e Testcontainers `1.21.4`.
 
 ## Distribuição oficial
 
@@ -132,7 +132,7 @@ O `main` foi validado no Verify #85, run `35544899150`, após:
 
 O reactor concluiu com `BUILD SUCCESS`.
 
-A publicação anterior do baseline `1.0.0` no run `35542606756` usou o namespace provisório `com.empresa.platform`. Ela permanece apenas como evidência operacional histórica do fluxo de deploy e não representa o baseline oficial final.
+A publicação anterior das coordenadas próprias em `1.0.0` no run `35542606756` usou o namespace provisório `com.empresa.platform`. Ela permanece apenas como evidência operacional histórica do fluxo de deploy e não representa o baseline oficial final.
 
 ## Condição para fechamento
 
