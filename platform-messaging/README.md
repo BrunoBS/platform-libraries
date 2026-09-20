@@ -117,7 +117,7 @@ audit_en.properties    -> audit.event.not.found
 ```
 
 Por convenção, cada módulo deve usar seu próprio namespace, por exemplo
-`audit.*`, `crud.*`, `routing.*`, `authorization.*` e `catalog.*`.
+`audit.*`, `routing.*`, `authorization.*` e `catalog.*`.
 
 
 ## Namespace automático por bundle
@@ -166,7 +166,7 @@ Dois serviços podem ter a mesma chave local sem colisão:
 
 ```text
 audit_pt_BR.properties -> event.not.found -> audit.event.not.found
-crud_pt_BR.properties  -> event.not.found -> crud.event.not.found
+catalog_pt_BR.properties -> event.not.found -> catalog.event.not.found
 ```
 
 A colisão ocorre apenas quando a mesma chave global é publicada duas vezes
