@@ -64,9 +64,9 @@ Messaging pode iniciar sem JDBC/DataSource; JDBC e Redis são integrações opci
 
 Authorization preserva o comportamento aprovado pela Foundation.
 
-## Pendência F6 — integração remota oficial
+## F6 — integração remota oficial concluída
 
-A arquitetura de distribuição aprovada exige:
+A arquitetura de distribuição aprovada foi validada no fluxo oficial:
 
 ```text
 platform-build
@@ -77,19 +77,22 @@ platform-libraries
   -> mvn clean verify
 ```
 
-As alterações estabilizadas do `platform-build` estão na branch `refactor/golden-foundation` / PR #6 e o workflow atual dessa branch executa verify, mas não publica os artefatos estabilizados no GitHub Packages.
+As Libraries passaram a consumir `com.empresa.platform:platform-parent:1.0.1` no commit `4b0a17bbc35b0d4cd6c52b9d4413b565e8d1842e`.
 
-Por isso, o sucesso atual de `platform-libraries` prova o reactor e a resolução remota configurada, mas não prova ainda que a versão publicada de `platform-parent` / `platform-dependencies` contém exatamente as mudanças da F1.
+GitHub Actions Verify #45, run `35531158159`:
 
-Não usar `mvn install` local como substituto desta evidência oficial.
+- branch `refactor/golden-foundation`;
+- commit `4b0a17bbc35b0d4cd6c52b9d4413b565e8d1842e`;
+- comando `mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean verify`;
+- RequireJavaVersion: sucesso;
+- RequireMavenVersion: sucesso;
+- DependencyConvergence: sucesso em todos os módulos;
+- reactor completo: `BUILD SUCCESS`.
 
-## Condição para declarar FOUNDATION-GOLDEN-V1
+Como o POM usa `<relativePath/>`, o parent 1.0.1 não é resolvido do workspace local. A execução do CI com o settings oficial e build verde constitui a evidência da resolução remota prevista para a F6.
 
-Antes do fechamento final:
+## Checkpoint
 
-1. disponibilizar no GitHub Packages a versão do `platform-parent` e `platform-dependencies` correspondente ao build estabilizado;
-2. executar `platform-libraries` contra esses artefatos remotos;
-3. obter `mvn clean verify` verde nesse fluxo;
-4. registrar a evidência final neste documento.
+Com F0–F6 concluídas e a integração remota oficial validada, o checkpoint `FOUNDATION-GOLDEN-V1` está tecnicamente concluído.
 
-Até isso ocorrer, o checkpoint permanece tecnicamente preparado, porém não declarado como concluído.
+A próxima fase arquitetural permitida pelo roadmap é a nova Golden Reference. Nenhum trabalho dessa fase é iniciado por este documento.
