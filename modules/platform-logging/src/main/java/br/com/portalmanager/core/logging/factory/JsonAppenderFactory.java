@@ -1,11 +1,11 @@
-package com.empresa.platform.logging.factory;
+package br.com.portalmanager.core.logging.factory;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 
-import com.empresa.platform.logging.constants.LoggingConstants;
+import br.com.portalmanager.core.logging.constants.LoggingConstants;
 import org.springframework.core.env.Environment;
 
 public final class JsonAppenderFactory {

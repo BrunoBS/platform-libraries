@@ -1,4 +1,4 @@
-package com.empresa.platform.logging.initializer;
+package br.com.portalmanager.core.logging.initializer;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -6,9 +6,9 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.NopStatusListener;
-import com.empresa.platform.logging.converter.JsonMessageConverter;
-import com.empresa.platform.logging.converter.JsonThrowableConverter;
-import com.empresa.platform.logging.converter.MaskingConverter;
+import br.com.portalmanager.core.logging.converter.JsonMessageConverter;
+import br.com.portalmanager.core.logging.converter.JsonThrowableConverter;
+import br.com.portalmanager.core.logging.converter.MaskingConverter;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;

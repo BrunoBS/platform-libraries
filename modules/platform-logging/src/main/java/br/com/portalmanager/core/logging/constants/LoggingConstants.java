@@ -1,4 +1,4 @@
-package com.empresa.platform.logging.constants;
+package br.com.portalmanager.core.logging.constants;
 
 public final class LoggingConstants {
     

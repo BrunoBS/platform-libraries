@@ -1,4 +1,4 @@
-package com.empresa.platform.logging.initializer;
+package br.com.portalmanager.core.logging.initializer;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
