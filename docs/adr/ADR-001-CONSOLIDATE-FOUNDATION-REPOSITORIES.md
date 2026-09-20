@@ -114,7 +114,7 @@ O repositório antigo não será apagado nem arquivado durante a implementação
 ## Trade-offs
 
 - mais um artefato BOM explícito no POM consumidor;
-- release train das capabilities ainda exige atualização coordenada dos módulos e do BOM;
+- a release train continua sendo coordenada, mas a versão é alterada em um único ponto via `.mvn/maven.config`;
 - o reactor passa a depender da resolução correta de parent/BOM siblings, que deve ser coberta pelo CI.
 
 ## Rollback

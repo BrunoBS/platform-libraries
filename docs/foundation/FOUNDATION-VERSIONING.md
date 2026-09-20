@@ -94,11 +94,13 @@ Após a decisão de limpar as versões/packages experimentais no GitHub Packages
 - capabilities: `1.0.0`;
 - root reactor: `platform-libraries:1.0.0`.
 
-Estado de publicação anterior permanece apenas como evidência histórica dos probes de consolidação. O novo baseline `1.0.0` ainda precisa ser publicado e validado remotamente:
+Estado de publicação anterior permanece apenas como evidência histórica dos probes de consolidação:
 
 - release train das capabilities `1.1.0`: publicada no registry de `platform-libraries` pelo run `35538290455`;
-- `platform-dependencies:1.0.0`: preparado no código, porém não comprovado como consumível no registry novo;
-- `platform-parent:1.0.0`: preparado no código, porém não consumível pelo `account-service` exclusivamente no registry novo;
-- `platform-libraries-bom:1.0.0`: preparado para o novo modelo, mas o checkpoint depende do cutover completo dos artifacts estruturais.
+- `platform-dependencies:1.0.3`: foi o artifact estrutural usado no probe que expôs o bloqueio de cutover;
+- `platform-parent:1.1.0`: foi o parent usado no probe do `account-service`;
+- `platform-libraries-bom:1.1.0`: pertenceu ao baseline experimental anterior.
+
+Essas versões não representam mais o baseline alvo. O novo baseline `1.0.0` ainda precisa ser publicado e validado remotamente após a limpeza dos packages experimentais.
 
 Nenhuma versão será marcada como baseline consolidado final antes do consumo remoto verde pelo consumidor de prova.
