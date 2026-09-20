@@ -5,6 +5,10 @@ import com.empresa.platform.authorization.config.PlatformAuthorizationProperties
 import com.empresa.platform.authorization.model.UserContext;
 import com.empresa.platform.authorization.model.UserSession;
 import com.empresa.platform.authorization.registry.AuthorizationMetadataRegistry;
+import com.empresa.platform.authorization.resource.ResourceVisibilityFilterManager;
+import com.empresa.platform.authorization.resource.ResourceVisibilityQueryContext;
+import com.empresa.platform.authorization.resource.NativeResourceVisibilityContext;
+import org.springframework.beans.factory.ObjectProvider;
 import com.empresa.platform.authorization.service.AuthorizationClientService;
 import com.empresa.platform.authorization.web.AuthorizationInterceptor;
 import com.empresa.platform.authorization.web.filter.AuthorizationContextCleanupFilter;
@@ -17,6 +21,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -43,9 +49,22 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ResourceVisibilityAspect resourceVisibilityAspect() {
-        return new ResourceVisibilityAspect();
+    public ResourceVisibilityQueryContext resourceVisibilityQueryContext() {
+        return new ResourceVisibilityQueryContext();
     }
+
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    @ConditionalOnMissingBean
+    public ResourceVisibilityAspect resourceVisibilityAspect(
+            ObjectProvider<ResourceVisibilityFilterManager> filterManagerProvider,
+            ObjectProvider<NativeResourceVisibilityContext> nativeContextProvider) {
+        return new ResourceVisibilityAspect(
+                filterManagerProvider.getIfAvailable(),
+                nativeContextProvider.getIfAvailable()
+        );
+    }
+
 
     @Bean
     @ConditionalOnMissingBean
