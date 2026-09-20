@@ -6,7 +6,6 @@ import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.catalog.model.BaseCatalogEntity;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
 import com.empresa.platform.catalog.validation.BaseCatalogValidator;
-import com.empresa.platform.crud.service.BaseListCrudService;
 import com.empresa.platform.messaging.exception.NotFoundException;
 import com.empresa.platform.messaging.exception.ValidationException;
 import com.empresa.platform.messaging.message.PlatformMessageKeys;
@@ -24,17 +23,21 @@ import java.util.stream.Stream;
 
 public abstract class BaseCatalogService<
         E extends BaseCatalogEntity,
-        D extends BaseCatalogDTO<D>>
-        extends BaseListCrudService<E, D, Long, BaseCatalogRepository<E>> {
+        D extends BaseCatalogDTO<D>> {
+
+    private final BaseCatalogRepository<E> repository;
+    private final BaseCatalogMapper<D, E> mapper;
+    private final BaseCatalogValidator<D> validator;
 
     protected BaseCatalogService(
             BaseCatalogRepository<E> repository,
             BaseCatalogMapper<D, E> mapper,
             BaseCatalogValidator<D> validator) {
-        super(repository, mapper, validator);
+        this.repository = repository;
+        this.mapper = mapper;
+        this.validator = validator;
     }
 
-    @Override
     protected Set<String> allowedFilters() {
         return Stream.concat(
                         Stream.of("active", "name"),
@@ -47,7 +50,43 @@ public abstract class BaseCatalogService<
         return Set.of();
     }
 
-    @Override
+    @Transactional(readOnly = true)
+    public List<D> findAll() {
+        return findAll(Map.of());
+    }
+
+    @Transactional(readOnly = true)
+    public List<D> findAll(Map<String, String> filters) {
+        Map<String, String> resolved = filters == null ? Map.of() : Map.copyOf(filters);
+        validateAllowedFilters(resolved);
+        return findAllEntities(resolved).stream().map(mapper::toDTO).toList();
+    }
+
+    @Transactional
+    public D create(D dto) {
+        validator.validateForCreate(dto);
+        E entity = mapper.toEntity(dto);
+        beforeCreate(entity, dto);
+        E saved = repository.save(entity);
+        afterCreate(saved, dto);
+        return mapper.toDTO(saved);
+    }
+
+    private void validateAllowedFilters(Map<String, String> filters) {
+        Set<String> allowed = allowedFilters();
+        filters.forEach((name, value) -> {
+            if (!allowed.contains(name)) throw unsupportedFilterException(name, value);
+        });
+    }
+
+    protected boolean booleanFilter(Map<String, String> filters, String name, boolean defaultValue) {
+        String value = filters.get(name);
+        if (value == null || value.isBlank()) return defaultValue;
+        if ("true".equalsIgnoreCase(value)) return true;
+        if ("false".equalsIgnoreCase(value)) return false;
+        throw invalidFilterException(name, value);
+    }
+
     protected List<E> findAllEntities(Map<String, String> filters) {
         boolean active = booleanFilter(filters, "active", true);
         String name = filters.get("name");
@@ -88,7 +127,6 @@ public abstract class BaseCatalogService<
         return mapper().toDTO(findActiveById(id));
     }
 
-    @Override
     @Transactional
     public D update(D dto) {
         validator().validateForUpdate(dto);
@@ -146,7 +184,6 @@ public abstract class BaseCatalogService<
         return repository().findByNameInAndActiveTrue(names);
     }
 
-    @Override
     protected E getEntity(D dto) {
         return findActiveById(dto.id());
     }
@@ -156,7 +193,6 @@ public abstract class BaseCatalogService<
                 .orElseThrow(() -> notFoundException(id));
     }
 
-    @Override
     protected RuntimeException unsupportedFilterException(String name, String value) {
         return new ValidationException(
                 PlatformMessageKeys.VALIDATION_FAILED,
@@ -169,7 +205,6 @@ public abstract class BaseCatalogService<
         );
     }
 
-    @Override
     protected RuntimeException invalidFilterException(String name, String value) {
         return invalidFilterException(name, value, "boolean");
     }
@@ -188,7 +223,6 @@ public abstract class BaseCatalogService<
         );
     }
 
-    @Override
     protected RuntimeException notFoundException(Long id) {
         return new NotFoundException(
                 CatalogMessageKeys.NOT_FOUND,
@@ -201,20 +235,24 @@ public abstract class BaseCatalogService<
                 Map.of("0", validator().entityName(), "1", id));
     }
 
-    @Override
     protected void beforeCreate(E entity, D dto) {
         applyAdditionalFields(entity, dto);
         adjustSortOrder(entity, nextSortOrder());
     }
 
-    @Override
     protected void deleteEntity(E entity) {
         entity.setActive(false);
         repository().save(entity);
     }
 
-    protected void applyAdditionalFields(E entity, D dto) {
-    }
+    protected void applyAdditionalFields(E entity, D dto) {}
+    protected void afterCreate(E entity, D dto) {}
+    protected void afterUpdate(E entity, D dto) {}
+    protected void beforeDelete(E entity) {}
+    protected void afterDelete(E entity) {}
+    protected BaseCatalogRepository<E> repository() { return repository; }
+    protected BaseCatalogMapper<D, E> mapper() { return mapper; }
+    protected BaseCatalogValidator<D> validator() { return validator; }
 
     private Integer nextSortOrder() {
         return repository().findFirstByOrderBySortOrderDesc()
