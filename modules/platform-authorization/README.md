@@ -56,7 +56,7 @@ Para uso isolado fora desse parent, a dependência pode ser declarada diretament
 
 ```xml
 <dependency>
-    <groupId>com.empresa.platform</groupId>
+    <groupId>br.com.portalmanager.core</groupId>
     <artifactId>platform-authorization</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>

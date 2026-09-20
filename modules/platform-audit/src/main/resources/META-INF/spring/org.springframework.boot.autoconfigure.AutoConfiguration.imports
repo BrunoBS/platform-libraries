@@ -1,2 +1,2 @@
-com.empresa.platform.audit.autoconfigure.PlatformAuditAutoConfiguration
-com.empresa.platform.audit.autoconfigure.PlatformAuditRedisAutoConfiguration
+br.com.portalmanager.core.audit.autoconfigure.PlatformAuditAutoConfiguration
+br.com.portalmanager.core.audit.autoconfigure.PlatformAuditRedisAutoConfiguration

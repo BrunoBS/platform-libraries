@@ -35,7 +35,7 @@ Adicione o módulo no `pom.xml` do microsserviço com escopo `test`:
 
 ```xml
 <dependency>
-    <groupId>com.empresa.platform</groupId>
+    <groupId>br.com.portalmanager.core</groupId>
     <artifactId>platform-test-support</artifactId>
     <version>${platform-libraries.version}</version>
     <scope>test</scope>
@@ -78,8 +78,8 @@ Não é necessário informar URL, usuário ou senha do MySQL quando o teste util
 ```java
 package com.empresa.account.integration;
 
-import com.empresa.platform.testing.annotation.PlatformIntegrationTest;
-import com.empresa.platform.testing.annotation.WithMySql;
+import br.com.portalmanager.core.testing.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.core.testing.annotation.WithMySql;
 import org.junit.jupiter.api.Test;
 
 @PlatformIntegrationTest
@@ -770,7 +770,7 @@ class ArchitectureTest {
 }
 ```
 
-Por padrão, a regra observa classes-base dos pacotes `com.empresa.platform`. Qualquer classe concreta da aplicação que sobrescreva comportamento declarado por uma classe ou interface da plataforma precisa ter cobertura específica.
+Por padrão, a regra observa classes-base dos pacotes `br.com.portalmanager.core`. Qualquer classe concreta da aplicação que sobrescreva comportamento declarado por uma classe ou interface da plataforma precisa ter cobertura específica.
 
 A cobertura pode ser reconhecida por convenção:
 
@@ -799,7 +799,7 @@ Também é possível customizar os pacotes-base observados:
 @PlatformArchitectureTest(
     basePackages = "com.minhaempresa.meuservico",
     observedBasePackages = {
-        "com.empresa.platform",
+        "br.com.portalmanager.core",
         "com.minhaempresa.framework"
     }
 )

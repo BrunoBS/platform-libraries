@@ -111,3 +111,10 @@ capabilities            1.0.0
 A release train continua usando a propriedade Maven 3 CI-friendly `revision`, definida em `.mvn/maven.config` como `-Drevision=1.0.0`. O nome `revision` é mantido por compatibilidade com Maven 3.9.9; propriedades arbitrárias como `${platform-libraries.version}` no campo `project.version` não fazem parte do suporte CI-friendly do Maven 3.
 
 Os runs e versões 1.0.3/1.1.0 documentados acima permanecem somente como evidência histórica da investigação de cutover e não representam o novo baseline de publicação.
+
+
+## Publicação limpa anterior ao namespace oficial
+
+Após a limpeza manual dos packages experimentais, o run `35542606756`, attempt 3, concluiu com sucesso a publicação do baseline `1.0.0` ainda sob o namespace Maven anterior `com.empresa.platform`.
+
+Essa publicação é evidência operacional de que o fluxo consolidado de deploy funciona, mas não é o baseline oficial final. Antes do checkpoint, a Foundation adotou o namespace definitivo `br.com.portalmanager.core` conforme ADR-002. Portanto os artifacts em `com.empresa.platform` passam a ser considerados experimentais/obsoletos e o baseline `1.0.0` deverá ser republicado sob as novas coordenadas, seguido de nova prova de consumo remoto.

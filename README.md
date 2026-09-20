@@ -74,7 +74,7 @@ Após a publicação consolidada, um serviço consumidor deverá usar o parent s
 
 ```xml
 <parent>
-    <groupId>com.empresa.platform</groupId>
+    <groupId>br.com.portalmanager.core</groupId>
     <artifactId>platform-parent</artifactId>
     <version>1.1.0</version>
     <relativePath/>
@@ -83,7 +83,7 @@ Após a publicação consolidada, um serviço consumidor deverá usar o parent s
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>com.empresa.platform</groupId>
+            <groupId>br.com.portalmanager.core</groupId>
             <artifactId>platform-libraries-bom</artifactId>
             <version>1.1.0</version>
             <type>pom</type>
@@ -97,7 +97,7 @@ Capabilities podem então ser declaradas sem versão:
 
 ```xml
 <dependency>
-    <groupId>com.empresa.platform</groupId>
+    <groupId>br.com.portalmanager.core</groupId>
     <artifactId>platform-starter</artifactId>
 </dependency>
 ```

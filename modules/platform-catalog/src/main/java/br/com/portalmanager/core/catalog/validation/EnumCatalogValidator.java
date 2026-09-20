@@ -1,0 +1,40 @@
+package br.com.portalmanager.core.catalog.validation;
+
+import br.com.portalmanager.core.catalog.dto.BaseCatalogDTO;
+import br.com.portalmanager.core.catalog.message.CatalogMessageKeys;
+import br.com.portalmanager.core.catalog.model.CatalogEnum;
+import br.com.portalmanager.core.catalog.repository.BaseCatalogRepository;
+
+import java.util.Map;
+
+/**
+ * Validator specialization for catalogs whose allowed names are defined by a
+ * Java enum implementing CatalogEnum.
+ */
+public abstract class EnumCatalogValidator<
+        E extends Enum<E> & CatalogEnum<E>,
+        D extends BaseCatalogDTO<D>> extends BaseCatalogValidator<D> {
+
+    private final Class<E> enumClass;
+
+    protected EnumCatalogValidator(BaseCatalogRepository<?> repository, Class<E> enumClass) {
+        super(repository);
+        this.enumClass = enumClass;
+    }
+
+    @Override
+    protected void validateAdditionalCatalogFields(D dto, CatalogValidationResult result) {
+        super.validateAdditionalCatalogFields(dto, result);
+        if (dto.name() != null && !dto.name().isBlank() && CatalogEnum.from(enumClass, dto.name()) == null) {
+            result.addError(
+                    "name",
+                    CatalogMessageKeys.NAME_NOT_ALLOWED,
+                    Map.of("0", entityName(), "1", CatalogEnum.getOptionsValid(enumClass))
+            );
+        }
+        validateEnumCatalogFields(dto, result);
+    }
+
+    protected void validateEnumCatalogFields(D dto, CatalogValidationResult result) {
+    }
+}

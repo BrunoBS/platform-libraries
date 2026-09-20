@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for structural implementation. Package cutover pending human decision.
+Accepted. A decisão posterior de namespace é registrada na ADR-002.
 
 ## Context
 
@@ -40,7 +40,7 @@ platform-libraries-bom     BOM das capabilities
 modules/platform-*         capabilities independentes
 ```
 
-O root POM será apenas aggregator e ponto de publicação do reactor. Não concentrará regras de build. As capabilities ficam agrupadas fisicamente sob `modules/`, sem alterar `groupId`, `artifactId` ou contrato de consumo.
+O root POM será apenas aggregator e ponto de publicação do reactor. Não concentrará regras de build. As capabilities ficam agrupadas fisicamente sob `modules/`. A consolidação originalmente preservou coordenadas; a alteração posterior do `groupId` e do namespace Java é decidida separadamente pela ADR-002. Os `artifactId` permanecem inalterados.
 
 `platform-parent` conterá Java 25, Maven mínimo, plugins, testes, Enforcer, convergence e importará apenas o baseline tecnológico via `platform-dependencies`.
 
