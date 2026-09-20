@@ -2,6 +2,9 @@ name: Publish Maven packages
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - refactor/consolidate-foundation-repositories
 
 permissions:
   contents: read
