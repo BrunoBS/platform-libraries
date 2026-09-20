@@ -36,11 +36,11 @@ Aplicações que ainda dependam de APIs genéricas de CRUD precisam tratar essa 
 
 O baseline é Java 25, Spring Boot 4.1.1 e Maven >= 3.9.9.
 
-O parent não gerencia mais `platform-crud`. As capabilities sobreviventes continuam governadas pelo `platform-build`.
+O parent não gerencia mais `platform-crud`. O `platform-parent` e o `platform-dependencies` foram migrados para `platform-libraries`. As versões das capabilities passam a ser governadas pelo `platform-libraries-bom`, não pelo parent.
 
 ## Distribuição Maven
 
-A integração oficial usa GitHub Packages. Consumidores e CI devem resolver parent/BOM remotamente; `mvn install` local não é evidência de integração oficial.
+O fluxo oficial alvo usa somente o package repository de `platform-libraries`. Consumidores devem resolver `platform-parent` e `platform-libraries-bom` remotamente; `mvn install` local não é evidência de integração oficial. Enquanto o novo checkpoint não fechar, o fluxo publicado anterior permanece disponível apenas para rollback.
 
 ## Fora de escopo
 
