@@ -28,7 +28,7 @@ Os comportamentos próprios de catálogo permanecem: active/inactive, restore, o
 
 ## CRUD genérico
 
-`platform-crud` foi removido da Foundation. Novos consumidores não devem declarar `com.empresa.platform:platform-crud`.
+`platform-crud` foi removido da Foundation. Novos consumidores não devem declarar `br.com.portalmanager.core:platform-crud`.
 
 Aplicações que ainda dependam de APIs genéricas de CRUD precisam tratar essa migração no contexto da própria aplicação ou, posteriormente, seguir os padrões explícitos demonstrados pela Golden Reference. Esta fase não migra domínio de aplicações.
 

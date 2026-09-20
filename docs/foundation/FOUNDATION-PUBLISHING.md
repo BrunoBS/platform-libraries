@@ -22,7 +22,7 @@ O reactor resolveu `platform-dependencies`, `platform-parent`, `platform-librari
 
 Foi executado um probe controlado de `clean deploy` no GitHub Actions Publish Maven packages #4, run `35537303423`.
 
-O primeiro artifact a publicar foi `com.empresa.platform:platform-dependencies:1.0.3`.
+O primeiro artifact a publicar foi `br.com.portalmanager.core:platform-dependencies:1.0.3`.
 
 Resultado:
 
@@ -60,7 +60,7 @@ Essa publicação parcial não fecha o checkpoint: os POMs das capabilities depe
 
 O run `35538856486` utilizou um POM Maven standalone fora do reactor, repositório local isolado e `-U`. A resolução de:
 
-`com.empresa.platform:platform-dependencies:pom:1.0.3`
+`br.com.portalmanager.core:platform-dependencies:pom:1.0.3`
 
 no endpoint:
 

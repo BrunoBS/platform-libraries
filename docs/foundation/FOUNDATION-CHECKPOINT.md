@@ -77,7 +77,7 @@ platform-libraries
   -> mvn clean verify
 ```
 
-As Libraries passaram a consumir `com.empresa.platform:platform-parent:1.0.1` no commit `4b0a17bbc35b0d4cd6c52b9d4413b565e8d1842e`.
+As Libraries passaram a consumir `br.com.portalmanager.core:platform-parent:1.0.1` no commit `4b0a17bbc35b0d4cd6c52b9d4413b565e8d1842e`.
 
 GitHub Actions Verify #45, run `35531158159`:
 
@@ -127,8 +127,8 @@ Golden consumer
 
 No `BrunoBS/account-service`, após autenticação válida e configuração dos dois registries, o GitHub Actions Verify #6, run `35534805355`, attempt 1, resolveu `platform-parent:1.0.1` remotamente, mas confirmou ausência de:
 
-- `com.empresa.platform:platform-starter:1.0.0`;
-- `com.empresa.platform:platform-test-support:1.0.0`;
+- `br.com.portalmanager.core:platform-starter:1.0.0`;
+- `br.com.portalmanager.core:platform-test-support:1.0.0`;
 
 tanto no registry de `platform-build` quanto no registry correto de `platform-libraries`.
 

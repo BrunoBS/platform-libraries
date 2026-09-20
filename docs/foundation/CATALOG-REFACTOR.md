@@ -29,7 +29,7 @@ As buscas de código no escopo `platform-catalog` retornaram zero ocorrências p
 - `BaseCrud`
 - `CrudValidation`
 - `CrudControllerSupport`
-- `com.empresa.platform.crud`
+- `br.com.portalmanager.core.crud`
 
 A busca remota do GitHub indicou `incomplete_results=true`; por isso ela é registrada como evidência auxiliar, não como única prova. A prova funcional principal é a remoção da dependência Maven seguida da compilação e testes bem-sucedidos do módulo e do reactor.
 
