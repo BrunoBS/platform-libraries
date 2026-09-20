@@ -24,4 +24,12 @@
         <module>platform-catalog</module>
         <module>platform-tagging</module>
     </modules>
+
+    <distributionManagement>
+        <repository>
+            <id>github-platform-libraries</id>
+            <name>GitHub Packages - Platform Libraries</name>
+            <url>https://maven.pkg.github.com/brunobs/platform-libraries</url>
+        </repository>
+    </distributionManagement>
 </project>

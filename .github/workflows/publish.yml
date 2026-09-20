@@ -1,0 +1,33 @@
+name: Publish Maven packages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - refactor/golden-foundation
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-libraries]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Verify and publish
+        env:
+          GITHUB_PACKAGES_USERNAME: BrunoBS
+          GITHUB_PACKAGES_TOKEN: ${{ secrets.PLATFORM_PACKAGES_TOKEN }}
+        run: mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean deploy
