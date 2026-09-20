@@ -5,10 +5,11 @@
     <servers>
         <server>
             <id>github-platform-libraries</id>
-            <username>${env.GITHUB_PACKAGES_USERNAME}</username>
-            <password>${env.GITHUB_PACKAGES_TOKEN}</password>
+            <username>${env.GITHUB_ACTOR}</username>
+            <password>${env.GITHUB_PUBLISH_TOKEN}</password>
         </server>
     </servers>
+
     <profiles>
         <profile>
             <id>github-platform-libraries</id>
@@ -22,5 +23,8 @@
             </repositories>
         </profile>
     </profiles>
-    <activeProfiles><activeProfile>github-platform-libraries</activeProfile></activeProfiles>
+
+    <activeProfiles>
+        <activeProfile>github-platform-libraries</activeProfile>
+    </activeProfiles>
 </settings>

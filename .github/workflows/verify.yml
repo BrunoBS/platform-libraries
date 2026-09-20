@@ -4,13 +4,15 @@ on:
   push:
     branches:
       - main
-      - fix/github-packages-consumer
+      - refactor/golden-foundation
+      - refactor/consolidate-foundation-repositories
   pull_request:
     branches:
       - main
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   verify:
@@ -21,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '25'
@@ -32,3 +34,16 @@ jobs:
           GITHUB_PACKAGES_USERNAME: BrunoBS
           GITHUB_PACKAGES_TOKEN: ${{ secrets.PLATFORM_PACKAGES_TOKEN }}
         run: mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean verify
+
+      - name: Verify release train metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          REVISION="$(sed -n 's/^-Drevision=//p' .mvn/maven.config)"
+          test -n "$REVISION"
+          test -f platform-libraries-bom/.flattened-pom.xml
+          grep -q "<version>$REVISION</version>" platform-libraries-bom/.flattened-pom.xml
+          if grep -R '\${revision}' platform-libraries-bom/.flattened-pom.xml modules/*/.flattened-pom.xml; then
+            echo "Unresolved revision found in flattened consumer POMs."
+            exit 1
+          fi

@@ -1,2 +1,0 @@
-com.empresa.platform.messaging.autoconfigure.PlatformMessagingAutoConfiguration
-com.empresa.platform.messaging.autoconfigure.PlatformMessagingRedisAutoConfiguration
