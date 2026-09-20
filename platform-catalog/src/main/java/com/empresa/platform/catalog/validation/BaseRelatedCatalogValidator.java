@@ -3,7 +3,6 @@ package com.empresa.platform.catalog.validation;
 import com.empresa.platform.catalog.dto.BaseCatalogDTO;
 import com.empresa.platform.catalog.message.CatalogMessageKeys;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
-import com.empresa.platform.crud.validation.CrudValidationResult;
 
 import java.util.Map;
 
@@ -22,7 +21,7 @@ public abstract class BaseRelatedCatalogValidator<D extends BaseCatalogDTO<D>, R
     }
 
     @Override
-    protected final void validateAdditionalCatalogFields(D dto, CrudValidationResult result) {
+    protected final void validateAdditionalCatalogFields(D dto, CatalogValidationResult result) {
         R relation = relatedValue(dto);
         if (isMissing(relation)) {
             result.addError(relatedField(), CatalogMessageKeys.REQUIRED,
@@ -38,7 +37,7 @@ public abstract class BaseRelatedCatalogValidator<D extends BaseCatalogDTO<D>, R
     }
 
     @Override
-    protected final void validateUniqueness(D dto, CrudValidationResult result) {
+    protected final void validateUniqueness(D dto, CatalogValidationResult result) {
         R relation = relatedValue(dto);
         if (isMissing(relation) || dto.name() == null || dto.name().isBlank()) {
             return;
@@ -54,7 +53,7 @@ public abstract class BaseRelatedCatalogValidator<D extends BaseCatalogDTO<D>, R
         return relation == null || (relation instanceof String value && value.isBlank());
     }
 
-    protected void validateRelatedFields(D dto, R relation, CrudValidationResult result) {
+    protected void validateRelatedFields(D dto, R relation, CatalogValidationResult result) {
     }
 
     protected abstract R relatedValue(D dto);
