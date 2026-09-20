@@ -38,7 +38,7 @@ Capacidade transversal explícita de tagging persistido, com isolamento de owner
 
 ### platform-test-support
 
-Infraestrutura reutilizável de testes. Contém suporte unitário, integração Spring, Testcontainers, MySQL, Kafka, WireMock, RestAssured, builders/factories/scenarios genéricos e validação arquitetural opt-in. Authorization e web são opcionais quando aplicável. É biblioteca de teste e não faz parte do starter de runtime.
+Infraestrutura reutilizável de testes. Contém suporte unitário, integração Spring, Testcontainers, MySQL, Kafka, WireMock, RestAssured, builders/factories/scenarios genéricos e validação arquitetural opt-in. Authorization e web são opcionais quando aplicável. JDBC, driver MySQL, Kafka e Testcontainers também são dependências Maven opcionais: consumir `platform-test-support` sozinho não adiciona infraestrutura e não deve disparar auto-configuração de DataSource/Kafka. Casos explícitos como `@WithMySql` e `@WithKafka` exigem que a aplicação de teste declare as dependências correspondentes. É biblioteca de teste e não faz parte do starter de runtime.
 
 ## Estrutura após F4
 

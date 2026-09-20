@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.empresa.platform</groupId>
         <artifactId>platform-libraries</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>platform-test-support</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <name>platform-test-support</name>
 
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.empresa.platform</groupId>
             <artifactId>platform-authorization</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -41,31 +41,38 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-kafka</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>mysql</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>kafka</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>

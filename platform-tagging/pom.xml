@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.empresa.platform</groupId>
         <artifactId>platform-libraries</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>platform-tagging</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>platform-tagging</name>
     <description>Reusable tagging capability with owner isolation and tag origin reconciliation.</description>
 

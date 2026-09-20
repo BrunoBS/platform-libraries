@@ -2,6 +2,9 @@ name: Publish Maven packages
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - refactor/golden-foundation
 
 permissions:
   contents: read
@@ -9,6 +12,7 @@ permissions:
 
 jobs:
   publish:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish-libraries]')
     runs-on: ubuntu-latest
 
     steps:

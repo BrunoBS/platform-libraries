@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.empresa.platform</groupId>
         <artifactId>platform-libraries</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>platform-audit</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>platform-audit</name>
     <description>Transparent audit event publishing for platform services.</description>
 
@@ -18,12 +18,12 @@
         <dependency>
             <groupId>com.empresa.platform</groupId>
             <artifactId>platform-authorization</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.empresa.platform</groupId>
             <artifactId>platform-messaging</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
