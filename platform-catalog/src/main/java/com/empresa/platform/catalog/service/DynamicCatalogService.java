@@ -6,7 +6,7 @@ import com.empresa.platform.catalog.model.BaseCatalogEntity;
 import com.empresa.platform.catalog.repository.BaseCatalogRepository;
 import com.empresa.platform.catalog.validation.BaseCatalogValidator;
 import com.empresa.platform.catalog.validation.CatalogSettingsValidator;
-import com.empresa.platform.crud.validation.CrudValidationResult;
+import com.empresa.platform.catalog.validation.CatalogValidationResult;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -45,7 +45,7 @@ public abstract class DynamicCatalogService<E extends BaseCatalogEntity>
 
         return new BaseCatalogValidator<>(repository) {
             @Override
-            protected void validateSettings(CatalogDTO dto, CrudValidationResult result) {
+            protected void validateSettings(CatalogDTO dto, CatalogValidationResult result) {
                 resolved.validate(dto, result);
             }
 
