@@ -14,7 +14,7 @@ O root `platform-libraries` é somente reactor/aggregator.
 
 O `platform-starter` agrega somente:
 
-- `platform-logging`
+- `platform-observability`
 - `platform-messaging`
 - `platform-authorization`
 
@@ -22,7 +22,7 @@ O `platform-starter` agrega somente:
 
 ## Revisão F5
 
-### platform-logging
+### platform-observability
 
 Responsabilidade transversal de logging estruturado. Não depende de outras libraries da plataforma. A integração web é opcional. Permanece no baseline obrigatório.
 
@@ -46,9 +46,9 @@ Capacidade específica para catálogos persistidos e gerenciados. Depende de mes
 
 Capacidade transversal explícita de tagging persistido, com isolamento de owner e reconciliação de origem. Depende de Spring/JPA, sem dependência de outras libraries da plataforma. Não entra transitivamente pelo starter.
 
-### platform-test-support
+### platform-testing
 
-Infraestrutura reutilizável de testes. Contém suporte unitário, integração Spring, Testcontainers, MySQL, Kafka, WireMock, RestAssured, builders/factories/scenarios genéricos e validação arquitetural opt-in. Authorization e web são opcionais quando aplicável. JDBC, driver MySQL, Kafka e Testcontainers também são dependências Maven opcionais: consumir `platform-test-support` sozinho não adiciona infraestrutura e não deve disparar auto-configuração de DataSource/Kafka. Casos explícitos como `@WithMySql` e `@WithKafka` exigem que a aplicação de teste declare as dependências correspondentes. É biblioteca de teste e não faz parte do starter de runtime.
+Infraestrutura reutilizável de testes. Contém suporte unitário, integração Spring, Testcontainers, MySQL, Kafka, WireMock, RestAssured, builders/factories/scenarios genéricos e validação arquitetural opt-in. Authorization e web são opcionais quando aplicável. JDBC, driver MySQL, Kafka e Testcontainers também são dependências Maven opcionais: consumir `platform-testing` sozinho não adiciona infraestrutura e não deve disparar auto-configuração de DataSource/Kafka. Casos explícitos como `@WithMySql` e `@WithKafka` exigem que a aplicação de teste declare as dependências correspondentes. É biblioteca de teste e não faz parte do starter de runtime.
 
 ## Capabilities sobreviventes
 
@@ -57,9 +57,9 @@ O reactor contém:
 - `platform-audit`
 - `platform-messaging`
 - `platform-authorization`
-- `platform-logging`
+- `platform-observability`
 - `platform-starter`
-- `platform-test-support`
+- `platform-testing`
 - `platform-catalog`
 - `platform-tagging`
 

@@ -50,13 +50,13 @@ Na release train preparada atualmente:
 ```text
 platform-libraries-bom 1.0.0
 platform-starter       1.0.0
-platform-logging       1.0.0
+platform-observability       1.0.0
 platform-messaging     1.0.0
 platform-authorization 1.0.0
 platform-audit         1.0.0
 platform-catalog       1.0.0
 platform-tagging       1.0.0
-platform-test-support  1.0.0
+platform-testing  1.0.0
 ```
 
 Mesmo uma alteração localizada em uma capability pode gerar nova release train, sem alterar `platform-parent`.
@@ -91,10 +91,10 @@ Para iniciar uma nova release train, altera-se somente `-Drevision=<nova-versão
 A partir da ADR-002, todos os artifacts próprios da Foundation usam o `groupId`:
 
 ```text
-br.com.portalmanager.core
+br.com.portalmanager.platform
 ```
 
-O namespace Java raiz também é `br.com.portalmanager.core`. Os `artifactId` permanecem `platform-*`.
+O namespace Java raiz também é `br.com.portalmanager.platform`. Os `artifactId` permanecem `platform-*`.
 
 As coordenadas anteriores em `com.empresa.platform` são históricas/experimentais e não pertencem às coordenadas oficiais finais.
 
@@ -102,11 +102,11 @@ As coordenadas anteriores em `com.empresa.platform` são históricas/experimenta
 
 As coordenadas próprias preparadas para publicação são:
 
-- `br.com.portalmanager.core:platform-dependencies:1.0.0`;
-- `br.com.portalmanager.core:platform-parent:1.0.0`;
-- `br.com.portalmanager.core:platform-libraries-bom:1.0.0`;
-- capabilities `br.com.portalmanager.core:platform-*:1.0.0`;
-- root reactor `br.com.portalmanager.core:platform-libraries:1.0.0`.
+- `br.com.portalmanager.platform:platform-dependencies:1.0.0`;
+- `br.com.portalmanager.platform:platform-parent:1.0.0`;
+- `br.com.portalmanager.platform:platform-libraries-bom:1.0.0`;
+- capabilities `br.com.portalmanager.platform:platform-*:1.0.0`;
+- root reactor `br.com.portalmanager.platform:platform-libraries:1.0.0`.
 
 A coincidência de `1.0.0` entre os artifacts próprios é operacional, não semântica.
 
@@ -129,7 +129,7 @@ Após a limpeza manual dos packages experimentais, o run `35542606756`, attempt 
 
 Nenhuma versão será marcada como baseline consolidado final antes de:
 
-1. publicação remota de `br.com.portalmanager.core:*:1.0.0`;
+1. publicação remota de `br.com.portalmanager.platform:*:1.0.0`;
 2. resolução remota do parent e BOM por um consumidor;
 3. `mvn clean verify` verde no consumidor;
 4. registro das evidências em `FOUNDATION-CHECKPOINT.md`.

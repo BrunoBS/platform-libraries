@@ -30,7 +30,7 @@ Audit API
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.core</groupId>
+    <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-audit</artifactId>
     <version>1.0.0</version>
 </dependency>

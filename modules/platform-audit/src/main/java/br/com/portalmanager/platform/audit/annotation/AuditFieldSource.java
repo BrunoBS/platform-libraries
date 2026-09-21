@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.audit.annotation;
+package br.com.portalmanager.platform.audit.annotation;
 
 public enum AuditFieldSource {
     PATH,
