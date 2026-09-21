@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.builder;
+package br.com.portalmanager.platform.testing.builder;
 
 @FunctionalInterface
 public interface TestDataBuilder<T> {

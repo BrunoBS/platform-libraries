@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.client;
+package br.com.portalmanager.platform.testing.client;
 
 import io.restassured.specification.RequestSpecification;
 import tools.jackson.core.JacksonException;

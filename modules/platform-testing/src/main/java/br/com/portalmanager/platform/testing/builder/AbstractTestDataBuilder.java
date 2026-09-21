@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.builder;
+package br.com.portalmanager.platform.testing.builder;
 
 public abstract class AbstractTestDataBuilder<
         T,

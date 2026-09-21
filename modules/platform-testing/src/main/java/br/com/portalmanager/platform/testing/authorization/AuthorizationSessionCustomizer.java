@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.authorization;
+package br.com.portalmanager.platform.testing.authorization;
 
 @FunctionalInterface
 public interface AuthorizationSessionCustomizer {
