@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.kafka;
+package br.com.portalmanager.platform.testing.kafka;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

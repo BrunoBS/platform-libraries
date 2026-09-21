@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.factory;
+package br.com.portalmanager.platform.testing.factory;
 
 @FunctionalInterface
 public interface TestDataFactory<T> {

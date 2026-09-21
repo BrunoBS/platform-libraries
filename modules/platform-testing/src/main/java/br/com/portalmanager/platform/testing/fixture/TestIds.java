@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.fixture;
+package br.com.portalmanager.platform.testing.fixture;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;

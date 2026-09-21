@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.extension;
+package br.com.portalmanager.platform.testing.extension;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;

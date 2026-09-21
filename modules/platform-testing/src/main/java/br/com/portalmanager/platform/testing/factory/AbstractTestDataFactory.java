@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.testing.factory;
+package br.com.portalmanager.platform.testing.factory;
 
-import br.com.portalmanager.core.testing.builder.TestDataBuilder;
+import br.com.portalmanager.platform.testing.builder.TestDataBuilder;
 
 public abstract class AbstractTestDataFactory<
         T,
