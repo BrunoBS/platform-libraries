@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.catalog.mapper;
+package br.com.portalmanager.platform.catalog.mapper;
 
-import br.com.portalmanager.core.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 

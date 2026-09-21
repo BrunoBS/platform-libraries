@@ -1,6 +1,6 @@
-# 📝 Módulo Platform Logging (`platform-logging`)
+# 📝 Módulo Platform Logging (`platform-observability`)
 
-O **`platform-logging`** é uma biblioteca de infraestrutura corporativa desenvolvida para **Spring Boot 4.0.0 e Java 21+**. Ela fornece **padronização absoluta de observabilidade em formato JSON estruturado** com política de **configuração zero**. Os microsserviços não necessitam de arquivos físicos como `logback-spring.xml` ou anotações acopladas para adotar o padrão organizacional.
+O **`platform-observability`** é uma biblioteca de infraestrutura corporativa desenvolvida para **Spring Boot 4.0.0 e Java 21+**. Ela fornece **padronização absoluta de observabilidade em formato JSON estruturado** com política de **configuração zero**. Os microsserviços não necessitam de arquivos físicos como `logback-spring.xml` ou anotações acopladas para adotar o padrão organizacional.
 
 ## 🚀 Como Ativar no Microsserviço
 
@@ -8,8 +8,8 @@ Basta adicionar a dependência diretamente no seu arquivo `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.core</groupId>
-    <artifactId>platform-logging</artifactId>
+    <groupId>br.com.portalmanager.platform</groupId>
+    <artifactId>platform-observability</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -18,7 +18,7 @@ Basta adicionar a dependência diretamente no seu arquivo `pom.xml`:
 
 ## 🛠️ Todos os Parâmetros Disponíveis (`application.yml`)
 
-Abaixo estão listadas todas as propriedades de configuração expostas pela biblioteca sob os prefixos `platform.logging` e chaves nativas do Spring, divididas por categoria de responsabilidade:
+Abaixo estão listadas todas as propriedades de configuração expostas pela biblioteca sob os prefixos `platform.observability.logging` e chaves nativas do Spring, divididas por categoria de responsabilidade:
 
 ```yaml
 # ====================================================================

@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.catalog.validation;
+package br.com.portalmanager.platform.catalog.validation;
 
-import br.com.portalmanager.core.catalog.dto.CatalogDTO;
-import br.com.portalmanager.core.catalog.model.BaseCatalogEntity;
-import br.com.portalmanager.core.catalog.repository.BaseCatalogRepository;
-import br.com.portalmanager.core.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.catalog.dto.CatalogDTO;
+import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
+import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.catalog.message;
+package br.com.portalmanager.platform.catalog.message;
 
-import br.com.portalmanager.core.messaging.message.PlatformDefaultMessageProvider;
+import br.com.portalmanager.platform.messaging.message.PlatformDefaultMessageProvider;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
