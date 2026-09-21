@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.authorization.model;
+package br.com.portalmanager.platform.authorization.model;
 
-import br.com.portalmanager.core.authorization.model.UserSession;
+import br.com.portalmanager.platform.authorization.model.UserSession;
 import java.util.Optional;
 
 public final class UserContext {

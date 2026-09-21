@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.authorization.model;
+package br.com.portalmanager.platform.authorization.model;
 
 import java.time.Instant;
 import java.time.ZoneId;

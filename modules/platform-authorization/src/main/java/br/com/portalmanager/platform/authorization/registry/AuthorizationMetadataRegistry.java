@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.authorization.registry;
+package br.com.portalmanager.platform.authorization.registry;
 
-import br.com.portalmanager.core.authorization.annotation.AuthorizationAccessPolicy;
-import br.com.portalmanager.core.authorization.annotation.AuthorizationRequired;
-import br.com.portalmanager.core.authorization.model.AuthorizationLevel;
-import br.com.portalmanager.core.authorization.model.AuthorizationPolicy;
+import br.com.portalmanager.platform.authorization.annotation.AuthorizationAccessPolicy;
+import br.com.portalmanager.platform.authorization.annotation.AuthorizationRequired;
+import br.com.portalmanager.platform.authorization.model.AuthorizationLevel;
+import br.com.portalmanager.platform.authorization.model.AuthorizationPolicy;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Component;

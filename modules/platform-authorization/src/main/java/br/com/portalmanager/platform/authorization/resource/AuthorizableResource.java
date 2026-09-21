@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.authorization.resource;
+package br.com.portalmanager.platform.authorization.resource;
 
 public interface AuthorizableResource {
 

@@ -1,12 +1,12 @@
-package br.com.portalmanager.core.authorization.web;
+package br.com.portalmanager.platform.authorization.web;
 
-import br.com.portalmanager.core.authorization.exception.UnauthorizedAccessException;
-import br.com.portalmanager.core.authorization.message.AuthorizationMessageKeys;
-import br.com.portalmanager.core.authorization.model.AuthorizationPolicy;
-import br.com.portalmanager.core.authorization.model.UserContext;
-import br.com.portalmanager.core.authorization.model.UserSession;
-import br.com.portalmanager.core.authorization.registry.AuthorizationMetadataRegistry;
-import br.com.portalmanager.core.authorization.service.AuthorizationClientService;
+import br.com.portalmanager.platform.authorization.exception.UnauthorizedAccessException;
+import br.com.portalmanager.platform.authorization.message.AuthorizationMessageKeys;
+import br.com.portalmanager.platform.authorization.model.AuthorizationPolicy;
+import br.com.portalmanager.platform.authorization.model.UserContext;
+import br.com.portalmanager.platform.authorization.model.UserSession;
+import br.com.portalmanager.platform.authorization.registry.AuthorizationMetadataRegistry;
+import br.com.portalmanager.platform.authorization.service.AuthorizationClientService;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

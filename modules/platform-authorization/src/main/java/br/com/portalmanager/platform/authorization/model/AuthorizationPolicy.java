@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.authorization.model;
+package br.com.portalmanager.platform.authorization.model;
 
 public record AuthorizationPolicy(
         AuthorizationLevel level,

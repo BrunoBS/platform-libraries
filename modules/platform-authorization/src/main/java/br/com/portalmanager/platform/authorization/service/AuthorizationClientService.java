@@ -1,10 +1,10 @@
-package br.com.portalmanager.core.authorization.service;
+package br.com.portalmanager.platform.authorization.service;
 
-import br.com.portalmanager.core.authorization.exception.ForbiddenAccessException;
-import br.com.portalmanager.core.authorization.exception.UnauthorizedAccessException;
-import br.com.portalmanager.core.authorization.message.AuthorizationMessageKeys;
-import br.com.portalmanager.core.authorization.model.AuthorizationLevel;
-import br.com.portalmanager.core.authorization.model.UserSession;
+import br.com.portalmanager.platform.authorization.exception.ForbiddenAccessException;
+import br.com.portalmanager.platform.authorization.exception.UnauthorizedAccessException;
+import br.com.portalmanager.platform.authorization.message.AuthorizationMessageKeys;
+import br.com.portalmanager.platform.authorization.model.AuthorizationLevel;
+import br.com.portalmanager.platform.authorization.model.UserSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.retry.RetryPolicy;
