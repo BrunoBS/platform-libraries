@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.messaging.config;
+package br.com.portalmanager.platform.messaging.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

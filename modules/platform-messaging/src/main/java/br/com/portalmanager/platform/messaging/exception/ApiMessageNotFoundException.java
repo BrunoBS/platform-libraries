@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.messaging.exception;
+package br.com.portalmanager.platform.messaging.exception;
 
 public class ApiMessageNotFoundException extends RuntimeException {
 

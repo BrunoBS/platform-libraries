@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.messaging.exception;
+package br.com.portalmanager.platform.messaging.exception;
 
 import java.util.Map;
 

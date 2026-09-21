@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.messaging.cache;
+package br.com.portalmanager.platform.messaging.cache;
 
-import br.com.portalmanager.core.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.Duration;
