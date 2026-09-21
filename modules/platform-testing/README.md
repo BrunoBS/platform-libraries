@@ -1,4 +1,4 @@
-# Platform Test Support
+# Platform Testing
 
 O `platform-testing` é a biblioteca compartilhada para padronização dos testes unitários e de integração dos microsserviços da plataforma.
 
@@ -24,8 +24,8 @@ As classes específicas do domínio, como `AccountClient`, `AccountBuilder`, `Ac
 
 ## Pré-requisitos
 
-- Java 21 ou superior;
-- Spring Boot compatível com a versão utilizada pelo `platform-libraries`;
+- Java 25;
+- Spring Boot 4.1.1 no baseline atual;
 - Docker em execução para testes que utilizam Testcontainers;
 - acesso ao repositório Maven em que as bibliotecas da plataforma são publicadas.
 
@@ -46,7 +46,7 @@ Exemplo da propriedade de versão:
 
 ```xml
 <properties>
-    <platform-libraries.version>1.0.0-SNAPSHOT</platform-libraries.version>
+    <platform-libraries.version>1.0.0</platform-libraries.version>
 </properties>
 ```
 
