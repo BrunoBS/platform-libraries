@@ -35,7 +35,7 @@ Mudança apenas em uma capability não exige nova versão do parent.
 
 Versiona o baseline tecnológico externo.
 
-Recebe nova versão quando muda uma dependência externa governada, como Spring Boot, Testcontainers, WireMock, RestAssured, Datafaker, ArchUnit ou Logstash encoder.
+Recebe nova versão quando muda o baseline tecnológico governado, como Spring Boot ou overrides externos explícitos de WireMock, RestAssured, Datafaker, ArchUnit e Logstash encoder. Famílias já gerenciadas pelo Spring Boot não recebem um segundo BOM concorrente.
 
 Uma mudança de baseline tecnológico deve ter compatibilidade avaliada com o parent, mas não implica automaticamente nova versão do libraries BOM.
 
@@ -110,7 +110,7 @@ As coordenadas próprias preparadas para publicação são:
 
 A coincidência de `1.0.0` entre os artifacts próprios é operacional, não semântica.
 
-Em particular, `platform-dependencies:1.0.0` é a versão do BOM tecnológico, não a versão das tecnologias contidas nele. O BOM gerencia Spring Boot `4.1.1`, Testcontainers `1.21.4` e demais dependências externas em suas versões próprias.
+Em particular, `platform-dependencies:1.0.0` é a versão do BOM tecnológico, não a versão das tecnologias contidas nele. O BOM gerencia Spring Boot `4.1.1`. Para famílias já gerenciadas pelo Spring Boot, a Foundation não importa um segundo BOM concorrente; Testcontainers, por exemplo, segue o gerenciamento do Spring Boot e atualmente resolve em `2.0.5`.
 
 ## Histórico de versões experimentais
 

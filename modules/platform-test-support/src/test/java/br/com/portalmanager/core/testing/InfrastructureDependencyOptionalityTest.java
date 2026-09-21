@@ -17,9 +17,9 @@ class InfrastructureDependencyOptionalityTest {
             "com.mysql:mysql-connector-j",
             "org.springframework.boot:spring-boot-testcontainers",
             "org.springframework.boot:spring-boot-starter-kafka",
-            "org.testcontainers:mysql",
-            "org.testcontainers:kafka",
-            "org.testcontainers:junit-jupiter"
+            "org.testcontainers:testcontainers-mysql",
+            "org.testcontainers:testcontainers-kafka",
+            "org.testcontainers:testcontainers-junit-jupiter"
     );
 
     @Test

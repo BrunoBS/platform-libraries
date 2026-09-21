@@ -39,7 +39,7 @@ O POM raiz é somente reactor/aggregator e não concentra regras de build.
 
 `platform-parent` define Java 25, Maven mínimo, plugins, Enforcer, dependency convergence e regras comuns de build. Ele importa `platform-dependencies`, mas não gerencia versões das capabilities.
 
-`platform-dependencies` gerencia somente o baseline tecnológico externo, incluindo Spring Boot 4.1.1 e dependências compartilhadas.
+`platform-dependencies` gerencia somente o baseline tecnológico externo. Spring Boot 4.1.1 é a fonte de verdade para as famílias de dependências que ele próprio gerencia, incluindo Testcontainers.
 
 `platform-libraries-bom` gerencia as versões das capabilities da plataforma.
 
@@ -53,7 +53,7 @@ platform-libraries-bom   -> baseline das capabilities
 
 A coincidência atual em `1.0.0` refere-se somente às versões dos artifacts próprios da Foundation e não cria acoplamento entre esses eixos.
 
-O `platform-dependencies:1.0.0` representa uma versão do BOM tecnológico; as tecnologias que ele gerencia possuem suas próprias versões, por exemplo Spring Boot `4.1.1` e Testcontainers `1.21.4`.
+O `platform-dependencies:1.0.0` representa uma versão do BOM tecnológico; as tecnologias que ele gerencia possuem suas próprias versões, por exemplo Spring Boot `4.1.1`; Testcontainers segue o gerenciamento do Spring Boot e atualmente resolve em `2.0.5`.
 
 ## Release train das capabilities
 
