@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.audit.recovery;
+package br.com.portalmanager.platform.audit.recovery;
 
-import br.com.portalmanager.core.audit.config.PlatformAuditProperties;
+import br.com.portalmanager.platform.audit.config.PlatformAuditProperties;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 

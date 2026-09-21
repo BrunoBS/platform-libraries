@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.audit.recovery;
+package br.com.portalmanager.platform.audit.recovery;
 
-import br.com.portalmanager.core.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.core.audit.fallback.AuditFallbackStore;
-import br.com.portalmanager.core.audit.model.AuditEventRequest;
-import br.com.portalmanager.core.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.audit.config.PlatformAuditProperties;
+import br.com.portalmanager.platform.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.audit.model.AuditEventRequest;
+import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;

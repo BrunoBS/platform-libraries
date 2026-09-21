@@ -1,10 +1,10 @@
-package br.com.portalmanager.core.audit.context;
+package br.com.portalmanager.platform.audit.context;
 
-import br.com.portalmanager.core.audit.exception.AuditException;
-import br.com.portalmanager.core.audit.message.AuditMessageKeys;
-import br.com.portalmanager.core.audit.model.AuditContext;
-import br.com.portalmanager.core.authorization.model.UserContext;
-import br.com.portalmanager.core.authorization.model.UserSession;
+import br.com.portalmanager.platform.audit.exception.AuditException;
+import br.com.portalmanager.platform.audit.message.AuditMessageKeys;
+import br.com.portalmanager.platform.audit.model.AuditContext;
+import br.com.portalmanager.platform.authorization.model.UserContext;
+import br.com.portalmanager.platform.authorization.model.UserSession;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

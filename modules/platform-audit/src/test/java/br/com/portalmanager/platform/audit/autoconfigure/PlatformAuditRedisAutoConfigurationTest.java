@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.audit.autoconfigure;
+package br.com.portalmanager.platform.audit.autoconfigure;
 
-import br.com.portalmanager.core.audit.fallback.AuditFallbackStore;
-import br.com.portalmanager.core.audit.publisher.AuditPublisher;
-import br.com.portalmanager.core.audit.recovery.AuditRecoveryLock;
-import br.com.portalmanager.core.audit.recovery.AuditRecoveryService;
+import br.com.portalmanager.platform.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.audit.recovery.AuditRecoveryLock;
+import br.com.portalmanager.platform.audit.recovery.AuditRecoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;

@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.audit.autoconfigure;
+package br.com.portalmanager.platform.audit.autoconfigure;
 
-import br.com.portalmanager.core.audit.aspect.AuditAspect;
-import br.com.portalmanager.core.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.core.audit.message.AuditMessageKeys;
-import br.com.portalmanager.core.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.audit.aspect.AuditAspect;
+import br.com.portalmanager.platform.audit.context.AuditAuthorizationContextResolver;
+import br.com.portalmanager.platform.audit.message.AuditMessageKeys;
+import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
