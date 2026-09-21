@@ -1,10 +1,10 @@
-package br.com.portalmanager.core.messaging.autoconfigure;
+package br.com.portalmanager.platform.messaging.autoconfigure;
 
-import br.com.portalmanager.core.messaging.repository.ApiMessageRepository;
-import br.com.portalmanager.core.messaging.repository.JdbcApiMessageRepository;
-import br.com.portalmanager.core.messaging.repository.NoOpApiMessageRepository;
-import br.com.portalmanager.core.messaging.resolver.ApiMessageResolver;
-import br.com.portalmanager.core.messaging.web.ApiExceptionHandler;
+import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.messaging.repository.JdbcApiMessageRepository;
+import br.com.portalmanager.platform.messaging.repository.NoOpApiMessageRepository;
+import br.com.portalmanager.platform.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.messaging.web.ApiExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;

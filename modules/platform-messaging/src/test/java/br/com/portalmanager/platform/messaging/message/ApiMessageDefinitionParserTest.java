@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.messaging.message;
+package br.com.portalmanager.platform.messaging.message;
 
 import org.junit.jupiter.api.Test;
 
