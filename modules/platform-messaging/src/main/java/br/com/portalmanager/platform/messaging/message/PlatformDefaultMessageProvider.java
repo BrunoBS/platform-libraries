@@ -1,7 +1,7 @@
-package br.com.portalmanager.core.messaging.message;
+package br.com.portalmanager.platform.messaging.message;
 
-import br.com.portalmanager.core.messaging.model.ApiMessage;
-import br.com.portalmanager.core.messaging.provider.ApiMessageProvider;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.messaging.provider.ApiMessageProvider;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;

@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.messaging.model;
+package br.com.portalmanager.platform.messaging.model;
 
 import java.time.Instant;
 import java.util.List;

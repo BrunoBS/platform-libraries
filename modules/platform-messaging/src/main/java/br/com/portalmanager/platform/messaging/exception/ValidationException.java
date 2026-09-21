@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.messaging.exception;
+package br.com.portalmanager.platform.messaging.exception;
 
-import br.com.portalmanager.core.messaging.message.PlatformMessageKeys;
-import br.com.portalmanager.core.messaging.model.ValidationDetail;
-import br.com.portalmanager.core.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.messaging.model.ValidationDetail;
+import br.com.portalmanager.platform.messaging.validation.ValidationResult;
 
 import java.util.List;
 import java.util.Map;

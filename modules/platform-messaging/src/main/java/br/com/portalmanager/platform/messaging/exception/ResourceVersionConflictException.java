@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.messaging.exception;
+package br.com.portalmanager.platform.messaging.exception;
 
-import br.com.portalmanager.core.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
 
 public class ResourceVersionConflictException extends ConflictException {
 
