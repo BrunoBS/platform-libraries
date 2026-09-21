@@ -1,7 +1,7 @@
-package br.com.portalmanager.core.tagging.repository;
+package br.com.portalmanager.platform.tagging.repository;
 
-import br.com.portalmanager.core.tagging.model.Tag;
-import br.com.portalmanager.core.tagging.model.TagOriginType;
+import br.com.portalmanager.platform.tagging.model.Tag;
+import br.com.portalmanager.platform.tagging.model.TagOriginType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;

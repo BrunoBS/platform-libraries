@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.tagging;
+package br.com.portalmanager.platform.tagging;
 
 import org.junit.jupiter.api.Test;
 

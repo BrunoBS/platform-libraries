@@ -1,6 +1,6 @@
-# Comece aqui — Testes com platform-test-support
+# Comece aqui — Testes com platform-testing
 
-Este guia é para quem nunca utilizou o `platform-test-support` e precisa criar testes de integração em um microsserviço da plataforma.
+Este guia é para quem nunca utilizou o `platform-testing` e precisa criar testes de integração em um microsserviço da plataforma.
 
 ## 1. Modelo mental
 
@@ -451,7 +451,7 @@ authMock.allow(session ->
         session.groups("PM5_OWNER"));
 ```
 
-## 15. O que não deve ir para platform-test-support
+## 15. O que não deve ir para platform-testing
 
 A lib fornece infraestrutura.
 
@@ -517,7 +517,7 @@ Se essas mudanças quebram testes, a suíte está protegendo comportamento, não
 | Como validar/extrair resposta? | Response |
 | O que precisa existir antes? | Scenario |
 | Onde fica a regra testada? | IntegrationTest |
-| Quem sobe banco/Kafka/auth? | platform-test-support |
+| Quem sobe banco/Kafka/auth? | platform-testing |
 
 ## 19. Projeto de referência
 
