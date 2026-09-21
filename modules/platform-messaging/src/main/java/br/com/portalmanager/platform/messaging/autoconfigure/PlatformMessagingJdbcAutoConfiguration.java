@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.messaging.autoconfigure;
+package br.com.portalmanager.platform.messaging.autoconfigure;
 
-import br.com.portalmanager.core.messaging.config.PlatformMessagingProperties;
-import br.com.portalmanager.core.messaging.config.SqlIdentifierValidator;
-import br.com.portalmanager.core.messaging.repository.ApiMessageRepository;
-import br.com.portalmanager.core.messaging.repository.JdbcApiMessageRepository;
+import br.com.portalmanager.platform.messaging.config.PlatformMessagingProperties;
+import br.com.portalmanager.platform.messaging.config.SqlIdentifierValidator;
+import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.messaging.repository.JdbcApiMessageRepository;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

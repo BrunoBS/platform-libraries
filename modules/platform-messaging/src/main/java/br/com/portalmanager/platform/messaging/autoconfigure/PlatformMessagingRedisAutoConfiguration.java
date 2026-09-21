@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.messaging.autoconfigure;
+package br.com.portalmanager.platform.messaging.autoconfigure;
 
-import br.com.portalmanager.core.messaging.cache.ApiMessageCache;
-import br.com.portalmanager.core.messaging.cache.RedisApiMessageCache;
-import br.com.portalmanager.core.messaging.config.PlatformMessagingProperties;
+import br.com.portalmanager.platform.messaging.cache.ApiMessageCache;
+import br.com.portalmanager.platform.messaging.cache.RedisApiMessageCache;
+import br.com.portalmanager.platform.messaging.config.PlatformMessagingProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

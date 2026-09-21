@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.logging.initializer;
+package br.com.portalmanager.platform.observability.logging.initializer;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -141,17 +141,17 @@ class PlatformLoggingInitializerTest {
     void shouldApplyCorporateDefaultLogLevels() {
 
         environment.setProperty(
-                "platform.logging.defaults.org.springframework",
+                "platform.observability.logging.defaults.org.springframework",
                 "ERROR"
         );
 
         environment.setProperty(
-                "platform.logging.defaults.org.hibernate",
+                "platform.observability.logging.defaults.org.hibernate",
                 "ERROR"
         );
 
         environment.setProperty(
-                "platform.logging.defaults.com.zaxxer.hikari",
+                "platform.observability.logging.defaults.com.zaxxer.hikari",
                 "ERROR"
         );
 
@@ -187,12 +187,12 @@ class PlatformLoggingInitializerTest {
     void shouldGiveApplicationLoggingConfigurationPrecedenceOverCorporateDefaults() {
 
         environment.setProperty(
-                "platform.logging.defaults.org.springframework",
+                "platform.observability.logging.defaults.org.springframework",
                 "ERROR"
         );
 
         environment.setProperty(
-                "platform.logging.defaults.org.hibernate",
+                "platform.observability.logging.defaults.org.hibernate",
                 "ERROR"
         );
 
@@ -224,12 +224,12 @@ class PlatformLoggingInitializerTest {
     void shouldSupportDifferentApplicationOverridesForDifferentPackages() {
 
         environment.setProperty(
-                "platform.logging.defaults.org.springframework",
+                "platform.observability.logging.defaults.org.springframework",
                 "ERROR"
         );
 
         environment.setProperty(
-                "platform.logging.defaults.org.hibernate",
+                "platform.observability.logging.defaults.org.hibernate",
                 "ERROR"
         );
 
@@ -268,12 +268,12 @@ class PlatformLoggingInitializerTest {
     void shouldApplyCustomLogLevelsDynamically() {
 
         environment.setProperty(
-                "platform.logging.levels.com.novaequipe.vendas",
+                "platform.observability.logging.levels.com.novaequipe.vendas",
                 "DEBUG"
         );
 
         environment.setProperty(
-                "platform.logging.levels.com.novaequipe.vendas.utils",
+                "platform.observability.logging.levels.com.novaequipe.vendas.utils",
                 "WARN"
         );
 
@@ -300,22 +300,22 @@ class PlatformLoggingInitializerTest {
     void shouldSupportMultipleCustomPackages() {
 
         environment.setProperty(
-                "platform.logging.levels.com.empresa.api",
+                "platform.observability.logging.levels.com.empresa.api",
                 "DEBUG"
         );
 
         environment.setProperty(
-                "platform.logging.levels.com.empresa.service",
+                "platform.observability.logging.levels.com.empresa.service",
                 "INFO"
         );
 
         environment.setProperty(
-                "platform.logging.levels.com.empresa.repository",
+                "platform.observability.logging.levels.com.empresa.repository",
                 "WARN"
         );
 
         environment.setProperty(
-                "platform.logging.levels.com.empresa.integration",
+                "platform.observability.logging.levels.com.empresa.integration",
                 "ERROR"
         );
 
@@ -385,7 +385,7 @@ class PlatformLoggingInitializerTest {
     void shouldInitializeSuccessfullyWhenOnlyDefaultsAreConfigured() {
 
         environment.setProperty(
-                "platform.logging.defaults.com.empresa",
+                "platform.observability.logging.defaults.com.empresa",
                 "WARN"
         );
 
@@ -405,7 +405,7 @@ class PlatformLoggingInitializerTest {
     void shouldInitializeSuccessfullyWhenOnlyCustomLevelsAreConfigured() {
 
         environment.setProperty(
-                "platform.logging.levels.com.empresa",
+                "platform.observability.logging.levels.com.empresa",
                 "DEBUG"
         );
 

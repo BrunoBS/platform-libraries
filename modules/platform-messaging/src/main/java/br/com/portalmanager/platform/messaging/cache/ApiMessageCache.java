@@ -1,5 +1,5 @@
-package br.com.portalmanager.core.messaging.cache;
-import br.com.portalmanager.core.messaging.model.ApiMessage;
+package br.com.portalmanager.platform.messaging.cache;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
 import java.util.Locale;
 import java.util.Optional;
 public interface ApiMessageCache {

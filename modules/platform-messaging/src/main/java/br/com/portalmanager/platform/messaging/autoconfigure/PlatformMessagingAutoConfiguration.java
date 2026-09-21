@@ -1,15 +1,15 @@
-package br.com.portalmanager.core.messaging.autoconfigure;
+package br.com.portalmanager.platform.messaging.autoconfigure;
 
-import br.com.portalmanager.core.messaging.cache.ApiMessageCache;
-import br.com.portalmanager.core.messaging.cache.NoOpApiMessageCache;
-import br.com.portalmanager.core.messaging.config.PlatformMessagingProperties;
-import br.com.portalmanager.core.messaging.message.PlatformDefaultMessageProvider;
-import br.com.portalmanager.core.messaging.provider.ApiMessageProvider;
-import br.com.portalmanager.core.messaging.repository.ApiMessageRepository;
-import br.com.portalmanager.core.messaging.repository.NoOpApiMessageRepository;
-import br.com.portalmanager.core.messaging.resolver.ApiMessageResolver;
-import br.com.portalmanager.core.messaging.resolver.DefaultApiMessageResolver;
-import br.com.portalmanager.core.messaging.web.ApiExceptionHandler;
+import br.com.portalmanager.platform.messaging.cache.ApiMessageCache;
+import br.com.portalmanager.platform.messaging.cache.NoOpApiMessageCache;
+import br.com.portalmanager.platform.messaging.config.PlatformMessagingProperties;
+import br.com.portalmanager.platform.messaging.message.PlatformDefaultMessageProvider;
+import br.com.portalmanager.platform.messaging.provider.ApiMessageProvider;
+import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.messaging.repository.NoOpApiMessageRepository;
+import br.com.portalmanager.platform.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.messaging.resolver.DefaultApiMessageResolver;
+import br.com.portalmanager.platform.messaging.web.ApiExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
