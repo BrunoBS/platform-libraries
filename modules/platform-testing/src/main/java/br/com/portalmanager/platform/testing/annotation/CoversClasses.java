@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.annotation;
+package br.com.portalmanager.platform.testing.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

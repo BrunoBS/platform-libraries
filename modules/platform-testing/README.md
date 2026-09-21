@@ -1,8 +1,8 @@
 # Platform Test Support
 
-O `platform-test-support` é a biblioteca compartilhada para padronização dos testes unitários e de integração dos microsserviços da plataforma.
+O `platform-testing` é a biblioteca compartilhada para padronização dos testes unitários e de integração dos microsserviços da plataforma.
 
-Se você está utilizando a biblioteca pela primeira vez, comece pelo [Comece aqui — Testes com platform-test-support](COMECE_AQUI_TESTES.md).
+Se você está utilizando a biblioteca pela primeira vez, comece pelo [Comece aqui — Testes com platform-testing](COMECE_AQUI_TESTES.md).
 
 Para referência completa de recursos e configurações, consulte o [Guia completo de uso](GUIA_DE_USO.md).
 
@@ -35,8 +35,8 @@ Adicione o módulo no `pom.xml` do microsserviço com escopo `test`:
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.core</groupId>
-    <artifactId>platform-test-support</artifactId>
+    <groupId>br.com.portalmanager.platform</groupId>
+    <artifactId>platform-testing</artifactId>
     <version>${platform-libraries.version}</version>
     <scope>test</scope>
 </dependency>
@@ -78,8 +78,8 @@ Não é necessário informar URL, usuário ou senha do MySQL quando o teste util
 ```java
 package com.empresa.account.integration;
 
-import br.com.portalmanager.core.testing.annotation.PlatformIntegrationTest;
-import br.com.portalmanager.core.testing.annotation.WithMySql;
+import br.com.portalmanager.platform.testing.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.testing.annotation.WithMySql;
 import org.junit.jupiter.api.Test;
 
 @PlatformIntegrationTest
@@ -435,7 +435,7 @@ class AccountControllerIT {
 
 Todo teste com `@WithMockAuthorization` utilizará esse customizador para o resultado `ALLOWED`. É possível declarar mais de um customizador; o Spring aplica todos na ordem configurada. Um teste ainda pode substituir o comportamento do cenário chamando `authorizationMock.allow(session -> ...)`.
 
-O recurso é opcional: sem `@WithMockAuthorization`, nenhum WireMock, bean ou propriedade de autorização é criado. A dependência da `platform-authorization` também é marcada como opcional no `platform-test-support`; o microsserviço só precisa dela quando efetivamente utiliza o autorizador.
+O recurso é opcional: sem `@WithMockAuthorization`, nenhum WireMock, bean ou propriedade de autorização é criado. A dependência da `platform-authorization` também é marcada como opcional no `platform-testing`; o microsserviço só precisa dela quando efetivamente utiliza o autorizador.
 
 ### Resposta totalmente customizada
 
@@ -678,13 +678,13 @@ src/test/java/com/empresa/account
 
 | Responsabilidade | Local |
 |---|---|
-| Configuração dos testes unitários | `platform-test-support` |
-| Inicialização do Spring Boot | `platform-test-support` |
-| MySQL e Kafka Testcontainers | `platform-test-support` |
-| Mock do serviço de autorização | `platform-test-support` |
-| Limpeza genérica do banco | `platform-test-support` |
-| Fábrica de requests RestAssured | `platform-test-support` |
-| Validações HTTP genéricas | `platform-test-support` |
+| Configuração dos testes unitários | `platform-testing` |
+| Inicialização do Spring Boot | `platform-testing` |
+| MySQL e Kafka Testcontainers | `platform-testing` |
+| Mock do serviço de autorização | `platform-testing` |
+| Limpeza genérica do banco | `platform-testing` |
+| Fábrica de requests RestAssured | `platform-testing` |
+| Validações HTTP genéricas | `platform-testing` |
 | Clients de endpoints específicos | Microsserviço |
 | Builders e factories do domínio | Microsserviço |
 | Scenarios de negócio | Microsserviço |
@@ -739,7 +739,7 @@ class AccountControllerIT {
 
 ## Performance da suíte
 
-O `platform-test-support` instrumenta testes com `@PlatformIntegrationTest` e registra métricas com o prefixo `[TEST-PERF]`.
+O `platform-testing` instrumenta testes com `@PlatformIntegrationTest` e registra métricas com o prefixo `[TEST-PERF]`.
 
 Ao final de cada classe são registrados o tempo total, a quantidade de testes e os cinco cenários mais lentos. Testes individuais acima do limite configurado geram `WARN`.
 
@@ -770,7 +770,7 @@ class ArchitectureTest {
 }
 ```
 
-Por padrão, a regra observa classes-base dos pacotes `br.com.portalmanager.core`. Qualquer classe concreta da aplicação que sobrescreva comportamento declarado por uma classe ou interface da plataforma precisa ter cobertura específica.
+Por padrão, a regra observa classes-base dos pacotes `br.com.portalmanager.platform`. Qualquer classe concreta da aplicação que sobrescreva comportamento declarado por uma classe ou interface da plataforma precisa ter cobertura específica.
 
 A cobertura pode ser reconhecida por convenção:
 
@@ -799,7 +799,7 @@ Também é possível customizar os pacotes-base observados:
 @PlatformArchitectureTest(
     basePackages = "com.minhaempresa.meuservico",
     observedBasePackages = {
-        "br.com.portalmanager.core",
+        "br.com.portalmanager.platform",
         "com.minhaempresa.framework"
     }
 )
@@ -809,4 +809,4 @@ class ArchitectureTest {
 
 Quando uma classe customiza comportamento e não possui cobertura reconhecida, o build falha mostrando a classe, o método sobrescrito e a classe/interface onde o comportamento foi originalmente declarado.
 
-A regra não é habilitada automaticamente pelo `platform-test-support`; cada serviço decide explicitamente se quer adotá-la.
+A regra não é habilitada automaticamente pelo `platform-testing`; cada serviço decide explicitamente se quer adotá-la.

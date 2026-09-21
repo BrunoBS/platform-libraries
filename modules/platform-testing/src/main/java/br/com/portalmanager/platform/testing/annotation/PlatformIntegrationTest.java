@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.testing.annotation;
+package br.com.portalmanager.platform.testing.annotation;
 
-import br.com.portalmanager.core.testing.extension.PlatformIntegrationExtension;
-import br.com.portalmanager.core.testing.extension.TestPerformanceExtension;
-import br.com.portalmanager.core.testing.client.PlatformHttpTestConfiguration;
+import br.com.portalmanager.platform.testing.extension.PlatformIntegrationExtension;
+import br.com.portalmanager.platform.testing.extension.TestPerformanceExtension;
+import br.com.portalmanager.platform.testing.client.PlatformHttpTestConfiguration;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;

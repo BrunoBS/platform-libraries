@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.testing.annotation;
+package br.com.portalmanager.platform.testing.annotation;
 
-import br.com.portalmanager.core.testing.architecture.PlatformArchitectureExtension;
+import br.com.portalmanager.platform.testing.architecture.PlatformArchitectureExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.ElementType;
@@ -23,5 +23,5 @@ public @interface PlatformArchitectureTest {
 
     String[] basePackages() default {};
 
-    String[] observedBasePackages() default {"br.com.portalmanager.core"};
+    String[] observedBasePackages() default {"br.com.portalmanager.platform"};
 }

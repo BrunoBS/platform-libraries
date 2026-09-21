@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.testing.annotation;
+package br.com.portalmanager.platform.testing.annotation;
 
-import br.com.portalmanager.core.testing.unit.PlatformUnitTestExtension;
+import br.com.portalmanager.platform.testing.unit.PlatformUnitTestExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 

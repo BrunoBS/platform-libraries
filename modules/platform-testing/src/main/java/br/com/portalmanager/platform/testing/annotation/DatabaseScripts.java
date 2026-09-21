@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.testing.annotation;
+package br.com.portalmanager.platform.testing.annotation;
 
-import br.com.portalmanager.core.testing.database.DatabaseScriptExtension;
+import br.com.portalmanager.platform.testing.database.DatabaseScriptExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.ElementType;
