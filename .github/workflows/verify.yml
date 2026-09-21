@@ -35,16 +35,24 @@ jobs:
           GITHUB_PACKAGES_TOKEN: ${{ secrets.PLATFORM_PACKAGES_TOKEN }}
         run: mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean verify
 
-      - name: Verify PortalManager namespace
+      - name: Verify Platform namespace
         shell: bash
         run: |
           set -euo pipefail
-          if git grep -n 'com\.empresa\.platform' -- ':!docs/**'; then
+          if git grep -nE 'com\.empresa\.platform|br\.com\.portalmanager\.core' -- ':!docs/**'; then
             echo "Legacy Maven/Java namespace found outside historical documentation."
             exit 1
           fi
-          if git ls-files | grep -Eq 'com/empresa/platform|com\.empresa\.platform'; then
+          if git ls-files | grep -Eq 'com/empresa/platform|br/com/portalmanager/core'; then
             echo "Legacy Java package path found."
+            exit 1
+          fi
+          if git grep -nE 'platform-logging|platform-test-support|platform\.logging' -- ':!docs/**'; then
+            echo "Legacy module/config naming found outside historical documentation."
+            exit 1
+          fi
+          if git ls-files | grep -Eq 'modules/platform-logging|modules/platform-test-support'; then
+            echo "Legacy module path found."
             exit 1
           fi
 
