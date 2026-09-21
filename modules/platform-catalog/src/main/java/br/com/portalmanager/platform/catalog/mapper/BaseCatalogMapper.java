@@ -1,7 +1,7 @@
-package br.com.portalmanager.core.catalog.mapper;
+package br.com.portalmanager.platform.catalog.mapper;
 
-import br.com.portalmanager.core.catalog.dto.BaseCatalogDTO;
-import br.com.portalmanager.core.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
+import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
 
 public abstract class BaseCatalogMapper<D extends BaseCatalogDTO<D>, E extends BaseCatalogEntity> {
     private final Class<E> entityClass;

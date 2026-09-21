@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.catalog.model;
+package br.com.portalmanager.platform.catalog.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;

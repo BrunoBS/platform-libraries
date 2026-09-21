@@ -1,7 +1,7 @@
-package br.com.portalmanager.core.catalog.mapper;
+package br.com.portalmanager.platform.catalog.mapper;
 
-import br.com.portalmanager.core.catalog.dto.CatalogDTO;
-import br.com.portalmanager.core.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.dto.CatalogDTO;
+import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;

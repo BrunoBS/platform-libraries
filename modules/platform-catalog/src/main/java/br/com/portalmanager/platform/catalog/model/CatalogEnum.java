@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.catalog.model;
+package br.com.portalmanager.platform.catalog.model;
 
 import java.util.Arrays;
 import java.util.List;

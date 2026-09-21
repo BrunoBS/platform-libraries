@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.catalog.repository;
+package br.com.portalmanager.platform.catalog.repository;
 
-import br.com.portalmanager.core.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;

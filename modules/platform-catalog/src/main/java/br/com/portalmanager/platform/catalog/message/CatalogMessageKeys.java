@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.catalog.message;
+package br.com.portalmanager.platform.catalog.message;
 
 public final class CatalogMessageKeys {
     public static final String NOT_FOUND = "catalog.not.found";

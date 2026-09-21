@@ -1,15 +1,15 @@
-package br.com.portalmanager.core.catalog.service;
+package br.com.portalmanager.platform.catalog.service;
 
-import br.com.portalmanager.core.catalog.dto.BaseCatalogDTO;
-import br.com.portalmanager.core.catalog.mapper.BaseCatalogMapper;
-import br.com.portalmanager.core.catalog.message.CatalogMessageKeys;
-import br.com.portalmanager.core.catalog.model.BaseCatalogEntity;
-import br.com.portalmanager.core.catalog.repository.BaseCatalogRepository;
-import br.com.portalmanager.core.catalog.validation.BaseCatalogValidator;
-import br.com.portalmanager.core.messaging.exception.NotFoundException;
-import br.com.portalmanager.core.messaging.exception.ValidationException;
-import br.com.portalmanager.core.messaging.message.PlatformMessageKeys;
-import br.com.portalmanager.core.messaging.model.ValidationDetail;
+import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
+import br.com.portalmanager.platform.catalog.mapper.BaseCatalogMapper;
+import br.com.portalmanager.platform.catalog.message.CatalogMessageKeys;
+import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
+import br.com.portalmanager.platform.catalog.validation.BaseCatalogValidator;
+import br.com.portalmanager.platform.messaging.exception.NotFoundException;
+import br.com.portalmanager.platform.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.messaging.model.ValidationDetail;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
