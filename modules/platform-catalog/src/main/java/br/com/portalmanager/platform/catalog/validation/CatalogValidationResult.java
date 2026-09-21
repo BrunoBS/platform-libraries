@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.catalog.validation;
+package br.com.portalmanager.platform.catalog.validation;
 
-import br.com.portalmanager.core.messaging.model.ValidationDetail;
+import br.com.portalmanager.platform.messaging.model.ValidationDetail;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

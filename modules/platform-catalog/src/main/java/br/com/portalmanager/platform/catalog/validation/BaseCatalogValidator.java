@@ -1,11 +1,11 @@
-package br.com.portalmanager.core.catalog.validation;
+package br.com.portalmanager.platform.catalog.validation;
 
-import br.com.portalmanager.core.catalog.dto.BaseCatalogDTO;
-import br.com.portalmanager.core.catalog.message.CatalogMessageKeys;
-import br.com.portalmanager.core.catalog.model.BaseCatalogEntity;
-import br.com.portalmanager.core.catalog.repository.BaseCatalogRepository;
-import br.com.portalmanager.core.messaging.exception.ValidationException;
-import br.com.portalmanager.core.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
+import br.com.portalmanager.platform.catalog.message.CatalogMessageKeys;
+import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
+import br.com.portalmanager.platform.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
 import java.util.Map;
 import java.util.Objects;
 

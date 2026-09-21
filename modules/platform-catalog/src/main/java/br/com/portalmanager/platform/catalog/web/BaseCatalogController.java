@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.catalog.web;
+package br.com.portalmanager.platform.catalog.web;
 
-import br.com.portalmanager.core.catalog.dto.BaseCatalogDTO;
-import br.com.portalmanager.core.catalog.model.BaseCatalogEntity;
-import br.com.portalmanager.core.catalog.service.BaseCatalogService;
+import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
+import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.service.BaseCatalogService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
