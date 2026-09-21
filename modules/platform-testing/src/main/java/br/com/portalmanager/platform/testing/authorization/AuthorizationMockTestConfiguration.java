@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.authorization;
+package br.com.portalmanager.platform.testing.authorization;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.springframework.beans.factory.annotation.Qualifier;

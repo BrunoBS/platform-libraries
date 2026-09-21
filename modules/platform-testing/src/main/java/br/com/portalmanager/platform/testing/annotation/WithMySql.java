@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.testing.annotation;
+package br.com.portalmanager.platform.testing.annotation;
 
-import br.com.portalmanager.core.testing.database.CleanupMode;
-import br.com.portalmanager.core.testing.mysql.MySqlTestConfiguration;
-import br.com.portalmanager.core.testing.mysql.MySqlTestExtension;
+import br.com.portalmanager.platform.testing.database.CleanupMode;
+import br.com.portalmanager.platform.testing.mysql.MySqlTestConfiguration;
+import br.com.portalmanager.platform.testing.mysql.MySqlTestExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.Import;
 

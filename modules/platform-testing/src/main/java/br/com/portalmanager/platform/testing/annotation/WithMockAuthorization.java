@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.testing.annotation;
+package br.com.portalmanager.platform.testing.annotation;
 
-import br.com.portalmanager.core.testing.authorization.AuthorizationMockExtension;
-import br.com.portalmanager.core.testing.authorization.AuthorizationMockResult;
-import br.com.portalmanager.core.testing.authorization.AuthorizationMockTestConfiguration;
+import br.com.portalmanager.platform.testing.authorization.AuthorizationMockExtension;
+import br.com.portalmanager.platform.testing.authorization.AuthorizationMockResult;
+import br.com.portalmanager.platform.testing.authorization.AuthorizationMockTestConfiguration;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.Import;
 

@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.testing.authorization;
+package br.com.portalmanager.platform.testing.authorization;
 
-import br.com.portalmanager.core.authorization.model.UserSession;
+import br.com.portalmanager.platform.authorization.model.UserSession;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.Json;
 

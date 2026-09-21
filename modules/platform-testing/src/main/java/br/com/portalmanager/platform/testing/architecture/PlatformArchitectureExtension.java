@@ -1,7 +1,7 @@
-package br.com.portalmanager.core.testing.architecture;
+package br.com.portalmanager.platform.testing.architecture;
 
-import br.com.portalmanager.core.testing.annotation.CoversClasses;
-import br.com.portalmanager.core.testing.annotation.PlatformArchitectureTest;
+import br.com.portalmanager.platform.testing.annotation.CoversClasses;
+import br.com.portalmanager.platform.testing.annotation.PlatformArchitectureTest;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
@@ -92,7 +92,7 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
 
     private String[] resolveObservedBasePackages(PlatformArchitectureTest annotation) {
         if (annotation == null || annotation.observedBasePackages().length == 0) {
-            return new String[]{"br.com.portalmanager.core"};
+            return new String[]{"br.com.portalmanager.platform"};
         }
         return clean(annotation.observedBasePackages());
     }
