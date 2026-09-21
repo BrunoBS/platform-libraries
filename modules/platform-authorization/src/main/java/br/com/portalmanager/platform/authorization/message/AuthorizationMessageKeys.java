@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.authorization.message;
+package br.com.portalmanager.platform.authorization.message;
 
 public final class AuthorizationMessageKeys {
 

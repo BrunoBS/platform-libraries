@@ -1,14 +1,14 @@
-package br.com.portalmanager.core.authorization.autoconfigure;
+package br.com.portalmanager.platform.authorization.autoconfigure;
 
-import br.com.portalmanager.core.authorization.aspect.ResourceVisibilityAspect;
-import br.com.portalmanager.core.authorization.config.PlatformAuthorizationProperties;
-import br.com.portalmanager.core.authorization.model.UserContext;
-import br.com.portalmanager.core.authorization.model.UserSession;
-import br.com.portalmanager.core.authorization.registry.AuthorizationMetadataRegistry;
-import br.com.portalmanager.core.authorization.service.AuthorizationClientService;
-import br.com.portalmanager.core.authorization.web.AuthorizationInterceptor;
-import br.com.portalmanager.core.authorization.web.filter.AuthorizationContextCleanupFilter;
-import br.com.portalmanager.core.authorization.web.filter.PayloadErrorLoggingFilter;
+import br.com.portalmanager.platform.authorization.aspect.ResourceVisibilityAspect;
+import br.com.portalmanager.platform.authorization.config.PlatformAuthorizationProperties;
+import br.com.portalmanager.platform.authorization.model.UserContext;
+import br.com.portalmanager.platform.authorization.model.UserSession;
+import br.com.portalmanager.platform.authorization.registry.AuthorizationMetadataRegistry;
+import br.com.portalmanager.platform.authorization.service.AuthorizationClientService;
+import br.com.portalmanager.platform.authorization.web.AuthorizationInterceptor;
+import br.com.portalmanager.platform.authorization.web.filter.AuthorizationContextCleanupFilter;
+import br.com.portalmanager.platform.authorization.web.filter.PayloadErrorLoggingFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;

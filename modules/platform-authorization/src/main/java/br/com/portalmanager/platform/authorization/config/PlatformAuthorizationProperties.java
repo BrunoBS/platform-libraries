@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.authorization.config;
+package br.com.portalmanager.platform.authorization.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

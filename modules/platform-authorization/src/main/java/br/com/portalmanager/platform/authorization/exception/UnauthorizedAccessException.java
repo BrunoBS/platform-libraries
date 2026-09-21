@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.authorization.exception;
+package br.com.portalmanager.platform.authorization.exception;
 
 public class UnauthorizedAccessException extends AuthorizationException {
 
