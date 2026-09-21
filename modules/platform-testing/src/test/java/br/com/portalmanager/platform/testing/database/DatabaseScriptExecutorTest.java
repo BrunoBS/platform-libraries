@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.database;
+package br.com.portalmanager.platform.testing.database;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.DefaultResourceLoader;

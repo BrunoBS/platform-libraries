@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.testing.client;
+package br.com.portalmanager.platform.testing.client;
 
-import br.com.portalmanager.core.testing.context.TestContext;
+import br.com.portalmanager.platform.testing.context.TestContext;
 import io.restassured.specification.QueryableRequestSpecification;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.SpecificationQuerier;

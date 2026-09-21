@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.context;
+package br.com.portalmanager.platform.testing.context;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

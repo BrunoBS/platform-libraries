@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.fixture;
+package br.com.portalmanager.platform.testing.fixture;
 
 import org.junit.jupiter.api.Test;
 

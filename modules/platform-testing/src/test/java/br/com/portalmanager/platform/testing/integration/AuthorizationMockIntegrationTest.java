@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.testing.integration;
+package br.com.portalmanager.platform.testing.integration;
 
-import br.com.portalmanager.core.testing.annotation.WithMockAuthorization;
-import br.com.portalmanager.core.testing.authorization.AuthorizationMock;
-import br.com.portalmanager.core.testing.authorization.AuthorizationSessionCustomizer;
+import br.com.portalmanager.platform.testing.annotation.WithMockAuthorization;
+import br.com.portalmanager.platform.testing.authorization.AuthorizationMock;
+import br.com.portalmanager.platform.testing.authorization.AuthorizationSessionCustomizer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
