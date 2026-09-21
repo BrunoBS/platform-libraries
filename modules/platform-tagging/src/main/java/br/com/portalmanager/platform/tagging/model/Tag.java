@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.tagging.model;
+package br.com.portalmanager.platform.tagging.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.tagging;
+package br.com.portalmanager.platform.tagging;
 
 import java.util.Locale;
 

@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.starter;
+package br.com.portalmanager.platform.starter;
 
-import br.com.portalmanager.core.authorization.registry.AuthorizationMetadataRegistry;
-import br.com.portalmanager.core.messaging.repository.ApiMessageRepository;
-import br.com.portalmanager.core.messaging.repository.NoOpApiMessageRepository;
-import br.com.portalmanager.core.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.authorization.registry.AuthorizationMetadataRegistry;
+import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.messaging.repository.NoOpApiMessageRepository;
+import br.com.portalmanager.platform.messaging.resolver.ApiMessageResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,10 +29,10 @@ class PlatformStarterMinimalConsumerTest {
                     .isInstanceOf(NoOpApiMessageRepository.class);
             assertThat(context.getBeansOfType(ApiMessageResolver.class)).hasSize(1);
 
-            assertThat(isPresent("br.com.portalmanager.core.catalog.autoconfigure.PlatformCatalogAutoConfiguration")).isFalse();
-            assertThat(isPresent("br.com.portalmanager.core.audit.autoconfigure.PlatformAuditAutoConfiguration")).isFalse();
-            assertThat(isPresent("br.com.portalmanager.core.tagging.autoconfigure.PlatformTaggingAutoConfiguration")).isFalse();
-            assertThat(isPresent("br.com.portalmanager.core.crud.autoconfigure.PlatformCrudAutoConfiguration")).isFalse();
+            assertThat(isPresent("br.com.portalmanager.platform.catalog.autoconfigure.PlatformCatalogAutoConfiguration")).isFalse();
+            assertThat(isPresent("br.com.portalmanager.platform.audit.autoconfigure.PlatformAuditAutoConfiguration")).isFalse();
+            assertThat(isPresent("br.com.portalmanager.platform.tagging.autoconfigure.PlatformTaggingAutoConfiguration")).isFalse();
+            assertThat(isPresent("br.com.portalmanager.platform.crud.autoconfigure.PlatformCrudAutoConfiguration")).isFalse();
         }
     }
 

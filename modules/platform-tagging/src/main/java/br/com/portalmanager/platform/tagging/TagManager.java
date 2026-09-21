@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.tagging;
+package br.com.portalmanager.platform.tagging;
 
-import br.com.portalmanager.core.tagging.model.Tag;
-import br.com.portalmanager.core.tagging.model.TagOriginType;
-import br.com.portalmanager.core.tagging.model.TagOwnerType;
-import br.com.portalmanager.core.tagging.repository.TagRepository;
+import br.com.portalmanager.platform.tagging.model.Tag;
+import br.com.portalmanager.platform.tagging.model.TagOriginType;
+import br.com.portalmanager.platform.tagging.model.TagOwnerType;
+import br.com.portalmanager.platform.tagging.repository.TagRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;

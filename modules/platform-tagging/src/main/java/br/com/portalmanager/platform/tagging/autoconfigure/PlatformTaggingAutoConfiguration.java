@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.tagging.autoconfigure;
+package br.com.portalmanager.platform.tagging.autoconfigure;
 
-import br.com.portalmanager.core.tagging.TagManager;
-import br.com.portalmanager.core.tagging.model.Tag;
-import br.com.portalmanager.core.tagging.repository.TagRepository;
+import br.com.portalmanager.platform.tagging.TagManager;
+import br.com.portalmanager.platform.tagging.model.Tag;
+import br.com.portalmanager.platform.tagging.repository.TagRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
