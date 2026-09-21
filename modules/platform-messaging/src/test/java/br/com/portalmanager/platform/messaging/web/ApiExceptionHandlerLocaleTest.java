@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.messaging.web;
+package br.com.portalmanager.platform.messaging.web;
 
-import br.com.portalmanager.core.messaging.exception.ApiException;
-import br.com.portalmanager.core.messaging.model.ApiMessage;
-import br.com.portalmanager.core.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.messaging.exception.ApiException;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.messaging.resolver.ApiMessageResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;

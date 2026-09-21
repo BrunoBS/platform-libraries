@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.messaging.validation;
+package br.com.portalmanager.platform.messaging.validation;
 
-import br.com.portalmanager.core.messaging.model.ValidationDetail;
+import br.com.portalmanager.platform.messaging.model.ValidationDetail;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

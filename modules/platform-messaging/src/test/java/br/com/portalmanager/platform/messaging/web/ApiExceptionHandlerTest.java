@@ -1,13 +1,13 @@
-package br.com.portalmanager.core.messaging.web;
+package br.com.portalmanager.platform.messaging.web;
 
-import br.com.portalmanager.core.messaging.exception.ApiException;
-import br.com.portalmanager.core.messaging.exception.ApiMessageNotFoundException;
-import br.com.portalmanager.core.messaging.exception.NotFoundException;
-import br.com.portalmanager.core.messaging.exception.ValidationException;
-import br.com.portalmanager.core.messaging.model.ApiErrorResponse;
-import br.com.portalmanager.core.messaging.model.ApiMessage;
-import br.com.portalmanager.core.messaging.model.ValidationDetail;
-import br.com.portalmanager.core.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.messaging.exception.ApiException;
+import br.com.portalmanager.platform.messaging.exception.ApiMessageNotFoundException;
+import br.com.portalmanager.platform.messaging.exception.NotFoundException;
+import br.com.portalmanager.platform.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.messaging.model.ApiErrorResponse;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.messaging.model.ValidationDetail;
+import br.com.portalmanager.platform.messaging.resolver.ApiMessageResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

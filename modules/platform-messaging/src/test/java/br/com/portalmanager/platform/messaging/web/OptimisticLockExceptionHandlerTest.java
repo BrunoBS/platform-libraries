@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.messaging.web;
+package br.com.portalmanager.platform.messaging.web;
 
-import br.com.portalmanager.core.messaging.message.PlatformMessageKeys;
-import br.com.portalmanager.core.messaging.model.ApiErrorResponse;
-import br.com.portalmanager.core.messaging.model.ApiMessage;
-import br.com.portalmanager.core.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.messaging.model.ApiErrorResponse;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.messaging.resolver.ApiMessageResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.OptimisticLockingFailureException;
