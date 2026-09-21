@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing;
+package br.com.portalmanager.platform.testing;
 
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;

@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.testing.annotation;
+package br.com.portalmanager.platform.testing.annotation;
 
-import br.com.portalmanager.core.testing.database.CleanupMode;
-import br.com.portalmanager.core.testing.database.DatabaseCleanupPhase;
-import br.com.portalmanager.core.testing.database.DatabaseSetupPhase;
-import br.com.portalmanager.core.testing.authorization.AuthorizationMockResult;
+import br.com.portalmanager.platform.testing.database.CleanupMode;
+import br.com.portalmanager.platform.testing.database.DatabaseCleanupPhase;
+import br.com.portalmanager.platform.testing.database.DatabaseSetupPhase;
+import br.com.portalmanager.platform.testing.authorization.AuthorizationMockResult;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.AnnotationSupport;
 

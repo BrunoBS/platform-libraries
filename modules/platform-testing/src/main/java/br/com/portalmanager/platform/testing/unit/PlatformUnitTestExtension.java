@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.testing.unit;
+package br.com.portalmanager.platform.testing.unit;
 
-import br.com.portalmanager.core.testing.context.TestContext;
+import br.com.portalmanager.platform.testing.context.TestContext;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
