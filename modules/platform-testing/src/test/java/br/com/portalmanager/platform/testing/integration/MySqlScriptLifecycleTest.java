@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.testing.integration;
+package br.com.portalmanager.platform.testing.integration;
 
-import br.com.portalmanager.core.testing.annotation.PlatformIntegrationTest;
-import br.com.portalmanager.core.testing.annotation.WithDatabaseScripts;
-import br.com.portalmanager.core.testing.annotation.WithMySql;
+import br.com.portalmanager.platform.testing.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.testing.annotation.WithDatabaseScripts;
+import br.com.portalmanager.platform.testing.annotation.WithMySql;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

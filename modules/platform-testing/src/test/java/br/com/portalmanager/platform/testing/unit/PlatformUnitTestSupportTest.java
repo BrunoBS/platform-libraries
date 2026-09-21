@@ -1,7 +1,7 @@
-package br.com.portalmanager.core.testing.unit;
+package br.com.portalmanager.platform.testing.unit;
 
-import br.com.portalmanager.core.testing.annotation.PlatformUnitTest;
-import br.com.portalmanager.core.testing.context.TestContext;
+import br.com.portalmanager.platform.testing.annotation.PlatformUnitTest;
+import br.com.portalmanager.platform.testing.context.TestContext;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
