@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.audit.recovery;
+package br.com.portalmanager.platform.audit.recovery;
 
 import java.util.Optional;
 

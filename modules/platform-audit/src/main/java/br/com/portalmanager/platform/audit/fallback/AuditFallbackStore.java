@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.audit.fallback;
+package br.com.portalmanager.platform.audit.fallback;
 
-import br.com.portalmanager.core.audit.model.AuditEventRequest;
+import br.com.portalmanager.platform.audit.model.AuditEventRequest;
 
 public interface AuditFallbackStore {
 

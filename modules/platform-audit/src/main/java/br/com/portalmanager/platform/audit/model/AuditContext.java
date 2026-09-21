@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.audit.model;
+package br.com.portalmanager.platform.audit.model;
 
 public record AuditContext(
         String accountId,

@@ -1,9 +1,9 @@
-package br.com.portalmanager.core.audit.fallback;
+package br.com.portalmanager.platform.audit.fallback;
 
-import br.com.portalmanager.core.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.core.audit.exception.AuditException;
-import br.com.portalmanager.core.audit.message.AuditMessageKeys;
-import br.com.portalmanager.core.audit.model.AuditEventRequest;
+import br.com.portalmanager.platform.audit.config.PlatformAuditProperties;
+import br.com.portalmanager.platform.audit.exception.AuditException;
+import br.com.portalmanager.platform.audit.message.AuditMessageKeys;
+import br.com.portalmanager.platform.audit.model.AuditEventRequest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import tools.jackson.databind.ObjectMapper;
 

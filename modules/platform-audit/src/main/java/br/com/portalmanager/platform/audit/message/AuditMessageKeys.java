@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.audit.message;
+package br.com.portalmanager.platform.audit.message;
 
 public final class AuditMessageKeys {
 

@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.audit.publisher;
+package br.com.portalmanager.platform.audit.publisher;
 
-import br.com.portalmanager.core.audit.model.AuditEventRequest;
+import br.com.portalmanager.platform.audit.model.AuditEventRequest;
 
 public interface AuditPublisher {
 

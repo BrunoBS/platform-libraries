@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.audit.model;
+package br.com.portalmanager.platform.audit.model;
 
 import java.time.Instant;
 import java.util.Map;
