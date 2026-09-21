@@ -1,13 +1,13 @@
-package br.com.portalmanager.core.authorization.aspect;
+package br.com.portalmanager.platform.authorization.aspect;
 
-import br.com.portalmanager.core.authorization.annotation.ResourceVisibility;
-import br.com.portalmanager.core.authorization.exception.ForbiddenAccessException;
-import br.com.portalmanager.core.authorization.exception.UnauthorizedAccessException;
-import br.com.portalmanager.core.authorization.message.AuthorizationMessageKeys;
-import br.com.portalmanager.core.authorization.model.ParsedGroup;
-import br.com.portalmanager.core.authorization.model.UserContext;
-import br.com.portalmanager.core.authorization.model.UserSession;
-import br.com.portalmanager.core.authorization.resource.AuthorizableResource;
+import br.com.portalmanager.platform.authorization.annotation.ResourceVisibility;
+import br.com.portalmanager.platform.authorization.exception.ForbiddenAccessException;
+import br.com.portalmanager.platform.authorization.exception.UnauthorizedAccessException;
+import br.com.portalmanager.platform.authorization.message.AuthorizationMessageKeys;
+import br.com.portalmanager.platform.authorization.model.ParsedGroup;
+import br.com.portalmanager.platform.authorization.model.UserContext;
+import br.com.portalmanager.platform.authorization.model.UserSession;
+import br.com.portalmanager.platform.authorization.resource.AuthorizableResource;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

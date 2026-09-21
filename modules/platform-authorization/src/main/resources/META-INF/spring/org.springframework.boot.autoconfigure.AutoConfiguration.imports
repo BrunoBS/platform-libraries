@@ -1,1 +1,1 @@
-br.com.portalmanager.core.authorization.autoconfigure.PlatformAuthorizationAutoConfiguration
+br.com.portalmanager.platform.authorization.autoconfigure.PlatformAuthorizationAutoConfiguration

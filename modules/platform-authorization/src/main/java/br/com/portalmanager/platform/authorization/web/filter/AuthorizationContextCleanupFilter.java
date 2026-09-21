@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.authorization.web.filter;
+package br.com.portalmanager.platform.authorization.web.filter;
 
-import br.com.portalmanager.core.authorization.model.UserContext;
+import br.com.portalmanager.platform.authorization.model.UserContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.authorization.web.filter;
+package br.com.portalmanager.platform.authorization.web.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
