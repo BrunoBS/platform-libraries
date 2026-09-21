@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>br.com.portalmanager.core</groupId>
+    <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-parent</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
@@ -36,7 +36,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>br.com.portalmanager.core</groupId>
+                <groupId>br.com.portalmanager.platform</groupId>
                 <artifactId>platform-dependencies</artifactId>
                 <version>${platform-dependencies.version}</version>
                 <type>pom</type>

@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>br.com.portalmanager.core</groupId>
+    <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-libraries</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
@@ -13,14 +13,14 @@
         <module>platform-dependencies</module>
         <module>platform-parent</module>
         <module>platform-libraries-bom</module>
-        <module>modules/platform-logging</module>
+        <module>modules/platform-observability</module>
         <module>modules/platform-messaging</module>
         <module>modules/platform-authorization</module>
         <module>modules/platform-audit</module>
         <module>modules/platform-catalog</module>
         <module>modules/platform-tagging</module>
         <module>modules/platform-starter</module>
-        <module>modules/platform-test-support</module>
+        <module>modules/platform-testing</module>
     </modules>
 
     <build>
