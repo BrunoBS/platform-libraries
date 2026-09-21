@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.audit.exception;
+package br.com.portalmanager.platform.audit.exception;
 
-import br.com.portalmanager.core.messaging.exception.ApiException;
+import br.com.portalmanager.platform.messaging.exception.ApiException;
 
 public class AuditException extends ApiException {
 

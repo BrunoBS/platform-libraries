@@ -1,14 +1,14 @@
-package br.com.portalmanager.core.audit.autoconfigure;
+package br.com.portalmanager.platform.audit.autoconfigure;
 
-import br.com.portalmanager.core.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.core.audit.exception.AuditException;
-import br.com.portalmanager.core.audit.fallback.AuditFallbackStore;
-import br.com.portalmanager.core.audit.fallback.RedisAuditFallbackStore;
-import br.com.portalmanager.core.audit.message.AuditMessageKeys;
-import br.com.portalmanager.core.audit.publisher.AuditPublisher;
-import br.com.portalmanager.core.audit.recovery.AuditRecoveryLock;
-import br.com.portalmanager.core.audit.recovery.AuditRecoveryService;
-import br.com.portalmanager.core.audit.recovery.RedisAuditRecoveryLock;
+import br.com.portalmanager.platform.audit.config.PlatformAuditProperties;
+import br.com.portalmanager.platform.audit.exception.AuditException;
+import br.com.portalmanager.platform.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.audit.fallback.RedisAuditFallbackStore;
+import br.com.portalmanager.platform.audit.message.AuditMessageKeys;
+import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.audit.recovery.AuditRecoveryLock;
+import br.com.portalmanager.platform.audit.recovery.AuditRecoveryService;
+import br.com.portalmanager.platform.audit.recovery.RedisAuditRecoveryLock;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

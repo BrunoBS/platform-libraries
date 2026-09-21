@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.audit.config;
+package br.com.portalmanager.platform.audit.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

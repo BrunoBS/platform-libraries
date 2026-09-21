@@ -1,13 +1,13 @@
-package br.com.portalmanager.core.audit.autoconfigure;
+package br.com.portalmanager.platform.audit.autoconfigure;
 
-import br.com.portalmanager.core.audit.aspect.AuditAspect;
-import br.com.portalmanager.core.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.core.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.core.audit.exception.AuditException;
-import br.com.portalmanager.core.audit.fallback.AuditFallbackStore;
-import br.com.portalmanager.core.audit.message.AuditMessageKeys;
-import br.com.portalmanager.core.audit.publisher.AuditPublisher;
-import br.com.portalmanager.core.audit.publisher.RestAuditPublisher;
+import br.com.portalmanager.platform.audit.aspect.AuditAspect;
+import br.com.portalmanager.platform.audit.config.PlatformAuditProperties;
+import br.com.portalmanager.platform.audit.context.AuditAuthorizationContextResolver;
+import br.com.portalmanager.platform.audit.exception.AuditException;
+import br.com.portalmanager.platform.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.audit.message.AuditMessageKeys;
+import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.audit.publisher.RestAuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;

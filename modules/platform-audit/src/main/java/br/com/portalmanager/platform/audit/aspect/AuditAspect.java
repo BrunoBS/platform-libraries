@@ -1,13 +1,13 @@
-package br.com.portalmanager.core.audit.aspect;
+package br.com.portalmanager.platform.audit.aspect;
 
-import br.com.portalmanager.core.audit.annotation.AuditField;
-import br.com.portalmanager.core.audit.annotation.AuditFieldSource;
-import br.com.portalmanager.core.audit.annotation.Auditable;
-import br.com.portalmanager.core.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.core.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.core.audit.model.AuditContext;
-import br.com.portalmanager.core.audit.model.AuditEventRequest;
-import br.com.portalmanager.core.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.audit.annotation.AuditField;
+import br.com.portalmanager.platform.audit.annotation.AuditFieldSource;
+import br.com.portalmanager.platform.audit.annotation.Auditable;
+import br.com.portalmanager.platform.audit.config.PlatformAuditProperties;
+import br.com.portalmanager.platform.audit.context.AuditAuthorizationContextResolver;
+import br.com.portalmanager.platform.audit.model.AuditContext;
+import br.com.portalmanager.platform.audit.model.AuditEventRequest;
+import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -51,8 +51,8 @@ public final class AuditAspect {
         this.request = request;
     }
 
-    @Around("@annotation(br.com.portalmanager.core.audit.annotation.Auditable) || "
-            + "@annotation(br.com.portalmanager.core.audit.annotation.Auditables)")
+    @Around("@annotation(br.com.portalmanager.platform.audit.annotation.Auditable) || "
+            + "@annotation(br.com.portalmanager.platform.audit.annotation.Auditables)")
     public Object audit(ProceedingJoinPoint joinPoint) throws Throwable {
         Object result = joinPoint.proceed();
 
