@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.messaging.util;
+package br.com.portalmanager.platform.messaging.util;
 
 import java.util.Map;
 import java.util.regex.Matcher;
