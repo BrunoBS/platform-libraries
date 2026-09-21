@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.authorization.annotation;
+package br.com.portalmanager.platform.authorization.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

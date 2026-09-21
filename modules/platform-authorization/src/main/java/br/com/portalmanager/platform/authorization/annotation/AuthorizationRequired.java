@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.authorization.annotation;
+package br.com.portalmanager.platform.authorization.annotation;
 
-import br.com.portalmanager.core.authorization.model.AuthorizationLevel;
+import br.com.portalmanager.platform.authorization.model.AuthorizationLevel;
 import java.lang.annotation.*;
 
 @Target({ElementType.TYPE, ElementType.METHOD})

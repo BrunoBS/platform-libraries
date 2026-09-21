@@ -47,7 +47,7 @@ Nos serviços que utilizam o `platform-service-parent`, o módulo faz parte do b
 O baseline inclui:
 
 ```text
-platform-logging
+platform-observability
 platform-messaging
 platform-authorization
 ```
@@ -56,7 +56,7 @@ Para uso isolado fora desse parent, a dependência pode ser declarada diretament
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.core</groupId>
+    <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-authorization</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
