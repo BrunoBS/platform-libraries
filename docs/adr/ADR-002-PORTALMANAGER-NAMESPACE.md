@@ -2,7 +2,11 @@
 
 ## Status
 
-Accepted.
+Superseded by `ADR-004-PLATFORM-NAMESPACE-AND-MODULE-NAMING.md`.
+
+## Supersession
+
+Esta ADR registra a decisão histórica que adotou `br.com.portalmanager.core`. A decisão vigente está na ADR-004, que substitui o namespace por `br.com.portalmanager.platform` e renomeia módulos públicos da Foundation.
 
 ## Contexto
 

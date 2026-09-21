@@ -14,13 +14,13 @@ platform-libraries/
 ├── platform-libraries-bom/    BOM das capabilities
 └── modules/
     ├── platform-starter/
-    ├── platform-logging/
+    ├── platform-observability/
     ├── platform-messaging/
     ├── platform-authorization/
     ├── platform-audit/
     ├── platform-catalog/
     ├── platform-tagging/
-    └── platform-test-support/
+    └── platform-testing/
 ```
 
 O root POM é somente aggregator/reactor. Não concentra regras de build.
@@ -28,7 +28,7 @@ O root POM é somente aggregator/reactor. Não concentra regras de build.
 O namespace Maven e Java oficial é:
 
 ```text
-br.com.portalmanager.core
+br.com.portalmanager.platform
 ```
 
 Os `artifactId` `platform-*` permanecem estáveis.
@@ -54,13 +54,13 @@ Não gerencia artifacts da própria Golden Platform.
 Representa o baseline das capabilities e gerencia:
 
 - platform-starter;
-- platform-logging;
+- platform-observability;
 - platform-messaging;
 - platform-authorization;
 - platform-audit;
 - platform-catalog;
 - platform-tagging;
-- platform-test-support.
+- platform-testing.
 
 As capabilities seguem inicialmente uma release train coerente controlada por `.mvn/maven.config`.
 
@@ -91,10 +91,10 @@ catalog -> messaging
 As versões atuais dos artifacts próprios da Foundation preparadas para publicação são:
 
 ```text
-br.com.portalmanager.core:platform-dependencies:1.0.0
-br.com.portalmanager.core:platform-parent:1.0.0
-br.com.portalmanager.core:platform-libraries-bom:1.0.0
-br.com.portalmanager.core:platform-*:1.0.0
+br.com.portalmanager.platform:platform-dependencies:1.0.0
+br.com.portalmanager.platform:platform-parent:1.0.0
+br.com.portalmanager.platform:platform-libraries-bom:1.0.0
+br.com.portalmanager.platform:platform-*:1.0.0
 ```
 
 A igualdade em `1.0.0` vale somente para as coordenadas dos artifacts próprios da Foundation. O `platform-dependencies:1.0.0` continua gerenciando versões tecnológicas independentes, como Spring Boot `4.1.1` e Testcontainers `1.21.4`.
@@ -126,7 +126,7 @@ O `main` foi validado no Verify #85, run `35544899150`, após:
 - consolidação de `platform-parent` e `platform-dependencies`;
 - criação do `platform-libraries-bom`;
 - remoção do gerenciamento de capabilities do parent;
-- migração Maven e Java para `br.com.portalmanager.core`;
+- migração Maven e Java para `br.com.portalmanager.platform`;
 - limpeza dos POMs gerados pelo Flatten Plugin;
 - gates de CI contra regressão de namespace e higiene do repositório.
 
@@ -138,7 +138,7 @@ A publicação anterior das coordenadas próprias em `1.0.0` no run `35542606756
 
 A arquitetura local está consolidada. O fechamento do checkpoint ainda depende de:
 
-1. publicar `br.com.portalmanager.core:*:1.0.0` no registry de `platform-libraries`;
+1. publicar `br.com.portalmanager.platform:*:1.0.0` no registry de `platform-libraries`;
 2. validar resolução remota dessas coordenadas por um consumidor;
 3. executar `mvn clean verify` verde no consumidor sem depender de `platform-build` ou `mvn install` local;
 4. registrar as evidências finais em `FOUNDATION-PUBLISHING.md` e `FOUNDATION-CHECKPOINT.md`.

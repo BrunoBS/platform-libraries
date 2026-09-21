@@ -11,7 +11,7 @@ O `platform-dependencies:1.0.0` importava:
 - `spring-boot-dependencies:4.1.1`;
 - `testcontainers-bom:1.21.4`.
 
-O Spring Boot 4.1.1 já gerencia a família Testcontainers em `2.0.5`. Manter um segundo BOM da mesma tecnologia criava duas fontes de verdade e permitia uma árvore híbrida, pois o Spring Boot podia gerenciar módulos transitivos de Testcontainers 2.x enquanto dependências opcionais do `platform-test-support` ainda usavam coordenadas do Testcontainers 1.x.
+O Spring Boot 4.1.1 já gerencia a família Testcontainers em `2.0.5`. Manter um segundo BOM da mesma tecnologia criava duas fontes de verdade e permitia uma árvore híbrida, pois o Spring Boot podia gerenciar módulos transitivos de Testcontainers 2.x enquanto dependências opcionais do `platform-testing` ainda usavam coordenadas do Testcontainers 1.x.
 
 ## Decisão
 
@@ -22,7 +22,7 @@ O `platform-dependencies`:
 - não declara `testcontainers.version`;
 - não importa `org.testcontainers:testcontainers-bom`.
 
-O `platform-test-support` usa as coordenadas de módulos compatíveis com Testcontainers 2.x:
+O `platform-testing` usa as coordenadas de módulos compatíveis com Testcontainers 2.x:
 
 ```text
 org.testcontainers:testcontainers-mysql

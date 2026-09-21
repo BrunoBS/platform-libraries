@@ -77,7 +77,7 @@ platform-libraries
   -> mvn clean verify
 ```
 
-As Libraries passaram a consumir `br.com.portalmanager.core:platform-parent:1.0.1` no commit `4b0a17bbc35b0d4cd6c52b9d4413b565e8d1842e`.
+As Libraries passaram a consumir `br.com.portalmanager.platform:platform-parent:1.0.1` no commit `4b0a17bbc35b0d4cd6c52b9d4413b565e8d1842e`.
 
 GitHub Actions Verify #45, run `35531158159`:
 
@@ -127,8 +127,8 @@ Golden consumer
 
 No `BrunoBS/account-service`, após autenticação válida e configuração dos dois registries, o GitHub Actions Verify #6, run `35534805355`, attempt 1, resolveu `platform-parent:1.0.1` remotamente, mas confirmou ausência de:
 
-- `br.com.portalmanager.core:platform-starter:1.0.0`;
-- `br.com.portalmanager.core:platform-test-support:1.0.0`;
+- `br.com.portalmanager.platform:platform-starter:1.0.0`;
+- `br.com.portalmanager.platform:platform-testing:1.0.0`;
 
 tanto no registry de `platform-build` quanto no registry correto de `platform-libraries`.
 
@@ -162,11 +162,11 @@ GitHub Actions Publish Maven packages #2, run `35534990418`:
 - `mvn --settings .github/maven-publish-settings.xml --batch-mode --no-transfer-progress clean deploy`;
 - reactor completo `1.0.0` publicado com sucesso;
 - `platform-starter`: sucesso;
-- `platform-test-support`: sucesso;
+- `platform-testing`: sucesso;
 - `platform-messaging`: sucesso;
 - `platform-authorization`: sucesso;
 - `platform-audit`: sucesso;
-- `platform-logging`: sucesso;
+- `platform-observability`: sucesso;
 - `platform-catalog`: sucesso;
 - `platform-tagging`: sucesso;
 - resultado final: `BUILD SUCCESS`.
@@ -198,7 +198,7 @@ platform-build
 
 ## Correção pós-checkpoint — infraestrutura de teste opt-in
 
-A G1 da Golden Reference revelou um segundo gap da Foundation: `platform-test-support:1.0.0` exportava transitivamente infraestrutura JDBC/MySQL/Kafka/Testcontainers mesmo para consumidores que não usavam essas capacidades.
+A G1 da Golden Reference revelou um segundo gap da Foundation: `platform-testing:1.0.0` exportava transitivamente infraestrutura JDBC/MySQL/Kafka/Testcontainers mesmo para consumidores que não usavam essas capacidades.
 
 No `BrunoBS/account-service`, um simples `@PlatformIntegrationTest` sem persistência passou a conter JDBC no classpath e o Spring Boot tentou ativar `DataSourceAutoConfiguration`.
 
@@ -206,7 +206,7 @@ O workaround temporário de excluir `DataSourceAutoConfiguration` no consumidor 
 
 ### Contrato corrigido
 
-A release `platform-test-support:1.0.1` torna opcionais:
+A release `platform-testing:1.0.1` torna opcionais:
 
 - `spring-boot-starter-jdbc`;
 - `mysql-connector-j`;
@@ -248,7 +248,7 @@ Commit funcional das Libraries:
 GitHub Actions Verify #50, run `35536158485`:
 
 - `InfrastructureDependencyOptionalityTest`: sucesso;
-- `platform-test-support`: 35 testes, 0 falhas, 0 erros;
+- `platform-testing`: 35 testes, 0 falhas, 0 erros;
 - reactor `platform-libraries 1.0.1`: `BUILD SUCCESS`.
 
 GitHub Actions Publish Maven packages #3, run `35536158484`:

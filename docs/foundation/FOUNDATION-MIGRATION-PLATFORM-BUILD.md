@@ -45,7 +45,7 @@ Foram adicionados:
 - `platform-libraries-bom/pom.xml`;
 - documentação de consolidação, versionamento, publicação e migração;
 - ADR-001 para a consolidação;
-- ADR-002 para o namespace oficial `br.com.portalmanager.core`.
+- ADR-002 para o namespace oficial `br.com.portalmanager.platform`.
 
 As oito capabilities foram agrupadas fisicamente sob `modules/`.
 
@@ -60,7 +60,7 @@ com.empresa.platform
 foi substituído por:
 
 ```text
-br.com.portalmanager.core
+br.com.portalmanager.platform
 ```
 
 A mudança abrange `groupId`, packages Java, imports e paths de código. Os `artifactId` permanecem `platform-*`.
@@ -90,9 +90,9 @@ Registry legado, fora do fluxo oficial final:
 
 Consumidores deverão:
 
-1. usar `br.com.portalmanager.core:platform-parent:1.0.0`;
-2. importar `br.com.portalmanager.core:platform-libraries-bom:1.0.0`;
-3. declarar capabilities `br.com.portalmanager.core:platform-*` sem versão;
+1. usar `br.com.portalmanager.platform:platform-parent:1.0.0`;
+2. importar `br.com.portalmanager.platform:platform-libraries-bom:1.0.0`;
+3. declarar capabilities `br.com.portalmanager.platform:platform-*` sem versão;
 4. configurar o registry de `platform-libraries` como fonte da Foundation;
 5. executar `mvn clean verify` em checkout limpo, idealmente com repositório Maven local vazio ou isolado.
 
@@ -100,7 +100,7 @@ Exemplo:
 
 ```xml
 <parent>
-    <groupId>br.com.portalmanager.core</groupId>
+    <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-parent</artifactId>
     <version>1.0.0</version>
     <relativePath/>
@@ -109,7 +109,7 @@ Exemplo:
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>br.com.portalmanager.core</groupId>
+            <groupId>br.com.portalmanager.platform</groupId>
             <artifactId>platform-libraries-bom</artifactId>
             <version>1.0.0</version>
             <type>pom</type>
@@ -137,6 +137,6 @@ A investigação intermediária passou por probes com `platform-dependencies:1.0
 
 Após a limpeza manual dos packages experimentais, o run `35542606756`, attempt 3, publicou com sucesso as coordenadas próprias em `1.0.0` ainda sob `com.empresa.platform`.
 
-Em seguida, a Foundation adotou `br.com.portalmanager.core`. O Verify #85, run `35544899150`, validou o reactor consolidado no namespace definitivo.
+Em seguida, a Foundation adotou `br.com.portalmanager.platform`. O Verify #85, run `35544899150`, validou o reactor consolidado no namespace definitivo.
 
-A etapa restante desta migração é publicar e consumir remotamente `br.com.portalmanager.core:*:1.0.0`. Somente essa evidência fecha o cutover.
+A etapa restante desta migração é publicar e consumir remotamente `br.com.portalmanager.platform:*:1.0.0`. Somente essa evidência fecha o cutover.
