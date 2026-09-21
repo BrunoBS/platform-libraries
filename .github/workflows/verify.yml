@@ -47,7 +47,7 @@ jobs:
             echo "Legacy Java package path found."
             exit 1
           fi
-          if git grep -nE 'platform-logging|platform-test-support|platform\.logging' -- ':!docs/**'; then
+          if git grep -nE 'platform-logging|platform-test-support|platform\.logging' -- ':!docs/**' ':!.github/workflows/verify.yml'; then
             echo "Legacy module/config naming found outside historical documentation."
             exit 1
           fi
