@@ -14,7 +14,6 @@
 
     <properties>
         <spring-boot.version>4.1.1</spring-boot.version>
-        <testcontainers.version>1.21.4</testcontainers.version>
         <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
         <json-schema-validator.version>3.0.7</json-schema-validator.version>
         <rest-assured.version>6.0.1</rest-assured.version>
@@ -29,13 +28,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

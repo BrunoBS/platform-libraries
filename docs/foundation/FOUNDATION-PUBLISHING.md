@@ -40,7 +40,7 @@ br.com.portalmanager.core:platform-test-support:1.0.0
 
 O root reactor `br.com.portalmanager.core:platform-libraries:1.0.0` é operacional e não é um eixo de consumo da Foundation.
 
-Esses `1.0.0` são versões dos artifacts próprios. O BOM `platform-dependencies:1.0.0` continua gerenciando tecnologias com versões independentes, como Spring Boot `4.1.1`, Testcontainers `1.21.4` e os demais componentes do baseline tecnológico.
+Esses `1.0.0` são versões dos artifacts próprios. O BOM `platform-dependencies:1.0.0` continua gerenciando tecnologias com versões independentes, como Spring Boot `4.1.1` e os demais componentes do baseline tecnológico. Testcontainers não possui mais BOM próprio na Foundation e segue o gerenciamento do Spring Boot, atualmente `2.0.5`.
 
 ## Release train
 
@@ -132,7 +132,17 @@ O run `35542606756`, attempt 3, publicou com sucesso o reactor completo com as c
 
 Essa publicação provou o funcionamento operacional do fluxo consolidado de deploy, mas deixou de representar as coordenadas oficiais quando a ADR-002 adotou `br.com.portalmanager.core`.
 
-## Publicação definitiva pendente
+## Publicação oficial de 1.0.0 e correção pré-checkpoint
+
+O run `35545852644` publicou com sucesso `br.com.portalmanager.core:*:1.0.0`.
+
+Antes da prova final do consumidor foi identificado um conflito de gerenciamento do Testcontainers: `platform-dependencies:1.0.0` importava simultaneamente `spring-boot-dependencies:4.1.1` e `testcontainers-bom:1.21.4`. O Spring Boot 4.1.1 já gerencia Testcontainers 2.0.5.
+
+Como o projeto ainda não está produtivo e o checkpoint final não foi fechado, a correção mantém as coordenadas próprias em `1.0.0`: remove o BOM próprio de Testcontainers, adota o gerenciamento do Spring Boot e atualiza apenas as coordenadas Maven opcionais do `platform-test-support` para os módulos Testcontainers 2.x.
+
+A publicação do run `35545852644` fica supersededida por essa correção pré-checkpoint. Para republicar a mesma versão, as versões `1.0.0` já publicadas devem ser removidas do registry antes do novo deploy; não tentar sobrescrever releases existentes in-place.
+
+## Republicação definitiva pendente
 
 A próxima publicação deve usar exclusivamente:
 
