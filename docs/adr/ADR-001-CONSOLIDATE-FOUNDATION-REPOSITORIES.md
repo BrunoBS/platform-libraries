@@ -51,13 +51,13 @@ O root POM será apenas aggregator e ponto de publicação do reactor. Não conc
 `platform-libraries-bom` gerenciará:
 
 - platform-starter;
-- platform-logging;
+- platform-observability;
 - platform-messaging;
 - platform-authorization;
 - platform-audit;
 - platform-catalog;
 - platform-tagging;
-- platform-test-support.
+- platform-testing.
 
 ## Versioning strategy for this migration
 

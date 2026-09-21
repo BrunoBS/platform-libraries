@@ -9,7 +9,7 @@ A Foundation fornece capacidades reutilizáveis e governança técnica. A Golden
 - Java 25;
 - Spring Boot 4.1.1;
 - Maven 3.9.9 ou superior dentro da faixa suportada pelo parent;
-- namespace Maven e Java oficial: `br.com.portalmanager.core`;
+- namespace Maven e Java oficial: `br.com.portalmanager.platform`;
 - versão preparada das coordenadas próprias da Foundation: `1.0.0`.
 
 `platform-crud` foi removido da Foundation e não deve ser recriado.
@@ -24,13 +24,13 @@ platform-libraries/
 ├── platform-libraries-bom/    -> BOM das capabilities
 └── modules/
     ├── platform-starter/
-    ├── platform-logging/
+    ├── platform-observability/
     ├── platform-messaging/
     ├── platform-authorization/
     ├── platform-audit/
     ├── platform-catalog/
     ├── platform-tagging/
-    └── platform-test-support/
+    └── platform-testing/
 ```
 
 O POM raiz é somente reactor/aggregator e não concentra regras de build.
@@ -81,12 +81,12 @@ platform-audit         -> platform-messaging
 platform-catalog       -> platform-messaging
 
 platform-starter
-├── platform-logging
+├── platform-observability
 ├── platform-messaging
 └── platform-authorization
 ```
 
-`platform-test-support` possui integrações opcionais e não deve introduzir JDBC/MySQL/Kafka/Testcontainers transitivamente quando essas capacidades não forem declaradas.
+`platform-testing` possui integrações opcionais e não deve introduzir JDBC/MySQL/Kafka/Testcontainers transitivamente quando essas capacidades não forem declaradas.
 
 ## Consumo alvo
 
@@ -94,7 +94,7 @@ Após a publicação definitiva das coordenadas da Foundation, um serviço consu
 
 ```xml
 <parent>
-    <groupId>br.com.portalmanager.core</groupId>
+    <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-parent</artifactId>
     <version>1.0.0</version>
     <relativePath/>
@@ -103,7 +103,7 @@ Após a publicação definitiva das coordenadas da Foundation, um serviço consu
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>br.com.portalmanager.core</groupId>
+            <groupId>br.com.portalmanager.platform</groupId>
             <artifactId>platform-libraries-bom</artifactId>
             <version>1.0.0</version>
             <type>pom</type>
@@ -117,7 +117,7 @@ Capabilities podem então ser declaradas sem versão:
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.core</groupId>
+    <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-starter</artifactId>
 </dependency>
 ```
@@ -138,9 +138,9 @@ A validação do reactor é:
 mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean verify
 ```
 
-O Verify #85 do `main`, run `35544899150`, validou o reactor após a migração para `br.com.portalmanager.core`, incluindo os gates de namespace, higiene do repositório e metadata da release train.
+O Verify #85 do `main`, run `35544899150`, validou o reactor após a migração para `br.com.portalmanager.platform`, incluindo os gates de namespace, higiene do repositório e metadata da release train.
 
-O checkpoint exige também publicação remota em `br.com.portalmanager.core:*:1.0.0` e validação de um consumidor com resolução remota; `mvn install` local não substitui essa evidência.
+O checkpoint exige também publicação remota em `br.com.portalmanager.platform:*:1.0.0` e validação de um consumidor com resolução remota; `mvn install` local não substitui essa evidência.
 
 Consulte:
 
