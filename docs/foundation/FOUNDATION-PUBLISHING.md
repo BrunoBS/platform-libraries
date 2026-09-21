@@ -2,27 +2,29 @@
 
 ## Estado atual
 
-A Foundation consolidada está pronta para a publicação definitiva das coordenadas próprias em `1.0.0` sob o namespace oficial:
+A Foundation está em migração de identidade pública conforme `ADR-004-PLATFORM-NAMESPACE-AND-MODULE-NAMING.md`.
+
+Novo namespace:
 
 ```text
 br.com.portalmanager.platform
 ```
 
-O código em `main` passou no Verify #85, run `35544899150`.
+Versão mantida por decisão do projeto:
 
-A publicação definitiva dessas novas coordenadas ainda deve ser executada e, em seguida, validada por um consumidor remoto antes do fechamento do checkpoint.
+```text
+1.0.0
+```
 
 ## Registry oficial
 
-O único registry oficial alvo é:
+```text
+https://maven.pkg.github.com/brunobs/platform-libraries
+```
 
-`https://maven.pkg.github.com/brunobs/platform-libraries`
+Nenhum outro registry faz parte do fluxo oficial.
 
-Todos os POMs estruturais, capabilities, settings e o workflow de publicação apontam para esse destino.
-
-O registry de `platform-build` não pertence ao fluxo oficial alvo.
-
-## Coordenadas próprias a publicar
+## Coordenadas alvo
 
 ```text
 br.com.portalmanager.platform:platform-dependencies:1.0.0
@@ -38,134 +40,75 @@ br.com.portalmanager.platform:platform-tagging:1.0.0
 br.com.portalmanager.platform:platform-testing:1.0.0
 ```
 
-O root reactor `br.com.portalmanager.platform:platform-libraries:1.0.0` é operacional e não é um eixo de consumo da Foundation.
+O root reactor `platform-libraries` é operacional e não é eixo de consumo.
 
-Esses `1.0.0` são versões dos artifacts próprios. O BOM `platform-dependencies:1.0.0` continua gerenciando tecnologias com versões independentes, como Spring Boot `4.1.1` e os demais componentes do baseline tecnológico. Testcontainers não possui mais BOM próprio na Foundation e segue o gerenciamento do Spring Boot, atualmente `2.0.5`.
+## Por que 1.0.0 pode ser mantido
 
-## Release train
-
-A release train das capabilities possui uma única fonte:
+As coordenadas anteriores usavam outro `groupId`:
 
 ```text
-.mvn/maven.config
--Drevision=1.0.0
+br.com.portalmanager.core
 ```
 
-Usam essa `revision`:
+A ADR-004 cria coordenadas Maven distintas ao mudar para:
 
-- root reactor;
-- `platform-libraries-bom`;
-- as oito capabilities.
+```text
+br.com.portalmanager.platform
+```
 
-Dependências internas usam `${project.version}`.
+Além disso:
 
-Como o Maven mínimo suportado é 3.9.9, os artifacts da release train usam `flatten-maven-plugin` em `resolveCiFriendliesOnly`. Os `.flattened-pom.xml` são gerados durante o build, verificados pelo CI e não são versionados no Git.
+```text
+platform-logging      → platform-observability
+platform-test-support → platform-testing
+```
 
-`platform-parent` e `platform-dependencies` permanecem fora da release train e mantêm eixos de versão independentes.
+Portanto esta migração não depende de sobrescrever artifacts do namespace anterior.
 
-## Build e publicação
+## Build
 
 Validação:
 
 ```bash
-mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress clean verify
+mvn --settings .github/maven-settings.xml \
+    --batch-mode \
+    --no-transfer-progress \
+    clean verify
 ```
 
-Publicação oficial:
+Publicação:
 
 ```bash
-mvn --settings .github/maven-publish-settings.xml --batch-mode --no-transfer-progress clean deploy
+mvn --settings .github/maven-publish-settings.xml \
+    --batch-mode \
+    --no-transfer-progress \
+    clean deploy
 ```
 
-O workflow `Publish Maven packages` utiliza `workflow_dispatch`, Java 25 e o `GITHUB_TOKEN` efêmero com `packages: write`.
+O workflow oficial `Publish Maven packages` usa Java 25 e `workflow_dispatch`.
 
-Não usar `mvn install` local como substituto de publicação ou prova de resolução remota.
+## Gate de publicação
 
-## Evidência local consolidada
+Antes do deploy:
 
-O Verify #85, run `35544899150`, validou o `main` após:
+1. reactor completo verde;
+2. nenhum source path em `br/com/portalmanager/core`;
+3. nenhum POM/código ativo com `br.com.portalmanager.core`;
+4. nenhum módulo `platform-logging`;
+5. nenhum módulo `platform-test-support`;
+6. revision permanece `1.0.0`.
 
-- consolidação de parent e technology BOM;
-- release train centralizada;
-- namespace `br.com.portalmanager.platform`;
-- remoção de paths legados;
-- higiene dos artifacts gerados pelo Flatten Plugin;
-- metadata da release train.
+## Gate downstream
 
-Resultado: `BUILD SUCCESS`.
+Após o deploy, o `account-service` deve:
 
-## Histórico do cutover Maven
-
-### Probe inicial
-
-Durante a consolidação foi executado o Publish Maven packages #4, run `35537303423`.
-
-O primeiro artifact era:
-
-`com.empresa.platform:platform-dependencies:1.0.3`
-
-O GitHub Packages respondeu:
-
-```text
-HTTP 422 Unprocessable Entity
-BUILD FAILURE
-```
-
-Naquele momento os artifacts estruturais ainda estavam associados ao contexto antigo de `platform-build`.
-
-### Release train experimental
-
-Durante a investigação também foram usados:
-
-- `platform-dependencies:1.0.3`;
-- `platform-parent:1.1.0`;
-- `platform-libraries-bom:1.1.0`;
-- capabilities `1.1.0`.
-
-Essas versões são somente evidência histórica e não representam o baseline oficial final.
-
-### Reset para 1.0.0
-
-Após a limpeza manual dos packages experimentais, as versões das coordenadas próprias foram reiniciadas em `1.0.0`.
-
-O run `35542606756`, attempt 3, publicou com sucesso o reactor completo com as coordenadas próprias em `1.0.0`, ainda no namespace provisório `com.empresa.platform`.
-
-Essa publicação provou o funcionamento operacional do fluxo consolidado de deploy, mas deixou de representar as coordenadas oficiais quando a ADR-002 adotou `br.com.portalmanager.platform`.
-
-## Publicação oficial de 1.0.0 e correção pré-checkpoint
-
-O run `35545852644` publicou com sucesso `br.com.portalmanager.platform:*:1.0.0`.
-
-Antes da prova final do consumidor foi identificado um conflito de gerenciamento do Testcontainers: `platform-dependencies:1.0.0` importava simultaneamente `spring-boot-dependencies:4.1.1` e `testcontainers-bom:1.21.4`. O Spring Boot 4.1.1 já gerencia Testcontainers 2.0.5.
-
-Como o projeto ainda não está produtivo e o checkpoint final não foi fechado, a correção mantém as coordenadas próprias em `1.0.0`: remove o BOM próprio de Testcontainers, adota o gerenciamento do Spring Boot e atualiza apenas as coordenadas Maven opcionais do `platform-testing` para os módulos Testcontainers 2.x.
-
-A publicação do run `35545852644` fica supersededida por essa correção pré-checkpoint. Para republicar a mesma versão, as versões `1.0.0` já publicadas devem ser removidas do registry antes do novo deploy; não tentar sobrescrever releases existentes in-place.
-
-## Republicação definitiva pendente
-
-A próxima publicação deve usar exclusivamente:
-
-```text
-br.com.portalmanager.platform:*:1.0.0
-```
-
-Depois do deploy, a evidência deve registrar:
-
-- run/attempt da publicação;
-- reactor completo com `BUILD SUCCESS`;
-- packages estruturais e capabilities publicados;
-- resolução remota sem cache local previamente instalado.
+- usar `br.com.portalmanager.platform:platform-parent:1.0.0`;
+- importar `br.com.portalmanager.platform:platform-libraries-bom:1.0.0`;
+- consumir `platform-starter`, `platform-tagging`, `platform-audit` e `platform-testing` sem versão;
+- migrar imports Java para `br.com.portalmanager.platform.*`;
+- executar `clean verify` com Maven repository local isolado;
+- não depender do namespace `br.com.portalmanager.core`.
 
 ## Condição de saída
 
-A publicação da Foundation só será considerada concluída quando:
-
-1. o reactor completo `br.com.portalmanager.platform:*:1.0.0` for publicado no registry de `platform-libraries`;
-2. um consumidor resolver `platform-parent:1.0.0` e `platform-libraries-bom:1.0.0` remotamente;
-3. o consumidor declarar capabilities sem versão;
-4. o consumidor executar `mvn clean verify` com sucesso;
-5. o consumidor não depender do registry `platform-build`;
-6. as evidências finais forem registradas em `FOUNDATION-CHECKPOINT.md`.
-
-Até lá, `FOUNDATION-GOLDEN-V1` permanece aberto.
+A migração só é considerada concluída quando Foundation e Golden consumer estiverem verdes no novo namespace.
