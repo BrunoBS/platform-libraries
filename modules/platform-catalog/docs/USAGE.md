@@ -46,7 +46,7 @@ Os names podem ser criados em runtime?
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.core</groupId>
+    <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-catalog</artifactId>
 </dependency>
 ```

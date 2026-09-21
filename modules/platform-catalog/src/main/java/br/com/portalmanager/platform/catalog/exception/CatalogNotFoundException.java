@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.catalog.exception;
+package br.com.portalmanager.platform.catalog.exception;
 
 import java.util.Map;
 

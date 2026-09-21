@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.catalog.dto;
+package br.com.portalmanager.platform.catalog.dto;
 
 import tools.jackson.databind.JsonNode;
 
