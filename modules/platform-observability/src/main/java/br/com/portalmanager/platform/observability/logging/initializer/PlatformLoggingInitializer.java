@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.logging.initializer;
+package br.com.portalmanager.platform.observability.logging.initializer;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -6,9 +6,9 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.NopStatusListener;
-import br.com.portalmanager.core.logging.converter.JsonMessageConverter;
-import br.com.portalmanager.core.logging.converter.JsonThrowableConverter;
-import br.com.portalmanager.core.logging.converter.MaskingConverter;
+import br.com.portalmanager.platform.observability.logging.converter.JsonMessageConverter;
+import br.com.portalmanager.platform.observability.logging.converter.JsonThrowableConverter;
+import br.com.portalmanager.platform.observability.logging.converter.MaskingConverter;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -48,7 +48,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
 
     private void loadInternalDefaults(ConfigurableEnvironment env) {
         try {
-            ClassPathResource resource = new ClassPathResource("platform-logging-defaults.properties");
+            ClassPathResource resource = new ClassPathResource("platform-observability-defaults.properties");
             if (resource.exists()) {
                 env.getPropertySources().addLast(new ResourcePropertySource("platformLoggingDefaults", resource));
             }
@@ -59,11 +59,11 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     private ConsoleAppender<ILoggingEvent> createJsonConsoleAppender(LoggerContext loggerContext, ConfigurableEnvironment env) {
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
         String appVersion = env.getProperty("info.build.version", "unknown");
-        boolean maskingEnabled = env.getProperty("platform.logging.masking.enabled", Boolean.class, true);
+        boolean maskingEnabled = env.getProperty("platform.observability.logging.masking.enabled", Boolean.class, true);
 
         // Captura o mapa de conversores customizados do usuário informados no YAML
         Map<String, String> customConverters = Binder.get(env)
-                .bind("platform.logging.custom-converters", Bindable.mapOf(String.class, String.class))
+                .bind("platform.observability.logging.custom-converters", Bindable.mapOf(String.class, String.class))
                 .orElse(new HashMap<>());
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder() {
@@ -123,7 +123,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
 
     private void configureLogLevels(LoggerContext loggerContext, ConfigurableEnvironment env) {
         Map<String, String> defaultLevels = Binder.get(env)
-                .bind("platform.logging.defaults", Bindable.mapOf(String.class, String.class))
+                .bind("platform.observability.logging.defaults", Bindable.mapOf(String.class, String.class))
                 .orElse(new HashMap<>());
 
         defaultLevels.forEach((packageName, levelStr) -> {
@@ -133,7 +133,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         });
 
         Map<String, String> customLevels = Binder.get(env)
-                .bind("platform.logging.levels", Bindable.mapOf(String.class, String.class))
+                .bind("platform.observability.logging.levels", Bindable.mapOf(String.class, String.class))
                 .orElse(new HashMap<>());
 
         customLevels.forEach((packageName, levelStr) ->

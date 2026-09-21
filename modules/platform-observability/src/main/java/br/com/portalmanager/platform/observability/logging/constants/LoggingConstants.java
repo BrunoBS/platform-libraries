@@ -1,13 +1,13 @@
-package br.com.portalmanager.core.logging.constants;
+package br.com.portalmanager.platform.observability.logging.constants;
 
 public final class LoggingConstants {
     
     private LoggingConstants() {} // Previne instanciação
 
     public static final String APPENDER_NAME = "JSON_CONSOLE";
-    public static final String PROPERTY_DEFAULTS_PREFIX = "platform.logging.defaults";
-    public static final String PROPERTY_CUSTOM_PREFIX = "platform.logging.levels";
-    public static final String INTERNAL_PROPERTIES_FILE = "platform-logging-defaults.properties";
+    public static final String PROPERTY_DEFAULTS_PREFIX = "platform.observability.logging.defaults";
+    public static final String PROPERTY_CUSTOM_PREFIX = "platform.observability.logging.levels";
+    public static final String INTERNAL_PROPERTIES_FILE = "platform-observability-defaults.properties";
     public static final String ENVIRONMENT_PROPERTY_SOURCE_NAME = "platformLoggingDefaults";
 
     // O template do JSON isolado do código de orquestração
