@@ -2,16 +2,27 @@
 
 ## Estado atual
 
-A Foundation está consolidada no repositório oficial `BrunoBS/platform-libraries`.
+A Foundation está consolidada em `BrunoBS/platform-libraries`.
 
-A topologia física em `main` é:
+Namespace Maven e Java vigente:
+
+```text
+br.com.portalmanager.platform
+```
+
+Versão dos artifacts próprios no baseline atual:
+
+```text
+1.0.0
+```
+
+## Estrutura
 
 ```text
 platform-libraries/
-├── pom.xml                    reactor/aggregator
-├── platform-parent/           governança de build
-├── platform-dependencies/     BOM tecnológico externo
-├── platform-libraries-bom/    BOM das capabilities
+├── platform-parent/
+├── platform-dependencies/
+├── platform-libraries-bom/
 └── modules/
     ├── platform-starter/
     ├── platform-observability/
@@ -23,35 +34,40 @@ platform-libraries/
     └── platform-testing/
 ```
 
-O root POM é somente aggregator/reactor. Não concentra regras de build.
+O root POM é somente reactor/aggregator.
 
-O namespace Maven e Java oficial é:
-
-```text
-br.com.portalmanager.platform
-```
-
-Os `artifactId` `platform-*` permanecem estáveis.
-
-## Responsabilidades
+## Eixos Maven
 
 ### platform-parent
 
-Responsável por Java 25, Maven mínimo, compiler, Surefire, Failsafe, JaCoCo, Enforcer, dependency convergence e plugins comuns.
+Governança de build:
 
-Importa apenas `platform-dependencies`.
+- Java 25;
+- Maven mínimo;
+- Compiler;
+- Surefire/Failsafe;
+- JaCoCo;
+- Enforcer;
+- dependency convergence;
+- plugins comuns.
 
-Não contém versões de capabilities.
+Importa somente `platform-dependencies`.
 
 ### platform-dependencies
 
-Representa exclusivamente o baseline tecnológico externo, incluindo Spring Boot 4.1.1, Testcontainers e ferramentas comuns.
+BOM tecnológico externo.
 
-Não gerencia artifacts da própria Golden Platform.
+Baseline atual:
+
+- Spring Boot 4.1.1;
+- Testcontainers gerenciado pelo Spring Boot, efetivamente 2.0.5;
+- overrides externos explícitos somente quando necessários.
+
+Não gerencia capabilities próprias.
 
 ### platform-libraries-bom
 
-Representa o baseline das capabilities e gerencia:
+Gerencia a release train compatível das capabilities:
 
 - platform-starter;
 - platform-observability;
@@ -62,85 +78,94 @@ Representa o baseline das capabilities e gerencia:
 - platform-tagging;
 - platform-testing.
 
-As capabilities seguem inicialmente uma release train coerente controlada por `.mvn/maven.config`.
+## Starter
 
-## Capabilities
-
-O starter obrigatório agrega somente logging, messaging e authorization.
-
-Audit, catalog e tagging permanecem explícitos. Test-support permanece capability de testes.
-
-`platform-crud` continua removido e não participa do reactor.
-
-`platform-catalog` permanece independente de CRUD genérico.
-
-## Dependências internas relevantes
+O starter agrega somente:
 
 ```text
-starter -> logging
+platform-observability
+platform-messaging
+platform-authorization
+```
+
+Audit, catalog e tagging são explícitos.
+
+`platform-testing` é exclusivo de testes e não faz parte do runtime starter.
+
+## Dependências internas
+
+```text
+starter -> observability
 starter -> messaging
 starter -> authorization
+
 authorization -> messaging
+
 audit -> authorization
 audit -> messaging
+
 catalog -> messaging
 ```
 
-## Coordenadas próprias preparadas
+`platform-tagging` é independente das demais capabilities de runtime.
 
-As versões atuais dos artifacts próprios da Foundation preparadas para publicação são:
+## Observability
 
-```text
-br.com.portalmanager.platform:platform-dependencies:1.0.0
-br.com.portalmanager.platform:platform-parent:1.0.0
-br.com.portalmanager.platform:platform-libraries-bom:1.0.0
-br.com.portalmanager.platform:platform-*:1.0.0
-```
+`platform-observability` é a fronteira de observabilidade.
 
-A igualdade em `1.0.0` vale somente para as coordenadas dos artifacts próprios da Foundation. O `platform-dependencies:1.0.0` continua gerenciando versões tecnológicas independentes, como Spring Boot `4.1.1` e Testcontainers `1.21.4`.
-
-## Distribuição oficial
-
-O único registry oficial alvo é:
-
-`https://maven.pkg.github.com/brunobs/platform-libraries`
-
-O fluxo de saída da Foundation é:
+No baseline atual implementa somente logging estruturado:
 
 ```text
-platform-libraries
-  -> clean verify
-  -> deploy
-GitHub Packages / platform-libraries
-  -> resolve remoto
-consumer
-  -> clean verify
+br.com.portalmanager.platform.observability.logging
 ```
 
-O registry de `platform-build` não faz parte do fluxo oficial alvo.
+Prefixo de configuração:
 
-## Evidência atual
+```text
+platform.observability.logging
+```
 
-O `main` foi validado no Verify #85, run `35544899150`, após:
+Metrics e tracing não são adicionados sem caso real aprovado.
 
-- consolidação de `platform-parent` e `platform-dependencies`;
-- criação do `platform-libraries-bom`;
-- remoção do gerenciamento de capabilities do parent;
-- migração Maven e Java para `br.com.portalmanager.platform`;
-- limpeza dos POMs gerados pelo Flatten Plugin;
-- gates de CI contra regressão de namespace e higiene do repositório.
+## Testing
 
-O reactor concluiu com `BUILD SUCCESS`.
+`platform-testing` fornece infraestrutura reutilizável para:
 
-A publicação anterior das coordenadas próprias em `1.0.0` no run `35542606756` usou o namespace provisório `com.empresa.platform`. Ela permanece apenas como evidência operacional histórica do fluxo de deploy e não representa o baseline oficial final.
+- unit tests;
+- Spring integration tests;
+- MySQL/Kafka Testcontainers;
+- WireMock authorization;
+- RestAssured;
+- database cleanup/scripts;
+- fixtures;
+- performance de testes;
+- architecture guard opt-in.
 
-## Condição para fechamento
+Infraestrutura pesada permanece opt-in.
 
-A arquitetura local está consolidada. O fechamento do checkpoint ainda depende de:
+## Guardrails
 
-1. publicar `br.com.portalmanager.platform:*:1.0.0` no registry de `platform-libraries`;
-2. validar resolução remota dessas coordenadas por um consumidor;
-3. executar `mvn clean verify` verde no consumidor sem depender de `platform-build` ou `mvn install` local;
-4. registrar as evidências finais em `FOUNDATION-PUBLISHING.md` e `FOUNDATION-CHECKPOINT.md`.
+- `platform-crud` permanece removido;
+- `platform-catalog` continua independente de CRUD genérico;
+- nenhum alias para `br.com.portalmanager.core`;
+- nenhum alias para `platform-logging` ou `platform-test-support`;
+- domínio de aplicação continua fora do namespace `platform`.
 
-Até essas provas remotas, o checkpoint de consolidação permanece aberto.
+## Distribuição
+
+Registry oficial:
+
+```text
+https://maven.pkg.github.com/brunobs/platform-libraries
+```
+
+Fluxo:
+
+```text
+Foundation clean verify
+→ publish
+→ consumer resolve remoto
+→ consumer clean verify
+```
+
+A migração definida na ADR-004 só é fechada após publicação e revalidação do `account-service`.
