@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.database;
+package br.com.portalmanager.platform.testing.database;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;

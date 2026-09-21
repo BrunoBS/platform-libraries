@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.context;
+package br.com.portalmanager.platform.testing.context;
 
 import java.util.UUID;
 

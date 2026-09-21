@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.database;
+package br.com.portalmanager.platform.testing.database;
 
 public enum CleanupMode {
     BEFORE_EACH,

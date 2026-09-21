@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.testing.database;
+package br.com.portalmanager.platform.testing.database;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
