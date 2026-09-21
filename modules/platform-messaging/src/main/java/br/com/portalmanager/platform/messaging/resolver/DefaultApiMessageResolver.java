@@ -1,10 +1,10 @@
-package br.com.portalmanager.core.messaging.resolver;
+package br.com.portalmanager.platform.messaging.resolver;
 
-import br.com.portalmanager.core.messaging.cache.ApiMessageCache;
-import br.com.portalmanager.core.messaging.exception.ApiMessageNotFoundException;
-import br.com.portalmanager.core.messaging.model.ApiMessage;
-import br.com.portalmanager.core.messaging.provider.ApiMessageProvider;
-import br.com.portalmanager.core.messaging.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.messaging.cache.ApiMessageCache;
+import br.com.portalmanager.platform.messaging.exception.ApiMessageNotFoundException;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.messaging.provider.ApiMessageProvider;
+import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
 
 import java.util.List;
 import java.util.Locale;

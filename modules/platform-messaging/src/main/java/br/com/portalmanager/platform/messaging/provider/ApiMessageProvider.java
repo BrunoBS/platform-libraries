@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.messaging.provider;
+package br.com.portalmanager.platform.messaging.provider;
 
-import br.com.portalmanager.core.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
 
 import java.util.Locale;
 import java.util.Optional;

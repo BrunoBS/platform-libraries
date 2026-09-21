@@ -1,4 +1,4 @@
-package br.com.portalmanager.core.messaging.model;
+package br.com.portalmanager.platform.messaging.model;
 
 public record ApiValidationDetail(
         String field,

@@ -1,6 +1,6 @@
-package br.com.portalmanager.core.messaging.resolver;
+package br.com.portalmanager.platform.messaging.resolver;
 
-import br.com.portalmanager.core.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.messaging.model.ApiMessage;
 
 import java.util.Locale;
 
