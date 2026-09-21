@@ -1,7 +1,7 @@
-package br.com.portalmanager.core.authorization.web.filter;
+package br.com.portalmanager.platform.authorization.web.filter;
 
-import br.com.portalmanager.core.authorization.model.UserContext;
-import br.com.portalmanager.core.authorization.model.UserSession;
+import br.com.portalmanager.platform.authorization.model.UserContext;
+import br.com.portalmanager.platform.authorization.model.UserSession;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

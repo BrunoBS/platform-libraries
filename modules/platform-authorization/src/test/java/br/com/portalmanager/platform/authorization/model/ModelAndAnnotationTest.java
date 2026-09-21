@@ -1,7 +1,7 @@
-package br.com.portalmanager.core.authorization.model;
+package br.com.portalmanager.platform.authorization.model;
 
-import br.com.portalmanager.core.authorization.annotation.AuthorizationAccessPolicy;
-import br.com.portalmanager.core.authorization.annotation.AuthorizationRequired;
+import br.com.portalmanager.platform.authorization.annotation.AuthorizationAccessPolicy;
+import br.com.portalmanager.platform.authorization.annotation.AuthorizationRequired;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;

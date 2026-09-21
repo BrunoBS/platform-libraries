@@ -1,8 +1,8 @@
-package br.com.portalmanager.core.authorization.service;
+package br.com.portalmanager.platform.authorization.service;
 
-import br.com.portalmanager.core.authorization.exception.ForbiddenAccessException;
-import br.com.portalmanager.core.authorization.message.AuthorizationMessageKeys;
-import br.com.portalmanager.core.authorization.model.AuthorizationLevel;
+import br.com.portalmanager.platform.authorization.exception.ForbiddenAccessException;
+import br.com.portalmanager.platform.authorization.message.AuthorizationMessageKeys;
+import br.com.portalmanager.platform.authorization.model.AuthorizationLevel;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
 

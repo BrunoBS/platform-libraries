@@ -1,10 +1,10 @@
-package br.com.portalmanager.core.authorization.context;
+package br.com.portalmanager.platform.authorization.context;
 
-import br.com.portalmanager.core.authorization.model.UserContext;
+import br.com.portalmanager.platform.authorization.model.UserContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import br.com.portalmanager.core.authorization.model.UserSession;
+import br.com.portalmanager.platform.authorization.model.UserSession;
 class UserContextTest {
 
     @BeforeEach
