@@ -36,7 +36,16 @@ public class PlatformMessagingProperties {
     }
 
     public static class Datasource {
+        private boolean enabled = false;
         private String viewName = "vw_api_message";
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean v) {
+            enabled = v;
+        }
 
         public String getViewName() {
             return viewName;

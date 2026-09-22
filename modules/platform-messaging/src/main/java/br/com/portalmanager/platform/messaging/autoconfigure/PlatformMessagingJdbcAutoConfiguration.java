@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 )
 @ConditionalOnClass(JdbcTemplate.class)
 @ConditionalOnProperty(prefix = "platform.messaging", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "platform.messaging.datasource", name = "enabled", havingValue = "true")
 public class PlatformMessagingJdbcAutoConfiguration {
 
     @Bean
