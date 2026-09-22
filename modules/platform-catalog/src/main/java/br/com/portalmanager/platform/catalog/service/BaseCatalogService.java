@@ -21,9 +21,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-abstract class BaseCatalogService<
+public abstract sealed class BaseCatalogService<
         E extends BaseCatalogEntity,
-        D extends BaseCatalogDTO<D>> {
+        D extends BaseCatalogDTO<D>> permits EnumCatalogService, DynamicCatalogService {
 
     private final BaseCatalogRepository<E> repository;
     private final BaseCatalogMapper<D, E> mapper;
