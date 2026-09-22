@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class BaseCatalogService<
+abstract class BaseCatalogService<
         E extends BaseCatalogEntity,
         D extends BaseCatalogDTO<D>> {
 
