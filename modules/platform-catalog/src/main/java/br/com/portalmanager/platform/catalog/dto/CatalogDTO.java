@@ -11,7 +11,7 @@ public record CatalogDTO(
         String description,
         Integer sortOrder,
         JsonNode settings
-) implements BaseCatalogDTO<CatalogDTO> {
+) implements CatalogDTOContract<CatalogDTO> {
 
     @Override
     public CatalogDTO withCode(String code) {
