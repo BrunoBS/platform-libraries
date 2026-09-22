@@ -13,7 +13,7 @@ import tools.jackson.databind.ObjectMapper;
  * Simple path for fully dynamic catalogs: the database is the source of truth
  * for allowed catalog names.
  */
-public abstract class DynamicCatalogService<E extends BaseCatalogEntity>
+public abstract non-sealed class DynamicCatalogService<E extends BaseCatalogEntity>
         extends BaseCatalogService<E, CatalogDTO> {
 
     protected DynamicCatalogService(
