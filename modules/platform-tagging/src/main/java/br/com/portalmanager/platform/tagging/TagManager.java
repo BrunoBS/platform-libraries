@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.tagging;
 import br.com.portalmanager.platform.tagging.model.Tag;
 import br.com.portalmanager.platform.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.tagging.model.TagOwnerType;
-import br.com.portalmanager.platform.tagging.repository.TagRepository;
+import br.com.portalmanager.platform.tagging.storage.TagStorage;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -17,10 +17,10 @@ import java.util.Set;
 
 public class TagManager {
 
-    private final TagRepository repository;
+    private final TagStorage storage;
 
-    public TagManager(TagRepository repository) {
-        this.repository = repository;
+    public TagManager(TagStorage storage) {
+        this.storage = storage;
     }
 
     @Transactional
@@ -35,7 +35,7 @@ public class TagManager {
         TagOwnerType normalizedOwnerType = () -> resolvedOwnerType;
 
         Map<String, TagOriginType> desired = desiredTags(manualTags, systemTags);
-        List<Tag> current = repository.findByOwnerTypeAndOwnerIdOrderByNameAsc(
+        List<Tag> current = storage.findByOwner(
                 resolvedOwnerType, resolvedOwnerId);
 
         List<Tag> obsolete = new ArrayList<>();
@@ -54,7 +54,7 @@ public class TagManager {
         }
 
         if (!obsolete.isEmpty()) {
-            repository.deleteAll(obsolete);
+            storage.deleteAll(obsolete);
         }
 
         List<Tag> created = desired.entrySet().stream()
@@ -66,7 +66,7 @@ public class TagManager {
                 .toList();
 
         if (!created.isEmpty()) {
-            repository.saveAll(created);
+            storage.saveAll(created);
             result.addAll(created);
         }
 
@@ -75,7 +75,7 @@ public class TagManager {
 
     @Transactional(readOnly = true)
     public List<Tag> findAll(TagOwnerType ownerType, Object ownerId) {
-        return repository.findByOwnerTypeAndOwnerIdOrderByNameAsc(
+        return storage.findByOwner(
                 requireOwnerType(ownerType),
                 requireOwnerId(ownerId));
     }
@@ -101,16 +101,16 @@ public class TagManager {
         if (normalizedTag == null) {
             return List.of();
         }
-        return repository.findOwnerIdsByTag(requireOwnerType(ownerType), normalizedTag);
+        return storage.findOwnerIdsByTag(requireOwnerType(ownerType), normalizedTag);
     }
 
     @Transactional
     public void deleteAll(TagOwnerType ownerType, Object ownerId) {
-        repository.deleteByOwnerTypeAndOwnerId(requireOwnerType(ownerType), requireOwnerId(ownerId));
+        storage.deleteByOwner(requireOwnerType(ownerType), requireOwnerId(ownerId));
     }
 
     private List<String> findByOrigin(TagOwnerType ownerType, Object ownerId, TagOriginType originType) {
-        return repository.findByOwnerTypeAndOwnerIdAndOriginTypeOrderByNameAsc(
+        return storage.findByOwnerAndOrigin(
                         requireOwnerType(ownerType), requireOwnerId(ownerId), originType)
                 .stream()
                 .map(Tag::getName)
@@ -130,7 +130,7 @@ public class TagManager {
         Map<String, List<String>> result = new LinkedHashMap<>();
         resolvedOwnerIds.forEach(ownerId -> result.put(ownerId, new ArrayList<>()));
 
-        repository.findByOwnerTypeAndOwnerIdInAndOriginTypeOrderByOwnerIdAscNameAsc(
+        storage.findByOwnersAndOrigin(
                         requireOwnerType(ownerType), resolvedOwnerIds, originType)
                 .forEach(tag -> result.get(tag.getOwnerId()).add(tag.getName()));
 
