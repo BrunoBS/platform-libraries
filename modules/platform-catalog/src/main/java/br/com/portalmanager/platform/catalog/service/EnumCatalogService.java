@@ -14,7 +14,7 @@ import tools.jackson.databind.ObjectMapper;
  * Simple path for catalogs whose allowed names are defined by a Java enum.
  * The database still owns label, description, sort order, active state and settings.
  */
-public abstract class EnumCatalogService<
+public abstract non-sealed class EnumCatalogService<
         E extends BaseCatalogEntity,
         C extends Enum<C> & CatalogEnum<C>>
         extends BaseCatalogService<E, CatalogDTO> {
