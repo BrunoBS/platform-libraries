@@ -169,6 +169,33 @@ class TagManagerTest {
     }
 
     @Test
+    void shouldFindOwnerIdsByNormalizedTag() {
+        TagRepository repository = repositoryWith();
+        when(repository.findOwnerIdsByTag("ACCOUNT", "minha-tag"))
+                .thenReturn(List.of("10", "20"));
+
+        TagManager manager = new TagManager(repository);
+
+        assertThat(manager.findOwnerIdsByTag(ACCOUNT, "  Minha   Tag  "))
+                .containsExactly("10", "20");
+
+        verify(repository).findOwnerIdsByTag("ACCOUNT", "minha-tag");
+    }
+
+    @Test
+    void shouldNotQueryWhenSearchTagIsBlank() {
+        TagRepository repository = repositoryWith();
+        TagManager manager = new TagManager(repository);
+
+        assertThat(manager.findOwnerIdsByTag(ACCOUNT, "   ")).isEmpty();
+
+        verify(repository, never()).findOwnerIdsByTag(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString()
+        );
+    }
+
+    @Test
     void shouldReadManualTagsForMultipleOwnersInOneQuery() {
         TagRepository repository = repositoryWith();
         Tag first = new Tag(ACCOUNT, "10", "first", TagOriginType.MANUAL);
