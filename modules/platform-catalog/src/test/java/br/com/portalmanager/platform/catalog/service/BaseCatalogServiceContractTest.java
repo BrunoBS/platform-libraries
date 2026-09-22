@@ -28,6 +28,9 @@ import static org.mockito.Mockito.when;
 @DisplayName("Contrato - BaseCatalogService")
 class BaseCatalogServiceContractTest {
 
+    // BaseCatalogService is intentionally package-private. External consumers must
+    // extend EnumCatalogService or DynamicCatalogService instead.
+
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
     private TestRepository repository;
