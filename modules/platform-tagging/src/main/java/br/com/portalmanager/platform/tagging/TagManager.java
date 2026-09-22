@@ -95,6 +95,15 @@ public class TagManager {
         return findByOwnersAndOrigin(ownerType, ownerIds, TagOriginType.MANUAL);
     }
 
+    @Transactional(readOnly = true)
+    public List<String> findOwnerIdsByTag(TagOwnerType ownerType, String tag) {
+        String normalizedTag = TagNormalizer.normalize(tag);
+        if (normalizedTag == null) {
+            return List.of();
+        }
+        return repository.findOwnerIdsByTag(requireOwnerType(ownerType), normalizedTag);
+    }
+
     @Transactional
     public void deleteAll(TagOwnerType ownerType, Object ownerId) {
         repository.deleteByOwnerTypeAndOwnerId(requireOwnerType(ownerType), requireOwnerId(ownerId));
