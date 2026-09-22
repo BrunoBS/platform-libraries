@@ -133,6 +133,13 @@ public abstract sealed class AbstractCatalogService<
         return mapper().toDTO(findActiveByCode(code));
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsActive(String code) {
+        return code != null
+                && !code.isBlank()
+                && repository().existsByCodeAndActiveTrue(code);
+    }
+
     @Transactional
     public D update(D dto) {
         validator().validateForUpdate(dto);
