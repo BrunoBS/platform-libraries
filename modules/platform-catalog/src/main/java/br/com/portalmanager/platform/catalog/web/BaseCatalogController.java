@@ -20,9 +20,9 @@ public abstract class BaseCatalogController<
         return getService().findAll(filters);
     }
 
-    @GetMapping("/{id}")
-    public D findById(@PathVariable Long id) {
-        return getService().findById(id);
+    @GetMapping("/{code}")
+    public D findByCode(@PathVariable String code) {
+        return getService().findByCode(code);
     }
 
     @PostMapping
@@ -31,19 +31,19 @@ public abstract class BaseCatalogController<
         return getService().create(dto);
     }
 
-    @PutMapping("/{id}")
-    public D update(@PathVariable Long id, @RequestBody D dto) {
-        return getService().update(id, dto);
+    @PutMapping("/{code}")
+    public D update(@PathVariable String code, @RequestBody D dto) {
+        return getService().update(code, dto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{code}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        getService().delete(id);
+    public void delete(@PathVariable String code) {
+        getService().delete(code);
     }
 
-    @PostMapping("/{id}/restore")
-    public D restore(@PathVariable Long id) {
-        return getService().restore(id);
+    @PostMapping("/{code}/restore")
+    public D restore(@PathVariable String code) {
+        return getService().restore(code);
     }
 }
