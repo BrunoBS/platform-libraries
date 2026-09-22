@@ -1,0 +1,106 @@
+name: Reset Maven packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Preview packages or delete them
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - delete
+      confirmation:
+        description: Type DELETE PLATFORM PACKAGES to confirm deletion
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.mode == 'delete' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.confirmation }}" != "DELETE PLATFORM PACKAGES" ]; then
+            echo "Deletion cancelled: confirmation text does not match."
+            exit 1
+          fi
+
+      - name: Preview or delete platform Maven packages
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PLATFORM_PACKAGES_TOKEN }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "Secret PLATFORM_PACKAGES_TOKEN is required."
+            echo "It must be able to read and delete GitHub Packages."
+            exit 1
+          fi
+
+          artifacts=(
+            platform-parent
+            platform-dependencies
+            platform-libraries-bom
+            platform-observability
+            platform-messaging
+            platform-authorization
+            platform-audit
+            platform-catalog
+            platform-tagging
+            platform-starter
+            platform-testing
+          )
+
+          is_platform_artifact() {
+            local package_name="$1"
+            local artifact
+            for artifact in "${artifacts[@]}"; do
+              if [ "$package_name" = "$artifact" ] || [[ "$package_name" == *".$artifact" ]]; then
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          mapfile -t packages < <(
+            gh api --paginate "/user/packages?package_type=maven&per_page=100" --jq '.[].name'
+          )
+
+          matched=0
+
+          for package in "${packages[@]}"; do
+            if ! is_platform_artifact "$package"; then
+              continue
+            fi
+
+            matched=$((matched + 1))
+
+            if [ "$MODE" = "preview" ]; then
+              echo "[preview] $package"
+              continue
+            fi
+
+            encoded_package="$(jq -rn --arg value "$package" '$value|@uri')"
+            echo "Deleting $package"
+            gh api               --method DELETE               "/user/packages/maven/$encoded_package"
+          done
+
+          if [ "$matched" -eq 0 ]; then
+            echo "No matching platform Maven packages were found."
+          elif [ "$MODE" = "preview" ]; then
+            echo "Preview complete. Re-run with mode=delete and the required confirmation text to remove them."
+          else
+            echo "Platform Maven package reset complete."
+          fi
