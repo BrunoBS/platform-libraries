@@ -41,11 +41,29 @@ class PlatformMessagingAutoConfigurationTest {
     }
 
     @Test
-    void shouldUseJdbcRepositoryWhenJdbcTemplateExists() {
+    void shouldUseNoOpRepositoryByDefaultEvenWhenJdbcTemplateExists() {
         this.contextRunner
                 .withUserConfiguration(MockInfrastructureConfiguration.class)
                 .withPropertyValues(
                         "platform.messaging.enabled=true",
+                        "platform.messaging.default-locale=pt-BR"
+                )
+                .run(context -> {
+                    assertThat(context).hasSingleBean(ApiMessageRepository.class);
+                    assertThat(context.getBean(ApiMessageRepository.class))
+                            .isInstanceOf(NoOpApiMessageRepository.class);
+                    assertThat(context).hasSingleBean(ApiMessageResolver.class);
+                    assertThat(context).hasSingleBean(ApiExceptionHandler.class);
+                });
+    }
+
+    @Test
+    void shouldUseJdbcRepositoryWhenExplicitlyEnabled() {
+        this.contextRunner
+                .withUserConfiguration(MockInfrastructureConfiguration.class)
+                .withPropertyValues(
+                        "platform.messaging.enabled=true",
+                        "platform.messaging.datasource.enabled=true",
                         "platform.messaging.default-locale=pt-BR"
                 )
                 .run(context -> {
