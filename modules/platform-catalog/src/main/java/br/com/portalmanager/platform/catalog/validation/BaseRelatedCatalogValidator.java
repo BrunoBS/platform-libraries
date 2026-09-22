@@ -7,11 +7,12 @@ import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
 import java.util.Map;
 
 /**
- * Base validator for MANAGED catalogs whose logical identity depends on a
- * related catalog, such as (scope, name).
+ * Base validator for catalogs that also depend on an active related catalog.
+ * Catalog identity is always the immutable semantic code inherited from the
+ * standard catalog contract; the relation is an additional domain rule.
  *
  * @param <D> catalog DTO
- * @param <R> related catalog key type (for example Long id or String name)
+ * @param <R> related catalog key type
  */
 public abstract class BaseRelatedCatalogValidator<D extends BaseCatalogDTO<D>, R>
         extends BaseCatalogValidator<D> {
@@ -24,29 +25,24 @@ public abstract class BaseRelatedCatalogValidator<D extends BaseCatalogDTO<D>, R
     protected final void validateAdditionalCatalogFields(D dto, CatalogValidationResult result) {
         R relation = relatedValue(dto);
         if (isMissing(relation)) {
-            result.addError(relatedField(), CatalogMessageKeys.REQUIRED,
-                    Map.of("0", relatedEntityName()));
+            result.addError(
+                    relatedField(),
+                    CatalogMessageKeys.REQUIRED,
+                    Map.of("0", relatedEntityName())
+            );
             return;
         }
-        if (!relatedExistsAndIsActive(relation)) {
-            result.addError(relatedField(), CatalogMessageKeys.NOT_FOUND,
-                    Map.of("0", relatedEntityName()));
-            return;
-        }
-        validateRelatedFields(dto, relation, result);
-    }
 
-    @Override
-    protected final void validateUniqueness(D dto, CatalogValidationResult result) {
-        R relation = relatedValue(dto);
-        if (isMissing(relation) || dto.name() == null || dto.name().isBlank()) {
+        if (!relatedExistsAndIsActive(relation)) {
+            result.addError(
+                    relatedField(),
+                    CatalogMessageKeys.NOT_FOUND,
+                    Map.of("0", relatedEntityName())
+            );
             return;
         }
-        long id = dto.id() == null ? 0L : dto.id();
-        if (existsByNameAndRelatedValue(dto.name(), relation, id)) {
-            result.addError("name", CatalogMessageKeys.NAME_DUPLICATE,
-                    Map.of("0", entityName(), "1", dto.name() + "/" + relation));
-        }
+
+        validateRelatedFields(dto, relation, result);
     }
 
     protected boolean isMissing(R relation) {
@@ -57,12 +53,7 @@ public abstract class BaseRelatedCatalogValidator<D extends BaseCatalogDTO<D>, R
     }
 
     protected abstract R relatedValue(D dto);
-
     protected abstract String relatedField();
-
     protected abstract String relatedEntityName();
-
     protected abstract boolean relatedExistsAndIsActive(R relation);
-
-    protected abstract boolean existsByNameAndRelatedValue(String name, R relation, long id);
 }
