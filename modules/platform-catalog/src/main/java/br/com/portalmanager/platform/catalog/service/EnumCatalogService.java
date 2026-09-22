@@ -11,7 +11,7 @@ import br.com.portalmanager.platform.catalog.validation.CatalogValidationResult;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Simple path for catalogs whose allowed names are defined by a Java enum.
+ * Simple path for catalogs whose allowed codes are defined by a Java enum.
  * The database still owns label, description, sort order, active state and settings.
  */
 public abstract non-sealed class EnumCatalogService<
