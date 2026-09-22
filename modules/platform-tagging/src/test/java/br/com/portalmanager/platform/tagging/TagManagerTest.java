@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.tagging;
 import br.com.portalmanager.platform.tagging.model.Tag;
 import br.com.portalmanager.platform.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.tagging.model.TagOwnerType;
-import br.com.portalmanager.platform.tagging.repository.TagRepository;
+import br.com.portalmanager.platform.tagging.storage.TagStorage;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -23,7 +23,7 @@ class TagManagerTest {
 
     @Test
     void manualTagShouldOverrideSystemTag() {
-        TagRepository repository = repositoryWith();
+        TagStorage storage = storageWith();
         TagManager manager = new TagManager(repository);
 
         List<Tag> result = manager.reconcile(
@@ -46,7 +46,7 @@ class TagManagerTest {
     @Test
     void shouldPromoteSystemTagToManualWithoutChangingId() {
         Tag existing = tag("same-tag", TagOriginType.SYSTEM);
-        TagRepository repository = repositoryWith(existing);
+        TagStorage storage = storageWith(existing);
         TagManager manager = new TagManager(repository);
 
         List<Tag> result = manager.reconcile(ACCOUNT, 10L, List.of("same-tag"), List.of("same-tag"));
@@ -60,7 +60,7 @@ class TagManagerTest {
     @Test
     void systemTagShouldReturnWhenManualOverrideIsRemovedWithoutChangingId() {
         Tag existing = tag("same-tag", TagOriginType.MANUAL);
-        TagRepository repository = repositoryWith(existing);
+        TagStorage storage = storageWith(existing);
         TagManager manager = new TagManager(repository);
 
         List<Tag> result = manager.reconcile(ACCOUNT, 10L, List.of(), List.of("same-tag"));
@@ -75,7 +75,7 @@ class TagManagerTest {
     void shouldDeleteOnlyObsoleteTags() {
         Tag kept = tag("keep", TagOriginType.SYSTEM);
         Tag obsolete = tag("remove", TagOriginType.MANUAL);
-        TagRepository repository = repositoryWith(kept, obsolete);
+        TagStorage storage = storageWith(kept, obsolete);
         TagManager manager = new TagManager(repository);
 
         manager.reconcile(ACCOUNT, 10L, List.of(), List.of("keep"));
@@ -90,7 +90,7 @@ class TagManagerTest {
     @Test
     void shouldInsertOnlyNewTags() {
         Tag existing = tag("existing", TagOriginType.SYSTEM);
-        TagRepository repository = repositoryWith(existing);
+        TagStorage storage = storageWith(existing);
         TagManager manager = new TagManager(repository);
 
         List<Tag> result = manager.reconcile(
@@ -113,7 +113,7 @@ class TagManagerTest {
     @Test
     void unchangedTagsShouldNotBeWritten() {
         Tag existing = tag("existing", TagOriginType.SYSTEM);
-        TagRepository repository = repositoryWith(existing);
+        TagStorage storage = storageWith(existing);
         TagManager manager = new TagManager(repository);
 
         List<Tag> result = manager.reconcile(ACCOUNT, 10L, List.of(), List.of("existing"));
@@ -125,7 +125,7 @@ class TagManagerTest {
 
     @Test
     void shouldNormalizeOwnerTypeAndTagNames() {
-        TagRepository repository = repositoryWith();
+        TagStorage storage = storageWith();
         TagManager manager = new TagManager(repository);
         TagOwnerType owner = () -> " account ";
 
@@ -146,7 +146,7 @@ class TagManagerTest {
 
     @Test
     void shouldReadOnlyManualTagNames() {
-        TagRepository repository = repositoryWith();
+        TagStorage storage = storageWith();
         when(repository.findByOwnerTypeAndOwnerIdAndOriginTypeOrderByNameAsc(
                 "ACCOUNT", "10", TagOriginType.MANUAL))
                 .thenReturn(List.of(tag("manual-a", TagOriginType.MANUAL), tag("manual-b", TagOriginType.MANUAL)));
@@ -158,7 +158,7 @@ class TagManagerTest {
 
     @Test
     void shouldReadOnlySystemTagNames() {
-        TagRepository repository = repositoryWith();
+        TagStorage storage = storageWith();
         when(repository.findByOwnerTypeAndOwnerIdAndOriginTypeOrderByNameAsc(
                 "ACCOUNT", "10", TagOriginType.SYSTEM))
                 .thenReturn(List.of(tag("system", TagOriginType.SYSTEM)));
@@ -170,7 +170,7 @@ class TagManagerTest {
 
     @Test
     void shouldFindOwnerIdsByNormalizedTag() {
-        TagRepository repository = repositoryWith();
+        TagStorage storage = storageWith();
         when(repository.findOwnerIdsByTag("ACCOUNT", "minha-tag"))
                 .thenReturn(List.of("10", "20"));
 
@@ -184,7 +184,7 @@ class TagManagerTest {
 
     @Test
     void shouldNotQueryWhenSearchTagIsBlank() {
-        TagRepository repository = repositoryWith();
+        TagStorage storage = storageWith();
         TagManager manager = new TagManager(repository);
 
         assertThat(manager.findOwnerIdsByTag(ACCOUNT, "   ")).isEmpty();
@@ -197,7 +197,7 @@ class TagManagerTest {
 
     @Test
     void shouldReadManualTagsForMultipleOwnersInOneQuery() {
-        TagRepository repository = repositoryWith();
+        TagStorage storage = storageWith();
         Tag first = new Tag(ACCOUNT, "10", "first", TagOriginType.MANUAL);
         Tag second = new Tag(ACCOUNT, "20", "second", TagOriginType.MANUAL);
         when(repository.findByOwnerTypeAndOwnerIdInAndOriginTypeOrderByOwnerIdAscNameAsc(
@@ -212,12 +212,12 @@ class TagManagerTest {
         assertThat(result.get("20")).containsExactly("second");
     }
 
-    private static TagRepository repositoryWith(Tag... tags) {
-        TagRepository repository = mock(TagRepository.class);
+    private static TagStorage storageWith(Tag... tags) {
+        TagStorage storage = mock(TagRepository.class);
         when(repository.findByOwnerTypeAndOwnerIdOrderByNameAsc("ACCOUNT", "10"))
                 .thenReturn(List.of(tags));
         when(repository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-        return repository;
+        return storage;
     }
 
     private static Tag tag(String name, TagOriginType origin) {
