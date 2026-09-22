@@ -3,6 +3,8 @@ package br.com.portalmanager.platform.tagging.autoconfigure;
 import br.com.portalmanager.platform.tagging.TagManager;
 import br.com.portalmanager.platform.tagging.model.Tag;
 import br.com.portalmanager.platform.tagging.repository.TagRepository;
+import br.com.portalmanager.platform.tagging.storage.JpaTagStorage;
+import br.com.portalmanager.platform.tagging.storage.TagStorage;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -33,8 +35,14 @@ public class PlatformTaggingAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(TagStorage.class)
+    TagStorage tagStorage(TagRepository repository) {
+        return new JpaTagStorage(repository);
+    }
+
+    @Bean
     @ConditionalOnMissingBean
-    TagManager tagManager(TagRepository repository) {
-        return new TagManager(repository);
+    TagManager tagManager(TagStorage storage) {
+        return new TagManager(storage);
     }
 }
