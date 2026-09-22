@@ -26,8 +26,7 @@ public class CatalogMapper<E extends BaseCatalogEntity>
         }
 
         return new CatalogDTO(
-                entity.getId(),
-                entity.getName(),
+                entity.getCode(),
                 entity.getLabel(),
                 entity.getDescription(),
                 entity.getSortOrder(),
