@@ -40,7 +40,7 @@ public abstract sealed class BaseCatalogService<
 
     protected Set<String> allowedFilters() {
         return Stream.concat(
-                        Stream.of("active", "name"),
+                        Stream.of("active", "code"),
                         additionalAllowedFilters().stream()
                 )
                 .collect(Collectors.toUnmodifiableSet());
@@ -75,46 +75,52 @@ public abstract sealed class BaseCatalogService<
     private void validateAllowedFilters(Map<String, String> filters) {
         Set<String> allowed = allowedFilters();
         filters.forEach((name, value) -> {
-            if (!allowed.contains(name)) throw unsupportedFilterException(name, value);
+            if (!allowed.contains(name)) {
+                throw unsupportedFilterException(name, value);
+            }
         });
     }
 
     protected boolean booleanFilter(Map<String, String> filters, String name, boolean defaultValue) {
         String value = filters.get(name);
-        if (value == null || value.isBlank()) return defaultValue;
-        if ("true".equalsIgnoreCase(value)) return true;
-        if ("false".equalsIgnoreCase(value)) return false;
+        if (value == null || value.isBlank()) {
+            return defaultValue;
+        }
+        if ("true".equalsIgnoreCase(value)) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return false;
+        }
         throw invalidFilterException(name, value);
     }
 
     protected List<E> findAllEntities(Map<String, String> filters) {
         boolean active = booleanFilter(filters, "active", true);
-        String name = filters.get("name");
+        String code = filters.get("code");
 
         Map<String, String> additionalFilters = new HashMap<>(filters);
         additionalFilters.remove("active");
-        additionalFilters.remove("name");
+        additionalFilters.remove("code");
 
         Specification<E> specification =
                 (root, query, cb) -> cb.equal(root.get("active"), active);
 
-        if (name != null && !name.isBlank()) {
-            String contains = "%" + name.toLowerCase() + "%";
+        if (code != null && !code.isBlank()) {
+            String contains = "%" + code.toUpperCase() + "%";
             specification = specification.and(
-                    (root, query, cb) -> cb.like(cb.lower(root.get("name")), contains)
+                    (root, query, cb) -> cb.like(cb.upper(root.get("code")), contains)
             );
         }
 
-        Specification<E> additional =
-                additionalSpecification(Map.copyOf(additionalFilters));
-
+        Specification<E> additional = additionalSpecification(Map.copyOf(additionalFilters));
         if (additional != null) {
             specification = specification.and(additional);
         }
 
         return repository().findAll(
                 specification,
-                Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("id"))
+                Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("code"))
         );
     }
 
@@ -123,8 +129,8 @@ public abstract sealed class BaseCatalogService<
     }
 
     @Transactional(readOnly = true)
-    public D findById(Long id) {
-        return mapper().toDTO(findActiveById(id));
+    public D findByCode(String code) {
+        return mapper().toDTO(findActiveByCode(code));
     }
 
     @Transactional
@@ -133,7 +139,7 @@ public abstract sealed class BaseCatalogService<
 
         E entity = getEntity(dto);
         Integer nextOrder = dto.sortOrder() == null || dto.sortOrder() < 1
-                ? nextSortOrderExcluding(dto.id())
+                ? nextSortOrderExcluding(dto.code())
                 : null;
 
         mapper().updateEntity(entity, dto);
@@ -149,13 +155,13 @@ public abstract sealed class BaseCatalogService<
     }
 
     @Transactional
-    public D update(Long id, D dto) {
-        return update(dto.withId(id));
+    public D update(String code, D dto) {
+        return update(dto.withCode(code));
     }
 
     @Transactional
-    public void delete(Long id) {
-        E entity = findActiveById(id);
+    public void delete(String code) {
+        E entity = findActiveByCode(code);
         D dto = mapper().toDTO(entity);
         validator().validateForDelete(dto);
         beforeDelete(entity);
@@ -163,16 +169,10 @@ public abstract sealed class BaseCatalogService<
         afterDelete(entity);
     }
 
-    @Transactional(readOnly = true)
-    public E findByName(String name) {
-        return repository().findByNameAndActiveTrue(name)
-                .orElseThrow(() -> notFoundException(null));
-    }
-
     @Transactional
-    public D restore(Long id) {
-        E entity = repository().findByIdAndActiveFalse(id)
-                .orElseThrow(() -> restoreException(id));
+    public D restore(String code) {
+        E entity = repository().findByCodeAndActiveFalse(code)
+                .orElseThrow(() -> restoreException(code));
 
         validator().validateForUpdate(mapper().toDTO(entity));
         entity.setActive(true);
@@ -180,17 +180,17 @@ public abstract sealed class BaseCatalogService<
     }
 
     @Transactional(readOnly = true)
-    public List<E> findByNames(List<String> names) {
-        return repository().findByNameInAndActiveTrue(names);
+    public List<E> findByCodes(List<String> codes) {
+        return repository().findByCodeInAndActiveTrue(codes);
     }
 
     protected E getEntity(D dto) {
-        return findActiveById(dto.id());
+        return findActiveByCode(dto.code());
     }
 
-    private E findActiveById(Long id) {
-        return repository().findByIdAndActiveTrue(id)
-                .orElseThrow(() -> notFoundException(id));
+    private E findActiveByCode(String code) {
+        return repository().findByCodeAndActiveTrue(code)
+                .orElseThrow(() -> notFoundException(code));
     }
 
     protected RuntimeException unsupportedFilterException(String name, String value) {
@@ -223,16 +223,18 @@ public abstract sealed class BaseCatalogService<
         );
     }
 
-    protected RuntimeException notFoundException(Long id) {
+    protected RuntimeException notFoundException(String code) {
         return new NotFoundException(
                 CatalogMessageKeys.NOT_FOUND,
-                Map.of("0", validator().entityName()));
+                Map.of("0", validator().entityName(), "1", code)
+        );
     }
 
-    protected RuntimeException restoreException(Long id) {
+    protected RuntimeException restoreException(String code) {
         return new ValidationException(
                 CatalogMessageKeys.RESTORE_INVALID,
-                Map.of("0", validator().entityName(), "1", id));
+                Map.of("0", validator().entityName(), "1", code)
+        );
     }
 
     protected void beforeCreate(E entity, D dto) {
@@ -260,8 +262,8 @@ public abstract sealed class BaseCatalogService<
                 .orElse(1);
     }
 
-    private Integer nextSortOrderExcluding(Long id) {
-        return repository().findFirstByIdNotOrderBySortOrderDesc(id)
+    private Integer nextSortOrderExcluding(String code) {
+        return repository().findFirstByCodeNotOrderBySortOrderDesc(code)
                 .map(last -> last.getSortOrder() + 1)
                 .orElse(1);
     }

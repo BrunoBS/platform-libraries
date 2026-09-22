@@ -32,7 +32,6 @@ class BaseCatalogServiceContractTest {
     private TestService service;
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     void setUp() {
         repository = mock(TestRepository.class);
         service = new TestService(repository);
@@ -44,36 +43,37 @@ class BaseCatalogServiceContractTest {
     @Test
     void deveAplicarProximoSortOrderNoCreate() {
         when(repository.findFirstByOrderBySortOrderDesc())
-                .thenReturn(Optional.of(entity(1L, "EXISTING", 5)));
+                .thenReturn(Optional.of(entity("EXISTING", 5)));
 
-        CatalogDTO created = service.create(dto(null, "ONE", null));
+        CatalogDTO created = service.create(dto("ONE", null));
 
         assertThat(created.sortOrder()).isEqualTo(6);
     }
 
     @Test
     void devePreservarSortOrderExplicitoNoCreate() {
-        CatalogDTO created = service.create(dto(null, "ONE", 30));
+        CatalogDTO created = service.create(dto("ONE", 30));
 
         assertThat(created.sortOrder()).isEqualTo(30);
     }
 
     @Test
     void deveCalcularSortOrderAntesDeMapearUpdateNulo() {
-        TestEntity current = entity(10L, "ONE", 5);
-        when(repository.findByIdAndActiveTrue(10L)).thenReturn(Optional.of(current));
-        when(repository.findFirstByIdNotOrderBySortOrderDesc(10L))
-                .thenReturn(Optional.of(entity(20L, "TWO", 10)));
+        TestEntity current = entity("ONE", 5);
+        when(repository.findByCodeAndActiveTrue("ONE")).thenReturn(Optional.of(current));
+        when(repository.findFirstByCodeNotOrderBySortOrderDesc("ONE"))
+                .thenReturn(Optional.of(entity("TWO", 10)));
 
-        CatalogDTO updated = service.update(10L, dto(null, "ONE", null));
+        CatalogDTO updated = service.update("ONE", dto(null, null));
 
         assertThat(updated.sortOrder()).isEqualTo(11);
-        verify(repository).findFirstByIdNotOrderBySortOrderDesc(10L);
+        assertThat(updated.code()).isEqualTo("ONE");
+        verify(repository).findFirstByCodeNotOrderBySortOrderDesc("ONE");
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    void deveOrdenarListagemPorSortOrderEId() {
+    void deveOrdenarListagemPorSortOrderECode() {
         when(repository.findAll(any(Specification.class), any(Sort.class)))
                 .thenReturn(List.of());
 
@@ -81,7 +81,7 @@ class BaseCatalogServiceContractTest {
 
         verify(repository).findAll(
                 any(Specification.class),
-                eq(Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("id")))
+                eq(Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("code")))
         );
     }
 
@@ -99,10 +99,10 @@ class BaseCatalogServiceContractTest {
 
     @Test
     void deveAplicarSoftDelete() {
-        TestEntity current = entity(10L, "ONE", 1);
-        when(repository.findByIdAndActiveTrue(10L)).thenReturn(Optional.of(current));
+        TestEntity current = entity("ONE", 1);
+        when(repository.findByCodeAndActiveTrue("ONE")).thenReturn(Optional.of(current));
 
-        service.delete(10L);
+        service.delete("ONE");
 
         assertThat(current.isActive()).isFalse();
         verify(repository).save(current);
@@ -110,32 +110,30 @@ class BaseCatalogServiceContractTest {
 
     @Test
     void deveRestaurarRegistroInativo() {
-        TestEntity current = entity(10L, "ONE", 1);
+        TestEntity current = entity("ONE", 1);
         current.setActive(false);
-        when(repository.findByIdAndActiveFalse(10L)).thenReturn(Optional.of(current));
+        when(repository.findByCodeAndActiveFalse("ONE")).thenReturn(Optional.of(current));
 
-        CatalogDTO restored = service.restore(10L);
+        CatalogDTO restored = service.restore("ONE");
 
-        assertThat(restored.id()).isEqualTo(10L);
+        assertThat(restored.code()).isEqualTo("ONE");
         assertThat(current.isActive()).isTrue();
     }
 
-    private CatalogDTO dto(Long id, String name, Integer sortOrder) {
+    private CatalogDTO dto(String code, Integer sortOrder) {
         return new CatalogDTO(
-                id,
-                name,
-                name,
+                code,
+                code == null ? "Label" : code,
                 "Descrição válida para catálogo",
                 sortOrder,
                 JSON.createObjectNode()
         );
     }
 
-    private static TestEntity entity(Long id, String name, Integer sortOrder) {
+    private static TestEntity entity(String code, Integer sortOrder) {
         TestEntity entity = new TestEntity();
-        entity.setTestId(id);
-        entity.setName(name);
-        entity.setLabel(name);
+        entity.setCode(code);
+        entity.setLabel(code);
         entity.setDescription("Descrição válida para catálogo");
         entity.setSortOrder(sortOrder);
         entity.setActive(true);
@@ -148,10 +146,6 @@ class BaseCatalogServiceContractTest {
 
     public static final class TestEntity extends BaseCatalogEntity {
         public TestEntity() {
-        }
-
-        void setTestId(Long id) {
-            this.id = id;
         }
     }
 

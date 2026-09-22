@@ -8,7 +8,7 @@ import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
 import java.util.Map;
 
 /**
- * Validator specialization for catalogs whose allowed names are defined by a
+ * Validator specialization for catalogs whose allowed codes are defined by a
  * Java enum implementing CatalogEnum.
  */
 public abstract class EnumCatalogValidator<
@@ -25,10 +25,12 @@ public abstract class EnumCatalogValidator<
     @Override
     protected void validateAdditionalCatalogFields(D dto, CatalogValidationResult result) {
         super.validateAdditionalCatalogFields(dto, result);
-        if (dto.name() != null && !dto.name().isBlank() && CatalogEnum.from(enumClass, dto.name()) == null) {
+        if (dto.code() != null
+                && !dto.code().isBlank()
+                && CatalogEnum.from(enumClass, dto.code()) == null) {
             result.addError(
-                    "name",
-                    CatalogMessageKeys.NAME_NOT_ALLOWED,
+                    "code",
+                    CatalogMessageKeys.CODE_NOT_ALLOWED,
                     Map.of("0", entityName(), "1", CatalogEnum.getOptionsValid(enumClass))
             );
         }
