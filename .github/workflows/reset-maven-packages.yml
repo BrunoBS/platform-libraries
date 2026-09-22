@@ -52,6 +52,7 @@ jobs:
           artifacts=(
             platform-parent
             platform-dependencies
+            platform-libraries
             platform-libraries-bom
             platform-observability
             platform-messaging
