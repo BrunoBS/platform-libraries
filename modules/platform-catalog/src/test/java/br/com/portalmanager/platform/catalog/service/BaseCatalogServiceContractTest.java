@@ -1,10 +1,8 @@
 package br.com.portalmanager.platform.catalog.service;
 
 import br.com.portalmanager.platform.catalog.dto.CatalogDTO;
-import br.com.portalmanager.platform.catalog.mapper.BaseCatalogMapper;
 import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
 import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
-import br.com.portalmanager.platform.catalog.validation.BaseCatalogValidator;
 import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,15 +29,13 @@ class BaseCatalogServiceContractTest {
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
     private TestRepository repository;
-    private BaseCatalogValidator<CatalogDTO> validator;
     private TestService service;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
         repository = mock(TestRepository.class);
-        validator = mock(BaseCatalogValidator.class);
-        service = new TestService(repository, new TestMapper(), validator);
+        service = new TestService(repository);
 
         when(repository.save(any(TestEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -159,48 +155,11 @@ class BaseCatalogServiceContractTest {
         }
     }
 
-    private static final class TestMapper extends BaseCatalogMapper<CatalogDTO, TestEntity> {
-
-        private TestMapper() {
-            super(TestEntity.class);
-        }
-
-        @Override
-        public TestEntity toEntity(CatalogDTO dto) {
-            if (dto == null) {
-                return null;
-            }
-            TestEntity entity = new TestEntity();
-            mapCommonFields(entity, dto);
-            entity.setActive(true);
-            return entity;
-        }
-
-        @Override
-        public CatalogDTO toDTO(TestEntity entity) {
-            if (entity == null) {
-                return null;
-            }
-            return new CatalogDTO(
-                    entity.getId(),
-                    entity.getName(),
-                    entity.getLabel(),
-                    entity.getDescription(),
-                    entity.getSortOrder(),
-                    JSON.createObjectNode()
-            );
-        }
-    }
-
     private static final class TestService
-            extends BaseCatalogService<TestEntity, CatalogDTO> {
+            extends DynamicCatalogService<TestEntity> {
 
-        private TestService(
-                TestRepository repository,
-                TestMapper mapper,
-                BaseCatalogValidator<CatalogDTO> validator
-        ) {
-            super(repository, mapper, validator);
+        private TestService(TestRepository repository) {
+            super(repository, JSON, TestEntity.class);
         }
     }
 }
