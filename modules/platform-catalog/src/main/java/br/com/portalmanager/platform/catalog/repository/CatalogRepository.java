@@ -14,6 +14,8 @@ public interface CatalogRepository<E extends CatalogEntity>
 
     Optional<E> findByCodeAndActiveTrue(String code);
 
+    boolean existsByCodeAndActiveTrue(String code);
+
     Optional<E> findByCodeAndActiveFalse(String code);
 
     List<E> findByActive(boolean active);
