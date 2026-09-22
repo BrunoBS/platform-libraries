@@ -1,8 +1,6 @@
 package br.com.portalmanager.platform.catalog.model;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
@@ -10,11 +8,8 @@ import jakarta.persistence.MappedSuperclass;
 public abstract class BaseCatalogEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
-
-    @Column(name = "name", nullable = false, length = 50)
-    protected String name;
+    @Column(name = "code", nullable = false, length = 50, updatable = false)
+    protected String code;
 
     @Column(name = "label", nullable = false, length = 100)
     protected String label;
@@ -34,9 +29,8 @@ public abstract class BaseCatalogEntity {
     protected BaseCatalogEntity() {
     }
 
-    public Long getId() { return id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
     public String getLabel() { return label; }
     public void setLabel(String label) { this.label = label; }
     public String getDescription() { return description; }
