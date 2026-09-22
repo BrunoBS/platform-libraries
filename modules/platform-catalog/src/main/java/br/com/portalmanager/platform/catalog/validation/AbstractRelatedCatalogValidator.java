@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.catalog.validation;
 
-import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
+import br.com.portalmanager.platform.catalog.dto.CatalogDTOContract;
 import br.com.portalmanager.platform.catalog.message.CatalogMessageKeys;
-import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
+import br.com.portalmanager.platform.catalog.repository.CatalogRepository;
 
 import java.util.Map;
 
@@ -14,10 +14,10 @@ import java.util.Map;
  * @param <D> catalog DTO
  * @param <R> related catalog key type
  */
-public abstract class BaseRelatedCatalogValidator<D extends BaseCatalogDTO<D>, R>
-        extends BaseCatalogValidator<D> {
+public abstract class AbstractRelatedCatalogValidator<D extends CatalogDTOContract<D>, R>
+        extends AbstractCatalogValidator<D> {
 
-    protected BaseRelatedCatalogValidator(BaseCatalogRepository<?> repository) {
+    protected AbstractRelatedCatalogValidator(CatalogRepository<?> repository) {
         super(repository);
     }
 

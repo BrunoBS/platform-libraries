@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.catalog.validation;
 
 import br.com.portalmanager.platform.catalog.dto.CatalogDTO;
-import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
-import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
+import br.com.portalmanager.platform.catalog.model.CatalogEntity;
+import br.com.portalmanager.platform.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("Contrato - BaseCatalogValidator")
-class BaseCatalogValidatorContractTest {
+@DisplayName("Contrato - AbstractCatalogValidator")
+class AbstractCatalogValidatorContractTest {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
@@ -95,15 +95,15 @@ class BaseCatalogValidatorContractTest {
                 );
     }
 
-    private interface TestRepository extends BaseCatalogRepository<TestEntity> {
+    private interface TestRepository extends CatalogRepository<TestEntity> {
     }
 
-    private static final class TestEntity extends BaseCatalogEntity {
+    private static final class TestEntity extends CatalogEntity {
         public TestEntity() {
         }
     }
 
-    private static final class TestValidator extends BaseCatalogValidator<CatalogDTO> {
+    private static final class TestValidator extends AbstractCatalogValidator<CatalogDTO> {
 
         private TestValidator(TestRepository repository) {
             super(repository);

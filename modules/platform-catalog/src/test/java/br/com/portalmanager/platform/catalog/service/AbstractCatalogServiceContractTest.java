@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.catalog.service;
 
 import br.com.portalmanager.platform.catalog.dto.CatalogDTO;
-import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
-import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
+import br.com.portalmanager.platform.catalog.model.CatalogEntity;
+import br.com.portalmanager.platform.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,8 +23,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@DisplayName("Contrato - BaseCatalogService")
-class BaseCatalogServiceContractTest {
+@DisplayName("Contrato - AbstractCatalogService")
+class AbstractCatalogServiceContractTest {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
@@ -141,10 +141,10 @@ class BaseCatalogServiceContractTest {
         return entity;
     }
 
-    private interface TestRepository extends BaseCatalogRepository<TestEntity> {
+    private interface TestRepository extends CatalogRepository<TestEntity> {
     }
 
-    public static final class TestEntity extends BaseCatalogEntity {
+    public static final class TestEntity extends CatalogEntity {
         public TestEntity() {
         }
     }

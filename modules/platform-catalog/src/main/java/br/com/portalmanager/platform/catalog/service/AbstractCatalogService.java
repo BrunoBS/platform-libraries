@@ -1,11 +1,11 @@
 package br.com.portalmanager.platform.catalog.service;
 
-import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
-import br.com.portalmanager.platform.catalog.mapper.BaseCatalogMapper;
+import br.com.portalmanager.platform.catalog.dto.CatalogDTOContract;
+import br.com.portalmanager.platform.catalog.mapper.AbstractCatalogMapper;
 import br.com.portalmanager.platform.catalog.message.CatalogMessageKeys;
-import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
-import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
-import br.com.portalmanager.platform.catalog.validation.BaseCatalogValidator;
+import br.com.portalmanager.platform.catalog.model.CatalogEntity;
+import br.com.portalmanager.platform.catalog.repository.CatalogRepository;
+import br.com.portalmanager.platform.catalog.validation.AbstractCatalogValidator;
 import br.com.portalmanager.platform.messaging.exception.NotFoundException;
 import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
@@ -21,18 +21,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract sealed class BaseCatalogService<
-        E extends BaseCatalogEntity,
-        D extends BaseCatalogDTO<D>> permits EnumCatalogService, DynamicCatalogService {
+public abstract sealed class AbstractCatalogService<
+        E extends CatalogEntity,
+        D extends CatalogDTOContract<D>> permits EnumCatalogService, DynamicCatalogService {
 
-    private final BaseCatalogRepository<E> repository;
-    private final BaseCatalogMapper<D, E> mapper;
-    private final BaseCatalogValidator<D> validator;
+    private final CatalogRepository<E> repository;
+    private final AbstractCatalogMapper<D, E> mapper;
+    private final AbstractCatalogValidator<D> validator;
 
-    protected BaseCatalogService(
-            BaseCatalogRepository<E> repository,
-            BaseCatalogMapper<D, E> mapper,
-            BaseCatalogValidator<D> validator) {
+    protected AbstractCatalogService(
+            CatalogRepository<E> repository,
+            AbstractCatalogMapper<D, E> mapper,
+            AbstractCatalogValidator<D> validator) {
         this.repository = repository;
         this.mapper = mapper;
         this.validator = validator;
@@ -252,9 +252,9 @@ public abstract sealed class BaseCatalogService<
     protected void afterUpdate(E entity, D dto) {}
     protected void beforeDelete(E entity) {}
     protected void afterDelete(E entity) {}
-    protected BaseCatalogRepository<E> repository() { return repository; }
-    protected BaseCatalogMapper<D, E> mapper() { return mapper; }
-    protected BaseCatalogValidator<D> validator() { return validator; }
+    protected CatalogRepository<E> repository() { return repository; }
+    protected AbstractCatalogMapper<D, E> mapper() { return mapper; }
+    protected AbstractCatalogValidator<D> validator() { return validator; }
 
     private Integer nextSortOrder() {
         return repository().findFirstByOrderBySortOrderDesc()

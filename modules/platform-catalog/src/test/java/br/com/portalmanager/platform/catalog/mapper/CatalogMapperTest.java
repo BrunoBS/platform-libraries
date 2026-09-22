@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.catalog.mapper;
 
 import br.com.portalmanager.platform.catalog.dto.CatalogDTO;
-import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.model.CatalogEntity;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -52,7 +52,7 @@ class CatalogMapperTest {
                 .hasMessage("Invalid catalog settings JSON stored in database");
     }
 
-    public static class TestCatalog extends BaseCatalogEntity {
+    public static class TestCatalog extends CatalogEntity {
         public TestCatalog() {
         }
     }

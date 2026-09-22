@@ -92,7 +92,7 @@ type_workspaces.code
 
 ## Extension points
 
-`BaseCatalogService` é `sealed`. Os únicos pontos de extensão direta são:
+`AbstractCatalogService` é `sealed`. Os únicos pontos de extensão direta são:
 
 ```text
 EnumCatalogService

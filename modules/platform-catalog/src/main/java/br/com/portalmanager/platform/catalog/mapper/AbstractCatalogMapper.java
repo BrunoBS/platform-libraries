@@ -1,13 +1,13 @@
 package br.com.portalmanager.platform.catalog.mapper;
 
-import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
-import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.dto.CatalogDTOContract;
+import br.com.portalmanager.platform.catalog.model.CatalogEntity;
 
-public abstract class BaseCatalogMapper<D extends BaseCatalogDTO<D>, E extends BaseCatalogEntity> {
+public abstract class AbstractCatalogMapper<D extends CatalogDTOContract<D>, E extends CatalogEntity> {
 
     private final Class<E> entityClass;
 
-    protected BaseCatalogMapper(Class<E> entityClass) {
+    protected AbstractCatalogMapper(Class<E> entityClass) {
         this.entityClass = entityClass;
     }
 

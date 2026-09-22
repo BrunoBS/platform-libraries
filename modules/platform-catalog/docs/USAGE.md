@@ -38,7 +38,7 @@ A estrutura persistida é igual nos dois modelos.
 ```java
 @Entity
 @Table(name = "type_languages")
-public class LanguageType extends BaseCatalogEntity {
+public class LanguageType extends CatalogEntity {
 }
 ```
 
@@ -53,7 +53,7 @@ public enum LanguageTypeEnum implements CatalogEnum<LanguageTypeEnum> {
 
 ```java
 public interface LanguageTypeRepository
-        extends BaseCatalogRepository<LanguageType> {
+        extends CatalogRepository<LanguageType> {
 }
 ```
 
@@ -141,7 +141,7 @@ EnumCatalogService
 DynamicCatalogService
 ```
 
-`BaseCatalogService` permanece `sealed`.
+`AbstractCatalogService` permanece `sealed`.
 
 ## 10. Checklist
 

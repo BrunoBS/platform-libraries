@@ -1,21 +1,21 @@
 package br.com.portalmanager.platform.catalog.validation;
 
-import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
+import br.com.portalmanager.platform.catalog.dto.CatalogDTOContract;
 import br.com.portalmanager.platform.catalog.message.CatalogMessageKeys;
-import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
+import br.com.portalmanager.platform.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public abstract class BaseCatalogValidator<D extends BaseCatalogDTO<D>> {
+public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> {
 
     private static final Pattern CODE_PATTERN = Pattern.compile("^[A-Z][A-Z0-9_]{0,49}$");
 
-    protected final BaseCatalogRepository<?> repository;
+    protected final CatalogRepository<?> repository;
 
-    protected BaseCatalogValidator(BaseCatalogRepository<?> repository) {
+    protected AbstractCatalogValidator(CatalogRepository<?> repository) {
         this.repository = repository;
     }
 

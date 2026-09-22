@@ -5,7 +5,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class BaseCatalogEntity {
+public abstract class CatalogEntity {
 
     @Id
     @Column(name = "code", nullable = false, length = 50, updatable = false)
@@ -26,7 +26,7 @@ public abstract class BaseCatalogEntity {
     @Column(name = "settings", nullable = false, columnDefinition = "TEXT")
     protected String settings;
 
-    protected BaseCatalogEntity() {
+    protected CatalogEntity() {
     }
 
     public String getCode() { return code; }

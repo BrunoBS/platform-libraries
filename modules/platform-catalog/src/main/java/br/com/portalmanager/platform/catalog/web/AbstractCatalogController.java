@@ -1,19 +1,19 @@
 package br.com.portalmanager.platform.catalog.web;
 
-import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
-import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
-import br.com.portalmanager.platform.catalog.service.BaseCatalogService;
+import br.com.portalmanager.platform.catalog.dto.CatalogDTOContract;
+import br.com.portalmanager.platform.catalog.model.CatalogEntity;
+import br.com.portalmanager.platform.catalog.service.AbstractCatalogService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
-public abstract class BaseCatalogController<
-        D extends BaseCatalogDTO<D>,
-        E extends BaseCatalogEntity> {
+public abstract class AbstractCatalogController<
+        D extends CatalogDTOContract<D>,
+        E extends CatalogEntity> {
 
-    protected abstract BaseCatalogService<E, D> getService();
+    protected abstract AbstractCatalogService<E, D> getService();
 
     @GetMapping
     public List<D> findAll(@RequestParam Map<String, String> filters) {

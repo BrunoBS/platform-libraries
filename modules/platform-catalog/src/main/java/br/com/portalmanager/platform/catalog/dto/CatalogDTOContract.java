@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.catalog.dto;
 
 import tools.jackson.databind.JsonNode;
 
-public interface BaseCatalogDTO<T extends BaseCatalogDTO<T>> {
+public interface CatalogDTOContract<T extends CatalogDTOContract<T>> {
     String code();
     String label();
     String description();

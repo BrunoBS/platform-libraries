@@ -1,9 +1,9 @@
 package br.com.portalmanager.platform.catalog.validation;
 
-import br.com.portalmanager.platform.catalog.dto.BaseCatalogDTO;
+import br.com.portalmanager.platform.catalog.dto.CatalogDTOContract;
 import br.com.portalmanager.platform.catalog.message.CatalogMessageKeys;
 import br.com.portalmanager.platform.catalog.model.CatalogEnum;
-import br.com.portalmanager.platform.catalog.repository.BaseCatalogRepository;
+import br.com.portalmanager.platform.catalog.repository.CatalogRepository;
 
 import java.util.Map;
 
@@ -13,11 +13,11 @@ import java.util.Map;
  */
 public abstract class EnumCatalogValidator<
         E extends Enum<E> & CatalogEnum<E>,
-        D extends BaseCatalogDTO<D>> extends BaseCatalogValidator<D> {
+        D extends CatalogDTOContract<D>> extends AbstractCatalogValidator<D> {
 
     private final Class<E> enumClass;
 
-    protected EnumCatalogValidator(BaseCatalogRepository<?> repository, Class<E> enumClass) {
+    protected EnumCatalogValidator(CatalogRepository<?> repository, Class<E> enumClass) {
         super(repository);
         this.enumClass = enumClass;
     }

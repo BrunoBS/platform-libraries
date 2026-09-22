@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.catalog.repository;
 
-import br.com.portalmanager.platform.catalog.model.BaseCatalogEntity;
+import br.com.portalmanager.platform.catalog.model.CatalogEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @NoRepositoryBean
-public interface BaseCatalogRepository<E extends BaseCatalogEntity>
+public interface CatalogRepository<E extends CatalogEntity>
         extends JpaRepository<E, String>, JpaSpecificationExecutor<E> {
 
     Optional<E> findByCodeAndActiveTrue(String code);
