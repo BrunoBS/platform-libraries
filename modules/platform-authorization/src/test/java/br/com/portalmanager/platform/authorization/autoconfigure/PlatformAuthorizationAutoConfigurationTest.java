@@ -164,6 +164,15 @@ class PlatformAuthorizationAutoConfigurationTest {
             assertThat(session.getEnvironmentId()).isEqualTo("environment-guest");
             assertThat(session.getTraceId()).isEqualTo("trace-guest");
             assertThat(session.getGroups()).containsExactly("GUEST");
+            assertThat(session.getAuthorizerGroups()).containsExactly(
+                    new br.com.portalmanager.platform.authorization.model.ParsedGroup(
+                            "GUEST",
+                            "GUEST",
+                            "environment-guest",
+                            "GUEST"
+                    )
+            );
+            assertThat(session.hasAuthorizer("GUEST")).isTrue();
             assertThat(org.slf4j.MDC.get("correlationId")).isEqualTo("trace-guest");
             assertThat(org.slf4j.MDC.get("username")).isEqualTo("guest");
             assertThat(org.slf4j.MDC.get("clientIp")).isEqualTo("127.0.0.1");
