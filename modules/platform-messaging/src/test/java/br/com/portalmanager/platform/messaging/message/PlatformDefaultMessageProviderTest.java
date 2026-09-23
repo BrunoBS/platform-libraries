@@ -36,6 +36,38 @@ class PlatformDefaultMessageProviderTest {
     }
 
     @Test
+    void shouldResolveServiceBundleDirectlyWhenWildcardScanMisses() throws Exception {
+        PathMatchingResourcePatternResolver resolver =
+                mock(PathMatchingResourcePatternResolver.class);
+
+        Resource workspace = new NamedByteArrayResource(
+                "workspace-service_pt_BR.properties",
+                "workspace.not-found=WORKSPACE-0001|404|O workspace solicitado não foi encontrado.|Verifique o identificador informado."
+        );
+
+        when(resolver.getResources("classpath*:META-INF/platform-messages/*.properties"))
+                .thenReturn(new Resource[0]);
+        when(resolver.getResources(
+                "classpath*:META-INF/platform-messages/workspace-service_pt_BR.properties"
+        )).thenReturn(new Resource[]{workspace});
+
+        PlatformDefaultMessageProvider customProvider =
+                new PlatformDefaultMessageProvider(
+                        resolver,
+                        new ApiMessageDefinitionParser()
+                );
+
+        var message = customProvider.find(
+                "workspace-service.workspace.not-found",
+                Locale.forLanguageTag("pt-BR")
+        );
+
+        assertThat(message).isPresent();
+        assertThat(message.orElseThrow().code()).isEqualTo("WORKSPACE-0001");
+        assertThat(message.orElseThrow().httpStatus()).isEqualTo(404);
+    }
+
+    @Test
     void shouldNotFallbackInternallyToAnotherLocale() {
         assertThat(provider.find(
                 PlatformMessageKeys.VALIDATION_FAILED,
