@@ -21,12 +21,14 @@ import java.util.regex.Pattern;
 
 public final class PlatformDefaultMessageProvider implements ApiMessageProvider {
 
+    private static final String RESOURCE_DIRECTORY = "META-INF/platform-messages";
     private static final String RESOURCE_PATTERN =
-            "classpath*:META-INF/platform-messages/*.properties";
+            "classpath*:" + RESOURCE_DIRECTORY + "/*.properties";
 
     private static final Pattern BUNDLE_FILENAME_PATTERN =
             Pattern.compile("^([a-z0-9-]+)_([a-z]{2}(?:_[A-Z]{2})?)\\.properties$");
 
+    private final PathMatchingResourcePatternResolver resourceResolver;
     private final ApiMessageDefinitionParser parser;
     private final Map<String, Map<String, String>> definitionsByLocale;
 
@@ -38,6 +40,7 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
             PathMatchingResourcePatternResolver resourceResolver,
             ApiMessageDefinitionParser parser
     ) {
+        this.resourceResolver = resourceResolver;
         this.parser = parser;
         this.definitionsByLocale = loadAndValidate(resourceResolver);
     }
@@ -49,16 +52,59 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
         }
 
         Map<String, String> definitions = definitionsByLocale.get(locale.toString());
-        if (definitions == null) {
+        if (definitions != null) {
+            String definition = definitions.get(key);
+            if (definition != null && !definition.isBlank()) {
+                return Optional.of(parser.parse(key, locale, definition));
+            }
+        }
+
+        return findDirectlyInServiceBundle(key, locale);
+    }
+
+    private Optional<ApiMessage> findDirectlyInServiceBundle(String key, Locale locale) {
+        int namespaceSeparator = key.indexOf('.');
+        if (namespaceSeparator <= 0 || namespaceSeparator == key.length() - 1) {
             return Optional.empty();
         }
 
-        String definition = definitions.get(key);
-        if (definition == null || definition.isBlank()) {
-            return Optional.empty();
-        }
+        String service = key.substring(0, namespaceSeparator);
+        String localKey = key.substring(namespaceSeparator + 1);
+        String resourceLocation = "classpath*:%s/%s_%s.properties"
+                .formatted(RESOURCE_DIRECTORY, service, locale);
 
-        return Optional.of(parser.parse(key, locale, definition));
+        try {
+            Resource[] resources = resourceResolver.getResources(resourceLocation);
+            ApiMessage resolved = null;
+            String owner = null;
+
+            for (Resource resource : resources) {
+                Properties properties = loadProperties(resource);
+                String definition = properties.getProperty(localKey);
+                if (definition == null || definition.isBlank()) {
+                    continue;
+                }
+
+                if (resolved != null) {
+                    throw duplicateKeyException(
+                            key,
+                            locale.toString(),
+                            owner,
+                            resourceName(resource)
+                    );
+                }
+
+                resolved = parser.parse(key, locale, definition);
+                owner = resourceName(resource);
+            }
+
+            return Optional.ofNullable(resolved);
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Could not load service message bundle from " + resourceLocation,
+                    exception
+            );
+        }
     }
 
     private Map<String, Map<String, String>> loadAndValidate(
