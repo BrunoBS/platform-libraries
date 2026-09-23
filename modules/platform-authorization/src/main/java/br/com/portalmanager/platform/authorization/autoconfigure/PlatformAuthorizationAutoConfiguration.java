@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.authorization.autoconfigure;
 
 import br.com.portalmanager.platform.authorization.aspect.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.authorization.config.PlatformAuthorizationProperties;
+import br.com.portalmanager.platform.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.authorization.model.UserContext;
 import br.com.portalmanager.platform.authorization.model.UserSession;
 import br.com.portalmanager.platform.authorization.registry.AuthorizationMetadataRegistry;
@@ -101,6 +102,9 @@ public class PlatformAuthorizationAutoConfiguration {
                         mockSession.setTraceId("trace-guest");
                         mockSession.setExpirationTime(Instant.now().plusSeconds(3600).toEpochMilli());
                         mockSession.setGroups(Set.of("GUEST"));
+                        mockSession.setAuthorizerGroups(Set.of(
+                                new ParsedGroup("GUEST", "GUEST", "environment-guest", "GUEST")
+                        ));
 
                         UserContext.set(mockSession);
 
