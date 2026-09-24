@@ -10,7 +10,14 @@ public class PlatformConfigurationException extends IllegalStateException {
     private final ApiErrorResponse errorResponse;
 
     public PlatformConfigurationException(PlatformErrorDefinition definition) {
-        super(definition.message());
+        this(definition, null);
+    }
+
+    public PlatformConfigurationException(
+            PlatformErrorDefinition definition,
+            Throwable cause
+    ) {
+        super(definition.message(), cause);
         this.errorResponse = new ApiErrorResponse(
                 definition.code(),
                 definition.message(),

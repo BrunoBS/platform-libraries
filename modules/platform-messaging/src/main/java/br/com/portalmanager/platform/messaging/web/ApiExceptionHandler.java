@@ -8,6 +8,7 @@ import br.com.portalmanager.platform.messaging.exception.ResourceVersionConflict
 import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.messaging.exception.ValidationDetailsProvider;
 import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.messaging.message.PlatformTechnicalErrors;
 import br.com.portalmanager.platform.messaging.model.ApiErrorResponse;
 import br.com.portalmanager.platform.messaging.model.ApiMessage;
 import br.com.portalmanager.platform.messaging.model.ApiValidationDetail;
@@ -232,10 +233,13 @@ public class ApiExceptionHandler {
             ApiMessageNotFoundException exception,
             HttpServletRequest request
     ) {
+        var definition = PlatformTechnicalErrors.messageDefinitionNotFound(
+                exception.getMessageKey()
+        );
         ApiErrorResponse response = new ApiErrorResponse(
-                "ERR-9999",
-                "Mensagem de API não encontrada.",
-                "Verifique se a chave está cadastrada no catálogo de mensagens.",
+                definition.code(),
+                definition.message(),
+                definition.solution(),
                 Instant.now(),
                 request.getRequestURI(),
                 MDC.get("correlationId")

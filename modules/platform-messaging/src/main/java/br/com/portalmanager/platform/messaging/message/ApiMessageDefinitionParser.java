@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.messaging.message;
 
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.messaging.model.ApiMessage;
 
 import java.util.Locale;
@@ -12,9 +13,11 @@ final class ApiMessageDefinitionParser {
     ApiMessage parse(String key, Locale locale, String definition) {
         String[] fields = definition.split(DELIMITER_REGEX, -1);
         if (fields.length != EXPECTED_FIELDS) {
-            throw new IllegalArgumentException(
-                    "Invalid message definition for key '" + key
-                            + "'. Expected format: code|httpStatus|message|solution"
+            throw new PlatformConfigurationException(
+                    PlatformTechnicalErrors.invalidMessageDefinition(
+                            key,
+                            "expected format code|httpStatus|message|solution"
+                    )
             );
         }
 
@@ -35,8 +38,11 @@ final class ApiMessageDefinitionParser {
 
     private String requireValue(String value, String key, String field) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Invalid message definition for key '" + key + "': " + field + " is required"
+            throw new PlatformConfigurationException(
+                    PlatformTechnicalErrors.invalidMessageDefinition(
+                            key,
+                            field + " is required"
+                    )
             );
         }
         return value.trim();
@@ -46,8 +52,11 @@ final class ApiMessageDefinitionParser {
         try {
             return Integer.parseInt(requireValue(value, key, "httpStatus"));
         } catch (NumberFormatException exception) {
-            throw new IllegalArgumentException(
-                    "Invalid message definition for key '" + key + "': httpStatus must be numeric",
+            throw new PlatformConfigurationException(
+                    PlatformTechnicalErrors.invalidMessageDefinition(
+                            key,
+                            "httpStatus must be numeric"
+                    ),
                     exception
             );
         }

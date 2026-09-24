@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.messaging.message;
 
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.messaging.model.ApiMessage;
 import br.com.portalmanager.platform.messaging.provider.ApiMessageProvider;
 import org.springframework.core.io.Resource;
@@ -142,8 +143,8 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
 
             return Optional.ofNullable(resolved);
         } catch (IOException exception) {
-            throw new IllegalStateException(
-                    "Could not load message bundle from " + resourceLocation,
+            throw new PlatformConfigurationException(
+                    PlatformTechnicalErrors.messageBundleLoadFailed(resourceLocation),
                     exception
             );
         }
@@ -162,9 +163,8 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
             for (Resource resource : resources) {
                 BundleDescriptor bundle = extractBundleDescriptor(resource);
                 if (bundle == null) {
-                    throw new IllegalStateException(
-                            "Invalid platform message bundle name: '%s'. Expected: <namespace>_<locale>.properties or messages_<locale>.properties"
-                                    .formatted(resourceName(resource))
+                    throw new PlatformConfigurationException(
+                            PlatformTechnicalErrors.invalidBundleName(resourceName(resource))
                     );
                 }
 
@@ -198,8 +198,8 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
 
             return Map.copyOf(immutableDefinitions);
         } catch (IOException exception) {
-            throw new IllegalStateException(
-                    "Could not load platform message bundles from " + RESOURCE_PATTERN,
+            throw new PlatformConfigurationException(
+                    PlatformTechnicalErrors.messageBundleLoadFailed(RESOURCE_PATTERN),
                     exception
             );
         }
@@ -207,16 +207,20 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
 
     private void validateLocalKey(String namespace, String localKey, Resource resource) {
         if (localKey == null || localKey.isBlank()) {
-            throw new IllegalStateException(
-                    "Blank platform message key in bundle '%s'".formatted(resourceName(resource))
+            throw new PlatformConfigurationException(
+                    PlatformTechnicalErrors.invalidBundleKey(
+                            resourceName(resource),
+                            "message key must not be blank"
+                    )
             );
         }
 
         if (localKey.startsWith(namespace + ".")) {
-            throw new IllegalStateException(
-                    ("Platform message key must be local to its bundle: key='%s', bundle='%s'. "
-                            + "Remove the '%s.' prefix.")
-                            .formatted(localKey, resourceName(resource), namespace)
+            throw new PlatformConfigurationException(
+                    PlatformTechnicalErrors.invalidBundleKey(
+                            resourceName(resource),
+                            "key '" + localKey + "' must be local to the bundle; remove the '" + namespace + ".' prefix"
+                    )
             );
         }
     }
@@ -249,15 +253,19 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
         return new BundleDescriptor(namespacedMatcher.group(1), namespacedMatcher.group(2));
     }
 
-    private IllegalStateException duplicateKeyException(
+    private PlatformConfigurationException duplicateKeyException(
             String key,
             String locale,
             String firstResource,
             String secondResource
     ) {
-        return new IllegalStateException(
-                "Duplicate platform message key detected: key='%s', locale='%s', bundles=['%s', '%s']"
-                        .formatted(key, locale, firstResource, secondResource)
+        return new PlatformConfigurationException(
+                PlatformTechnicalErrors.duplicateBundleKey(
+                        key,
+                        locale,
+                        firstResource,
+                        secondResource
+                )
         );
     }
 

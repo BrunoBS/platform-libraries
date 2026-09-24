@@ -205,9 +205,9 @@ public abstract sealed class AbstractCatalogService<
                 PlatformMessageKeys.VALIDATION_FAILED,
                 List.of(new ValidationDetail(
                         name,
-                        null,
-                        Map.of(),
-                        "Unsupported filter: " + name
+                        CatalogMessageKeys.FILTER_UNSUPPORTED,
+                        Map.of("0", name),
+                        null
                 ))
         );
     }

@@ -13,6 +13,7 @@ public final class CatalogMessageKeys {
     public static final String LABEL_REQUIRED = "catalog.label.required";
     public static final String DESCRIPTION_REQUIRED = "catalog.description.required";
     public static final String DESCRIPTION_INVALID_LENGTH = "catalog.description.invalid.length";
+    public static final String FILTER_UNSUPPORTED = "catalog.filter.unsupported";
 
     private CatalogMessageKeys() {
     }
