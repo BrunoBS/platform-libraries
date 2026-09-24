@@ -19,6 +19,6 @@ public final class LoggingConstants {
             "\"message\":\"%%message\"," +
             "\"service\":\"%s\"," +
             "\"version\":\"%s\"," +
-            "\"host\":\"%%property{HOSTNAME:-unknown-host}\"," +
-            "\"context\":%%mdc}%%n";
+            "\"host\":\"%s\"," +
+            "\"context\":%%jsonMdc}%%n";
 }
