@@ -60,6 +60,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     private ConsoleAppender<ILoggingEvent> createJsonConsoleAppender(LoggerContext loggerContext, ConfigurableEnvironment env) {
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
         String appVersion = env.getProperty("info.build.version", "unknown");
+        String host = resolveHost(env);
         boolean maskingEnabled = env.getProperty("platform.observability.logging.masking.enabled", Boolean.class, true);
 
         // Captura o mapa de conversores customizados do usuário informados no YAML
@@ -90,7 +91,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         };
 
         encoder.setContext(loggerContext);
-        encoder.setPattern(buildJsonPattern(serviceName, appVersion, maskingEnabled, customConverters));
+        encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, maskingEnabled, customConverters));
         encoder.start();
 
         ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
@@ -105,13 +106,11 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     /**
      * Monta a String do template estruturado do JSON aplicando o envelopamento infinito em cascata.
      */
-    private String buildJsonPattern(String serviceName, String appVersion, boolean maskingEnabled, Map<String, String> customConverters) {
+    private String buildJsonPattern(String serviceName, String appVersion, String host, boolean maskingEnabled, Map<String, String> customConverters) {
         String messageToken = maskingEnabled ? "%corporateLgpdMask" : "%jsonMessage";
         for (String userTag : customConverters.keySet()) {
             messageToken = String.format("%%%s({%s})", userTag, messageToken);
         }
-
-        String host = resolveHost();
 
         return String.format(
                 "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"context\":%%jsonMdc,\"exception\":\"%%jsonThrowable\"}%%n",
@@ -119,8 +118,8 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         );
     }
 
-    private String resolveHost() {
-        String host = System.getenv("HOSTNAME");
+    private String resolveHost(ConfigurableEnvironment env) {
+        String host = env.getProperty("HOSTNAME");
         if (host == null || host.isBlank() || "null".equalsIgnoreCase(host)) {
             return "unknown-host";
         }
