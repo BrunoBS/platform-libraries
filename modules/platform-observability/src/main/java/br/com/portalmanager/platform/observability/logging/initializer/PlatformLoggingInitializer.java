@@ -6,6 +6,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.NopStatusListener;
+import br.com.portalmanager.platform.observability.logging.converter.JsonErrorMdcConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonMdcConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonMessageConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonThrowableConverter;
@@ -75,6 +76,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
             public void start() {
                 ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMessage", JsonMessageConverter.class.getName());
                 ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMdc", JsonMdcConverter.class.getName());
+                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonError", JsonErrorMdcConverter.class.getName());
                 ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonThrowable", JsonThrowableConverter.class.getName());
                 if (maskingEnabled) {
                     ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("corporateLgpdMask", MaskingConverter.class.getName());
@@ -115,7 +117,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         }
 
         return String.format(
-                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"context\":%%jsonMdc,\"exception\":\"%%jsonThrowable\"}%%n",
+                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"context\":%%jsonMdc,\"error\":%%jsonError,\"exception\":\"%%jsonThrowable\"}%%n",
                 messageToken, serviceName, appVersion, host
         );
     }
