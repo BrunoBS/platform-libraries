@@ -139,6 +139,11 @@ class PlatformLoggingInitializerTest {
                 "Erros resolvidos deveriam ser emitidos como objeto JSON estruturado."
         );
 
+        assertTrue(
+                encoder.getPattern().contains("\"exception\":%jsonThrowable"),
+                "A exceção deveria ser renderizada como campo JSON anulável."
+        );
+
         assertFalse(
                 encoder.getPattern().contains("\"host\":\"null\""),
                 "HOSTNAME textual null não deveria ser emitido no log."
