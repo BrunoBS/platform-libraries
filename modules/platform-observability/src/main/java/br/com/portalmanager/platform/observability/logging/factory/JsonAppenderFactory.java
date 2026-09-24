@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 
 import br.com.portalmanager.platform.observability.logging.constants.LoggingConstants;
+import br.com.portalmanager.platform.observability.logging.converter.JsonMdcConverter;
 import org.springframework.core.env.Environment;
 
 public final class JsonAppenderFactory {
@@ -15,10 +16,16 @@ public final class JsonAppenderFactory {
     public static ConsoleAppender<ILoggingEvent> create(LoggerContext loggerContext, Environment env) {
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
         String appVersion = env.getProperty("info.build.version", "unknown");
+        String host = resolveHost(env);
+
+        ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(
+                "jsonMdc",
+                JsonMdcConverter.class.getName()
+        );
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(loggerContext);
-        encoder.setPattern(String.format(LoggingConstants.JSON_PATTERN_TEMPLATE, serviceName, appVersion));
+        encoder.setPattern(String.format(LoggingConstants.JSON_PATTERN_TEMPLATE, serviceName, appVersion, host));
         encoder.start();
 
         ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
@@ -28,5 +35,13 @@ public final class JsonAppenderFactory {
         appender.start();
 
         return appender;
+    }
+
+    private static String resolveHost(Environment env) {
+        String host = env.getProperty("HOSTNAME");
+        if (host == null || host.isBlank() || "null".equalsIgnoreCase(host)) {
+            return "unknown-host";
+        }
+        return host;
     }
 }
