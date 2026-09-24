@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.messaging.config;
 
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,9 +17,9 @@ class SqlIdentifierValidatorTest {
     @Test
     void shouldThrowExceptionForInvalidIdentifiers() {
         // Testando tentativas de injeção sql e caracteres proibidos
-        assertThrows(IllegalArgumentException.class, () -> SqlIdentifierValidator.validate("vw_api_message; DROP TABLE x;"));
-        assertThrows(IllegalArgumentException.class, () -> SqlIdentifierValidator.validate("vw-api-message")); // hífen
-        assertThrows(IllegalArgumentException.class, () -> SqlIdentifierValidator.validate("tabela de mensagens")); // espaço
-        assertThrows(IllegalArgumentException.class, () -> SqlIdentifierValidator.validate(null));
+        assertThrows(PlatformConfigurationException.class, () -> SqlIdentifierValidator.validate("vw_api_message; DROP TABLE x;"));
+        assertThrows(PlatformConfigurationException.class, () -> SqlIdentifierValidator.validate("vw-api-message")); // hífen
+        assertThrows(PlatformConfigurationException.class, () -> SqlIdentifierValidator.validate("tabela de mensagens")); // espaço
+        assertThrows(PlatformConfigurationException.class, () -> SqlIdentifierValidator.validate(null));
     }
 }
