@@ -18,6 +18,7 @@ public class JsonMdcConverter extends ClassicConverter {
         }
 
         return mdc.entrySet().stream()
+                .filter(entry -> !JsonErrorMdcConverter.ERROR_MDC_KEY.equals(entry.getKey()))
                 .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
                 .map(entry -> "\"" + escapeJson(entry.getKey()) + "\":\"" + escapeJson(entry.getValue()) + "\"")
                 .collect(Collectors.joining(",", "{", "}"));
