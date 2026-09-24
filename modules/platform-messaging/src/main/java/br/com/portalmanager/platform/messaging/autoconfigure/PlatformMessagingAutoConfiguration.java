@@ -3,6 +3,8 @@ package br.com.portalmanager.platform.messaging.autoconfigure;
 import br.com.portalmanager.platform.messaging.cache.ApiMessageCache;
 import br.com.portalmanager.platform.messaging.cache.NoOpApiMessageCache;
 import br.com.portalmanager.platform.messaging.config.PlatformMessagingProperties;
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.messaging.message.PlatformTechnicalErrors;
 import br.com.portalmanager.platform.messaging.message.PlatformDefaultMessageProvider;
 import br.com.portalmanager.platform.messaging.provider.ApiMessageProvider;
 import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
@@ -74,8 +76,8 @@ public class PlatformMessagingAutoConfiguration {
     private String requireApplicationName(Environment environment) {
         String applicationName = environment.getProperty("spring.application.name");
         if (applicationName == null || applicationName.isBlank()) {
-            throw new IllegalStateException(
-                    "spring.application.name is required when platform.messaging is enabled"
+            throw new PlatformConfigurationException(
+                    PlatformTechnicalErrors.APPLICATION_NAME_REQUIRED
             );
         }
         return applicationName.trim();

@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.messaging.autoconfigure;
 
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.messaging.repository.JdbcApiMessageRepository;
 import br.com.portalmanager.platform.messaging.repository.NoOpApiMessageRepository;
@@ -104,10 +105,22 @@ class PlatformMessagingAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
-                            .hasRootCauseInstanceOf(IllegalStateException.class)
+                            .hasRootCauseInstanceOf(PlatformConfigurationException.class)
                             .hasRootCauseMessage(
                                     "spring.application.name is required when platform.messaging is enabled"
                             );
+
+                    PlatformConfigurationException exception =
+                            (PlatformConfigurationException) context.getStartupFailure().getCause().getCause();
+
+                    assertThat(exception.getErrorResponse().code()).isEqualTo("PLT-MSG-001");
+                    assertThat(exception.getErrorResponse().message())
+                            .isEqualTo("spring.application.name is required when platform.messaging is enabled");
+                    assertThat(exception.getErrorResponse().solution())
+                            .isEqualTo("Configure spring.application.name with the service name.");
+                    assertThat(exception.getErrorResponse().details()).isEmpty();
+                    assertThat(exception.getErrorResponse().path()).isNull();
+                    assertThat(exception.getErrorResponse().correlationId()).isNull();
                 });
     }
 
@@ -123,10 +136,22 @@ class PlatformMessagingAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
-                            .hasRootCauseInstanceOf(IllegalStateException.class)
+                            .hasRootCauseInstanceOf(PlatformConfigurationException.class)
                             .hasRootCauseMessage(
                                     "spring.application.name is required when platform.messaging is enabled"
                             );
+
+                    PlatformConfigurationException exception =
+                            (PlatformConfigurationException) context.getStartupFailure().getCause().getCause();
+
+                    assertThat(exception.getErrorResponse().code()).isEqualTo("PLT-MSG-001");
+                    assertThat(exception.getErrorResponse().message())
+                            .isEqualTo("spring.application.name is required when platform.messaging is enabled");
+                    assertThat(exception.getErrorResponse().solution())
+                            .isEqualTo("Configure spring.application.name with the service name.");
+                    assertThat(exception.getErrorResponse().details()).isEmpty();
+                    assertThat(exception.getErrorResponse().path()).isNull();
+                    assertThat(exception.getErrorResponse().correlationId()).isNull();
                 });
     }
 }
