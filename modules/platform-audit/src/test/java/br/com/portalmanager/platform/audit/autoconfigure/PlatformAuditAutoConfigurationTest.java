@@ -93,8 +93,8 @@ class PlatformAuditAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context.getStartupFailure()).isNotNull();
                     assertThat(context.getStartupFailure())
-                            .hasRootCauseInstanceOf(PlatformConfigurationException.class)
-                            .hasRootCauseMessage(
+                            .isInstanceOf(PlatformConfigurationException.class)
+                            .hasMessage(
                                     "Audit fallback is enabled without a configured fallback store"
                             );
                 });
