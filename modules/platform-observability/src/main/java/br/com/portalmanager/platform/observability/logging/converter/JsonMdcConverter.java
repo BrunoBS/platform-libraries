@@ -19,7 +19,7 @@ public class JsonMdcConverter extends ClassicConverter {
 
         return mdc.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
-                .map(entry -> """ + escapeJson(entry.getKey()) + "":"" + escapeJson(entry.getValue()) + """)
+                .map(entry -> "\"" + escapeJson(entry.getKey()) + "\":\"" + escapeJson(entry.getValue()) + "\"")
                 .collect(Collectors.joining(",", "{", "}"));
     }
 
@@ -33,7 +33,7 @@ public class JsonMdcConverter extends ClassicConverter {
             char character = value.charAt(i);
             switch (character) {
                 case '\\' -> escaped.append("\\\\");
-                case '"' -> escaped.append("\\"");
+                case '"' -> escaped.append("\\\"");
                 case '\b' -> escaped.append("\\b");
                 case '\f' -> escaped.append("\\f");
                 case '\n' -> escaped.append("\\n");
