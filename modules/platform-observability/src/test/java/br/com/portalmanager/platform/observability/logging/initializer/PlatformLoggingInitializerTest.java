@@ -117,7 +117,7 @@ class PlatformLoggingInitializerTest {
     }
 
     @Test
-    void shouldConfigureStructuredJsonContextAndNormalizeNullHost() {
+    void shouldConfigureStructuredJsonContextAndResolveHostFallback() {
 
         environment.setProperty("HOSTNAME", "null");
 
@@ -134,9 +134,9 @@ class PlatformLoggingInitializerTest {
                 "O contexto deveria usar o conversor JSON do MDC."
         );
 
-        assertTrue(
-                encoder.getPattern().contains("\"host\":\"unknown-host\""),
-                "HOSTNAME nulo textual deveria ser normalizado."
+        assertFalse(
+                encoder.getPattern().contains("\"host\":\"null\""),
+                "HOSTNAME textual null não deveria ser emitido no log."
         );
     }
 
