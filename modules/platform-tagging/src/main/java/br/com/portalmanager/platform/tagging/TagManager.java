@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class TagManager {
@@ -30,8 +31,8 @@ public class TagManager {
             Collection<String> manualTags,
             Collection<String> systemTags) {
 
-        String resolvedOwnerType = TagValidation.TagValidation.requireOwnerType(ownerType);
-        String resolvedOwnerId = TagValidation.TagValidation.requireOwnerId(ownerId);
+        String resolvedOwnerType = TagValidation.requireOwnerType(ownerType);
+        String resolvedOwnerId = TagValidation.requireOwnerId(ownerId);
         TagOwnerType normalizedOwnerType = () -> resolvedOwnerType;
 
         Map<String, TagOriginType> desired = desiredTags(manualTags, systemTags);
