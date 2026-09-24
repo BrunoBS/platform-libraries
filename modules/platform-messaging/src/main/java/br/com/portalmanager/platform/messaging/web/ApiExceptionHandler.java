@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 public class ApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+    private static final String STRUCTURED_ERROR_MDC_KEY = "platform.error";
 
     private final ApiMessageResolver resolver;
 
@@ -56,7 +57,6 @@ public class ApiExceptionHandler {
             Locale locale,
             HttpServletRequest request
     ) {
-        logException(exception);
         return resolve(exception, locale, request);
     }
 
@@ -231,11 +231,6 @@ public class ApiExceptionHandler {
             ApiMessageNotFoundException exception,
             HttpServletRequest request
     ) {
-        log.error(
-                "Catálogo de mensagens não encontrou uma definição para a chave '{}'.",
-                exception.getMessageKey()
-        );
-
         ApiErrorResponse response = new ApiErrorResponse(
                 "ERR-9999",
                 "Mensagem de API não encontrada.",
@@ -243,6 +238,13 @@ public class ApiExceptionHandler {
                 Instant.now(),
                 request.getRequestURI(),
                 MDC.get("correlationId")
+        );
+
+        logStructuredError(
+                exception.getMessageKey(),
+                response,
+                exception,
+                "Catálogo de mensagens não encontrou uma definição para a chave '" + exception.getMessageKey() + "'."
         );
 
         return ResponseEntity.internalServerError().body(response);
@@ -272,6 +274,8 @@ public class ApiExceptionHandler {
                     request.getRequestURI(),
                     MDC.get("correlationId")
             );
+
+            logResolvedException(exception, response);
 
             return ResponseEntity.status(message.httpStatus()).body(response);
         } catch (ApiMessageNotFoundException exceptionNotFound) {
@@ -339,19 +343,114 @@ public class ApiExceptionHandler {
         return null;
     }
 
-    private void logException(ApiException exception) {
-        if (exception.getCause() != null) {
-            log.error(
-                    "Erro de plataforma capturado para a chave '{}'.",
-                    exception.getMessageKey(),
-                    exception.getCause()
+    private void logResolvedException(
+            ApiException exception,
+            ApiErrorResponse response
+    ) {
+        String logMessage = exception.getCause() == null
+                ? "Exceção de negócio resolvida: " + response.code() + " - " + response.message()
+                : "Erro de plataforma resolvido: " + response.code() + " - " + response.message();
+
+        logStructuredError(
+                exception.getMessageKey(),
+                response,
+                exception.getCause(),
+                logMessage
+        );
+    }
+
+    private void logStructuredError(
+            String messageKey,
+            ApiErrorResponse response,
+            Throwable cause,
+            String logMessage
+    ) {
+        String previousStructuredError = MDC.get(STRUCTURED_ERROR_MDC_KEY);
+
+        try {
+            MDC.put(
+                    STRUCTURED_ERROR_MDC_KEY,
+                    toStructuredErrorJson(messageKey, response)
             );
-            return;
+
+            if (cause != null) {
+                log.error(logMessage, cause);
+            } else {
+                log.warn(logMessage);
+            }
+        } finally {
+            if (previousStructuredError == null) {
+                MDC.remove(STRUCTURED_ERROR_MDC_KEY);
+            } else {
+                MDC.put(STRUCTURED_ERROR_MDC_KEY, previousStructuredError);
+            }
+        }
+    }
+
+    private String toStructuredErrorJson(
+            String messageKey,
+            ApiErrorResponse response
+    ) {
+        return "{" +
+                "\"key\":" + jsonString(messageKey) + "," +
+                "\"code\":" + jsonString(response.code()) + "," +
+                "\"message\":" + jsonString(response.message()) + "," +
+                "\"solution\":" + jsonString(response.solution()) + "," +
+                "\"details\":" + toJsonDetails(response.details()) + "," +
+                "\"timestamp\":" + jsonString(
+                        response.timestamp() == null
+                                ? null
+                                : response.timestamp().toString()
+                ) + "," +
+                "\"path\":" + jsonString(response.path()) + "," +
+                "\"correlationId\":" + jsonString(response.correlationId()) +
+                "}";
+    }
+
+    private String toJsonDetails(List<ApiValidationDetail> details) {
+        if (details == null || details.isEmpty()) {
+            return "[]";
         }
 
-        log.warn(
-                "Exceção de negócio disparada para a chave '{}'.",
-                exception.getMessageKey()
-        );
+        return details.stream()
+                .map(detail -> "{" +
+                        "\"field\":" + jsonString(detail.field()) + "," +
+                        "\"message\":" + jsonString(detail.message()) +
+                        "}")
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    private String jsonString(String value) {
+        if (value == null) {
+            return "null";
+        }
+        return "\"" + escapeJson(value) + "\"";
+    }
+
+    private String escapeJson(String value) {
+        StringBuilder escaped = new StringBuilder(value.length() + 16);
+
+        for (int i = 0; i < value.length(); i++) {
+            char character = value.charAt(i);
+
+            switch (character) {
+                case '\\' -> escaped.append("\\\\");
+                case '"' -> escaped.append("\\\"");
+                case '\b' -> escaped.append("\\b");
+                case '\f' -> escaped.append("\\f");
+                case '\n' -> escaped.append("\\n");
+                case '\r' -> escaped.append("\\r");
+                case '\t' -> escaped.append("\\t");
+                default -> {
+                    if (character < 0x20) {
+                        escaped.append(String.format("\\u%04x", (int) character));
+                    } else {
+                        escaped.append(character);
+                    }
+                }
+            }
+        }
+
+        return escaped.toString();
     }
 }
