@@ -10,6 +10,7 @@ import br.com.portalmanager.platform.observability.logging.converter.JsonMdcConv
 import br.com.portalmanager.platform.observability.logging.converter.JsonMessageConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonThrowableConverter;
 import br.com.portalmanager.platform.observability.logging.converter.MaskingConverter;
+import br.com.portalmanager.platform.observability.logging.metadata.BuildVersionResolver;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -59,7 +60,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
 
     private ConsoleAppender<ILoggingEvent> createJsonConsoleAppender(LoggerContext loggerContext, ConfigurableEnvironment env) {
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
-        String appVersion = env.getProperty("info.build.version", "unknown");
+        String appVersion = BuildVersionResolver.resolve(env);
         String host = resolveHost(env);
         boolean maskingEnabled = env.getProperty("platform.observability.logging.masking.enabled", Boolean.class, true);
 
