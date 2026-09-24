@@ -25,21 +25,37 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
     private static final String RESOURCE_PATTERN =
             "classpath*:" + RESOURCE_DIRECTORY + "/*.properties";
 
-    private static final Pattern BUNDLE_FILENAME_PATTERN =
+    private static final Pattern NAMESPACED_BUNDLE_FILENAME_PATTERN =
             Pattern.compile("^([a-z0-9-]+)_([a-z]{2}(?:_[A-Z]{2})?)\\.properties$");
+    private static final Pattern SERVICE_BUNDLE_FILENAME_PATTERN =
+            Pattern.compile("^messages_([a-z]{2}(?:_[A-Z]{2})?)\\.properties$");
 
     private final PathMatchingResourcePatternResolver resourceResolver;
     private final ApiMessageDefinitionParser parser;
+    private final String serviceName;
     private final Map<String, Map<String, String>> definitionsByLocale;
 
     public PlatformDefaultMessageProvider() {
-        this(new PathMatchingResourcePatternResolver(), new ApiMessageDefinitionParser());
+        this(null, new PathMatchingResourcePatternResolver(), new ApiMessageDefinitionParser());
+    }
+
+    public PlatformDefaultMessageProvider(String serviceName) {
+        this(serviceName, new PathMatchingResourcePatternResolver(), new ApiMessageDefinitionParser());
     }
 
     PlatformDefaultMessageProvider(
             PathMatchingResourcePatternResolver resourceResolver,
             ApiMessageDefinitionParser parser
     ) {
+        this(null, resourceResolver, parser);
+    }
+
+    PlatformDefaultMessageProvider(
+            String serviceName,
+            PathMatchingResourcePatternResolver resourceResolver,
+            ApiMessageDefinitionParser parser
+    ) {
+        this.serviceName = normalizeServiceName(serviceName);
         this.resourceResolver = resourceResolver;
         this.parser = parser;
         this.definitionsByLocale = loadAndValidate(resourceResolver);
@@ -59,20 +75,46 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
             }
         }
 
-        return findDirectlyInServiceBundle(key, locale);
+        return findDirectlyInBundle(key, locale);
     }
 
-    private Optional<ApiMessage> findDirectlyInServiceBundle(String key, Locale locale) {
+    private Optional<ApiMessage> findDirectlyInBundle(String key, Locale locale) {
         int namespaceSeparator = key.indexOf('.');
         if (namespaceSeparator <= 0 || namespaceSeparator == key.length() - 1) {
             return Optional.empty();
         }
 
-        String service = key.substring(0, namespaceSeparator);
+        String namespace = key.substring(0, namespaceSeparator);
         String localKey = key.substring(namespaceSeparator + 1);
-        String resourceLocation = "classpath*:%s/%s_%s.properties"
-                .formatted(RESOURCE_DIRECTORY, service, locale);
 
+        if (serviceName != null && serviceName.equals(namespace)) {
+            Optional<ApiMessage> serviceMessage = findInResource(
+                    key,
+                    localKey,
+                    locale,
+                    "classpath*:%s/messages_%s.properties"
+                            .formatted(RESOURCE_DIRECTORY, locale)
+            );
+            if (serviceMessage.isPresent()) {
+                return serviceMessage;
+            }
+        }
+
+        return findInResource(
+                key,
+                localKey,
+                locale,
+                "classpath*:%s/%s_%s.properties"
+                        .formatted(RESOURCE_DIRECTORY, namespace, locale)
+        );
+    }
+
+    private Optional<ApiMessage> findInResource(
+            String globalKey,
+            String localKey,
+            Locale locale,
+            String resourceLocation
+    ) {
         try {
             Resource[] resources = resourceResolver.getResources(resourceLocation);
             ApiMessage resolved = null;
@@ -87,21 +129,21 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
 
                 if (resolved != null) {
                     throw duplicateKeyException(
-                            key,
+                            globalKey,
                             locale.toString(),
                             owner,
                             resourceName(resource)
                     );
                 }
 
-                resolved = parser.parse(key, locale, definition);
+                resolved = parser.parse(globalKey, locale, definition);
                 owner = resourceName(resource);
             }
 
             return Optional.ofNullable(resolved);
         } catch (IOException exception) {
             throw new IllegalStateException(
-                    "Could not load service message bundle from " + resourceLocation,
+                    "Could not load message bundle from " + resourceLocation,
                     exception
             );
         }
@@ -121,7 +163,7 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
                 BundleDescriptor bundle = extractBundleDescriptor(resource);
                 if (bundle == null) {
                     throw new IllegalStateException(
-                            "Invalid platform message bundle name: '%s'. Expected: <service>_<locale>.properties"
+                            "Invalid platform message bundle name: '%s'. Expected: <namespace>_<locale>.properties or messages_<locale>.properties"
                                     .formatted(resourceName(resource))
                     );
                 }
@@ -133,9 +175,9 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
                         owners.computeIfAbsent(bundle.locale(), ignored -> new HashMap<>());
 
                 for (String localKey : properties.stringPropertyNames()) {
-                    validateLocalKey(bundle.service(), localKey, resource);
+                    validateLocalKey(bundle.namespace(), localKey, resource);
 
-                    String globalKey = bundle.service() + "." + localKey;
+                    String globalKey = bundle.namespace() + "." + localKey;
                     String currentOwner = localeOwners.putIfAbsent(globalKey, resourceName(resource));
                     if (currentOwner != null) {
                         throw duplicateKeyException(
@@ -163,18 +205,18 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
         }
     }
 
-    private void validateLocalKey(String service, String localKey, Resource resource) {
+    private void validateLocalKey(String namespace, String localKey, Resource resource) {
         if (localKey == null || localKey.isBlank()) {
             throw new IllegalStateException(
                     "Blank platform message key in bundle '%s'".formatted(resourceName(resource))
             );
         }
 
-        if (localKey.startsWith(service + ".")) {
+        if (localKey.startsWith(namespace + ".")) {
             throw new IllegalStateException(
                     ("Platform message key must be local to its bundle: key='%s', bundle='%s'. "
                             + "Remove the '%s.' prefix.")
-                            .formatted(localKey, resourceName(resource), service)
+                            .formatted(localKey, resourceName(resource), namespace)
             );
         }
     }
@@ -191,12 +233,20 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
             return null;
         }
 
-        Matcher matcher = BUNDLE_FILENAME_PATTERN.matcher(filename);
-        if (!matcher.matches()) {
+        Matcher serviceMatcher = SERVICE_BUNDLE_FILENAME_PATTERN.matcher(filename);
+        if (serviceMatcher.matches()) {
+            if (serviceName == null) {
+                return null;
+            }
+            return new BundleDescriptor(serviceName, serviceMatcher.group(1));
+        }
+
+        Matcher namespacedMatcher = NAMESPACED_BUNDLE_FILENAME_PATTERN.matcher(filename);
+        if (!namespacedMatcher.matches()) {
             return null;
         }
 
-        return new BundleDescriptor(matcher.group(1), matcher.group(2));
+        return new BundleDescriptor(namespacedMatcher.group(1), namespacedMatcher.group(2));
     }
 
     private IllegalStateException duplicateKeyException(
@@ -216,6 +266,13 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
         return filename == null ? resource.getDescription() : filename;
     }
 
-    private record BundleDescriptor(String service, String locale) {
+    private String normalizeServiceName(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
+    }
+
+    private record BundleDescriptor(String namespace, String locale) {
     }
 }

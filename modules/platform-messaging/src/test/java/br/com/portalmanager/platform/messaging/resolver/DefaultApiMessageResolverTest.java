@@ -132,4 +132,31 @@ class DefaultApiMessageResolverTest {
                 resolver.resolve("key.inexistente", Locale.forLanguageTag("en-US"))
         );
     }
+    @Test
+    void shouldResolveLocalServiceKeyUsingSpringApplicationNameNamespace() {
+        ApiMessageRepository repository = (k, l) ->
+                "workspace-service.workspace.not-found".equals(k)
+                        ? Optional.of(new ApiMessage(
+                                "WORKSPACE-0001",
+                                k,
+                                l.toLanguageTag(),
+                                "Workspace não encontrado.",
+                                "Verifique o identificador.",
+                                404
+                        ))
+                        : Optional.empty();
+
+        var resolver = new DefaultApiMessageResolver(
+                repository,
+                new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"),
+                null,
+                "workspace-service"
+        );
+
+        var result = resolver.resolve("workspace.not-found", Locale.forLanguageTag("pt-BR"));
+
+        assertEquals("workspace-service.workspace.not-found", result.messageKey());
+        assertEquals("WORKSPACE-0001", result.code());
+    }
 }

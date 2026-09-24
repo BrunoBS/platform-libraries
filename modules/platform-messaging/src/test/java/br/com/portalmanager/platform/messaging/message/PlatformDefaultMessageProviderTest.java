@@ -41,18 +41,19 @@ class PlatformDefaultMessageProviderTest {
                 mock(PathMatchingResourcePatternResolver.class);
 
         Resource workspace = new NamedByteArrayResource(
-                "workspace-service_pt_BR.properties",
+                "messages_pt_BR.properties",
                 "workspace.not-found=WORKSPACE-0001|404|O workspace solicitado não foi encontrado.|Verifique o identificador informado."
         );
 
         when(resolver.getResources("classpath*:META-INF/platform-messages/*.properties"))
                 .thenReturn(new Resource[0]);
         when(resolver.getResources(
-                "classpath*:META-INF/platform-messages/workspace-service_pt_BR.properties"
+                "classpath*:META-INF/platform-messages/messages_pt_BR.properties"
         )).thenReturn(new Resource[]{workspace});
 
         PlatformDefaultMessageProvider customProvider =
                 new PlatformDefaultMessageProvider(
+                        "workspace-service",
                         resolver,
                         new ApiMessageDefinitionParser()
                 );

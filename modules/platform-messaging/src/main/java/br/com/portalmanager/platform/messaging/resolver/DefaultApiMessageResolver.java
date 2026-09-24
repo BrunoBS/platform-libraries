@@ -6,6 +6,8 @@ import br.com.portalmanager.platform.messaging.model.ApiMessage;
 import br.com.portalmanager.platform.messaging.provider.ApiMessageProvider;
 import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -16,13 +18,14 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
     private final ApiMessageCache cache;
     private final Locale defaultLocale;
     private final ApiMessageProvider provider;
+    private final String serviceName;
 
     public DefaultApiMessageResolver(
             ApiMessageRepository repository,
             ApiMessageCache cache,
             Locale defaultLocale
     ) {
-        this(repository, cache, defaultLocale, null);
+        this(repository, cache, defaultLocale, null, null);
     }
 
     public DefaultApiMessageResolver(
@@ -31,28 +34,44 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
             Locale defaultLocale,
             ApiMessageProvider provider
     ) {
+        this(repository, cache, defaultLocale, provider, null);
+    }
+
+    public DefaultApiMessageResolver(
+            ApiMessageRepository repository,
+            ApiMessageCache cache,
+            Locale defaultLocale,
+            ApiMessageProvider provider,
+            String serviceName
+    ) {
         this.repository = repository;
         this.cache = cache;
         this.defaultLocale = defaultLocale;
         this.provider = provider;
+        this.serviceName = normalizeServiceName(serviceName);
     }
 
     @Override
     public ApiMessage resolve(String key, Locale locale) {
-        List<Locale> candidates = getCandidates(locale);
+        List<Locale> localeCandidates = getLocaleCandidates(locale);
+        List<String> keyCandidates = getKeyCandidates(key);
 
-        for (Locale candidate : candidates) {
-            Optional<ApiMessage> externalMessage = tryGetFromCache(key, candidate)
-                    .or(() -> tryGetFromRepositoryAndCache(key, candidate));
-            if (externalMessage.isPresent()) {
-                return externalMessage.get();
+        for (Locale candidateLocale : localeCandidates) {
+            for (String candidateKey : keyCandidates) {
+                Optional<ApiMessage> externalMessage = tryGetFromCache(candidateKey, candidateLocale)
+                        .or(() -> tryGetFromRepositoryAndCache(candidateKey, candidateLocale));
+                if (externalMessage.isPresent()) {
+                    return externalMessage.get();
+                }
             }
         }
 
-        for (Locale candidate : candidates) {
-            Optional<ApiMessage> fallbackMessage = tryGetFromProvider(key, candidate);
-            if (fallbackMessage.isPresent()) {
-                return fallbackMessage.get();
+        for (Locale candidateLocale : localeCandidates) {
+            for (String candidateKey : keyCandidates) {
+                Optional<ApiMessage> fallbackMessage = tryGetFromProvider(candidateKey, candidateLocale);
+                if (fallbackMessage.isPresent()) {
+                    return fallbackMessage.get();
+                }
             }
         }
 
@@ -88,8 +107,24 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
         }
     }
 
-    private List<Locale> getCandidates(Locale locale) {
-        var uniqueCandidates = new java.util.LinkedHashSet<Locale>();
+    private List<String> getKeyCandidates(String key) {
+        LinkedHashSet<String> candidates = new LinkedHashSet<>();
+        if (key == null || key.isBlank()) {
+            return new ArrayList<>();
+        }
+
+        String normalizedKey = key.trim();
+        candidates.add(normalizedKey);
+
+        if (serviceName != null && !normalizedKey.startsWith(serviceName + ".")) {
+            candidates.add(serviceName + "." + normalizedKey);
+        }
+
+        return new ArrayList<>(candidates);
+    }
+
+    private List<Locale> getLocaleCandidates(Locale locale) {
+        LinkedHashSet<Locale> uniqueCandidates = new LinkedHashSet<>();
         if (locale != null) {
             uniqueCandidates.add(locale);
             uniqueCandidates.add(Locale.forLanguageTag(locale.getLanguage()));
@@ -97,6 +132,13 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
         uniqueCandidates.add(this.defaultLocale);
         uniqueCandidates.add(Locale.forLanguageTag("pt-BR"));
         uniqueCandidates.remove(Locale.ROOT);
-        return new java.util.ArrayList<>(uniqueCandidates);
+        return new ArrayList<>(uniqueCandidates);
+    }
+
+    private String normalizeServiceName(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 }

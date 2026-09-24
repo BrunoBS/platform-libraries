@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 
 import java.util.Locale;
 
@@ -38,8 +39,8 @@ public class PlatformMessagingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ApiMessageProvider.class)
-    ApiMessageProvider apiMessageProvider() {
-        return new PlatformDefaultMessageProvider();
+    ApiMessageProvider apiMessageProvider(Environment environment) {
+        return new PlatformDefaultMessageProvider(environment.getProperty("spring.application.name"));
     }
 
     @Bean
@@ -48,13 +49,20 @@ public class PlatformMessagingAutoConfiguration {
             ApiMessageRepository repository,
             ApiMessageCache cache,
             PlatformMessagingProperties properties,
-            ApiMessageProvider provider
+            ApiMessageProvider provider,
+            Environment environment
     ) {
         Locale yamlLocale = Locale.forLanguageTag(properties.getDefaultLocale());
         Locale safeDefault = yamlLocale.equals(Locale.ROOT)
                 ? Locale.forLanguageTag("pt-BR")
                 : yamlLocale;
-        return new DefaultApiMessageResolver(repository, cache, safeDefault, provider);
+        return new DefaultApiMessageResolver(
+                repository,
+                cache,
+                safeDefault,
+                provider,
+                environment.getProperty("spring.application.name")
+        );
     }
 
     @Bean
