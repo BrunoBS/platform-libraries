@@ -1,0 +1,39 @@
+package br.com.portalmanager.platform.observability.logging.converter;
+
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+class JsonThrowableConverterTest {
+
+    private final JsonThrowableConverter converter = new JsonThrowableConverter();
+
+    @Test
+    void shouldReturnJsonNullWhenEventHasNoThrowable() {
+        ILoggingEvent event = mock(ILoggingEvent.class);
+        when(event.getThrowableProxy()).thenReturn(null);
+
+        assertThat(converter.convert(event)).isEqualTo("null");
+    }
+
+    @Test
+    void shouldReturnQuotedJsonStringWhenThrowableExists() {
+        ILoggingEvent event = mock(ILoggingEvent.class);
+        IThrowableProxy throwableProxy = mock(IThrowableProxy.class);
+
+        when(event.getThrowableProxy()).thenReturn(throwableProxy);
+        when(throwableProxy.getClassName()).thenReturn("java.lang.IllegalStateException");
+        when(throwableProxy.getMessage()).thenReturn("boom");
+
+        String converted = converter.convert(event);
+
+        assertThat(converted).startsWith("\"");
+        assertThat(converted).endsWith("\"");
+        assertThat(converted).contains("java.lang.IllegalStateException");
+        assertThat(converted).contains("boom");
+    }
+}
