@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.authorization.autoconfigure;
 
+import br.com.portalmanager.platform.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.authorization.model.UserContext;
 import br.com.portalmanager.platform.authorization.model.UserSession;
 import br.com.portalmanager.platform.authorization.registry.AuthorizationMetadataRegistry;
@@ -165,7 +166,7 @@ class PlatformAuthorizationAutoConfigurationTest {
             assertThat(session.getTraceId()).isEqualTo("trace-guest");
             assertThat(session.getGroups()).containsExactly("GUEST");
             assertThat(session.getAuthorizerGroups()).containsExactly(
-                    new br.com.portalmanager.platform.authorization.model.ParsedGroup(
+                    new ParsedGroup(
                             "GUEST",
                             "GUEST",
                             "environment-guest",
@@ -182,6 +183,60 @@ class PlatformAuthorizationAutoConfigurationTest {
             assertThat(org.slf4j.MDC.get("environmentId")).isEqualTo("environment-guest");
             assertThat(org.slf4j.MDC.get("applicationId")).isEqualTo("application-guest");
         });
+    }
+
+    @Test
+    void shouldPopulateConfiguredMockGroupsAndAuthorizerGroupsWhenDisabled() {
+        contextRunner
+                .withUserConfiguration(InfrastructureConfiguration.class)
+                .withPropertyValues(
+                        "platform.authorization.enabled=false",
+                        "platform.authorization.mock.user-name=local-user",
+                        "platform.authorization.mock.email=local-user@empresa.com",
+                        "platform.authorization.mock.account-id=account-local",
+                        "platform.authorization.mock.application-id=application-local",
+                        "platform.authorization.mock.environment-id=DEV",
+                        "platform.authorization.mock.trace-id=trace-local",
+                        "platform.authorization.mock.groups[0]=USER",
+                        "platform.authorization.mock.groups[1]=TESTER",
+                        "platform.authorization.mock.authorizer-groups[0].full-group=GRP_WORKSPACE_DEV_TEAM_A",
+                        "platform.authorization.mock.authorizer-groups[0].profile=DEV",
+                        "platform.authorization.mock.authorizer-groups[0].environment=DEV",
+                        "platform.authorization.mock.authorizer-groups[0].authorizer=TEAM_A",
+                        "platform.authorization.mock.authorizer-groups[1].full-group=GRP_WORKSPACE_DEV_TEAM_B",
+                        "platform.authorization.mock.authorizer-groups[1].profile=DEV",
+                        "platform.authorization.mock.authorizer-groups[1].environment=DEV",
+                        "platform.authorization.mock.authorizer-groups[1].authorizer=TEAM_B"
+                )
+                .run(context -> {
+                    WebMvcConfigurer configurer = context.getBean(WebMvcConfigurer.class);
+                    CapturingInterceptorRegistry registry = new CapturingInterceptorRegistry();
+                    configurer.addInterceptors(registry);
+
+                    HandlerInterceptor interceptor = registry.getInterceptor();
+                    HttpServletRequest request = mock(HttpServletRequest.class);
+                    HttpServletResponse response = mock(HttpServletResponse.class);
+                    when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+                    when(request.getRequestURI()).thenReturn("/api/test");
+
+                    assertThat(interceptor.preHandle(request, response, new Object())).isTrue();
+
+                    UserSession session = UserContext.get().orElseThrow();
+                    assertThat(session.getUserName()).isEqualTo("local-user");
+                    assertThat(session.getEmail()).isEqualTo("local-user@empresa.com");
+                    assertThat(session.getAccountId()).isEqualTo("account-local");
+                    assertThat(session.getApplicationId()).isEqualTo("application-local");
+                    assertThat(session.getEnvironmentId()).isEqualTo("DEV");
+                    assertThat(session.getTraceId()).isEqualTo("trace-local");
+                    assertThat(session.getGroups()).containsExactlyInAnyOrder("USER", "TESTER");
+                    assertThat(session.getAuthorizerGroups()).containsExactlyInAnyOrder(
+                            new ParsedGroup("GRP_WORKSPACE_DEV_TEAM_A", "DEV", "DEV", "TEAM_A"),
+                            new ParsedGroup("GRP_WORKSPACE_DEV_TEAM_B", "DEV", "DEV", "TEAM_B")
+                    );
+                    assertThat(session.hasAuthorizer("TEAM_A")).isTrue();
+                    assertThat(session.hasAuthorizer("TEAM_B")).isTrue();
+                    assertThat(session.hasAuthorizer("TEAM_C")).isFalse();
+                });
     }
 
     @Test
