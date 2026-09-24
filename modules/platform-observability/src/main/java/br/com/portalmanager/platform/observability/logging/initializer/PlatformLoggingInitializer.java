@@ -6,6 +6,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.NopStatusListener;
+import br.com.portalmanager.platform.observability.logging.converter.JsonMdcConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonMessageConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonThrowableConverter;
 import br.com.portalmanager.platform.observability.logging.converter.MaskingConverter;
@@ -70,6 +71,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
             @Override
             public void start() {
                 ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMessage", JsonMessageConverter.class.getName());
+                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMdc", JsonMdcConverter.class.getName());
                 ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonThrowable", JsonThrowableConverter.class.getName());
                 if (maskingEnabled) {
                     ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("corporateLgpdMask", MaskingConverter.class.getName());
@@ -113,6 +115,14 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
                 "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%%property{HOSTNAME:-unknown-host}\",\"context\":%%mdc,\"exception\":\"%%jsonThrowable\"}%%n",
                 messageToken, serviceName, appVersion
         );
+    }
+
+    private String resolveHost() {
+        String host = System.getenv("HOSTNAME");
+        if (host == null || host.isBlank() || "null".equalsIgnoreCase(host)) {
+            return "unknown-host";
+        }
+        return host;
     }
 
     private void registerAppender(LoggerContext loggerContext, ConsoleAppender<ILoggingEvent> appender) {
