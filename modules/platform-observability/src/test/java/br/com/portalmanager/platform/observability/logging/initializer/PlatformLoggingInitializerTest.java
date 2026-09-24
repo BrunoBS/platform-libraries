@@ -134,6 +134,11 @@ class PlatformLoggingInitializerTest {
                 "O contexto deveria usar o conversor JSON do MDC."
         );
 
+        assertTrue(
+                encoder.getPattern().contains("\"error\":%jsonError"),
+                "Erros resolvidos deveriam ser emitidos como objeto JSON estruturado."
+        );
+
         assertFalse(
                 encoder.getPattern().contains("\"host\":\"null\""),
                 "HOSTNAME textual null não deveria ser emitido no log."
