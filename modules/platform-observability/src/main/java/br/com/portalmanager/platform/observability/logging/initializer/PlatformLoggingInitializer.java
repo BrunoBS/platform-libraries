@@ -11,6 +11,7 @@ import br.com.portalmanager.platform.observability.logging.converter.JsonMessage
 import br.com.portalmanager.platform.observability.logging.converter.JsonThrowableConverter;
 import br.com.portalmanager.platform.observability.logging.converter.MaskingConverter;
 import br.com.portalmanager.platform.observability.logging.metadata.BuildVersionResolver;
+import br.com.portalmanager.platform.observability.logging.metadata.HostResolver;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -61,7 +62,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     private ConsoleAppender<ILoggingEvent> createJsonConsoleAppender(LoggerContext loggerContext, ConfigurableEnvironment env) {
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
         String appVersion = BuildVersionResolver.resolve(env);
-        String host = resolveHost(env);
+        String host = HostResolver.resolve(env);
         boolean maskingEnabled = env.getProperty("platform.observability.logging.masking.enabled", Boolean.class, true);
 
         // Captura o mapa de conversores customizados do usuário informados no YAML
@@ -119,13 +120,6 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         );
     }
 
-    private String resolveHost(ConfigurableEnvironment env) {
-        String host = env.getProperty("HOSTNAME");
-        if (host == null || host.isBlank() || "null".equalsIgnoreCase(host)) {
-            return "unknown-host";
-        }
-        return host;
-    }
 
     private void registerAppender(LoggerContext loggerContext, ConsoleAppender<ILoggingEvent> appender) {
         ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
