@@ -105,8 +105,8 @@ class ApiExceptionHandlerTest {
         assertEquals(500, responseEntity.getStatusCode().value());
         ApiErrorResponse body = responseEntity.getBody();
         assertNotNull(body);
-        assertEquals("ERR-9999", body.code());
-        assertEquals("Mensagem de API não encontrada.", body.message());
+        assertEquals("PLT-MSG-009", body.code());
+        assertEquals("Platform message definition was not found for key 'UNKNOWN_KEY'", body.message());
         assertEquals("/api/v1/orders", body.path());
     }
 
@@ -196,7 +196,7 @@ class ApiExceptionHandlerTest {
         assertEquals(500, responseEntity.getStatusCode().value());
         ApiErrorResponse body = responseEntity.getBody();
         assertNotNull(body);
-        assertEquals("ERR-9999", body.code());
+        assertEquals("PLT-MSG-009", body.code());
         assertEquals("/api/v1/products", body.path());
     }
 }
