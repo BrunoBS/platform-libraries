@@ -146,6 +146,45 @@ Após a autorização, a sessão é disponibilizada no `UserContext` e limpa ao 
 
 Com `platform.authorization.enabled=false`, o módulo permite desenvolvimento local sem depender do serviço central de autorização.
 
+Sem configuração adicional, o contexto continua usando o guest padrão:
+
+```text
+userName = guest
+groups = [GUEST]
+authorizerGroups = [GUEST]
+```
+
+Para simular cenários reais de autorização e visibilidade, a sessão local pode ser configurada:
+
+```yaml
+platform:
+  authorization:
+    enabled: false
+    mock:
+      user-name: local-user
+      email: local-user@empresa.com
+      account-id: account-local
+      application-id: application-local
+      environment-id: DEV
+      trace-id: trace-local
+      groups:
+        - USER
+        - TESTER
+      authorizer-groups:
+        - full-group: GRP_WORKSPACE_DEV_TEAM_A
+          profile: DEV
+          environment: DEV
+          authorizer: TEAM_A
+        - full-group: GRP_WORKSPACE_DEV_TEAM_B
+          profile: DEV
+          environment: DEV
+          authorizer: TEAM_B
+```
+
+`groups` representa os grupos gerais da sessão. `authorizer-groups` popula os `ParsedGroup` usados por `hasAuthorizer(...)` e por `@ResourceVisibility`.
+
+As propriedades de mock são consideradas somente quando `platform.authorization.enabled=false`. Quando a autorização real está ativa, a sessão continua vindo exclusivamente do serviço central de autorização.
+
 ### 5. Cliente resiliente
 
 A comunicação com o serviço de autorização utiliza `RestClient` e política de retry/backoff.

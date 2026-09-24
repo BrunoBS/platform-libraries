@@ -86,25 +86,42 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "false")
-    public WebMvcConfigurer mockInterceptorConfigurer() {
+    public WebMvcConfigurer mockInterceptorConfigurer(PlatformAuthorizationProperties properties) {
         return new WebMvcConfigurer() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
                 registry.addInterceptor(new HandlerInterceptor() {
                     @Override
                     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+                        PlatformAuthorizationProperties.Mock mock = properties.getMock();
+
                         UserSession mockSession = new UserSession();
-                        mockSession.setUserName("guest");
-                        mockSession.setEmail("guest@empresa.com");
-                        mockSession.setAccountId("account-guest");
-                        mockSession.setApplicationId("application-guest");
-                        mockSession.setEnvironmentId("environment-guest");
-                        mockSession.setTraceId("trace-guest");
+                        mockSession.setUserName(mock.getUserName());
+                        mockSession.setEmail(mock.getEmail());
+                        mockSession.setAccountId(mock.getAccountId());
+                        mockSession.setApplicationId(mock.getApplicationId());
+                        mockSession.setEnvironmentId(mock.getEnvironmentId());
+                        mockSession.setTraceId(mock.getTraceId());
                         mockSession.setExpirationTime(Instant.now().plusSeconds(3600).toEpochMilli());
-                        mockSession.setGroups(Set.of("GUEST"));
-                        mockSession.setAuthorizerGroups(Set.of(
-                                new ParsedGroup("GUEST", "GUEST", "environment-guest", "GUEST")
-                        ));
+                        mockSession.setGroups(mock.getGroups());
+
+                        Set<ParsedGroup> authorizerGroups = mock.getAuthorizerGroups().isEmpty()
+                                ? Set.of(new ParsedGroup(
+                                        "GUEST",
+                                        "GUEST",
+                                        mock.getEnvironmentId(),
+                                        "GUEST"
+                                ))
+                                : Set.copyOf(mock.getAuthorizerGroups().stream()
+                                        .map(group -> new ParsedGroup(
+                                                group.getFullGroup(),
+                                                group.getProfile(),
+                                                group.getEnvironment(),
+                                                group.getAuthorizer()
+                                        ))
+                                        .toList());
+
+                        mockSession.setAuthorizerGroups(authorizerGroups);
 
                         UserContext.set(mockSession);
 
