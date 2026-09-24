@@ -2,7 +2,6 @@ package br.com.portalmanager.platform.starter;
 
 import br.com.portalmanager.platform.authorization.registry.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.messaging.repository.ApiMessageRepository;
-import br.com.portalmanager.platform.messaging.repository.NoOpApiMessageRepository;
 import br.com.portalmanager.platform.messaging.resolver.ApiMessageResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
@@ -18,16 +17,15 @@ class PlatformStarterMinimalConsumerTest {
         SpringApplication application = new SpringApplication(MinimalConsumerApplication.class);
         application.setDefaultProperties(java.util.Map.of(
                 "spring.main.web-application-type", "none",
-                "platform.authorization.enabled", "false"
+                "platform.authorization.enabled", "false",
+                "platform.messaging.enabled", "false"
         ));
 
         try (ConfigurableApplicationContext context = application.run()) {
             assertThat(context.isActive()).isTrue();
             assertThat(context.getBeansOfType(AuthorizationMetadataRegistry.class)).hasSize(1);
-            assertThat(context.getBeansOfType(ApiMessageRepository.class)).hasSize(1);
-            assertThat(context.getBean(ApiMessageRepository.class))
-                    .isInstanceOf(NoOpApiMessageRepository.class);
-            assertThat(context.getBeansOfType(ApiMessageResolver.class)).hasSize(1);
+            assertThat(context.getBeansOfType(ApiMessageRepository.class)).isEmpty();
+            assertThat(context.getBeansOfType(ApiMessageResolver.class)).isEmpty();
 
             assertThat(isPresent("br.com.portalmanager.platform.catalog.autoconfigure.PlatformCatalogAutoConfiguration")).isFalse();
             assertThat(isPresent("br.com.portalmanager.platform.audit.autoconfigure.PlatformAuditAutoConfiguration")).isFalse();
