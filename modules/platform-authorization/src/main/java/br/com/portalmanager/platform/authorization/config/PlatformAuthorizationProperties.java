@@ -46,9 +46,7 @@ public class PlatformAuthorizationProperties {
         private String environmentId = "environment-guest";
         private String traceId = "trace-guest";
         private Set<String> groups = new LinkedHashSet<>(Set.of("GUEST"));
-        private List<AuthorizerGroup> authorizerGroups = List.of(
-                new AuthorizerGroup("GUEST", "GUEST", "environment-guest", "GUEST")
-        );
+        private List<AuthorizerGroup> authorizerGroups = List.of();
 
         public String getUserName() {
             return userName;
@@ -113,9 +111,7 @@ public class PlatformAuthorizationProperties {
         }
 
         public void setAuthorizerGroups(List<AuthorizerGroup> authorizerGroups) {
-            this.authorizerGroups = authorizerGroups == null || authorizerGroups.isEmpty()
-                    ? List.of(new AuthorizerGroup("GUEST", "GUEST", environmentId, "GUEST"))
-                    : List.copyOf(authorizerGroups);
+            this.authorizerGroups = authorizerGroups == null ? List.of() : List.copyOf(authorizerGroups);
         }
     }
 
