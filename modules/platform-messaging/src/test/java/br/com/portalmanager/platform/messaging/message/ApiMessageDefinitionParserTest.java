@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.messaging.message;
 
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -45,7 +46,7 @@ class ApiMessageDefinitionParserTest {
                 Locale.forLanguageTag("pt-BR"),
                 "VALIDATION-0001|400|Mensagem sem solution"
         ))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(PlatformConfigurationException.class)
                 .hasMessageContaining("code|httpStatus|message|solution");
     }
 }
