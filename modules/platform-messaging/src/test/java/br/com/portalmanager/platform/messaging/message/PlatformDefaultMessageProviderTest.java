@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.messaging.message;
 
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
@@ -140,7 +141,7 @@ class PlatformDefaultMessageProviderTest {
                         new ApiMessageDefinitionParser()
                 )
         )
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(PlatformConfigurationException.class)
                 .hasMessageContaining("Duplicate platform message key detected")
                 .hasMessageContaining("catalog.not.found")
                 .hasMessageContaining("pt_BR");
@@ -165,8 +166,8 @@ class PlatformDefaultMessageProviderTest {
                         new ApiMessageDefinitionParser()
                 )
         )
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("must be local to its bundle")
+                .isInstanceOf(PlatformConfigurationException.class)
+                .hasMessageContaining("Invalid platform message key in bundle")
                 .hasMessageContaining("catalog.not.found");
     }
 
@@ -189,7 +190,7 @@ class PlatformDefaultMessageProviderTest {
                         new ApiMessageDefinitionParser()
                 )
         )
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(PlatformConfigurationException.class)
                 .hasMessageContaining("Invalid platform message bundle name");
     }
 
