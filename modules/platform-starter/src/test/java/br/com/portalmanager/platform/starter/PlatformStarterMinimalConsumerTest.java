@@ -17,11 +17,12 @@ class PlatformStarterMinimalConsumerTest {
         SpringApplication application = new SpringApplication(MinimalConsumerApplication.class);
         application.setDefaultProperties(java.util.Map.of(
                 "spring.main.web-application-type", "none",
-                "platform.authorization.enabled", "false",
-                "platform.messaging.enabled", "false"
+                "platform.authorization.enabled", "false"
         ));
 
-        try (ConfigurableApplicationContext context = application.run()) {
+        try (ConfigurableApplicationContext context = application.run(
+                "--platform.messaging.enabled=false"
+        )) {
             assertThat(context.isActive()).isTrue();
             assertThat(context.getBeansOfType(AuthorizationMetadataRegistry.class)).hasSize(1);
             assertThat(context.getBeansOfType(ApiMessageRepository.class)).isEmpty();
