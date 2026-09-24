@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.observability.logging.initializer;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
@@ -112,6 +113,30 @@ class PlatformLoggingInitializerTest {
         assertNotNull(
                 rootLogger().getAppender("JSON_CONSOLE"),
                 "A inicialização deveria funcionar mesmo sem metadados da aplicação."
+        );
+    }
+
+    @Test
+    void shouldConfigureStructuredJsonContextAndNormalizeNullHost() {
+
+        environment.setProperty("HOSTNAME", "null");
+
+        initializer.initialize(context);
+
+        @SuppressWarnings("unchecked")
+        ConsoleAppender<ILoggingEvent> appender =
+                (ConsoleAppender<ILoggingEvent>) rootLogger().getAppender("JSON_CONSOLE");
+
+        PatternLayoutEncoder encoder = (PatternLayoutEncoder) appender.getEncoder();
+
+        assertTrue(
+                encoder.getPattern().contains("\"context\":%jsonMdc"),
+                "O contexto deveria usar o conversor JSON do MDC."
+        );
+
+        assertTrue(
+                encoder.getPattern().contains("\"host\":\"unknown-host\""),
+                "HOSTNAME nulo textual deveria ser normalizado."
         );
     }
 
