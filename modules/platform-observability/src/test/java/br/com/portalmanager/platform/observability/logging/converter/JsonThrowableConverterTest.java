@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.observability.logging.converter;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.ThrowableProxy;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,11 +23,10 @@ class JsonThrowableConverterTest {
     @Test
     void shouldReturnQuotedJsonStringWhenThrowableExists() {
         ILoggingEvent event = mock(ILoggingEvent.class);
-        IThrowableProxy throwableProxy = mock(IThrowableProxy.class);
+        ThrowableProxy throwableProxy =
+                new ThrowableProxy(new IllegalStateException("boom"));
 
         when(event.getThrowableProxy()).thenReturn(throwableProxy);
-        when(throwableProxy.getClassName()).thenReturn("java.lang.IllegalStateException");
-        when(throwableProxy.getMessage()).thenReturn("boom");
 
         String converted = converter.convert(event);
 
@@ -35,5 +34,6 @@ class JsonThrowableConverterTest {
         assertThat(converted).endsWith("\"");
         assertThat(converted).contains("java.lang.IllegalStateException");
         assertThat(converted).contains("boom");
+        assertThat(converted).contains("\\n");
     }
 }
