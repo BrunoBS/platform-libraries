@@ -7,6 +7,12 @@ public class JsonThrowableConverter extends ThrowableProxyConverter {
 
     @Override
     public String convert(ILoggingEvent event) {
-        return JsonMessageConverter.escapeJson(super.convert(event));
+        String throwable = super.convert(event);
+
+        if (throwable == null || throwable.isBlank()) {
+            return "null";
+        }
+
+        return "\"" + JsonMessageConverter.escapeJson(throwable) + "\"";
     }
 }
