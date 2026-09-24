@@ -1,8 +1,6 @@
 package br.com.portalmanager.platform.observability.logging.converter;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -15,21 +13,17 @@ import static org.mockito.Mockito.when;
 class JsonMdcConverterTest {
 
     private final JsonMdcConverter converter = new JsonMdcConverter();
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void shouldReturnEmptyJsonObjectWhenMdcIsEmpty() throws Exception {
+    void shouldReturnEmptyJsonObjectWhenMdcIsEmpty() {
         ILoggingEvent event = mock(ILoggingEvent.class);
         when(event.getMDCPropertyMap()).thenReturn(Map.of());
 
-        String result = converter.convert(event);
-
-        assertThat(result).isEqualTo("{}");
-        assertThat(objectMapper.readTree(result).isObject()).isTrue();
+        assertThat(converter.convert(event)).isEqualTo("{}");
     }
 
     @Test
-    void shouldSerializeMdcAsJsonObject() throws Exception {
+    void shouldSerializeMdcAsJsonObject() {
         ILoggingEvent event = mock(ILoggingEvent.class);
         Map<String, String> mdc = new LinkedHashMap<>();
         mdc.put("accountId", "AC-01");
@@ -37,26 +31,19 @@ class JsonMdcConverterTest {
         mdc.put("username", "bbs");
         when(event.getMDCPropertyMap()).thenReturn(mdc);
 
-        String result = converter.convert(event);
-        JsonNode json = objectMapper.readTree(result);
-
-        assertThat(json.get("accountId").asText()).isEqualTo("AC-01");
-        assertThat(json.get("environmentId").asText()).isEqualTo("DEV");
-        assertThat(json.get("username").asText()).isEqualTo("bbs");
+        assertThat(converter.convert(event))
+                .isEqualTo("{\"accountId\":\"AC-01\",\"environmentId\":\"DEV\",\"username\":\"bbs\"}");
     }
 
     @Test
-    void shouldEscapeSpecialCharactersAndKeepValidJson() throws Exception {
+    void shouldEscapeSpecialCharacters() {
         ILoggingEvent event = mock(ILoggingEvent.class);
         when(event.getMDCPropertyMap()).thenReturn(Map.of(
                 "uri", "/api/\"workspace\"",
                 "userAgent", "line1\nline2\\client"
         ));
 
-        String result = converter.convert(event);
-        JsonNode json = objectMapper.readTree(result);
-
-        assertThat(json.get("uri").asText()).isEqualTo("/api/\"workspace\"");
-        assertThat(json.get("userAgent").asText()).isEqualTo("line1\nline2\\client");
+        assertThat(converter.convert(event))
+                .isEqualTo("{\"uri\":\"/api/\\\"workspace\\\"\",\"userAgent\":\"line1\\nline2\\\\client\"}");
     }
 }
