@@ -36,6 +36,18 @@ class JsonMdcConverterTest {
     }
 
     @Test
+    void shouldExcludeStructuredErrorFromContext() {
+        ILoggingEvent event = mock(ILoggingEvent.class);
+        when(event.getMDCPropertyMap()).thenReturn(Map.of(
+                "correlationId", "corr-01",
+                JsonErrorMdcConverter.ERROR_MDC_KEY, "{\"code\":\"GLOBAL-0001\"}"
+        ));
+
+        assertThat(converter.convert(event))
+                .isEqualTo("{\"correlationId\":\"corr-01\"}");
+    }
+
+    @Test
     void shouldEscapeSpecialCharacters() {
         ILoggingEvent event = mock(ILoggingEvent.class);
         when(event.getMDCPropertyMap()).thenReturn(Map.of(
