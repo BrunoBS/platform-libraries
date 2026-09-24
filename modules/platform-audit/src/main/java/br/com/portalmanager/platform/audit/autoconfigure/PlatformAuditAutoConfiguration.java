@@ -3,9 +3,9 @@ package br.com.portalmanager.platform.audit.autoconfigure;
 import br.com.portalmanager.platform.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.platform.audit.exception.AuditException;
 import br.com.portalmanager.platform.audit.fallback.AuditFallbackStore;
-import br.com.portalmanager.platform.audit.message.AuditMessageKeys;
+import br.com.portalmanager.platform.audit.message.AuditTechnicalErrors;
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.audit.publisher.RestAuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,7 +48,7 @@ public class PlatformAuditAutoConfiguration {
             ObjectProvider<AuditFallbackStore> fallbackStoreProvider
     ) {
         if (properties.getServiceUrl() == null || properties.getServiceUrl().isBlank()) {
-            throw new AuditException(AuditMessageKeys.SERVICE_URL_REQUIRED);
+            throw new PlatformConfigurationException(AuditTechnicalErrors.SERVICE_URL_REQUIRED);
         }
 
         return new RestAuditPublisher(
@@ -66,7 +66,7 @@ public class PlatformAuditAutoConfiguration {
     ) {
         return () -> {
             if (fallbackStoreProvider.getIfAvailable() == null) {
-                throw new AuditException(AuditMessageKeys.FALLBACK_STORE_MISSING);
+                throw new PlatformConfigurationException(AuditTechnicalErrors.FALLBACK_STORE_MISSING);
             }
         };
     }

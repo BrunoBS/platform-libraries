@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.authorization.autoconfigure;
 
 import br.com.portalmanager.platform.authorization.model.ParsedGroup;
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.authorization.model.UserContext;
 import br.com.portalmanager.platform.authorization.model.UserSession;
 import br.com.portalmanager.platform.authorization.registry.AuthorizationMetadataRegistry;
@@ -66,8 +67,8 @@ class PlatformAuthorizationAutoConfigurationTest {
     void shouldFailWhenServiceUrlIsMissing() {
         contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=true").run(context -> {
             assertThat(context).hasFailed();
-            assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(IllegalArgumentException.class);
-            assertThat(context.getStartupFailure()).hasRootCauseMessage("A propriedade [platform.authorization.service-url] e obrigatoria quando o modulo de autorizacao esta ativo.");
+            assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
+            assertThat(context.getStartupFailure()).hasRootCauseMessage("platform.authorization.service-url is required when platform.authorization is enabled");
         });
     }
 
@@ -75,7 +76,7 @@ class PlatformAuthorizationAutoConfigurationTest {
     void shouldFailWhenServiceUrlIsBlank() {
         contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=true", "platform.authorization.service-url=").run(context -> {
             assertThat(context).hasFailed();
-            assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(IllegalArgumentException.class);
+            assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
         });
     }
 

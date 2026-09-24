@@ -2,6 +2,8 @@ package br.com.portalmanager.platform.authorization.autoconfigure;
 
 import br.com.portalmanager.platform.authorization.aspect.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.authorization.config.PlatformAuthorizationProperties;
+import br.com.portalmanager.platform.authorization.message.AuthorizationTechnicalErrors;
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.authorization.model.UserContext;
 import br.com.portalmanager.platform.authorization.model.UserSession;
@@ -57,8 +59,8 @@ public class PlatformAuthorizationAutoConfiguration {
 
         String authUrl = properties.getServiceUrl();
         if (authUrl == null || authUrl.isBlank()) {
-            throw new IllegalArgumentException(
-                    "A propriedade [platform.authorization.service-url] e obrigatoria quando o modulo de autorizacao esta ativo."
+            throw new PlatformConfigurationException(
+                    AuthorizationTechnicalErrors.SERVICE_URL_REQUIRED
             );
         }
         return new AuthorizationClientService(builder, authUrl);

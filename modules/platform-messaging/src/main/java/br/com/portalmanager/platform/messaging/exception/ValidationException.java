@@ -7,7 +7,7 @@ import br.com.portalmanager.platform.messaging.validation.ValidationResult;
 import java.util.List;
 import java.util.Map;
 
-public class ValidationException extends ApiException {
+public class ValidationException extends ApiException implements ValidationDetailsProvider {
 
     private final List<ValidationDetail> details;
 

@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.tagging.model.Tag;
 import br.com.portalmanager.platform.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.tagging.model.TagOwnerType;
 import br.com.portalmanager.platform.tagging.storage.TagStorage;
+import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -208,6 +209,26 @@ class TagManagerTest {
 
         assertThat(result.get("10")).containsExactly("first");
         assertThat(result.get("20")).containsExactly("second");
+    }
+
+    @Test
+    void shouldUseStandardValidationExceptionForMissingOwnerType() {
+        TagManager manager = new TagManager(storageWith());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> manager.findAll(null, 10L)
+                )
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void shouldUseStandardValidationExceptionForMissingOwnerId() {
+        TagManager manager = new TagManager(storageWith());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> manager.findAll(ACCOUNT, null)
+                )
+                .isInstanceOf(ValidationException.class);
     }
 
     private static TagStorage storageWith(Tag... tags) {

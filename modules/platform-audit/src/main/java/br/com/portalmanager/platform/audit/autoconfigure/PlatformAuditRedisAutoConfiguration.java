@@ -1,10 +1,10 @@
 package br.com.portalmanager.platform.audit.autoconfigure;
 
 import br.com.portalmanager.platform.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.platform.audit.exception.AuditException;
 import br.com.portalmanager.platform.audit.fallback.AuditFallbackStore;
 import br.com.portalmanager.platform.audit.fallback.RedisAuditFallbackStore;
-import br.com.portalmanager.platform.audit.message.AuditMessageKeys;
+import br.com.portalmanager.platform.audit.message.AuditTechnicalErrors;
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.audit.recovery.AuditRecoveryLock;
 import br.com.portalmanager.platform.audit.recovery.AuditRecoveryService;
@@ -37,7 +37,7 @@ public class PlatformAuditRedisAutoConfiguration {
     ) {
         StringRedisTemplate redisTemplate = redisTemplateProvider.getIfAvailable();
         if (redisTemplate == null) {
-            throw new AuditException(AuditMessageKeys.REDIS_NOT_CONFIGURED);
+            throw new PlatformConfigurationException(AuditTechnicalErrors.REDIS_NOT_CONFIGURED);
         }
         return new RedisAuditFallbackStore(redisTemplate, objectMapper, properties);
     }
@@ -50,7 +50,7 @@ public class PlatformAuditRedisAutoConfiguration {
     ) {
         StringRedisTemplate redisTemplate = redisTemplateProvider.getIfAvailable();
         if (redisTemplate == null) {
-            throw new AuditException(AuditMessageKeys.REDIS_NOT_CONFIGURED);
+            throw new PlatformConfigurationException(AuditTechnicalErrors.REDIS_NOT_CONFIGURED);
         }
         return new RedisAuditRecoveryLock(redisTemplate, properties);
     }

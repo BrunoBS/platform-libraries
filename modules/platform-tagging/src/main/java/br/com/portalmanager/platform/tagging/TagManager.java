@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.tagging.model.Tag;
 import br.com.portalmanager.platform.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.tagging.model.TagOwnerType;
 import br.com.portalmanager.platform.tagging.storage.TagStorage;
+import br.com.portalmanager.platform.tagging.validation.TagValidation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -12,7 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 public class TagManager {
@@ -30,8 +30,8 @@ public class TagManager {
             Collection<String> manualTags,
             Collection<String> systemTags) {
 
-        String resolvedOwnerType = requireOwnerType(ownerType);
-        String resolvedOwnerId = requireOwnerId(ownerId);
+        String resolvedOwnerType = TagValidation.TagValidation.requireOwnerType(ownerType);
+        String resolvedOwnerId = TagValidation.TagValidation.requireOwnerId(ownerId);
         TagOwnerType normalizedOwnerType = () -> resolvedOwnerType;
 
         Map<String, TagOriginType> desired = desiredTags(manualTags, systemTags);
@@ -76,8 +76,8 @@ public class TagManager {
     @Transactional(readOnly = true)
     public List<Tag> findAll(TagOwnerType ownerType, Object ownerId) {
         return storage.findByOwner(
-                requireOwnerType(ownerType),
-                requireOwnerId(ownerId));
+                TagValidation.requireOwnerType(ownerType),
+                TagValidation.requireOwnerId(ownerId));
     }
 
     @Transactional(readOnly = true)
@@ -101,17 +101,17 @@ public class TagManager {
         if (normalizedTag == null) {
             return List.of();
         }
-        return storage.findOwnerIdsByTag(requireOwnerType(ownerType), normalizedTag);
+        return storage.findOwnerIdsByTag(TagValidation.requireOwnerType(ownerType), normalizedTag);
     }
 
     @Transactional
     public void deleteAll(TagOwnerType ownerType, Object ownerId) {
-        storage.deleteByOwner(requireOwnerType(ownerType), requireOwnerId(ownerId));
+        storage.deleteByOwner(TagValidation.requireOwnerType(ownerType), TagValidation.requireOwnerId(ownerId));
     }
 
     private List<String> findByOrigin(TagOwnerType ownerType, Object ownerId, TagOriginType originType) {
         return storage.findByOwnerAndOrigin(
-                        requireOwnerType(ownerType), requireOwnerId(ownerId), originType)
+                        TagValidation.requireOwnerType(ownerType), TagValidation.requireOwnerId(ownerId), originType)
                 .stream()
                 .map(Tag::getName)
                 .toList();
@@ -124,14 +124,14 @@ public class TagManager {
         }
 
         Set<String> resolvedOwnerIds = ownerIds.stream()
-                .map(TagManager::requireOwnerId)
+                .map(TagValidation::requireOwnerId)
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
 
         Map<String, List<String>> result = new LinkedHashMap<>();
         resolvedOwnerIds.forEach(ownerId -> result.put(ownerId, new ArrayList<>()));
 
         storage.findByOwnersAndOrigin(
-                        requireOwnerType(ownerType), resolvedOwnerIds, originType)
+                        TagValidation.requireOwnerType(ownerType), resolvedOwnerIds, originType)
                 .forEach(tag -> result.get(tag.getOwnerId()).add(tag.getName()));
 
         return result;
@@ -159,21 +159,4 @@ public class TagManager {
         return normalized;
     }
 
-    private static String requireOwnerType(TagOwnerType ownerType) {
-        Objects.requireNonNull(ownerType, "ownerType");
-        String value = ownerType.value();
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("ownerType must not be blank");
-        }
-        return value.trim().toUpperCase(java.util.Locale.ROOT);
-    }
-
-    private static String requireOwnerId(Object ownerId) {
-        Objects.requireNonNull(ownerId, "ownerId");
-        String value = String.valueOf(ownerId).trim();
-        if (value.isBlank()) {
-            throw new IllegalArgumentException("ownerId must not be blank");
-        }
-        return value;
-    }
 }

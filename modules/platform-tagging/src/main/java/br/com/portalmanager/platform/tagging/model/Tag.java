@@ -8,8 +8,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import java.util.Objects;
 import java.util.UUID;
+
+import br.com.portalmanager.platform.tagging.validation.TagValidation;
 
 @Entity
 @Table(
@@ -42,19 +43,25 @@ public class Tag {
     }
 
     public Tag(TagOwnerType ownerType, Object ownerId, String name, TagOriginType originType) {
-        this(UUID.randomUUID().toString(), ownerType.value(), String.valueOf(ownerId), name, originType);
+        this(
+                UUID.randomUUID().toString(),
+                TagValidation.requireOwnerType(ownerType),
+                TagValidation.requireOwnerId(ownerId),
+                TagValidation.requireName(name),
+                TagValidation.requireOrigin(originType)
+        );
     }
 
     Tag(String id, String ownerType, String ownerId, String name, TagOriginType originType) {
-        this.id = Objects.requireNonNull(id, "id");
-        this.ownerType = Objects.requireNonNull(ownerType, "ownerType");
-        this.ownerId = Objects.requireNonNull(ownerId, "ownerId");
-        this.name = Objects.requireNonNull(name, "name");
-        this.originType = Objects.requireNonNull(originType, "originType");
+        this.id = TagValidation.requireId(id);
+        this.ownerType = TagValidation.requireOwnerType(ownerType);
+        this.ownerId = TagValidation.requireOwnerId(ownerId);
+        this.name = TagValidation.requireName(name);
+        this.originType = TagValidation.requireOrigin(originType);
     }
 
     public void changeOrigin(TagOriginType originType) {
-        this.originType = Objects.requireNonNull(originType, "originType");
+        this.originType = TagValidation.requireOrigin(originType);
     }
 
     public String getId() { return id; }

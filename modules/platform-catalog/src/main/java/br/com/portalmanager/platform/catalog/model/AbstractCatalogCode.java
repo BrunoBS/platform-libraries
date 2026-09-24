@@ -1,8 +1,14 @@
 package br.com.portalmanager.platform.catalog.model;
 
+import br.com.portalmanager.platform.catalog.message.CatalogMessageKeys;
+import br.com.portalmanager.platform.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.messaging.model.ValidationDetail;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -43,7 +49,14 @@ public abstract class AbstractCatalogCode {
 
     private static String requireValid(String value) {
         if (!isValidFormat(value)) {
-            throw new IllegalArgumentException("Invalid catalog code: " + value);
+            throw new ValidationException(
+                    PlatformMessageKeys.VALIDATION_FAILED,
+                    List.of(new ValidationDetail(
+                            "code",
+                            CatalogMessageKeys.CODE_INVALID_FORMAT,
+                            Map.of("0", value == null ? "" : value)
+                    ))
+            );
         }
         return value;
     }

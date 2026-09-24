@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.messaging.exception.ConflictException;
 import br.com.portalmanager.platform.messaging.exception.NotFoundException;
 import br.com.portalmanager.platform.messaging.exception.ResourceVersionConflictException;
 import br.com.portalmanager.platform.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.messaging.exception.ValidationDetailsProvider;
 import br.com.portalmanager.platform.messaging.message.PlatformMessageKeys;
 import br.com.portalmanager.platform.messaging.model.ApiErrorResponse;
 import br.com.portalmanager.platform.messaging.model.ApiMessage;
@@ -297,7 +298,7 @@ public class ApiExceptionHandler {
             ApiException exception,
             Locale locale
     ) {
-        if (!(exception instanceof ValidationException validationException)
+        if (!(exception instanceof ValidationDetailsProvider validationException)
                 || validationException.getDetails().isEmpty()) {
             return List.of();
         }

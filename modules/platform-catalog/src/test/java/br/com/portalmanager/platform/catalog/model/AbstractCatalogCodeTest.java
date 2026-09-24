@@ -1,9 +1,9 @@
 package br.com.portalmanager.platform.catalog.model;
 
+import br.com.portalmanager.platform.messaging.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class AbstractCatalogCodeTest {
 
@@ -24,8 +24,10 @@ class AbstractCatalogCodeTest {
 
     @Test
     void shouldRejectInvalidCode() {
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> ServiceCode.of("workspace service"));
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> ServiceCode.of("workspace service")
+                )
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
