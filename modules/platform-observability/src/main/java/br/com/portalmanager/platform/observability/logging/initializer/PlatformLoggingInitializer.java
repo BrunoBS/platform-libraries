@@ -117,7 +117,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         }
 
         return String.format(
-                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"context\":%%jsonMdc,\"error\":%%jsonError,\"exception\":\"%%jsonThrowable\"}%%n",
+                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"context\":%%jsonMdc,\"error\":%%jsonError,\"exception\":%%jsonThrowable}%%n",
                 messageToken, serviceName, appVersion, host
         );
     }
