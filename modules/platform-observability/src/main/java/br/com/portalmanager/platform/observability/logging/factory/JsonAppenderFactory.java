@@ -8,6 +8,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import br.com.portalmanager.platform.observability.logging.constants.LoggingConstants;
 import br.com.portalmanager.platform.observability.logging.converter.JsonMdcConverter;
 import br.com.portalmanager.platform.observability.logging.metadata.BuildVersionResolver;
+import br.com.portalmanager.platform.observability.logging.metadata.HostResolver;
 import org.springframework.core.env.Environment;
 
 public final class JsonAppenderFactory {
@@ -17,7 +18,7 @@ public final class JsonAppenderFactory {
     public static ConsoleAppender<ILoggingEvent> create(LoggerContext loggerContext, Environment env) {
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
         String appVersion = BuildVersionResolver.resolve(env);
-        String host = resolveHost(env);
+        String host = HostResolver.resolve(env);
 
         ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(
                 "jsonMdc",
@@ -38,11 +39,4 @@ public final class JsonAppenderFactory {
         return appender;
     }
 
-    private static String resolveHost(Environment env) {
-        String host = env.getProperty("HOSTNAME");
-        if (host == null || host.isBlank() || "null".equalsIgnoreCase(host)) {
-            return "unknown-host";
-        }
-        return host;
-    }
 }
