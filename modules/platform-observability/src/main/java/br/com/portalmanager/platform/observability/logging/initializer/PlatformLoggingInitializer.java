@@ -6,6 +6,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.NopStatusListener;
+import br.com.portalmanager.platform.observability.logging.converter.JsonMdcConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonMessageConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonThrowableConverter;
 import br.com.portalmanager.platform.observability.logging.converter.MaskingConverter;
@@ -59,6 +60,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     private ConsoleAppender<ILoggingEvent> createJsonConsoleAppender(LoggerContext loggerContext, ConfigurableEnvironment env) {
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
         String appVersion = env.getProperty("info.build.version", "unknown");
+        String host = resolveHost(env);
         boolean maskingEnabled = env.getProperty("platform.observability.logging.masking.enabled", Boolean.class, true);
 
         // Captura o mapa de conversores customizados do usuário informados no YAML
@@ -70,6 +72,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
             @Override
             public void start() {
                 ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMessage", JsonMessageConverter.class.getName());
+                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMdc", JsonMdcConverter.class.getName());
                 ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonThrowable", JsonThrowableConverter.class.getName());
                 if (maskingEnabled) {
                     ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("corporateLgpdMask", MaskingConverter.class.getName());
@@ -88,7 +91,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         };
 
         encoder.setContext(loggerContext);
-        encoder.setPattern(buildJsonPattern(serviceName, appVersion, maskingEnabled, customConverters));
+        encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, maskingEnabled, customConverters));
         encoder.start();
 
         ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
@@ -103,16 +106,24 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     /**
      * Monta a String do template estruturado do JSON aplicando o envelopamento infinito em cascata.
      */
-    private String buildJsonPattern(String serviceName, String appVersion, boolean maskingEnabled, Map<String, String> customConverters) {
+    private String buildJsonPattern(String serviceName, String appVersion, String host, boolean maskingEnabled, Map<String, String> customConverters) {
         String messageToken = maskingEnabled ? "%corporateLgpdMask" : "%jsonMessage";
         for (String userTag : customConverters.keySet()) {
             messageToken = String.format("%%%s({%s})", userTag, messageToken);
         }
 
         return String.format(
-                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%%property{HOSTNAME:-unknown-host}\",\"context\":%%mdc,\"exception\":\"%%jsonThrowable\"}%%n",
-                messageToken, serviceName, appVersion
+                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"context\":%%jsonMdc,\"exception\":\"%%jsonThrowable\"}%%n",
+                messageToken, serviceName, appVersion, host
         );
+    }
+
+    private String resolveHost(ConfigurableEnvironment env) {
+        String host = env.getProperty("HOSTNAME");
+        if (host == null || host.isBlank() || "null".equalsIgnoreCase(host)) {
+            return "unknown-host";
+        }
+        return host;
     }
 
     private void registerAppender(LoggerContext loggerContext, ConsoleAppender<ILoggingEvent> appender) {
