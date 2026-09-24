@@ -40,7 +40,7 @@ public class PlatformMessagingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(ApiMessageProvider.class)
     ApiMessageProvider apiMessageProvider(Environment environment) {
-        return new PlatformDefaultMessageProvider(environment.getProperty("spring.application.name"));
+        return new PlatformDefaultMessageProvider(requireApplicationName(environment));
     }
 
     @Bean
@@ -61,7 +61,7 @@ public class PlatformMessagingAutoConfiguration {
                 cache,
                 safeDefault,
                 provider,
-                environment.getProperty("spring.application.name")
+                requireApplicationName(environment)
         );
     }
 
@@ -69,5 +69,15 @@ public class PlatformMessagingAutoConfiguration {
     @ConditionalOnMissingBean
     ApiExceptionHandler apiExceptionHandler(ApiMessageResolver resolver) {
         return new ApiExceptionHandler(resolver);
+    }
+
+    private String requireApplicationName(Environment environment) {
+        String applicationName = environment.getProperty("spring.application.name");
+        if (applicationName == null || applicationName.isBlank()) {
+            throw new IllegalStateException(
+                    "spring.application.name is required when platform.messaging is enabled"
+            );
+        }
+        return applicationName.trim();
     }
 }

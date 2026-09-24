@@ -46,7 +46,8 @@ class PlatformMessagingAutoConfigurationTest {
                 .withUserConfiguration(MockInfrastructureConfiguration.class)
                 .withPropertyValues(
                         "platform.messaging.enabled=true",
-                        "platform.messaging.default-locale=pt-BR"
+                        "platform.messaging.default-locale=pt-BR",
+                        "spring.application.name=test-service"
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(ApiMessageRepository.class);
@@ -64,7 +65,8 @@ class PlatformMessagingAutoConfigurationTest {
                 .withPropertyValues(
                         "platform.messaging.enabled=true",
                         "platform.messaging.datasource.enabled=true",
-                        "platform.messaging.default-locale=pt-BR"
+                        "platform.messaging.default-locale=pt-BR",
+                        "spring.application.name=test-service"
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(ApiMessageRepository.class);
@@ -80,7 +82,8 @@ class PlatformMessagingAutoConfigurationTest {
         this.contextRunner
                 .withPropertyValues(
                         "platform.messaging.enabled=true",
-                        "platform.messaging.default-locale=pt-BR"
+                        "platform.messaging.default-locale=pt-BR",
+                        "spring.application.name=test-service"
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(ApiMessageRepository.class);
@@ -88,6 +91,42 @@ class PlatformMessagingAutoConfigurationTest {
                             .isInstanceOf(NoOpApiMessageRepository.class);
                     assertThat(context).hasSingleBean(ApiMessageResolver.class);
                     assertThat(context).hasSingleBean(ApiExceptionHandler.class);
+                });
+    }
+    @Test
+    void shouldFailStartupWhenApplicationNameIsMissing() {
+        this.contextRunner
+                .withUserConfiguration(MockInfrastructureConfiguration.class)
+                .withPropertyValues(
+                        "platform.messaging.enabled=true",
+                        "platform.messaging.default-locale=pt-BR"
+                )
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .hasRootCauseInstanceOf(IllegalStateException.class)
+                            .hasRootCauseMessage(
+                                    "spring.application.name is required when platform.messaging is enabled"
+                            );
+                });
+    }
+
+    @Test
+    void shouldFailStartupWhenApplicationNameIsBlank() {
+        this.contextRunner
+                .withUserConfiguration(MockInfrastructureConfiguration.class)
+                .withPropertyValues(
+                        "platform.messaging.enabled=true",
+                        "platform.messaging.default-locale=pt-BR",
+                        "spring.application.name=   "
+                )
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .hasRootCauseInstanceOf(IllegalStateException.class)
+                            .hasRootCauseMessage(
+                                    "spring.application.name is required when platform.messaging is enabled"
+                            );
                 });
     }
 }
