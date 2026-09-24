@@ -6,7 +6,7 @@
 
     <groupId>br.com.portalmanager.platform</groupId>
     <artifactId>platform-dependencies</artifactId>
-    <version>${revision}</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>Gerenciamento de Dependências da Plataforma</name>
