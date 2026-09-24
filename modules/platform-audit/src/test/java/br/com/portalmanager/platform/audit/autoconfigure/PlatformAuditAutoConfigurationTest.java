@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.audit.autoconfigure;
 
 import br.com.portalmanager.platform.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.platform.audit.message.AuditMessageKeys;
+import br.com.portalmanager.platform.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.audit.publisher.AuditPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -68,7 +68,17 @@ class PlatformAuditAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context.getStartupFailure()).isNotNull();
                     assertThat(context.getStartupFailure())
-                            .hasStackTraceContaining(AuditMessageKeys.SERVICE_URL_REQUIRED);
+                            .hasRootCauseInstanceOf(PlatformConfigurationException.class)
+                            .hasRootCauseMessage(
+                                    "platform.audit.service-url is required when platform.audit is enabled"
+                            );
+
+                    PlatformConfigurationException exception =
+                            (PlatformConfigurationException) context.getStartupFailure().getCause().getCause();
+
+                    assertThat(exception.getErrorResponse().code()).isEqualTo("PLT-AUD-001");
+                    assertThat(exception.getErrorResponse().solution())
+                            .isEqualTo("Configure platform.audit.service-url with the audit service URL.");
                 });
     }
 
@@ -83,7 +93,10 @@ class PlatformAuditAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context.getStartupFailure()).isNotNull();
                     assertThat(context.getStartupFailure())
-                            .hasStackTraceContaining(AuditMessageKeys.FALLBACK_STORE_MISSING);
+                            .hasRootCauseInstanceOf(PlatformConfigurationException.class)
+                            .hasRootCauseMessage(
+                                    "Audit fallback is enabled without a configured fallback store"
+                            );
                 });
     }
 
