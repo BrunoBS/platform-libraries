@@ -6,6 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 
 import br.com.portalmanager.platform.observability.logging.constants.LoggingConstants;
+import br.com.portalmanager.platform.observability.logging.converter.JsonErrorMdcConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonMdcConverter;
 import br.com.portalmanager.platform.observability.logging.metadata.BuildVersionResolver;
 import br.com.portalmanager.platform.observability.logging.metadata.HostResolver;
@@ -23,6 +24,10 @@ public final class JsonAppenderFactory {
         ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(
                 "jsonMdc",
                 JsonMdcConverter.class.getName()
+        );
+        ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(
+                "jsonError",
+                JsonErrorMdcConverter.class.getName()
         );
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
