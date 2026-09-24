@@ -21,5 +21,6 @@ public final class LoggingConstants {
             "\"version\":\"%s\"," +
             "\"host\":\"%s\"," +
             "\"context\":%%jsonMdc," +
-            "\"error\":%%jsonError}%%n";
+            "\"error\":%%jsonError," +
+            "\"exception\":%%jsonThrowable}%%n";
 }

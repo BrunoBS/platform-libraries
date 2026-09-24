@@ -8,6 +8,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import br.com.portalmanager.platform.observability.logging.constants.LoggingConstants;
 import br.com.portalmanager.platform.observability.logging.converter.JsonErrorMdcConverter;
 import br.com.portalmanager.platform.observability.logging.converter.JsonMdcConverter;
+import br.com.portalmanager.platform.observability.logging.converter.JsonThrowableConverter;
 import br.com.portalmanager.platform.observability.logging.metadata.BuildVersionResolver;
 import br.com.portalmanager.platform.observability.logging.metadata.HostResolver;
 import org.springframework.core.env.Environment;
@@ -28,6 +29,10 @@ public final class JsonAppenderFactory {
         ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(
                 "jsonError",
                 JsonErrorMdcConverter.class.getName()
+        );
+        ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(
+                "jsonThrowable",
+                JsonThrowableConverter.class.getName()
         );
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
