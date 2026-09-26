@@ -18,7 +18,7 @@ O `platform-starter` já inclui essa capability.
 ## Package
 
 ```text
-br.com.portalmanager.platform.observability.logging
+br.com.portalmanager.platform.library.observability.logging
 ```
 
 ## Capacidades atuais

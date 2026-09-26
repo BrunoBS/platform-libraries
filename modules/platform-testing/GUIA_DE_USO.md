@@ -120,7 +120,7 @@ O teste mínimo para uma API HTTP é:
 ```java
 package com.empresa.product.integration;
 
-import br.com.portalmanager.platform.testing.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.annotation.PlatformIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 @PlatformIntegrationTest
@@ -284,7 +284,7 @@ Injete `PlatformRequestSpecificationFactory` no client do microsserviço:
 ```java
 package com.empresa.product.client;
 
-import br.com.portalmanager.platform.testing.client.PlatformRequestSpecificationFactory;
+import br.com.portalmanager.platform.library.testing.client.PlatformRequestSpecificationFactory;
 import com.empresa.product.client.response.ProductResponse;
 import com.empresa.product.web.dto.CreateProductRequest;
 import io.restassured.RestAssured;
@@ -340,7 +340,7 @@ Ele não contém autorização automaticamente.
 Para enviar os headers da plataforma, use `createAuthorized`:
 
 ```java
-import br.com.portalmanager.platform.testing.client.AuthorizationRequestData;
+import br.com.portalmanager.platform.library.testing.client.AuthorizationRequestData;
 
 public ProductResponse create(CreateProductRequest body) {
     AuthorizationRequestData authorization = AuthorizationRequestData.builder()
@@ -441,7 +441,7 @@ Crie uma response específica para o domínio:
 ```java
 package com.empresa.product.client.response;
 
-import br.com.portalmanager.platform.testing.client.response.BaseResponse;
+import br.com.portalmanager.platform.library.testing.client.response.BaseResponse;
 import com.empresa.product.web.dto.ProductResponseDTO;
 import io.restassured.response.ValidatableResponse;
 
@@ -499,7 +499,7 @@ expectSize("items", 3);
 ```java
 package com.empresa.product.builder;
 
-import br.com.portalmanager.platform.testing.builder.TestDataBuilder;
+import br.com.portalmanager.platform.library.testing.builder.TestDataBuilder;
 import com.empresa.product.web.dto.CreateProductRequest;
 
 import java.math.BigDecimal;
@@ -568,7 +568,7 @@ O contrato principal não exige herança:
 ```java
 package com.empresa.product.factory;
 
-import br.com.portalmanager.platform.testing.factory.TestDataFactory;
+import br.com.portalmanager.platform.library.testing.factory.TestDataFactory;
 import com.empresa.product.builder.ProductRequestBuilder;
 import com.empresa.product.web.dto.CreateProductRequest;
 import org.springframework.stereotype.Component;
@@ -630,7 +630,7 @@ Implementação:
 ```java
 package com.empresa.product.scenario;
 
-import br.com.portalmanager.platform.testing.scenario.TestScenario;
+import br.com.portalmanager.platform.library.testing.scenario.TestScenario;
 import com.empresa.product.client.ProductClient;
 import com.empresa.product.factory.ProductFactory;
 
@@ -744,7 +744,7 @@ Crie uma configuração de teste:
 ```java
 package com.empresa.product.config;
 
-import br.com.portalmanager.platform.testing.authorization.AuthorizationSessionCustomizer;
+import br.com.portalmanager.platform.library.testing.authorization.AuthorizationSessionCustomizer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -825,11 +825,11 @@ class ProductCompleteFlowIT {
 ```java
 package com.empresa.product.integration;
 
-import br.com.portalmanager.platform.testing.annotation.PlatformIntegrationTest;
-import br.com.portalmanager.platform.testing.annotation.WithDatabaseScripts;
-import br.com.portalmanager.platform.testing.annotation.WithMockAuthorization;
-import br.com.portalmanager.platform.testing.annotation.WithMySql;
-import br.com.portalmanager.platform.testing.authorization.AuthorizationMock;
+import br.com.portalmanager.platform.library.testing.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.annotation.WithDatabaseScripts;
+import br.com.portalmanager.platform.library.testing.annotation.WithMockAuthorization;
+import br.com.portalmanager.platform.library.testing.annotation.WithMySql;
+import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMock;
 import com.empresa.product.client.ProductClient;
 import com.empresa.product.config.ProductAuthorizationTestConfiguration;
 import com.empresa.product.factory.ProductFactory;
@@ -1008,7 +1008,7 @@ Testes unitários não devem inicializar Spring, MySQL, Kafka, WireMock ou servi
 ```java
 package com.empresa.product.core;
 
-import br.com.portalmanager.platform.testing.annotation.PlatformUnitTest;
+import br.com.portalmanager.platform.library.testing.annotation.PlatformUnitTest;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -1068,7 +1068,7 @@ class ProductServiceTest {
 Quando a classe recebe um `Clock`, utilize `TestClock`:
 
 ```java
-import br.com.portalmanager.platform.testing.fixture.TestClock;
+import br.com.portalmanager.platform.library.testing.fixture.TestClock;
 
 Clock clock = TestClock.fixed("2026-09-12T12:00:00Z");
 ExpirationService service = new ExpirationService(clock);
@@ -1093,7 +1093,7 @@ Evite chamar `Instant.now()` ou `LocalDateTime.now()` diretamente nas regras que
 Use `TestIds` quando o cenário precisar de identificadores estáveis:
 
 ```java
-import br.com.portalmanager.platform.testing.fixture.TestIds;
+import br.com.portalmanager.platform.library.testing.fixture.TestIds;
 
 UUID accountId = TestIds.uuid("account-1");
 UUID productId = TestIds.uuid("product-1");

@@ -78,8 +78,8 @@ Não é necessário informar URL, usuário ou senha do MySQL quando o teste util
 ```java
 package com.empresa.account.integration;
 
-import br.com.portalmanager.platform.testing.annotation.PlatformIntegrationTest;
-import br.com.portalmanager.platform.testing.annotation.WithMySql;
+import br.com.portalmanager.platform.library.testing.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.annotation.WithMySql;
 import org.junit.jupiter.api.Test;
 
 @PlatformIntegrationTest
