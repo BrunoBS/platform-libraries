@@ -1,2 +1,2 @@
-br.com.portalmanager.platform.audit.autoconfigure.PlatformAuditAutoConfiguration
-br.com.portalmanager.platform.audit.autoconfigure.PlatformAuditRedisAutoConfiguration
+br.com.portalmanager.platform.library.audit.autoconfigure.PlatformAuditAutoConfiguration
+br.com.portalmanager.platform.library.audit.autoconfigure.PlatformAuditRedisAutoConfiguration

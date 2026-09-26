@@ -1,2 +1,2 @@
 org.springframework.context.ApplicationContextInitializer=\
-br.com.portalmanager.platform.observability.logging.initializer.PlatformLoggingInitializer
+br.com.portalmanager.platform.library.observability.logging.initializer.PlatformLoggingInitializer
