@@ -23,7 +23,7 @@ class ResourceVisibilityMappingRegistrarTest {
 
         Collection<PersistentClass> entityBindings = List.of(entity);
         doReturn(entityBindings).when(metadata).getEntityBindings();
-        when(entity.getMappedClass()).thenReturn(TestResource.class);
+        doReturn(TestResource.class).when(entity).getMappedClass();
         when(entity.getFilters()).thenReturn(List.of());
 
         int registered = ResourceVisibilityMappingRegistrar.register(metadata);
@@ -44,7 +44,7 @@ class ResourceVisibilityMappingRegistrarTest {
 
         Collection<PersistentClass> entityBindings = List.of(entity);
         doReturn(entityBindings).when(metadata).getEntityBindings();
-        when(entity.getMappedClass()).thenReturn(PlainEntity.class);
+        doReturn(PlainEntity.class).when(entity).getMappedClass();
 
         assertEquals(0, ResourceVisibilityMappingRegistrar.register(metadata));
     }
