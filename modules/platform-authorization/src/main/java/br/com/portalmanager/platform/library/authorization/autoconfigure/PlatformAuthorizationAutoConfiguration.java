@@ -8,14 +8,17 @@ import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
+import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
 import br.com.portalmanager.platform.library.authorization.service.AuthorizationClientService;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationInterceptor;
 import br.com.portalmanager.platform.library.authorization.web.filter.AuthorizationContextCleanupFilter;
 import br.com.portalmanager.platform.library.authorization.web.filter.PayloadErrorLoggingFilter;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -45,9 +48,17 @@ public class PlatformAuthorizationAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnBean(EntityManager.class)
     @ConditionalOnMissingBean
-    public ResourceVisibilityAspect resourceVisibilityAspect() {
-        return new ResourceVisibilityAspect();
+    public ResourceVisibilityFilterManager resourceVisibilityFilterManager(EntityManager entityManager) {
+        return new ResourceVisibilityFilterManager(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnBean(ResourceVisibilityFilterManager.class)
+    @ConditionalOnMissingBean
+    public ResourceVisibilityAspect resourceVisibilityAspect(ResourceVisibilityFilterManager filterManager) {
+        return new ResourceVisibilityAspect(filterManager);
     }
 
     @Bean
@@ -108,27 +119,15 @@ public class PlatformAuthorizationAutoConfiguration {
                         mockSession.setGroups(mock.getGroups());
 
                         Set<ParsedGroup> authorizerGroups = mock.getAuthorizerGroups().isEmpty()
-                                ? Set.of(new ParsedGroup(
-                                        "GUEST",
-                                        "GUEST",
-                                        mock.getEnvironmentId(),
-                                        "GUEST"
-                                ))
+                                ? Set.of(new ParsedGroup("GUEST", "GUEST", mock.getEnvironmentId(), "GUEST"))
                                 : Set.copyOf(mock.getAuthorizerGroups().stream()
                                         .map(group -> new ParsedGroup(
-                                                group.getFullGroup(),
-                                                group.getProfile(),
-                                                group.getEnvironment(),
-                                                group.getAuthorizer()
-                                        ))
+                                                group.getFullGroup(), group.getProfile(), group.getEnvironment(), group.getAuthorizer()))
                                         .toList());
-
                         mockSession.setAuthorizerGroups(authorizerGroups);
-
                         UserContext.set(mockSession);
 
                         String userAgent = request.getHeader("User-Agent");
-
                         MDC.put("correlationId", mockSession.getTraceId());
                         MDC.put("username", mockSession.getUserName());
                         MDC.put("clientIp", request.getRemoteAddr());
@@ -137,7 +136,6 @@ public class PlatformAuthorizationAutoConfiguration {
                         MDC.put("accountId", mockSession.getAccountId());
                         MDC.put("environmentId", mockSession.getEnvironmentId());
                         MDC.put("applicationId", mockSession.getApplicationId());
-
                         return true;
                     }
 
