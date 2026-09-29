@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.authorization.resource;
 
 import org.hibernate.boot.Metadata;
 import org.hibernate.mapping.PersistentClass;
+import org.hibernate.mapping.RootClass;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -19,7 +20,7 @@ class ResourceVisibilityMappingRegistrarTest {
     @Test
     void shouldAttachFilterProgrammaticallyToAuthorizableEntity() {
         Metadata metadata = mock(Metadata.class);
-        PersistentClass entity = mock(PersistentClass.class);
+        PersistentClass entity = mock(RootClass.class);
 
         Collection<PersistentClass> entityBindings = List.of(entity);
         doReturn(entityBindings).when(metadata).getEntityBindings();
@@ -40,7 +41,7 @@ class ResourceVisibilityMappingRegistrarTest {
     @Test
     void shouldIgnoreEntityThatDoesNotParticipateInVisibility() {
         Metadata metadata = mock(Metadata.class);
-        PersistentClass entity = mock(PersistentClass.class);
+        PersistentClass entity = mock(RootClass.class);
 
         Collection<PersistentClass> entityBindings = List.of(entity);
         doReturn(entityBindings).when(metadata).getEntityBindings();
