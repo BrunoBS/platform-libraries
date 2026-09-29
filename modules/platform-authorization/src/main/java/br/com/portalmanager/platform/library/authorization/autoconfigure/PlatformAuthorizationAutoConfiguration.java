@@ -1,6 +1,5 @@
 package br.com.portalmanager.platform.library.authorization.autoconfigure;
 
-import br.com.portalmanager.platform.library.authorization.aspect.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
@@ -8,17 +7,14 @@ import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
-import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
 import br.com.portalmanager.platform.library.authorization.service.AuthorizationClientService;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationInterceptor;
 import br.com.portalmanager.platform.library.authorization.web.filter.AuthorizationContextCleanupFilter;
 import br.com.portalmanager.platform.library.authorization.web.filter.PayloadErrorLoggingFilter;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -45,20 +41,6 @@ public class PlatformAuthorizationAutoConfiguration {
     @ConditionalOnMissingBean
     public AuthorizationContextCleanupFilter authorizationContextCleanupFilter() {
         return new AuthorizationContextCleanupFilter();
-    }
-
-    @Bean
-    @ConditionalOnBean(EntityManager.class)
-    @ConditionalOnMissingBean
-    public ResourceVisibilityFilterManager resourceVisibilityFilterManager(EntityManager entityManager) {
-        return new ResourceVisibilityFilterManager(entityManager);
-    }
-
-    @Bean
-    @ConditionalOnBean(ResourceVisibilityFilterManager.class)
-    @ConditionalOnMissingBean
-    public ResourceVisibilityAspect resourceVisibilityAspect(ResourceVisibilityFilterManager filterManager) {
-        return new ResourceVisibilityAspect(filterManager);
     }
 
     @Bean
