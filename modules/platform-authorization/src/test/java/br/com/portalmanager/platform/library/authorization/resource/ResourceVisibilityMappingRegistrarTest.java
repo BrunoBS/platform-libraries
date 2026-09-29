@@ -4,10 +4,12 @@ import org.hibernate.boot.Metadata;
 import org.hibernate.mapping.PersistentClass;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,7 +21,8 @@ class ResourceVisibilityMappingRegistrarTest {
         Metadata metadata = mock(Metadata.class);
         PersistentClass entity = mock(PersistentClass.class);
 
-        when(metadata.getEntityBindings()).thenReturn(List.of(entity));
+        Collection<PersistentClass> entityBindings = List.of(entity);
+        doReturn(entityBindings).when(metadata).getEntityBindings();
         when(entity.getMappedClass()).thenReturn(TestResource.class);
         when(entity.getFilters()).thenReturn(List.of());
 
@@ -39,7 +42,8 @@ class ResourceVisibilityMappingRegistrarTest {
         Metadata metadata = mock(Metadata.class);
         PersistentClass entity = mock(PersistentClass.class);
 
-        when(metadata.getEntityBindings()).thenReturn(List.of(entity));
+        Collection<PersistentClass> entityBindings = List.of(entity);
+        doReturn(entityBindings).when(metadata).getEntityBindings();
         when(entity.getMappedClass()).thenReturn(PlainEntity.class);
 
         assertEquals(0, ResourceVisibilityMappingRegistrar.register(metadata));
