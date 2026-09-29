@@ -1,24 +1,27 @@
 package br.com.portalmanager.platform.library.authorization.aspect;
 
 import br.com.portalmanager.platform.library.authorization.annotation.ResourceVisibility;
-import br.com.portalmanager.platform.library.authorization.exception.ForbiddenAccessException;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
-import br.com.portalmanager.platform.library.authorization.resource.AuthorizableResource;
+import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-
 @Aspect
 public class ResourceVisibilityAspect {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceVisibilityAspect.class);
+
+    private final ResourceVisibilityFilterManager filterManager;
+
+    public ResourceVisibilityAspect(ResourceVisibilityFilterManager filterManager) {
+        this.filterManager = filterManager;
+    }
 
     @Around("@annotation(resourceVisibility)")
     public Object applyVisibility(
@@ -32,7 +35,7 @@ public class ResourceVisibilityAspect {
                 ));
 
         if (session.isOwner()) {
-            log.debug("Usuário OWNER ignorou filtro de visibilidade de recurso.");
+            log.debug("Usuário OWNER ignorou filtro Hibernate de visibilidade de recurso.");
             return joinPoint.proceed();
         }
 
@@ -43,34 +46,13 @@ public class ResourceVisibilityAspect {
             );
         }
 
-        Object result = joinPoint.proceed();
-
-        if (result instanceof Collection<?> collection) {
-            return collection.stream()
-                    .filter(item -> isVisible(item, session))
-                    .toList();
+        boolean enabled = filterManager.enable(session);
+        try {
+            return joinPoint.proceed();
+        } finally {
+            if (enabled) {
+                filterManager.disable();
+            }
         }
-
-        if (result != null && !isVisible(result, session)) {
-            log.warn(
-                    "Recurso não visível para o usuário. gruposUsuario={} recurso={}",
-                    session.getGroups(),
-                    result.getClass().getSimpleName()
-            );
-
-            throw new ForbiddenAccessException(
-                    AuthorizationMessageKeys.RESOURCE_ACCESS_DENIED
-            );
-        }
-
-        return result;
-    }
-
-    private boolean isVisible(Object resource, UserSession session) {
-        if (resource instanceof AuthorizableResource authorizable) {
-            return session.hasAuthorizer(authorizable.getAuthorizerGroup());
-        }
-
-        return true;
     }
 }
