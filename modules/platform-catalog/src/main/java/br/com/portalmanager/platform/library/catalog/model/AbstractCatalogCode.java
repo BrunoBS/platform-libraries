@@ -47,6 +47,23 @@ public abstract class AbstractCatalogCode {
         return value != null && CODE_PATTERN.matcher(value).matches();
     }
 
+    /**
+     * Resolves a textual catalog code against the enum that defines the semantic
+     * values accepted by a concrete CatalogCode VO. Invalid values are exposed
+     * through the platform messaging validation contract instead of leaking an
+     * {@link IllegalArgumentException} from {@link Enum#valueOf(Class, String)}.
+     */
+    protected static <E extends Enum<E>> E requireEnumValue(String value, Class<E> enumType) {
+        if (value == null) {
+            throw invalidCatalogCode(value);
+        }
+        try {
+            return Enum.valueOf(enumType, value);
+        } catch (IllegalArgumentException exception) {
+            throw invalidCatalogCode(value);
+        }
+    }
+
     private static String requireValid(String value) {
         if (!isValidFormat(value)) {
             throw new ValidationException(
@@ -59,6 +76,17 @@ public abstract class AbstractCatalogCode {
             );
         }
         return value;
+    }
+
+    private static ValidationException invalidCatalogCode(String value) {
+        return new ValidationException(
+                PlatformMessageKeys.VALIDATION_FAILED,
+                List.of(new ValidationDetail(
+                        "code",
+                        CatalogMessageKeys.CODE_NOT_ALLOWED,
+                        Map.of("0", value == null ? "" : value)
+                ))
+        );
     }
 
     @Override
