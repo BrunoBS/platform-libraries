@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.authorization.autoconfigure;
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizerGroupParser;
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
@@ -100,12 +101,23 @@ public class PlatformAuthorizationAutoConfiguration {
                         mockSession.setExpirationTime(Instant.now().plusSeconds(3600).toEpochMilli());
                         mockSession.setGroups(mock.getGroups());
 
-                        Set<ParsedGroup> authorizerGroups = mock.getAuthorizerGroups().isEmpty()
-                                ? Set.of(new ParsedGroup("GUEST", "GUEST", mock.getEnvironmentId(), "GUEST"))
-                                : Set.copyOf(mock.getAuthorizerGroups().stream()
-                                        .map(group -> new ParsedGroup(
-                                                group.getFullGroup(), group.getProfile(), group.getEnvironment(), group.getAuthorizer()))
-                                        .toList());
+                        Set<ParsedGroup> authorizerGroups;
+                        if (!mock.getAuthorizerGroups().isEmpty()) {
+                            authorizerGroups = Set.copyOf(mock.getAuthorizerGroups().stream()
+                                    .map(group -> new ParsedGroup(
+                                            group.getFullGroup(),
+                                            group.getProfile(),
+                                            group.getEnvironment(),
+                                            group.getAuthorizer()))
+                                    .toList());
+                        } else {
+                            authorizerGroups = AuthorizerGroupParser.parseAll(mock.getGroups());
+                            if (authorizerGroups.isEmpty()) {
+                                authorizerGroups = Set.of(
+                                        new ParsedGroup("GUEST", "GUEST", mock.getEnvironmentId(), "GUEST")
+                                );
+                            }
+                        }
                         mockSession.setAuthorizerGroups(authorizerGroups);
                         UserContext.set(mockSession);
 

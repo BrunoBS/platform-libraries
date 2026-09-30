@@ -187,6 +187,43 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
+    void shouldDeriveMockAuthorizerGroupsFromConfiguredGroupsWhenDisabled() {
+        contextRunner
+                .withUserConfiguration(InfrastructureConfiguration.class)
+                .withPropertyValues(
+                        "platform.authorization.enabled=false",
+                        "platform.authorization.mock.user-name=bbs",
+                        "platform.authorization.mock.email=bruno.barbosa@empresa.com.br",
+                        "platform.authorization.mock.account-id=-",
+                        "platform.authorization.mock.application-id=-",
+                        "platform.authorization.mock.environment-id=-",
+                        "platform.authorization.mock.trace-id=81f3503a-8153-4b80-9ee8-5ef41e611b31",
+                        "platform.authorization.mock.groups[0]=PM5-ENG-DEV_WSE"
+                )
+                .run(context -> {
+                    WebMvcConfigurer configurer = context.getBean(WebMvcConfigurer.class);
+                    CapturingInterceptorRegistry registry = new CapturingInterceptorRegistry();
+                    configurer.addInterceptors(registry);
+
+                    HandlerInterceptor interceptor = registry.getInterceptor();
+                    HttpServletRequest request = mock(HttpServletRequest.class);
+                    HttpServletResponse response = mock(HttpServletResponse.class);
+                    when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+                    when(request.getRequestURI()).thenReturn("/api/test");
+
+                    assertThat(interceptor.preHandle(request, response, new Object())).isTrue();
+
+                    UserSession session = UserContext.get().orElseThrow();
+                    assertThat(session.getGroups()).containsExactly("PM5-ENG-DEV_WSE");
+                    assertThat(session.getAuthorizerGroups()).containsExactly(
+                            new ParsedGroup("PM5-ENG-DEV_WSE", "ENG", "DEV", "WSE")
+                    );
+                    assertThat(session.hasAuthorizer("WSE")).isTrue();
+                    assertThat(session.hasAuthorizer("GUEST")).isFalse();
+                });
+    }
+
+    @Test
     void shouldPopulateConfiguredMockGroupsAndAuthorizerGroupsWhenDisabled() {
         contextRunner
                 .withUserConfiguration(InfrastructureConfiguration.class)
