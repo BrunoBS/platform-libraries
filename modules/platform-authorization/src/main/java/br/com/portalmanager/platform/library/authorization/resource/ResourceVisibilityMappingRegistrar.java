@@ -9,13 +9,14 @@ import java.util.Map;
  * POC bootstrap primitive that attaches the platform visibility filter to
  * authorizable entity mappings without requiring @Filter on domain entities.
  *
- * The remaining POC step is wiring this registrar into a Hibernate 7 bootstrap
- * extension point before the SessionFactory mapping model is finalized.
+ * <p>The entity only participates by implementing {@link AuthorizableResource}.
+ * Authorization metadata itself lives outside the entity and is resolved before
+ * the business query runs.</p>
  */
 public final class ResourceVisibilityMappingRegistrar {
 
     public static final String DEFAULT_CONDITION =
-            "lower(authorizer_group) in (:" + ResourceVisibilityFilterManager.PARAMETER_NAME + ")";
+            "id in (:" + ResourceVisibilityFilterManager.PARAMETER_NAME + ")";
 
     private ResourceVisibilityMappingRegistrar() {
     }
