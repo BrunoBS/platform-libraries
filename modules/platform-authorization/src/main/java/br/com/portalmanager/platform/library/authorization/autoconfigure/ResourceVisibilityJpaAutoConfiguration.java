@@ -10,7 +10,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 
-@AutoConfiguration(after = PlatformAuthorizationAutoConfiguration.class)
+@AutoConfiguration(
+        after = PlatformAuthorizationAutoConfiguration.class,
+        afterName = "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration"
+)
 @ConditionalOnClass(name = {
         "jakarta.persistence.EntityManager",
         "jakarta.persistence.EntityManagerFactory",
