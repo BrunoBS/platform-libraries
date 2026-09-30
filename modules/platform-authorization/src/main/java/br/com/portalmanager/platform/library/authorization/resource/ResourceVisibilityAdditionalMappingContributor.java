@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.resource;
 
+import org.hibernate.boot.ResourceStreamLocator;
 import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.AdditionalMappingContributor;
 import org.hibernate.boot.spi.InFlightMetadataCollector;
@@ -7,7 +8,6 @@ import org.hibernate.boot.spi.MetadataBuildingContext;
 import org.hibernate.engine.spi.FilterDefinition;
 import org.hibernate.metamodel.mapping.JdbcMapping;
 import org.hibernate.resource.beans.spi.ManagedBean;
-import org.hibernate.boot.jaxb.internal.ResourceStreamLocator;
 
 import java.util.Map;
 import java.util.function.Supplier;
