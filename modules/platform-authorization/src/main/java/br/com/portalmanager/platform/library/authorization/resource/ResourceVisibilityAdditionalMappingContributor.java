@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.resource;
 
+import br.com.portalmanager.platform.library.authorization.annotation.AuthorizerGroup;
 import org.hibernate.boot.ResourceStreamLocator;
 import org.hibernate.boot.spi.AdditionalMappingContributions;
 import org.hibernate.boot.spi.AdditionalMappingContributor;
@@ -17,8 +18,8 @@ import java.util.function.Supplier;
  *
  * <p>The contributor is discovered through Java ServiceLoader. It defines the
  * platform filter once and attaches it programmatically to every mapped entity
- * implementing {@link AuthorizableResource}. Domain entities therefore do not
- * need Hibernate @Filter/@FilterDef annotations.</p>
+ * that exposes an {@link AuthorizerGroup} field. Domain entities therefore do
+ * not need Hibernate @Filter/@FilterDef annotations or a marker interface.</p>
  */
 public final class ResourceVisibilityAdditionalMappingContributor
         implements AdditionalMappingContributor {
@@ -57,7 +58,7 @@ public final class ResourceVisibilityAdditionalMappingContributor
         metadata.addFilterDefinition(
                 new FilterDefinition(
                         ResourceVisibilityFilterManager.FILTER_NAME,
-                        ResourceVisibilityMappingRegistrar.DEFAULT_CONDITION,
+                        "",
                         false,
                         true,
                         Map.of(ResourceVisibilityFilterManager.PARAMETER_NAME, stringType),

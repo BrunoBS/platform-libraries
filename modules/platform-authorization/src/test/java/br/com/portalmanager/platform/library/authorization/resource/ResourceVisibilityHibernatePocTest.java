@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.resource;
 
+import br.com.portalmanager.platform.library.authorization.annotation.AuthorizerGroup;
 import br.com.portalmanager.platform.library.authorization.annotation.ResourceVisibility;
 import br.com.portalmanager.platform.library.authorization.aspect.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
@@ -38,12 +39,13 @@ import static org.mockito.Mockito.when;
  * End-to-end POC for platform-managed Hibernate resource visibility.
  *
  * Acceptance criteria:
- * 1. entity has no Hibernate @Filter/@FilterDef annotations;
- * 2. collection query is restricted by authorizer_group;
- * 3. OWNER executes unrestricted;
- * 4. direct load/find-by-id is protected;
- * 5. concurrent Sessions never share filter parameters;
- * 6. filter is disabled/cleaned in finally.
+ * 1. entity has no Hibernate @Filter/@FilterDef annotations or marker interface;
+ * 2. @AuthorizerGroup may use any Java attribute and physical column name;
+ * 3. collection query is restricted by the annotated authorizer column;
+ * 4. OWNER executes unrestricted;
+ * 5. direct load/find-by-id is protected;
+ * 6. concurrent Sessions never share filter parameters;
+ * 7. filter is disabled/cleaned in finally.
  */
 class ResourceVisibilityHibernatePocTest {
 
@@ -91,7 +93,7 @@ class ResourceVisibilityHibernatePocTest {
     }
 
     @Test
-    void shouldFilterCollectionWithoutEntityFilterAnnotation() {
+    void shouldFilterCollectionUsingAnnotatedPhysicalColumn() {
         try (Session session = sessionFactory.openSession()) {
             ResourceVisibilityFilterManager manager = new ResourceVisibilityFilterManager(session);
             manager.enable(Set.of("bbs-app", "CATALOG"));
@@ -142,7 +144,7 @@ class ResourceVisibilityHibernatePocTest {
             PocAccount allowed = session.find(PocAccount.class, 1L);
             PocAccount denied = session.find(PocAccount.class, 3L);
 
-            assertEquals("BBS-APP", allowed.authorizerGroup);
+            assertEquals("BBS-APP", allowed.visibilityOwner);
             assertNull(denied);
         }
     }
@@ -224,13 +226,13 @@ class ResourceVisibilityHibernatePocTest {
 
     private static List<String> authorizers(List<PocAccount> accounts) {
         return accounts.stream()
-                .map(account -> account.authorizerGroup)
+                .map(account -> account.visibilityOwner)
                 .toList();
     }
 
     @Entity(name = "PocAccount")
     @Table(name = "poc_account")
-    static class PocAccount implements AuthorizableResource {
+    static class PocAccount {
 
         @Id
         private Long id;
@@ -238,16 +240,17 @@ class ResourceVisibilityHibernatePocTest {
         @Column(name = "name", nullable = false)
         private String name;
 
-        @Column(name = "authorizer_group", nullable = false, length = 100)
-        private String authorizerGroup;
+        @AuthorizerGroup
+        @Column(name = "custom_authorizer", nullable = false, length = 100)
+        private String visibilityOwner;
 
         protected PocAccount() {
         }
 
-        PocAccount(Long id, String name, String authorizerGroup) {
+        PocAccount(Long id, String name, String visibilityOwner) {
             this.id = id;
             this.name = name;
-            this.authorizerGroup = authorizerGroup;
+            this.visibilityOwner = visibilityOwner;
         }
     }
 }

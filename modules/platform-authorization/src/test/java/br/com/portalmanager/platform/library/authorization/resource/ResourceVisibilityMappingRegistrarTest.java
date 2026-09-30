@@ -1,7 +1,10 @@
 package br.com.portalmanager.platform.library.authorization.resource;
 
+import br.com.portalmanager.platform.library.authorization.annotation.AuthorizerGroup;
 import org.hibernate.boot.Metadata;
+import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
+import org.hibernate.mapping.Property;
 import org.hibernate.mapping.RootClass;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -18,28 +22,33 @@ import static org.mockito.Mockito.when;
 class ResourceVisibilityMappingRegistrarTest {
 
     @Test
-    void shouldAttachFilterProgrammaticallyToAuthorizableEntity() {
+    void shouldResolvePhysicalColumnFromAnnotatedAttribute() {
         Metadata metadata = mock(Metadata.class);
         PersistentClass entity = mock(RootClass.class);
+        Property property = mock(Property.class);
+        Column column = new Column("meu_authorizer");
 
         Collection<PersistentClass> entityBindings = List.of(entity);
         doReturn(entityBindings).when(metadata).getEntityBindings();
         doReturn(TestResource.class).when(entity).getMappedClass();
         when(entity.getFilters()).thenReturn(List.of());
+        when(entity.getProperty("qualquerNome")).thenReturn(property);
+        when(property.getColumnSpan()).thenReturn(1);
+        when(property.getSelectables()).thenReturn(List.of(column));
 
         int registered = ResourceVisibilityMappingRegistrar.register(metadata);
 
         assertEquals(1, registered);
         verify(entity).addFilter(
                 ResourceVisibilityFilterManager.FILTER_NAME,
-                ResourceVisibilityMappingRegistrar.DEFAULT_CONDITION,
+                "meu_authorizer in (:authorizerGroups)",
                 true,
                 Map.of(),
                 Map.of());
     }
 
     @Test
-    void shouldIgnoreEntityThatDoesNotParticipateInVisibility() {
+    void shouldIgnoreEntityWithoutAuthorizerGroupAttribute() {
         Metadata metadata = mock(Metadata.class);
         PersistentClass entity = mock(RootClass.class);
 
@@ -50,9 +59,34 @@ class ResourceVisibilityMappingRegistrarTest {
         assertEquals(0, ResourceVisibilityMappingRegistrar.register(metadata));
     }
 
-    static final class TestResource implements AuthorizableResource {
+    @Test
+    void shouldRejectEntityWithMoreThanOneAuthorizerGroupAttribute() {
+        Metadata metadata = mock(Metadata.class);
+        PersistentClass entity = mock(RootClass.class);
+
+        Collection<PersistentClass> entityBindings = List.of(entity);
+        doReturn(entityBindings).when(metadata).getEntityBindings();
+        doReturn(InvalidResource.class).when(entity).getMappedClass();
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> ResourceVisibilityMappingRegistrar.register(metadata)
+        );
+    }
+
+    static final class TestResource {
+        @AuthorizerGroup
+        private String qualquerNome;
     }
 
     static final class PlainEntity {
+    }
+
+    static final class InvalidResource {
+        @AuthorizerGroup
+        private String first;
+
+        @AuthorizerGroup
+        private String second;
     }
 }
