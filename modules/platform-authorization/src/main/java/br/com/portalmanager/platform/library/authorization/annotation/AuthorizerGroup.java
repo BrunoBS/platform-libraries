@@ -7,11 +7,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks the persistent attribute that stores the resource authorizer group.
+ * Marks the persistent String attribute that stores the resource authorizer group.
  *
  * <p>The platform resolves the physical database column through Hibernate
  * metadata, so neither the Java attribute name nor the column name needs to
  * follow a fixed naming convention.</p>
+ *
+ * <p>Authorizer values are expected to be persisted normalized in uppercase.
+ * The current user's authorizers are also normalized to uppercase before being
+ * bound to the Hibernate filter.</p>
  */
 @Documented
 @Target(ElementType.FIELD)

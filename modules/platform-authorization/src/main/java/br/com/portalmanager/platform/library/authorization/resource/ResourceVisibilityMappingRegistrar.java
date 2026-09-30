@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * Attaches the platform visibility filter to entities that declare exactly one
- * persistent field annotated with {@link AuthorizerGroup}.
+ * persistent String field annotated with {@link AuthorizerGroup}.
  *
  * <p>The filter condition is built from Hibernate metadata, not from Java or
  * database naming conventions. For example, an attribute named
@@ -47,13 +47,21 @@ public final class ResourceVisibilityMappingRegistrar {
                 );
             }
 
+            Field authorizerField = authorizerFields.getFirst();
+            if (authorizerField.getType() != String.class) {
+                throw new IllegalStateException(
+                        "@AuthorizerGroup field " + mappedClass.getName() + "." + authorizerField.getName()
+                                + " must be java.lang.String"
+                );
+            }
+
             boolean alreadyRegistered = entityBinding.getFilters().stream()
                     .anyMatch(filter -> ResourceVisibilityFilterManager.FILTER_NAME.equals(filter.getName()));
             if (alreadyRegistered) {
                 continue;
             }
 
-            String condition = resolveCondition(entityBinding, mappedClass, authorizerFields.getFirst());
+            String condition = resolveCondition(entityBinding, mappedClass, authorizerField);
 
             entityBinding.addFilter(
                     ResourceVisibilityFilterManager.FILTER_NAME,

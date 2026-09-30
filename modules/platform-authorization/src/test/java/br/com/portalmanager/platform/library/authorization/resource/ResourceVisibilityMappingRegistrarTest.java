@@ -74,6 +74,28 @@ class ResourceVisibilityMappingRegistrarTest {
         );
     }
 
+    @Test
+    void shouldRejectNonStringAuthorizerGroupAttribute() {
+        Metadata metadata = mock(Metadata.class);
+        PersistentClass entity = mock(RootClass.class);
+
+        Collection<PersistentClass> entityBindings = List.of(entity);
+        doReturn(entityBindings).when(metadata).getEntityBindings();
+        doReturn(InvalidTypeResource.class).when(entity).getMappedClass();
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> ResourceVisibilityMappingRegistrar.register(metadata)
+        );
+
+        assertEquals(
+                "@AuthorizerGroup field "
+                        + InvalidTypeResource.class.getName()
+                        + ".authorizer must be java.lang.String",
+                exception.getMessage()
+        );
+    }
+
     static final class TestResource {
         @AuthorizerGroup
         private String qualquerNome;
@@ -88,5 +110,10 @@ class ResourceVisibilityMappingRegistrarTest {
 
         @AuthorizerGroup
         private String second;
+    }
+
+    static final class InvalidTypeResource {
+        @AuthorizerGroup
+        private Long authorizer;
     }
 }
