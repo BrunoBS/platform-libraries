@@ -1,23 +1,21 @@
 package br.com.portalmanager.platform.library.authorization.resource;
 
-import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
-import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Filter;
 import org.hibernate.Session;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
- * POC: controls the lifecycle of the Hibernate resource visibility filter in the
- * current persistence context. The filter definition/mapping is intentionally
- * kept outside domain entities and will be registered by the library bootstrap.
+ * Controls the lifecycle of the Hibernate resource visibility filter in the
+ * current persistence context.
  */
 public class ResourceVisibilityFilterManager {
 
     public static final String FILTER_NAME = "platformResourceVisibility";
-    public static final String PARAMETER_NAME = "authorizerGroups";
-    static final String NO_AUTHORIZER = "__PLATFORM_NO_AUTHORIZER__";
+    public static final String PARAMETER_NAME = "resourceVisibilityIds";
+    static final long NO_RESOURCE_ID = Long.MIN_VALUE;
 
     private final EntityManager entityManager;
 
@@ -25,25 +23,14 @@ public class ResourceVisibilityFilterManager {
         this.entityManager = entityManager;
     }
 
-    public boolean enable(UserSession userSession) {
-        if (userSession.isOwner()) {
-            return false;
-        }
-
-        List<String> authorizers = userSession.getAuthorizerGroups().stream()
-                .map(ParsedGroup::authorizer)
-                .filter(value -> value != null && !value.isBlank())
-                .map(String::toLowerCase)
-                .distinct()
-                .toList();
-
-        if (authorizers.isEmpty()) {
-            authorizers = List.of(NO_AUTHORIZER);
-        }
+    public boolean enable(Collection<Long> authorizedIds) {
+        List<Long> ids = authorizedIds == null || authorizedIds.isEmpty()
+                ? List.of(NO_RESOURCE_ID)
+                : authorizedIds.stream().distinct().toList();
 
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter(FILTER_NAME);
-        filter.setParameterList(PARAMETER_NAME, authorizers);
+        filter.setParameterList(PARAMETER_NAME, ids);
         return true;
     }
 
