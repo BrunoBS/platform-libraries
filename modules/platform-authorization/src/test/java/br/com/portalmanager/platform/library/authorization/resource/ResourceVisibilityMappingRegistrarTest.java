@@ -51,10 +51,6 @@ class ResourceVisibilityMappingRegistrarTest {
     }
 
     static final class TestResource implements AuthorizableResource {
-        @Override
-        public String getAuthorizerGroup() {
-            return "test";
-        }
     }
 
     static final class PlainEntity {
