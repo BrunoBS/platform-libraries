@@ -66,7 +66,7 @@ class ResourceVisibilityAspectTest {
         Object expected = new Object();
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(expected);
-        when(annotation.value()).thenReturn(TestResource.class);
+        org.mockito.Mockito.doReturn(TestResource.class).when(annotation).value();
         when(filterManager.enable(TestResource.class, Set.of("BBS-APP", "CATALOG"))).thenReturn(true);
 
         Object result = aspect.applyVisibility(joinPoint, annotation);
@@ -88,7 +88,7 @@ class ResourceVisibilityAspectTest {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         RuntimeException expected = new RuntimeException("boom");
         when(joinPoint.proceed()).thenThrow(expected);
-        when(annotation.value()).thenReturn(TestResource.class);
+        org.mockito.Mockito.doReturn(TestResource.class).when(annotation).value();
         when(filterManager.enable(TestResource.class, Set.of("BBS-APP"))).thenReturn(true);
 
         RuntimeException result = assertThrows(
@@ -112,7 +112,7 @@ class ResourceVisibilityAspectTest {
         Object expected = new Object();
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(expected);
-        when(annotation.value()).thenReturn(TestResource.class);
+        org.mockito.Mockito.doReturn(TestResource.class).when(annotation).value();
         when(filterManager.enable(TestResource.class, Set.of("BBS-APP"))).thenReturn(false);
 
         Object result = aspect.applyVisibility(joinPoint, annotation);

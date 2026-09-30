@@ -122,7 +122,7 @@ class ResourceVisibilityHibernatePocTest {
 
             ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
             ResourceVisibility annotation = mock(ResourceVisibility.class);
-            when(annotation.value()).thenReturn(PocAccount.class);
+            org.mockito.Mockito.doReturn(PocAccount.class).when(annotation).value();
             when(joinPoint.proceed()).thenAnswer(invocation -> session.createQuery(
                     "from PocAccount account order by account.id",
                     PocAccount.class
@@ -189,7 +189,7 @@ class ResourceVisibilityHibernatePocTest {
 
             ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
             ResourceVisibility annotation = mock(ResourceVisibility.class);
-            when(annotation.value()).thenReturn(PocAccount.class);
+            org.mockito.Mockito.doReturn(PocAccount.class).when(annotation).value();
             when(joinPoint.proceed()).thenAnswer(invocation -> {
                 assertTrue(
                         session.getEnabledFilter(ResourceVisibilityFilterManager.filterName(PocAccount.class)) != null
