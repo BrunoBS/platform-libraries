@@ -1,49 +1,38 @@
 # Platform Tagging
 
-Capability reutilizável para gerenciamento de tags por recurso.
+Motor reutilizável de tagging, independente de JPA, tabela e tipo de recurso.
 
-## Modelo
+## Responsabilidade
 
-A tabela `tags` isola tags por `owner_type + owner_id` e mantém a origem da tag em `MANUAL` ou `SYSTEM`.
+O módulo concentra a regra transversal:
 
-A unicidade é garantida por:
+- normalização;
+- reconciliação por diff;
+- precedência de tag `MANUAL` sobre `SYSTEM`;
+- preservação do registro quando muda apenas a origem;
+- leitura de tags manuais;
+- busca de owners por tag;
+- remoção das tags de um owner.
 
-`UK(owner_type, owner_id, name)`
+A persistência pertence ao serviço consumidor. A library não cria entidade `Tag`, não registra entidade JPA e não assume uma tabela genérica `tags`.
 
-## Reconcile
+## Contratos
 
-`TagManager.reconcile` recebe as tags manuais e as tags calculadas pelo sistema, normaliza os valores e reconcilia por diff o conjunto persistido do owner. Tags existentes são preservadas quando possível: a origem é atualizada no mesmo registro, apenas tags obsoletas são removidas e apenas tags novas são inseridas.
+O recurso implementa `TagRecord` em sua entidade de tag e expõe sua persistência através de `TagPersistence<T, O, ID, KEY>`.
 
-Regras:
+Isso permite tabelas físicas e FKs reais por recurso, por exemplo:
 
-- tags são normalizadas para minúsculas, espaços externos são removidos e espaços internos viram `-`;
-- valores nulos ou vazios são ignorados;
-- duplicidades são eliminadas;
-- `MANUAL` prevalece sobre `SYSTEM` quando o nome normalizado coincide;
-- quando o override manual deixa de existir, a tag `SYSTEM` volta a ser persistida se continuar sendo calculada;
-- a reconciliação preserva o `id` quando uma tag muda apenas entre `SYSTEM` e `MANUAL`;
-- tags inalteradas não são regravadas;
-- owners são extensíveis através de `TagOwnerType`; cada serviço define seus próprios tipos, como `ACCOUNT` e `APPLICATION`.
+- `workspace_tag.workspace_id -> workspaces.id`;
+- `application_tag.application_id -> applications.id`.
 
-## Uso
+O serviço cria um `TagManager` tipado para cada recurso:
 
 ```java
-enum ResourceTagOwner implements TagOwnerType {
-    ACCOUNT,
-    APPLICATION;
-
-    @Override
-    public String value() {
-        return name();
-    }
+@Bean
+TagManager<ApplicationTag, Application, Long, String> applicationTags(
+        ApplicationTagRepository repository) {
+    return new TagManager<>(repository);
 }
 ```
 
-```java
-tagManager.reconcile(
-        ResourceTagOwner.ACCOUNT,
-        account.getId(),
-        dto.tags(),
-        systemTags
-);
-```
+As system tags continuam sendo responsabilidade do domínio do recurso. O motor recebe apenas as coleções manual/system e não conhece Application, Workspace ou qualquer outro domínio.
