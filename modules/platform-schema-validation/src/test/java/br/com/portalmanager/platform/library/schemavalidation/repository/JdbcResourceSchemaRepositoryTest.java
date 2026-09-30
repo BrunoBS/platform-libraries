@@ -26,7 +26,7 @@ class JdbcResourceSchemaRepositoryTest {
                 INSERT INTO vw_platform_resource_schemas
                 (resource_type, resource_code, schema_version, definition)
                 VALUES (?, ?, ?, ?)
-                """, "APPLICATION", "application", 1, "{"type":"object"}");
+                """, "APPLICATION", "application", 1, "{\"type\":\"object\"}");
 
         var properties = new PlatformSchemaValidationProperties();
         properties.getDatasource().setViewName("vw_platform_resource_schemas");
@@ -36,6 +36,6 @@ class JdbcResourceSchemaRepositoryTest {
 
         assertThat(schema).isPresent();
         assertThat(schema.orElseThrow().schemaVersion()).isEqualTo(1);
-        assertThat(schema.orElseThrow().definition()).contains(""object"");
+        assertThat(schema.orElseThrow().definition()).contains("\"object\"");
     }
 }
