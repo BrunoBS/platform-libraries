@@ -7,7 +7,6 @@ import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
-import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityIdResolver;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -26,8 +25,7 @@ import static org.mockito.Mockito.when;
 class ResourceVisibilityAspectTest {
 
     private final ResourceVisibilityFilterManager filterManager = mock(ResourceVisibilityFilterManager.class);
-    private final ResourceVisibilityIdResolver idResolver = mock(ResourceVisibilityIdResolver.class);
-    private final ResourceVisibilityAspect aspect = new ResourceVisibilityAspect(filterManager, idResolver);
+    private final ResourceVisibilityAspect aspect = new ResourceVisibilityAspect(filterManager);
     private final ResourceVisibility annotation = mock(ResourceVisibility.class);
 
     @AfterEach
@@ -36,8 +34,11 @@ class ResourceVisibilityAspectTest {
     }
 
     @Test
-    void shouldAllowOwnerWithoutResolvingIdsOrEnablingFilter() throws Throwable {
-        UserSession session = session(Set.of("PM5_OWNER"), Set.of());
+    void shouldAllowOwnerWithoutEnablingFilter() throws Throwable {
+        UserSession session = session(
+                Set.of("PM5_OWNER"),
+                Set.of(new ParsedGroup("PM5-ENG-DEV_BBS-APP", "ENG", "DEV", "BBS-APP"))
+        );
         UserContext.set(session);
 
         Object expected = new Object();
@@ -48,29 +49,29 @@ class ResourceVisibilityAspectTest {
 
         assertSame(expected, result);
         verify(joinPoint).proceed();
-        verifyNoInteractions(filterManager, idResolver);
+        verifyNoInteractions(filterManager);
     }
 
     @Test
-    void shouldResolveIdsThenEnableAndDisableHibernateFilter() throws Throwable {
+    void shouldEnableAndDisableHibernateFilterWithParsedAuthorizers() throws Throwable {
         UserSession session = session(
                 Set.of("USER"),
-                Set.of(new ParsedGroup("full", "profile", "env", "A-ONE"))
+                Set.of(
+                        new ParsedGroup("PM5-ENG-DEV_BBS-APP", "ENG", "DEV", "BBS-APP"),
+                        new ParsedGroup("PM5-NEG-DEV_CATALOG", "NEG", "DEV", "CATALOG")
+                )
         );
         UserContext.set(session);
 
-        Set<Long> authorizedIds = Set.of(10L, 20L);
         Object expected = new Object();
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(expected);
-        when(idResolver.findAuthorizedIds(annotation, Set.of("A-ONE"))).thenReturn(authorizedIds);
-        when(filterManager.enable(authorizedIds)).thenReturn(true);
+        when(filterManager.enable(Set.of("BBS-APP", "CATALOG"))).thenReturn(true);
 
         Object result = aspect.applyVisibility(joinPoint, annotation);
 
         assertSame(expected, result);
-        verify(idResolver).findAuthorizedIds(annotation, Set.of("A-ONE"));
-        verify(filterManager).enable(authorizedIds);
+        verify(filterManager).enable(Set.of("BBS-APP", "CATALOG"));
         verify(joinPoint).proceed();
         verify(filterManager).disable();
     }
@@ -79,16 +80,14 @@ class ResourceVisibilityAspectTest {
     void shouldDisableHibernateFilterWhenProceedThrows() throws Throwable {
         UserSession session = session(
                 Set.of("USER"),
-                Set.of(new ParsedGroup("full", "profile", "env", "A-ONE"))
+                Set.of(new ParsedGroup("PM5-ENG-DEV_BBS-APP", "ENG", "DEV", "BBS-APP"))
         );
         UserContext.set(session);
 
-        Set<Long> authorizedIds = Set.of(10L);
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         RuntimeException expected = new RuntimeException("boom");
         when(joinPoint.proceed()).thenThrow(expected);
-        when(idResolver.findAuthorizedIds(annotation, Set.of("A-ONE"))).thenReturn(authorizedIds);
-        when(filterManager.enable(authorizedIds)).thenReturn(true);
+        when(filterManager.enable(Set.of("BBS-APP"))).thenReturn(true);
 
         RuntimeException result = assertThrows(
                 RuntimeException.class,
@@ -96,8 +95,7 @@ class ResourceVisibilityAspectTest {
         );
 
         assertSame(expected, result);
-        verify(idResolver).findAuthorizedIds(annotation, Set.of("A-ONE"));
-        verify(filterManager).enable(authorizedIds);
+        verify(filterManager).enable(Set.of("BBS-APP"));
         verify(filterManager).disable();
     }
 
@@ -105,21 +103,19 @@ class ResourceVisibilityAspectTest {
     void shouldNotDisableFilterWhenManagerDidNotEnableIt() throws Throwable {
         UserSession session = session(
                 Set.of("USER"),
-                Set.of(new ParsedGroup("full", "profile", "env", "A-ONE"))
+                Set.of(new ParsedGroup("PM5-ENG-DEV_BBS-APP", "ENG", "DEV", "BBS-APP"))
         );
         UserContext.set(session);
 
-        Set<Long> authorizedIds = Set.of(10L);
         Object expected = new Object();
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(expected);
-        when(idResolver.findAuthorizedIds(annotation, Set.of("A-ONE"))).thenReturn(authorizedIds);
-        when(filterManager.enable(authorizedIds)).thenReturn(false);
+        when(filterManager.enable(Set.of("BBS-APP"))).thenReturn(false);
 
         Object result = aspect.applyVisibility(joinPoint, annotation);
 
         assertSame(expected, result);
-        verify(filterManager).enable(authorizedIds);
+        verify(filterManager).enable(Set.of("BBS-APP"));
         verify(filterManager, never()).disable();
     }
 
@@ -133,12 +129,12 @@ class ResourceVisibilityAspectTest {
         );
 
         assertEquals(AuthorizationMessageKeys.SESSION_NOT_FOUND, exception.getCode());
-        verifyNoInteractions(joinPoint, filterManager, idResolver);
+        verifyNoInteractions(joinPoint, filterManager);
     }
 
     @Test
-    void shouldRejectWhenSessionHasNoGroups() {
-        UserSession session = session(Set.of(), Set.of());
+    void shouldRejectWhenAuthorizerGroupsAreMissing() {
+        UserSession session = session(Set.of("USER"), Set.of());
         UserContext.set(session);
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
 
@@ -148,7 +144,7 @@ class ResourceVisibilityAspectTest {
         );
 
         assertEquals(AuthorizationMessageKeys.GROUPS_NOT_FOUND, exception.getCode());
-        verifyNoInteractions(joinPoint, filterManager, idResolver);
+        verifyNoInteractions(joinPoint, filterManager);
     }
 
     private UserSession session(Set<String> groups, Set<ParsedGroup> authorizerGroups) {
