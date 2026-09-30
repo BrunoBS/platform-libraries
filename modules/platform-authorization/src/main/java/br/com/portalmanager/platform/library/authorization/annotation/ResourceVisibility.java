@@ -6,17 +6,34 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Applies visibility rules to resources returned by the annotated method.
+ * Applies resource visibility to the annotated use-case method.
  *
- * <p>This annotation does not authorize execution of the endpoint. Endpoint
- * access must be controlled separately with {@link AuthorizationRequired}.</p>
+ * <p>The source metadata is used only by the platform library to resolve the
+ * internal resource ids visible to the current user's authorizer groups.
+ * The business repository remains unaware of authorization filtering.</p>
  *
- * <p>For collections, resources whose authorizer group is not present in the
- * current user session are filtered out. For a single resource, access is
- * denied when the resource is not visible to the current user. OWNER users
- * bypass visibility filtering.</p>
+ * <p>Table and column names are validated as SQL identifiers before use.
+ * Values coming from the user session are always bound as query parameters.</p>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ResourceVisibility {
+
+    /**
+     * Table (or schema-qualified table) that maps a resource id to an authorizer group.
+     * Example: {@code workspace_authorization}.
+     */
+    String table();
+
+    /**
+     * Column in {@link #table()} containing the resource internal BIGINT id.
+     * Example: {@code workspace_id}.
+     */
+    String resourceIdColumn();
+
+    /**
+     * Column in {@link #table()} containing the authorizer group.
+     * Example: {@code authorizer_group}.
+     */
+    String authorizerGroupColumn();
 }
