@@ -7,6 +7,7 @@ import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
+import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityIdResolver;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,8 @@ import static org.mockito.Mockito.when;
 class ResourceVisibilityAspectTest {
 
     private final ResourceVisibilityFilterManager filterManager = mock(ResourceVisibilityFilterManager.class);
-    private final ResourceVisibilityAspect aspect = new ResourceVisibilityAspect(filterManager);
+    private final ResourceVisibilityIdResolver idResolver = mock(ResourceVisibilityIdResolver.class);
+    private final ResourceVisibilityAspect aspect = new ResourceVisibilityAspect(filterManager, idResolver);
     private final ResourceVisibility annotation = mock(ResourceVisibility.class);
 
     @AfterEach
@@ -34,7 +36,7 @@ class ResourceVisibilityAspectTest {
     }
 
     @Test
-    void shouldAllowOwnerWithoutEnablingFilter() throws Throwable {
+    void shouldAllowOwnerWithoutResolvingIdsOrEnablingFilter() throws Throwable {
         UserSession session = session(Set.of("PM5_OWNER"), Set.of());
         UserContext.set(session);
 
@@ -46,26 +48,29 @@ class ResourceVisibilityAspectTest {
 
         assertSame(expected, result);
         verify(joinPoint).proceed();
-        verifyNoInteractions(filterManager);
+        verifyNoInteractions(filterManager, idResolver);
     }
 
     @Test
-    void shouldEnableAndDisableHibernateFilterForAuthorizedSession() throws Throwable {
+    void shouldResolveIdsThenEnableAndDisableHibernateFilter() throws Throwable {
         UserSession session = session(
                 Set.of("USER"),
                 Set.of(new ParsedGroup("full", "profile", "env", "A-ONE"))
         );
         UserContext.set(session);
 
+        Set<Long> authorizedIds = Set.of(10L, 20L);
         Object expected = new Object();
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(expected);
-        when(filterManager.enable(session)).thenReturn(true);
+        when(idResolver.findAuthorizedIds(annotation, Set.of("A-ONE"))).thenReturn(authorizedIds);
+        when(filterManager.enable(authorizedIds)).thenReturn(true);
 
         Object result = aspect.applyVisibility(joinPoint, annotation);
 
         assertSame(expected, result);
-        verify(filterManager).enable(session);
+        verify(idResolver).findAuthorizedIds(annotation, Set.of("A-ONE"));
+        verify(filterManager).enable(authorizedIds);
         verify(joinPoint).proceed();
         verify(filterManager).disable();
     }
@@ -78,10 +83,12 @@ class ResourceVisibilityAspectTest {
         );
         UserContext.set(session);
 
+        Set<Long> authorizedIds = Set.of(10L);
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         RuntimeException expected = new RuntimeException("boom");
         when(joinPoint.proceed()).thenThrow(expected);
-        when(filterManager.enable(session)).thenReturn(true);
+        when(idResolver.findAuthorizedIds(annotation, Set.of("A-ONE"))).thenReturn(authorizedIds);
+        when(filterManager.enable(authorizedIds)).thenReturn(true);
 
         RuntimeException result = assertThrows(
                 RuntimeException.class,
@@ -89,7 +96,8 @@ class ResourceVisibilityAspectTest {
         );
 
         assertSame(expected, result);
-        verify(filterManager).enable(session);
+        verify(idResolver).findAuthorizedIds(annotation, Set.of("A-ONE"));
+        verify(filterManager).enable(authorizedIds);
         verify(filterManager).disable();
     }
 
@@ -101,15 +109,17 @@ class ResourceVisibilityAspectTest {
         );
         UserContext.set(session);
 
+        Set<Long> authorizedIds = Set.of(10L);
         Object expected = new Object();
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(expected);
-        when(filterManager.enable(session)).thenReturn(false);
+        when(idResolver.findAuthorizedIds(annotation, Set.of("A-ONE"))).thenReturn(authorizedIds);
+        when(filterManager.enable(authorizedIds)).thenReturn(false);
 
         Object result = aspect.applyVisibility(joinPoint, annotation);
 
         assertSame(expected, result);
-        verify(filterManager).enable(session);
+        verify(filterManager).enable(authorizedIds);
         verify(filterManager, never()).disable();
     }
 
@@ -123,7 +133,7 @@ class ResourceVisibilityAspectTest {
         );
 
         assertEquals(AuthorizationMessageKeys.SESSION_NOT_FOUND, exception.getCode());
-        verifyNoInteractions(joinPoint, filterManager);
+        verifyNoInteractions(joinPoint, filterManager, idResolver);
     }
 
     @Test
@@ -138,7 +148,7 @@ class ResourceVisibilityAspectTest {
         );
 
         assertEquals(AuthorizationMessageKeys.GROUPS_NOT_FOUND, exception.getCode());
-        verifyNoInteractions(joinPoint, filterManager);
+        verifyNoInteractions(joinPoint, filterManager, idResolver);
     }
 
     private UserSession session(Set<String> groups, Set<ParsedGroup> authorizerGroups) {
