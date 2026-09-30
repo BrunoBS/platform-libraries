@@ -1,41 +1,84 @@
 package br.com.portalmanager.platform.library.schemavalidation.repository;
 
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
+import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class JdbcResourceSchemaRepositoryTest {
 
-    @Test
-    void readsPublishedSchemaViewContract() {
-        var dataSource = new EmbeddedDatabaseBuilder().setType(H2).build();
-        var jdbc = new JdbcTemplate(dataSource);
-        jdbc.execute("""
-                CREATE TABLE vw_platform_resource_schemas (
-                    resource_type VARCHAR(100),
-                    resource_code VARCHAR(100),
-                    schema_version INT,
-                    definition VARCHAR(1000)
-                )
-                """);
-        jdbc.update("""
-                INSERT INTO vw_platform_resource_schemas
-                (resource_type, resource_code, schema_version, definition)
-                VALUES (?, ?, ?, ?)
-                """, "APPLICATION", "application", 1, "{\"type\":\"object\"}");
+    private JdbcTemplate jdbcTemplate;
+    private JdbcResourceSchemaRepository repository;
 
-        var properties = new PlatformSchemaValidationProperties();
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate = mock(JdbcTemplate.class);
+
+        PlatformSchemaValidationProperties properties = new PlatformSchemaValidationProperties();
         properties.getDatasource().setViewName("vw_platform_resource_schemas");
-        var repository = new JdbcResourceSchemaRepository(jdbc, properties);
 
-        var schema = repository.find("APPLICATION", "application");
+        repository = new JdbcResourceSchemaRepository(jdbcTemplate, properties);
+    }
 
-        assertThat(schema).isPresent();
-        assertThat(schema.orElseThrow().schemaVersion()).isEqualTo(1);
-        assertThat(schema.orElseThrow().definition()).contains("\"object\"");
+    @Test
+    void shouldReturnResourceSchemaWhenFoundInView() throws SQLException {
+        ResultSet resultSet = mock(ResultSet.class);
+        when(resultSet.next()).thenReturn(true);
+        when(resultSet.getString("resource_type")).thenReturn("APPLICATION");
+        when(resultSet.getString("resource_code")).thenReturn("application");
+        when(resultSet.getInt("schema_version")).thenReturn(1);
+        when(resultSet.getString("definition")).thenReturn("{\"type\":\"object\"}");
+
+        when(jdbcTemplate.query(
+                any(String.class),
+                any(ResultSetExtractor.class),
+                eq("APPLICATION"),
+                eq("application")
+        )).thenAnswer(invocation -> {
+            ResultSetExtractor<ResourceSchema> extractor = invocation.getArgument(1);
+            return extractor.extractData(resultSet);
+        });
+
+        Optional<ResourceSchema> result = repository.find("APPLICATION", "application");
+
+        assertTrue(result.isPresent());
+        ResourceSchema schema = result.orElseThrow();
+        assertEquals("APPLICATION", schema.resourceType());
+        assertEquals("application", schema.resourceCode());
+        assertEquals(1, schema.schemaVersion());
+        assertEquals("{\"type\":\"object\"}", schema.definition());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenSchemaIsNotFoundInView() throws SQLException {
+        ResultSet resultSet = mock(ResultSet.class);
+        when(resultSet.next()).thenReturn(false);
+
+        when(jdbcTemplate.query(
+                any(String.class),
+                any(ResultSetExtractor.class),
+                eq("MENU"),
+                eq("menu")
+        )).thenAnswer(invocation -> {
+            ResultSetExtractor<ResourceSchema> extractor = invocation.getArgument(1);
+            return extractor.extractData(resultSet);
+        });
+
+        Optional<ResourceSchema> result = repository.find("MENU", "menu");
+
+        assertTrue(result.isEmpty());
     }
 }
