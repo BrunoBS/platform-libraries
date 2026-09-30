@@ -9,14 +9,13 @@ import java.util.Map;
  * POC bootstrap primitive that attaches the platform visibility filter to
  * authorizable entity mappings without requiring @Filter on domain entities.
  *
- * <p>The entity only participates by implementing {@link AuthorizableResource}.
- * Authorization metadata itself lives outside the entity and is resolved before
- * the business query runs.</p>
+ * <p>Participating resource tables follow the platform convention of exposing
+ * an uppercase {@code authorizer_group} column.</p>
  */
 public final class ResourceVisibilityMappingRegistrar {
 
     public static final String DEFAULT_CONDITION =
-            "id in (:" + ResourceVisibilityFilterManager.PARAMETER_NAME + ")";
+            "authorizer_group in (:" + ResourceVisibilityFilterManager.PARAMETER_NAME + ")";
 
     private ResourceVisibilityMappingRegistrar() {
     }
