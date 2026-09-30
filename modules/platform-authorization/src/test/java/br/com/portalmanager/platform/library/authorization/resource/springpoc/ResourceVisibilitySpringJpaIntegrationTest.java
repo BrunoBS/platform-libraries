@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         classes = ResourceVisibilitySpringJpaIntegrationTest.TestApplication.class,
         properties = {
                 "platform.authorization.enabled=false",
+                "platform.messaging.enabled=false",
                 "spring.main.web-application-type=none",
                 "spring.datasource.url=jdbc:h2:mem:resource_visibility_spring;MODE=MySQL;DB_CLOSE_DELAY=-1",
                 "spring.datasource.driver-class-name=org.h2.Driver",
