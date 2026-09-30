@@ -2,25 +2,32 @@ package br.com.portalmanager.platform.library.authorization.autoconfigure;
 
 import br.com.portalmanager.platform.library.authorization.aspect.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.orm.jpa.SharedEntityManagerCreator;
 
 @AutoConfiguration(after = PlatformAuthorizationAutoConfiguration.class)
 @ConditionalOnClass(name = {
         "jakarta.persistence.EntityManager",
-        "org.hibernate.Session"
+        "jakarta.persistence.EntityManagerFactory",
+        "org.hibernate.Session",
+        "org.springframework.orm.jpa.SharedEntityManagerCreator"
 })
 public class ResourceVisibilityJpaAutoConfiguration {
 
     @Bean
-    @ConditionalOnBean(EntityManager.class)
+    @ConditionalOnBean(EntityManagerFactory.class)
     @ConditionalOnMissingBean
-    public ResourceVisibilityFilterManager resourceVisibilityFilterManager(EntityManager entityManager) {
-        return new ResourceVisibilityFilterManager(entityManager);
+    public ResourceVisibilityFilterManager resourceVisibilityFilterManager(
+            EntityManagerFactory entityManagerFactory
+    ) {
+        return new ResourceVisibilityFilterManager(
+                SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory)
+        );
     }
 
     @Bean
