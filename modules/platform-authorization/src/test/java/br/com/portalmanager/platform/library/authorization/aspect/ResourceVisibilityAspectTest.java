@@ -66,14 +66,15 @@ class ResourceVisibilityAspectTest {
         Object expected = new Object();
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(expected);
-        when(filterManager.enable(Set.of("BBS-APP", "CATALOG"))).thenReturn(true);
+        when(annotation.value()).thenReturn(TestResource.class);
+        when(filterManager.enable(TestResource.class, Set.of("BBS-APP", "CATALOG"))).thenReturn(true);
 
         Object result = aspect.applyVisibility(joinPoint, annotation);
 
         assertSame(expected, result);
-        verify(filterManager).enable(Set.of("BBS-APP", "CATALOG"));
+        verify(filterManager).enable(TestResource.class, Set.of("BBS-APP", "CATALOG"));
         verify(joinPoint).proceed();
-        verify(filterManager).disable();
+        verify(filterManager).disable(TestResource.class);
     }
 
     @Test
@@ -87,7 +88,8 @@ class ResourceVisibilityAspectTest {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         RuntimeException expected = new RuntimeException("boom");
         when(joinPoint.proceed()).thenThrow(expected);
-        when(filterManager.enable(Set.of("BBS-APP"))).thenReturn(true);
+        when(annotation.value()).thenReturn(TestResource.class);
+        when(filterManager.enable(TestResource.class, Set.of("BBS-APP"))).thenReturn(true);
 
         RuntimeException result = assertThrows(
                 RuntimeException.class,
@@ -95,8 +97,8 @@ class ResourceVisibilityAspectTest {
         );
 
         assertSame(expected, result);
-        verify(filterManager).enable(Set.of("BBS-APP"));
-        verify(filterManager).disable();
+        verify(filterManager).enable(TestResource.class, Set.of("BBS-APP"));
+        verify(filterManager).disable(TestResource.class);
     }
 
     @Test
@@ -110,13 +112,14 @@ class ResourceVisibilityAspectTest {
         Object expected = new Object();
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(expected);
-        when(filterManager.enable(Set.of("BBS-APP"))).thenReturn(false);
+        when(annotation.value()).thenReturn(TestResource.class);
+        when(filterManager.enable(TestResource.class, Set.of("BBS-APP"))).thenReturn(false);
 
         Object result = aspect.applyVisibility(joinPoint, annotation);
 
         assertSame(expected, result);
-        verify(filterManager).enable(Set.of("BBS-APP"));
-        verify(filterManager, never()).disable();
+        verify(filterManager).enable(TestResource.class, Set.of("BBS-APP"));
+        verify(filterManager, never()).disable(TestResource.class);
     }
 
     @Test
@@ -152,5 +155,7 @@ class ResourceVisibilityAspectTest {
         session.setGroups(groups);
         session.setAuthorizerGroups(authorizerGroups);
         return session;
+    }
+    private static final class TestResource {
     }
 }

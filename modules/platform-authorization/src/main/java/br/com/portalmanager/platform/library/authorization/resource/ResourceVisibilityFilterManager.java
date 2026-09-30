@@ -7,14 +7,15 @@ import org.hibernate.Session;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
- * Controls the lifecycle of the Hibernate resource visibility filter in the
- * current persistence context.
+ * Controls entity-scoped Hibernate resource visibility filters in the current
+ * persistence context.
  */
 public class ResourceVisibilityFilterManager {
 
-    public static final String FILTER_NAME = "platformResourceVisibility";
+    public static final String FILTER_NAME_PREFIX = "platformResourceVisibility";
     public static final String PARAMETER_NAME = "authorizerGroups";
     public static final int MAX_AUTHORIZER_GROUPS = 500;
     static final String NO_AUTHORIZER = "__PLATFORM_NO_AUTHORIZER__";
@@ -25,7 +26,15 @@ public class ResourceVisibilityFilterManager {
         this.entityManager = entityManager;
     }
 
-    public boolean enable(Collection<String> authorizerGroups) {
+    public static String filterName(Class<?> resourceType) {
+        Objects.requireNonNull(resourceType, "resourceType must not be null");
+        return FILTER_NAME_PREFIX + "_"
+                + resourceType.getName()
+                        .replace('.', '_')
+                        .replace('$', '_');
+    }
+
+    public boolean enable(Class<?> resourceType, Collection<String> authorizerGroups) {
         List<String> normalized = authorizerGroups == null
                 ? List.of()
                 : authorizerGroups.stream()
@@ -47,15 +56,22 @@ public class ResourceVisibilityFilterManager {
         }
 
         Session session = entityManager.unwrap(Session.class);
-        Filter filter = session.enableFilter(FILTER_NAME);
+        String filterName = filterName(resourceType);
+
+        if (session.getEnabledFilter(filterName) != null) {
+            return false;
+        }
+
+        Filter filter = session.enableFilter(filterName);
         filter.setParameterList(PARAMETER_NAME, normalized);
         return true;
     }
 
-    public void disable() {
+    public void disable(Class<?> resourceType) {
         Session session = entityManager.unwrap(Session.class);
-        if (session.getEnabledFilter(FILTER_NAME) != null) {
-            session.disableFilter(FILTER_NAME);
+        String filterName = filterName(resourceType);
+        if (session.getEnabledFilter(filterName) != null) {
+            session.disableFilter(filterName);
         }
     }
 }

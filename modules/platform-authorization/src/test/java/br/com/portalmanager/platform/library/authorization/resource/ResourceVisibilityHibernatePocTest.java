@@ -96,7 +96,7 @@ class ResourceVisibilityHibernatePocTest {
     void shouldFilterCollectionUsingAnnotatedPhysicalColumn() {
         try (Session session = sessionFactory.openSession()) {
             ResourceVisibilityFilterManager manager = new ResourceVisibilityFilterManager(session);
-            manager.enable(Set.of("bbs-app", "CATALOG"));
+            manager.enable(PocAccount.class, Set.of("bbs-app", "CATALOG"));
 
             List<PocAccount> result = session.createQuery(
                     "from PocAccount account order by account.id",
@@ -122,6 +122,7 @@ class ResourceVisibilityHibernatePocTest {
 
             ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
             ResourceVisibility annotation = mock(ResourceVisibility.class);
+            when(annotation.value()).thenReturn(PocAccount.class);
             when(joinPoint.proceed()).thenAnswer(invocation -> session.createQuery(
                     "from PocAccount account order by account.id",
                     PocAccount.class
@@ -131,7 +132,7 @@ class ResourceVisibilityHibernatePocTest {
             List<PocAccount> result = (List<PocAccount>) aspect.applyVisibility(joinPoint, annotation);
 
             assertEquals(3, result.size());
-            assertNull(session.getEnabledFilter(ResourceVisibilityFilterManager.FILTER_NAME));
+            assertNull(session.getEnabledFilter(ResourceVisibilityFilterManager.filterName(PocAccount.class)));
         }
     }
 
@@ -139,7 +140,7 @@ class ResourceVisibilityHibernatePocTest {
     void shouldProtectFindById() {
         try (Session session = sessionFactory.openSession()) {
             ResourceVisibilityFilterManager manager = new ResourceVisibilityFilterManager(session);
-            manager.enable(Set.of("BBS-APP"));
+            manager.enable(PocAccount.class, Set.of("BBS-APP"));
 
             PocAccount allowed = session.find(PocAccount.class, 1L);
             PocAccount denied = session.find(PocAccount.class, 3L);
@@ -188,9 +189,10 @@ class ResourceVisibilityHibernatePocTest {
 
             ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
             ResourceVisibility annotation = mock(ResourceVisibility.class);
+            when(annotation.value()).thenReturn(PocAccount.class);
             when(joinPoint.proceed()).thenAnswer(invocation -> {
                 assertTrue(
-                        session.getEnabledFilter(ResourceVisibilityFilterManager.FILTER_NAME) != null
+                        session.getEnabledFilter(ResourceVisibilityFilterManager.filterName(PocAccount.class)) != null
                 );
                 return session.createQuery(
                         "from PocAccount account order by account.id",
@@ -202,7 +204,7 @@ class ResourceVisibilityHibernatePocTest {
             List<PocAccount> result = (List<PocAccount>) aspect.applyVisibility(joinPoint, annotation);
 
             assertEquals(List.of("BBS-APP"), authorizers(result));
-            assertNull(session.getEnabledFilter(ResourceVisibilityFilterManager.FILTER_NAME));
+            assertNull(session.getEnabledFilter(ResourceVisibilityFilterManager.filterName(PocAccount.class)));
         }
     }
 
@@ -213,7 +215,7 @@ class ResourceVisibilityHibernatePocTest {
     ) throws Exception {
         try (Session session = sessionFactory.openSession()) {
             ResourceVisibilityFilterManager manager = new ResourceVisibilityFilterManager(session);
-            manager.enable(Set.of(authorizer));
+            manager.enable(PocAccount.class, Set.of(authorizer));
             ready.countDown();
             start.await();
 

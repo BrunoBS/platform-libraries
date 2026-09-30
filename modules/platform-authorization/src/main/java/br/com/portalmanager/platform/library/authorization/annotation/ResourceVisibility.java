@@ -9,8 +9,10 @@ import java.lang.annotation.Target;
 /**
  * Enables platform-managed resource visibility for the annotated use-case method.
  *
- * <p>The platform library resolves the current user's authorizer groups and
- * enables the Hibernate filter before the business query executes.</p>
+ * <p>The entity type identifies the resource whose Hibernate visibility filter
+ * must be enabled for the invocation. This keeps visibility scoped to that
+ * resource and avoids filtering incidental queries of other protected entities
+ * in the same persistence context.</p>
  *
  * <p>Entities participate in visibility by declaring exactly one persistent
  * field annotated with {@link AuthorizerGroup}. The physical database column is
@@ -21,4 +23,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ResourceVisibility {
+
+    Class<?> value();
 }

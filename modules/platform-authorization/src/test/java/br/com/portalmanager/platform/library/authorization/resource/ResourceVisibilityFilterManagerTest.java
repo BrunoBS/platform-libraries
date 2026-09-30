@@ -28,10 +28,10 @@ class ResourceVisibilityFilterManagerTest {
     @Test
     void shouldNormalizeAuthorizersToUppercaseAndRemoveDuplicates() {
         when(entityManager.unwrap(Session.class)).thenReturn(hibernateSession);
-        when(hibernateSession.enableFilter(ResourceVisibilityFilterManager.FILTER_NAME))
+        when(hibernateSession.enableFilter(ResourceVisibilityFilterManager.filterName(TestResource.class)))
                 .thenReturn(filter);
 
-        assertTrue(manager.enable(List.of("bbs-app", "BBS-APP", "catalog")));
+        assertTrue(manager.enable(TestResource.class, List.of("bbs-app", "BBS-APP", "catalog")));
 
         verify(filter).setParameterList(
                 ResourceVisibilityFilterManager.PARAMETER_NAME,
@@ -42,14 +42,14 @@ class ResourceVisibilityFilterManagerTest {
     @Test
     void shouldAcceptExactlyFiveHundredDistinctAuthorizers() {
         when(entityManager.unwrap(Session.class)).thenReturn(hibernateSession);
-        when(hibernateSession.enableFilter(ResourceVisibilityFilterManager.FILTER_NAME))
+        when(hibernateSession.enableFilter(ResourceVisibilityFilterManager.filterName(TestResource.class)))
                 .thenReturn(filter);
 
         Set<String> groups = IntStream.range(0, ResourceVisibilityFilterManager.MAX_AUTHORIZER_GROUPS)
                 .mapToObj(index -> "GROUP_" + index)
                 .collect(Collectors.toSet());
 
-        assertTrue(manager.enable(groups));
+        assertTrue(manager.enable(TestResource.class, groups));
     }
 
     @Test
@@ -58,7 +58,7 @@ class ResourceVisibilityFilterManagerTest {
                 .mapToObj(index -> "GROUP_" + index)
                 .collect(Collectors.toSet());
 
-        assertThrows(IllegalArgumentException.class, () -> manager.enable(groups));
+        assertThrows(IllegalArgumentException.class, () -> manager.enable(TestResource.class, groups));
 
         verify(entityManager, never()).unwrap(Session.class);
     }
@@ -66,10 +66,10 @@ class ResourceVisibilityFilterManagerTest {
     @Test
     void shouldUseNoAuthorizerSentinelForEmptyCollection() {
         when(entityManager.unwrap(Session.class)).thenReturn(hibernateSession);
-        when(hibernateSession.enableFilter(ResourceVisibilityFilterManager.FILTER_NAME))
+        when(hibernateSession.enableFilter(ResourceVisibilityFilterManager.filterName(TestResource.class)))
                 .thenReturn(filter);
 
-        assertTrue(manager.enable(Set.of()));
+        assertTrue(manager.enable(TestResource.class, Set.of()));
 
         verify(filter).setParameterList(
                 ResourceVisibilityFilterManager.PARAMETER_NAME,
@@ -80,11 +80,13 @@ class ResourceVisibilityFilterManagerTest {
     @Test
     void shouldDisableEnabledFilter() {
         when(entityManager.unwrap(Session.class)).thenReturn(hibernateSession);
-        when(hibernateSession.getEnabledFilter(ResourceVisibilityFilterManager.FILTER_NAME))
+        when(hibernateSession.getEnabledFilter(ResourceVisibilityFilterManager.filterName(TestResource.class)))
                 .thenReturn(filter);
 
-        manager.disable();
+        manager.disable(TestResource.class);
 
-        verify(hibernateSession).disableFilter(ResourceVisibilityFilterManager.FILTER_NAME);
+        verify(hibernateSession).disableFilter(ResourceVisibilityFilterManager.filterName(TestResource.class));
+    }
+    private static final class TestResource {
     }
 }

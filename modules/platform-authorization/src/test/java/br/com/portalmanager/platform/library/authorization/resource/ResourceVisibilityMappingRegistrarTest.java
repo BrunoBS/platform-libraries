@@ -40,7 +40,7 @@ class ResourceVisibilityMappingRegistrarTest {
 
         assertEquals(1, registered);
         verify(entity).addFilter(
-                ResourceVisibilityFilterManager.FILTER_NAME,
+                ResourceVisibilityFilterManager.filterName(TestResource.class),
                 "meu_authorizer in (:authorizerGroups)",
                 true,
                 Map.of(),

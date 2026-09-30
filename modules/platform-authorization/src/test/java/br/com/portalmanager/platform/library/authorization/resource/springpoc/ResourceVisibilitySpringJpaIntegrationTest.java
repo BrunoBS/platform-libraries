@@ -174,7 +174,7 @@ class SpringPocWorkspaceRepository {
 
         Session session = entityManager.unwrap(Session.class);
         assertNotNull(
-                session.getEnabledFilter(ResourceVisibilityFilterManager.FILTER_NAME),
+                session.getEnabledFilter(ResourceVisibilityFilterManager.filterName(SpringPocWorkspace.class)),
                 "Resource visibility filter must be enabled on the transaction-bound Hibernate Session"
         );
 
@@ -194,7 +194,7 @@ class SpringPocWorkspaceQueryService {
         this.repository = repository;
     }
 
-    @ResourceVisibility
+    @ResourceVisibility(SpringPocWorkspace.class)
     @Transactional(readOnly = true)
     public List<SpringPocWorkspaceOutput> findAll() {
         return repository.findFiltered().stream()

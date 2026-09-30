@@ -55,12 +55,13 @@ public class ResourceVisibilityAspect {
             );
         }
 
-        boolean enabled = filterManager.enable(authorizerGroups);
+        Class<?> resourceType = resourceVisibility.value();
+        boolean enabled = filterManager.enable(resourceType, authorizerGroups);
         try {
             return joinPoint.proceed();
         } finally {
             if (enabled) {
-                filterManager.disable();
+                filterManager.disable(resourceType);
             }
         }
     }

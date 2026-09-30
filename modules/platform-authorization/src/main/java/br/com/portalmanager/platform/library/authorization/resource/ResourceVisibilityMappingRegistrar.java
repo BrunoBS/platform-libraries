@@ -14,13 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Attaches the platform visibility filter to entities that declare exactly one
- * persistent String field annotated with {@link AuthorizerGroup}.
- *
- * <p>The filter condition is built from Hibernate metadata, not from Java or
- * database naming conventions. For example, an attribute named
- * {@code meuAuthorizerGroup} mapped to {@code meu_authorizer} produces
- * {@code meu_authorizer in (:authorizerGroups)}.</p>
+ * Attaches an entity-scoped platform visibility filter to entities that declare
+ * exactly one persistent String field annotated with {@link AuthorizerGroup}.
  */
 public final class ResourceVisibilityMappingRegistrar {
 
@@ -55,8 +50,9 @@ public final class ResourceVisibilityMappingRegistrar {
                 );
             }
 
+            String filterName = ResourceVisibilityFilterManager.filterName(mappedClass);
             boolean alreadyRegistered = entityBinding.getFilters().stream()
-                    .anyMatch(filter -> ResourceVisibilityFilterManager.FILTER_NAME.equals(filter.getName()));
+                    .anyMatch(filter -> filterName.equals(filter.getName()));
             if (alreadyRegistered) {
                 continue;
             }
@@ -64,7 +60,7 @@ public final class ResourceVisibilityMappingRegistrar {
             String condition = resolveCondition(entityBinding, mappedClass, authorizerField);
 
             entityBinding.addFilter(
-                    ResourceVisibilityFilterManager.FILTER_NAME,
+                    filterName,
                     condition,
                     true,
                     Map.of(),
@@ -73,6 +69,19 @@ public final class ResourceVisibilityMappingRegistrar {
         }
 
         return registered;
+    }
+
+    static List<Class<?>> findResourceTypes(Metadata metadata) {
+        List<Class<?>> resourceTypes = new ArrayList<>();
+
+        for (PersistentClass entityBinding : metadata.getEntityBindings()) {
+            Class<?> mappedClass = entityBinding.getMappedClass();
+            if (mappedClass != null && !findAuthorizerFields(mappedClass).isEmpty()) {
+                resourceTypes.add(mappedClass);
+            }
+        }
+
+        return List.copyOf(resourceTypes);
     }
 
     private static String resolveCondition(

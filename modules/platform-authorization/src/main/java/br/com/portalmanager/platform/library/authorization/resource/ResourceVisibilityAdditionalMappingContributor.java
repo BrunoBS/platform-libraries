@@ -16,10 +16,9 @@ import java.util.function.Supplier;
 /**
  * Hibernate 7 bootstrap hook for platform-managed resource visibility.
  *
- * <p>The contributor is discovered through Java ServiceLoader. It defines the
- * platform filter once and attaches it programmatically to every mapped entity
- * that exposes an {@link AuthorizerGroup} field. Domain entities therefore do
- * not need Hibernate @Filter/@FilterDef annotations or a marker interface.</p>
+ * <p>The contributor is discovered through Java ServiceLoader. It defines one
+ * Hibernate filter per protected entity and attaches it programmatically to the
+ * entity that exposes an {@link AuthorizerGroup} field.</p>
  */
 public final class ResourceVisibilityAdditionalMappingContributor
         implements AdditionalMappingContributor {
@@ -36,15 +35,16 @@ public final class ResourceVisibilityAdditionalMappingContributor
             ResourceStreamLocator resourceStreamLocator,
             MetadataBuildingContext buildingContext
     ) {
-        registerFilterDefinition(metadata);
+        JdbcMapping stringType = resolveStringType(metadata);
+
+        for (Class<?> resourceType : ResourceVisibilityMappingRegistrar.findResourceTypes(metadata)) {
+            registerFilterDefinition(metadata, resourceType, stringType);
+        }
+
         ResourceVisibilityMappingRegistrar.register(metadata);
     }
 
-    private static void registerFilterDefinition(InFlightMetadataCollector metadata) {
-        if (metadata.getFilterDefinition(ResourceVisibilityFilterManager.FILTER_NAME) != null) {
-            return;
-        }
-
+    private static JdbcMapping resolveStringType(InFlightMetadataCollector metadata) {
         JdbcMapping stringType = metadata.getTypeConfiguration()
                 .getBasicTypeRegistry()
                 .getRegisteredType(String.class.getName());
@@ -55,9 +55,22 @@ public final class ResourceVisibilityAdditionalMappingContributor
             );
         }
 
+        return stringType;
+    }
+
+    private static void registerFilterDefinition(
+            InFlightMetadataCollector metadata,
+            Class<?> resourceType,
+            JdbcMapping stringType
+    ) {
+        String filterName = ResourceVisibilityFilterManager.filterName(resourceType);
+        if (metadata.getFilterDefinition(filterName) != null) {
+            return;
+        }
+
         metadata.addFilterDefinition(
                 new FilterDefinition(
-                        ResourceVisibilityFilterManager.FILTER_NAME,
+                        filterName,
                         "",
                         false,
                         true,
