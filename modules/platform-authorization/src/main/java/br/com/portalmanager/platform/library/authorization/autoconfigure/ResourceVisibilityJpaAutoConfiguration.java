@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.authorization.autoconfigure;
 
 import br.com.portalmanager.platform.library.authorization.aspect.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
+import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityIdResolver;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -24,9 +25,22 @@ public class ResourceVisibilityJpaAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(ResourceVisibilityFilterManager.class)
+    @ConditionalOnBean(EntityManager.class)
     @ConditionalOnMissingBean
-    public ResourceVisibilityAspect resourceVisibilityAspect(ResourceVisibilityFilterManager filterManager) {
-        return new ResourceVisibilityAspect(filterManager);
+    public ResourceVisibilityIdResolver resourceVisibilityIdResolver(EntityManager entityManager) {
+        return new ResourceVisibilityIdResolver(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnBean({
+            ResourceVisibilityFilterManager.class,
+            ResourceVisibilityIdResolver.class
+    })
+    @ConditionalOnMissingBean
+    public ResourceVisibilityAspect resourceVisibilityAspect(
+            ResourceVisibilityFilterManager filterManager,
+            ResourceVisibilityIdResolver idResolver
+    ) {
+        return new ResourceVisibilityAspect(filterManager, idResolver);
     }
 }
