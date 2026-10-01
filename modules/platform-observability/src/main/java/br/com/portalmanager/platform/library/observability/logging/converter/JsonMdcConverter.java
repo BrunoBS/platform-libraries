@@ -78,9 +78,13 @@ public class JsonMdcConverter extends ClassicConverter {
             return Optional.empty();
         }
 
-        boolean truncated = buffer.length >= PayloadErrorLoggingFilter.MAX_PAYLOAD_SIZE_BYTES;
+        Object configuredLimit = wrapper.getAttribute(PayloadErrorLoggingFilter.class.getName() + ".maxPayloadSizeBytes");
+        int maxPayloadSize = configuredLimit instanceof Integer limit
+                ? limit
+                : PayloadErrorLoggingFilter.DEFAULT_MAX_PAYLOAD_SIZE_BYTES;
+        boolean truncated = buffer.length >= maxPayloadSize;
         return Optional.of(truncated
-                ? content + " ... [PAYLOAD TRUNCATED - EXCEEDED 1MB LIMIT]"
+                ? content + " ... [PAYLOAD TRUNCATED - EXCEEDED CONFIGURED LIMIT]"
                 : content);
     }
 
