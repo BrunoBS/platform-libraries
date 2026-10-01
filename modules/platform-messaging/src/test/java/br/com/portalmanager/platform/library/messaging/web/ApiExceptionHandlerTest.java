@@ -213,6 +213,48 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
+    void shouldKeepValidationParametersOnlyInResolvedPublicMessage() {
+        when(request.getRequestURI()).thenReturn("/api/v1/accounts");
+        when(request.getHeader("Accept-Language")).thenReturn("pt-BR");
+        Locale locale = Locale.of("pt", "BR");
+        when(request.getLocale()).thenReturn(locale);
+
+        when(resolver.resolve("global.validation.failed", locale))
+                .thenReturn(new ApiMessage(
+                        "GLOBAL-0001",
+                        "global.validation.failed",
+                        "pt-BR",
+                        "Um ou mais campos são inválidos.",
+                        "Corrija os campos.",
+                        400
+                ));
+        when(resolver.resolve("account.field.invalid", locale))
+                .thenReturn(new ApiMessage(
+                        "ACCOUNT-0100",
+                        "account.field.invalid",
+                        "pt-BR",
+                        "Valor {0} inválido.",
+                        null,
+                        400
+                ));
+
+        ValidationException exception = new ValidationException(
+                "global.validation.failed",
+                List.of(new ValidationDetail(
+                        "name",
+                        "account.field.invalid",
+                        Map.of("0", "valor-informado")
+                ))
+        );
+
+        ApiErrorResponse body = handler.handle(exception, locale, request).getBody();
+
+        assertNotNull(body);
+        assertEquals(1, body.details().size());
+        assertEquals("Valor valor-informado inválido.", body.details().getFirst().message());
+    }
+
+    @Test
     void shouldHandleDirectApiMessageNotFoundExceptionSignature() {
         // Arrange
         when(request.getRequestURI()).thenReturn("/api/v1/products");
