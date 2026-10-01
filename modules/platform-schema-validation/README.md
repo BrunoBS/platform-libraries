@@ -109,3 +109,12 @@ O módulo possui uma única raiz pública de configuração: `PlatformSchemaVali
 - `platform.schema-validation.datasource.view-name`: `vw_platform_resource_schemas`
 
 Valores textuais em branco usam o default do módulo. As auto-configurations apenas consomem essa raiz; componentes de negócio não consultam `Environment` ou propriedades diretamente.
+
+
+## Contrato AOP
+
+O aspect mantém uma responsabilidade pequena: localizar o parâmetro `@SchemaPayload`, convertê-lo para `JsonNode`, delegar a validação e somente então prosseguir com o use case.
+
+A posição do `@SchemaPayload` é resolvida uma vez por método e mantida em cache. Assim, a reflexão usada para validar o contrato da annotation não é repetida em cada chamada. O contrato continua exigindo exatamente um `@SchemaPayload` por método anotado.
+
+A biblioteca não move regras de negócio para o aspect e não exige annotations de protocolo nos controllers.
