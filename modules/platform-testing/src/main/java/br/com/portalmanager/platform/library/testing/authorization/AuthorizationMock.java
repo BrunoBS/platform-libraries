@@ -110,23 +110,28 @@ public final class AuthorizationMock {
         verifyCalled(0);
     }
 
-    public void verifyCalledWithAccount(String accountId) {
+    public void verifyCalledWithWorkspace(String workspaceIdentifier) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
-                .withHeader("X-Account-Id", equalTo(accountId)));
+                .withHeader("workspaceIdentifier", equalTo(workspaceIdentifier)));
+    }
+
+    @Deprecated(forRemoval = false)
+    public void verifyCalledWithAccount(String accountId) {
+        verifyCalledWithWorkspace(accountId);
     }
 
     public void verifyCalledWithEnvironment(String environment) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
-                .withHeader("X-Environment", equalTo(environment)));
+                .withHeader("environmentIdentifier", equalTo(environment)));
     }
 
     public void verifyCalledWithApplication(String applicationId) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
-                .withHeader("X-Application-Id", equalTo(applicationId)));
+                .withHeader("applicationIdentifier", equalTo(applicationId)));
     }
 
     public void verifyCalledWithPolicy(String policy) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
-                .withHeader("X-Policy", equalTo(policy)));
+                .withHeader("policy", equalTo(policy)));
     }
 }
