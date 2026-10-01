@@ -57,6 +57,32 @@ class AuthorizationMockIntegrationTest {
     }
 
     @Test
+    void shouldMatchAuthorizationByResourceContextAndCustomHeader() throws Exception {
+        authorizationMock.reset();
+        authorizationMock.allowResource(resource -> resource
+                        .workspace("workspace-123")
+                        .application("application-456")
+                        .environment("DEV")
+                        .header("X-Custom-Resource", "custom-789"),
+                session -> session.groups("RESOURCE_ALLOWED"));
+
+        HttpRequest matching = HttpRequest.newBuilder()
+                .uri(URI.create(authorizationMock.baseUrl() + "/authorize"))
+                .header("X-Workspace-Id", "workspace-123")
+                .header("X-Application-Id", "application-456")
+                .header("X-Environment", "DEV")
+                .header("X-Custom-Resource", "custom-789")
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(
+                matching, HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).contains("RESOURCE_ALLOWED");
+    }
+
+    @Test
     void shouldExposeUncalledVerification() {
         authorizationMock.verifyNotCalled();
     }
