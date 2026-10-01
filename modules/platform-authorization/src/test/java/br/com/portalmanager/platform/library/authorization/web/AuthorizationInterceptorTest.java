@@ -165,17 +165,17 @@ class AuthorizationInterceptorTest {
         Map<String, String> pathVariables = new HashMap<>();
 
         pathVariables.put(
-                "accountId",
+                "workspaceIdentifier",
                 "account-123"
         );
 
         pathVariables.put(
-                "environmentId",
+                "environmentIdentifier",
                 "env-123"
         );
 
         pathVariables.put(
-                "applicationId",
+                "applicationIdentifier",
                 "app-123"
         );
 
