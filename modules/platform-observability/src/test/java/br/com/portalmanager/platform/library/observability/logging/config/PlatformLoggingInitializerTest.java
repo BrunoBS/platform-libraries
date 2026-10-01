@@ -484,6 +484,35 @@ class PlatformLoggingInitializerTest {
         );
     }
 
+    @Test
+    void shouldPreserveApplicationAppenderWhenPlatformLoggingIsInitialized() {
+        ConsoleAppender<ILoggingEvent> applicationAppender = new ConsoleAppender<>();
+        applicationAppender.setContext(loggerContext);
+        applicationAppender.setName("APPLICATION_APPENDER");
+        applicationAppender.start();
+        rootLogger().addAppender(applicationAppender);
+
+        initializer.initialize(context);
+
+        assertNotNull(rootLogger().getAppender("APPLICATION_APPENDER"));
+        assertNotNull(rootLogger().getAppender("JSON_CONSOLE"));
+    }
+
+    @Test
+    void shouldFailFastWhenCustomConverterClassDoesNotExist() {
+        environment.setProperty(
+                "platform.observability.logging.custom-converters.audit",
+                "com.example.DoesNotExistConverter"
+        );
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> initializer.initialize(context)
+        );
+
+        assertTrue(exception.getMessage().contains("DoesNotExistConverter"));
+    }
+
     // ========================================================================
     // ORDER
     // ========================================================================
