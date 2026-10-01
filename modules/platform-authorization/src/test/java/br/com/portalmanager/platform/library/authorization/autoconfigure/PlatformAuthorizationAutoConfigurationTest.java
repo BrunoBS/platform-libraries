@@ -44,8 +44,8 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
-    void shouldLoadRealSecurityBeansWhenEnabled() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=true", "platform.authorization.service-url=http://localhost").run(context -> {
+    void shouldLoadRealSecurityBeansInRealMode() {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=REAL", "platform.authorization.service-url=http://localhost").run(context -> {
             assertThat(context).hasSingleBean(AuthorizationMetadataRegistry.class);
             assertThat(context).hasSingleBean(AuthorizationClientService.class);
             assertThat(context).hasSingleBean(AuthorizationInterceptor.class);
@@ -55,7 +55,7 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
-    void shouldUseEnabledByDefaultWhenPropertyIsMissing() {
+    void shouldUseRealModeByDefaultWhenPropertyIsMissing() {
         contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.service-url=http://localhost").run(context -> {
             assertThat(context).hasSingleBean(AuthorizationClientService.class);
             assertThat(context).hasSingleBean(AuthorizationInterceptor.class);
@@ -65,7 +65,7 @@ class PlatformAuthorizationAutoConfigurationTest {
 
     @Test
     void shouldFailWhenServiceUrlIsMissing() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=true").run(context -> {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=REAL").run(context -> {
             assertThat(context).hasFailed();
             assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
             assertThat(context.getStartupFailure()).hasRootCauseMessage("platform.authorization.service-url is required when platform.authorization is enabled");
@@ -74,15 +74,15 @@ class PlatformAuthorizationAutoConfigurationTest {
 
     @Test
     void shouldFailWhenServiceUrlIsBlank() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=true", "platform.authorization.service-url=").run(context -> {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=REAL", "platform.authorization.service-url=").run(context -> {
             assertThat(context).hasFailed();
             assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
         });
     }
 
     @Test
-    void shouldLoadMockGuestInterceptorWhenDisabled() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=false").run(context -> {
+    void shouldLoadMockGuestInterceptorInMockMode() {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=MOCK").run(context -> {
             assertThat(context).doesNotHaveBean(AuthorizationClientService.class);
             assertThat(context).doesNotHaveBean(AuthorizationInterceptor.class);
             assertThat(context).hasSingleBean(AuthorizationMetadataRegistry.class);
@@ -91,8 +91,8 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
-    void shouldNotCreateRealSecurityBeansWhenDisabled() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=false").run(context -> {
+    void shouldNotCreateRealSecurityBeansInMockMode() {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=MOCK").run(context -> {
             assertThat(context).doesNotHaveBean(AuthorizationClientService.class);
             assertThat(context).doesNotHaveBean(AuthorizationInterceptor.class);
         });
@@ -100,7 +100,7 @@ class PlatformAuthorizationAutoConfigurationTest {
 
     @Test
     void shouldKeepUserAuthorizationMetadataRegistry() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class, CustomRegistryConfiguration.class).withPropertyValues("platform.authorization.enabled=true", "platform.authorization.service-url=http://localhost").run(context -> {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class, CustomRegistryConfiguration.class).withPropertyValues("platform.authorization.mode=REAL", "platform.authorization.service-url=http://localhost").run(context -> {
             assertThat(context).hasSingleBean(AuthorizationMetadataRegistry.class);
             assertThat(context.getBean(AuthorizationMetadataRegistry.class)).isSameAs(context.getBean("customAuthorizationMetadataRegistry"));
         });
@@ -108,7 +108,7 @@ class PlatformAuthorizationAutoConfigurationTest {
 
     @Test
     void shouldKeepUserAuthorizationClientService() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class, CustomClientServiceConfiguration.class).withPropertyValues("platform.authorization.enabled=true", "platform.authorization.service-url=http://localhost").run(context -> {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class, CustomClientServiceConfiguration.class).withPropertyValues("platform.authorization.mode=REAL", "platform.authorization.service-url=http://localhost").run(context -> {
             assertThat(context).hasSingleBean(AuthorizationClientService.class);
             assertThat(context.getBean(AuthorizationClientService.class)).isSameAs(context.getBean("customAuthorizationClientService"));
         });
@@ -116,7 +116,7 @@ class PlatformAuthorizationAutoConfigurationTest {
 
     @Test
     void shouldKeepUserAuthorizationInterceptor() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class, CustomInterceptorConfiguration.class).withPropertyValues("platform.authorization.enabled=true", "platform.authorization.service-url=http://localhost").run(context -> {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class, CustomInterceptorConfiguration.class).withPropertyValues("platform.authorization.mode=REAL", "platform.authorization.service-url=http://localhost").run(context -> {
             assertThat(context).hasSingleBean(AuthorizationInterceptor.class);
             assertThat(context.getBean(AuthorizationInterceptor.class)).isSameAs(context.getBean("customAuthorizationInterceptor"));
         });
@@ -124,7 +124,7 @@ class PlatformAuthorizationAutoConfigurationTest {
 
     @Test
     void shouldRegisterRealInterceptorInWebMvcPipeline() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=true", "platform.authorization.service-url=http://localhost").run(context -> {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=REAL", "platform.authorization.service-url=http://localhost").run(context -> {
             WebMvcConfigurer configurer = context.getBean(WebMvcConfigurer.class);
             CapturingInterceptorRegistry registry = new CapturingInterceptorRegistry();
             configurer.addInterceptors(registry);
@@ -133,8 +133,8 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
-    void shouldRegisterMockInterceptorWhenDisabled() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=false").run(context -> {
+    void shouldRegisterMockInterceptorInMockMode() {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=MOCK").run(context -> {
             WebMvcConfigurer configurer = context.getBean(WebMvcConfigurer.class);
             CapturingInterceptorRegistry registry = new CapturingInterceptorRegistry();
             configurer.addInterceptors(registry);
@@ -144,8 +144,8 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
-    void shouldPopulateGuestContextWhenAuthorizationIsDisabled() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=false").run(context -> {
+    void shouldPopulateGuestContextInMockMode() {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=MOCK").run(context -> {
             WebMvcConfigurer configurer = context.getBean(WebMvcConfigurer.class);
             CapturingInterceptorRegistry registry = new CapturingInterceptorRegistry();
             configurer.addInterceptors(registry);
@@ -187,11 +187,11 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
-    void shouldDeriveMockAuthorizerGroupsFromConfiguredGroupsWhenDisabled() {
+    void shouldDeriveMockAuthorizerGroupsFromConfiguredGroupsInMockMode() {
         contextRunner
                 .withUserConfiguration(InfrastructureConfiguration.class)
                 .withPropertyValues(
-                        "platform.authorization.enabled=false",
+                        "platform.authorization.mode=MOCK",
                         "platform.authorization.mock.user-name=bbs",
                         "platform.authorization.mock.email=bruno.barbosa@empresa.com.br",
                         "platform.authorization.mock.account-id=-",
@@ -224,11 +224,11 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
-    void shouldPopulateConfiguredMockGroupsAndAuthorizerGroupsWhenDisabled() {
+    void shouldPopulateConfiguredMockGroupsAndAuthorizerGroupsInMockMode() {
         contextRunner
                 .withUserConfiguration(InfrastructureConfiguration.class)
                 .withPropertyValues(
-                        "platform.authorization.enabled=false",
+                        "platform.authorization.mode=MOCK",
                         "platform.authorization.mock.user-name=local-user",
                         "platform.authorization.mock.email=local-user@empresa.com",
                         "platform.authorization.mock.account-id=account-local",
@@ -279,7 +279,7 @@ class PlatformAuthorizationAutoConfigurationTest {
 
     @Test
     void shouldUseMockAgentWhenUserAgentIsMissing() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=false").run(context -> {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=MOCK").run(context -> {
             WebMvcConfigurer configurer = context.getBean(WebMvcConfigurer.class);
             CapturingInterceptorRegistry registry = new CapturingInterceptorRegistry();
             configurer.addInterceptors(registry);
@@ -297,7 +297,7 @@ class PlatformAuthorizationAutoConfigurationTest {
 
     @Test
     void shouldClearGuestContextAndMdcAfterCompletion() {
-        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.enabled=false").run(context -> {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=MOCK").run(context -> {
             WebMvcConfigurer configurer = context.getBean(WebMvcConfigurer.class);
             CapturingInterceptorRegistry registry = new CapturingInterceptorRegistry();
             configurer.addInterceptors(registry);
