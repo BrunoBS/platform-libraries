@@ -87,6 +87,36 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
+    void shouldNotExposeTechnicalCauseInApiResponse() {
+        when(request.getRequestURI()).thenReturn("/api/v1/payments");
+        when(request.getHeader("Accept-Language")).thenReturn("en-US");
+        when(request.getLocale()).thenReturn(Locale.US);
+        when(resolver.resolve("PAYMENT_FAILED", Locale.US))
+                .thenReturn(new ApiMessage(
+                        "ERR-500",
+                        "PAYMENT_FAILED",
+                        "en-US",
+                        "Payment failed",
+                        "Retry later",
+                        500
+                ));
+
+        ApiException exception = new ApiException(
+                "PAYMENT_FAILED",
+                Map.of(),
+                new RuntimeException("password=secret database.internal.local")
+        );
+
+        ApiErrorResponse body = handler.handle(exception, Locale.US, request).getBody();
+
+        assertNotNull(body);
+        assertFalse(body.message().contains("secret"));
+        assertFalse(body.message().contains("database.internal.local"));
+        assertFalse(body.solution().contains("secret"));
+        assertFalse(body.solution().contains("database.internal.local"));
+    }
+
+    @Test
     void shouldHandleApiMessageNotFoundExceptionInsideTryBlock() {
         // Arrange
         when(request.getRequestURI()).thenReturn("/api/v1/orders");
@@ -180,6 +210,48 @@ class ApiExceptionHandlerTest {
                 "O e-mail invalido está em um formato incorreto.",
                 body.details().get(1).message()
         );
+    }
+
+    @Test
+    void shouldKeepValidationParametersOnlyInResolvedPublicMessage() {
+        when(request.getRequestURI()).thenReturn("/api/v1/accounts");
+        when(request.getHeader("Accept-Language")).thenReturn("pt-BR");
+        Locale locale = Locale.of("pt", "BR");
+        when(request.getLocale()).thenReturn(locale);
+
+        when(resolver.resolve("global.validation.failed", locale))
+                .thenReturn(new ApiMessage(
+                        "GLOBAL-0001",
+                        "global.validation.failed",
+                        "pt-BR",
+                        "Um ou mais campos são inválidos.",
+                        "Corrija os campos.",
+                        400
+                ));
+        when(resolver.resolve("account.field.invalid", locale))
+                .thenReturn(new ApiMessage(
+                        "ACCOUNT-0100",
+                        "account.field.invalid",
+                        "pt-BR",
+                        "Valor {0} inválido.",
+                        null,
+                        400
+                ));
+
+        ValidationException exception = new ValidationException(
+                "global.validation.failed",
+                List.of(new ValidationDetail(
+                        "name",
+                        "account.field.invalid",
+                        Map.of("0", "valor-informado")
+                ))
+        );
+
+        ApiErrorResponse body = handler.handle(exception, locale, request).getBody();
+
+        assertNotNull(body);
+        assertEquals(1, body.details().size());
+        assertEquals("Valor valor-informado inválido.", body.details().getFirst().message());
     }
 
     @Test

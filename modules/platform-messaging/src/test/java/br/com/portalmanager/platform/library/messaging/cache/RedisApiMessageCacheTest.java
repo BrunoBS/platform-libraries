@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.Duration;
@@ -104,7 +105,7 @@ class RedisApiMessageCacheTest {
         String cacheKey = "platform:message:timeout.key:en-US";
 
         // Simula uma queda ou timeout de conexão do Redis
-        when(valueOperations.get(cacheKey)).thenThrow(new RuntimeException("Redis connection refused"));
+        when(valueOperations.get(cacheKey)).thenThrow(new DataAccessResourceFailureException("Redis connection refused"));
 
         // Act
         Optional<ApiMessage> result = cache.get(key, locale);

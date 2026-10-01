@@ -40,6 +40,17 @@ class ApiMessageDefinitionParserTest {
     }
 
     @Test
+    void shouldRejectHttpStatusOutsideValidRange() {
+        assertThatThrownBy(() -> parser.parse(
+                "validation.invalid.status",
+                Locale.forLanguageTag("pt-BR"),
+                "VALIDATION-0003|999|Mensagem|Solução"
+        ))
+                .isInstanceOf(PlatformConfigurationException.class)
+                .hasMessageContaining("httpStatus must be between 100 and 599");
+    }
+
+    @Test
     void shouldRejectMalformedDefinition() {
         assertThatThrownBy(() -> parser.parse(
                 "validation.invalid",

@@ -1,3 +1,3 @@
-br.com.portalmanager.platform.library.messaging.autoconfigure.PlatformMessagingJdbcAutoConfiguration
-br.com.portalmanager.platform.library.messaging.autoconfigure.PlatformMessagingAutoConfiguration
-br.com.portalmanager.platform.library.messaging.autoconfigure.PlatformMessagingRedisAutoConfiguration
+br.com.portalmanager.platform.library.messaging.config.PlatformMessagingJdbcAutoConfiguration
+br.com.portalmanager.platform.library.messaging.config.PlatformMessagingAutoConfiguration
+br.com.portalmanager.platform.library.messaging.config.PlatformMessagingRedisAutoConfiguration

@@ -14,7 +14,7 @@ import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
 import br.com.portalmanager.platform.library.messaging.model.ApiValidationDetail;
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
-import br.com.portalmanager.platform.library.messaging.util.MessageParameterResolver;
+import br.com.portalmanager.platform.library.messaging.message.MessageParameterResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +68,6 @@ public class ApiExceptionHandler {
             Locale locale,
             HttpServletRequest request
     ) {
-        log.warn("Optimistic locking conflict: {}", exception.getMessage());
         return resolve(
                 new ResourceVersionConflictException(exception),
                 locale,
@@ -82,12 +81,6 @@ public class ApiExceptionHandler {
             Locale locale,
             HttpServletRequest request
     ) {
-        log.error(
-                "Database integrity violation: {}",
-                exception.getMostSpecificCause().getMessage(),
-                exception
-        );
-
         return resolve(
                 new ConflictException(
                         PlatformMessageKeys.DATA_INTEGRITY,
@@ -105,7 +98,6 @@ public class ApiExceptionHandler {
             HttpServletRequest request
     ) {
         String errorId = UUID.randomUUID().toString();
-        log.error("Database access error. Error ID: {}", errorId, exception);
 
         return resolve(
                 new ApiException(
@@ -215,7 +207,6 @@ public class ApiExceptionHandler {
             HttpServletRequest request
     ) {
         String errorId = UUID.randomUUID().toString();
-        log.error("Unexpected error. Error ID: {}", errorId, exception);
 
         return resolve(
                 new ApiException(
@@ -249,7 +240,7 @@ public class ApiExceptionHandler {
                 exception.getMessageKey(),
                 response,
                 exception,
-                "Catálogo de mensagens não encontrou uma definição para a chave '" + exception.getMessageKey() + "'."
+                "Definição de mensagem não encontrada: " + definition.code()
         );
 
         return ResponseEntity.internalServerError().body(response);
@@ -353,8 +344,8 @@ public class ApiExceptionHandler {
             ApiErrorResponse response
     ) {
         String logMessage = exception.getCause() == null
-                ? "Exceção de negócio resolvida: " + response.code() + " - " + response.message()
-                : "Erro de plataforma resolvido: " + response.code() + " - " + response.message();
+                ? "Exceção de negócio resolvida: " + response.code()
+                : "Erro de plataforma resolvido: " + response.code();
 
         logStructuredError(
                 exception.getMessageKey(),

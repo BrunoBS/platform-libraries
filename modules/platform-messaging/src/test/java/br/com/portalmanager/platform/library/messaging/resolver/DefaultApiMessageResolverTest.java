@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.messaging.resolver;
 
+import br.com.portalmanager.platform.library.messaging.cache.ApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.cache.NoOpApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.exception.ApiMessageNotFoundException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 class DefaultApiMessageResolverTest {
 
@@ -132,6 +134,51 @@ class DefaultApiMessageResolverTest {
                 resolver.resolve("key.inexistente", Locale.forLanguageTag("en-US"))
         );
     }
+    @Test
+    void shouldPropagateRepositoryFailureInsteadOfHidingItAsMessageNotFound() {
+        RuntimeException repositoryFailure = new RuntimeException("database unavailable");
+        ApiMessageRepository repository = (k, l) -> {
+            throw repositoryFailure;
+        };
+
+        var resolver = new DefaultApiMessageResolver(
+                repository,
+                new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"),
+                new PlatformDefaultMessageProvider()
+        );
+
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> resolver.resolve("user.not.found", Locale.forLanguageTag("pt-BR"))
+        );
+
+        assertSame(repositoryFailure, thrown);
+    }
+
+    @Test
+    void shouldPropagateProviderFailureInsteadOfConvertingItToMessageNotFound() {
+        ApiMessageRepository repository = (k, l) -> Optional.empty();
+        RuntimeException providerFailure = new RuntimeException("bundle failure");
+        ApiMessageProvider provider = (k, l) -> {
+            throw providerFailure;
+        };
+
+        var resolver = new DefaultApiMessageResolver(
+                repository,
+                new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"),
+                provider
+        );
+
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> resolver.resolve("user.not.found", Locale.forLanguageTag("pt-BR"))
+        );
+
+        assertSame(providerFailure, thrown);
+    }
+
     @Test
     void shouldResolveLocalServiceKeyUsingSpringApplicationNameNamespace() {
         ApiMessageRepository repository = (k, l) ->

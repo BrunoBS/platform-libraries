@@ -1,7 +1,5 @@
-package br.com.portalmanager.platform.library.messaging.autoconfigure;
+package br.com.portalmanager.platform.library.messaging.config;
 
-import br.com.portalmanager.platform.library.messaging.config.PlatformMessagingProperties;
-import br.com.portalmanager.platform.library.messaging.config.SqlIdentifierValidator;
 import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.repository.JdbcApiMessageRepository;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
