@@ -84,8 +84,16 @@ platform:
   messaging:
     enabled: true
     default-locale: "pt-BR"
+    datasource:
+      enabled: false
+      view-name: "vw_api_message"
+    cache:
+      enabled: false
+      ttl: 1h
 ```
 
+
+Todos esses valores já possuem defaults seguros em `PlatformMessagingProperties`; a aplicação consumidora só precisa declarar o que deseja sobrescrever. JDBC e Redis permanecem opt-in (`enabled: false`). A biblioteca não publica um `application.yml` próprio, evitando inserir propriedades no `Environment` da aplicação consumidora.
 
 ## Validação de unicidade no startup
 
