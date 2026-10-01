@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.authorization.message.Authorization
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
-import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
+import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityFilterManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
