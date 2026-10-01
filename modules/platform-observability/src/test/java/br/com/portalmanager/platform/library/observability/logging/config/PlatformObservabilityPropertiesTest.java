@@ -18,6 +18,7 @@ class PlatformObservabilityPropertiesTest {
 
             assertThat(properties.getLogging().getMasking().isEnabled()).isTrue();
             assertThat(properties.getLogging().getRequestBody().isEnabled()).isFalse();
+            assertThat(properties.getLogging().getRequestBody().getMaxSize().toBytes()).isEqualTo(1024 * 1024);
         });
     }
 
@@ -26,6 +27,8 @@ class PlatformObservabilityPropertiesTest {
         contextRunner.withPropertyValues(
                 "platform.observability.logging.masking.enabled=false",
                 "platform.observability.logging.request-body.enabled=true",
+                "platform.observability.logging.request-body.max-size=256KB",
+                "platform.observability.logging.masking.additional-sensitive-fields[0]=privateKey",
                 "platform.observability.logging.levels.br.com.portalmanager=DEBUG",
                 "platform.observability.logging.defaults.org.springframework=ERROR",
                 "platform.observability.logging.custom-converters.audit=com.example.AuditConverter"
@@ -34,6 +37,8 @@ class PlatformObservabilityPropertiesTest {
 
             assertThat(properties.getLogging().getMasking().isEnabled()).isFalse();
             assertThat(properties.getLogging().getRequestBody().isEnabled()).isTrue();
+            assertThat(properties.getLogging().getRequestBody().getMaxSize().toBytes()).isEqualTo(256 * 1024);
+            assertThat(properties.getLogging().getMasking().getAdditionalSensitiveFields()).contains("privateKey");
             assertThat(properties.getLogging().getLevels()).containsEntry("br.com.portalmanager", "DEBUG");
             assertThat(properties.getLogging().getDefaults()).containsEntry("org.springframework", "ERROR");
             assertThat(properties.getLogging().getCustomConverters()).containsEntry("audit", "com.example.AuditConverter");
