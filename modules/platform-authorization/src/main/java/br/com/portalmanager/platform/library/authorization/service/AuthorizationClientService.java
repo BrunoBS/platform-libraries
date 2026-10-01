@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.authorization.service;
 import br.com.portalmanager.platform.library.authorization.exception.ForbiddenAccessException;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
 import br.com.portalmanager.platform.library.authorization.exception.AuthorizationServiceUnavailableException;
+import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
@@ -13,13 +14,11 @@ import org.springframework.core.retry.RetryTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
-import java.time.Duration;
 
 @Service
 public class AuthorizationClientService {
@@ -29,14 +28,18 @@ public class AuthorizationClientService {
     private final RestClient restClient;
     private final RetryTemplate retryTemplate;
 
-    public AuthorizationClientService(RestClient.Builder builder, String authUrl) {
+    public AuthorizationClientService(
+            RestClient.Builder builder,
+            String authUrl,
+            PlatformAuthorizationProperties.Retry retry
+    ) {
         this.restClient = builder.baseUrl(authUrl).build();
         this.retryTemplate = new RetryTemplate(
                 RetryPolicy.builder()
                         .includes(HttpServerErrorException.class, ResourceAccessException.class)
-                        .maxRetries(2)
-                        .delay(Duration.ofMillis(200))
-                        .multiplier(2)
+                        .maxRetries(retry.getMaxRetries())
+                        .delay(retry.getInitialDelay())
+                        .multiplier(retry.getMultiplier())
                         .build()
         );
         log.info("AuthorizationClientService inicializado com sucesso na URL: {}", authUrl);
