@@ -38,6 +38,32 @@ class ResourceSchemaValidationAspectTest {
     }
 
     @Test
+    void shouldResolvePayloadMetadataOnceAndReuseItAcrossCalls() throws Throwable {
+        Method method = SampleUseCase.class.getMethod("create", String.class, SampleInput.class);
+        ValidateResourceSchema binding = method.getAnnotation(ValidateResourceSchema.class);
+
+        aspect.validate(
+                joinPoint(method, new Object[]{"workspace-1", new SampleInput("app-1")}),
+                binding
+        );
+        aspect.validate(
+                joinPoint(method, new Object[]{"workspace-2", new SampleInput("app-2")}),
+                binding
+        );
+
+        verify(validator).validate(
+                eq("APPLICATION"),
+                eq("application"),
+                eq(objectMapper.valueToTree(new SampleInput("app-1")))
+        );
+        verify(validator).validate(
+                eq("APPLICATION"),
+                eq("application"),
+                eq(objectMapper.valueToTree(new SampleInput("app-2")))
+        );
+    }
+
+    @Test
     void shouldRejectAnnotatedMethodWithoutExactlyOneSchemaPayload() throws Throwable {
         Method method = InvalidUseCase.class.getMethod("create", SampleInput.class);
         ProceedingJoinPoint joinPoint = joinPoint(method, new Object[]{new SampleInput("app")});
