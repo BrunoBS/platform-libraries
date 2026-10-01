@@ -137,7 +137,7 @@ class AbstractCatalogServiceContractTest {
         entity.setDescription("Descrição válida para catálogo");
         entity.setSortOrder(sortOrder);
         entity.setActive(true);
-        entity.setSettings("{}");
+        entity.setSettings(JsonMapper.builder().build().createObjectNode());
         return entity;
     }
 
