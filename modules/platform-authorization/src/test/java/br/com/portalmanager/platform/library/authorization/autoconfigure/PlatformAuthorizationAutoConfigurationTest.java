@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.autoconfigure;
+package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
