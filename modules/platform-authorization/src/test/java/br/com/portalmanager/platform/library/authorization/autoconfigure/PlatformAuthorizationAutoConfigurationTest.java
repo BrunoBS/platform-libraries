@@ -7,6 +7,7 @@ import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.authorization.service.AuthorizationClientService;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationInterceptor;
+import br.com.portalmanager.platform.library.authorization.web.MockAuthorizationInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -86,6 +87,7 @@ class PlatformAuthorizationAutoConfigurationTest {
             assertThat(context).doesNotHaveBean(AuthorizationClientService.class);
             assertThat(context).doesNotHaveBean(AuthorizationInterceptor.class);
             assertThat(context).hasSingleBean(AuthorizationMetadataRegistry.class);
+            assertThat(context).hasSingleBean(MockAuthorizationInterceptor.class);
             assertThat(context).hasSingleBean(WebMvcConfigurer.class);
         });
     }
@@ -138,8 +140,7 @@ class PlatformAuthorizationAutoConfigurationTest {
             WebMvcConfigurer configurer = context.getBean(WebMvcConfigurer.class);
             CapturingInterceptorRegistry registry = new CapturingInterceptorRegistry();
             configurer.addInterceptors(registry);
-            assertThat(registry.getInterceptor()).isNotNull();
-            assertThat(registry.getInterceptor()).isNotInstanceOf(AuthorizationInterceptor.class);
+            assertThat(registry.getInterceptor()).isSameAs(context.getBean(MockAuthorizationInterceptor.class));
         });
     }
 
