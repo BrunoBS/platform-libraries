@@ -26,12 +26,7 @@ public class ValidationResult {
     }
 
     public void addError(String field, String messageKey) {
-        if (isMessageKey(messageKey)) {
-            details.add(new ValidationDetail(field, messageKey));
-            return;
-        }
-
-        addLiteralError(field, messageKey);
+        details.add(new ValidationDetail(field, messageKey));
     }
 
     public void addError(
@@ -66,7 +61,4 @@ public class ValidationResult {
         }
     }
 
-    private boolean isMessageKey(String value) {
-        return value != null && value.matches("^[a-z0-9._-]+$");
-    }
 }
