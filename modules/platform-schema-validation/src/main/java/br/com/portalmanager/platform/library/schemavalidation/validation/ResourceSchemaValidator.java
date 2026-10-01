@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.schemavalidation.validation;
 
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
@@ -13,8 +14,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 public class ResourceSchemaValidator {
-
-    private static final String INVALID_MESSAGE_KEY = "schemavalidation.invalid";
 
     private final ResourceSchemaResolver resolver;
     private final ObjectMapper objectMapper;
@@ -33,7 +32,7 @@ public class ResourceSchemaValidator {
         ValidationResult result = new ValidationResult();
 
         if (payload == null || payload.isNull()) {
-            result.addError("request", INVALID_MESSAGE_KEY);
+            result.addError("request", SchemaValidationMessageKeys.INVALID);
             throw new ValidationException(result);
         }
 
@@ -44,7 +43,7 @@ public class ResourceSchemaValidator {
             String field = resolveField(error);
             result.addError(
                     field,
-                    INVALID_MESSAGE_KEY,
+                    SchemaValidationMessageKeys.INVALID,
                     Map.of("0", field, "1", error.getMessage())
             );
         });
