@@ -19,7 +19,7 @@ public class ApiException extends RuntimeException {
     }
 
     public ApiException(String messageKey, Map<String, Object> parameters, Throwable cause) {
-        super(messageKey, cause); // Repassa a causa para o RuntimeException do Java
+        super(messageKey, cause);
         this.messageKey = messageKey;
         this.parameters = parameters == null ? Map.of() : Map.copyOf(parameters);
     }
