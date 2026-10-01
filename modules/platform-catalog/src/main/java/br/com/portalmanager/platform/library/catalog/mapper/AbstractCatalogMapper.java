@@ -34,7 +34,7 @@ public abstract class AbstractCatalogMapper<D extends CatalogDTOContract<D>, E e
         entity.setLabel(dto.label());
         entity.setDescription(dto.description());
         entity.setSortOrder(dto.sortOrder());
-        entity.setSettings(dto.settings() == null ? "{}" : dto.settings().toString());
+        entity.setSettings(dto.settings());
     }
 
     private E createEntityInstance() {
