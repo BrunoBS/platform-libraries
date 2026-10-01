@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.authorization.resource;
 
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizerGroup;
 import br.com.portalmanager.platform.library.authorization.annotation.ResourceVisibility;
-import br.com.portalmanager.platform.library.authorization.aspect.ResourceVisibilityAspect;
+import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
