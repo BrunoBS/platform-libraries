@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.authorization.visibility;
 
+import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationAutoConfiguration;
+
 import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityFilterManager;
 import jakarta.persistence.EntityManagerFactory;
