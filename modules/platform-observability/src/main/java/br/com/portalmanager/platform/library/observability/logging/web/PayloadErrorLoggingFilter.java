@@ -10,17 +10,22 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 
-/**
- * Wraps the request early so its body can be read by observability components
- * at the exact moment an error log is emitted.
- *
- * <p>This filter deliberately does not write request data to MDC. Keeping the
- * payload attached to the request lifecycle prevents thread-local leakage
- * between requests.</p>
- */
 public class PayloadErrorLoggingFilter extends OncePerRequestFilter implements Ordered {
 
-    public static final int MAX_PAYLOAD_SIZE_BYTES = 1024 * 1024;
+    public static final int DEFAULT_MAX_PAYLOAD_SIZE_BYTES = 1024 * 1024;
+
+    private final int maxPayloadSizeBytes;
+
+    public PayloadErrorLoggingFilter(int maxPayloadSizeBytes) {
+        if (maxPayloadSizeBytes <= 0) {
+            throw new IllegalArgumentException("Request body max size must be greater than zero");
+        }
+        this.maxPayloadSizeBytes = maxPayloadSizeBytes;
+    }
+
+    public int getMaxPayloadSizeBytes() {
+        return maxPayloadSizeBytes;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -31,8 +36,9 @@ public class PayloadErrorLoggingFilter extends OncePerRequestFilter implements O
         ContentCachingRequestWrapper wrappedRequest =
                 request instanceof ContentCachingRequestWrapper existing
                         ? existing
-                        : new ContentCachingRequestWrapper(request, MAX_PAYLOAD_SIZE_BYTES);
+                        : new ContentCachingRequestWrapper(request, maxPayloadSizeBytes);
 
+        wrappedRequest.setAttribute(PayloadErrorLoggingFilter.class.getName() + ".maxPayloadSizeBytes", maxPayloadSizeBytes);
         filterChain.doFilter(wrappedRequest, response);
     }
 

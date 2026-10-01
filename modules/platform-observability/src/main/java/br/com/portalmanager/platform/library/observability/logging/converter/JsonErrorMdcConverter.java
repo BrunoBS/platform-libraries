@@ -36,7 +36,10 @@ public class JsonErrorMdcConverter extends ClassicConverter {
         }
 
         String error = mdc.get(ERROR_MDC_KEY);
-        return error == null || error.isBlank() ? null : error;
+        if (error == null || error.isBlank()) {
+            return null;
+        }
+        return sanitizeStructuredJson(error);
     }
 
     private ApiErrorResponse resolveThrowableError(ILoggingEvent event) {
@@ -75,13 +78,24 @@ public class JsonErrorMdcConverter extends ClassicConverter {
         }
         return details.stream()
                 .map(String::valueOf)
+                .map(br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers::sanitize)
                 .map(this::jsonString)
                 .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    private String sanitizeStructuredJson(String value) {
+        String sanitized = br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers.sanitize(value);
+        try {
+            tools.jackson.databind.JsonNode json = new tools.jackson.databind.ObjectMapper().readTree(sanitized);
+            return new tools.jackson.databind.ObjectMapper().writeValueAsString(json);
+        } catch (Exception ignored) {
+            return jsonString(sanitized);
+        }
     }
 
     private String jsonString(String value) {
         return value == null
                 ? "null"
-                : "\"" + JsonMessageConverter.escapeJson(value) + "\"";
+                : "\"" + JsonMessageConverter.escapeJson(br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers.sanitize(value)) + "\"";
     }
 }

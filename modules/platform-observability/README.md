@@ -43,6 +43,12 @@ platform:
     logging:
       masking:
         enabled: true
+        additional-sensitive-fields:
+          - privateKey
+          - credential
+      request-body:
+        enabled: false
+        max-size: 1MB
       levels:
         br.com.portalmanager.account: INFO
       custom-converters: {}
@@ -64,11 +70,13 @@ Os defaults internos são carregados de:
 platform-observability-defaults.properties
 ```
 
-O prefixo oficial é:
+O contrato de configuração é centralizado em `PlatformObservabilityProperties`, com uma única raiz pública:
 
 ```text
-platform.observability.logging
+platform.observability
 ```
+
+As configurações de logging ficam agrupadas em `logging` (`masking`, `request-body`, `levels`, `defaults` e `custom-converters`). `masking.enabled` é `true` por default e `request-body.enabled` é `false` por default. Quando o body é habilitado, `request-body.max-size` limita a captura (default `1MB`). Campos adicionais podem ser protegidos com `masking.additional-sensitive-fields`.
 
 ## Limite atual
 
