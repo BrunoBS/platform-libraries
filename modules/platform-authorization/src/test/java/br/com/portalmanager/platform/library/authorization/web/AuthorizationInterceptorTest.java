@@ -273,17 +273,17 @@ class AuthorizationInterceptorTest {
 
         assertEquals(
                 "account-123",
-                MDC.get("workspaceIdentifier")
+                MDC.get("accountId")
         );
 
         assertEquals(
                 "env-123",
-                MDC.get("environmentIdentifier")
+                MDC.get("environmentId")
         );
 
         assertEquals(
                 "app-123",
-                MDC.get("applicationIdentifier")
+                MDC.get("applicationId")
         );
 
         verify(registry).resolve(String.class, methodForHandler(), "GET");
