@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.schemavalidation.aspect;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.SchemaPayload;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class ResourceSchemaValidationAspectTest {
         ProceedingJoinPoint joinPoint = joinPoint(method, new Object[]{new SampleInput("app")});
         ValidateResourceSchema binding = method.getAnnotation(ValidateResourceSchema.class);
 
-        assertThrows(IllegalStateException.class, () -> aspect.validate(joinPoint, binding));
+        assertThrows(PlatformConfigurationException.class, () -> aspect.validate(joinPoint, binding));
         verify(joinPoint, never()).proceed();
     }
 
