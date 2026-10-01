@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.registry;
+package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizationRequired;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationLevel;
