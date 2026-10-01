@@ -71,12 +71,13 @@ Para uso isolado fora desse parent, a dependência pode ser declarada diretament
 ```yaml
 platform:
   authorization:
-    enabled: true
+    mode: REAL
     service-url: "https://empresa.com"
 ```
 
-- `enabled=true`: usa o fluxo real de autorização.
-- `enabled=false`: usa o modo local/mock disponibilizado pela autoconfiguração.
+- `mode=REAL`: usa o fluxo real e encaminha a decisão de autorização para a Authorization API.
+- `mode=MOCK`: usa exclusivamente a sessão local simulada e não chama a Authorization API.
+- Quando `mode` não é informado, o padrão seguro é `REAL`.
 
 ---
 
@@ -144,7 +145,7 @@ Após a autorização, a sessão é disponibilizada no `UserContext` e limpa ao 
 
 ### 4. Modo local
 
-Com `platform.authorization.enabled=false`, o módulo permite desenvolvimento local sem depender do serviço central de autorização.
+Com `platform.authorization.mode=MOCK`, o módulo permite desenvolvimento local sem depender do serviço central de autorização.
 
 Sem configuração adicional, o contexto continua usando o guest padrão:
 
@@ -159,7 +160,7 @@ Para simular cenários reais de autorização e visibilidade, a sessão local po
 ```yaml
 platform:
   authorization:
-    enabled: false
+    mode: MOCK
     mock:
       user-name: local-user
       email: local-user@empresa.com
@@ -254,12 +255,13 @@ Para uso isolado fora desse parent, a dependência pode ser declarada diretament
 ```yaml
 platform:
   authorization:
-    enabled: true
+    mode: REAL
     service-url: "https://empresa.com"
 ```
 
-- `enabled=true`: usa o fluxo real de autorização.
-- `enabled=false`: usa o modo local/mock disponibilizado pela autoconfiguração.
+- `mode=REAL`: usa o fluxo real e encaminha a decisão de autorização para a Authorization API.
+- `mode=MOCK`: usa exclusivamente a sessão local simulada e não chama a Authorization API.
+- Quando `mode` não é informado, o padrão seguro é `REAL`.
 
 ---
 
@@ -327,7 +329,7 @@ Após a autorização, a sessão é disponibilizada no `UserContext` e limpa ao 
 
 ### 4. Modo local
 
-Com `platform.authorization.enabled=false`, o módulo permite desenvolvimento local sem depender do serviço central de autorização.
+Com `platform.authorization.mode=MOCK`, o módulo permite desenvolvimento local sem depender do serviço central de autorização.
 
 Sem configuração adicional, o contexto continua usando o guest padrão:
 
@@ -342,7 +344,7 @@ Para simular cenários reais de autorização e visibilidade, a sessão local po
 ```yaml
 platform:
   authorization:
-    enabled: false
+    mode: MOCK
     mock:
       user-name: local-user
       email: local-user@empresa.com
@@ -366,7 +368,9 @@ platform:
 
  são convertidos automaticamente em `ParsedGroup` para `hasAuthorizer(...)` e `@ResourceVisibility`. Por exemplo, `PM5-ENG-DEV_WSE` gera `profile=ENG`, `environment=DEV` e `authorizer=WSE`. `authorizer-groups` continua disponível como override explícito.
 
-As propriedades de mock são consideradas somente quando `platform.authorization.enabled=false`. Quando a autorização real está ativa, a sessão continua vindo exclusivamente do serviço central de autorização.
+As propriedades de mock são consideradas somente em `mode=MOCK`. Em `mode=REAL`, a sessão vem exclusivamente da Authorization API.
+
+A library não decide a semântica dos níveis de autorização, incluindo `OPEN`. Ela encaminha token, contexto da requisição e `AuthorizationLevel` para a Authorization API, que valida o token e toma a decisão de autorização.
 
 ### 5. Cliente resiliente
 
@@ -376,7 +380,7 @@ A comunicação com o serviço de autorização utiliza `RestClient` e política
 
 ## 📋 Comportamento
 
-| `enabled` | Interceptor | `UserContext` | Chamada externa |
+| `mode` | Interceptor | `UserContext` | Chamada externa |
 | :---: | :---: | :--- | :---: |
-| `true` | `AuthorizationInterceptor` | sessão real | Sim |
-| `false` | interceptor local | sessão guest/local | Não |
+| `REAL` | `AuthorizationInterceptor` | sessão real | Sim |
+| `MOCK` | interceptor local | sessão guest/local | Não |
