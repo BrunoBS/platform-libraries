@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PayloadErrorLoggingFilterTest {
 
-    private final PayloadErrorLoggingFilter filter = new PayloadErrorLoggingFilter();
+    private final PayloadErrorLoggingFilter filter = new PayloadErrorLoggingFilter(1024 * 1024);
 
     @Test
     void shouldWrapRequestBeforeApplicationConsumesBody() throws Exception {
