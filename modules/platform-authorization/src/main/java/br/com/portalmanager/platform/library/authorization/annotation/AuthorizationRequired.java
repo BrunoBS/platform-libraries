@@ -9,4 +9,10 @@ import java.lang.annotation.*;
 public @interface AuthorizationRequired {
 
     AuthorizationLevel level() default AuthorizationLevel.OPEN;
+
+    String workspacePathVariable() default "workspaceIdentifier";
+
+    String applicationPathVariable() default "applicationIdentifier";
+
+    String environmentPathVariable() default "environmentIdentifier";
 }

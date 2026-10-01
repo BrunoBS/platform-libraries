@@ -1,81 +1,51 @@
 package br.com.portalmanager.platform.library.authorization.registry;
 
-import br.com.portalmanager.platform.library.authorization.annotation.AuthorizationAccessPolicy;
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizationRequired;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationLevel;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationPolicy;
 import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Method;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AuthorizationMetadataRegistryTest {
-
-    static class BaseController {
-        public void findAll() {}
-        public void create() {}
-    }
-
-    @AuthorizationAccessPolicy(
-            read = AuthorizationLevel.OPEN,
-            write = AuthorizationLevel.OWNER
-    )
-    static class SampleController extends BaseController {
-
-        @AuthorizationRequired(level = AuthorizationLevel.ADM)
-        public void securedMethod() {}
-    }
+    static class BaseController { public void findAll() {} }
 
     @AuthorizationRequired(level = AuthorizationLevel.DEV)
-    static class LegacyController {
-        public void inheritedMethod() {}
+    static class SampleController extends BaseController {
+        @AuthorizationRequired(level = AuthorizationLevel.ADM)
+        public void securedMethod() {}
+
+        @AuthorizationRequired(level = AuthorizationLevel.DEV,
+                workspacePathVariable = "tenantId",
+                applicationPathVariable = "appId",
+                environmentPathVariable = "envId")
+        public void securedWithCustomPathVariables() {}
     }
 
-    private final AuthorizationMetadataRegistry registry =
-            new AuthorizationMetadataRegistry();
+    private final AuthorizationMetadataRegistry registry = new AuthorizationMetadataRegistry();
 
     @Test
     void shouldPreferMethodAnnotation() throws NoSuchMethodException {
-        Method method = SampleController.class.getMethod("securedMethod");
-
-        AuthorizationPolicy policy =
-                registry.resolve(SampleController.class, method, "POST");
-
+        AuthorizationPolicy policy = registry.resolve(SampleController.class,
+                SampleController.class.getMethod("securedMethod"));
         assertEquals(AuthorizationLevel.ADM, policy.level());
         assertEquals(AuthorizationPolicy.Source.METHOD, policy.source());
     }
 
     @Test
-    void shouldApplyReadPolicyToInheritedGetMethod() throws NoSuchMethodException {
-        Method method = BaseController.class.getMethod("findAll");
-
-        AuthorizationPolicy policy =
-                registry.resolve(SampleController.class, method, "GET");
-
-        assertEquals(AuthorizationLevel.OPEN, policy.level());
-        assertEquals(AuthorizationPolicy.Source.CLASS_POLICY, policy.source());
-    }
-
-    @Test
-    void shouldApplyWritePolicyToInheritedPostMethod() throws NoSuchMethodException {
-        Method method = BaseController.class.getMethod("create");
-
-        AuthorizationPolicy policy =
-                registry.resolve(SampleController.class, method, "POST");
-
-        assertEquals(AuthorizationLevel.OWNER, policy.level());
-        assertEquals(AuthorizationPolicy.Source.CLASS_POLICY, policy.source());
-    }
-
-    @Test
-    void shouldKeepLegacyClassAuthorizationRequired() throws NoSuchMethodException {
-        Method method = LegacyController.class.getMethod("inheritedMethod");
-
-        AuthorizationPolicy policy =
-                registry.resolve(LegacyController.class, method, "GET");
-
+    void shouldUseClassAnnotationWhenMethodHasNoOverride() throws NoSuchMethodException {
+        AuthorizationPolicy policy = registry.resolve(SampleController.class,
+                BaseController.class.getMethod("findAll"));
         assertEquals(AuthorizationLevel.DEV, policy.level());
         assertEquals(AuthorizationPolicy.Source.CLASS, policy.source());
+    }
+
+    @Test
+    void shouldResolveCustomPathVariableNames() throws NoSuchMethodException {
+        AuthorizationPolicy policy = registry.resolve(SampleController.class,
+                SampleController.class.getMethod("securedWithCustomPathVariables"));
+        assertEquals("tenantId", policy.workspacePathVariable());
+        assertEquals("appId", policy.applicationPathVariable());
+        assertEquals("envId", policy.environmentPathVariable());
     }
 }

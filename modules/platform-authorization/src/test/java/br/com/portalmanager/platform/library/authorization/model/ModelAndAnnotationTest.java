@@ -1,6 +1,5 @@
 package br.com.portalmanager.platform.library.authorization.model;
 
-import br.com.portalmanager.platform.library.authorization.annotation.AuthorizationAccessPolicy;
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizationRequired;
 import org.junit.jupiter.api.Test;
 
@@ -54,19 +53,4 @@ class ModelAndAnnotationTest {
         assertEquals(AuthorizationLevel.ADM, ann.level());
     }
 
-    @Test
-    void testClassAuthorizationAccessPolicyAnnotation() {
-        var ann = PolicySample.class.getAnnotation(AuthorizationAccessPolicy.class);
-
-        assertNotNull(ann);
-        assertEquals(AuthorizationLevel.OPEN, ann.read());
-        assertEquals(AuthorizationLevel.OWNER, ann.write());
-    }
-
-    @AuthorizationAccessPolicy(
-            read = AuthorizationLevel.OPEN,
-            write = AuthorizationLevel.OWNER
-    )
-    static class PolicySample {
-    }
 }

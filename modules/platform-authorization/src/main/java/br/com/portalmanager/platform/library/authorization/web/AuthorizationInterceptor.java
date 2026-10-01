@@ -24,7 +24,6 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
     public static final String LEGACY_CORRELATION_ID_HEADER = "correlationId";
-    // Standard resource path variables: workspaceIdentifier, applicationIdentifier, environmentIdentifier.
 
     private final AuthorizationClientService authorizationClientService;
     private final AuthorizationMetadataRegistry authorizationMetadataRegistry;
@@ -50,8 +49,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
         AuthorizationPolicy policy = authorizationMetadataRegistry.resolve(
                 handlerMethod.getBeanType(),
-                handlerMethod.getMethod(),
-                request.getMethod()
+                handlerMethod.getMethod()
         );
 
         Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
@@ -73,9 +71,9 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         }
 
         if (pathVariables != null) {
-            workspaceIdentifier = pathVariables.get("workspaceIdentifier");
-            environmentIdentifier = pathVariables.get("environmentIdentifier");
-            applicationIdentifier = pathVariables.get("applicationIdentifier");
+            workspaceIdentifier = pathVariables.get(policy.workspacePathVariable());
+            environmentIdentifier = pathVariables.get(policy.environmentPathVariable());
+            applicationIdentifier = pathVariables.get(policy.applicationPathVariable());
         }
 
         UserSession body = authorizationClientService.authorize(
