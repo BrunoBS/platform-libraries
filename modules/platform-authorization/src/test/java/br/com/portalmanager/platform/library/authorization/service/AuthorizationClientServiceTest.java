@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.authorization.service;
 
 import br.com.portalmanager.platform.library.authorization.exception.AuthorizationServiceUnavailableException;
+import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationLevel;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class AuthorizationClientServiceTest {
         when(builder.baseUrl(anyString())).thenReturn(builder);
         when(builder.build()).thenReturn(restClient);
 
-        AuthorizationClientService service = new AuthorizationClientService(builder, "http://localhost:8080");
+        AuthorizationClientService service = new AuthorizationClientService(builder, "http://localhost:8080", new PlatformAuthorizationProperties.Retry());
         RuntimeException exception = new RuntimeException("Network timeout");
         AuthorizationRequest request = new AuthorizationRequest(
                 "trace-1",
