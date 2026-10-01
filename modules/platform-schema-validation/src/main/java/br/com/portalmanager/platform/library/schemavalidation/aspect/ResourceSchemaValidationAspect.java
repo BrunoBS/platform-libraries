@@ -14,12 +14,15 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 public class ResourceSchemaValidationAspect {
 
     private final ResourceSchemaValidator validator;
     private final ObjectMapper objectMapper;
+    private final Map<Method, Integer> payloadParameterIndexes = new ConcurrentHashMap<>();
 
     public ResourceSchemaValidationAspect(
             ResourceSchemaValidator validator,
@@ -44,16 +47,22 @@ public class ResourceSchemaValidationAspect {
 
     private Object resolvePayload(ProceedingJoinPoint joinPoint) {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        Object[] arguments = joinPoint.getArgs();
+        int payloadIndex = payloadParameterIndexes.computeIfAbsent(
+                method,
+                this::resolvePayloadParameterIndex
+        );
+        return joinPoint.getArgs()[payloadIndex];
+    }
 
-        Object payload = null;
+    private int resolvePayloadParameterIndex(Method method) {
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        int payloadIndex = -1;
         int payloadCount = 0;
 
         for (int index = 0; index < parameterAnnotations.length; index++) {
             for (Annotation annotation : parameterAnnotations[index]) {
                 if (annotation.annotationType().equals(SchemaPayload.class)) {
-                    payload = arguments[index];
+                    payloadIndex = index;
                     payloadCount++;
                 }
             }
@@ -65,6 +74,6 @@ public class ResourceSchemaValidationAspect {
             );
         }
 
-        return payload;
+        return payloadIndex;
     }
 }
