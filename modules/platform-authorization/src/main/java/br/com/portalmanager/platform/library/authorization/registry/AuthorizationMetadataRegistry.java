@@ -37,7 +37,10 @@ public class AuthorizationMetadataRegistry {
         if (methodAnn != null) {
             return new AuthorizationPolicy(
                     methodAnn.level(),
-                    AuthorizationPolicy.Source.METHOD
+                    AuthorizationPolicy.Source.METHOD,
+                    methodAnn.workspacePathVariable(),
+                    methodAnn.applicationPathVariable(),
+                    methodAnn.environmentPathVariable()
             );
         }
 
@@ -63,7 +66,10 @@ public class AuthorizationMetadataRegistry {
         if (classAnn != null) {
             return new AuthorizationPolicy(
                     classAnn.level(),
-                    AuthorizationPolicy.Source.CLASS
+                    AuthorizationPolicy.Source.CLASS,
+                    classAnn.workspacePathVariable(),
+                    classAnn.applicationPathVariable(),
+                    classAnn.environmentPathVariable()
             );
         }
 
