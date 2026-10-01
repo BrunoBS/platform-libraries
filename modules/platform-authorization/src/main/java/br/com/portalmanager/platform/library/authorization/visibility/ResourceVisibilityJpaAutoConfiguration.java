@@ -1,7 +1,9 @@
-package br.com.portalmanager.platform.library.authorization.autoconfigure;
+package br.com.portalmanager.platform.library.authorization.visibility;
 
-import br.com.portalmanager.platform.library.authorization.aspect.ResourceVisibilityAspect;
-import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
+import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationAutoConfiguration;
+
+import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityAspect;
+import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityFilterManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

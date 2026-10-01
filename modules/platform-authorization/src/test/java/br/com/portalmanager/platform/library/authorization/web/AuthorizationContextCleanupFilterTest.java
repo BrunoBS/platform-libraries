@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.web.filter;
+package br.com.portalmanager.platform.library.authorization.web;
 
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;

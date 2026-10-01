@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.service;
+package br.com.portalmanager.platform.library.authorization.web;
 
 import br.com.portalmanager.platform.library.authorization.exception.ForbiddenAccessException;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;

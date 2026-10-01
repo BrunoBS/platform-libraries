@@ -1,14 +1,14 @@
-package br.com.portalmanager.platform.library.authorization.autoconfigure;
+package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
-import br.com.portalmanager.platform.library.authorization.service.AuthorizationClientService;
+import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
+import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationInterceptor;
 import br.com.portalmanager.platform.library.authorization.web.MockAuthorizationInterceptor;
-import br.com.portalmanager.platform.library.authorization.web.filter.AuthorizationContextCleanupFilter;
-import br.com.portalmanager.platform.library.authorization.web.filter.PayloadErrorLoggingFilter;
+import br.com.portalmanager.platform.library.authorization.web.AuthorizationContextCleanupFilter;
+import br.com.portalmanager.platform.library.authorization.web.PayloadErrorLoggingFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

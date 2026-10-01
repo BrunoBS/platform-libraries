@@ -1,11 +1,11 @@
-package br.com.portalmanager.platform.library.authorization.resource.springpoc;
+package br.com.portalmanager.platform.library.authorization.visibility.springpoc;
 
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizerGroup;
 import br.com.portalmanager.platform.library.authorization.annotation.ResourceVisibility;
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
-import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
+import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityFilterManager;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;

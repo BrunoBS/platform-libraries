@@ -1,11 +1,11 @@
-package br.com.portalmanager.platform.library.authorization.autoconfigure;
+package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
-import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
-import br.com.portalmanager.platform.library.authorization.service.AuthorizationClientService;
+import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
+import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationInterceptor;
 import br.com.portalmanager.platform.library.authorization.web.MockAuthorizationInterceptor;
 import jakarta.servlet.http.HttpServletRequest;

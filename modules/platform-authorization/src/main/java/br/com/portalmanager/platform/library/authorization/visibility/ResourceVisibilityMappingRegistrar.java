@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.resource;
+package br.com.portalmanager.platform.library.authorization.visibility;
 
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizerGroup;
 import org.hibernate.MappingException;

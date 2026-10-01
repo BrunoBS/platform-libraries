@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.aspect;
+package br.com.portalmanager.platform.library.authorization.visibility;
 
 import br.com.portalmanager.platform.library.authorization.annotation.ResourceVisibility;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.authorization.message.Authorization
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
-import br.com.portalmanager.platform.library.authorization.resource.ResourceVisibilityFilterManager;
+import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityFilterManager;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
