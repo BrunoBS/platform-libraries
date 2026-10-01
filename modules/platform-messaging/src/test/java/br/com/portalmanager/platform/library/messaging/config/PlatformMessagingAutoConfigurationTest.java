@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -26,6 +27,15 @@ class PlatformMessagingAutoConfigurationTest {
         @Bean
         JdbcTemplate jdbcTemplate() {
             return mock(JdbcTemplate.class);
+        }
+    }
+
+
+    @Configuration
+    static class MockRedisInfrastructureConfiguration {
+        @Bean
+        StringRedisTemplate stringRedisTemplate() {
+            return mock(StringRedisTemplate.class);
         }
     }
 
