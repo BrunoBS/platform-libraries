@@ -4,8 +4,8 @@ import br.com.portalmanager.platform.library.messaging.cache.ApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.cache.NoOpApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.config.PlatformMessagingProperties;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.message.PlatformTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
+import br.com.portalmanager.platform.library.messaging.message.PlatformTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.provider.ApiMessageProvider;
 import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.repository.NoOpApiMessageRepository;
@@ -18,8 +18,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-
-import java.util.Locale;
 
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformMessagingProperties.class)
@@ -54,14 +52,10 @@ public class PlatformMessagingAutoConfiguration {
             ApiMessageProvider provider,
             Environment environment
     ) {
-        Locale yamlLocale = Locale.forLanguageTag(properties.getDefaultLocale());
-        Locale safeDefault = yamlLocale.equals(Locale.ROOT)
-                ? Locale.forLanguageTag("pt-BR")
-                : yamlLocale;
         return new DefaultApiMessageResolver(
                 repository,
                 cache,
-                safeDefault,
+                properties.resolveDefaultLocale(),
                 provider,
                 requireApplicationName(environment)
         );
