@@ -41,20 +41,28 @@ public class RedisApiMessageCache implements ApiMessageCache {
                 return Optional.empty();
             }
 
-            String[] p = v.split(DELIMITER, -1);
-            if (p.length != TOTAL_EXPECTED_FIELDS) {
-                return Optional.empty();
-            }
+            return deserialize(v);
+        } catch (org.springframework.dao.DataAccessException exception) {
+            return Optional.empty();
+        }
+    }
 
+    private Optional<ApiMessage> deserialize(String value) {
+        String[] fields = value.split(DELIMITER, -1);
+        if (fields.length != TOTAL_EXPECTED_FIELDS) {
+            return Optional.empty();
+        }
+
+        try {
             return Optional.of(new ApiMessage(
-                    p[INDEX_CODE],
-                    p[INDEX_MESSAGE_KEY],
-                    p[INDEX_LOCALE],
-                    p[INDEX_MESSAGE],
-                    p[INDEX_SOLUTION],
-                    Integer.parseInt(p[INDEX_HTTP_STATUS])
+                    fields[INDEX_CODE],
+                    fields[INDEX_MESSAGE_KEY],
+                    fields[INDEX_LOCALE],
+                    fields[INDEX_MESSAGE],
+                    fields[INDEX_SOLUTION],
+                    Integer.parseInt(fields[INDEX_HTTP_STATUS])
             ));
-        } catch (Exception e) {
+        } catch (NumberFormatException exception) {
             return Optional.empty();
         }
     }
@@ -72,14 +80,16 @@ public class RedisApiMessageCache implements ApiMessageCache {
             );
 
             redisTemplate.opsForValue().set(key(m.messageKey(), Locale.forLanguageTag(m.locale())), v, ttl);
-        } catch (Exception ignored) {
+        } catch (org.springframework.dao.DataAccessException ignored) {
+            // Cache is fail-open when Redis is unavailable.
         }
     }
 
     public void evict(String k, Locale l) {
         try {
             redisTemplate.delete(key(k, l));
-        } catch (Exception ignored) {
+        } catch (org.springframework.dao.DataAccessException ignored) {
+            // Cache is fail-open when Redis is unavailable.
         }
     }
 }
