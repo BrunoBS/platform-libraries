@@ -53,14 +53,14 @@ public abstract class AbstractCatalogCode {
      * through the platform messaging validation contract instead of leaking an
      * {@link IllegalArgumentException} from {@link Enum#valueOf(Class, String)}.
      */
-    protected static <E extends Enum<E>> E requireEnumValue(String value, Class<E> enumType) {
+    protected static <E extends Enum<E>> E requireEnumValue(String field, String value, Class<E> enumType) {
         if (value == null) {
-            throw invalidCatalogCode(value);
+            throw invalidCatalogCode(field, value);
         }
         try {
             return Enum.valueOf(enumType, value);
         } catch (IllegalArgumentException exception) {
-            throw invalidCatalogCode(value);
+            throw invalidCatalogCode(field, value);
         }
     }
 
@@ -78,11 +78,11 @@ public abstract class AbstractCatalogCode {
         return value;
     }
 
-    private static ValidationException invalidCatalogCode(String value) {
+    private static ValidationException invalidCatalogCode(String field, String value) {
         return new ValidationException(
                 PlatformMessageKeys.VALIDATION_FAILED,
                 List.of(new ValidationDetail(
-                        "code",
+                        field,
                         CatalogMessageKeys.CODE_NOT_ALLOWED,
                         Map.of("0", value == null ? "" : value)
                 ))
