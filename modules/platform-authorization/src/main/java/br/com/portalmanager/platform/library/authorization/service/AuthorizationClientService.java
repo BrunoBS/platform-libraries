@@ -20,7 +20,6 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 
-@Service
 public class AuthorizationClientService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorizationClientService.class);
