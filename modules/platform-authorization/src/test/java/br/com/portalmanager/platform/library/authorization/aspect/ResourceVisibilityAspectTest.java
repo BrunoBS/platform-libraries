@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.aspect;
+package br.com.portalmanager.platform.library.authorization.visibility;
 
 import br.com.portalmanager.platform.library.authorization.annotation.ResourceVisibility;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
