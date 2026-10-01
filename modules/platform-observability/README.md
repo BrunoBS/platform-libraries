@@ -64,11 +64,13 @@ Os defaults internos são carregados de:
 platform-observability-defaults.properties
 ```
 
-O prefixo oficial é:
+O contrato de configuração é centralizado em `PlatformObservabilityProperties`, com uma única raiz pública:
 
 ```text
-platform.observability.logging
+platform.observability
 ```
+
+As configurações de logging ficam agrupadas em `logging` (`masking`, `request-body`, `levels`, `defaults` e `custom-converters`). `masking.enabled` é `true` por default e `request-body.enabled` é `false` por default.
 
 ## Limite atual
 
