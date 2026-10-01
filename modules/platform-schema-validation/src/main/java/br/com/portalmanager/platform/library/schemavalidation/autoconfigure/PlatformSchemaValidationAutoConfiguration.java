@@ -1,12 +1,12 @@
 package br.com.portalmanager.platform.library.schemavalidation.autoconfigure;
 
+import br.com.portalmanager.platform.library.schemavalidation.aspect.ResourceSchemaValidationAspect;
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.repository.NoOpResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.DefaultResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
-import br.com.portalmanager.platform.library.schemavalidation.web.ResourceSchemaRequestBodyAdvice;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -50,10 +50,10 @@ public class PlatformSchemaValidationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    ResourceSchemaRequestBodyAdvice resourceSchemaRequestBodyAdvice(
+    ResourceSchemaValidationAspect resourceSchemaValidationAspect(
             ResourceSchemaValidator validator,
             ObjectMapper objectMapper
     ) {
-        return new ResourceSchemaRequestBodyAdvice(validator, objectMapper);
+        return new ResourceSchemaValidationAspect(validator, objectMapper);
     }
 }
