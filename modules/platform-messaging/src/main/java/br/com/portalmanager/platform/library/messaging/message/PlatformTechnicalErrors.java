@@ -12,6 +12,14 @@ public final class PlatformTechnicalErrors {
                     500
             );
 
+    public static final PlatformErrorDefinition CACHE_TTL_INVALID =
+            new PlatformErrorDefinition(
+                    "PLT-MSG-010",
+                    "platform.messaging.cache.ttl must be greater than zero",
+                    "Configure platform.messaging.cache.ttl with a positive duration.",
+                    500
+            );
+
     public static final PlatformErrorDefinition VIEW_NAME_REQUIRED =
             new PlatformErrorDefinition(
                     "PLT-MSG-002",
