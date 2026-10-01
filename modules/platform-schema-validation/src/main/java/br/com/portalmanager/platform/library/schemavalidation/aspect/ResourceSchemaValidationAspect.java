@@ -3,6 +3,8 @@ package br.com.portalmanager.platform.library.schemavalidation.aspect;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.SchemaPayload;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -58,8 +60,8 @@ public class ResourceSchemaValidationAspect {
         }
 
         if (payloadCount != 1) {
-            throw new IllegalStateException(
-                    "@ValidateResourceSchema requires exactly one @SchemaPayload parameter"
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.PAYLOAD_BINDING_INVALID
             );
         }
 
