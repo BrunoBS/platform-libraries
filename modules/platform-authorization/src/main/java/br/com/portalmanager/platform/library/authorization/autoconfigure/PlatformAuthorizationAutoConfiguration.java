@@ -46,7 +46,7 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
     public AuthorizationClientService authorizationClientService(
             RestClient.Builder builder,
             PlatformAuthorizationProperties properties) {
@@ -62,7 +62,7 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
     public AuthorizationInterceptor authorizationInterceptor(
             AuthorizationClientService clientService,
             AuthorizationMetadataRegistry metadataRegistry) {
@@ -70,7 +70,7 @@ public class PlatformAuthorizationAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
     public WebMvcConfigurer realInterceptorConfigurer(AuthorizationInterceptor realInterceptor) {
         return new WebMvcConfigurer() {
             @Override
@@ -81,7 +81,7 @@ public class PlatformAuthorizationAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "false")
+    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "MOCK")
     public WebMvcConfigurer mockInterceptorConfigurer(PlatformAuthorizationProperties properties) {
         return new WebMvcConfigurer() {
             @Override
@@ -144,7 +144,7 @@ public class PlatformAuthorizationAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
     public PayloadErrorLoggingFilter payloadErrorLoggingFilter() {
         return new PayloadErrorLoggingFilter();
     }
