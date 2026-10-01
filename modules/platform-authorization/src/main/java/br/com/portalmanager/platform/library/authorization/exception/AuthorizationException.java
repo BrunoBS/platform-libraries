@@ -12,6 +12,10 @@ public abstract class AuthorizationException extends ApiException {
         super(messageKey, cause);
     }
 
+    protected AuthorizationException(String messageKey, java.util.Map<String, Object> parameters) {
+        super(messageKey, parameters);
+    }
+
     /**
      * Backward-compatible alias for the authorization message key.
      */
