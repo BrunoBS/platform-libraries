@@ -27,7 +27,7 @@ class AuthorizationMetadataRegistryTest {
     @Test
     void shouldPreferMethodAnnotation() throws NoSuchMethodException {
         AuthorizationPolicy policy = registry.resolve(SampleController.class,
-                SampleController.class.getMethod("securedMethod"), "POST");
+                SampleController.class.getMethod("securedMethod"));
         assertEquals(AuthorizationLevel.ADM, policy.level());
         assertEquals(AuthorizationPolicy.Source.METHOD, policy.source());
     }
@@ -35,7 +35,7 @@ class AuthorizationMetadataRegistryTest {
     @Test
     void shouldUseClassAnnotationWhenMethodHasNoOverride() throws NoSuchMethodException {
         AuthorizationPolicy policy = registry.resolve(SampleController.class,
-                BaseController.class.getMethod("findAll"), "GET");
+                BaseController.class.getMethod("findAll"));
         assertEquals(AuthorizationLevel.DEV, policy.level());
         assertEquals(AuthorizationPolicy.Source.CLASS, policy.source());
     }
@@ -43,7 +43,7 @@ class AuthorizationMetadataRegistryTest {
     @Test
     void shouldResolveCustomPathVariableNames() throws NoSuchMethodException {
         AuthorizationPolicy policy = registry.resolve(SampleController.class,
-                SampleController.class.getMethod("securedWithCustomPathVariables"), "GET");
+                SampleController.class.getMethod("securedWithCustomPathVariables"));
         assertEquals("tenantId", policy.workspacePathVariable());
         assertEquals("appId", policy.applicationPathVariable());
         assertEquals("envId", policy.environmentPathVariable());
