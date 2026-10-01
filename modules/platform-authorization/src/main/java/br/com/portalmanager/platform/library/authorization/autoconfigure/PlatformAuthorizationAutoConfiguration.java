@@ -15,6 +15,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestClient;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+
+import java.net.http.HttpClient;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -48,7 +51,20 @@ public class PlatformAuthorizationAutoConfiguration {
                     AuthorizationTechnicalErrors.SERVICE_URL_REQUIRED
             );
         }
-        return new AuthorizationClientService(builder, authUrl);
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(properties.getConnectTimeout())
+                .build();
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(properties.getReadTimeout());
+
+        RestClient.Builder authorizationBuilder = builder.clone()
+                .requestFactory(requestFactory);
+
+        return new AuthorizationClientService(
+                authorizationBuilder,
+                authUrl,
+                properties.getRetry()
+        );
     }
 
     @Bean
