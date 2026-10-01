@@ -189,7 +189,7 @@ class AuthorizationInterceptorTest {
                         AuthorizationPolicy.Source.DEFAULT
                 );
 
-        when(registry.resolve(any(), any(), any())).thenReturn(policy);
+        when(registry.resolve(any(), any())).thenReturn(policy);
 
         UserSession session = new UserSession();
 
@@ -286,7 +286,7 @@ class AuthorizationInterceptorTest {
                 MDC.get("applicationId")
         );
 
-        verify(registry).resolve(String.class, methodForHandler(), "GET");
+        verify(registry).resolve(String.class, methodForHandler());
 
         verify(clientService).authorize(
                 "12345",
@@ -333,7 +333,7 @@ class AuthorizationInterceptorTest {
                         AuthorizationPolicy.Source.DEFAULT
                 );
 
-        when(registry.resolve(String.class, methodForHandler(), "GET")).thenReturn(policy);
+        when(registry.resolve(String.class, methodForHandler())).thenReturn(policy);
 
         UserSession session = new UserSession();
 
@@ -438,7 +438,7 @@ class AuthorizationInterceptorTest {
                         AuthorizationPolicy.Source.DEFAULT
                 );
 
-        when(registry.resolve(String.class, methodForHandler(), "GET")).thenReturn(policy);
+        when(registry.resolve(String.class, methodForHandler())).thenReturn(policy);
 
         UserSession session = new UserSession();
 
