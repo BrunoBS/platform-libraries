@@ -10,14 +10,12 @@ import br.com.portalmanager.platform.library.authorization.service.Authorization
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.Map;
 
-@Component
 @SuppressWarnings("unchecked")
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
