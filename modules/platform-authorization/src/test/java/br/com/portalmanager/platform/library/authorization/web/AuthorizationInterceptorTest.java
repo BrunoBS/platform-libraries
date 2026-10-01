@@ -6,8 +6,8 @@ import br.com.portalmanager.platform.library.authorization.model.AuthorizationPo
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
-import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
-import br.com.portalmanager.platform.library.authorization.service.AuthorizationClientService;
+import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
+import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
