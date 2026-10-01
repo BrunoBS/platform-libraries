@@ -23,7 +23,7 @@ public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
         String code = requireText(resourceCode, "resourceCode");
 
         return repository.find(type, code)
-                .or(() -> repository.find(type, properties.getFallbackCode()))
+                .or(() -> repository.find(type, properties.resolveFallbackCode()))
                 .orElseThrow(() -> new IllegalStateException(
                         "No published resource schema found for " + type + "/" + code
                 ));
