@@ -9,16 +9,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "platform.authorization")
 public class PlatformAuthorizationProperties {
 
-    private boolean enabled = true;
+    private AuthorizationMode mode = AuthorizationMode.REAL;
     private String serviceUrl;
     private Mock mock = new Mock();
 
-    public boolean isEnabled() {
-        return enabled;
+    public AuthorizationMode getMode() {
+        return mode;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setMode(AuthorizationMode mode) {
+        this.mode = mode == null ? AuthorizationMode.REAL : mode;
     }
 
     public String getServiceUrl() {
