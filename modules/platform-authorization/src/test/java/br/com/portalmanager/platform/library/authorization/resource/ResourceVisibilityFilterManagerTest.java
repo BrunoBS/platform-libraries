@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.resource;
 
+import br.com.portalmanager.platform.library.authorization.exception.AuthorizerGroupLimitExceededException;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Filter;
 import org.hibernate.Session;
@@ -58,7 +59,7 @@ class ResourceVisibilityFilterManagerTest {
                 .mapToObj(index -> "GROUP_" + index)
                 .collect(Collectors.toSet());
 
-        assertThrows(IllegalArgumentException.class, () -> manager.enable(TestResource.class, groups));
+        assertThrows(AuthorizerGroupLimitExceededException.class, () -> manager.enable(TestResource.class, groups));
 
         verify(entityManager, never()).unwrap(Session.class);
     }
