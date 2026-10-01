@@ -25,6 +25,14 @@ class AuthorizationMetadataRegistryTest {
 
         @AuthorizationRequired(level = AuthorizationLevel.ADM)
         public void securedMethod() {}
+
+        @AuthorizationRequired(
+                level = AuthorizationLevel.DEV,
+                workspacePathVariable = "tenantId",
+                applicationPathVariable = "appId",
+                environmentPathVariable = "envId"
+        )
+        public void securedWithCustomPathVariables() {}
     }
 
     @AuthorizationRequired(level = AuthorizationLevel.DEV)
@@ -44,6 +52,17 @@ class AuthorizationMetadataRegistryTest {
 
         assertEquals(AuthorizationLevel.ADM, policy.level());
         assertEquals(AuthorizationPolicy.Source.METHOD, policy.source());
+    }
+
+    @Test
+    void shouldResolveCustomPathVariableNames() throws NoSuchMethodException {
+        Method method = SampleController.class.getMethod("securedWithCustomPathVariables");
+
+        AuthorizationPolicy policy = registry.resolve(SampleController.class, method, "GET");
+
+        assertEquals("tenantId", policy.workspacePathVariable());
+        assertEquals("appId", policy.applicationPathVariable());
+        assertEquals("envId", policy.environmentPathVariable());
     }
 
     @Test
