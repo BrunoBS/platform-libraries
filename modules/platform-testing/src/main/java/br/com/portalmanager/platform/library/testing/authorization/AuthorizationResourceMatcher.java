@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class AuthorizationResourceMatcher {
-    public static final String WORKSPACE_HEADER = "X-Workspace-Id";
+    public static final String WORKSPACE_HEADER = "X-Account-Id";
     public static final String APPLICATION_HEADER = "X-Application-Id";
     public static final String ENVIRONMENT_HEADER = "X-Environment";
 
