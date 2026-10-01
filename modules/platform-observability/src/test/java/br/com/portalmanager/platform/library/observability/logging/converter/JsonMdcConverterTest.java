@@ -73,7 +73,7 @@ class JsonMdcConverterTest {
     void shouldIncludeSanitizedRequestBodyOnlyWhileErrorLogIsConverted() throws Exception {
         MockHttpServletRequest rawRequest = new MockHttpServletRequest();
         rawRequest.setContent("{\"password\":\"secret\",\"cpf\":\"123.456.789-00\"}".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest);
+        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
         request.getInputStream().readAllBytes();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -93,7 +93,7 @@ class JsonMdcConverterTest {
     void shouldKeepSanitizationBeforeJsonParsingForNestedObjects() throws Exception {
         MockHttpServletRequest rawRequest = new MockHttpServletRequest();
         rawRequest.setContent("{\"user\":{\"email\":\"bruno@example.com\",\"token\":\"abc\"},\"items\":[{\"password\":\"secret\"}]}".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest);
+        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
         request.getInputStream().readAllBytes();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -109,7 +109,7 @@ class JsonMdcConverterTest {
     void shouldPreserveJsonArrayAsStructuredRequestBody() throws Exception {
         MockHttpServletRequest rawRequest = new MockHttpServletRequest();
         rawRequest.setContent("[{\"cpf\":\"12345678900\"},{\"password\":\"secret\"}]".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest);
+        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
         request.getInputStream().readAllBytes();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -125,7 +125,7 @@ class JsonMdcConverterTest {
     void shouldFallbackToSanitizedStringWhenRequestBodyIsNotJson() throws Exception {
         MockHttpServletRequest rawRequest = new MockHttpServletRequest();
         rawRequest.setContent("cpf=123.456.789-00".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest);
+        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
         request.getInputStream().readAllBytes();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
@@ -141,7 +141,7 @@ class JsonMdcConverterTest {
     void shouldNotIncludeRequestBodyInInformationalLogs() throws Exception {
         MockHttpServletRequest rawRequest = new MockHttpServletRequest();
         rawRequest.setContent("payload".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest);
+        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
         request.getInputStream().readAllBytes();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
