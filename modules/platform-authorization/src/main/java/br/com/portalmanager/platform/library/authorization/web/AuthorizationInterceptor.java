@@ -22,8 +22,8 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
-    public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
-    public static final String LEGACY_CORRELATION_ID_HEADER = "correlationId";
+    public static final String CORRELATION_ID_HEADER = "correlationId";
+    public static final String LEGACY_CORRELATION_ID_HEADER = "X-Correlation-Id";
 
     private final AuthorizationClientService authorizationClientService;
     private final AuthorizationMetadataRegistry authorizationMetadataRegistry;
