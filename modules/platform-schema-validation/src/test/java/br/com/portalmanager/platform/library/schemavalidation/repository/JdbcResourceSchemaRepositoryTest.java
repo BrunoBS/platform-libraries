@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.dao.DataAccessResourceFailureException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -60,6 +62,21 @@ class JdbcResourceSchemaRepositoryTest {
         assertEquals("application", schema.resourceCode());
         assertEquals(1, schema.schemaVersion());
         assertEquals("{\"type\":\"object\"}", schema.definition());
+    }
+
+    @Test
+    void shouldPropagateDatasourceFailureInsteadOfTreatingItAsMissingSchema() {
+        when(jdbcTemplate.query(
+                any(String.class),
+                any(ResultSetExtractor.class),
+                eq("APPLICATION"),
+                eq("application")
+        )).thenThrow(new DataAccessResourceFailureException("database unavailable"));
+
+        assertThrows(
+                DataAccessResourceFailureException.class,
+                () -> repository.find("APPLICATION", "application")
+        );
     }
 
     @Test
