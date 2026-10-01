@@ -1,8 +1,10 @@
 package br.com.portalmanager.platform.library.schemavalidation.validation;
 
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
+import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
@@ -58,7 +60,10 @@ public class ResourceSchemaValidator {
             JsonNode schemaNode = objectMapper.readTree(definition);
             return schemaRegistry.getSchema(schemaNode);
         } catch (Exception exception) {
-            throw new IllegalStateException("Published resource schema is invalid", exception);
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.PUBLISHED_SCHEMA_INVALID,
+                    exception
+            );
         }
     }
 
