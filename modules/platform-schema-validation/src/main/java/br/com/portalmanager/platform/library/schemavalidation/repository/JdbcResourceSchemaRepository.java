@@ -21,7 +21,7 @@ public class JdbcResourceSchemaRepository implements ResourceSchemaRepository {
 
     @Override
     public Optional<ResourceSchema> find(String resourceType, String resourceCode) {
-        String viewName = properties.getDatasource().getViewName();
+        String viewName = properties.getDatasource().resolveViewName();
 
         String sql = """
                 SELECT resource_type, resource_code, schema_version, definition
