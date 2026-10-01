@@ -69,7 +69,7 @@ class PlatformAuthorizationAutoConfigurationTest {
         contextRunner.withUserConfiguration(InfrastructureConfiguration.class).withPropertyValues("platform.authorization.mode=REAL").run(context -> {
             assertThat(context).hasFailed();
             assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
-            assertThat(context.getStartupFailure()).hasRootCauseMessage("platform.authorization.service-url is required when platform.authorization is enabled");
+            assertThat(context.getStartupFailure()).hasRootCauseMessage("platform.authorization.service-url is required when platform.authorization.mode=REAL");
         });
     }
 
