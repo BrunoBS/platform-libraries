@@ -93,4 +93,19 @@ class JsonErrorMdcConverterTest {
 
         assertThat(converter.convert(event)).isEqualTo(structuredError);
     }
+
+    @org.junit.jupiter.api.Test
+    void shouldSanitizeSensitiveDataFromStructuredMdcError() {
+        ch.qos.logback.classic.spi.ILoggingEvent event = org.mockito.Mockito.mock(ch.qos.logback.classic.spi.ILoggingEvent.class);
+        org.mockito.Mockito.when(event.getMDCPropertyMap()).thenReturn(java.util.Map.of(
+                JsonErrorMdcConverter.ERROR_MDC_KEY,
+                "{\"code\":\"ERR\",\"message\":\"password=secret\",\"details\":[\"bruno@example.com\"]}"
+        ));
+
+        String converted = new JsonErrorMdcConverter().convert(event);
+
+        org.assertj.core.api.Assertions.assertThat(converted)
+                .doesNotContain("bruno@example.com")
+                .contains("b****@example.com");
+    }
 }
