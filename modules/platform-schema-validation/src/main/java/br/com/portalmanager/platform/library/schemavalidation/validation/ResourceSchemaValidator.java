@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.library.messaging.validation.ValidationResu
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
+import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
@@ -14,12 +15,14 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceSchemaValidator {
 
     private final ResourceSchemaResolver resolver;
     private final ObjectMapper objectMapper;
     private final SchemaRegistry schemaRegistry;
+    private final Map<SchemaCacheKey, Schema> compiledSchemas = new ConcurrentHashMap<>();
 
     public ResourceSchemaValidator(
             ResourceSchemaResolver resolver,
@@ -38,8 +41,11 @@ public class ResourceSchemaValidator {
             throw new ValidationException(result);
         }
 
-        String definition = resolver.resolve(resourceType, resourceCode).definition();
-        Schema schema = parse(definition);
+        ResourceSchema resourceSchema = resolver.resolve(resourceType, resourceCode);
+        Schema schema = compiledSchemas.computeIfAbsent(
+                SchemaCacheKey.from(resourceSchema),
+                key -> parse(resourceSchema.definition())
+        );
 
         schema.validate(payload).forEach(error -> {
             String field = resolveField(error);
@@ -63,6 +69,20 @@ public class ResourceSchemaValidator {
             throw new PlatformConfigurationException(
                     SchemaValidationTechnicalErrors.PUBLISHED_SCHEMA_INVALID,
                     exception
+            );
+        }
+    }
+
+    private record SchemaCacheKey(
+            String resourceType,
+            String resourceCode,
+            Integer schemaVersion
+    ) {
+        private static SchemaCacheKey from(ResourceSchema schema) {
+            return new SchemaCacheKey(
+                    schema.resourceType(),
+                    schema.resourceCode(),
+                    schema.schemaVersion()
             );
         }
     }
