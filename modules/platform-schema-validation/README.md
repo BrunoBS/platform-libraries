@@ -118,3 +118,14 @@ O aspect mantém uma responsabilidade pequena: localizar o parâmetro `@SchemaPa
 A posição do `@SchemaPayload` é resolvida uma vez por método e mantida em cache. Assim, a reflexão usada para validar o contrato da annotation não é repetida em cada chamada. O contrato continua exigindo exatamente um `@SchemaPayload` por método anotado.
 
 A biblioteca não move regras de negócio para o aspect e não exige annotations de protocolo nos controllers.
+
+
+## Runtime e cache de schema
+
+A resolução continua consultando a fonte configurada em cada validação para descobrir a versão publicada atual. Ausência de registro permite o fallback `(type, DEFAULT)`; falhas de infraestrutura do datasource não são convertidas em ausência e são propagadas.
+
+Após a resolução, o JSON Schema compilado é reutilizado em memória pela chave:
+
+`resourceType + resourceCode + schemaVersion`
+
+Assim, chamadas da mesma versão publicada não recompilam a definição. Quando uma nova versão é publicada e a VIEW passa a retorná-la, uma nova chave é usada e a nova definição é compilada automaticamente. O cache é local à instância da aplicação e não substitui a resolução da versão publicada.
