@@ -4,11 +4,9 @@ import br.com.portalmanager.platform.library.authorization.annotation.Authorizat
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationPolicy;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
-@Component
 public class AuthorizationMetadataRegistry {
 
     public AuthorizationPolicy resolve(Class<?> targetClass, Method method) {
