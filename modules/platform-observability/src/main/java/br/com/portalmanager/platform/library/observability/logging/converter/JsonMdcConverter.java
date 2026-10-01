@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.observability.logging.converter;
 
+import br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers;
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
@@ -20,7 +21,8 @@ public class JsonMdcConverter extends ClassicConverter {
         return mdc.entrySet().stream()
                 .filter(entry -> !JsonErrorMdcConverter.ERROR_MDC_KEY.equals(entry.getKey()))
                 .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
-                .map(entry -> "\"" + escapeJson(entry.getKey()) + "\":\"" + escapeJson(entry.getValue()) + "\"")
+                .map(entry -> "\"" + escapeJson(entry.getKey()) + "\":\"" +
+                        escapeJson(LogSanitizers.sanitize(entry.getValue())) + "\"")
                 .collect(Collectors.joining(",", "{", "}"));
     }
 
