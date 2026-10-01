@@ -54,7 +54,7 @@ public class JsonMdcConverter extends ClassicConverter {
     }
 
     private Optional<String> resolveRequestBody(ILoggingEvent event) {
-        if (!event.getLevel().isGreaterOrEqual(Level.WARN)) {
+        if (event.getLevel() == null || !event.getLevel().isGreaterOrEqual(Level.WARN)) {
             return Optional.empty();
         }
         if (!(RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes)) {
