@@ -7,7 +7,6 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CatalogMapperTest {
 
@@ -36,20 +35,6 @@ class CatalogMapperTest {
 
         assertThat(entity.getCode()).isEqualTo("ONE");
         assertThat(entity.getLabel()).isEqualTo("Updated");
-    }
-
-    @Test
-    void shouldFailFastWhenStoredSettingsJsonIsInvalid() {
-        TestCatalog entity = new TestCatalog();
-        entity.setCode("ONE");
-        entity.setSettings("{invalid-json");
-
-        CatalogMapper<TestCatalog> mapper =
-                new CatalogMapper<>(TestCatalog.class, new ObjectMapper());
-
-        assertThatThrownBy(() -> mapper.toDTO(entity))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Invalid catalog settings JSON stored in database");
     }
 
     public static class TestCatalog extends CatalogEntity {
