@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 class PlatformMessagingAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(PlatformMessagingJdbcAutoConfiguration.class, PlatformMessagingAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(PlatformMessagingJdbcAutoConfiguration.class, PlatformMessagingAutoConfiguration.class, PlatformMessagingRedisAutoConfiguration.class));
 
     @Configuration
     static class MockInfrastructureConfiguration {
@@ -104,6 +104,26 @@ class PlatformMessagingAutoConfigurationTest {
                     assertThat(context).hasSingleBean(ApiExceptionHandler.class);
                 });
     }
+    @Test
+    void shouldFailStartupWithStandardErrorWhenCacheTtlIsInvalid() {
+        this.contextRunner
+                .withUserConfiguration(MockRedisInfrastructureConfiguration.class)
+                .withPropertyValues(
+                        "platform.messaging.enabled=true",
+                        "platform.messaging.cache.enabled=true",
+                        "platform.messaging.cache.ttl=0s",
+                        "spring.application.name=test-service"
+                )
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .hasRootCauseInstanceOf(PlatformConfigurationException.class)
+                            .hasRootCauseMessage(
+                                    "platform.messaging.cache.ttl must be greater than zero"
+                            );
+                });
+    }
+
     @Test
     void shouldFailStartupWhenApplicationNameIsMissing() {
         this.contextRunner
