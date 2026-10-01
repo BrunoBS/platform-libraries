@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 @Component
 public class AuthorizationMetadataRegistry {
 
-    public AuthorizationPolicy resolve(Class<?> targetClass, Method method, String httpMethod) {
+    public AuthorizationPolicy resolve(Class<?> targetClass, Method method) {
         Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
         AuthorizationRequired methodAnn = AnnotatedElementUtils.findMergedAnnotation(
