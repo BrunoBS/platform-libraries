@@ -1,2 +1,2 @@
-br.com.portalmanager.platform.library.authorization.autoconfigure.PlatformAuthorizationAutoConfiguration
-br.com.portalmanager.platform.library.authorization.autoconfigure.ResourceVisibilityJpaAutoConfiguration
+br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationAutoConfiguration
+br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityJpaAutoConfiguration
