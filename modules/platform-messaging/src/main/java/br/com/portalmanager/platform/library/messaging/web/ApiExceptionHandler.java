@@ -14,7 +14,7 @@ import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
 import br.com.portalmanager.platform.library.messaging.model.ApiValidationDetail;
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
-import br.com.portalmanager.platform.library.messaging.util.MessageParameterResolver;
+import br.com.portalmanager.platform.library.messaging.message.MessageParameterResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
