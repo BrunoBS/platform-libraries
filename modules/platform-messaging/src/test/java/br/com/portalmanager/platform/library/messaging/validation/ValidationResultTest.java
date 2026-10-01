@@ -35,8 +35,9 @@ class ValidationResultTest {
     }
 
     @Test
-    void shouldTreatNonKeyTextAsLiteralMessage() {
-        ValidationResult result = new ValidationResult(
+    void shouldAddLiteralMessageOnlyWhenExplicitlyRequested() {
+        ValidationResult result = new ValidationResult();
+        result.addLiteralError(
                 "sharing",
                 "Participante não pertence ao compartilhamento informado"
         );
@@ -48,6 +49,17 @@ class ValidationResultTest {
                 "Participante não pertence ao compartilhamento informado",
                 detail.defaultMessage()
         );
+    }
+
+    @Test
+    void shouldAlwaysTreatAddErrorValueAsMessageKey() {
+        ValidationResult result = new ValidationResult();
+
+        result.addError("email", "invalid-email");
+
+        ValidationDetail detail = result.getDetails().getFirst();
+        assertEquals("invalid-email", detail.messageKey());
+        assertNull(detail.defaultMessage());
     }
 
     @Test
