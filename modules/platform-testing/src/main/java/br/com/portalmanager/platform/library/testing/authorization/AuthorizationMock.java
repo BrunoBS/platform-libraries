@@ -115,11 +115,6 @@ public final class AuthorizationMock {
                 .withHeader("workspaceIdentifier", equalTo(workspaceIdentifier)));
     }
 
-    @Deprecated(forRemoval = false)
-    public void verifyCalledWithAccount(String accountId) {
-        verifyCalledWithWorkspace(accountId);
-    }
-
     public void verifyCalledWithEnvironment(String environment) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
                 .withHeader("environmentIdentifier", equalTo(environment)));
