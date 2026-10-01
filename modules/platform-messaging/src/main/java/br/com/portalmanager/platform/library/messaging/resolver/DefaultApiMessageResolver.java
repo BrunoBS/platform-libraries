@@ -79,19 +79,12 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
     }
 
     private Optional<ApiMessage> tryGetFromCache(String key, Locale locale) {
-        try {
-            return cache.get(key, locale);
-        } catch (Exception ignored) {
-            return Optional.empty();
-        }
+        return cache.get(key, locale);
     }
 
     private Optional<ApiMessage> tryGetFromRepositoryAndCache(String key, Locale locale) {
         return repository.find(key, locale).map(message -> {
-            try {
-                cache.put(message);
-            } catch (Exception ignored) {
-            }
+            cache.put(message);
             return message;
         });
     }
@@ -100,11 +93,7 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
         if (provider == null) {
             return Optional.empty();
         }
-        try {
-            return provider.find(key, locale);
-        } catch (Exception ignored) {
-            return Optional.empty();
-        }
+        return provider.find(key, locale);
     }
 
     private List<String> getKeyCandidates(String key) {
