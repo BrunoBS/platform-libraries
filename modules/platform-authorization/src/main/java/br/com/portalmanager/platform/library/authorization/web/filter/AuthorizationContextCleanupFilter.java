@@ -29,8 +29,7 @@ public class AuthorizationContextCleanupFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } finally {
-            UserContext.clear();
-            MDC.clear();
+            AuthorizationRequestContext.clear();
         }
     }
 }
