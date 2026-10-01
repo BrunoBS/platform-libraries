@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.authorization.service;
 import br.com.portalmanager.platform.library.authorization.exception.ForbiddenAccessException;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
 import br.com.portalmanager.platform.library.authorization.exception.AuthorizationServiceUnavailableException;
+import br.com.portalmanager.platform.library.authorization.exception.AuthorizationContractException;
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
@@ -13,7 +14,6 @@ import org.springframework.core.retry.RetryPolicy;
 import org.springframework.core.retry.RetryTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -62,7 +62,6 @@ public class AuthorizationClientService {
                     setIfNotNull(headers, "environmentIdentifier", request.environmentIdentifier());
                     setIfNotNull(headers, "applicationIdentifier", request.applicationIdentifier());
                     setIfNotNull(headers, "method", request.method());
-                    headers.setContentType(MediaType.APPLICATION_JSON);
                     if (request.policy() != null) {
                         headers.set("policy", request.policy().name());
                     }
@@ -78,7 +77,7 @@ public class AuthorizationClientService {
                     throw new ForbiddenAccessException(AuthorizationMessageKeys.RESOURCE_ACCESS_DENIED);
                 })
                 .onStatus(status -> status.is4xxClientError(), (httpRequest, response) -> {
-                    throw new HttpClientErrorException(response.getStatusCode());
+                    throw new AuthorizationContractException(new HttpClientErrorException(response.getStatusCode()));
                 })
                 .body(UserSession.class);
     }
