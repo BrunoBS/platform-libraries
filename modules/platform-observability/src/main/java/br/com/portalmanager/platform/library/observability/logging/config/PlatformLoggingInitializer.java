@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.status.NopStatusListener;
 import br.com.portalmanager.platform.library.observability.logging.converter.JsonErrorMdcConverter;
@@ -82,12 +83,9 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
                     ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("corporateLgpdMask", MaskingConverter.class.getName());
                 }
 
-                customConverters.forEach((wordTag, className) -> {
-                    try {
-                        Class.forName(className);
-                        ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(wordTag, className);
-                    } catch (ClassNotFoundException ignored) {
-                    }
+                        customConverters.forEach((wordTag, className) -> {
+                    validateCustomConverter(wordTag, className);
+                    ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(wordTag, className);
                 });
 
                 super.start();
@@ -110,6 +108,20 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     /**
      * Monta a String do template estruturado do JSON aplicando o envelopamento infinito em cascata.
      */
+    private void validateCustomConverter(String wordTag, String className) {
+        if (wordTag == null || wordTag.isBlank() || className == null || className.isBlank()) {
+            throw new IllegalStateException("Custom logging converter tag and class must not be blank");
+        }
+        try {
+            Class.forName(className);
+        } catch (ClassNotFoundException exception) {
+            throw new IllegalStateException(
+                    "Custom logging converter class not found for tag '" + wordTag + "': " + className,
+                    exception
+            );
+        }
+    }
+
     private String buildJsonPattern(String serviceName, String appVersion, String host, boolean maskingEnabled, Map<String, String> customConverters) {
         String messageToken = maskingEnabled ? "%corporateLgpdMask" : "%jsonMessage";
         for (String userTag : customConverters.keySet()) {
@@ -125,7 +137,11 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
 
     private void registerAppender(LoggerContext loggerContext, ConsoleAppender<ILoggingEvent> appender) {
         ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        rootLogger.detachAndStopAllAppenders();
+        Appender<ILoggingEvent> previousPlatformAppender = rootLogger.getAppender(APPENDER_NAME);
+        if (previousPlatformAppender != null) {
+            rootLogger.detachAppender(previousPlatformAppender);
+            previousPlatformAppender.stop();
+        }
         rootLogger.addAppender(appender);
     }
 
