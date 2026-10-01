@@ -1,7 +1,6 @@
 package br.com.portalmanager.platform.library.schemavalidation.config;
 
 import br.com.portalmanager.platform.library.schemavalidation.aspect.ResourceSchemaValidationAspect;
-import br.com.portalmanager.platform.library.schemavalidation.repository.NoOpResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.DefaultResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
@@ -22,12 +21,6 @@ import tools.jackson.databind.ObjectMapper;
         matchIfMissing = true
 )
 public class PlatformSchemaValidationAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(ResourceSchemaRepository.class)
-    ResourceSchemaRepository noOpResourceSchemaRepository() {
-        return new NoOpResourceSchemaRepository();
-    }
 
     @Bean
     @ConditionalOnMissingBean
