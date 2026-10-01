@@ -2,7 +2,6 @@ package br.com.portalmanager.platform.library.messaging.config;
 
 import br.com.portalmanager.platform.library.messaging.cache.ApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.cache.NoOpApiMessageCache;
-import br.com.portalmanager.platform.library.messaging.config.PlatformMessagingProperties;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
 import br.com.portalmanager.platform.library.messaging.message.PlatformTechnicalErrors;
