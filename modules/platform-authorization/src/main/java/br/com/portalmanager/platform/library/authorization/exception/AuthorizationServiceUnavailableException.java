@@ -1,14 +1,13 @@
 package br.com.portalmanager.platform.library.authorization.exception;
 
-import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
 
 /**
  * Signals a technical failure while communicating with the central Authorization API.
  */
-public class AuthorizationServiceUnavailableException extends PlatformConfigurationException {
+public class AuthorizationServiceUnavailableException extends AuthorizationException {
 
     public AuthorizationServiceUnavailableException(Throwable cause) {
-        super(AuthorizationTechnicalErrors.SERVICE_UNAVAILABLE, cause);
+        super(AuthorizationMessageKeys.SERVICE_UNAVAILABLE, cause);
     }
 }
