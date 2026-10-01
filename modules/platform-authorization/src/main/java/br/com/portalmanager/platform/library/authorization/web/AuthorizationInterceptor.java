@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.authorization.web;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationPolicy;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.authorization.service.AuthorizationClientService;
@@ -72,7 +73,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             applicationIdentifier = pathVariables.get(policy.applicationPathVariable());
         }
 
-        UserSession body = authorizationClientService.authorize(
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                 correlationId,
                 authHeader,
                 workspaceIdentifier,
@@ -81,6 +82,8 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
                 request.getMethod(),
                 policy.level()
         );
+
+        UserSession body = authorizationClientService.authorize(authorizationRequest);
 
         AuthorizationRequestContext.set(body, request, "unknown");
 
