@@ -11,22 +11,27 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class PayloadErrorLoggingFilter extends OncePerRequestFilter implements Ordered {
 
     private static final String MDC_REQUEST_BODY_KEY = "requestBody";
+    private static final int MAX_PAYLOAD_BYTES = 1024 * 1024;
+    private static final String MASK = "***";
+
+    private static final Pattern SENSITIVE_JSON_FIELD = Pattern.compile(
+            "(?i)(\\\"(?:password|passwd|pwd|token|access_token|refresh_token|authorization|secret|client_secret|api_key|apikey)\\\"\\s*:\\s*\\\")(.*?)(\\\")"
+    );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        int umMegabyteEmBytes = 1024 * 1024;
-        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, umMegabyteEmBytes);
+        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, MAX_PAYLOAD_BYTES);
         try {
             filterChain.doFilter(wrappedRequest, response);
         } finally {
-            int status = response.getStatus();
-            if (status >= 400) {
+            if (response.getStatus() >= 400) {
                 String body = getPayloadFromBody(wrappedRequest);
                 if (!body.isBlank()) {
                     MDC.put(MDC_REQUEST_BODY_KEY, body);
@@ -36,27 +41,32 @@ public class PayloadErrorLoggingFilter extends OncePerRequestFilter implements O
     }
 
     private String getPayloadFromBody(ContentCachingRequestWrapper request) {
-        byte[] buf = request.getContentAsByteArray();
-        if (buf.length > 0) {
-            try {
-                // Verifica se o tamanho do cache atingiu o limite máximo configurado (1 MB)
-                boolean cacheAtingiuOLimite = buf.length >= (1024 * 1024);
-
-                String content = new String(buf, 0, buf.length, StandardCharsets.UTF_8);
-                content = content.replaceAll("\\s+", " ").trim();
-
-                // Se estourou, adiciona um sufixo explicativo no JSON do log
-                return cacheAtingiuOLimite ? content + " ... [PAYLOAD TRUNCATED - EXCEEDED 1MB LIMIT]" : content;
-            } catch (Exception ignored) {
-                return "[unreadable-payload]";
-            }
+        byte[] buffer = request.getContentAsByteArray();
+        if (buffer.length == 0) {
+            return "";
         }
-        return "";
+
+        try {
+            boolean truncated = buffer.length >= MAX_PAYLOAD_BYTES;
+            String content = new String(buffer, 0, buffer.length, StandardCharsets.UTF_8)
+                    .replaceAll("\\s+", " ")
+                    .trim();
+            content = maskSensitiveFields(content);
+
+            return truncated
+                    ? content + " ... [PAYLOAD TRUNCATED - EXCEEDED 1MB LIMIT]"
+                    : content;
+        } catch (RuntimeException exception) {
+            return "[unreadable-payload]";
+        }
+    }
+
+    private String maskSensitiveFields(String content) {
+        return SENSITIVE_JSON_FIELD.matcher(content).replaceAll("$1" + MASK + "$3");
     }
 
     @Override
     public int getOrder() {
-        // Roda com prioridade altíssima na entrada de Servlets, logo após os filtros primitivos
         return Ordered.HIGHEST_PRECEDENCE + 5;
     }
 }
