@@ -120,12 +120,10 @@ A posição do `@SchemaPayload` é resolvida uma vez por método e mantida em ca
 A biblioteca não move regras de negócio para o aspect e não exige annotations de protocolo nos controllers.
 
 
-## Runtime e cache de schema
+## Runtime e resolução de schema
 
 A resolução continua consultando a fonte configurada em cada validação para descobrir a versão publicada atual. Ausência de registro permite o fallback `(type, DEFAULT)`; falhas de infraestrutura do datasource não são convertidas em ausência e são propagadas.
 
-Após a resolução, o JSON Schema compilado é reutilizado em memória pela chave:
+Após a resolução, a definição publicada é parseada e compilada para a validação corrente. O módulo não mantém cache de resolução, versão ou JSON Schema compilado.
 
-`resourceType + resourceCode + schemaVersion`
-
-Assim, chamadas da mesma versão publicada não recompilam a definição. Quando uma nova versão é publicada e a VIEW passa a retorná-la, uma nova chave é usada e a nova definição é compilada automaticamente. O cache é local à instância da aplicação e não substitui a resolução da versão publicada.
+Essa decisão mantém a VIEW como fonte de verdade imediata e evita TTL, invalidação e retenção de versões históricas em memória. O cache existente no módulo é restrito ao metadado estático de reflection do contrato AOP (método → posição do parâmetro `@SchemaPayload`). Cache de schema poderá ser introduzido futuramente apenas se medições demonstrarem necessidade.
