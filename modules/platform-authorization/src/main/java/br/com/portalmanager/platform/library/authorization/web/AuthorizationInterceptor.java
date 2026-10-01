@@ -22,8 +22,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
-    public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
-    public static final String LEGACY_CORRELATION_ID_HEADER = "correlationId";
+    public static final String CORRELATION_ID_HEADER = "correlationId";
 
     private final AuthorizationClientService authorizationClientService;
     private final AuthorizationMetadataRegistry authorizationMetadataRegistry;
@@ -101,11 +100,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
     }
 
     private String resolveCorrelationId(HttpServletRequest request) {
-        String correlationId = request.getHeader(CORRELATION_ID_HEADER);
-        if (correlationId == null || correlationId.isBlank()) {
-            correlationId = request.getHeader(LEGACY_CORRELATION_ID_HEADER);
-        }
-        return correlationId;
+        return request.getHeader(CORRELATION_ID_HEADER);
     }
 
     @Override

@@ -35,10 +35,10 @@ class AuthorizationMockIntegrationTest {
     void shouldReturnCustomizedPlatformSessionAndVerifyRequestContract() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(authorizationMock.baseUrl() + "/authorize"))
-                .header("X-Account-Id", "account-123")
-                .header("X-Environment", "DEV")
-                .header("X-Application-Id", "application-456")
-                .header("X-Policy", "ADMIN")
+                .header("workspaceIdentifier", "account-123")
+                .header("environmentIdentifier", "DEV")
+                .header("applicationIdentifier", "application-456")
+                .header("policy", "ADMIN")
                 .POST(HttpRequest.BodyPublishers.noBody())
                 .build();
 
@@ -50,10 +50,36 @@ class AuthorizationMockIntegrationTest {
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).contains("bruno.barbosa", "account-123", "PM5_OWNER");
         authorizationMock.verifyCalled();
-        authorizationMock.verifyCalledWithAccount("account-123");
+        authorizationMock.verifyCalledWithWorkspace("account-123");
         authorizationMock.verifyCalledWithEnvironment("DEV");
         authorizationMock.verifyCalledWithApplication("application-456");
         authorizationMock.verifyCalledWithPolicy("ADMIN");
+    }
+
+    @Test
+    void shouldMatchAuthorizationByResourceContextAndCustomHeader() throws Exception {
+        authorizationMock.reset();
+        authorizationMock.allowResource(resource -> resource
+                        .workspace("workspace-123")
+                        .application("application-456")
+                        .environment("DEV")
+                        .header("X-Custom-Resource", "custom-789"),
+                session -> session.groups("RESOURCE_ALLOWED"));
+
+        HttpRequest matching = HttpRequest.newBuilder()
+                .uri(URI.create(authorizationMock.baseUrl() + "/authorize"))
+                .header("workspaceIdentifier", "workspace-123")
+                .header("applicationIdentifier", "application-456")
+                .header("environmentIdentifier", "DEV")
+                .header("X-Custom-Resource", "custom-789")
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(
+                matching, HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).contains("RESOURCE_ALLOWED");
     }
 
     @Test

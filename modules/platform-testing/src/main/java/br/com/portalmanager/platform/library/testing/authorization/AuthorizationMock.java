@@ -4,6 +4,8 @@ import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.Json;
 
+import java.util.function.Consumer;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -38,6 +40,34 @@ public final class AuthorizationMock {
 
     public void allow(UserSession session) {
         custom(200, Json.write(session));
+    }
+
+    public void allowResource(Consumer<AuthorizationResourceMatcher> resource,
+                              AuthorizationSessionCustomizer customizer) {
+        AuthorizationSessionBuilder builder = AuthorizationSessionBuilder.builder();
+        customizer.customize(builder);
+        customResource(resource, 200, Json.write(builder.build()));
+    }
+
+    public void forbiddenResource(Consumer<AuthorizationResourceMatcher> resource) {
+        customResource(resource, 403, "{\"message\":\"Permissão insuficiente\"}");
+    }
+
+    public void denyResource(Consumer<AuthorizationResourceMatcher> resource) {
+        customResource(resource, 401, "{\"message\":\"Acesso não permitido\"}");
+    }
+
+    public void customResource(Consumer<AuthorizationResourceMatcher> resource, int status, String body) {
+        AuthorizationResourceMatcher matcher = new AuthorizationResourceMatcher();
+        resource.accept(matcher);
+        var mapping = post(urlEqualTo(AUTHORIZATION_PATH));
+        for (var header : matcher.headers().entrySet()) {
+            mapping = mapping.withHeader(header.getKey(), equalTo(header.getValue()));
+        }
+        server.stubFor(mapping.willReturn(aResponse()
+                .withStatus(status)
+                .withHeader("Content-Type", CONTENT_TYPE)
+                .withBody(body)));
     }
 
     public void deny() {
@@ -80,23 +110,23 @@ public final class AuthorizationMock {
         verifyCalled(0);
     }
 
-    public void verifyCalledWithAccount(String accountId) {
+    public void verifyCalledWithWorkspace(String workspaceIdentifier) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
-                .withHeader("X-Account-Id", equalTo(accountId)));
+                .withHeader("workspaceIdentifier", equalTo(workspaceIdentifier)));
     }
 
     public void verifyCalledWithEnvironment(String environment) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
-                .withHeader("X-Environment", equalTo(environment)));
+                .withHeader("environmentIdentifier", equalTo(environment)));
     }
 
     public void verifyCalledWithApplication(String applicationId) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
-                .withHeader("X-Application-Id", equalTo(applicationId)));
+                .withHeader("applicationIdentifier", equalTo(applicationId)));
     }
 
     public void verifyCalledWithPolicy(String policy) {
         server.verify(postRequestedFor(urlEqualTo(AUTHORIZATION_PATH))
-                .withHeader("X-Policy", equalTo(policy)));
+                .withHeader("policy", equalTo(policy)));
     }
 }

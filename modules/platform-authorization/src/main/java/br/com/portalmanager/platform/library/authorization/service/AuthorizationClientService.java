@@ -42,17 +42,17 @@ public class AuthorizationClientService {
     }
 
     public UserSession authorize(
-            String correlationId, String authorization, String account,
-            String environment, String application, String method,
+            String correlationId, String authorization, String workspaceIdentifier,
+            String environmentIdentifier, String applicationIdentifier, String method,
             AuthorizationLevel policy
     ) {
         try {
             return retryTemplate.invoke(() -> executeAuthorization(
                     correlationId,
                     authorization,
-                    account,
-                    environment,
-                    application,
+                    workspaceIdentifier,
+                    environmentIdentifier,
+                    applicationIdentifier,
                     method,
                     policy
             ));
@@ -62,9 +62,9 @@ public class AuthorizationClientService {
                     exception,
                     correlationId,
                     authorization,
-                    account,
-                    environment,
-                    application,
+                    workspaceIdentifier,
+                    environmentIdentifier,
+                    applicationIdentifier,
                     method,
                     policy
             );
@@ -72,22 +72,22 @@ public class AuthorizationClientService {
     }
 
     private UserSession executeAuthorization(
-            String correlationId, String authorization, String account,
-            String environment, String application, String method,
+            String correlationId, String authorization, String workspaceIdentifier,
+            String environmentIdentifier, String applicationIdentifier, String method,
             AuthorizationLevel policy
     ) {
         return restClient.post()
                 .uri(uriBuilder -> uriBuilder.path("/authorize").build())
                 .headers(headers -> {
-                    setIfNotNull(headers, "X-Correlation-Id", correlationId);
+                    setIfNotNull(headers, "correlationId", correlationId);
                     setIfNotNull(headers, "Authorization", authorization);
-                    setIfNotNull(headers, "X-Account-Id", account);
-                    setIfNotNull(headers, "X-Environment", environment);
-                    setIfNotNull(headers, "X-Application-Id", application);
-                    setIfNotNull(headers, "X-Method", method);
+                    setIfNotNull(headers, "workspaceIdentifier", workspaceIdentifier);
+                    setIfNotNull(headers, "environmentIdentifier", environmentIdentifier);
+                    setIfNotNull(headers, "applicationIdentifier", applicationIdentifier);
+                    setIfNotNull(headers, "method", method);
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     if (policy != null) {
-                        headers.set("X-Policy", policy.name());
+                        headers.set("policy", policy.name());
                     }
                 })
                 .retrieve()

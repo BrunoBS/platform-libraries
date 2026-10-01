@@ -69,7 +69,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("X-Correlation-Id"))
+        when(request.getHeader("correlationId"))
                 .thenReturn(null);
 
         assertThrows(
@@ -90,7 +90,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("X-Correlation-Id"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
@@ -117,7 +117,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("X-Correlation-Id"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
@@ -144,7 +144,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("X-Correlation-Id"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
@@ -305,7 +305,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("X-Correlation-Id"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
@@ -410,7 +410,7 @@ class AuthorizationInterceptorTest {
 
         configureHandlerMethod();
 
-        when(request.getHeader("X-Correlation-Id"))
+        when(request.getHeader("correlationId"))
                 .thenReturn("12345");
 
         when(request.getHeader("Authorization"))
