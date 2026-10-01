@@ -8,7 +8,6 @@ import br.com.portalmanager.platform.library.authorization.web.AuthorizationClie
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationInterceptor;
 import br.com.portalmanager.platform.library.authorization.web.MockAuthorizationInterceptor;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationContextCleanupFilter;
-import br.com.portalmanager.platform.library.authorization.web.PayloadErrorLoggingFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -105,9 +104,4 @@ public class PlatformAuthorizationAutoConfiguration {
         };
     }
 
-    @Bean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
-    public PayloadErrorLoggingFilter payloadErrorLoggingFilter() {
-        return new PayloadErrorLoggingFilter();
-    }
 }
