@@ -37,7 +37,7 @@ class ResourceSchemaValidationAspectTest {
     }
 
     @Test
-    void shouldRejectAnnotatedMethodWithoutExactlyOneSchemaPayload() throws Exception {
+    void shouldRejectAnnotatedMethodWithoutExactlyOneSchemaPayload() throws Throwable {
         Method method = InvalidUseCase.class.getMethod("create", SampleInput.class);
         ProceedingJoinPoint joinPoint = joinPoint(method, new Object[]{new SampleInput("app")});
         ValidateResourceSchema binding = method.getAnnotation(ValidateResourceSchema.class);
