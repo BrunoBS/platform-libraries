@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.authorization.config;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.time.Duration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -11,6 +12,9 @@ public class PlatformAuthorizationProperties {
 
     private AuthorizationMode mode = AuthorizationMode.REAL;
     private String serviceUrl;
+    private Duration connectTimeout = Duration.ofMillis(500);
+    private Duration readTimeout = Duration.ofSeconds(2);
+    private Retry retry = new Retry();
     private Mock mock = new Mock();
 
     public AuthorizationMode getMode() {
@@ -29,12 +33,67 @@ public class PlatformAuthorizationProperties {
         this.serviceUrl = serviceUrl;
     }
 
+    public Duration getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(Duration connectTimeout) {
+        this.connectTimeout = connectTimeout == null ? Duration.ofMillis(500) : connectTimeout;
+    }
+
+    public Duration getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(Duration readTimeout) {
+        this.readTimeout = readTimeout == null ? Duration.ofSeconds(2) : readTimeout;
+    }
+
+    public Retry getRetry() {
+        return retry;
+    }
+
+    public void setRetry(Retry retry) {
+        this.retry = retry == null ? new Retry() : retry;
+    }
+
     public Mock getMock() {
         return mock;
     }
 
     public void setMock(Mock mock) {
         this.mock = mock == null ? new Mock() : mock;
+    }
+
+    public static class Retry {
+
+        private int maxRetries = 2;
+        private Duration initialDelay = Duration.ofMillis(200);
+        private double multiplier = 2.0;
+
+        public int getMaxRetries() {
+            return maxRetries;
+        }
+
+        public void setMaxRetries(int maxRetries) {
+            this.maxRetries = maxRetries;
+        }
+
+        public Duration getInitialDelay() {
+            return initialDelay;
+        }
+
+        public void setInitialDelay(Duration initialDelay) {
+            this.initialDelay = initialDelay == null ? Duration.ofMillis(200) : initialDelay;
+        }
+
+        public double getMultiplier() {
+            return multiplier;
+        }
+
+        public void setMultiplier(double multiplier) {
+            this.multiplier = multiplier;
+        }
     }
 
     public static class Mock {
