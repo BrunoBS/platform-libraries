@@ -96,9 +96,6 @@ class AuthorizationInterceptorTest {
         when(request.getHeader("Authorization"))
                 .thenReturn(null);
 
-        when(request.getHeader("User-Agent"))
-                .thenReturn(null);
-
         assertThrows(
                 UnauthorizedAccessException.class,
                 () -> interceptor.preHandle(
@@ -122,9 +119,6 @@ class AuthorizationInterceptorTest {
 
         when(request.getHeader("Authorization"))
                 .thenReturn("Basic abc123");
-
-        when(request.getHeader("User-Agent"))
-                .thenReturn(null);
 
         assertThrows(
                 UnauthorizedAccessException.class,
