@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.autoconfigure;
+package br.com.portalmanager.platform.library.authorization.visibility;
 
 import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityAspect;
 import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityFilterManager;
