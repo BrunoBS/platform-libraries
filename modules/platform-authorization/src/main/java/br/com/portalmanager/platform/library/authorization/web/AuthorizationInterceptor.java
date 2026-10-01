@@ -60,9 +60,9 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         String correlationId = resolveCorrelationId(request);
         String userAgent = request.getHeader("User-Agent");
         String authHeader = request.getHeader("Authorization");
-        String accountId = null;
-        String environmentId = null;
-        String applicationId = null;
+        String workspaceIdentifier = null;
+        String environmentIdentifier = null;
+        String applicationIdentifier = null;
 
         if (correlationId == null || correlationId.isBlank()) {
             throw new UnauthorizedAccessException(AuthorizationMessageKeys.CORRELATION_ID_MISSING);
@@ -72,17 +72,17 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         }
 
         if (pathVariables != null) {
-            accountId = pathVariables.get("accountId");
-            environmentId = pathVariables.get("environmentId");
-            applicationId = pathVariables.get("applicationId");
+            workspaceIdentifier = pathVariables.get("workspaceIdentifier");
+            environmentIdentifier = pathVariables.get("environmentIdentifier");
+            applicationIdentifier = pathVariables.get("applicationIdentifier");
         }
 
         UserSession body = authorizationClientService.authorize(
                 correlationId,
                 authHeader,
-                accountId,
-                environmentId,
-                applicationId,
+                workspaceIdentifier,
+                environmentIdentifier,
+                applicationIdentifier,
                 request.getMethod(),
                 policy.level()
         );
