@@ -25,6 +25,19 @@ class AuthorizationMessageBundleTest {
     }
 
     @Test
+    void shouldResolveServiceUnavailableWithStandardizedContract() {
+        var message = provider.find(
+                AuthorizationMessageKeys.SERVICE_UNAVAILABLE,
+                Locale.forLanguageTag("pt-BR")
+        ).orElseThrow();
+
+        assertEquals("PLT-AUTH-002", message.code());
+        assertEquals("Authorization API indisponível.", message.message());
+        assertEquals(503, message.httpStatus());
+        assertEquals("pt-BR", message.locale());
+    }
+
+    @Test
     void shouldResolveEnglishAuthorizationMessageFromModuleBundle() {
         var message = provider.find(
                 AuthorizationMessageKeys.PLATFORM_ACCESS_DENIED,
