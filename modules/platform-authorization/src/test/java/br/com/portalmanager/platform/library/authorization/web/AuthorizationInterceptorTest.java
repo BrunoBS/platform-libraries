@@ -300,6 +300,50 @@ class AuthorizationInterceptorTest {
     }
 
     @Test
+    void shouldForwardOpenPolicyToAuthorizationApiWithoutLocalDecision() throws Exception {
+        configureHandlerMethod();
+
+        when(request.getHeader("correlationId")).thenReturn("open-correlation");
+        when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getRequestURI()).thenReturn("/api/v1/open-resource");
+        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(null);
+
+        AuthorizationPolicy policy = new AuthorizationPolicy(
+                AuthorizationLevel.OPEN,
+                AuthorizationPolicy.Source.DEFAULT
+        );
+        when(registry.resolve(String.class, methodForHandler())).thenReturn(policy);
+
+        UserSession session = new UserSession();
+        session.setTraceId("open-correlation");
+        session.setUserName("bruno");
+
+        when(clientService.authorize(
+                "open-correlation",
+                "Bearer valid-token",
+                null,
+                null,
+                null,
+                "GET",
+                AuthorizationLevel.OPEN
+        )).thenReturn(session);
+
+        assertTrue(interceptor.preHandle(request, response, handlerMethod));
+
+        verify(clientService).authorize(
+                "open-correlation",
+                "Bearer valid-token",
+                null,
+                null,
+                null,
+                "GET",
+                AuthorizationLevel.OPEN
+        );
+    }
+
+    @Test
     void shouldAuthorizeWithoutPathVariables()
             throws Exception {
 
