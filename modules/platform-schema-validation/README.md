@@ -83,7 +83,9 @@ platform:
       view-name: vw_platform_resource_schemas
 ```
 
-Quando não existe `JdbcTemplate` ou o datasource está desabilitado, a biblioteca usa `NoOpResourceSchemaRepository`.
+Quando a validação está habilitada, deve existir um `ResourceSchemaRepository`. O caminho padrão é habilitar o datasource JDBC; alternativamente, o serviço consumidor pode fornecer sua própria implementação do repository.
+
+A biblioteca não registra repository NoOp. Portanto, `platform.schema-validation.enabled=true` sem uma fonte de schema válida é tratado como configuração inválida e impede a criação do resolver no startup, em vez de simular "schema não encontrado" na primeira validação.
 
 ## Contrato da VIEW
 
