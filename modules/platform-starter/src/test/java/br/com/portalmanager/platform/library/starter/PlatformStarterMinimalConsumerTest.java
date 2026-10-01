@@ -17,7 +17,7 @@ class PlatformStarterMinimalConsumerTest {
         SpringApplication application = new SpringApplication(MinimalConsumerApplication.class);
         application.setDefaultProperties(java.util.Map.of(
                 "spring.main.web-application-type", "none",
-                "platform.authorization.enabled", "false"
+                "platform.authorization.mode", "MOCK"
         ));
 
         try (ConfigurableApplicationContext context = application.run(
