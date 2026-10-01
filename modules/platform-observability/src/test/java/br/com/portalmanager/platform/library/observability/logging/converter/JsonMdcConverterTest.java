@@ -82,11 +82,59 @@ class JsonMdcConverterTest {
         when(event.getMDCPropertyMap()).thenReturn(Map.of("correlationId", "corr-01"));
 
         assertThat(converter.convert(event))
-                .contains("\"requestBody\":\"{\\\"password\\\":\\\"***\\\",\\\"cpf\\\":\\\"***.***.***-**\\\"}\"");
+                .contains("\"requestBody\":{\"password\":\"***\",\"cpf\":\"***.***.***-**\"}");
 
         RequestContextHolder.resetRequestAttributes();
         assertThat(converter.convert(event))
                 .isEqualTo("{\"correlationId\":\"corr-01\"}");
+    }
+
+    @Test
+    void shouldKeepSanitizationBeforeJsonParsingForNestedObjects() throws Exception {
+        MockHttpServletRequest rawRequest = new MockHttpServletRequest();
+        rawRequest.setContent("{\"user\":{\"email\":\"bruno@example.com\",\"token\":\"abc\"},\"items\":[{\"password\":\"secret\"}]}".getBytes());
+        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest);
+        request.getInputStream().readAllBytes();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        ILoggingEvent event = mock(ILoggingEvent.class);
+        when(event.getLevel()).thenReturn(Level.ERROR);
+        when(event.getMDCPropertyMap()).thenReturn(Map.of());
+
+        assertThat(converter.convert(event))
+                .isEqualTo("{\"requestBody\":{\"user\":{\"email\":\"b****@example.com\",\"token\":\"***\"},\"items\":[{\"password\":\"***\"}]}}");
+    }
+
+    @Test
+    void shouldPreserveJsonArrayAsStructuredRequestBody() throws Exception {
+        MockHttpServletRequest rawRequest = new MockHttpServletRequest();
+        rawRequest.setContent("[{\"cpf\":\"12345678900\"},{\"password\":\"secret\"}]".getBytes());
+        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest);
+        request.getInputStream().readAllBytes();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        ILoggingEvent event = mock(ILoggingEvent.class);
+        when(event.getLevel()).thenReturn(Level.WARN);
+        when(event.getMDCPropertyMap()).thenReturn(Map.of());
+
+        assertThat(converter.convert(event))
+                .isEqualTo("{\"requestBody\":[{\"cpf\":\"***.***.***-**\"},{\"password\":\"***\"}]}");
+    }
+
+    @Test
+    void shouldFallbackToSanitizedStringWhenRequestBodyIsNotJson() throws Exception {
+        MockHttpServletRequest rawRequest = new MockHttpServletRequest();
+        rawRequest.setContent("cpf=123.456.789-00".getBytes());
+        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest);
+        request.getInputStream().readAllBytes();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        ILoggingEvent event = mock(ILoggingEvent.class);
+        when(event.getLevel()).thenReturn(Level.ERROR);
+        when(event.getMDCPropertyMap()).thenReturn(Map.of());
+
+        assertThat(converter.convert(event))
+                .isEqualTo("{\"requestBody\":\"cpf=***.***.***-**\"}");
     }
 
     @Test
