@@ -10,6 +10,9 @@ public final class AuthorizationMessageKeys {
     public static final String OWNER_REQUIRED = "authorization.owner.required";
     public static final String RESOURCE_ACCESS_DENIED = "authorization.resource.access.denied";
     public static final String PLATFORM_ACCESS_DENIED = "authorization.platform.access.denied";
+    public static final String SERVICE_UNAVAILABLE = "authorization.service.unavailable";
+    public static final String SERVICE_CONTRACT_ERROR = "authorization.service.contract.error";
+    public static final String TOO_MANY_AUTHORIZER_GROUPS = "authorization.authorizer-groups.limit.exceeded";
 
     private AuthorizationMessageKeys() {
     }

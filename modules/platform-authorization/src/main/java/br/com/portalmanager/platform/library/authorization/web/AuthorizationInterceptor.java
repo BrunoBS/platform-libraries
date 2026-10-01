@@ -3,22 +3,19 @@ package br.com.portalmanager.platform.library.authorization.web;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationPolicy;
-import br.com.portalmanager.platform.library.authorization.model.UserContext;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.authorization.service.AuthorizationClientService;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.Map;
 
-@Component
 @SuppressWarnings("unchecked")
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
@@ -51,16 +48,19 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
                 handlerMethod.getMethod()
         );
 
-        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
-                HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE
-        );
+        AuthorizationRequest authorizationRequest = createAuthorizationRequest(request, policy);
+        UserSession session = authorizationClientService.authorize(authorizationRequest);
+        AuthorizationRequestContext.set(session, request, "unknown");
 
+        return true;
+    }
+
+    private AuthorizationRequest createAuthorizationRequest(
+            HttpServletRequest request,
+            AuthorizationPolicy policy
+    ) {
         String correlationId = resolveCorrelationId(request);
-        String userAgent = request.getHeader("User-Agent");
         String authHeader = request.getHeader("Authorization");
-        String workspaceIdentifier = null;
-        String environmentIdentifier = null;
-        String applicationIdentifier = null;
 
         if (correlationId == null || correlationId.isBlank()) {
             throw new UnauthorizedAccessException(AuthorizationMessageKeys.CORRELATION_ID_MISSING);
@@ -69,34 +69,23 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             throw new UnauthorizedAccessException(AuthorizationMessageKeys.TOKEN_MISSING);
         }
 
-        if (pathVariables != null) {
-            workspaceIdentifier = pathVariables.get(policy.workspacePathVariable());
-            environmentIdentifier = pathVariables.get(policy.environmentPathVariable());
-            applicationIdentifier = pathVariables.get(policy.applicationPathVariable());
-        }
+        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
+                HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE
+        );
 
-        UserSession body = authorizationClientService.authorize(
+        return new AuthorizationRequest(
                 correlationId,
                 authHeader,
-                workspaceIdentifier,
-                environmentIdentifier,
-                applicationIdentifier,
+                pathVariable(pathVariables, policy.workspacePathVariable()),
+                pathVariable(pathVariables, policy.environmentPathVariable()),
+                pathVariable(pathVariables, policy.applicationPathVariable()),
                 request.getMethod(),
                 policy.level()
         );
+    }
 
-        UserContext.set(body);
-
-        MDC.put("correlationId", body.getTraceId());
-        MDC.put("username", body.getUserName());
-        MDC.put("clientIp", request.getRemoteAddr());
-        MDC.put("userAgent", userAgent != null ? userAgent : "unknown");
-        MDC.put("uri", request.getRequestURI());
-        MDC.put("accountId", body.getAccountId());
-        MDC.put("environmentId", body.getEnvironmentId());
-        MDC.put("applicationId", body.getApplicationId());
-
-        return true;
+    private String pathVariable(Map<String, String> pathVariables, String name) {
+        return pathVariables == null ? null : pathVariables.get(name);
     }
 
     private String resolveCorrelationId(HttpServletRequest request) {
@@ -110,7 +99,6 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             @Nonnull Object handler,
             Exception ex
     ) {
-        UserContext.clear();
-        MDC.clear();
+        AuthorizationRequestContext.clear();
     }
 }

@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.resource;
 
+import br.com.portalmanager.platform.library.authorization.exception.AuthorizerGroupLimitExceededException;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Filter;
 import org.hibernate.Session;
@@ -44,11 +45,7 @@ public class ResourceVisibilityFilterManager {
                         .toList();
 
         if (normalized.size() > MAX_AUTHORIZER_GROUPS) {
-            throw new IllegalArgumentException(
-                    "Resource visibility supports at most "
-                            + MAX_AUTHORIZER_GROUPS
-                            + " distinct authorizer groups"
-            );
+            throw new AuthorizerGroupLimitExceededException(MAX_AUTHORIZER_GROUPS);
         }
 
         if (normalized.isEmpty()) {

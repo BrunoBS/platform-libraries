@@ -1,11 +1,10 @@
 package br.com.portalmanager.platform.library.authorization.web.filter;
 
-import br.com.portalmanager.platform.library.authorization.model.UserContext;
+import br.com.portalmanager.platform.library.authorization.web.AuthorizationRequestContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.MDC;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -25,14 +24,12 @@ public class AuthorizationContextCleanupFilter extends OncePerRequestFilter {
 
         // Defensive cleanup in case the container reuses a thread that still
         // contains state from a previously interrupted request.
-        UserContext.clear();
-        MDC.clear();
+        AuthorizationRequestContext.clear();
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            UserContext.clear();
-            MDC.clear();
+            AuthorizationRequestContext.clear();
         }
     }
 }

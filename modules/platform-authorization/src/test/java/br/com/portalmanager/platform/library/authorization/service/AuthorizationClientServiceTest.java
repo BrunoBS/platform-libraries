@@ -1,8 +1,9 @@
 package br.com.portalmanager.platform.library.authorization.service;
 
-import br.com.portalmanager.platform.library.authorization.exception.ForbiddenAccessException;
-import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
+import br.com.portalmanager.platform.library.authorization.exception.AuthorizationServiceUnavailableException;
+import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationLevel;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
 
@@ -15,31 +16,30 @@ import static org.mockito.Mockito.when;
 class AuthorizationClientServiceTest {
 
     @Test
-    void shouldTriggerRecoverAndThrowForbiddenException() {
+    void shouldReportTechnicalFailureWhenAuthorizationApiIsUnavailable() {
         RestClient.Builder builder = mock(RestClient.Builder.class);
         RestClient restClient = mock(RestClient.class);
         when(builder.baseUrl(anyString())).thenReturn(builder);
         when(builder.build()).thenReturn(restClient);
 
-        AuthorizationClientService service = new AuthorizationClientService(builder, "http://localhost:8080");
-
+        AuthorizationClientService service = new AuthorizationClientService(builder, "http://localhost:8080", new PlatformAuthorizationProperties.Retry());
         RuntimeException exception = new RuntimeException("Network timeout");
-
-        ForbiddenAccessException thrown = assertThrows(
-                ForbiddenAccessException.class,
-                () -> service.recover(
-                        exception,
-                        "trace-1",
-                        "Bearer token",
-                        "acc",
-                        "env",
-                        "app",
-                        "GET",
-                        AuthorizationLevel.ADM
-                )
+        AuthorizationRequest request = new AuthorizationRequest(
+                "trace-1",
+                "Bearer token",
+                "workspace",
+                "env",
+                "app",
+                "GET",
+                AuthorizationLevel.ADM
         );
 
-        assertEquals(AuthorizationMessageKeys.PLATFORM_ACCESS_DENIED, thrown.getCode());
+        AuthorizationServiceUnavailableException thrown = assertThrows(
+                AuthorizationServiceUnavailableException.class,
+                () -> service.recover(exception, request)
+        );
+
+        assertEquals("authorization.service.unavailable", thrown.getMessageKey());
         assertEquals(exception, thrown.getCause());
     }
 }

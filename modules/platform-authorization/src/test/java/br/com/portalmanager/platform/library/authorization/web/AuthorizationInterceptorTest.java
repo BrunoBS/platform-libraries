@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.authorization.web;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationLevel;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationPolicy;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.registry.AuthorizationMetadataRegistry;
@@ -96,9 +97,6 @@ class AuthorizationInterceptorTest {
         when(request.getHeader("Authorization"))
                 .thenReturn(null);
 
-        when(request.getHeader("User-Agent"))
-                .thenReturn(null);
-
         assertThrows(
                 UnauthorizedAccessException.class,
                 () -> interceptor.preHandle(
@@ -122,9 +120,6 @@ class AuthorizationInterceptorTest {
 
         when(request.getHeader("Authorization"))
                 .thenReturn("Basic abc123");
-
-        when(request.getHeader("User-Agent"))
-                .thenReturn(null);
 
         assertThrows(
                 UnauthorizedAccessException.class,
@@ -199,15 +194,9 @@ class AuthorizationInterceptorTest {
         session.setApplicationId("app-123");
         session.setEnvironmentId("env-123");
 
-        when(clientService.authorize(
-                "12345",
-                "Bearer valid-token",
-                "account-123",
-                "env-123",
-                "app-123",
-                "GET",
-                AuthorizationLevel.DEV
-        )).thenReturn(session);
+        when(clientService.authorize(new AuthorizationRequest(
+                "12345", "Bearer valid-token", "account-123", "env-123", "app-123", "GET", AuthorizationLevel.DEV
+        ))).thenReturn(session);
 
         boolean result =
                 interceptor.preHandle(
@@ -288,15 +277,41 @@ class AuthorizationInterceptorTest {
 
         verify(registry).resolve(String.class, methodForHandler());
 
-        verify(clientService).authorize(
-                "12345",
-                "Bearer valid-token",
-                "account-123",
-                "env-123",
-                "app-123",
-                "GET",
-                AuthorizationLevel.DEV
+        verify(clientService).authorize(new AuthorizationRequest(
+                "12345", "Bearer valid-token", "account-123", "env-123", "app-123", "GET", AuthorizationLevel.DEV
+        ));
+    }
+
+    @Test
+    void shouldForwardOpenPolicyToAuthorizationApiWithoutLocalDecision() throws Exception {
+        configureHandlerMethod();
+
+        when(request.getHeader("correlationId")).thenReturn("open-correlation");
+        when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getRequestURI()).thenReturn("/api/v1/open-resource");
+        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(null);
+
+        AuthorizationPolicy policy = new AuthorizationPolicy(
+                AuthorizationLevel.OPEN,
+                AuthorizationPolicy.Source.DEFAULT
         );
+        when(registry.resolve(String.class, methodForHandler())).thenReturn(policy);
+
+        UserSession session = new UserSession();
+        session.setTraceId("open-correlation");
+        session.setUserName("bruno");
+
+        when(clientService.authorize(new AuthorizationRequest(
+                "open-correlation", "Bearer valid-token", null, null, null, "GET", AuthorizationLevel.OPEN
+        ))).thenReturn(session);
+
+        assertTrue(interceptor.preHandle(request, response, handlerMethod));
+
+        verify(clientService).authorize(new AuthorizationRequest(
+                "open-correlation", "Bearer valid-token", null, null, null, "GET", AuthorizationLevel.OPEN
+        ));
     }
 
     @Test
@@ -340,15 +355,9 @@ class AuthorizationInterceptorTest {
         session.setTraceId("12345");
         session.setUserName("bruno");
 
-        when(clientService.authorize(
-                "12345",
-                "Bearer valid-token",
-                null,
-                null,
-                null,
-                "GET",
-                AuthorizationLevel.DEV
-        )).thenReturn(session);
+        when(clientService.authorize(new AuthorizationRequest(
+                "12345", "Bearer valid-token", null, null, null, "GET", AuthorizationLevel.DEV
+        ))).thenReturn(session);
 
         boolean result =
                 interceptor.preHandle(
@@ -364,15 +373,9 @@ class AuthorizationInterceptorTest {
                 MDC.get("correlationId")
         );
 
-        verify(clientService).authorize(
-                "12345",
-                "Bearer valid-token",
-                null,
-                null,
-                null,
-                "GET",
-                AuthorizationLevel.DEV
-        );
+        verify(clientService).authorize(new AuthorizationRequest(
+                "12345", "Bearer valid-token", null, null, null, "GET", AuthorizationLevel.DEV
+        ));
     }
 
     @Test
@@ -445,15 +448,9 @@ class AuthorizationInterceptorTest {
         session.setTraceId("12345");
         session.setUserName("bruno");
 
-        when(clientService.authorize(
-                "12345",
-                "Bearer valid-token",
-                null,
-                null,
-                null,
-                "GET",
-                AuthorizationLevel.DEV
-        )).thenReturn(session);
+        when(clientService.authorize(new AuthorizationRequest(
+                "12345", "Bearer valid-token", null, null, null, "GET", AuthorizationLevel.DEV
+        ))).thenReturn(session);
 
         boolean result =
                 interceptor.preHandle(
