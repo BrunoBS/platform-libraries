@@ -39,7 +39,7 @@ class AuthorizationClientServiceTest {
                 () -> service.recover(exception, request)
         );
 
-        assertEquals("PLT-AUTH-002", thrown.getErrorResponse().code());
+        assertEquals("authorization.service.unavailable", thrown.getMessageKey());
         assertEquals(exception, thrown.getCause());
     }
 }
