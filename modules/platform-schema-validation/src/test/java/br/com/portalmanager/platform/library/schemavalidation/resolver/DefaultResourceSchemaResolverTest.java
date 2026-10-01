@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.schemavalidation.resolver;
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -40,7 +41,7 @@ class DefaultResourceSchemaResolverTest {
         var resolver = new DefaultResourceSchemaResolver(repository, new PlatformSchemaValidationProperties());
 
         assertThatThrownBy(() -> resolver.resolve("MENU", "menu"))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(PlatformConfigurationException.class)
                 .hasMessageContaining("MENU/menu");
     }
 }
