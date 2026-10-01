@@ -12,14 +12,6 @@ public final class AuthorizationTechnicalErrors {
                     500
             );
 
-    public static final PlatformErrorDefinition SERVICE_UNAVAILABLE =
-            new PlatformErrorDefinition(
-                    "PLT-AUTH-002",
-                    "Authorization API is unavailable.",
-                    "Verify the Authorization API availability and connectivity.",
-                    503
-            );
-
     private AuthorizationTechnicalErrors() {
     }
 }
