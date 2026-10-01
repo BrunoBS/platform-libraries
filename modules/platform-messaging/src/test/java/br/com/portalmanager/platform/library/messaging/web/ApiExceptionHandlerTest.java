@@ -87,6 +87,36 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
+    void shouldNotExposeTechnicalCauseInApiResponse() {
+        when(request.getRequestURI()).thenReturn("/api/v1/payments");
+        when(request.getHeader("Accept-Language")).thenReturn("en-US");
+        when(request.getLocale()).thenReturn(Locale.US);
+        when(resolver.resolve("PAYMENT_FAILED", Locale.US))
+                .thenReturn(new ApiMessage(
+                        "ERR-500",
+                        "PAYMENT_FAILED",
+                        "en-US",
+                        "Payment failed",
+                        "Retry later",
+                        500
+                ));
+
+        ApiException exception = new ApiException(
+                "PAYMENT_FAILED",
+                Map.of(),
+                new RuntimeException("password=secret database.internal.local")
+        );
+
+        ApiErrorResponse body = handler.handle(exception, Locale.US, request).getBody();
+
+        assertNotNull(body);
+        assertFalse(body.message().contains("secret"));
+        assertFalse(body.message().contains("database.internal.local"));
+        assertFalse(body.solution().contains("secret"));
+        assertFalse(body.solution().contains("database.internal.local"));
+    }
+
+    @Test
     void shouldHandleApiMessageNotFoundExceptionInsideTryBlock() {
         // Arrange
         when(request.getRequestURI()).thenReturn("/api/v1/orders");
