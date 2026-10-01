@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.messaging.exception.ValidationExcep
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AbstractCatalogCodeTest {
 
@@ -31,6 +32,14 @@ class AbstractCatalogCodeTest {
     }
 
     @Test
+    void shouldPreserveFieldWhenEnumValueIsInvalid() {
+        assertThatThrownBy(() -> LifecycleCode.of("INVALID"))
+                .isInstanceOfSatisfying(ValidationException.class, exception ->
+                        assertThat(exception.getDetails().getFirst().field()).isEqualTo("lifecycle")
+                );
+    }
+
+    @Test
     void shouldUseConcreteTypeInEquality() {
         assertThat(LifecycleCode.of(Lifecycle.ACTIVE))
                 .isEqualTo(LifecycleCode.of(Lifecycle.ACTIVE))
@@ -48,6 +57,10 @@ class AbstractCatalogCodeTest {
 
         static LifecycleCode of(Lifecycle value) {
             return new LifecycleCode(value);
+        }
+
+        static LifecycleCode of(String value) {
+            return new LifecycleCode(requireEnumValue("lifecycle", value, Lifecycle.class));
         }
     }
 
