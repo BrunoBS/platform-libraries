@@ -2,7 +2,8 @@ package br.com.portalmanager.platform.library.messaging.config;
 
 import br.com.portalmanager.platform.library.messaging.cache.ApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.cache.RedisApiMessageCache;
-import br.com.portalmanager.platform.library.messaging.config.PlatformMessagingProperties;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.message.PlatformTechnicalErrors;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -29,7 +30,7 @@ public class PlatformMessagingRedisAutoConfiguration {
     ) {
         Duration ttl = properties.getCache().getTtl();
         if (ttl == null || ttl.isZero() || ttl.isNegative()) {
-            throw new IllegalArgumentException("Cache TTL must be positive");
+            throw new PlatformConfigurationException(PlatformTechnicalErrors.CACHE_TTL_INVALID);
         }
         return new RedisApiMessageCache(redisTemplate, ttl);
     }
