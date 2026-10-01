@@ -48,15 +48,19 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
                 handlerMethod.getMethod()
         );
 
-        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
-                HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE
-        );
+        AuthorizationRequest authorizationRequest = createAuthorizationRequest(request, policy);
+        UserSession session = authorizationClientService.authorize(authorizationRequest);
+        AuthorizationRequestContext.set(session, request, "unknown");
 
+        return true;
+    }
+
+    private AuthorizationRequest createAuthorizationRequest(
+            HttpServletRequest request,
+            AuthorizationPolicy policy
+    ) {
         String correlationId = resolveCorrelationId(request);
         String authHeader = request.getHeader("Authorization");
-        String workspaceIdentifier = null;
-        String environmentIdentifier = null;
-        String applicationIdentifier = null;
 
         if (correlationId == null || correlationId.isBlank()) {
             throw new UnauthorizedAccessException(AuthorizationMessageKeys.CORRELATION_ID_MISSING);
@@ -65,27 +69,23 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             throw new UnauthorizedAccessException(AuthorizationMessageKeys.TOKEN_MISSING);
         }
 
-        if (pathVariables != null) {
-            workspaceIdentifier = pathVariables.get(policy.workspacePathVariable());
-            environmentIdentifier = pathVariables.get(policy.environmentPathVariable());
-            applicationIdentifier = pathVariables.get(policy.applicationPathVariable());
-        }
+        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(
+                HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE
+        );
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+        return new AuthorizationRequest(
                 correlationId,
                 authHeader,
-                workspaceIdentifier,
-                environmentIdentifier,
-                applicationIdentifier,
+                pathVariable(pathVariables, policy.workspacePathVariable()),
+                pathVariable(pathVariables, policy.environmentPathVariable()),
+                pathVariable(pathVariables, policy.applicationPathVariable()),
                 request.getMethod(),
                 policy.level()
         );
+    }
 
-        UserSession body = authorizationClientService.authorize(authorizationRequest);
-
-        AuthorizationRequestContext.set(body, request, "unknown");
-
-        return true;
+    private String pathVariable(Map<String, String> pathVariables, String name) {
+        return pathVariables == null ? null : pathVariables.get(name);
     }
 
     private String resolveCorrelationId(HttpServletRequest request) {
