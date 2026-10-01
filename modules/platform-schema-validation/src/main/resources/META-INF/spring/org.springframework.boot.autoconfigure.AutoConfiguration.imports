@@ -1,2 +1,2 @@
-br.com.portalmanager.platform.library.schemavalidation.autoconfigure.PlatformSchemaValidationJdbcAutoConfiguration
-br.com.portalmanager.platform.library.schemavalidation.autoconfigure.PlatformSchemaValidationAutoConfiguration
+br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationJdbcAutoConfiguration
+br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationAutoConfiguration
