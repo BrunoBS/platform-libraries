@@ -2,7 +2,6 @@ package br.com.portalmanager.platform.library.catalog.mapper;
 
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -30,20 +29,8 @@ public class CatalogMapper<E extends CatalogEntity>
                 entity.getLabel(),
                 entity.getDescription(),
                 entity.getSortOrder(),
-                readSettings(entity.getSettings())
+                entity.getSettings()
         );
     }
 
-    private JsonNode readSettings(String settings) {
-        try {
-            return settings == null || settings.isBlank()
-                    ? objectMapper.createObjectNode()
-                    : objectMapper.readTree(settings);
-        } catch (JacksonException exception) {
-            throw new IllegalStateException(
-                    "Invalid catalog settings JSON stored in database",
-                    exception
-            );
-        }
-    }
 }
