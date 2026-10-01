@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.schemavalidation.autoconfigure;
 
+import br.com.portalmanager.platform.library.schemavalidation.aspect.ResourceSchemaValidationAspect;
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.repository.NoOpResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
@@ -46,6 +47,15 @@ public class PlatformSchemaValidationAutoConfiguration {
             ObjectMapper objectMapper
     ) {
         return new ResourceSchemaValidator(resolver, objectMapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ResourceSchemaValidationAspect resourceSchemaValidationAspect(
+            ResourceSchemaValidator validator,
+            ObjectMapper objectMapper
+    ) {
+        return new ResourceSchemaValidationAspect(validator, objectMapper);
     }
 
     @Bean
