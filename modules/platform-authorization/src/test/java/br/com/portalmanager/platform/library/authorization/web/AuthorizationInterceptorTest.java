@@ -165,17 +165,17 @@ class AuthorizationInterceptorTest {
         Map<String, String> pathVariables = new HashMap<>();
 
         pathVariables.put(
-                "accountId",
+                "workspaceIdentifier",
                 "account-123"
         );
 
         pathVariables.put(
-                "environmentId",
+                "environmentIdentifier",
                 "env-123"
         );
 
         pathVariables.put(
-                "applicationId",
+                "applicationIdentifier",
                 "app-123"
         );
 
@@ -273,17 +273,17 @@ class AuthorizationInterceptorTest {
 
         assertEquals(
                 "account-123",
-                MDC.get("accountId")
+                MDC.get("workspaceIdentifier")
         );
 
         assertEquals(
                 "env-123",
-                MDC.get("environmentId")
+                MDC.get("environmentIdentifier")
         );
 
         assertEquals(
                 "app-123",
-                MDC.get("applicationId")
+                MDC.get("applicationIdentifier")
         );
 
         verify(registry).resolve(String.class, methodForHandler(), "GET");
