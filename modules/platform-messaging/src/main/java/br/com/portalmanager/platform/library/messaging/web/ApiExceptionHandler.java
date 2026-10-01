@@ -240,7 +240,7 @@ public class ApiExceptionHandler {
                 exception.getMessageKey(),
                 response,
                 exception,
-                "Catálogo de mensagens não encontrou uma definição para a chave '" + exception.getMessageKey() + "'."
+                "Definição de mensagem não encontrada: " + definition.code()
         );
 
         return ResponseEntity.internalServerError().body(response);
