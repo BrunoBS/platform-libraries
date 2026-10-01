@@ -15,7 +15,7 @@ class ResourceSchemaValidatorTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void shouldReuseCompiledSchemaForSamePublishedVersion() {
+    void shouldResolvePublishedSchemaForEveryValidation() {
         ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
         ResourceSchema schema = new ResourceSchema(
                 "APPLICATION",
@@ -49,7 +49,7 @@ class ResourceSchemaValidatorTest {
     }
 
     @Test
-    void shouldCompileAnotherSchemaWhenPublishedVersionChanges() {
+    void shouldUseNewDefinitionWhenPublishedVersionChanges() {
         ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
         ResourceSchema versionOne = new ResourceSchema(
                 "APPLICATION", "application", 1, "{\"type\":\"object\"}"
@@ -61,7 +61,8 @@ class ResourceSchemaValidatorTest {
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" }
-                  }
+                  },
+                  "required": ["name"]
                 }
                 """
         );
@@ -71,11 +72,15 @@ class ResourceSchemaValidatorTest {
 
         ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
 
-        validator.validate("APPLICATION", "application", objectMapper.createObjectNode());
         validator.validate(
                 "APPLICATION",
                 "application",
-                objectMapper.valueToTree(new SampleInput("new-version"))
+                objectMapper.valueToTree(new SampleInput("first"))
+        );
+        validator.validate(
+                "APPLICATION",
+                "application",
+                objectMapper.valueToTree(new SampleInput("second"))
         );
 
         verify(resolver, times(2)).resolve("APPLICATION", "application");
