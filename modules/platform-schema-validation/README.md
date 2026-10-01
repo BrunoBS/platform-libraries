@@ -97,3 +97,15 @@ definition
 ```
 
 A biblioteca consulta essa VIEW diretamente, assim como `platform-messaging` consulta sua view de mensagens.
+
+
+### Defaults Golden
+
+O módulo possui uma única raiz pública de configuração: `PlatformSchemaValidationProperties`.
+
+- `platform.schema-validation.enabled`: `true`
+- `platform.schema-validation.fallback-code`: `DEFAULT`
+- `platform.schema-validation.datasource.enabled`: `false`
+- `platform.schema-validation.datasource.view-name`: `vw_platform_resource_schemas`
+
+Valores textuais em branco usam o default do módulo. As auto-configurations apenas consomem essa raiz; componentes de negócio não consultam `Environment` ou propriedades diretamente.
