@@ -50,7 +50,16 @@ final class ApiMessageDefinitionParser {
 
     private int parseHttpStatus(String value, String key) {
         try {
-            return Integer.parseInt(requireValue(value, key, "httpStatus"));
+            int httpStatus = Integer.parseInt(requireValue(value, key, "httpStatus"));
+            if (httpStatus < 100 || httpStatus > 599) {
+                throw new PlatformConfigurationException(
+                        PlatformTechnicalErrors.invalidMessageDefinition(
+                                key,
+                                "httpStatus must be between 100 and 599"
+                        )
+                );
+            }
+            return httpStatus;
         } catch (NumberFormatException exception) {
             throw new PlatformConfigurationException(
                     PlatformTechnicalErrors.invalidMessageDefinition(
