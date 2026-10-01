@@ -9,6 +9,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -34,10 +35,29 @@ public class ResourceSchemaValidationAspect {
     ) throws Throwable {
         Object payload = resolvePayload(joinPoint);
         JsonNode payloadNode = payload == null ? null : objectMapper.valueToTree(payload);
+        removeNullObjectProperties(payloadNode);
 
         validator.validate(binding.type(), binding.code(), payloadNode);
 
         return joinPoint.proceed();
+    }
+
+    private void removeNullObjectProperties(JsonNode node) {
+        if (node instanceof ObjectNode objectNode) {
+            java.util.List<String> nullFields = new java.util.ArrayList<>();
+            objectNode.properties().forEach(entry -> {
+                if (entry.getValue() == null || entry.getValue().isNull()) {
+                    nullFields.add(entry.getKey());
+                } else {
+                    removeNullObjectProperties(entry.getValue());
+                }
+            });
+            nullFields.forEach(objectNode::remove);
+            return;
+        }
+        if (node != null && node.isArray()) {
+            node.forEach(this::removeNullObjectProperties);
+        }
     }
 
     private Object resolvePayload(ProceedingJoinPoint joinPoint) {
