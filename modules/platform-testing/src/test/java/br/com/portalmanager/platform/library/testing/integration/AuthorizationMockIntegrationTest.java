@@ -68,7 +68,7 @@ class AuthorizationMockIntegrationTest {
 
         HttpRequest matching = HttpRequest.newBuilder()
                 .uri(URI.create(authorizationMock.baseUrl() + "/authorize"))
-                .header("X-Workspace-Id", "workspace-123")
+                .header("X-Account-Id", "workspace-123")
                 .header("X-Application-Id", "application-456")
                 .header("X-Environment", "DEV")
                 .header("X-Custom-Resource", "custom-789")
