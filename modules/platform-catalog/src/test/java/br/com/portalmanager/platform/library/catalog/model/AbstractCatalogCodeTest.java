@@ -32,10 +32,10 @@ class AbstractCatalogCodeTest {
     }
 
     @Test
-    void shouldPreserveFieldWhenEnumValueIsInvalid() {
+    void shouldUseCodeFieldWhenEnumValueIsInvalid() {
         assertThatThrownBy(() -> LifecycleCode.of("INVALID"))
                 .isInstanceOfSatisfying(ValidationException.class, exception ->
-                        assertThat(exception.getDetails().getFirst().field()).isEqualTo("lifecycle")
+                        assertThat(exception.getDetails().getFirst().field()).isEqualTo("code")
                 );
     }
 
@@ -60,7 +60,7 @@ class AbstractCatalogCodeTest {
         }
 
         static LifecycleCode of(String value) {
-            return new LifecycleCode(requireEnumValue("lifecycle", value, Lifecycle.class));
+            return new LifecycleCode(requireEnumValue(value, Lifecycle.class));
         }
     }
 
