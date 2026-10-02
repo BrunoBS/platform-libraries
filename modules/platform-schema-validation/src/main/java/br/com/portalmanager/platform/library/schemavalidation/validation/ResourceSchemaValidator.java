@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.messaging.exception.ValidationExcep
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
+import br.com.portalmanager.platform.library.schemavalidation.cache.CompiledSchemaCache;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
@@ -20,14 +21,17 @@ public class ResourceSchemaValidator implements SchemaValidator {
     private final ResourceSchemaResolver resolver;
     private final ObjectMapper objectMapper;
     private final SchemaRegistry schemaRegistry;
+    private final CompiledSchemaCache compiledSchemaCache;
     private final SchemaValidationErrorMapper errorMapper = new SchemaValidationErrorMapper();
 
     public ResourceSchemaValidator(
             ResourceSchemaResolver resolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            CompiledSchemaCache compiledSchemaCache
     ) {
         this.resolver = resolver;
         this.objectMapper = objectMapper;
+        this.compiledSchemaCache = compiledSchemaCache;
         this.schemaRegistry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12);
     }
 
@@ -41,7 +45,11 @@ public class ResourceSchemaValidator implements SchemaValidator {
         }
 
         ResourceSchema resourceSchema = resolver.resolve(resourceType, resourceCode);
-        Schema schema = parse(resourceSchema);
+        Schema schema = compiledSchemaCache.get(resourceSchema).orElseGet(() -> {
+            Schema compiled = parse(resourceSchema);
+            compiledSchemaCache.put(resourceSchema, compiled);
+            return compiled;
+        });
 
         schema.validate(
                 payload,
