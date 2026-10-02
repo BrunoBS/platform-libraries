@@ -30,7 +30,7 @@ class JdbcResourceSchemaRepositoryTest {
         jdbcTemplate = mock(JdbcTemplate.class);
 
         PlatformSchemaValidationProperties properties = new PlatformSchemaValidationProperties();
-        properties.getDatasource().setViewName("vw_platform_resource_schemas");
+        properties.setViewName("vw_platform_resource_schemas");
 
         repository = new JdbcResourceSchemaRepository(jdbcTemplate, properties);
     }
