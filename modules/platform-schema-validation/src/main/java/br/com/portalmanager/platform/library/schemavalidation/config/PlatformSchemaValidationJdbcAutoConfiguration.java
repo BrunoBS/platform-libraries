@@ -26,6 +26,11 @@ public class PlatformSchemaValidationJdbcAutoConfiguration {
             PlatformSchemaValidationProperties properties
     ) {
         SqlIdentifierValidator.validate(properties.resolveViewName());
-        return new JdbcResourceSchemaRepository(jdbcTemplate, properties);
+
+        JdbcResourceSchemaRepository repository =
+                new JdbcResourceSchemaRepository(jdbcTemplate, properties);
+        repository.validateSource();
+
+        return repository;
     }
 }
