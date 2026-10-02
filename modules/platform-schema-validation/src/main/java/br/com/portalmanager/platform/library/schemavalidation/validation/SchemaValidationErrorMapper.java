@@ -5,35 +5,40 @@ import com.networknt.schema.Error;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 final class SchemaValidationErrorMapper {
 
-    private static final Map<String, Integer> VALUE_ARGUMENT_INDEX = Map.of(
-            "type", 1,
-            "enum", 0,
-            "const", 0,
-            "format", 0,
-            "dependentRequired", 1,
-            "minLength", 0,
-            "maxLength", 0,
-            "minimum", 0,
-            "maximum", 0,
-            "exclusiveMinimum", 0,
-            "exclusiveMaximum", 0,
-            "multipleOf", 0,
-            "minItems", 0,
-            "maxItems", 0,
-            "minContains", 0,
-            "maxContains", 0,
-            "minProperties", 0,
-            "maxProperties", 0
+    private static final Map<String, Integer> ARGUMENT_INDEX = Map.ofEntries(
+            Map.entry("type", 1),
+            Map.entry("enum", 0),
+            Map.entry("const", 0),
+            Map.entry("format", 0),
+            Map.entry("dependentRequired", 1),
+            Map.entry("minLength", 0),
+            Map.entry("maxLength", 0),
+            Map.entry("minimum", 0),
+            Map.entry("maximum", 0),
+            Map.entry("exclusiveMinimum", 0),
+            Map.entry("exclusiveMaximum", 0),
+            Map.entry("multipleOf", 0),
+            Map.entry("minItems", 0),
+            Map.entry("maxItems", 0),
+            Map.entry("minContains", 0),
+            Map.entry("maxContains", 0),
+            Map.entry("minProperties", 0),
+            Map.entry("maxProperties", 0)
     );
 
-    private static final Set<String> FIELD_ONLY_KEYWORDS = Set.of(
-            "required", "pattern", "additionalProperties", "uniqueItems",
-            "propertyNames", "oneOf", "not",
-            "unevaluatedProperties", "unevaluatedItems"
+    private static final Map<String, Integer> FIELD_ONLY_KEYWORDS = Map.ofEntries(
+            Map.entry("required", -1),
+            Map.entry("pattern", -1),
+            Map.entry("additionalProperties", -1),
+            Map.entry("uniqueItems", -1),
+            Map.entry("propertyNames", -1),
+            Map.entry("oneOf", -1),
+            Map.entry("not", -1),
+            Map.entry("unevaluatedProperties", -1),
+            Map.entry("unevaluatedItems", -1)
     );
 
     MappedValidationError map(Error error, String field) {
@@ -60,11 +65,11 @@ final class SchemaValidationErrorMapper {
     private Map<String, Object> parameters(Error error, String field) {
         String keyword = error.getKeyword();
 
-        if (keyword == null || keyword.isBlank() || FIELD_ONLY_KEYWORDS.contains(keyword)) {
+        if (keyword == null || keyword.isBlank() || FIELD_ONLY_KEYWORDS.containsKey(keyword)) {
             return Map.of("0", field);
         }
 
-        Integer argumentIndex = VALUE_ARGUMENT_INDEX.get(keyword);
+        Integer argumentIndex = ARGUMENT_INDEX.get(keyword);
         if (argumentIndex != null) {
             return withValue(field, argument(error, argumentIndex));
         }
@@ -96,7 +101,7 @@ final class SchemaValidationErrorMapper {
 
     private String argument(Error error, int index) {
         Object[] arguments = error.getArguments();
-        if (arguments == null || index >= arguments.length || arguments[index] == null) {
+        if (arguments == null || index < 0 || index >= arguments.length || arguments[index] == null) {
             return null;
         }
         return String.valueOf(arguments[index]);
