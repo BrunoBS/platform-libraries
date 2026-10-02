@@ -49,7 +49,8 @@ public class ResourceSchemaValidator {
             result.addError(
                     mappedError.field(),
                     mappedError.messageKey(),
-                    Map.of("0", mappedError.field())
+                    Map.of("0", mappedError.field()),
+                    SchemaValidationMessageKeys.INVALID
             );
         });
 
