@@ -29,7 +29,9 @@ public class PlatformSchemaValidationAutoConfiguration {
     @ConditionalOnMissingBean
     CompiledSchemaCache compiledSchemaCache(PlatformSchemaValidationProperties properties) {
         var local = properties.getCache().getLocal();
-        return new CaffeineCompiledSchemaCache(local.getTtl(), local.getMaxSize());
+        return local.isEnabled()
+                ? new CaffeineCompiledSchemaCache(local.getTtl(), local.getMaxSize())
+                : new NoOpCompiledSchemaCache();
     }
 
     @Bean
