@@ -27,7 +27,7 @@ O `code` é imutável depois da criação.
 
 ## 2. Dynamic ou Enum
 
-Use `DynamicCatalogService` quando novos códigos podem ser criados em runtime.
+Use `DynamicCatalogService` para o modelo Included/Dynamic, quando novos códigos podem ser incluídos em runtime.
 
 Use `EnumCatalogService` quando o código da aplicação define os valores permitidos. Nesse caso, o `code` precisa existir no enum que implementa `CatalogEnum`.
 
@@ -132,7 +132,11 @@ application.language_type_code
 type_languages.code
 ```
 
-## 9. Extension points
+## 9. Value Objects de código
+
+`AbstractCatalogCode` é o contrato compartilhado para referências semânticas a códigos de catálogo dentro dos domínios consumidores. Ele não representa a regra de criação do `CatalogEntity`: VOs dinâmicos podem aceitar valores como `workspace-service`, enquanto o `code` administrável do catálogo mantém o formato uppercase/underscore desta documentação.
+
+## 10. Extension points
 
 Os únicos pontos oficiais de extensão direta de service são:
 
@@ -143,7 +147,7 @@ DynamicCatalogService
 
 `AbstractCatalogService` permanece `sealed`.
 
-## 10. Checklist
+## 11. Checklist
 
 Para qualquer catálogo:
 
