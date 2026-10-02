@@ -35,4 +35,33 @@ class PlatformSchemaValidationPropertiesTest {
         assertThat(properties.resolveFallbackCode()).isEqualTo("PLATFORM_DEFAULT");
         assertThat(properties.resolveViewName()).isEqualTo("custom_schema_view");
     }
+
+    @Test
+    void rejectsNonPositiveCacheConfiguration() {
+        PlatformSchemaValidationProperties properties = new PlatformSchemaValidationProperties();
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                () -> properties.getCache().getRedis().setTtl(java.time.Duration.ZERO)
+        ).isInstanceOf(IllegalArgumentException.class);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                () -> properties.getCache().getLocal().setTtl(java.time.Duration.ofSeconds(-1))
+        ).isInstanceOf(IllegalArgumentException.class);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                () -> properties.getCache().getLocal().setMaxSize(0)
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void keepsRedisAndLocalCacheSwitchesIndependent() {
+        PlatformSchemaValidationProperties properties = new PlatformSchemaValidationProperties();
+
+        properties.getCache().getRedis().setEnabled(true);
+        properties.getCache().getLocal().setEnabled(false);
+
+        assertThat(properties.getCache().getRedis().isEnabled()).isTrue();
+        assertThat(properties.getCache().getLocal().isEnabled()).isFalse();
+    }
 }
+
