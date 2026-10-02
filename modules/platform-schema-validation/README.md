@@ -97,6 +97,8 @@ nenhum custom + JdbcTemplate disponível
         ↓
 JdbcResourceSchemaRepository da library
         ↓
+valida contrato da VIEW no startup
+        ↓
 view-name
 
 nenhum ResourceSchemaRepository disponível
@@ -118,6 +120,8 @@ definition
 ```
 
 A biblioteca consulta essa VIEW diretamente, assim como `platform-messaging` consulta sua view de mensagens.
+
+Quando o caminho JDBC default é utilizado, a library valida a fonte no startup com uma consulta estrutural que seleciona as quatro colunas contratuais usando `WHERE 1 = 0`. A consulta não exige schema publicado nem lê dados de negócio; ela comprova acesso à fonte, existência da VIEW e compatibilidade das colunas. Falha de conexão, permissão, VIEW inexistente ou contrato incompatível impede a inicialização. Implementações customizadas de `ResourceSchemaRepository` não recebem health check genérico da library.
 
 O contrato exige **no máximo uma linha por `(resource_type, resource_code)`**. A VIEW deve expor somente a versão publicada corrente de cada recurso. A library não usa `LIMIT 1` para esconder duplicidade: zero linhas significa ausência e permite fallback; uma linha é o schema resolvido; mais de uma linha é violação do contrato da VIEW e a falha JDBC é propagada.
 
