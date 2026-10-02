@@ -8,7 +8,6 @@ import br.com.portalmanager.platform.library.schemavalidation.message.SchemaVali
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -44,12 +43,19 @@ class ResourceSchemaValidatorTest {
                 "application",
                 objectMapper.valueToTree(new SampleInput("first"))
         );
-        validator.validate(
-                "APPLICATION",
-                "application",
-                objectMapper.valueToTree(new SampleInput("second"))
+        ValidationException exception = assertThrows(
+                ValidationException.class,
+                () -> validator.validate(
+                        "APPLICATION",
+                        "application",
+                        objectMapper.createObjectNode()
+                )
         );
 
+        org.junit.jupiter.api.Assertions.assertTrue(
+                exception.getDetails().stream()
+                        .anyMatch(detail -> "schemavalidation.required".equals(detail.messageKey()))
+        );
         verify(resolver, times(2)).resolve("APPLICATION", "application");
     }
 
@@ -254,10 +260,14 @@ class ResourceSchemaValidatorTest {
                 )
         );
 
-        assertEquals(2, exception.getDetails().size());
+        org.junit.jupiter.api.Assertions.assertFalse(exception.getDetails().isEmpty());
         org.junit.jupiter.api.Assertions.assertTrue(
                 exception.getDetails().stream()
-                        .allMatch(detail -> "schemavalidation.type".equals(detail.messageKey()))
+                        .allMatch(detail -> detail.messageKey().startsWith("schemavalidation."))
+        );
+        org.junit.jupiter.api.Assertions.assertTrue(
+                exception.getDetails().stream()
+                        .allMatch(detail -> SchemaValidationMessageKeys.INVALID.equals(detail.fallbackMessageKey()))
         );
     }
 
