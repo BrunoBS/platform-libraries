@@ -112,10 +112,12 @@ class JdbcResourceSchemaRepositoryTest {
                 eq("application")
         )).thenThrow(new IncorrectResultSizeDataAccessException(1, 2));
 
-        assertThrows(
-                IncorrectResultSizeDataAccessException.class,
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
                 () -> repository.find("APPLICATION", "application")
         );
+
+        assertTrue(exception.getCause() instanceof IncorrectResultSizeDataAccessException);
     }
 
     @Test
@@ -127,9 +129,11 @@ class JdbcResourceSchemaRepositoryTest {
                 eq("application")
         )).thenThrow(new DataAccessResourceFailureException("database unavailable"));
 
-        assertThrows(
-                DataAccessResourceFailureException.class,
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
                 () -> repository.find("APPLICATION", "application")
         );
+
+        assertTrue(exception.getCause() instanceof DataAccessResourceFailureException);
     }
 }
