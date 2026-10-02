@@ -3,9 +3,12 @@ package br.com.portalmanager.platform.library.schemavalidation.validation;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -106,6 +109,78 @@ class ResourceSchemaValidatorTest {
     @Test
     void shouldRejectMalformedPublishedDefinition() {
         assertInvalidDefinition("{invalid-json");
+    }
+
+    @Test
+    void shouldMapRealNetworkntRequiredError() {
+        assertValidationMessage(
+                """
+                {"type":"object","required":["name"]}
+                """,
+                "{}",
+                SchemaValidationMessageKeys.REQUIRED
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntTypeError() {
+        assertValidationMessage(
+                """
+                {"type":"object","properties":{"name":{"type":"string"}}}
+                """,
+                """
+                {"name":123}
+                """,
+                SchemaValidationMessageKeys.TYPE
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntMinLengthError() {
+        assertValidationMessage(
+                """
+                {"type":"object","properties":{"name":{"type":"string","minLength":3}}}
+                """,
+                """
+                {"name":"a"}
+                """,
+                SchemaValidationMessageKeys.MIN_LENGTH
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntAdditionalPropertiesError() {
+        assertValidationMessage(
+                """
+                {"type":"object","additionalProperties":false}
+                """,
+                """
+                {"unexpected":"value"}
+                """,
+                SchemaValidationMessageKeys.ADDITIONAL_PROPERTIES
+        );
+    }
+
+    private void assertValidationMessage(String definition, String payload, String expectedMessageKey) {
+        ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
+        when(resolver.resolve("APPLICATION", "application"))
+                .thenReturn(new ResourceSchema("APPLICATION", "application", 1, definition));
+
+        ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
+
+        ValidationException exception = assertThrows(
+                ValidationException.class,
+                () -> validator.validate(
+                        "APPLICATION",
+                        "application",
+                        objectMapper.readTree(payload)
+                )
+        );
+
+        assertEquals(
+                expectedMessageKey,
+                exception.getValidationResult().getDetails().getFirst().messageKey()
+        );
     }
 
     private void assertInvalidDefinition(String definition) {
