@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.schemavalidation.aspect.ResourceSch
 import br.com.portalmanager.platform.library.schemavalidation.repository.JdbcResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
-import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -34,7 +34,7 @@ class PlatformSchemaValidationAutoConfigurationTest {
                             .isSameAs(CustomRepositoryConfiguration.REPOSITORY);
                     assertThat(context).doesNotHaveBean(JdbcResourceSchemaRepository.class);
                     assertThat(context).hasSingleBean(ResourceSchemaResolver.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaValidator.class);
+                    assertThat(context).hasSingleBean(SchemaValidator.class);
                     assertThat(context).hasSingleBean(ResourceSchemaValidationAspect.class);
                 });
     }
@@ -48,7 +48,7 @@ class PlatformSchemaValidationAutoConfigurationTest {
                     assertThat(context.getBean(ResourceSchemaRepository.class))
                             .isInstanceOf(JdbcResourceSchemaRepository.class);
                     assertThat(context).hasSingleBean(ResourceSchemaResolver.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaValidator.class);
+                    assertThat(context).hasSingleBean(SchemaValidator.class);
                     assertThat(context).hasSingleBean(ResourceSchemaValidationAspect.class);
                 });
     }
@@ -71,7 +71,7 @@ class PlatformSchemaValidationAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasSingleBean(ResourceSchemaRepository.class);
                     assertThat(context).hasSingleBean(ResourceSchemaResolver.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaValidator.class);
+                    assertThat(context).hasSingleBean(SchemaValidator.class);
                     assertThat(context).hasSingleBean(ResourceSchemaValidationAspect.class);
                 });
     }
