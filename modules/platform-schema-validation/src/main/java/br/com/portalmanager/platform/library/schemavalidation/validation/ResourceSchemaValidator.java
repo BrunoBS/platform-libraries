@@ -15,7 +15,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 
-public class ResourceSchemaValidator {
+public class ResourceSchemaValidator implements SchemaValidator {
 
     private final ResourceSchemaResolver resolver;
     private final ObjectMapper objectMapper;
@@ -31,6 +31,7 @@ public class ResourceSchemaValidator {
         this.schemaRegistry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12);
     }
 
+    @Override
     public void validate(String resourceType, String resourceCode, JsonNode payload) {
         ValidationResult result = new ValidationResult();
 
