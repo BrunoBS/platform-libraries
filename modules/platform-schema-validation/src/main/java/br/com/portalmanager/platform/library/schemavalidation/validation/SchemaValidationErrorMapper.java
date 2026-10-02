@@ -10,10 +10,6 @@ final class SchemaValidationErrorMapper {
     }
 
     private String messageKey(Error error) {
-        if (error == null || error.getKeyword() == null) {
-            return SchemaValidationMessageKeys.INVALID;
-        }
-
         return switch (error.getKeyword()) {
             case "required" -> SchemaValidationMessageKeys.REQUIRED;
             case "type" -> SchemaValidationMessageKeys.TYPE;
