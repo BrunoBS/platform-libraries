@@ -11,6 +11,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultApiMessageResolver implements ApiMessageResolver {
 
@@ -75,25 +79,65 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
             }
         }
 
-        throw new ApiMessageNotFoundException(key);
+        logFailure("definition", key, null, "Platform message definition not found; using immutable default");
+        return platformDefault(locale);
     }
 
     private Optional<ApiMessage> tryGetFromCache(String key, Locale locale) {
-        return cache.get(key, locale);
+        try {
+            return cache.get(key, locale);
+        } catch (RuntimeException exception) {
+            logFailure("cache", key, exception, "Platform messaging cache unavailable; continuing fallback");
+            return Optional.empty();
+        }
     }
 
     private Optional<ApiMessage> tryGetFromRepositoryAndCache(String key, Locale locale) {
-        return repository.find(key, locale).map(message -> {
-            cache.put(message);
-            return message;
-        });
+        try {
+            return repository.find(key, locale).map(message -> {
+                try {
+                    cache.put(message);
+                } catch (RuntimeException exception) {
+                    logFailure("cache", key, exception, "Platform messaging cache unavailable while storing message; continuing");
+                }
+                return message;
+            });
+        } catch (RuntimeException exception) {
+            logFailure("datasource", key, exception, "Platform messaging datasource unavailable; continuing fallback");
+            return Optional.empty();
+        }
     }
 
     private Optional<ApiMessage> tryGetFromProvider(String key, Locale locale) {
         if (provider == null) {
             return Optional.empty();
         }
-        return provider.find(key, locale);
+        try {
+            return provider.find(key, locale);
+        } catch (RuntimeException exception) {
+            logFailure("bundle", key, exception, "Platform messaging bundle unavailable; using immutable default if necessary");
+            return Optional.empty();
+        }
+    }
+
+    private ApiMessage platformDefault(Locale locale) {
+        String languageTag = locale == null || Locale.ROOT.equals(locale) ? defaultLocale.toLanguageTag() : locale.toLanguageTag();
+        return new ApiMessage(DEFAULT_CODE, DEFAULT_KEY, languageTag, DEFAULT_MESSAGE, DEFAULT_SOLUTION, 500);
+    }
+
+    private void logFailure(String source, String key, Throwable cause, String message) {
+        String throttleKey = source + ":" + (cause == null ? "missing" : cause.getClass().getName());
+        long now = System.currentTimeMillis();
+        Long previous = LAST_FAILURE_LOG.putIfAbsent(throttleKey, now);
+        if (previous != null && now - previous < LOG_THROTTLE_MILLIS) {
+            return;
+        }
+        LAST_FAILURE_LOG.put(throttleKey, now);
+        if (cause == null) {
+            log.warn("{} [source={}, key={}]", message, source, key);
+        } else {
+            log.error("{} [source={}, key={}]", message, source, key, cause);
+        }
     }
 
     private List<String> getKeyCandidates(String key) {
