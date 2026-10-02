@@ -15,8 +15,11 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
+import java.util.Set;
 
 public class ResourceSchemaValidator {
+
+    private static final Set<String> COMPOSITION_KEYWORDS = Set.of("allOf", "anyOf", "oneOf", "not");
 
     private final ResourceSchemaResolver resolver;
     private final ObjectMapper objectMapper;
@@ -43,16 +46,25 @@ public class ResourceSchemaValidator {
         var resourceSchema = resolver.resolve(resourceType, resourceCode);
         Schema schema = parse(resourceSchema);
 
-        schema.validate(payload).forEach(error -> {
-            String field = resolveField(error);
-            var mappedError = errorMapper.map(error, field);
-            result.addError(
-                    mappedError.field(),
-                    mappedError.messageKey(),
-                    Map.of("0", mappedError.field()),
-                    SchemaValidationMessageKeys.INVALID
-            );
-        });
+        var errors = schema.validate(payload);
+        var compositionLocations = errors.stream()
+                .filter(error -> COMPOSITION_KEYWORDS.contains(error.getKeyword()))
+                .map(this::instanceLocation)
+                .collect(java.util.stream.Collectors.toSet());
+
+        errors.stream()
+                .filter(error -> COMPOSITION_KEYWORDS.contains(error.getKeyword())
+                        || !compositionLocations.contains(instanceLocation(error)))
+                .forEach(error -> {
+                    String field = resolveField(error);
+                    var mappedError = errorMapper.map(error, field);
+                    result.addError(
+                            mappedError.field(),
+                            mappedError.messageKey(),
+                            Map.of("0", mappedError.field()),
+                            SchemaValidationMessageKeys.INVALID
+                    );
+                });
 
         if (result.hasErrors()) {
             throw new ValidationException(result);
@@ -88,10 +100,12 @@ public class ResourceSchemaValidator {
         }
     }
 
+    private String instanceLocation(Error error) {
+        return error.getInstanceLocation() == null ? "" : error.getInstanceLocation().toString();
+    }
+
     private String resolveField(Error error) {
-        String instanceLocation = error.getInstanceLocation() == null
-                ? ""
-                : error.getInstanceLocation().toString();
+        String instanceLocation = instanceLocation(error);
 
         String field = appendJsonPointer(instanceLocation);
         String property = error.getProperty();
