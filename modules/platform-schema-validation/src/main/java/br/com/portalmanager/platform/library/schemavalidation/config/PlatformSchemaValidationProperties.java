@@ -49,15 +49,28 @@ public class PlatformSchemaValidationProperties {
     }
 
     public static class Cache {
+        private final Redis redis = new Redis();
+        private final Local local = new Local();
+
+        public Redis getRedis() { return redis; }
+        public Local getLocal() { return local; }
+    }
+
+    public static class Redis {
         private boolean enabled;
         private Duration ttl = DEFAULT_REDIS_TTL;
-        private final Local local = new Local();
 
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
         public Duration getTtl() { return ttl; }
-        public void setTtl(Duration ttl) { this.ttl = ttl; }
-        public Local getLocal() { return local; }
+        public void setTtl(Duration ttl) { this.ttl = requirePositive(ttl, "platform.schema-validation.cache.redis.ttl"); }
+    }
+
+    private static Duration requirePositive(Duration value, String property) {
+        if (value == null || value.isZero() || value.isNegative()) {
+            throw new IllegalArgumentException(property + " must be greater than zero");
+        }
+        return value;
     }
 
     public static class Local {
@@ -68,9 +81,14 @@ public class PlatformSchemaValidationProperties {
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
         public Duration getTtl() { return ttl; }
-        public void setTtl(Duration ttl) { this.ttl = ttl; }
+        public void setTtl(Duration ttl) { this.ttl = requirePositive(ttl, "platform.schema-validation.cache.local.ttl"); }
         public long getMaxSize() { return maxSize; }
-        public void setMaxSize(long maxSize) { this.maxSize = maxSize; }
+        public void setMaxSize(long maxSize) {
+            if (maxSize <= 0) {
+                throw new IllegalArgumentException("platform.schema-validation.cache.local.max-size must be greater than zero");
+            }
+            this.maxSize = maxSize;
+        }
     }
 }
 

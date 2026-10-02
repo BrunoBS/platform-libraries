@@ -13,7 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration(before = PlatformSchemaValidationAutoConfiguration.class)
 @ConditionalOnClass(StringRedisTemplate.class)
-@ConditionalOnProperty(prefix = "platform.schema-validation.cache", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "platform.schema-validation.cache.redis", name = "enabled", havingValue = "true")
 public class PlatformSchemaValidationRedisAutoConfiguration {
 
     @Bean
@@ -24,6 +24,6 @@ public class PlatformSchemaValidationRedisAutoConfiguration {
             ObjectMapper objectMapper,
             PlatformSchemaValidationProperties properties
     ) {
-        return new RedisResourceSchemaCache(redis, objectMapper, properties.getCache().getTtl());
+        return new RedisResourceSchemaCache(redis, objectMapper, properties.getCache().getRedis().getTtl());
     }
 }
