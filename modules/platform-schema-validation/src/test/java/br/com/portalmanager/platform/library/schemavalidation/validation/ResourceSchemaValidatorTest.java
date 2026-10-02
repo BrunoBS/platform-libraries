@@ -43,19 +43,12 @@ class ResourceSchemaValidatorTest {
                 "application",
                 objectMapper.valueToTree(new SampleInput("first"))
         );
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> validator.validate(
-                        "APPLICATION",
-                        "application",
-                        objectMapper.createObjectNode()
-                )
+        validator.validate(
+                "APPLICATION",
+                "application",
+                objectMapper.valueToTree(new SampleInput("second"))
         );
 
-        org.junit.jupiter.api.Assertions.assertTrue(
-                exception.getDetails().stream()
-                        .anyMatch(detail -> "schemavalidation.required".equals(detail.messageKey()))
-        );
         verify(resolver, times(2)).resolve("APPLICATION", "application");
     }
 
@@ -88,12 +81,19 @@ class ResourceSchemaValidatorTest {
                 "application",
                 objectMapper.valueToTree(new SampleInput("first"))
         );
-        validator.validate(
-                "APPLICATION",
-                "application",
-                objectMapper.valueToTree(new SampleInput("second"))
+        ValidationException exception = assertThrows(
+                ValidationException.class,
+                () -> validator.validate(
+                        "APPLICATION",
+                        "application",
+                        objectMapper.createObjectNode()
+                )
         );
 
+        org.junit.jupiter.api.Assertions.assertTrue(
+                exception.getDetails().stream()
+                        .anyMatch(detail -> "schemavalidation.required".equals(detail.messageKey()))
+        );
         verify(resolver, times(2)).resolve("APPLICATION", "application");
     }
 
