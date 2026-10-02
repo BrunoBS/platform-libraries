@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.library.schemavalidation.message.SchemaVali
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Optional;
@@ -67,6 +68,21 @@ public class JdbcResourceSchemaRepository implements ResourceSchemaRepository {
             ));
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();
+        } catch (IncorrectResultSizeDataAccessException exception) {
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.schemaSourceContractInvalid(
+                            resourceType,
+                            resourceCode
+                    ),
+                    exception
+            );
+        } catch (DataAccessException exception) {
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.schemaSourceUnavailable(
+                            properties.resolveViewName()
+                    ),
+                    exception
+            );
         }
     }
 }
