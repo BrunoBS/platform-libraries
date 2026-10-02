@@ -8,6 +8,7 @@ import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKe
 
 import java.util.Map;
 import java.util.regex.Pattern;
+import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 
 public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> {
 
@@ -21,7 +22,7 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
     }
 
     public void validateForCreate(D dto) {
-        CatalogValidationResult result = new CatalogValidationResult();
+        ValidationResult result = new ValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
             validateAttributes(dto, result);
@@ -32,7 +33,7 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
     }
 
     public void validateForUpdate(D dto) {
-        CatalogValidationResult result = new CatalogValidationResult();
+        ValidationResult result = new ValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
             validateAttributes(dto, result);
@@ -42,7 +43,7 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
     }
 
     public void validateForDelete(D dto) {
-        CatalogValidationResult result = new CatalogValidationResult();
+        ValidationResult result = new ValidationResult();
         validateRequired(dto, result);
         if (!result.hasErrors()) {
             validateCode(dto, result);
@@ -51,13 +52,13 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
         throwIfInvalid(result);
     }
 
-    protected void validateRequired(D dto, CatalogValidationResult result) {
+    protected void validateRequired(D dto, ValidationResult result) {
         if (dto == null) {
             result.addError(entityName(), CatalogMessageKeys.REQUIRED);
         }
     }
 
-    protected void validateAttributes(D dto, CatalogValidationResult result) {
+    protected void validateAttributes(D dto, ValidationResult result) {
         validateCode(dto, result);
 
         if (dto.label() == null || dto.label().isBlank()) {
@@ -78,7 +79,7 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
         validateAdditionalCatalogFields(dto, result);
     }
 
-    protected void validateCode(D dto, CatalogValidationResult result) {
+    protected void validateCode(D dto, ValidationResult result) {
         if (dto.code() == null || dto.code().isBlank()) {
             result.addError("code", CatalogMessageKeys.CODE_REQUIRED, Map.of("0", entityName()));
             return;
@@ -93,12 +94,12 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
         }
     }
 
-    protected void validateIntegrity(D dto, CatalogValidationResult result) {
+    protected void validateIntegrity(D dto, ValidationResult result) {
         validateUniqueness(dto, result);
         validateAdditionalIntegrity(dto, result);
     }
 
-    protected void validateUniqueness(D dto, CatalogValidationResult result) {
+    protected void validateUniqueness(D dto, ValidationResult result) {
         if (dto.code() != null && repository.existsById(dto.code())) {
             result.addError(
                     "code",
@@ -108,7 +109,7 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
         }
     }
 
-    protected void throwIfInvalid(CatalogValidationResult result) {
+    protected void throwIfInvalid(ValidationResult result) {
         if (result.hasErrors()) {
             throw new ValidationException(
                     PlatformMessageKeys.VALIDATION_FAILED,
@@ -117,11 +118,11 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
         }
     }
 
-    protected void validateDelete(D dto, CatalogValidationResult result) {}
-    protected void validateSettings(D dto, CatalogValidationResult result) {}
-    protected void validateAdditionalFields(D dto, CatalogValidationResult result) {}
-    protected void validateAdditionalCatalogFields(D dto, CatalogValidationResult result) {}
-    protected void validateAdditionalIntegrity(D dto, CatalogValidationResult result) {}
+    protected void validateDelete(D dto, ValidationResult result) {}
+    protected void validateSettings(D dto, ValidationResult result) {}
+    protected void validateAdditionalFields(D dto, ValidationResult result) {}
+    protected void validateAdditionalCatalogFields(D dto, ValidationResult result) {}
+    protected void validateAdditionalIntegrity(D dto, ValidationResult result) {}
 
     public abstract String entityName();
 }
