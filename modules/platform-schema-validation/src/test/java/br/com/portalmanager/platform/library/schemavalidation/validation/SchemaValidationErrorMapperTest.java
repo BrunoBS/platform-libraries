@@ -4,6 +4,8 @@ import br.com.portalmanager.platform.library.schemavalidation.message.SchemaVali
 import com.networknt.schema.Error;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,13 +35,64 @@ class SchemaValidationErrorMapperTest {
         assertKey("../unsafe", SchemaValidationMessageKeys.INVALID);
     }
 
-    private void assertKey(String keyword, String expectedKey) {
-        Error error = mock(Error.class);
-        when(error.getKeyword()).thenReturn(keyword);
+    @Test
+    void shouldMapExpectedTypeInsteadOfActualType() {
+        SchemaValidationErrorMapper.MappedValidationError mapped =
+                map("type", "name", "integer", "string");
 
-        var mapped = mapper.map(error, "name");
+        assertEquals(Map.of("0", "name", "1", "string"), mapped.parameters());
+    }
+
+    @Test
+    void shouldMapStableLimitParameter() {
+        SchemaValidationErrorMapper.MappedValidationError mapped =
+                map("minLength", "name", 3);
+
+        assertEquals(Map.of("0", "name", "1", "3"), mapped.parameters());
+    }
+
+    @Test
+    void shouldMapExpectedConstValue() {
+        SchemaValidationErrorMapper.MappedValidationError mapped =
+                map("const", "status", "ACTIVE", "INACTIVE");
+
+        assertEquals(Map.of("0", "status", "1", "ACTIVE"), mapped.parameters());
+    }
+
+    @Test
+    void shouldMapDependentRequiredUsingMissingAndOriginFields() {
+        SchemaValidationErrorMapper.MappedValidationError mapped =
+                map("dependentRequired", "address", "zipCode", "address");
+
+        assertEquals("zipCode", mapped.field());
+        assertEquals(Map.of("0", "zipCode", "1", "address"), mapped.parameters());
+    }
+
+    @Test
+    void shouldKeepTechnicalArgumentsOutOfGenericMessages() {
+        SchemaValidationErrorMapper.MappedValidationError mapped =
+                map("pattern", "name", "^[A-Z]+$");
+
+        assertEquals(Map.of("0", "name"), mapped.parameters());
+    }
+
+    private void assertKey(String keyword, String expectedKey) {
+        SchemaValidationErrorMapper.MappedValidationError mapped = map(keyword, "name");
 
         assertEquals("name", mapped.field());
         assertEquals(expectedKey, mapped.messageKey());
+        assertEquals(Map.of("0", "name"), mapped.parameters());
+    }
+
+    private SchemaValidationErrorMapper.MappedValidationError map(
+            String keyword,
+            String field,
+            Object... arguments
+    ) {
+        Error error = mock(Error.class);
+        when(error.getKeyword()).thenReturn(keyword);
+        when(error.getArguments()).thenReturn(arguments.length == 0 ? null : arguments);
+
+        return mapper.map(error, field);
     }
 }
