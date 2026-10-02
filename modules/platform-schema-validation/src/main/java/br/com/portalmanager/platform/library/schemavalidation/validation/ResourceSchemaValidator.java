@@ -24,6 +24,10 @@ public class ResourceSchemaValidator implements SchemaValidator {
     private final CompiledSchemaCache compiledSchemaCache;
     private final SchemaValidationErrorMapper errorMapper = new SchemaValidationErrorMapper();
 
+    public ResourceSchemaValidator(ResourceSchemaResolver resolver, ObjectMapper objectMapper) {
+        this(resolver, objectMapper, new br.com.portalmanager.platform.library.schemavalidation.cache.NoOpCompiledSchemaCache());
+    }
+
     public ResourceSchemaValidator(
             ResourceSchemaResolver resolver,
             ObjectMapper objectMapper,
