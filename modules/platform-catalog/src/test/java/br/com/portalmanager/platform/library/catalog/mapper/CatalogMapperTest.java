@@ -57,8 +57,32 @@ class CatalogMapperTest {
                 });
     }
 
+    @Test
+    void shouldFailWithStandardTechnicalExceptionWhenEntityCannotBeInstantiated() {
+        CatalogMapper<InvalidCatalog> mapper =
+                new CatalogMapper<>(InvalidCatalog.class, new ObjectMapper());
+
+        assertThatThrownBy(() -> mapper.toEntity(new CatalogDTO(
+                "ONE",
+                "One",
+                "Descrição válida",
+                1,
+                JSON.createObjectNode()
+        )))
+                .isInstanceOfSatisfying(CatalogTechnicalException.class, exception -> {
+                    assertThat(exception.getMessageKey())
+                            .isEqualTo(CatalogMessageKeys.ENTITY_INSTANTIATION_FAILED);
+                    assertThat(exception.getCause()).isNotNull();
+                });
+    }
+
     public static class TestCatalog extends CatalogEntity {
         public TestCatalog() {
+        }
+    }
+
+    public static class InvalidCatalog extends CatalogEntity {
+        private InvalidCatalog(String ignored) {
         }
     }
 }
