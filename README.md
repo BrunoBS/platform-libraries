@@ -97,7 +97,7 @@ Após a publicação definitiva das coordenadas da Foundation, um serviço consu
 
 ```xml
 <parent>
-    <groupId>br.com.portalmanager.platform</groupId>
+    <groupId>br.com.portalmanager.platform.library</groupId>
     <artifactId>platform-parent</artifactId>
     <version>1.0.0</version>
     <relativePath/>
@@ -106,7 +106,7 @@ Após a publicação definitiva das coordenadas da Foundation, um serviço consu
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>br.com.portalmanager.platform</groupId>
+            <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-libraries-bom</artifactId>
             <version>1.0.0</version>
             <type>pom</type>
@@ -120,7 +120,7 @@ Capabilities podem então ser declaradas sem versão. O `platform-starter` mant�
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.platform</groupId>
+    <groupId>br.com.portalmanager.platform.library</groupId>
     <artifactId>platform-starter</artifactId>
 </dependency>
 ```
