@@ -7,8 +7,8 @@ import br.com.portalmanager.platform.library.catalog.model.CatalogEnum;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
 import br.com.portalmanager.platform.library.catalog.validation.EnumCatalogValidator;
-import tools.jackson.databind.ObjectMapper;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Simple path for catalogs whose allowed codes are defined by a Java enum.
