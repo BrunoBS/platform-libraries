@@ -50,8 +50,11 @@ class CatalogMapperTest {
                 new CatalogMapper<>(TestCatalog.class, new ObjectMapper());
 
         assertThatThrownBy(() -> mapper.toDTO(entity))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Invalid catalog settings JSON stored in database");
+                .isInstanceOfSatisfying(CatalogTechnicalException.class, exception -> {
+                    assertThat(exception.getMessageKey())
+                            .isEqualTo(CatalogMessageKeys.SETTINGS_INVALID_STORED_JSON);
+                    assertThat(exception.getCause()).isNotNull();
+                });
     }
 
     public static class TestCatalog extends CatalogEntity {
