@@ -1,7 +1,10 @@
 package br.com.portalmanager.platform.library.schemavalidation.repository;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
+import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -27,7 +30,16 @@ public class JdbcResourceSchemaRepository implements ResourceSchemaRepository {
                 WHERE 1 = 0
                 """.formatted(properties.resolveViewName());
 
-        jdbcTemplate.query(sql, rs -> null);
+        try {
+            jdbcTemplate.query(sql, rs -> null);
+        } catch (DataAccessException exception) {
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.schemaSourceUnavailable(
+                            properties.resolveViewName()
+                    ),
+                    exception
+            );
+        }
     }
 
     @Override
