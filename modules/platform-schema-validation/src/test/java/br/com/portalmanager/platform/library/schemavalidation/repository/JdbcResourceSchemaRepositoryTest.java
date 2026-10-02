@@ -57,7 +57,7 @@ class JdbcResourceSchemaRepositoryTest {
     void shouldFailSourceValidationWhenViewIsUnavailable() {
         when(jdbcTemplate.query(
                 any(String.class),
-                any(org.springframework.jdbc.core.ResultSetExtractor.class)
+                org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
         )).thenThrow(new DataAccessResourceFailureException("view unavailable"));
 
         assertThrows(DataAccessResourceFailureException.class, repository::validateSource);
