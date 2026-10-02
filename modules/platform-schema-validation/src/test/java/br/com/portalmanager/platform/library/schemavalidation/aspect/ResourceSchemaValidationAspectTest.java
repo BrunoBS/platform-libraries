@@ -38,7 +38,7 @@ class ResourceSchemaValidationAspectTest {
     }
 
     @Test
-    void shouldResolvePayloadMetadataOnceAndReuseItAcrossCalls() throws Throwable {
+    void shouldResolveAndValidatePayloadAcrossRepeatedCalls() throws Throwable {
         Method method = SampleUseCase.class.getMethod("create", String.class, SampleInput.class);
         ValidateResourceSchema binding = method.getAnnotation(ValidateResourceSchema.class);
 
