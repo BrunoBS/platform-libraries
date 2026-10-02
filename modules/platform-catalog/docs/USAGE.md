@@ -160,3 +160,28 @@ Para qualquer catálogo:
 7. testes.
 
 No Enum Catalog, adicione também o enum implementando `CatalogEnum`.
+
+## 12. Contrato público Golden
+
+No microserviço consumidor, use diretamente os contratos fornecidos pela library:
+
+```text
+CatalogEntity
+CatalogRepository
+CatalogDTO
+CatalogController
+EnumCatalogService | IncludedCatalogService
+CatalogEnum        (somente Enum Catalog)
+AbstractCatalogCode (quando necessário como VO)
+CatalogSettingsValidator (quando houver settings)
+```
+
+Não estenda nem replique `CatalogMapper`, `AbstractCatalogService`,
+`AbstractCatalogValidator` ou `EnumCatalogValidator`. Essas classes fazem
+parte da implementação interna do fluxo padrão.
+
+O microserviço é responsável por declarar qual catálogo existe, seu enum quando
+aplicável, schema de settings, autorização e regras de domínio. A library é
+responsável pelo comportamento comum de persistência, CRUD, lifecycle,
+ordenação e validação estrutural do catálogo.
+
