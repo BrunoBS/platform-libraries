@@ -43,6 +43,15 @@ public final class SchemaValidationTechnicalErrors {
         );
     }
 
+    public static PlatformErrorDefinition schemaSourceUnavailable(String viewName) {
+        return new PlatformErrorDefinition(
+                "PLT-SCHEMA-005",
+                "Schema validation source is unavailable: " + viewName,
+                "Verify that the schema view exists, exposes the required columns, and is accessible by the application datasource.",
+                500
+        );
+    }
+
     private SchemaValidationTechnicalErrors() {
     }
 }
