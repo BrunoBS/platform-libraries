@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.library.catalog.model.CatalogEnum;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 
 import java.util.Map;
+import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 
 /**
  * Validator specialization for catalogs whose allowed codes are defined by a
@@ -23,7 +24,7 @@ public abstract class EnumCatalogValidator<
     }
 
     @Override
-    protected void validateAdditionalCatalogFields(D dto, CatalogValidationResult result) {
+    protected void validateAdditionalCatalogFields(D dto, ValidationResult result) {
         super.validateAdditionalCatalogFields(dto, result);
         if (dto.code() != null
                 && !dto.code().isBlank()
@@ -37,6 +38,6 @@ public abstract class EnumCatalogValidator<
         validateEnumCatalogFields(dto, result);
     }
 
-    protected void validateEnumCatalogFields(D dto, CatalogValidationResult result) {
+    protected void validateEnumCatalogFields(D dto, ValidationResult result) {
     }
 }
