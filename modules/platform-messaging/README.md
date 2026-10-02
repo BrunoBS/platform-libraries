@@ -202,3 +202,18 @@ NoOp repository -> PlatformDefaultMessageProvider -> Bundle
 ```
 
 Não é necessário configurar DataSource apenas para utilizar mensagens locais.
+
+
+## Resiliência das fontes
+
+A resolução de mensagens é fail-safe. Falhas de infraestrutura em cache, datasource/view ou bundle são registradas e não interrompem a cadeia de fallback:
+
+```text
+Redis -> Banco / VIEW -> Bundle -> Platform Default
+```
+
+Um miss é fluxo normal e não é tratado como falha. Quando nenhuma fonte conhece a chave, a library devolve uma mensagem técnica interna e imutável com HTTP 500, sem depender de I/O ou configuração.
+
+Quando o datasource está habilitado, a library executa no startup uma consulta sem linhas (`WHERE 1 = 0`) com as colunas do contrato para diagnosticar existência/acesso da view. Falhas são registradas, mas não impedem o startup; em runtime a resolução continua pelos fallbacks disponíveis.
+
+Falhas repetidas durante a resolução são limitadas por fonte/tipo de erro em uma janela curta para evitar tempestade de logs.

@@ -2,7 +2,6 @@ package br.com.portalmanager.platform.library.messaging.resolver;
 
 import br.com.portalmanager.platform.library.messaging.cache.ApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.cache.NoOpApiMessageCache;
-import br.com.portalmanager.platform.library.messaging.exception.ApiMessageNotFoundException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
 import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
 import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
@@ -14,8 +13,6 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 class DefaultApiMessageResolverTest {
 
@@ -121,62 +118,47 @@ class DefaultApiMessageResolverTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenMessageIsNotFoundInAnyCandidate() {
+    void shouldUseImmutablePlatformDefaultWhenMessageIsNotFoundAnywhere() {
         ApiMessageRepository repository = (k, l) -> Optional.empty();
         var resolver = new DefaultApiMessageResolver(
                 repository,
                 new NoOpApiMessageCache(),
                 Locale.forLanguageTag("pt-BR"),
-                new PlatformDefaultMessageProvider()
+                (k, l) -> Optional.empty()
         );
 
-        assertThrows(ApiMessageNotFoundException.class, () ->
-                resolver.resolve("key.inexistente", Locale.forLanguageTag("en-US"))
-        );
-    }
-    @Test
-    void shouldPropagateRepositoryFailureInsteadOfHidingItAsMessageNotFound() {
-        RuntimeException repositoryFailure = new RuntimeException("database unavailable");
-        ApiMessageRepository repository = (k, l) -> {
-            throw repositoryFailure;
-        };
+        var result = resolver.resolve("key.inexistente", Locale.forLanguageTag("en-US"));
 
-        var resolver = new DefaultApiMessageResolver(
-                repository,
-                new NoOpApiMessageCache(),
-                Locale.forLanguageTag("pt-BR"),
-                new PlatformDefaultMessageProvider()
-        );
-
-        RuntimeException thrown = assertThrows(
-                RuntimeException.class,
-                () -> resolver.resolve("user.not.found", Locale.forLanguageTag("pt-BR"))
-        );
-
-        assertSame(repositoryFailure, thrown);
+        assertEquals("PLT-500", result.code());
+        assertEquals("platform.internal.error", result.messageKey());
+        assertEquals(500, result.httpStatus());
     }
 
     @Test
-    void shouldPropagateProviderFailureInsteadOfConvertingItToMessageNotFound() {
-        ApiMessageRepository repository = (k, l) -> Optional.empty();
-        RuntimeException providerFailure = new RuntimeException("bundle failure");
-        ApiMessageProvider provider = (k, l) -> {
-            throw providerFailure;
-        };
-
-        var resolver = new DefaultApiMessageResolver(
-                repository,
-                new NoOpApiMessageCache(),
-                Locale.forLanguageTag("pt-BR"),
-                provider
+    void shouldContinueToProviderWhenRepositoryFails() {
+        ApiMessageRepository repository = (k, l) -> { throw new RuntimeException("database unavailable"); };
+        ApiMessageProvider provider = (k, l) -> Optional.of(
+                new ApiMessage("BUNDLE-500", k, l.toLanguageTag(), "Bundle fallback", "Try again", 500)
         );
+        var resolver = new DefaultApiMessageResolver(repository, new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"), provider);
 
-        RuntimeException thrown = assertThrows(
-                RuntimeException.class,
-                () -> resolver.resolve("user.not.found", Locale.forLanguageTag("pt-BR"))
-        );
+        var result = resolver.resolve("user.not.found", Locale.forLanguageTag("pt-BR"));
 
-        assertSame(providerFailure, thrown);
+        assertEquals("Bundle fallback", result.message());
+    }
+
+    @Test
+    void shouldUseImmutableDefaultWhenProviderAlsoFails() {
+        ApiMessageRepository repository = (k, l) -> { throw new RuntimeException("database unavailable"); };
+        ApiMessageProvider provider = (k, l) -> { throw new RuntimeException("bundle unavailable"); };
+        var resolver = new DefaultApiMessageResolver(repository, new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"), provider);
+
+        var result = resolver.resolve("user.not.found", Locale.forLanguageTag("pt-BR"));
+
+        assertEquals("PLT-500", result.code());
+        assertEquals(500, result.httpStatus());
     }
 
     @Test
