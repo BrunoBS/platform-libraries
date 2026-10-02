@@ -27,9 +27,9 @@ Ele também é a chave usada em URLs e relacionamentos de banco.
 
 ## Tipos de catálogo
 
-### Dynamic Catalog
+### Included Catalog
 
-`DynamicCatalogService` (o modelo Included/Dynamic) é usado quando novos códigos podem ser incluídos em runtime e o banco é a fonte de verdade.
+`IncludedCatalogService` (o modelo Included) é usado quando novos códigos podem ser incluídos em runtime e o banco é a fonte de verdade.
 
 ### Enum Catalog
 
@@ -41,7 +41,7 @@ A persistência é igual nos dois modelos; muda somente quem governa quais `code
 
 ```text
 CatalogDTO
-DynamicCatalogService
+IncludedCatalogService
 EnumCatalogService
 CatalogController
 ```
@@ -78,7 +78,7 @@ POST   /api/v1/<catalog>/{code}/restore
 - ordenação por `sortOrder` e `code`;
 - validação do formato e duplicidade do `code`;
 - no `EnumCatalogService`, validação do `code` contra o enum;
-- no `DynamicCatalogService`, criação de novos códigos em runtime;
+- no `IncludedCatalogService`, criação de novos códigos em runtime;
 - validação opcional de `settings` por `CatalogSettingsValidator`.
 
 ## Relacionamentos
@@ -101,7 +101,7 @@ O `code` persistido e administrável por `CatalogEntity` segue o formato upperca
 
 ```text
 EnumCatalogService
-DynamicCatalogService
+IncludedCatalogService
 ```
 
 ## Ownership
