@@ -99,7 +99,7 @@ view-name
 
 nenhum ResourceSchemaRepository disponível
         ↓
-startup falha
+runtime de schema validation não é ativado
 ```
 
 Não existe `enabled`, `datasource.enabled` ou property de `mode`. Se o serviço fornece um `ResourceSchemaRepository`, a implementação JDBC da library não é criada por causa de `@ConditionalOnMissingBean`. Assim o serviço pode resolver schemas por tabela própria, JPA, JDBC customizado ou outra fonte sem alterar o contrato da validação.
@@ -116,6 +116,12 @@ definition
 ```
 
 A biblioteca consulta essa VIEW diretamente, assim como `platform-messaging` consulta sua view de mensagens.
+
+O contrato exige **no máximo uma linha por `(resource_type, resource_code)`**. A VIEW deve expor somente a versão publicada corrente de cada recurso. A library não usa `LIMIT 1` para esconder duplicidade: zero linhas significa ausência e permite fallback; uma linha é o schema resolvido; mais de uma linha é violação do contrato da VIEW e a falha JDBC é propagada.
+
+A VIEW MySQL não possui índices próprios. Performance e unicidade devem ser garantidas pelas tabelas base do serviço owner. Como referência, o modelo owner deve possuir índice/constraint para localizar a configuração por tipo/código e índice adequado para localizar a versão `PUBLISHED` corrente. Os nomes e DDL exatos pertencem ao serviço owner e não à library.
+
+Quando o consumidor fornece um `ResourceSchemaRepository` customizado, ele deve preservar a mesma semântica: `Optional.empty()` exclusivamente para schema inexistente e falhas de infraestrutura/configuração devem ser propagadas, não convertidas em ausência.
 
 
 ### Defaults Golden
