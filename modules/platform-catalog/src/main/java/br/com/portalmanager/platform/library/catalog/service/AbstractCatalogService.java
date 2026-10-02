@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract sealed class AbstractCatalogService<E extends CatalogEntity>
-        permits EnumCatalogService, DynamicCatalogService {
+        permits EnumCatalogService, IncludedCatalogService {
 
     private static final Set<String> ALLOWED_FILTERS = Set.of("active", "code");
 
