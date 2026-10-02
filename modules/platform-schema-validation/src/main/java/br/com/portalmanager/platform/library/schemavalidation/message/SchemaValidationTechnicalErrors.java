@@ -30,13 +30,18 @@ public final class SchemaValidationTechnicalErrors {
         );
     }
 
-    public static final PlatformErrorDefinition PUBLISHED_SCHEMA_INVALID =
-            new PlatformErrorDefinition(
-                    "PLT-SCHEMA-004",
-                    "Published resource schema is invalid",
-                    "Correct and republish the JSON Schema definition.",
-                    500
-            );
+    public static PlatformErrorDefinition publishedSchemaInvalid(
+            String type,
+            String code,
+            Integer version
+    ) {
+        return new PlatformErrorDefinition(
+                "PLT-SCHEMA-004",
+                "Published resource schema is invalid for " + type + "/" + code + ", version " + version,
+                "Correct and republish the JSON Schema definition.",
+                500
+        );
+    }
 
     private SchemaValidationTechnicalErrors() {
     }
