@@ -62,7 +62,7 @@ final class SchemaValidationErrorMapper {
             return withValue(field, argument(error, argumentIndex));
         }
 
-        return Map.of("0", field);
+        return rawParameters(field, error.getArguments());
     }
 
     private Map<String, Object> withValue(String field, String value) {
