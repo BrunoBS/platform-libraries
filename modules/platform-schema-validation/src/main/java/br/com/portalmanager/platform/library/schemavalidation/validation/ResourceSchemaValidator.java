@@ -13,13 +13,13 @@ import com.networknt.schema.SpecificationVersion;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.Map;
 
 public class ResourceSchemaValidator {
 
     private final ResourceSchemaResolver resolver;
     private final ObjectMapper objectMapper;
     private final SchemaRegistry schemaRegistry;
+    private final SchemaValidationErrorMapper errorMapper = new SchemaValidationErrorMapper();
 
     public ResourceSchemaValidator(
             ResourceSchemaResolver resolver,
@@ -43,10 +43,11 @@ public class ResourceSchemaValidator {
 
         schema.validate(payload).forEach(error -> {
             String field = resolveField(error);
+            var mappedError = errorMapper.map(error, field);
             result.addError(
-                    field,
-                    SchemaValidationMessageKeys.INVALID,
-                    Map.of("0", field, "1", error.getMessage())
+                    mappedError.field(),
+                    mappedError.messageKey(),
+                    java.util.Map.of("0", mappedError.field())
             );
         });
 
