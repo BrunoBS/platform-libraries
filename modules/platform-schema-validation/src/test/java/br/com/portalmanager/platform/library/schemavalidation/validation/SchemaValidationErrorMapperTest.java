@@ -25,7 +25,14 @@ class SchemaValidationErrorMapperTest {
 
     @Test
     void shouldDeriveKeyForFutureKeywordWithoutLibraryChange() {
-        assertKey("futureKeyword", "schemavalidation.future-keyword");
+        SchemaValidationErrorMapper.MappedValidationError mapped =
+                map("futureKeyword", "name", "first", "second");
+
+        assertEquals("schemavalidation.future-keyword", mapped.messageKey());
+        assertEquals(
+                Map.of("0", "name", "1", "first", "2", "second"),
+                mapped.parameters()
+        );
     }
 
     @Test
@@ -49,6 +56,14 @@ class SchemaValidationErrorMapperTest {
                 map("minLength", "name", 3);
 
         assertEquals(Map.of("0", "name", "1", "3"), mapped.parameters());
+    }
+
+    @Test
+    void shouldMapFormatNameWithoutExposingInvalidValue() {
+        SchemaValidationErrorMapper.MappedValidationError mapped =
+                map("format", "email", "email", "not-an-email");
+
+        assertEquals(Map.of("0", "email", "1", "email"), mapped.parameters());
     }
 
     @Test
