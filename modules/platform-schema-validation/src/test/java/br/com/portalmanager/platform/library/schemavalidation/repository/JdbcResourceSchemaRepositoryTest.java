@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class JdbcResourceSchemaRepositoryTest {
@@ -33,6 +34,33 @@ class JdbcResourceSchemaRepositoryTest {
         properties.setViewName("vw_platform_resource_schemas");
 
         repository = new JdbcResourceSchemaRepository(jdbcTemplate, properties);
+    }
+
+    @Test
+    void shouldValidateDefaultViewContractWithoutReadingBusinessData() {
+        repository.validateSource();
+
+        verify(jdbcTemplate).query(
+                org.mockito.ArgumentMatchers.argThat(sql ->
+                        sql.contains("FROM vw_platform_resource_schemas")
+                                && sql.contains("WHERE 1 = 0")
+                                && sql.contains("resource_type")
+                                && sql.contains("resource_code")
+                                && sql.contains("schema_version")
+                                && sql.contains("definition")
+                ),
+                any(org.springframework.jdbc.core.ResultSetExtractor.class)
+        );
+    }
+
+    @Test
+    void shouldFailSourceValidationWhenViewIsUnavailable() {
+        when(jdbcTemplate.query(
+                any(String.class),
+                any(org.springframework.jdbc.core.ResultSetExtractor.class)
+        )).thenThrow(new DataAccessResourceFailureException("view unavailable"));
+
+        assertThrows(DataAccessResourceFailureException.class, repository::validateSource);
     }
 
     @Test
