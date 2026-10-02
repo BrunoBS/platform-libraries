@@ -6,15 +6,28 @@ import com.networknt.schema.Error;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 final class SchemaValidationErrorMapper {
 
-    private static final Set<String> LIMIT_KEYWORDS = Set.of(
-            "minLength", "maxLength", "minimum", "maximum",
-            "exclusiveMinimum", "exclusiveMaximum", "multipleOf",
-            "minItems", "maxItems", "minContains", "maxContains",
-            "minProperties", "maxProperties"
+    private static final Map<String, Integer> VALUE_ARGUMENT_INDEX = Map.of(
+            "type", 1,
+            "enum", 0,
+            "const", 0,
+            "format", 0,
+            "dependentRequired", 1,
+            "minLength", 0,
+            "maxLength", 0,
+            "minimum", 0,
+            "maximum", 0,
+            "exclusiveMinimum", 0,
+            "exclusiveMaximum", 0,
+            "multipleOf", 0,
+            "minItems", 0,
+            "maxItems", 0,
+            "minContains", 0,
+            "maxContains", 0,
+            "minProperties", 0,
+            "maxProperties", 0
     );
 
     private static final Set<String> FIELD_ONLY_KEYWORDS = Set.of(
@@ -22,9 +35,6 @@ final class SchemaValidationErrorMapper {
             "propertyNames", "oneOf", "not",
             "unevaluatedProperties", "unevaluatedItems"
     );
-
-    private static final Map<String, BiFunction<Error, String, Map<String, Object>>> PARAMETER_MAPPERS =
-            parameterMappers();
 
     MappedValidationError map(Error error, String field) {
         String keyword = error.getKeyword();
@@ -38,85 +48,58 @@ final class SchemaValidationErrorMapper {
     }
 
     private String mappedField(Error error, String field) {
-        String requiredField = "dependentRequired".equals(error.getKeyword())
-                ? argument(error, 0)
-                : null;
-
-        return requiredField != null ? requiredField : field;
+        if ("dependentRequired".equals(error.getKeyword())) {
+            String requiredField = argument(error, 0);
+            if (requiredField != null) {
+                return requiredField;
+            }
+        }
+        return field;
     }
 
     private Map<String, Object> parameters(Error error, String field) {
         String keyword = error.getKeyword();
 
-        if (keyword == null || keyword.isBlank()) {
-            return fieldOnly(field);
+        if (keyword == null || keyword.isBlank() || FIELD_ONLY_KEYWORDS.contains(keyword)) {
+            return Map.of("0", field);
         }
 
-        BiFunction<Error, String, Map<String, Object>> mapper = PARAMETER_MAPPERS.get(keyword);
-        return mapper != null
-                ? mapper.apply(error, field)
-                : rawParameters(field, error.getArguments());
+        Integer argumentIndex = VALUE_ARGUMENT_INDEX.get(keyword);
+        if (argumentIndex != null) {
+            return withValue(field, argument(error, argumentIndex));
+        }
+
+        return rawParameters(field, error.getArguments());
     }
 
-    private static Map<String, Object> withArgument(String field, int index, Error error) {
-        return withValue(field, argument(error, index));
+    private Map<String, Object> withValue(String field, String value) {
+        if (value == null) {
+            return Map.of("0", field);
+        }
+        return Map.of("0", field, "1", value);
     }
 
-    private static Map<String, Object> withValue(String field, String value) {
-        return value == null
-                ? fieldOnly(field)
-                : Map.of("0", field, "1", value);
-    }
-
-    private static Map<String, Object> fieldOnly(String field) {
-        return Map.of("0", field);
-    }
-
-    private static Map<String, Object> rawParameters(String field, Object[] arguments) {
+    private Map<String, Object> rawParameters(String field, Object[] arguments) {
         if (arguments == null || arguments.length == 0) {
-            return fieldOnly(field);
+            return Map.of("0", field);
         }
 
         Map<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("0", field);
-
         for (int index = 0; index < arguments.length; index++) {
             if (arguments[index] != null) {
                 parameters.put(String.valueOf(index + 1), String.valueOf(arguments[index]));
             }
         }
-
         return Map.copyOf(parameters);
     }
 
-    private static String argument(Error error, int index) {
+    private String argument(Error error, int index) {
         Object[] arguments = error.getArguments();
-
-        if (arguments == null || index < 0 || index >= arguments.length || arguments[index] == null) {
+        if (arguments == null || index >= arguments.length || arguments[index] == null) {
             return null;
         }
-
         return String.valueOf(arguments[index]);
-    }
-
-    private static Map<String, BiFunction<Error, String, Map<String, Object>>> parameterMappers() {
-        Map<String, BiFunction<Error, String, Map<String, Object>>> mappers = new LinkedHashMap<>();
-
-        mappers.put("type", (error, field) -> withArgument(field, 1, error));
-        mappers.put("enum", (error, field) -> withArgument(field, 0, error));
-        mappers.put("const", (error, field) -> withArgument(field, 0, error));
-        mappers.put("format", (error, field) -> withArgument(field, 0, error));
-        mappers.put("dependentRequired", (error, field) -> withArgument(field, 1, error));
-
-        LIMIT_KEYWORDS.forEach(keyword ->
-                mappers.put(keyword, (error, field) -> withArgument(field, 0, error))
-        );
-
-        FIELD_ONLY_KEYWORDS.forEach(keyword ->
-                mappers.put(keyword, (error, field) -> fieldOnly(field))
-        );
-
-        return Map.copyOf(mappers);
     }
 
     record MappedValidationError(
