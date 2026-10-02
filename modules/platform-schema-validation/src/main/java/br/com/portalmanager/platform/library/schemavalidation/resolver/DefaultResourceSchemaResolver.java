@@ -2,6 +2,10 @@ package br.com.portalmanager.platform.library.schemavalidation.resolver;
 
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.cache.ResourceSchemaCache;
+import br.com.portalmanager.platform.library.schemavalidation.cache.NoOpResourceSchemaCache;
+import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
@@ -12,13 +16,15 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultResourceSchemaResolver.class);
+    private static final Duration CACHE_FAILURE_LOG_INTERVAL = Duration.ofMinutes(10);
+    private static final ConcurrentMap<String, Long> LAST_FAILURE_LOG = new ConcurrentHashMap<>();
 
     private final ResourceSchemaRepository repository;
     private final PlatformSchemaValidationProperties properties;
     private final ResourceSchemaCache cache;
 
     public DefaultResourceSchemaResolver(ResourceSchemaRepository repository, PlatformSchemaValidationProperties properties) {
-        this(repository, properties, new br.com.portalmanager.platform.library.schemavalidation.cache.NoOpResourceSchemaCache());
+        this(repository, properties, new NoOpResourceSchemaCache());
     }
 
     public DefaultResourceSchemaResolver(
@@ -54,7 +60,7 @@ public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
                 return cached;
             }
         } catch (RuntimeException exception) {
-            log.error("Schema validation Redis cache unavailable; continuing with datasource", exception);
+            logCacheFailure("read", exception, "Schema validation Redis cache unavailable; continuing with datasource");
         }
 
         var resolved = repository.find(type, code);
@@ -62,10 +68,21 @@ public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
             try {
                 cache.put(schema);
             } catch (RuntimeException exception) {
-                log.error("Schema validation Redis cache unavailable while storing schema; continuing", exception);
+                logCacheFailure("write", exception, "Schema validation Redis cache unavailable while storing schema; continuing");
             }
         });
         return resolved;
+    }
+
+    private void logCacheFailure(String operation, RuntimeException exception, String message) {
+        String throttleKey = operation + ":" + exception.getClass().getName();
+        long now = System.currentTimeMillis();
+        Long previous = LAST_FAILURE_LOG.putIfAbsent(throttleKey, now);
+        if (previous != null && now - previous < CACHE_FAILURE_LOG_INTERVAL.toMillis()) {
+            return;
+        }
+        LAST_FAILURE_LOG.put(throttleKey, now);
+        log.error("{} [operation={}]", message, operation, exception);
     }
 
     private String requireText(String value, String field) {
