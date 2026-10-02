@@ -103,7 +103,7 @@ class AbstractCatalogValidatorContractTest {
         }
     }
 
-    private static final class TestValidator extends AbstractCatalogValidator<CatalogDTO> {
+    private static final class TestValidator extends AbstractCatalogValidator {
 
         private TestValidator(TestRepository repository) {
             super(repository);
