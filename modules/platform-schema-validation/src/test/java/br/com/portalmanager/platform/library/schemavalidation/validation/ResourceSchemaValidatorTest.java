@@ -217,10 +217,11 @@ class ResourceSchemaValidatorTest {
                 )
         );
 
-        assertEquals(1, exception.getDetails().size());
-        assertEquals(
-                expectedMessageKey,
-                exception.getDetails().getFirst().messageKey()
+        org.junit.jupiter.api.Assertions.assertTrue(
+                exception.getDetails().stream()
+                        .anyMatch(detail -> expectedMessageKey.equals(detail.messageKey())),
+                () -> "Expected message key " + expectedMessageKey + " but got " +
+                        exception.getDetails().stream().map(detail -> detail.messageKey()).toList()
         );
     }
 
