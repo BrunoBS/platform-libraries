@@ -38,28 +38,24 @@ final class SchemaValidationErrorMapper {
     }
 
     private String mappedField(Error error, String field) {
-        if ("dependentRequired".equals(error.getKeyword())) {
-            String requiredField = argument(error, 0);
-            if (requiredField != null) {
-                return requiredField;
-            }
-        }
-        return field;
+        String requiredField = "dependentRequired".equals(error.getKeyword())
+                ? argument(error, 0)
+                : null;
+
+        return requiredField != null ? requiredField : field;
     }
 
     private Map<String, Object> parameters(Error error, String field) {
         String keyword = error.getKeyword();
 
         if (keyword == null || keyword.isBlank()) {
-            return Map.of("0", field);
+            return fieldOnly(field);
         }
 
         BiFunction<Error, String, Map<String, Object>> mapper = PARAMETER_MAPPERS.get(keyword);
-        if (mapper != null) {
-            return mapper.apply(error, field);
-        }
-
-        return rawParameters(field, error.getArguments());
+        return mapper != null
+                ? mapper.apply(error, field)
+                : rawParameters(field, error.getArguments());
     }
 
     private static Map<String, Object> withArgument(String field, int index, Error error) {
@@ -67,10 +63,9 @@ final class SchemaValidationErrorMapper {
     }
 
     private static Map<String, Object> withValue(String field, String value) {
-        if (value == null) {
-            return Map.of("0", field);
-        }
-        return Map.of("0", field, "1", value);
+        return value == null
+                ? fieldOnly(field)
+                : Map.of("0", field, "1", value);
     }
 
     private static Map<String, Object> fieldOnly(String field) {
@@ -84,19 +79,23 @@ final class SchemaValidationErrorMapper {
 
         Map<String, Object> parameters = new LinkedHashMap<>();
         parameters.put("0", field);
+
         for (int index = 0; index < arguments.length; index++) {
             if (arguments[index] != null) {
                 parameters.put(String.valueOf(index + 1), String.valueOf(arguments[index]));
             }
         }
+
         return Map.copyOf(parameters);
     }
 
     private static String argument(Error error, int index) {
         Object[] arguments = error.getArguments();
-        if (arguments == null || index >= arguments.length || arguments[index] == null) {
+
+        if (arguments == null || index < 0 || index >= arguments.length || arguments[index] == null) {
             return null;
         }
+
         return String.valueOf(arguments[index]);
     }
 
