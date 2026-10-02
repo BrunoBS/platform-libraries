@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.catalog.mapper;
 
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
+import br.com.portalmanager.platform.library.catalog.exception.CatalogTechnicalException;
+import br.com.portalmanager.platform.library.catalog.message.CatalogMessageKeys;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
