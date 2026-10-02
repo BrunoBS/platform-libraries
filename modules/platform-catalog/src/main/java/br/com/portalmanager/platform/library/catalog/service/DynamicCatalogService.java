@@ -9,41 +9,27 @@ import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsV
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import tools.jackson.databind.ObjectMapper;
 
-/**
- * Simple path for fully dynamic catalogs: the database is the source of truth
- * for allowed catalog codes.
- */
 public abstract non-sealed class DynamicCatalogService<E extends CatalogEntity>
-        extends AbstractCatalogService<E, CatalogDTO> {
+        extends AbstractCatalogService<E> {
 
     protected DynamicCatalogService(
-            CatalogRepository<E> repository,
-            ObjectMapper objectMapper,
-            Class<E> entityClass) {
+            CatalogRepository<E> repository, ObjectMapper objectMapper, Class<E> entityClass) {
         this(repository, objectMapper, entityClass, CatalogSettingsValidator.none());
     }
 
     protected DynamicCatalogService(
-            CatalogRepository<E> repository,
-            ObjectMapper objectMapper,
-            Class<E> entityClass,
-            CatalogSettingsValidator<CatalogDTO> settingsValidator) {
-        super(
-                repository,
-                new CatalogMapper<>(entityClass, objectMapper),
-                validator(repository, entityClass, settingsValidator)
-        );
+            CatalogRepository<E> repository, ObjectMapper objectMapper, Class<E> entityClass,
+            CatalogSettingsValidator settingsValidator) {
+        super(repository, new CatalogMapper<>(entityClass, objectMapper),
+                validator(repository, entityClass, settingsValidator));
     }
 
-    private static <E extends CatalogEntity> AbstractCatalogValidator<CatalogDTO> validator(
-            CatalogRepository<E> repository,
-            Class<E> entityClass,
-            CatalogSettingsValidator<CatalogDTO> settingsValidator) {
-        CatalogSettingsValidator<CatalogDTO> resolved = settingsValidator == null
-                ? CatalogSettingsValidator.none()
-                : settingsValidator;
-
-        return new AbstractCatalogValidator<>(repository) {
+    private static <E extends CatalogEntity> AbstractCatalogValidator validator(
+            CatalogRepository<E> repository, Class<E> entityClass,
+            CatalogSettingsValidator settingsValidator) {
+        CatalogSettingsValidator resolved =
+                settingsValidator == null ? CatalogSettingsValidator.none() : settingsValidator;
+        return new AbstractCatalogValidator(repository) {
             @Override
             protected void validateSettings(CatalogDTO dto, ValidationResult result) {
                 resolved.validate(dto, result);
