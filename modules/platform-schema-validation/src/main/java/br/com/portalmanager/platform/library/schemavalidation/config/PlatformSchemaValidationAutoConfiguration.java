@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.library.schemavalidation.resolver.DefaultRe
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformSchemaValidationProperties.class)
+@ConditionalOnBean(ResourceSchemaRepository.class)
 public class PlatformSchemaValidationAutoConfiguration {
 
     @Bean
