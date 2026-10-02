@@ -101,12 +101,14 @@ valida contrato da VIEW no startup
         ↓
 view-name
 
-nenhum ResourceSchemaRepository disponível
+nenhum ResourceSchemaRepository + nenhum JdbcTemplate
         ↓
-runtime de schema validation não é ativado
+PLT-SCHEMA-007
+        ↓
+startup failure
 ```
 
-Não existe `enabled`, `datasource.enabled` ou property de `mode`. Se o serviço fornece um `ResourceSchemaRepository`, a implementação JDBC da library não é criada por causa de `@ConditionalOnMissingBean`. Assim o serviço pode resolver schemas por tabela própria, JPA, JDBC customizado ou outra fonte sem alterar o contrato da validação.
+Não existe `enabled`, `datasource.enabled` ou property de `mode`. Adicionar o módulo declara a intenção de usar Schema Validation; por isso, a aplicação não inicia sem uma fonte. O caminho default exige `JdbcTemplate`; alternativamente, o serviço deve fornecer um `ResourceSchemaRepository` customizado. Se o serviço fornece um `ResourceSchemaRepository`, a implementação JDBC da library não é criada por causa de `@ConditionalOnMissingBean`. Assim o serviço pode resolver schemas por tabela própria, JPA, JDBC customizado ou outra fonte sem alterar o contrato da validação.
 
 ## Contrato da VIEW
 
@@ -123,11 +125,11 @@ A biblioteca consulta essa VIEW diretamente, assim como `platform-messaging` con
 
 Quando o caminho JDBC default é utilizado, a library valida a fonte no startup com uma consulta estrutural que seleciona as quatro colunas contratuais usando `WHERE 1 = 0`. A consulta não exige schema publicado nem lê dados de negócio; ela comprova acesso à fonte, existência da VIEW e compatibilidade das colunas. Falha de conexão, permissão, VIEW inexistente ou contrato incompatível impede a inicialização. Implementações customizadas de `ResourceSchemaRepository` não recebem health check genérico da library.
 
-O contrato exige **no máximo uma linha por `(resource_type, resource_code)`**. A VIEW deve expor somente a versão publicada corrente de cada recurso. A library não usa `LIMIT 1` para esconder duplicidade: zero linhas significa ausência e permite fallback; uma linha é o schema resolvido; mais de uma linha é violação do contrato da VIEW e a falha JDBC é propagada.
+O contrato exige **no máximo uma linha por `(resource_type, resource_code)`**. A VIEW deve expor somente a versão publicada corrente de cada recurso. A library não usa `LIMIT 1` para esconder duplicidade: zero linhas significa ausência e permite fallback; uma linha é o schema resolvido; mais de uma linha é violação do contrato da VIEW e gera `PlatformConfigurationException` (`PLT-SCHEMA-006`), preservando a exceção JDBC original como causa.
 
 A VIEW MySQL não possui índices próprios. Performance e unicidade devem ser garantidas pelas tabelas base do serviço owner. Como referência, o modelo owner deve possuir índice/constraint para localizar a configuração por tipo/código e índice adequado para localizar a versão `PUBLISHED` corrente. Os nomes e DDL exatos pertencem ao serviço owner e não à library.
 
-Quando o consumidor fornece um `ResourceSchemaRepository` customizado, ele deve preservar a mesma semântica: `Optional.empty()` exclusivamente para schema inexistente e falhas de infraestrutura/configuração devem ser propagadas, não convertidas em ausência.
+Quando o consumidor fornece um `ResourceSchemaRepository` customizado, ele deve preservar a mesma semântica: cardinalidade lógica 0..1 para cada `(resourceType, resourceCode)`; `Optional.empty()` exclusivamente para schema inexistente; mais de um schema é violação de contrato e deve lançar `PlatformConfigurationException`, nunca escolher um registro arbitrariamente. Falhas de infraestrutura/configuração também devem ser propagadas como erro de plataforma, não convertidas em ausência.
 
 
 ### Defaults Golden
@@ -150,7 +152,7 @@ A biblioteca não move regras de negócio para o aspect e não exige annotations
 
 ## Runtime e resolução de schema
 
-A resolução continua consultando a fonte configurada em cada validação para descobrir a versão publicada atual. Ausência de registro permite o fallback `(type, DEFAULT)`; falhas de infraestrutura do datasource não são convertidas em ausência e são propagadas.
+A resolução continua consultando a fonte configurada em cada validação para descobrir a versão publicada atual. Ausência de registro permite o fallback `(type, DEFAULT)`; falhas de infraestrutura do datasource não são convertidas em ausência. No repository JDBC default elas são traduzidas para `PlatformConfigurationException` (`PLT-SCHEMA-005`), preservando a causa JDBC; duplicidade é traduzida para `PLT-SCHEMA-006`.
 
 Após a resolução, a definição publicada é parseada e compilada para a validação corrente. O módulo não mantém cache de resolução, versão ou JSON Schema compilado.
 
@@ -179,7 +181,7 @@ Keywords são normalizadas de forma determinística para chaves do namespace `sc
 
 Essas mensagens estruturais pertencem ao fluxo normal do `platform-messaging`: possuem definição default nos bundles `schemavalidation_*.properties` e podem ser sobrescritas pelo mecanismo central de mensagens sem alterar a library ou o serviço consumidor.
 
-Erros técnicos `PLT-SCHEMA-001` a `PLT-SCHEMA-004` são diferentes: representam configuração ou integridade da plataforma, usam `PlatformErrorDefinition` e permanecem como contrato técnico estável, fora do mecanismo de override das mensagens estruturais.
+Erros técnicos `PLT-SCHEMA-001` a `PLT-SCHEMA-007` são diferentes: representam configuração ou integridade da plataforma, usam `PlatformErrorDefinition` e permanecem como contrato técnico estável, fora do mecanismo de override das mensagens estruturais.
 
 
 ### Extensibilidade de keywords
