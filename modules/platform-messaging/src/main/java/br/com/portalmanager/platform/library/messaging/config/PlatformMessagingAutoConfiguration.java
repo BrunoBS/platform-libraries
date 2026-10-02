@@ -17,29 +17,45 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformMessagingProperties.class)
 @ConditionalOnProperty(prefix = "platform.messaging", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlatformMessagingAutoConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(PlatformMessagingAutoConfiguration.class);
+
     @Bean
     @ConditionalOnMissingBean(ApiMessageRepository.class)
-    ApiMessageRepository noOpApiMessageRepository() {
+    ApiMessageRepository noOpApiMessageRepository(PlatformMessagingProperties properties) {
+        if (properties.getDatasource().isEnabled()) {
+            log.error("Platform messaging datasource is enabled but JdbcTemplate is unavailable; continuing through fallbacks");
+        }
         return new NoOpApiMessageRepository();
     }
 
     @Bean
     @ConditionalOnMissingBean(ApiMessageCache.class)
-    @ConditionalOnProperty(prefix = "platform.messaging.cache", name = "enabled", havingValue = "false", matchIfMissing = true)
-    ApiMessageCache noOpApiMessageCache() {
+    ApiMessageCache noOpApiMessageCache(PlatformMessagingProperties properties) {
+        if (properties.getCache().isEnabled()) {
+            log.error("Platform messaging cache is enabled but Redis infrastructure is unavailable; continuing through fallbacks");
+        }
         return new NoOpApiMessageCache();
     }
 
     @Bean
     @ConditionalOnMissingBean(ApiMessageProvider.class)
     ApiMessageProvider apiMessageProvider(Environment environment) {
-        return new PlatformDefaultMessageProvider(requireApplicationName(environment));
+        try {
+            return new PlatformDefaultMessageProvider(requireApplicationName(environment));
+        } catch (RuntimeException exception) {
+            log.error("Platform messaging bundle unavailable during startup; continuing with immutable platform default", exception);
+            return (key, locale) -> Optional.empty();
+        }
     }
 
     @Bean
