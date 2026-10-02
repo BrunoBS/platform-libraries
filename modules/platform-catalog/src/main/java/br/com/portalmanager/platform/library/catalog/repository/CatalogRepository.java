@@ -18,8 +18,6 @@ public interface CatalogRepository<E extends CatalogEntity>
 
     Optional<E> findByCodeAndActiveFalse(String code);
 
-    List<E> findByActive(boolean active);
-
     Optional<E> findFirstByOrderBySortOrderDesc();
 
     Optional<E> findFirstByCodeNotOrderBySortOrderDesc(String code);
