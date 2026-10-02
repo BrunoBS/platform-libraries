@@ -42,7 +42,12 @@ public class ResourceSchemaValidator {
         ResourceSchema resourceSchema = resolver.resolve(resourceType, resourceCode);
         Schema schema = parse(resourceSchema);
 
-        schema.validate(payload).forEach(error -> {
+        schema.validate(
+                payload,
+                executionContext -> executionContext.executionConfig(
+                        executionConfig -> executionConfig.formatAssertionsEnabled(true)
+                )
+        ).forEach(error -> {
             String field = resolveField(error);
             SchemaValidationErrorMapper.MappedValidationError mappedError = errorMapper.map(error, field);
             result.addError(
