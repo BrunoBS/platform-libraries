@@ -17,6 +17,16 @@ public class JdbcApiMessageRepository implements ApiMessageRepository {
         this.properties = properties;
     }
 
+    public void validateSource() {
+        String tableName = properties.getDatasource().getViewName();
+        String sql = """
+            SELECT code, message_key, locale, message, solution, http_status
+            FROM %s
+            WHERE 1 = 0
+            """.formatted(tableName);
+        jdbcTemplate.query(sql, rs -> null);
+    }
+
     @Override
     public Optional<ApiMessage> find(String messageKey, Locale locale) {
         String tableName = properties.getDatasource().getViewName();
