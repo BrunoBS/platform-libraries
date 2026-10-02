@@ -29,7 +29,7 @@ Ele também é a chave usada em URLs e relacionamentos de banco.
 
 ### Dynamic Catalog
 
-`DynamicCatalogService` é usado quando novos códigos podem ser criados em runtime e o banco é a fonte de verdade.
+`DynamicCatalogService` (o modelo Included/Dynamic) é usado quando novos códigos podem ser incluídos em runtime e o banco é a fonte de verdade.
 
 ### Enum Catalog
 
@@ -73,6 +73,7 @@ POST   /api/v1/<catalog>/{code}/restore
 - soft delete por `active=false`;
 - restore com revalidação;
 - `sortOrder` automático quando não informado;
+- validações acumuladas usam diretamente o `ValidationResult` compartilhado da `platform-messaging`;
 - filtros padrão por `active` e `code`;
 - ordenação por `sortOrder` e `code`;
 - validação do formato e duplicidade do `code`;
@@ -89,6 +90,10 @@ workspaces.workspace_type_code
         ↓
 type_workspaces.code
 ```
+
+## Contratos de código
+
+O `code` persistido e administrável por `CatalogEntity` segue o formato uppercase/underscore documentado acima. `AbstractCatalogCode` é um Value Object semântico reutilizável e deliberadamente aceita também códigos dinâmicos como `workspace-service`; os dois contratos têm finalidades diferentes e não devem ser confundidos.
 
 ## Extension points
 
