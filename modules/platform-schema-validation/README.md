@@ -16,6 +16,8 @@ Use Case
   ↓
 ResourceSchemaValidationAspect
   ↓
+SchemaValidator
+  ↓
 ResourceSchemaValidator
   ↓
 ResourceSchemaResolver
@@ -188,4 +190,17 @@ futureKeyword         -> schemavalidation.future-keyword
 
 As assertions conhecidas do Draft 2020-12 possuem defaults nos bundles da library. Uma keyword futura pode ser atendida pelo mecanismo central do `platform-messaging` usando a chave normalizada, sem exigir nova versão desta library. Keywords ausentes, vazias ou com formato inseguro usam `schemavalidation.invalid`.
 
-O texto interno produzido pelo NetworkNT nunca faz parte do contrato público. A ativação de assertions é uma decisão separada do mapeamento de mensagens; em particular, disponibilizar `schemavalidation.format` não altera por si só a configuração que determina se `format` reprova um payload.
+O texto interno produzido pelo NetworkNT nunca faz parte do contrato público. A ativação de assertions é uma decisão separada do mapeamento de mensagens. No runtime Golden atual, assertions de `format` são habilitadas explicitamente; portanto, formatos declarados no schema, como `email`, participam da validação e podem reprovar o payload.
+
+
+## Validação explícita
+
+Além do uso automático por AOP, a library expõe `SchemaValidator` como contrato público para casos em que o tipo e o código do schema são definidos dinamicamente pelo próprio use case.
+
+```java
+private final SchemaValidator schemaValidator;
+
+schemaValidator.validate(resourceType, resourceCode, payload);
+```
+
+O consumidor depende somente de `SchemaValidator`. `ResourceSchemaValidator`, NetworkNT, resolução e mapeamento de erros permanecem detalhes internos da implementação. O Aspect também consome o mesmo contrato, garantindo um único fluxo de validação para chamadas automáticas e explícitas.
