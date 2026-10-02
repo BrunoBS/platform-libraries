@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.catalog.message.CatalogMessageKeys;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 
 import java.util.Map;
+import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 
 /**
  * Base validator for catalogs that also depend on an active related catalog.
@@ -22,7 +23,7 @@ public abstract class AbstractRelatedCatalogValidator<D extends CatalogDTOContra
     }
 
     @Override
-    protected final void validateAdditionalCatalogFields(D dto, CatalogValidationResult result) {
+    protected final void validateAdditionalCatalogFields(D dto, ValidationResult result) {
         R relation = relatedValue(dto);
         if (isMissing(relation)) {
             result.addError(
@@ -49,7 +50,7 @@ public abstract class AbstractRelatedCatalogValidator<D extends CatalogDTOContra
         return relation == null || (relation instanceof String value && value.isBlank());
     }
 
-    protected void validateRelatedFields(D dto, R relation, CatalogValidationResult result) {
+    protected void validateRelatedFields(D dto, R relation, ValidationResult result) {
     }
 
     protected abstract R relatedValue(D dto);
