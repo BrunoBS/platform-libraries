@@ -17,6 +17,10 @@ public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
     private final PlatformSchemaValidationProperties properties;
     private final ResourceSchemaCache cache;
 
+    public DefaultResourceSchemaResolver(ResourceSchemaRepository repository, PlatformSchemaValidationProperties properties) {
+        this(repository, properties, new br.com.portalmanager.platform.library.schemavalidation.cache.NoOpResourceSchemaCache());
+    }
+
     public DefaultResourceSchemaResolver(
             ResourceSchemaRepository repository,
             PlatformSchemaValidationProperties properties,
