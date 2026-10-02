@@ -169,7 +169,7 @@ platform-messaging
 bundle default / override central
 ```
 
-Keywords conhecidas são convertidas para chaves estáveis do módulo, como `schemavalidation.required`, `schemavalidation.type`, `schemavalidation.min-length` e `schemavalidation.additional-properties`. Keywords não mapeadas usam `schemavalidation.invalid` como fallback.
+Keywords são normalizadas de forma determinística para chaves do namespace `schemavalidation.*`, como `schemavalidation.required`, `schemavalidation.min-length` e `schemavalidation.additional-properties`. Se a chave normalizada não estiver cadastrada no `platform-messaging`, a resposta usa `schemavalidation.invalid` como fallback; o texto técnico do NetworkNT não é exposto.
 
 Essas mensagens estruturais pertencem ao fluxo normal do `platform-messaging`: possuem definição default nos bundles `schemavalidation_*.properties` e podem ser sobrescritas pelo mecanismo central de mensagens sem alterar a library ou o serviço consumidor.
 
@@ -189,14 +189,3 @@ futureKeyword         -> schemavalidation.future-keyword
 As assertions conhecidas do Draft 2020-12 possuem defaults nos bundles da library. Uma keyword futura pode ser atendida pelo mecanismo central do `platform-messaging` usando a chave normalizada, sem exigir nova versão desta library. Keywords ausentes, vazias ou com formato inseguro usam `schemavalidation.invalid`.
 
 O texto interno produzido pelo NetworkNT nunca faz parte do contrato público. A ativação de assertions é uma decisão separada do mapeamento de mensagens; em particular, disponibilizar `schemavalidation.format` não altera por si só a configuração que determina se `format` reprova um payload.
-
-
-### Resolução extensível por keyword
-
-O contrato de mensagens não mantém uma lista fechada no código. A keyword estruturada produzida pelo engine é normalizada de camelCase para kebab-case e recebe o namespace `schemavalidation.`.
-
-Exemplos: `minLength` → `schemavalidation.min-length`, `additionalProperties` → `schemavalidation.additional-properties` e uma futura `futureKeyword` → `schemavalidation.future-keyword`.
-
-As assertions conhecidas do Draft 2020-12 possuem defaults nos bundles da library. Uma keyword futura pode ser atendida pelo mecanismo central do `platform-messaging` sem exigir uma nova versão desta library. Keywords ausentes ou inseguras usam `schemavalidation.invalid`. O texto interno do NetworkNT nunca integra o contrato público.
-
-A existência de `schemavalidation.format` apenas prepara o contrato de mensagem. Ela não altera a configuração do engine nem habilita `format` como assertion.
