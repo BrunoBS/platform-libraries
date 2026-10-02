@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,8 +56,10 @@ class NetworkntErrorContractTest {
         for (Case testCase : cases) {
             List<Error> errors = validate(testCase.schema(), testCase.payload());
             assertFalse(errors.isEmpty(), testCase.name());
+            Error error = find(errors, testCase.expectedKeyword());
+            printContract(testCase.name(), error);
             assertTrue(
-                    errors.stream().anyMatch(error -> testCase.expectedKeyword().equals(error.getKeyword())),
+                    errors.stream().anyMatch(candidate -> testCase.expectedKeyword().equals(candidate.getKeyword())),
                     () -> testCase.name() + " expected keyword " + testCase.expectedKeyword()
                             + " but got " + errors.stream().map(Error::getKeyword).toList()
             );
@@ -106,6 +109,20 @@ class NetworkntErrorContractTest {
         assertTrue(errors.stream().allMatch(error -> error.getKeyword() != null && !error.getKeyword().isBlank()));
     }
 
+    private void printContract(String scenario, Error error) {
+        String arguments = error.getArguments() == null
+                ? "null"
+                : Arrays.toString(error.getArguments());
+
+        System.out.printf(
+                "NETWORKNT_CONTRACT scenario=%s keyword=%s property=%s arguments=%s%n",
+                scenario,
+                error.getKeyword(),
+                error.getProperty(),
+                arguments
+        );
+    }
+
     private void assertArguments(
             String definition,
             String payload,
@@ -113,7 +130,7 @@ class NetworkntErrorContractTest {
             String... expected
     ) throws Exception {
         Error error = find(validate(definition, payload), keyword);
-        List<String> actual = java.util.Arrays.stream(error.getArguments())
+        List<String> actual = Arrays.stream(error.getArguments())
                 .map(String::valueOf)
                 .toList();
         assertEquals(List.of(expected), actual, keyword);
