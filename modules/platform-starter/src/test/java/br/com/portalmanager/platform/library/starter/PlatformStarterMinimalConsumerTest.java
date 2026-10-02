@@ -3,17 +3,19 @@ package br.com.portalmanager.platform.library.starter;
 import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PlatformStarterMinimalConsumerTest {
 
     @Test
-    void shouldStartMinimalConsumerWithoutOptionalCapabilities() {
+    void shouldStartMinimalConsumerWithRequiredSchemaSource() {
         SpringApplication application = new SpringApplication(MinimalConsumerApplication.class);
         application.setDefaultProperties(java.util.Map.of(
                 "spring.main.web-application-type", "none",
@@ -46,5 +48,10 @@ class PlatformStarterMinimalConsumerTest {
 
     @SpringBootApplication
     static class MinimalConsumerApplication {
+
+        @Bean
+        ResourceSchemaRepository resourceSchemaRepository() {
+            return (resourceType, resourceCode) -> java.util.Optional.empty();
+        }
     }
 }
