@@ -174,3 +174,18 @@ Keywords conhecidas são convertidas para chaves estáveis do módulo, como `sch
 Essas mensagens estruturais pertencem ao fluxo normal do `platform-messaging`: possuem definição default nos bundles `schemavalidation_*.properties` e podem ser sobrescritas pelo mecanismo central de mensagens sem alterar a library ou o serviço consumidor.
 
 Erros técnicos `PLT-SCHEMA-001` a `PLT-SCHEMA-004` são diferentes: representam configuração ou integridade da plataforma, usam `PlatformErrorDefinition` e permanecem como contrato técnico estável, fora do mecanismo de override das mensagens estruturais.
+
+
+### Extensibilidade de keywords
+
+A chave de mensagem não depende de um `switch` fechado da library. A keyword retornada pelo engine é normalizada de forma determinística de camelCase para kebab-case:
+
+```text
+minLength             -> schemavalidation.min-length
+additionalProperties  -> schemavalidation.additional-properties
+futureKeyword         -> schemavalidation.future-keyword
+```
+
+As assertions conhecidas do Draft 2020-12 possuem defaults nos bundles da library. Uma keyword futura pode ser atendida pelo mecanismo central do `platform-messaging` usando a chave normalizada, sem exigir nova versão desta library. Keywords ausentes, vazias ou com formato inseguro usam `schemavalidation.invalid`.
+
+O texto interno produzido pelo NetworkNT nunca faz parte do contrato público. A ativação de assertions é uma decisão separada do mapeamento de mensagens; em particular, disponibilizar `schemavalidation.format` não altera por si só a configuração que determina se `format` reprova um payload.
