@@ -25,9 +25,9 @@ Exemplos: `JAVA`, `MANAGER`, `WORKSPACE_REGISTRATION`, `OPEN_API`.
 
 O `code` é imutável depois da criação.
 
-## 2. Dynamic ou Enum
+## 2. Included ou Enum
 
-Use `DynamicCatalogService` para o modelo Included/Dynamic, quando novos códigos podem ser incluídos em runtime.
+Use `IncludedCatalogService` para o modelo Included, quando novos códigos podem ser incluídos em runtime.
 
 Use `EnumCatalogService` quando o código da aplicação define os valores permitidos. Nesse caso, o `code` precisa existir no enum que implementa `CatalogEnum`.
 
@@ -70,9 +70,9 @@ public class LanguageTypeService
 }
 ```
 
-## 4. Dynamic Catalog
+## 4. Included Catalog
 
-O Dynamic Catalog usa `DynamicCatalogService` e não possui enum. Novos `code` podem ser criados via API.
+O Included Catalog usa `IncludedCatalogService` e não possui enum. Novos `code` podem ser criados via API.
 
 ## 5. DTO padrão
 
@@ -116,7 +116,7 @@ POST   /api/v1/<catalog>/{code}/restore
 - `code` aceita somente `A-Z`, `0-9` e `_`, inicia por letra e tem no máximo 50 caracteres;
 - `code` não é alterado em updates;
 - `EnumCatalogService` valida o código contra o enum;
-- `DynamicCatalogService` permite novos códigos em runtime;
+- `IncludedCatalogService` permite novos códigos em runtime;
 - `active=false` representa soft delete;
 - restore revalida o registro;
 - `sortOrder` é calculado quando ausente ou menor que 1;
@@ -142,7 +142,7 @@ Os únicos pontos oficiais de extensão direta de service são:
 
 ```text
 EnumCatalogService
-DynamicCatalogService
+IncludedCatalogService
 ```
 
 `AbstractCatalogService` permanece `sealed`.
@@ -154,7 +154,7 @@ Para qualquer catálogo:
 1. migration com `code VARCHAR(50) PRIMARY KEY`;
 2. entity;
 3. repository;
-4. service `EnumCatalogService` ou `DynamicCatalogService`;
+4. service `EnumCatalogService` ou `IncludedCatalogService`;
 5. controller;
 6. autorização;
 7. testes.
