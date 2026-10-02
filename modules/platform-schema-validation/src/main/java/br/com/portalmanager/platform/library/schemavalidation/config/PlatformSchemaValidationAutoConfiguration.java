@@ -7,19 +7,12 @@ import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceS
 import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformSchemaValidationProperties.class)
-@ConditionalOnProperty(
-        prefix = "platform.schema-validation",
-        name = "enabled",
-        havingValue = "true",
-        matchIfMissing = true
-)
 public class PlatformSchemaValidationAutoConfiguration {
 
     @Bean
