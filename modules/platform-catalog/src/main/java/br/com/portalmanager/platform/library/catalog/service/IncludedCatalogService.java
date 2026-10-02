@@ -7,6 +7,7 @@ import br.com.portalmanager.platform.library.catalog.repository.CatalogRepositor
 import br.com.portalmanager.platform.library.catalog.validation.AbstractCatalogValidator;
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import tools.jackson.databind.ObjectMapper;
 
 public abstract non-sealed class IncludedCatalogService<E extends CatalogEntity>
@@ -15,6 +16,13 @@ public abstract non-sealed class IncludedCatalogService<E extends CatalogEntity>
     protected IncludedCatalogService(
             CatalogRepository<E> repository, ObjectMapper objectMapper, Class<E> entityClass) {
         this(repository, objectMapper, entityClass, CatalogSettingsValidator.none());
+    }
+
+    protected IncludedCatalogService(
+            CatalogRepository<E> repository, ObjectMapper objectMapper, Class<E> entityClass,
+            String schemaResourceCode, SchemaValidator schemaValidator) {
+        this(repository, objectMapper, entityClass,
+                CatalogSettingsValidator.schema(schemaResourceCode, schemaValidator));
     }
 
     protected IncludedCatalogService(
