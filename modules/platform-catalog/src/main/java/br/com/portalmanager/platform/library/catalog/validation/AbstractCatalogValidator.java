@@ -5,10 +5,10 @@ import br.com.portalmanager.platform.library.catalog.message.CatalogMessageKeys;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 
 import java.util.Map;
 import java.util.regex.Pattern;
-import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 
 public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> {
 
