@@ -4,9 +4,24 @@ import br.com.portalmanager.platform.library.schemavalidation.message.SchemaVali
 import com.networknt.schema.Error;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Map;\nimport java.util.Set;
 
 final class SchemaValidationErrorMapper {
+
+    private static final Set<String> FIELD_ONLY_KEYWORDS = Set.of(
+            "required",
+            "pattern",
+            "additionalProperties",
+            "uniqueItems",
+            "contains",
+            "propertyNames",
+            "allOf",
+            "anyOf",
+            "oneOf",
+            "not",
+            "unevaluatedProperties",
+            "unevaluatedItems"
+    );
 
     private static final Map<String, Integer> ARGUMENT_INDEX = Map.ofEntries(
             Map.entry("type", 1),
