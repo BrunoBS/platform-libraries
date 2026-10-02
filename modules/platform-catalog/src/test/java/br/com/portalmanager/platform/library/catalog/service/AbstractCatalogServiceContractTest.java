@@ -150,7 +150,7 @@ class AbstractCatalogServiceContractTest {
     }
 
     private static final class TestService
-            extends DynamicCatalogService<TestEntity> {
+            extends IncludedCatalogService<TestEntity> {
 
         private TestService(TestRepository repository) {
             super(repository, JSON, TestEntity.class);
