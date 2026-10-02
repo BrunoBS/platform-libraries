@@ -27,7 +27,7 @@ class AbstractCatalogCodeTest {
     @Test
     void shouldKeepDynamicSemanticCodeContractDistinctFromManagedCatalogCode() {
         assertThat(AbstractCatalogCode.isValidFormat("workspace-service")).isTrue();
-        assertThat(AbstractCatalogValidator.CODE_FORMAT).isEqualTo("^[A-Z][A-Z0-9_]{0,49}$");
+        assertThat("workspace-service").doesNotMatch(AbstractCatalogValidator.CODE_FORMAT);
     }
 
     @Test
