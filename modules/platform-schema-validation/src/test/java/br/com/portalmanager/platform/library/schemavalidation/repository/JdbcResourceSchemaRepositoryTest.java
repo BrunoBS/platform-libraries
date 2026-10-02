@@ -41,7 +41,7 @@ class JdbcResourceSchemaRepositoryTest {
         repository.validateSource();
 
         verify(jdbcTemplate).query(
-                org.mockito.ArgumentMatchers.argThat(sql ->
+                org.mockito.ArgumentMatchers.<String>argThat(sql ->
                         sql.contains("FROM vw_platform_resource_schemas")
                                 && sql.contains("WHERE 1 = 0")
                                 && sql.contains("resource_type")
@@ -49,7 +49,7 @@ class JdbcResourceSchemaRepositoryTest {
                                 && sql.contains("schema_version")
                                 && sql.contains("definition")
                 ),
-                any(org.springframework.jdbc.core.ResultSetExtractor.class)
+                org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
         );
     }
 
