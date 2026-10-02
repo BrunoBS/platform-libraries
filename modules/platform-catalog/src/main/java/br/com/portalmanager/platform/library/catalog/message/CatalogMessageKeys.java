@@ -14,6 +14,8 @@ public final class CatalogMessageKeys {
     public static final String DESCRIPTION_REQUIRED = "catalog.description.required";
     public static final String DESCRIPTION_INVALID_LENGTH = "catalog.description.invalid.length";
     public static final String FILTER_UNSUPPORTED = "catalog.filter.unsupported";
+    public static final String SETTINGS_INVALID_STORED_JSON = "catalog.settings.invalid.stored-json";
+    public static final String ENTITY_INSTANTIATION_FAILED = "catalog.entity.instantiation.failed";
 
     private CatalogMessageKeys() {
     }
