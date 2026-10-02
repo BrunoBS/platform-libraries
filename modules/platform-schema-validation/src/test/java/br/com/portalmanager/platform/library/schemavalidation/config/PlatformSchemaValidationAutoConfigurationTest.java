@@ -14,7 +14,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class PlatformSchemaValidationAutoConfigurationTest {
 
@@ -106,7 +108,12 @@ class PlatformSchemaValidationAutoConfigurationTest {
 
         @Bean
         JdbcTemplate jdbcTemplate() {
-            return mock(JdbcTemplate.class);
+            JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+            when(jdbcTemplate.query(
+                    any(String.class),
+                    any(org.springframework.jdbc.core.ResultSetExtractor.class)
+            )).thenReturn(null);
+            return jdbcTemplate;
         }
 
         @Bean
