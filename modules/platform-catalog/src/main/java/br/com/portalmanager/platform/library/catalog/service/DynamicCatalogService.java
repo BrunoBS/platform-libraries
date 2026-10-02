@@ -6,8 +6,8 @@ import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.library.catalog.validation.AbstractCatalogValidator;
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
-import tools.jackson.databind.ObjectMapper;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Simple path for fully dynamic catalogs: the database is the source of truth
