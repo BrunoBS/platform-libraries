@@ -14,6 +14,7 @@ import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
 import br.com.portalmanager.platform.library.messaging.model.ApiValidationDetail;
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.resolver.DefaultApiMessageResolver;
 import br.com.portalmanager.platform.library.messaging.message.MessageParameterResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -318,6 +319,11 @@ public class ApiExceptionHandler {
         ApiMessage message;
         try {
             message = resolver.resolve(detail.messageKey(), locale);
+            if (DefaultApiMessageResolver.DEFAULT_KEY.equals(message.messageKey())
+                    && detail.fallbackMessageKey() != null
+                    && !detail.fallbackMessageKey().isBlank()) {
+                message = resolver.resolve(detail.fallbackMessageKey(), locale);
+            }
         } catch (ApiMessageNotFoundException notFound) {
             if (detail.fallbackMessageKey() == null || detail.fallbackMessageKey().isBlank()) {
                 throw notFound;
