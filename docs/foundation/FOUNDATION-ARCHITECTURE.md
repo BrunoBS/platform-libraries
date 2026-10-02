@@ -27,6 +27,7 @@ platform-libraries/
     ├── platform-starter/
     ├── platform-observability/
     ├── platform-messaging/
+    ├── platform-schema-validation/
     ├── platform-authorization/
     ├── platform-audit/
     ├── platform-catalog/
@@ -72,6 +73,7 @@ Gerencia a release train compatível das capabilities:
 - platform-starter;
 - platform-observability;
 - platform-messaging;
+- platform-schema-validation;
 - platform-authorization;
 - platform-audit;
 - platform-catalog;
@@ -88,7 +90,9 @@ platform-messaging
 platform-authorization
 ```
 
-Audit, catalog e tagging são explícitos.
+Schema validation, audit, catalog e tagging são capabilities explícitas e não são introduzidas transitivamente pelo starter.
+
+Ao declarar `platform-schema-validation`, o consumidor deve possuir `JdbcTemplate` para a fonte JDBC default ou fornecer um `ResourceSchemaRepository` customizado. A ausência de ambas as fontes é erro de configuração e impede o startup.
 
 `platform-testing` é exclusivo de testes e não faz parte do runtime starter.
 
@@ -98,6 +102,8 @@ Audit, catalog e tagging são explícitos.
 starter -> observability
 starter -> messaging
 starter -> authorization
+
+schema-validation -> messaging
 
 authorization -> messaging
 

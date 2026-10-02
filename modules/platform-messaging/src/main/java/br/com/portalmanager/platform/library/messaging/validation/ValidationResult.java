@@ -37,6 +37,15 @@ public class ValidationResult {
         details.add(new ValidationDetail(field, messageKey, parameters));
     }
 
+    public void addError(
+            String field,
+            String messageKey,
+            Map<String, Object> parameters,
+            String fallbackMessageKey
+    ) {
+        details.add(new ValidationDetail(field, messageKey, parameters, fallbackMessageKey));
+    }
+
     public void addLiteralError(String field, String message) {
         details.add(ValidationDetail.literal(field, message));
     }

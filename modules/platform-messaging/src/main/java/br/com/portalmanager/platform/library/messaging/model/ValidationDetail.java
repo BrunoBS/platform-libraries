@@ -6,10 +6,11 @@ public record ValidationDetail(
         String field,
         String messageKey,
         Map<String, Object> parameters,
-        String defaultMessage
+        String defaultMessage,
+        String fallbackMessageKey
 ) {
     public ValidationDetail(String field, String messageKey) {
-        this(field, messageKey, Map.of(), null);
+        this(field, messageKey, Map.of(), null, null);
     }
 
     public ValidationDetail(
@@ -17,11 +18,20 @@ public record ValidationDetail(
             String messageKey,
             Map<String, Object> parameters
     ) {
-        this(field, messageKey, parameters, null);
+        this(field, messageKey, parameters, null, null);
     }
 
     public static ValidationDetail literal(String field, String message) {
-        return new ValidationDetail(field, null, Map.of(), message);
+        return new ValidationDetail(field, null, Map.of(), message, null);
+    }
+
+    public ValidationDetail(
+            String field,
+            String messageKey,
+            Map<String, Object> parameters,
+            String fallbackMessageKey
+    ) {
+        this(field, messageKey, parameters, null, fallbackMessageKey);
     }
 
     public ValidationDetail {

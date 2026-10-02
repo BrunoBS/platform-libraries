@@ -1,21 +1,25 @@
 package br.com.portalmanager.platform.library.schemavalidation.repository;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class JdbcResourceSchemaRepositoryTest {
@@ -28,57 +32,108 @@ class JdbcResourceSchemaRepositoryTest {
         jdbcTemplate = mock(JdbcTemplate.class);
 
         PlatformSchemaValidationProperties properties = new PlatformSchemaValidationProperties();
-        properties.getDatasource().setViewName("vw_platform_resource_schemas");
+        properties.setViewName("vw_platform_resource_schemas");
 
         repository = new JdbcResourceSchemaRepository(jdbcTemplate, properties);
     }
 
     @Test
-    void shouldReturnResourceSchemaWhenFoundInView() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.next()).thenReturn(true);
-        when(resultSet.getString("resource_type")).thenReturn("APPLICATION");
-        when(resultSet.getString("resource_code")).thenReturn("application");
-        when(resultSet.getInt("schema_version")).thenReturn(1);
-        when(resultSet.getString("definition")).thenReturn("{\"type\":\"object\"}");
+    void shouldValidateDefaultViewContractWithoutReadingBusinessData() {
+        repository.validateSource();
 
+        verify(jdbcTemplate).query(
+                org.mockito.ArgumentMatchers.<String>argThat(sql ->
+                        sql.contains("FROM vw_platform_resource_schemas")
+                                && sql.contains("WHERE 1 = 0")
+                                && sql.contains("resource_type")
+                                && sql.contains("resource_code")
+                                && sql.contains("schema_version")
+                                && sql.contains("definition")
+                ),
+                org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
+        );
+    }
+
+    @Test
+    void shouldFailSourceValidationWhenViewIsUnavailable() {
         when(jdbcTemplate.query(
                 any(String.class),
-                any(ResultSetExtractor.class),
+                org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
+        )).thenThrow(new DataAccessResourceFailureException("view unavailable"));
+
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
+                repository::validateSource
+        );
+
+        assertTrue(exception.getCause() instanceof DataAccessResourceFailureException);
+    }
+
+    @Test
+    void shouldReturnResourceSchemaWhenFoundInView() {
+        ResourceSchema expected = new ResourceSchema(
+                "APPLICATION",
+                "application",
+                1,
+                "{\"type\":\"object\"}"
+        );
+
+        when(jdbcTemplate.queryForObject(
+                any(String.class),
+                any(RowMapper.class),
                 eq("APPLICATION"),
                 eq("application")
-        )).thenAnswer(invocation -> {
-            ResultSetExtractor<ResourceSchema> extractor = invocation.getArgument(1);
-            return extractor.extractData(resultSet);
-        });
+        )).thenReturn(expected);
 
         Optional<ResourceSchema> result = repository.find("APPLICATION", "application");
 
         assertTrue(result.isPresent());
-        ResourceSchema schema = result.orElseThrow();
-        assertEquals("APPLICATION", schema.resourceType());
-        assertEquals("application", schema.resourceCode());
-        assertEquals(1, schema.schemaVersion());
-        assertEquals("{\"type\":\"object\"}", schema.definition());
+        assertEquals(expected, result.orElseThrow());
     }
 
     @Test
-    void shouldReturnEmptyWhenSchemaIsNotFoundInView() throws SQLException {
-        ResultSet resultSet = mock(ResultSet.class);
-        when(resultSet.next()).thenReturn(false);
-
-        when(jdbcTemplate.query(
+    void shouldReturnEmptyWhenSchemaIsNotFoundInView() {
+        when(jdbcTemplate.queryForObject(
                 any(String.class),
-                any(ResultSetExtractor.class),
+                any(RowMapper.class),
                 eq("MENU"),
                 eq("menu")
-        )).thenAnswer(invocation -> {
-            ResultSetExtractor<ResourceSchema> extractor = invocation.getArgument(1);
-            return extractor.extractData(resultSet);
-        });
+        )).thenThrow(new EmptyResultDataAccessException(1));
 
-        Optional<ResourceSchema> result = repository.find("MENU", "menu");
+        assertTrue(repository.find("MENU", "menu").isEmpty());
+    }
 
-        assertTrue(result.isEmpty());
+    @Test
+    void shouldPropagateDuplicateRowsAsInvalidViewContract() {
+        when(jdbcTemplate.queryForObject(
+                any(String.class),
+                any(RowMapper.class),
+                eq("APPLICATION"),
+                eq("application")
+        )).thenThrow(new IncorrectResultSizeDataAccessException(1, 2));
+
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
+                () -> repository.find("APPLICATION", "application")
+        );
+
+        assertTrue(exception.getCause() instanceof IncorrectResultSizeDataAccessException);
+    }
+
+    @Test
+    void shouldPropagateDatasourceFailureInsteadOfTreatingItAsMissingSchema() {
+        when(jdbcTemplate.queryForObject(
+                any(String.class),
+                any(RowMapper.class),
+                eq("APPLICATION"),
+                eq("application")
+        )).thenThrow(new DataAccessResourceFailureException("database unavailable"));
+
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
+                () -> repository.find("APPLICATION", "application")
+        );
+
+        assertTrue(exception.getCause() instanceof DataAccessResourceFailureException);
     }
 }

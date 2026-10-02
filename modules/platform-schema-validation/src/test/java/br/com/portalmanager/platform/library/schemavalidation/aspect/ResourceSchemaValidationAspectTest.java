@@ -2,7 +2,8 @@ package br.com.portalmanager.platform.library.schemavalidation.aspect;
 
 import br.com.portalmanager.platform.library.schemavalidation.annotation.SchemaPayload;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchema;
-import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import static org.mockito.Mockito.*;
 
 class ResourceSchemaValidationAspectTest {
 
-    private final ResourceSchemaValidator validator = mock(ResourceSchemaValidator.class);
+    private final SchemaValidator validator = mock(SchemaValidator.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ResourceSchemaValidationAspect aspect =
             new ResourceSchemaValidationAspect(validator, objectMapper);
@@ -37,12 +38,38 @@ class ResourceSchemaValidationAspectTest {
     }
 
     @Test
+    void shouldResolveAndValidatePayloadAcrossRepeatedCalls() throws Throwable {
+        Method method = SampleUseCase.class.getMethod("create", String.class, SampleInput.class);
+        ValidateResourceSchema binding = method.getAnnotation(ValidateResourceSchema.class);
+
+        aspect.validate(
+                joinPoint(method, new Object[]{"workspace-1", new SampleInput("app-1")}),
+                binding
+        );
+        aspect.validate(
+                joinPoint(method, new Object[]{"workspace-2", new SampleInput("app-2")}),
+                binding
+        );
+
+        verify(validator).validate(
+                eq("APPLICATION"),
+                eq("application"),
+                eq(objectMapper.valueToTree(new SampleInput("app-1")))
+        );
+        verify(validator).validate(
+                eq("APPLICATION"),
+                eq("application"),
+                eq(objectMapper.valueToTree(new SampleInput("app-2")))
+        );
+    }
+
+    @Test
     void shouldRejectAnnotatedMethodWithoutExactlyOneSchemaPayload() throws Throwable {
         Method method = InvalidUseCase.class.getMethod("create", SampleInput.class);
         ProceedingJoinPoint joinPoint = joinPoint(method, new Object[]{new SampleInput("app")});
         ValidateResourceSchema binding = method.getAnnotation(ValidateResourceSchema.class);
 
-        assertThrows(IllegalStateException.class, () -> aspect.validate(joinPoint, binding));
+        assertThrows(PlatformConfigurationException.class, () -> aspect.validate(joinPoint, binding));
         verify(joinPoint, never()).proceed();
     }
 

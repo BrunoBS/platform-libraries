@@ -2,7 +2,9 @@ package br.com.portalmanager.platform.library.schemavalidation.aspect;
 
 import br.com.portalmanager.platform.library.schemavalidation.annotation.SchemaPayload;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchema;
-import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -12,15 +14,18 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 public class ResourceSchemaValidationAspect {
 
-    private final ResourceSchemaValidator validator;
+    private final SchemaValidator validator;
     private final ObjectMapper objectMapper;
+    private final Map<Method, Integer> payloadParameterIndexes = new ConcurrentHashMap<>();
 
     public ResourceSchemaValidationAspect(
-            ResourceSchemaValidator validator,
+            SchemaValidator validator,
             ObjectMapper objectMapper
     ) {
         this.validator = validator;
@@ -42,27 +47,33 @@ public class ResourceSchemaValidationAspect {
 
     private Object resolvePayload(ProceedingJoinPoint joinPoint) {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        Object[] arguments = joinPoint.getArgs();
+        int payloadIndex = payloadParameterIndexes.computeIfAbsent(
+                method,
+                this::resolvePayloadParameterIndex
+        );
+        return joinPoint.getArgs()[payloadIndex];
+    }
 
-        Object payload = null;
+    private int resolvePayloadParameterIndex(Method method) {
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        int payloadIndex = -1;
         int payloadCount = 0;
 
         for (int index = 0; index < parameterAnnotations.length; index++) {
             for (Annotation annotation : parameterAnnotations[index]) {
                 if (annotation.annotationType().equals(SchemaPayload.class)) {
-                    payload = arguments[index];
+                    payloadIndex = index;
                     payloadCount++;
                 }
             }
         }
 
         if (payloadCount != 1) {
-            throw new IllegalStateException(
-                    "@ValidateResourceSchema requires exactly one @SchemaPayload parameter"
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.PAYLOAD_BINDING_INVALID
             );
         }
 
-        return payload;
+        return payloadIndex;
     }
 }

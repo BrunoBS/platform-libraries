@@ -3,6 +3,8 @@ package br.com.portalmanager.platform.library.schemavalidation.resolver;
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
+import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 
 public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
 
@@ -23,15 +25,17 @@ public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
         String code = requireText(resourceCode, "resourceCode");
 
         return repository.find(type, code)
-                .or(() -> repository.find(type, properties.getFallbackCode()))
-                .orElseThrow(() -> new IllegalStateException(
-                        "No published resource schema found for " + type + "/" + code
+                .or(() -> repository.find(type, properties.resolveFallbackCode()))
+                .orElseThrow(() -> new PlatformConfigurationException(
+                        SchemaValidationTechnicalErrors.publishedSchemaNotFound(type, code)
                 ));
     }
 
     private String requireText(String value, String field) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(field + " is required");
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.requiredResolverArgument(field)
+            );
         }
         return value.trim();
     }

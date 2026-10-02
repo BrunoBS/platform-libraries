@@ -1,34 +1,22 @@
-package br.com.portalmanager.platform.library.schemavalidation.autoconfigure;
+package br.com.portalmanager.platform.library.schemavalidation.config;
 
 import br.com.portalmanager.platform.library.schemavalidation.aspect.ResourceSchemaValidationAspect;
-import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
-import br.com.portalmanager.platform.library.schemavalidation.repository.NoOpResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.DefaultResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformSchemaValidationProperties.class)
-@ConditionalOnProperty(
-        prefix = "platform.schema-validation",
-        name = "enabled",
-        havingValue = "true",
-        matchIfMissing = true
-)
+@ConditionalOnBean(ResourceSchemaRepository.class)
 public class PlatformSchemaValidationAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(ResourceSchemaRepository.class)
-    ResourceSchemaRepository noOpResourceSchemaRepository() {
-        return new NoOpResourceSchemaRepository();
-    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -41,7 +29,7 @@ public class PlatformSchemaValidationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    ResourceSchemaValidator resourceSchemaValidator(
+    SchemaValidator schemaValidator(
             ResourceSchemaResolver resolver,
             ObjectMapper objectMapper
     ) {
@@ -51,7 +39,7 @@ public class PlatformSchemaValidationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ResourceSchemaValidationAspect resourceSchemaValidationAspect(
-            ResourceSchemaValidator validator,
+            SchemaValidator validator,
             ObjectMapper objectMapper
     ) {
         return new ResourceSchemaValidationAspect(validator, objectMapper);

@@ -1,8 +1,11 @@
 package br.com.portalmanager.platform.library.schemavalidation.validation;
 
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
+import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
+import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
@@ -11,13 +14,13 @@ import com.networknt.schema.SpecificationVersion;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.Map;
 
-public class ResourceSchemaValidator {
+public class ResourceSchemaValidator implements SchemaValidator {
 
     private final ResourceSchemaResolver resolver;
     private final ObjectMapper objectMapper;
     private final SchemaRegistry schemaRegistry;
+    private final SchemaValidationErrorMapper errorMapper = new SchemaValidationErrorMapper();
 
     public ResourceSchemaValidator(
             ResourceSchemaResolver resolver,
@@ -28,6 +31,7 @@ public class ResourceSchemaValidator {
         this.schemaRegistry = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12);
     }
 
+    @Override
     public void validate(String resourceType, String resourceCode, JsonNode payload) {
         ValidationResult result = new ValidationResult();
 
@@ -36,15 +40,22 @@ public class ResourceSchemaValidator {
             throw new ValidationException(result);
         }
 
-        String definition = resolver.resolve(resourceType, resourceCode).definition();
-        Schema schema = parse(definition);
+        ResourceSchema resourceSchema = resolver.resolve(resourceType, resourceCode);
+        Schema schema = parse(resourceSchema);
 
-        schema.validate(payload).forEach(error -> {
+        schema.validate(
+                payload,
+                executionContext -> executionContext.executionConfig(
+                        executionConfig -> executionConfig.formatAssertionsEnabled(true)
+                )
+        ).forEach(error -> {
             String field = resolveField(error);
+            SchemaValidationErrorMapper.MappedValidationError mappedError = errorMapper.map(error, field);
             result.addError(
-                    field,
-                    SchemaValidationMessageKeys.INVALID,
-                    Map.of("0", field, "1", error.getMessage())
+                    mappedError.field(),
+                    mappedError.messageKey(),
+                    mappedError.parameters(),
+                    SchemaValidationMessageKeys.INVALID
             );
         });
 
@@ -53,13 +64,57 @@ public class ResourceSchemaValidator {
         }
     }
 
-    private Schema parse(String definition) {
+    private Schema parse(ResourceSchema resourceSchema) {
+        if (resourceSchema.definition() == null || resourceSchema.definition().isBlank()) {
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.publishedSchemaInvalid(
+                            resourceSchema.resourceType(),
+                            resourceSchema.resourceCode(),
+                            resourceSchema.schemaVersion()
+                    )
+            );
+        }
+
+        JsonNode schemaNode;
         try {
-            JsonNode schemaNode = objectMapper.readTree(definition);
+            schemaNode = objectMapper.readTree(resourceSchema.definition());
+        } catch (Exception exception) {
+            throw invalidPublishedSchema(resourceSchema, exception);
+        }
+
+        if (schemaNode == null || schemaNode.isNull()) {
+            throw invalidPublishedSchema(resourceSchema);
+        }
+
+        try {
             return schemaRegistry.getSchema(schemaNode);
         } catch (Exception exception) {
-            throw new IllegalStateException("Published resource schema is invalid", exception);
+            throw invalidPublishedSchema(resourceSchema, exception);
         }
+    }
+
+    private PlatformConfigurationException invalidPublishedSchema(ResourceSchema resourceSchema) {
+        return new PlatformConfigurationException(
+                SchemaValidationTechnicalErrors.publishedSchemaInvalid(
+                        resourceSchema.resourceType(),
+                        resourceSchema.resourceCode(),
+                        resourceSchema.schemaVersion()
+                )
+        );
+    }
+
+    private PlatformConfigurationException invalidPublishedSchema(
+            ResourceSchema resourceSchema,
+            Exception exception
+    ) {
+        return new PlatformConfigurationException(
+                SchemaValidationTechnicalErrors.publishedSchemaInvalid(
+                        resourceSchema.resourceType(),
+                        resourceSchema.resourceCode(),
+                        resourceSchema.schemaVersion()
+                ),
+                exception
+        );
     }
 
     private String resolveField(Error error) {

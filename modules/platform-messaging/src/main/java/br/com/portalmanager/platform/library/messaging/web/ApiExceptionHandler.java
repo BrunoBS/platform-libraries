@@ -315,7 +315,15 @@ public class ApiExceptionHandler {
             );
         }
 
-        ApiMessage message = resolver.resolve(detail.messageKey(), locale);
+        ApiMessage message;
+        try {
+            message = resolver.resolve(detail.messageKey(), locale);
+        } catch (ApiMessageNotFoundException notFound) {
+            if (detail.fallbackMessageKey() == null || detail.fallbackMessageKey().isBlank()) {
+                throw notFound;
+            }
+            message = resolver.resolve(detail.fallbackMessageKey(), locale);
+        }
 
         return new ApiValidationDetail(
                 detail.field(),
