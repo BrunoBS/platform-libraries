@@ -6,22 +6,10 @@ import com.networknt.schema.Error;
 final class SchemaValidationErrorMapper {
 
     MappedValidationError map(Error error, String field) {
-        return new MappedValidationError(field, messageKey(error));
-    }
-
-    private String messageKey(Error error) {
-        return switch (error.getKeyword()) {
-            case "required" -> SchemaValidationMessageKeys.REQUIRED;
-            case "type" -> SchemaValidationMessageKeys.TYPE;
-            case "minLength" -> SchemaValidationMessageKeys.MIN_LENGTH;
-            case "maxLength" -> SchemaValidationMessageKeys.MAX_LENGTH;
-            case "minimum" -> SchemaValidationMessageKeys.MINIMUM;
-            case "maximum" -> SchemaValidationMessageKeys.MAXIMUM;
-            case "pattern" -> SchemaValidationMessageKeys.PATTERN;
-            case "enum" -> SchemaValidationMessageKeys.ENUM;
-            case "additionalProperties" -> SchemaValidationMessageKeys.ADDITIONAL_PROPERTIES;
-            default -> SchemaValidationMessageKeys.INVALID;
-        };
+        return new MappedValidationError(
+                field,
+                SchemaValidationMessageKeys.fromKeyword(error.getKeyword())
+        );
     }
 
     record MappedValidationError(String field, String messageKey) {
