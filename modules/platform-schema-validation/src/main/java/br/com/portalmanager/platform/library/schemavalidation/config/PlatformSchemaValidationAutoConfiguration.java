@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.schemavalidation.config;
 
 import br.com.portalmanager.platform.library.schemavalidation.aspect.ResourceSchemaValidationAspect;
+import br.com.portalmanager.platform.library.schemavalidation.cache.*;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.DefaultResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
@@ -20,20 +21,37 @@ public class PlatformSchemaValidationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    ResourceSchemaCache resourceSchemaCache() {
+        return new NoOpResourceSchemaCache();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    CompiledSchemaCache compiledSchemaCache(PlatformSchemaValidationProperties properties) {
+        var local = properties.getCache().getLocal();
+        return local.isEnabled()
+                ? new CaffeineCompiledSchemaCache(local.getTtl(), local.getMaxSize())
+                : new NoOpCompiledSchemaCache();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     ResourceSchemaResolver resourceSchemaResolver(
             ResourceSchemaRepository repository,
-            PlatformSchemaValidationProperties properties
+            PlatformSchemaValidationProperties properties,
+            ResourceSchemaCache cache
     ) {
-        return new DefaultResourceSchemaResolver(repository, properties);
+        return new DefaultResourceSchemaResolver(repository, properties, cache);
     }
 
     @Bean
     @ConditionalOnMissingBean
     SchemaValidator schemaValidator(
             ResourceSchemaResolver resolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            CompiledSchemaCache compiledSchemaCache
     ) {
-        return new ResourceSchemaValidator(resolver, objectMapper);
+        return new ResourceSchemaValidator(resolver, objectMapper, compiledSchemaCache);
     }
 
     @Bean
