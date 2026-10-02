@@ -40,7 +40,7 @@ public class ResourceSchemaValidator {
             throw new ValidationException(result);
         }
 
-        var resourceSchema = resolver.resolve(resourceType, resourceCode);
+        ResourceSchema resourceSchema = resolver.resolve(resourceType, resourceCode);
         Schema schema = parse(resourceSchema);
 
         schema.validate(payload).forEach(error -> {
@@ -70,22 +70,46 @@ public class ResourceSchemaValidator {
             );
         }
 
+        JsonNode schemaNode;
         try {
-            JsonNode schemaNode = objectMapper.readTree(resourceSchema.definition());
-            if (schemaNode == null || schemaNode.isNull()) {
-                throw new IllegalArgumentException("Schema definition must be a JSON object or boolean");
-            }
+            schemaNode = objectMapper.readTree(resourceSchema.definition());
+        } catch (Exception exception) {
+            throw invalidPublishedSchema(resourceSchema, exception);
+        }
+
+        if (schemaNode == null || schemaNode.isNull()) {
+            throw invalidPublishedSchema(resourceSchema);
+        }
+
+        try {
             return schemaRegistry.getSchema(schemaNode);
         } catch (Exception exception) {
-            throw new PlatformConfigurationException(
-                    SchemaValidationTechnicalErrors.publishedSchemaInvalid(
-                            resourceSchema.resourceType(),
-                            resourceSchema.resourceCode(),
-                            resourceSchema.schemaVersion()
-                    ),
-                    exception
-            );
+            throw invalidPublishedSchema(resourceSchema, exception);
         }
+    }
+
+    private PlatformConfigurationException invalidPublishedSchema(ResourceSchema resourceSchema) {
+        return new PlatformConfigurationException(
+                SchemaValidationTechnicalErrors.publishedSchemaInvalid(
+                        resourceSchema.resourceType(),
+                        resourceSchema.resourceCode(),
+                        resourceSchema.schemaVersion()
+                )
+        );
+    }
+
+    private PlatformConfigurationException invalidPublishedSchema(
+            ResourceSchema resourceSchema,
+            Exception exception
+    ) {
+        return new PlatformConfigurationException(
+                SchemaValidationTechnicalErrors.publishedSchemaInvalid(
+                        resourceSchema.resourceType(),
+                        resourceSchema.resourceCode(),
+                        resourceSchema.schemaVersion()
+                ),
+                exception
+        );
     }
 
     private String resolveField(Error error) {
