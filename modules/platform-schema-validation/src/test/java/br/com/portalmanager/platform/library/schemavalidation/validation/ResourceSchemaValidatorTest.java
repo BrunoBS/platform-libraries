@@ -296,7 +296,7 @@ class ResourceSchemaValidatorTest {
     }
 
     @Test
-    void shouldKeepFormatAsMessageContractWithoutAssumingAssertionIsEnabled() throws Exception {
+    void shouldRejectInvalidFormatWhenAssertionsAreEnabled() throws Exception {
         ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
         when(resolver.resolve("APPLICATION", "application"))
                 .thenReturn(new ResourceSchema(
@@ -305,7 +305,23 @@ class ResourceSchemaValidatorTest {
                 ));
 
         ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
-        validator.validate("APPLICATION", "application", objectMapper.readTree("\"not-an-email\""));
+
+        ValidationException exception = assertThrows(
+                ValidationException.class,
+                () -> validator.validate(
+                        "APPLICATION",
+                        "application",
+                        objectMapper.readTree("\"not-an-email\"")
+                )
+        );
+
+        org.junit.jupiter.api.Assertions.assertTrue(
+                exception.getDetails().stream()
+                        .anyMatch(detail ->
+                                "schemavalidation.format".equals(detail.messageKey())
+                                        && "email".equals(detail.parameters().get("1"))
+                        )
+        );
     }
 
     private void assertCompositionProducesOnlyControlledKeys(String definition, String payload) {
