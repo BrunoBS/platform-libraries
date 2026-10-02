@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.Duration;
 
-@AutoConfiguration(after = PlatformMessagingAutoConfiguration.class)
+@AutoConfiguration(before = PlatformMessagingAutoConfiguration.class)
 @ConditionalOnClass(StringRedisTemplate.class)
 @ConditionalOnProperty(
         prefix = "platform.messaging.cache",
