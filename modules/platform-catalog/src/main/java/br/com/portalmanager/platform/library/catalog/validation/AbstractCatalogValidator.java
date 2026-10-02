@@ -11,7 +11,8 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> {
 
-    private static final Pattern CODE_PATTERN = Pattern.compile("^[A-Z][A-Z0-9_]{0,49}$");
+    public static final String CODE_FORMAT = "^[A-Z][A-Z0-9_]{0,49}$";
+    private static final Pattern CODE_PATTERN = Pattern.compile(CODE_FORMAT);
 
     protected final CatalogRepository<?> repository;
 
@@ -87,7 +88,7 @@ public abstract class AbstractCatalogValidator<D extends CatalogDTOContract<D>> 
             result.addError(
                     "code",
                     CatalogMessageKeys.CODE_INVALID_FORMAT,
-                    Map.of("0", entityName(), "1", "^[A-Z][A-Z0-9_]{0,49}$")
+                    Map.of("0", entityName(), "1", CODE_FORMAT)
             );
         }
     }
