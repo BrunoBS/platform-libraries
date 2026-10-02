@@ -255,6 +255,37 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
+    void shouldUseValidationDetailFallbackWhenDynamicMessageIsNotRegistered() {
+        when(request.getRequestURI()).thenReturn("/api/v1/accounts");
+        Locale locale = Locale.of("pt", "BR");
+        when(request.getHeader("Accept-Language")).thenReturn("pt-BR");
+        when(request.getLocale()).thenReturn(locale);
+        when(resolver.resolve("global.validation.failed", locale))
+                .thenReturn(new ApiMessage("GLOBAL-0001", "global.validation.failed", "pt-BR", "Falha de validação.", "Revise.", 400));
+        when(resolver.resolve("schemavalidation.future-keyword", locale))
+                .thenThrow(new ApiMessageNotFoundException("schemavalidation.future-keyword"));
+        when(resolver.resolve("schemavalidation.invalid", locale))
+                .thenReturn(new ApiMessage("SCHEMA-VALIDATION-0001", "schemavalidation.invalid", "pt-BR", "O campo {0} possui um valor inválido.", "Revise.", 400));
+
+        ValidationException exception = new ValidationException(
+                "global.validation.failed",
+                List.of(new ValidationDetail(
+                        "name",
+                        "schemavalidation.future-keyword",
+                        Map.of("0", "name"),
+                        "schemavalidation.invalid"
+                ))
+        );
+
+        ApiErrorResponse body = handler.handle(exception, locale, request).getBody();
+
+        assertNotNull(body);
+        assertEquals("O campo name possui um valor inválido.", body.details().getFirst().message());
+        verify(resolver).resolve("schemavalidation.future-keyword", locale);
+        verify(resolver).resolve("schemavalidation.invalid", locale);
+    }
+
+    @Test
     void shouldHandleDirectApiMessageNotFoundExceptionSignature() {
         // Arrange
         when(request.getRequestURI()).thenReturn("/api/v1/products");
