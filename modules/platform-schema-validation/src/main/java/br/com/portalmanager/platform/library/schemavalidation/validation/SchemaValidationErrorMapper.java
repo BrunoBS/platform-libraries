@@ -4,7 +4,8 @@ import br.com.portalmanager.platform.library.schemavalidation.message.SchemaVali
 import com.networknt.schema.Error;
 
 import java.util.LinkedHashMap;
-import java.util.Map;\nimport java.util.Set;
+import java.util.Map;
+import java.util.Set;
 
 final class SchemaValidationErrorMapper {
 
