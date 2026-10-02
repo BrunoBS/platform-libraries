@@ -52,6 +52,23 @@ public final class SchemaValidationTechnicalErrors {
         );
     }
 
+    public static PlatformErrorDefinition schemaSourceContractInvalid(String type, String code) {
+        return new PlatformErrorDefinition(
+                "PLT-SCHEMA-006",
+                "Schema source returned multiple schemas for " + type + "/" + code,
+                "Ensure the schema source returns at most one published schema for each resource type and code.",
+                500
+        );
+    }
+
+    public static final PlatformErrorDefinition SCHEMA_SOURCE_MISSING =
+            new PlatformErrorDefinition(
+                    "PLT-SCHEMA-007",
+                    "No schema validation source is available",
+                    "Configure a JdbcTemplate for the default schema view or provide a ResourceSchemaRepository implementation.",
+                    500
+            );
+
     private SchemaValidationTechnicalErrors() {
     }
 }
