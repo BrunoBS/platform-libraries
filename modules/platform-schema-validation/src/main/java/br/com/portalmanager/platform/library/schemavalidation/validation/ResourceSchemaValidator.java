@@ -55,8 +55,17 @@ public class ResourceSchemaValidator {
     }
 
     private Schema parse(String definition) {
+        if (definition == null || definition.isBlank()) {
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.PUBLISHED_SCHEMA_INVALID
+            );
+        }
+
         try {
             JsonNode schemaNode = objectMapper.readTree(definition);
+            if (schemaNode == null || schemaNode.isNull()) {
+                throw new IllegalArgumentException("Schema definition must be a JSON object or boolean");
+            }
             return schemaRegistry.getSchema(schemaNode);
         } catch (Exception exception) {
             throw new PlatformConfigurationException(
