@@ -217,6 +217,7 @@ class ResourceSchemaValidatorTest {
                 )
         );
 
+        assertEquals(1, exception.getDetails().size());
         assertEquals(
                 expectedMessageKey,
                 exception.getDetails().getFirst().messageKey()
