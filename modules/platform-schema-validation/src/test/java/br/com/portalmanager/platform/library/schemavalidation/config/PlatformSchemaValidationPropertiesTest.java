@@ -22,7 +22,7 @@ class PlatformSchemaValidationPropertiesTest {
         properties.setViewName(null);
 
         assertThat(properties.resolveFallbackCode()).isEqualTo("DEFAULT");
-        assertThat(properties.getDatasource().resolveViewName())
+        assertThat(properties.resolveViewName())
                 .isEqualTo("vw_platform_resource_schemas");
     }
 
@@ -33,6 +33,6 @@ class PlatformSchemaValidationPropertiesTest {
         properties.setViewName("  custom_schema_view  ");
 
         assertThat(properties.resolveFallbackCode()).isEqualTo("PLATFORM_DEFAULT");
-        assertThat(properties.getDatasource().resolveViewName()).isEqualTo("custom_schema_view");
+        assertThat(properties.resolveViewName()).isEqualTo("custom_schema_view");
     }
 }
