@@ -22,7 +22,7 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
     private static final Logger log = LoggerFactory.getLogger(DefaultApiMessageResolver.class);
     private static final Duration SOURCE_FAILURE_LOG_INTERVAL = Duration.ofMinutes(10);
     private static final String DEFAULT_CODE = "PLT-500";
-    private static final String DEFAULT_KEY = "platform.internal.error";
+    public static final String DEFAULT_KEY = "platform.internal.error";
     private static final String DEFAULT_MESSAGE = "Ocorreu um erro inesperado.";
     private static final String DEFAULT_SOLUTION = "Tente novamente. Se o problema persistir, contate o suporte.";
     private static final ConcurrentMap<String, Long> LAST_FAILURE_LOG = new ConcurrentHashMap<>();
