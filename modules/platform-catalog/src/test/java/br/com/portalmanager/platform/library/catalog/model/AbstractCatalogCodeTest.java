@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.catalog.model;
 
+import br.com.portalmanager.platform.library.catalog.validation.AbstractCatalogValidator;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +22,12 @@ class AbstractCatalogCodeTest {
         ServiceCode code = ServiceCode.of("workspace-service");
 
         assertThat(code.value()).isEqualTo("workspace-service");
+    }
+
+    @Test
+    void shouldKeepDynamicSemanticCodeContractDistinctFromManagedCatalogCode() {
+        assertThat(AbstractCatalogCode.isValidFormat("workspace-service")).isTrue();
+        assertThat(AbstractCatalogValidator.CODE_FORMAT).isEqualTo("^[A-Z][A-Z0-9_]{0,49}$");
     }
 
     @Test
