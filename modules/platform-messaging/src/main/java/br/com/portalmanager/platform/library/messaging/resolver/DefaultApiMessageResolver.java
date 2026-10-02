@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +130,7 @@ public class DefaultApiMessageResolver implements ApiMessageResolver {
         String throttleKey = source + ":" + (cause == null ? "missing" : cause.getClass().getName());
         long now = System.currentTimeMillis();
         Long previous = LAST_FAILURE_LOG.putIfAbsent(throttleKey, now);
-        if (previous != null && now - previous < LOG_THROTTLE_MILLIS) {
+        if (previous != null && now - previous < SOURCE_FAILURE_LOG_INTERVAL.toMillis()) {
             return;
         }
         LAST_FAILURE_LOG.put(throttleKey, now);
