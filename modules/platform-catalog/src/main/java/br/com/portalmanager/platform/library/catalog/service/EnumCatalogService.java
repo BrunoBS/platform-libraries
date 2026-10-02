@@ -8,6 +8,7 @@ import br.com.portalmanager.platform.library.catalog.repository.CatalogRepositor
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
 import br.com.portalmanager.platform.library.catalog.validation.EnumCatalogValidator;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import tools.jackson.databind.ObjectMapper;
 
 public abstract non-sealed class EnumCatalogService<
@@ -19,6 +20,14 @@ public abstract non-sealed class EnumCatalogService<
             CatalogRepository<E> repository, ObjectMapper objectMapper,
             Class<E> entityClass, Class<C> enumClass) {
         this(repository, objectMapper, entityClass, enumClass, CatalogSettingsValidator.none());
+    }
+
+    protected EnumCatalogService(
+            CatalogRepository<E> repository, ObjectMapper objectMapper,
+            Class<E> entityClass, Class<C> enumClass,
+            String schemaResourceCode, SchemaValidator schemaValidator) {
+        this(repository, objectMapper, entityClass, enumClass,
+                CatalogSettingsValidator.schema(schemaResourceCode, schemaValidator));
     }
 
     protected EnumCatalogService(
