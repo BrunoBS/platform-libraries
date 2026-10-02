@@ -73,19 +73,36 @@ erro de configuração
 
 ## Configuração
 
+No caminho Golden, nenhuma configuração é obrigatória:
+
 ```yaml
 platform:
   schema-validation:
-    enabled: true
     fallback-code: DEFAULT
-    datasource:
-      enabled: true
-      view-name: vw_platform_resource_schemas
+    view-name: vw_platform_resource_schemas
 ```
 
-Quando a validação está habilitada, deve existir um `ResourceSchemaRepository`. O caminho padrão é habilitar o datasource JDBC; alternativamente, o serviço consumidor pode fornecer sua própria implementação do repository.
+Os dois valores acima já são defaults e só precisam ser declarados quando houver override.
 
-A biblioteca não registra repository NoOp. Portanto, `platform.schema-validation.enabled=true` sem uma fonte de schema válida é tratado como configuração inválida e impede a criação do resolver no startup, em vez de simular "schema não encontrado" na primeira validação.
+A resolução da fonte segue o próprio container Spring:
+
+```text
+ResourceSchemaRepository customizado existe
+        ↓
+usa implementação do serviço
+
+nenhum custom + JdbcTemplate disponível
+        ↓
+JdbcResourceSchemaRepository da library
+        ↓
+view-name
+
+nenhum ResourceSchemaRepository disponível
+        ↓
+startup falha
+```
+
+Não existe `enabled`, `datasource.enabled` ou property de `mode`. Se o serviço fornece um `ResourceSchemaRepository`, a implementação JDBC da library não é criada por causa de `@ConditionalOnMissingBean`. Assim o serviço pode resolver schemas por tabela própria, JPA, JDBC customizado ou outra fonte sem alterar o contrato da validação.
 
 ## Contrato da VIEW
 
@@ -105,13 +122,10 @@ A biblioteca consulta essa VIEW diretamente, assim como `platform-messaging` con
 
 O módulo possui uma única raiz pública de configuração: `PlatformSchemaValidationProperties`.
 
-- `platform.schema-validation.enabled`: `true`
 - `platform.schema-validation.fallback-code`: `DEFAULT`
-- `platform.schema-validation.datasource.enabled`: `false`
-- `platform.schema-validation.datasource.view-name`: `vw_platform_resource_schemas`
+- `platform.schema-validation.view-name`: `vw_platform_resource_schemas`
 
-Valores textuais em branco usam o default do módulo. As auto-configurations apenas consomem essa raiz; componentes de negócio não consultam `Environment` ou propriedades diretamente.
-
+Valores textuais em branco usam o default do módulo. Componentes de negócio não consultam `Environment` ou propriedades diretamente.
 
 ## Contrato AOP
 
