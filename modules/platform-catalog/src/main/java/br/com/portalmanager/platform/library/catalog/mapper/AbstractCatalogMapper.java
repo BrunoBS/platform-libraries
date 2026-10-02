@@ -45,8 +45,9 @@ public abstract class AbstractCatalogMapper<D extends CatalogDTOContract<D>, E e
         try {
             return entityClass.getDeclaredConstructor().newInstance();
         } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException(
-                    "Unable to instantiate catalog entity " + entityClass.getSimpleName(),
+            throw new CatalogTechnicalException(
+                    CatalogMessageKeys.ENTITY_INSTANTIATION_FAILED,
+                    Map.of("0", entityClass.getSimpleName()),
                     exception
             );
         }
