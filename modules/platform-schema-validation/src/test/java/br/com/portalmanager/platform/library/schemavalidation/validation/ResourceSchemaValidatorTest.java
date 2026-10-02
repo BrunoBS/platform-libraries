@@ -181,19 +181,32 @@ class ResourceSchemaValidatorTest {
 
     @Test
     void shouldExposeStructuredBranchErrorsForRealNetworkntAnyOf() {
-        String schema = """
-                {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "anyOf": [
-                    { "type": "string" },
-                    { "type": "integer" }
-                  ]
-                }
-                """;
+        ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
+        when(resolver.resolve("APPLICATION", "application"))
+                .thenReturn(new ResourceSchema(
+                        "APPLICATION",
+                        "application",
+                        1,
+                        """
+                        {
+                          "$schema": "https://json-schema.org/draft/2020-12/schema",
+                          "anyOf": [
+                            { "type": "string" },
+                            { "type": "integer" }
+                          ]
+                        }
+                        """
+                ));
 
-        BusinessValidationException exception = assertThrows(
-                BusinessValidationException.class,
-                () -> validator.validate(schema, mapper.valueToTree(true))
+        ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
+
+        ValidationException exception = assertThrows(
+                ValidationException.class,
+                () -> validator.validate(
+                        "APPLICATION",
+                        "application",
+                        objectMapper.valueToTree(true)
+                )
         );
 
         assertEquals(2, exception.getDetails().size());
