@@ -38,7 +38,8 @@ public class ResourceSchemaValidator {
             throw new ValidationException(result);
         }
 
-        Schema schema = parse(resolver.resolve(resourceType, resourceCode).definition());
+        var resourceSchema = resolver.resolve(resourceType, resourceCode);
+        Schema schema = parse(resourceSchema);
 
         schema.validate(payload).forEach(error -> {
             String field = resolveField(error);
@@ -54,22 +55,30 @@ public class ResourceSchemaValidator {
         }
     }
 
-    private Schema parse(String definition) {
-        if (definition == null || definition.isBlank()) {
+    private Schema parse(br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema resourceSchema) {
+        if (resourceSchema.definition() == null || resourceSchema.definition().isBlank()) {
             throw new PlatformConfigurationException(
-                    SchemaValidationTechnicalErrors.PUBLISHED_SCHEMA_INVALID
+                    SchemaValidationTechnicalErrors.publishedSchemaInvalid(
+                            resourceSchema.resourceType(),
+                            resourceSchema.resourceCode(),
+                            resourceSchema.schemaVersion()
+                    )
             );
         }
 
         try {
-            JsonNode schemaNode = objectMapper.readTree(definition);
+            JsonNode schemaNode = objectMapper.readTree(resourceSchema.definition());
             if (schemaNode == null || schemaNode.isNull()) {
                 throw new IllegalArgumentException("Schema definition must be a JSON object or boolean");
             }
             return schemaRegistry.getSchema(schemaNode);
         } catch (Exception exception) {
             throw new PlatformConfigurationException(
-                    SchemaValidationTechnicalErrors.PUBLISHED_SCHEMA_INVALID,
+                    SchemaValidationTechnicalErrors.publishedSchemaInvalid(
+                            resourceSchema.resourceType(),
+                            resourceSchema.resourceCode(),
+                            resourceSchema.schemaVersion()
+                    ),
                     exception
             );
         }
