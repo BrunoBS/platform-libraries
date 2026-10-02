@@ -20,8 +20,12 @@ SchemaValidator
   ↓
 ResourceSchemaValidator
   ↓
+Caffeine (Schema compilado por type/code/version)
+  ↓
 ResourceSchemaResolver
   ↓
+Redis opcional (ResourceSchema)
+  ↓ miss/indisponível
 Repository
   ↓
 VIEW configurada no banco do consumidor
@@ -82,6 +86,14 @@ platform:
   schema-validation:
     fallback-code: DEFAULT
     view-name: vw_platform_resource_schemas
+    cache:
+      redis:
+        enabled: false
+        ttl: 6h
+      local:
+        enabled: true
+        ttl: 15m
+        max-size: 500
 ```
 
 Os dois valores acima já são defaults e só precisam ser declarados quando houver override.
@@ -138,8 +150,13 @@ O módulo possui uma única raiz pública de configuração: `PlatformSchemaVali
 
 - `platform.schema-validation.fallback-code`: `DEFAULT`
 - `platform.schema-validation.view-name`: `vw_platform_resource_schemas`
+- `platform.schema-validation.cache.redis.enabled`: `false`
+- `platform.schema-validation.cache.redis.ttl`: `6h`
+- `platform.schema-validation.cache.local.enabled`: `true`
+- `platform.schema-validation.cache.local.ttl`: `15m`
+- `platform.schema-validation.cache.local.max-size`: `500`
 
-Valores textuais em branco usam o default do módulo. Componentes de negócio não consultam `Environment` ou propriedades diretamente.
+Valores textuais em branco usam o default do módulo. TTLs e `max-size` devem ser maiores que zero. Componentes de negócio não consultam `Environment` ou propriedades diretamente.
 
 ## Contrato AOP
 
@@ -152,11 +169,13 @@ A biblioteca não move regras de negócio para o aspect e não exige annotations
 
 ## Runtime e resolução de schema
 
-A resolução continua consultando a fonte configurada em cada validação para descobrir a versão publicada atual. Ausência de registro permite o fallback `(type, DEFAULT)`; falhas de infraestrutura do datasource não são convertidas em ausência. No repository JDBC default elas são traduzidas para `PlatformConfigurationException` (`PLT-SCHEMA-005`), preservando a causa JDBC; duplicidade é traduzida para `PLT-SCHEMA-006`.
+A resolução consulta primeiro o cache Redis quando `cache.redis.enabled=true`. Um miss consulta o `ResourceSchemaRepository`/VIEW e armazena o schema resolvido no Redis pelo TTL configurado. Falha do Redis não interrompe a validação: é registrada com throttling de 10 minutos e o fluxo continua para a fonte. Falhas da VIEW continuam sendo erro de plataforma; não são convertidas em ausência.
 
-Após a resolução, a definição publicada é parseada e compilada para a validação corrente. O módulo não mantém cache de resolução, versão ou JSON Schema compilado.
+O fallback continua sendo `(type, code) -> (type, DEFAULT)`. O resultado DEFAULT é armazenado somente sob sua própria chave real; ele não é gravado sob o código solicitado, evitando mascarar a publicação posterior de um schema específico durante o TTL.
 
-Essa decisão mantém a VIEW como fonte de verdade imediata e evita TTL, invalidação e retenção de versões históricas em memória. O cache existente no módulo é restrito ao metadado estático de reflection do contrato AOP (método → posição do parâmetro `@SchemaPayload`). Cache de schema poderá ser introduzido futuramente apenas se medições demonstrarem necessidade.
+Depois da resolução, o JSON Schema compilado é mantido em Caffeine, internamente, pela chave `resourceType + resourceCode + schemaVersion`. O cache local usa `expireAfterAccess`, TTL de 15 minutos e limite default de 500 entradas. Uma nova versão publicada gera uma nova chave e, portanto, não reutiliza a compilação da versão anterior.
+
+Redis é opcional e depende da infraestrutura `StringRedisTemplate` da aplicação. Caffeine é detalhe de implementação: o consumidor não usa sua API nem precisa configurá-lo diretamente.
 
 
 ## Contrato de mensagens de validação
