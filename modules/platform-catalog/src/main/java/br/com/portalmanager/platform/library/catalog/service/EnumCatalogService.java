@@ -7,8 +7,8 @@ import br.com.portalmanager.platform.library.catalog.model.CatalogEnum;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
 import br.com.portalmanager.platform.library.catalog.validation.EnumCatalogValidator;
-import br.com.portalmanager.platform.library.catalog.validation.CatalogValidationResult;
 import tools.jackson.databind.ObjectMapper;
+import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 
 /**
  * Simple path for catalogs whose allowed codes are defined by a Java enum.
@@ -52,7 +52,7 @@ public abstract non-sealed class EnumCatalogService<
 
         return new EnumCatalogValidator<>(repository, enumClass) {
             @Override
-            protected void validateSettings(CatalogDTO dto, CatalogValidationResult result) {
+            protected void validateSettings(CatalogDTO dto, ValidationResult result) {
                 resolved.validate(dto, result);
             }
 
