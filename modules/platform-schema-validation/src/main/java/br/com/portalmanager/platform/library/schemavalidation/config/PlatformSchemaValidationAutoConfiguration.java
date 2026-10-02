@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.schemavalidation.repository.Resourc
 import br.com.portalmanager.platform.library.schemavalidation.resolver.DefaultResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,7 +29,7 @@ public class PlatformSchemaValidationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    ResourceSchemaValidator resourceSchemaValidator(
+    SchemaValidator schemaValidator(
             ResourceSchemaResolver resolver,
             ObjectMapper objectMapper
     ) {
@@ -38,7 +39,7 @@ public class PlatformSchemaValidationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ResourceSchemaValidationAspect resourceSchemaValidationAspect(
-            ResourceSchemaValidator validator,
+            SchemaValidator validator,
             ObjectMapper objectMapper
     ) {
         return new ResourceSchemaValidationAspect(validator, objectMapper);
