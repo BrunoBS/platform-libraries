@@ -10,32 +10,48 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 
-/**
- * Mapper for the standard catalog shape.
- */
-public class CatalogMapper<E extends CatalogEntity>
-        extends AbstractCatalogMapper<CatalogDTO, E> {
+/** Maps the standard catalog API shape to a catalog entity. */
+public final class CatalogMapper<E extends CatalogEntity> {
 
+    private final Class<E> entityClass;
     private final ObjectMapper objectMapper;
 
     public CatalogMapper(Class<E> entityClass, ObjectMapper objectMapper) {
-        super(entityClass);
+        this.entityClass = entityClass;
         this.objectMapper = objectMapper;
     }
 
-    @Override
-    public CatalogDTO toDTO(E entity) {
-        if (entity == null) {
-            return null;
-        }
+    public E toEntity(CatalogDTO dto) {
+        if (dto == null) return null;
+        E entity = createEntity();
+        entity.setCode(dto.code());
+        updateEntity(entity, dto);
+        entity.setActive(true);
+        return entity;
+    }
 
-        return new CatalogDTO(
-                entity.getCode(),
-                entity.getLabel(),
-                entity.getDescription(),
-                entity.getSortOrder(),
-                readSettings(entity.getSettings())
-        );
+    public CatalogDTO toDTO(E entity) {
+        if (entity == null) return null;
+        return new CatalogDTO(entity.getCode(), entity.getLabel(), entity.getDescription(),
+                entity.getSortOrder(), readSettings(entity.getSettings()));
+    }
+
+    public void updateEntity(E entity, CatalogDTO dto) {
+        if (entity == null || dto == null) return;
+        entity.setLabel(dto.label());
+        entity.setDescription(dto.description());
+        entity.setSortOrder(dto.sortOrder());
+        entity.setSettings(dto.settings() == null ? "{}" : dto.settings().toString());
+    }
+
+    private E createEntity() {
+        try {
+            return entityClass.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException exception) {
+            throw new CatalogTechnicalException(
+                    CatalogMessageKeys.ENTITY_INSTANTIATION_FAILED,
+                    Map.of("0", entityClass.getSimpleName()), exception);
+        }
     }
 
     private JsonNode readSettings(String settings) {
@@ -45,10 +61,7 @@ public class CatalogMapper<E extends CatalogEntity>
                     : objectMapper.readTree(settings);
         } catch (JacksonException exception) {
             throw new CatalogTechnicalException(
-                    CatalogMessageKeys.SETTINGS_INVALID_STORED_JSON,
-                    Map.of(),
-                    exception
-            );
+                    CatalogMessageKeys.SETTINGS_INVALID_STORED_JSON, Map.of(), exception);
         }
     }
 }
