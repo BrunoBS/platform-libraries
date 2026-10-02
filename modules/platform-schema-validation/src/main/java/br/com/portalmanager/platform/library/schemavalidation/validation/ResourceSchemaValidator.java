@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
+import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import com.networknt.schema.Error;
 import com.networknt.schema.Schema;
@@ -13,6 +14,7 @@ import com.networknt.schema.SpecificationVersion;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Map;
 
 public class ResourceSchemaValidator {
 
@@ -47,7 +49,7 @@ public class ResourceSchemaValidator {
             result.addError(
                     mappedError.field(),
                     mappedError.messageKey(),
-                    java.util.Map.of("0", mappedError.field())
+                    Map.of("0", mappedError.field())
             );
         });
 
@@ -56,7 +58,7 @@ public class ResourceSchemaValidator {
         }
     }
 
-    private Schema parse(br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema resourceSchema) {
+    private Schema parse(ResourceSchema resourceSchema) {
         if (resourceSchema.definition() == null || resourceSchema.definition().isBlank()) {
             throw new PlatformConfigurationException(
                     SchemaValidationTechnicalErrors.publishedSchemaInvalid(
