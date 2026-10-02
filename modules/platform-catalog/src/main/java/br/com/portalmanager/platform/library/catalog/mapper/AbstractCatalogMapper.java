@@ -1,7 +1,11 @@
 package br.com.portalmanager.platform.library.catalog.mapper;
 
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTOContract;
+import br.com.portalmanager.platform.library.catalog.exception.CatalogTechnicalException;
+import br.com.portalmanager.platform.library.catalog.message.CatalogMessageKeys;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
+
+import java.util.Map;
 
 public abstract class AbstractCatalogMapper<D extends CatalogDTOContract<D>, E extends CatalogEntity> {
 
