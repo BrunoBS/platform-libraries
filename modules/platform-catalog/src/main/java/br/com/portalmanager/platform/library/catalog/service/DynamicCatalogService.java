@@ -6,8 +6,8 @@ import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.library.catalog.validation.AbstractCatalogValidator;
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
-import br.com.portalmanager.platform.library.catalog.validation.CatalogValidationResult;
 import tools.jackson.databind.ObjectMapper;
+import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 
 /**
  * Simple path for fully dynamic catalogs: the database is the source of truth
@@ -45,7 +45,7 @@ public abstract non-sealed class DynamicCatalogService<E extends CatalogEntity>
 
         return new AbstractCatalogValidator<>(repository) {
             @Override
-            protected void validateSettings(CatalogDTO dto, CatalogValidationResult result) {
+            protected void validateSettings(CatalogDTO dto, ValidationResult result) {
                 resolved.validate(dto, result);
             }
 
