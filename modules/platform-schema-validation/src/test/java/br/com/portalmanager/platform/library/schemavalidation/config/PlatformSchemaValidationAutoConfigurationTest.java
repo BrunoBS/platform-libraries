@@ -58,9 +58,27 @@ class PlatformSchemaValidationAutoConfigurationTest {
         contextRunner.run(context -> {
             assertThat(context).doesNotHaveBean(ResourceSchemaRepository.class);
             assertThat(context).doesNotHaveBean(ResourceSchemaResolver.class);
-            assertThat(context).doesNotHaveBean(ResourceSchemaValidator.class);
+            assertThat(context).doesNotHaveBean(SchemaValidator.class);
             assertThat(context).doesNotHaveBean(ResourceSchemaValidationAspect.class);
         });
+    }
+
+    @Test
+    void shouldExposePublicSchemaValidatorContractForDirectValidation() {
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(PlatformSchemaValidationAutoConfiguration.class))
+                .withUserConfiguration(ValidatingRepositoryConfiguration.class)
+                .run(context -> {
+                    SchemaValidator validator = context.getBean(SchemaValidator.class);
+
+                    validator.validate(
+                            "PUBLISHER",
+                            "websocket",
+                            context.getBean(ObjectMapper.class).createObjectNode().put("url", "wss://example.test")
+                    );
+
+                    assertThat(validator).isNotNull();
+                });
     }
 
     @Test
@@ -103,6 +121,35 @@ class PlatformSchemaValidationAutoConfigurationTest {
         @Bean
         JdbcTemplate jdbcTemplate() {
             return mock(JdbcTemplate.class);
+        }
+
+        @Bean
+        ObjectMapper objectMapper() {
+            return new ObjectMapper();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class ValidatingRepositoryConfiguration {
+
+        @Bean
+        ResourceSchemaRepository resourceSchemaRepository() {
+            return (resourceType, resourceCode) -> java.util.Optional.of(
+                    new br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema(
+                            resourceType,
+                            resourceCode,
+                            1,
+                            """
+                            {
+                              "type": "object",
+                              "properties": {
+                                "url": { "type": "string" }
+                              },
+                              "required": ["url"]
+                            }
+                            """
+                    )
+            );
         }
 
         @Bean
