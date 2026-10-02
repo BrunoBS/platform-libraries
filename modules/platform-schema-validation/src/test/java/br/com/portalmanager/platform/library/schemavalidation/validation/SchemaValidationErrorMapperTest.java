@@ -13,21 +13,24 @@ class SchemaValidationErrorMapperTest {
     private final SchemaValidationErrorMapper mapper = new SchemaValidationErrorMapper();
 
     @Test
-    void shouldMapKnownKeywordsToPlatformMessageKeys() {
-        assertKey("required", SchemaValidationMessageKeys.REQUIRED);
-        assertKey("type", SchemaValidationMessageKeys.TYPE);
-        assertKey("minLength", SchemaValidationMessageKeys.MIN_LENGTH);
-        assertKey("maxLength", SchemaValidationMessageKeys.MAX_LENGTH);
-        assertKey("minimum", SchemaValidationMessageKeys.MINIMUM);
-        assertKey("maximum", SchemaValidationMessageKeys.MAXIMUM);
-        assertKey("pattern", SchemaValidationMessageKeys.PATTERN);
-        assertKey("enum", SchemaValidationMessageKeys.ENUM);
-        assertKey("additionalProperties", SchemaValidationMessageKeys.ADDITIONAL_PROPERTIES);
+    void shouldDeriveStablePlatformKeysFromNetworkntKeywords() {
+        assertKey("required", "schemavalidation.required");
+        assertKey("minLength", "schemavalidation.min-length");
+        assertKey("additionalProperties", "schemavalidation.additional-properties");
+        assertKey("exclusiveMinimum", "schemavalidation.exclusive-minimum");
+        assertKey("unevaluatedProperties", "schemavalidation.unevaluated-properties");
     }
 
     @Test
-    void shouldFallbackToGenericMessageForUnknownKeyword() {
-        assertKey("futureKeyword", SchemaValidationMessageKeys.INVALID);
+    void shouldDeriveKeyForFutureKeywordWithoutLibraryChange() {
+        assertKey("futureKeyword", "schemavalidation.future-keyword");
+    }
+
+    @Test
+    void shouldFallbackForMissingOrUnsafeKeyword() {
+        assertKey(null, SchemaValidationMessageKeys.INVALID);
+        assertKey(" ", SchemaValidationMessageKeys.INVALID);
+        assertKey("../unsafe", SchemaValidationMessageKeys.INVALID);
     }
 
     private void assertKey(String keyword, String expectedKey) {
