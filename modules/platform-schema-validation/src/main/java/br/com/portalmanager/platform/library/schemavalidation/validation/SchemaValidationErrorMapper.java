@@ -78,6 +78,10 @@ final class SchemaValidationErrorMapper {
             return withValue(field, argument(error, argumentIndex));
         }
 
+        if (FIELD_ONLY_KEYWORDS.contains(keyword)) {
+            return Map.of("0", field);
+        }
+
         return rawParameters(field, error.getArguments());
     }
 
