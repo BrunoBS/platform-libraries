@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.schemavalidation.config;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.schemavalidation.aspect.ResourceSchemaValidationAspect;
 import br.com.portalmanager.platform.library.schemavalidation.repository.JdbcResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
@@ -23,6 +24,7 @@ class PlatformSchemaValidationAutoConfigurationTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
                     PlatformSchemaValidationJdbcAutoConfiguration.class,
+                    PlatformSchemaValidationSourceAutoConfiguration.class,
                     PlatformSchemaValidationAutoConfiguration.class
             ));
 
@@ -56,12 +58,11 @@ class PlatformSchemaValidationAutoConfigurationTest {
     }
 
     @Test
-    void shouldNotActivateRuntimeWithoutRepositoryOrJdbcTemplate() {
+    void shouldFailStartupWithoutRepositoryOrJdbcTemplate() {
         contextRunner.run(context -> {
-            assertThat(context).doesNotHaveBean(ResourceSchemaRepository.class);
-            assertThat(context).doesNotHaveBean(ResourceSchemaResolver.class);
-            assertThat(context).doesNotHaveBean(SchemaValidator.class);
-            assertThat(context).doesNotHaveBean(ResourceSchemaValidationAspect.class);
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure())
+                    .hasRootCauseInstanceOf(PlatformConfigurationException.class);
         });
     }
 
