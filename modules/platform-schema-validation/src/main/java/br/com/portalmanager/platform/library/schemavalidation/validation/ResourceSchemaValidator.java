@@ -14,7 +14,6 @@ import com.networknt.schema.SpecificationVersion;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.Map;
 
 public class ResourceSchemaValidator {
 
@@ -45,11 +44,11 @@ public class ResourceSchemaValidator {
 
         schema.validate(payload).forEach(error -> {
             String field = resolveField(error);
-            var mappedError = errorMapper.map(error, field);
+            SchemaValidationErrorMapper.MappedValidationError mappedError = errorMapper.map(error, field);
             result.addError(
                     mappedError.field(),
                     mappedError.messageKey(),
-                    Map.of("0", mappedError.field()),
+                    mappedError.parameters(),
                     SchemaValidationMessageKeys.INVALID
             );
         });
