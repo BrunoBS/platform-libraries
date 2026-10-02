@@ -54,7 +54,12 @@ public class ResourceSchemaValidator {
 
         errors.stream()
                 .filter(error -> COMPOSITION_KEYWORDS.contains(error.getKeyword())
-                        || !compositionLocations.contains(instanceLocation(error)))
+                        || compositionLocations.stream().noneMatch(
+                                compositionLocation -> isSameOrDescendant(
+                                        instanceLocation(error),
+                                        compositionLocation
+                                )
+                        ))
                 .forEach(error -> {
                     String field = resolveField(error);
                     var mappedError = errorMapper.map(error, field);
@@ -98,6 +103,13 @@ public class ResourceSchemaValidator {
                     exception
             );
         }
+    }
+
+    private boolean isSameOrDescendant(String location, String ancestor) {
+        if (ancestor == null || ancestor.isBlank()) {
+            return true;
+        }
+        return location.equals(ancestor) || location.startsWith(ancestor + "/");
     }
 
     private String instanceLocation(Error error) {
