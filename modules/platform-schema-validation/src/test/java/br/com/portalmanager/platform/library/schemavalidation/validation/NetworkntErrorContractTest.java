@@ -98,6 +98,59 @@ class NetworkntErrorContractTest {
     }
 
     @Test
+    void shouldCharacterizeContainsKeywordBehavior() throws Exception {
+        List<Error> errors = validate(
+                "{\"type\":\"array\",\"contains\":{\"const\":1}}",
+                "[2,3]"
+        );
+
+        assertFalse(errors.isEmpty());
+        errors.forEach(error -> printContract("containsCharacterization", error));
+    }
+
+    @Test
+    void shouldCharacterizeFormatWhenAssertionsAreEnabled() throws Exception {
+        JsonNode schemaNode = objectMapper.readTree(
+                "{\"type\":\"string\",\"format\":\"email\"}"
+        );
+        JsonNode payloadNode = objectMapper.readTree("\"not-an-email\"");
+        Schema schema = schemaRegistry.getSchema(schemaNode);
+
+        List<Error> errors = schema.validate(
+                payloadNode,
+                executionContext -> executionContext.executionConfig(
+                        executionConfig -> executionConfig.formatAssertionsEnabled(true)
+                )
+        );
+
+        assertFalse(errors.isEmpty());
+        errors.forEach(error -> printContract("formatAssertionEnabled", error));
+        assertTrue(errors.stream().anyMatch(error -> "format".equals(error.getKeyword())));
+    }
+
+    @Test
+    void shouldCharacterizeAllOfAggregateBehavior() throws Exception {
+        List<Error> errors = validate(
+                "{\"allOf\":[{\"type\":\"string\"},{\"minLength\":3}]}",
+                "1"
+        );
+
+        assertFalse(errors.isEmpty());
+        errors.forEach(error -> printContract("allOfAggregate", error));
+    }
+
+    @Test
+    void shouldCharacterizeAnyOfAggregateBehavior() throws Exception {
+        List<Error> errors = validate(
+                "{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}",
+                "true"
+        );
+
+        assertFalse(errors.isEmpty());
+        errors.forEach(error -> printContract("anyOfAggregate", error));
+    }
+
+    @Test
     void shouldCharacterizeCompositionBehaviorWithoutInventingAggregateErrors() throws Exception {
         assertControlledComposition("{\"allOf\":[{\"type\":\"string\"},{\"minLength\":3}]}", "1");
         assertControlledComposition("{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}", "true");
