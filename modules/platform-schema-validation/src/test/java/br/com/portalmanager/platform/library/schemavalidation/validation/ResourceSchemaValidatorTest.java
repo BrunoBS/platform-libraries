@@ -262,6 +262,30 @@ class ResourceSchemaValidatorTest {
     }
 
     @Test
+    void shouldExposeControlledErrorsForRealNetworkntAllOf() {
+        assertCompositionProducesOnlyControlledKeys(
+                "{\"allOf\":[{\"type\":\"string\"},{\"minLength\":3}]}",
+                "1"
+        );
+    }
+
+    @Test
+    void shouldExposeControlledErrorsForRealNetworkntOneOf() {
+        assertCompositionProducesOnlyControlledKeys(
+                "{\"oneOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}",
+                "true"
+        );
+    }
+
+    @Test
+    void shouldExposeControlledErrorsForRealNetworkntNot() {
+        assertCompositionProducesOnlyControlledKeys(
+                "{\"not\":{\"type\":\"string\"}}",
+                "\"blocked\""
+        );
+    }
+
+    @Test
     void shouldKeepFormatAsMessageContractWithoutAssumingAssertionIsEnabled() throws Exception {
         ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
         when(resolver.resolve("APPLICATION", "application"))
@@ -272,6 +296,33 @@ class ResourceSchemaValidatorTest {
 
         ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
         validator.validate("APPLICATION", "application", objectMapper.readTree("\"not-an-email\""));
+    }
+
+    private void assertCompositionProducesOnlyControlledKeys(String definition, String payload) {
+        ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
+        when(resolver.resolve("APPLICATION", "application"))
+                .thenReturn(new ResourceSchema("APPLICATION", "application", 1, definition));
+
+        ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
+
+        ValidationException exception = assertThrows(
+                ValidationException.class,
+                () -> validator.validate(
+                        "APPLICATION",
+                        "application",
+                        objectMapper.readTree(payload)
+                )
+        );
+
+        org.junit.jupiter.api.Assertions.assertFalse(exception.getDetails().isEmpty());
+        org.junit.jupiter.api.Assertions.assertTrue(
+                exception.getDetails().stream()
+                        .allMatch(detail -> detail.messageKey().startsWith("schemavalidation."))
+        );
+        org.junit.jupiter.api.Assertions.assertTrue(
+                exception.getDetails().stream()
+                        .allMatch(detail -> SchemaValidationMessageKeys.INVALID.equals(detail.fallbackMessageKey()))
+        );
     }
 
     private void assertValidationMessage(String definition, String payload, String expectedMessageKey) {
