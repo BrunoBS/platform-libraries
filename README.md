@@ -26,6 +26,7 @@ platform-libraries/
     ├── platform-starter/
     ├── platform-observability/
     ├── platform-messaging/
+    ├── platform-schema-validation/
     ├── platform-authorization/
     ├── platform-audit/
     ├── platform-catalog/
@@ -68,7 +69,7 @@ Usam essa `revision`:
 
 - root reactor `platform-libraries`;
 - `platform-libraries-bom`;
-- as oito capabilities em `modules/`.
+- as nove capabilities em `modules/`.
 
 As dependências internas entre capabilities usam `${project.version}`. Os POMs de consumo gerados pelo Flatten Maven Plugin não são versionados no Git.
 
@@ -84,6 +85,8 @@ platform-starter
 ├── platform-observability
 ├── platform-messaging
 └── platform-authorization
+
+platform-schema-validation -> platform-messaging
 ```
 
 `platform-testing` possui integrações opcionais e não deve introduzir JDBC/MySQL/Kafka/Testcontainers transitivamente quando essas capacidades não forem declaradas.
@@ -113,7 +116,7 @@ Após a publicação definitiva das coordenadas da Foundation, um serviço consu
 </dependencyManagement>
 ```
 
-Capabilities podem então ser declaradas sem versão:
+Capabilities podem então ser declaradas sem versão. O `platform-starter` mantém somente o baseline comum; `platform-schema-validation` é opt-in e deve ser declarado explicitamente pelo serviço que pretende validar payloads por JSON Schema:
 
 ```xml
 <dependency>
@@ -121,6 +124,17 @@ Capabilities podem então ser declaradas sem versão:
     <artifactId>platform-starter</artifactId>
 </dependency>
 ```
+
+Para habilitar Schema Validation:
+
+```xml
+<dependency>
+    <groupId>br.com.portalmanager.platform.library</groupId>
+    <artifactId>platform-schema-validation</artifactId>
+</dependency>
+```
+
+Ao declarar essa capability, o serviço deve possuir `JdbcTemplate` para a fonte JDBC default ou fornecer um `ResourceSchemaRepository` customizado; sem uma fonte, a aplicação falha no startup.
 
 ## Registry oficial
 
