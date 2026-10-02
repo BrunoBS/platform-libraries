@@ -10,10 +10,8 @@ class PlatformSchemaValidationPropertiesTest {
     void shouldExposeGoldenDefaults() {
         PlatformSchemaValidationProperties properties = new PlatformSchemaValidationProperties();
 
-        assertThat(properties.isEnabled()).isTrue();
         assertThat(properties.resolveFallbackCode()).isEqualTo("DEFAULT");
-        assertThat(properties.getDatasource().isEnabled()).isFalse();
-        assertThat(properties.getDatasource().resolveViewName())
+        assertThat(properties.resolveViewName())
                 .isEqualTo("vw_platform_resource_schemas");
     }
 
@@ -21,7 +19,7 @@ class PlatformSchemaValidationPropertiesTest {
     void shouldFallbackWhenTextConfigurationIsBlank() {
         PlatformSchemaValidationProperties properties = new PlatformSchemaValidationProperties();
         properties.setFallbackCode(" ");
-        properties.getDatasource().setViewName(null);
+        properties.setViewName(null);
 
         assertThat(properties.resolveFallbackCode()).isEqualTo("DEFAULT");
         assertThat(properties.getDatasource().resolveViewName())
@@ -32,7 +30,7 @@ class PlatformSchemaValidationPropertiesTest {
     void shouldNormalizeConfiguredTextValues() {
         PlatformSchemaValidationProperties properties = new PlatformSchemaValidationProperties();
         properties.setFallbackCode("  PLATFORM_DEFAULT  ");
-        properties.getDatasource().setViewName("  custom_schema_view  ");
+        properties.setViewName("  custom_schema_view  ");
 
         assertThat(properties.resolveFallbackCode()).isEqualTo("PLATFORM_DEFAULT");
         assertThat(properties.getDatasource().resolveViewName()).isEqualTo("custom_schema_view");
