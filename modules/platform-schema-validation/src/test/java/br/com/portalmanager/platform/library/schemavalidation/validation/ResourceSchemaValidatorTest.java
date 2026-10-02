@@ -180,6 +180,51 @@ class ResourceSchemaValidatorTest {
     }
 
     @Test
+    void shouldMapRealNetworkntMaxLengthError() {
+        assertValidationMessage(
+                "{\"type\":\"string\",\"maxLength\":3}",
+                "\"abcd\"",
+                SchemaValidationMessageKeys.fromKeyword("maxLength")
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntMultipleOfError() {
+        assertValidationMessage(
+                "{\"type\":\"number\",\"multipleOf\":2}",
+                "3",
+                SchemaValidationMessageKeys.fromKeyword("multipleOf")
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntUniqueItemsError() {
+        assertValidationMessage(
+                "{\"type\":\"array\",\"uniqueItems\":true}",
+                "[1,1]",
+                SchemaValidationMessageKeys.fromKeyword("uniqueItems")
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntEnumError() {
+        assertValidationMessage(
+                "{\"enum\":[\"ACTIVE\",\"INACTIVE\"]}",
+                "\"UNKNOWN\"",
+                SchemaValidationMessageKeys.fromKeyword("enum")
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntConstError() {
+        assertValidationMessage(
+                "{\"const\":\"EXPECTED\"}",
+                "\"OTHER\"",
+                SchemaValidationMessageKeys.fromKeyword("const")
+        );
+    }
+
+    @Test
     void shouldExposeStructuredBranchErrorsForRealNetworkntAnyOf() {
         ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
         when(resolver.resolve("APPLICATION", "application"))
