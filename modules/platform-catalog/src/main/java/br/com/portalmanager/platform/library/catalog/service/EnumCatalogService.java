@@ -10,46 +10,31 @@ import br.com.portalmanager.platform.library.catalog.validation.EnumCatalogValid
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import tools.jackson.databind.ObjectMapper;
 
-/**
- * Simple path for catalogs whose allowed codes are defined by a Java enum.
- * The database still owns label, description, sort order, active state and settings.
- */
 public abstract non-sealed class EnumCatalogService<
         E extends CatalogEntity,
         C extends Enum<C> & CatalogEnum<C>>
-        extends AbstractCatalogService<E, CatalogDTO> {
+        extends AbstractCatalogService<E> {
 
     protected EnumCatalogService(
-            CatalogRepository<E> repository,
-            ObjectMapper objectMapper,
-            Class<E> entityClass,
-            Class<C> enumClass) {
+            CatalogRepository<E> repository, ObjectMapper objectMapper,
+            Class<E> entityClass, Class<C> enumClass) {
         this(repository, objectMapper, entityClass, enumClass, CatalogSettingsValidator.none());
     }
 
     protected EnumCatalogService(
-            CatalogRepository<E> repository,
-            ObjectMapper objectMapper,
-            Class<E> entityClass,
-            Class<C> enumClass,
-            CatalogSettingsValidator<CatalogDTO> settingsValidator) {
-        super(
-                repository,
-                new CatalogMapper<>(entityClass, objectMapper),
-                validator(repository, entityClass, enumClass, settingsValidator)
-        );
+            CatalogRepository<E> repository, ObjectMapper objectMapper,
+            Class<E> entityClass, Class<C> enumClass,
+            CatalogSettingsValidator settingsValidator) {
+        super(repository, new CatalogMapper<>(entityClass, objectMapper),
+                validator(repository, entityClass, enumClass, settingsValidator));
     }
 
     private static <E extends CatalogEntity, C extends Enum<C> & CatalogEnum<C>>
-    EnumCatalogValidator<C, CatalogDTO> validator(
-            CatalogRepository<E> repository,
-            Class<E> entityClass,
-            Class<C> enumClass,
-            CatalogSettingsValidator<CatalogDTO> settingsValidator) {
-        CatalogSettingsValidator<CatalogDTO> resolved = settingsValidator == null
-                ? CatalogSettingsValidator.none()
-                : settingsValidator;
-
+    EnumCatalogValidator<C> validator(
+            CatalogRepository<E> repository, Class<E> entityClass,
+            Class<C> enumClass, CatalogSettingsValidator settingsValidator) {
+        CatalogSettingsValidator resolved =
+                settingsValidator == null ? CatalogSettingsValidator.none() : settingsValidator;
         return new EnumCatalogValidator<>(repository, enumClass) {
             @Override
             protected void validateSettings(CatalogDTO dto, ValidationResult result) {
