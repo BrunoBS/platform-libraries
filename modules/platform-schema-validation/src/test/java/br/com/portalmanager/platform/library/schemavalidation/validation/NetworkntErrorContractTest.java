@@ -39,7 +39,7 @@ class NetworkntErrorContractTest {
                 new Case("minItems", "{\"type\":\"array\",\"minItems\":2}", "[1]", "minItems"),
                 new Case("maxItems", "{\"type\":\"array\",\"maxItems\":1}", "[1,2]", "maxItems"),
                 new Case("uniqueItems", "{\"type\":\"array\",\"uniqueItems\":true}", "[1,1]", "uniqueItems"),
-                new Case("contains", "{\"type\":\"array\",\"contains\":{\"const\":1}}", "[2]", "contains"),
+                new Case("containsDefaultMinimum", "{\"type\":\"array\",\"contains\":{\"const\":1}}", "[2]", "minContains"),
                 new Case("minContains", "{\"type\":\"array\",\"contains\":{\"const\":1},\"minContains\":2}", "[1]", "minContains"),
                 new Case("maxContains", "{\"type\":\"array\",\"contains\":{\"const\":1},\"maxContains\":1}", "[1,1]", "maxContains"),
                 new Case("minProperties", "{\"type\":\"object\",\"minProperties\":2}", "{\"a\":1}", "minProperties"),
@@ -81,7 +81,7 @@ class NetworkntErrorContractTest {
                 "[1,1]"
         ), "uniqueItems");
 
-        assertEquals(0, uniqueItems.getArguments().length);
+        org.junit.jupiter.api.Assertions.assertNull(uniqueItems.getArguments());
     }
 
     @Test
