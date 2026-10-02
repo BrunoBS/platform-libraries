@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -17,17 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
         before = PlatformSchemaValidationAutoConfiguration.class
 )
 @ConditionalOnClass(JdbcTemplate.class)
-@ConditionalOnProperty(
-        prefix = "platform.schema-validation",
-        name = "enabled",
-        havingValue = "true",
-        matchIfMissing = true
-)
-@ConditionalOnProperty(
-        prefix = "platform.schema-validation.datasource",
-        name = "enabled",
-        havingValue = "true"
-)
 public class PlatformSchemaValidationJdbcAutoConfiguration {
 
     @Bean
@@ -37,7 +25,7 @@ public class PlatformSchemaValidationJdbcAutoConfiguration {
             JdbcTemplate jdbcTemplate,
             PlatformSchemaValidationProperties properties
     ) {
-        SqlIdentifierValidator.validate(properties.getDatasource().resolveViewName());
+        SqlIdentifierValidator.validate(properties.resolveViewName());
         return new JdbcResourceSchemaRepository(jdbcTemplate, properties);
     }
 }
