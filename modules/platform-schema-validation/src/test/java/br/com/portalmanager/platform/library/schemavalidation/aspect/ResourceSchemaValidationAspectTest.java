@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.schemavalidation.aspect;
 
 import br.com.portalmanager.platform.library.schemavalidation.annotation.SchemaPayload;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchema;
-import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 
 class ResourceSchemaValidationAspectTest {
 
-    private final ResourceSchemaValidator validator = mock(ResourceSchemaValidator.class);
+    private final SchemaValidator validator = mock(SchemaValidator.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ResourceSchemaValidationAspect aspect =
             new ResourceSchemaValidationAspect(validator, objectMapper);
