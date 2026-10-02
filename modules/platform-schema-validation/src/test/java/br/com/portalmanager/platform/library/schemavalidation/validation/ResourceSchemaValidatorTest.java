@@ -118,7 +118,7 @@ class ResourceSchemaValidatorTest {
                 {"type":"object","required":["name"]}
                 """,
                 "{}",
-                SchemaValidationMessageKeys.REQUIRED
+                SchemaValidationMessageKeys.fromKeyword("required")
         );
     }
 
@@ -131,7 +131,7 @@ class ResourceSchemaValidatorTest {
                 """
                 {"name":123}
                 """,
-                SchemaValidationMessageKeys.TYPE
+                SchemaValidationMessageKeys.fromKeyword("type")
         );
     }
 
@@ -144,7 +144,7 @@ class ResourceSchemaValidatorTest {
                 """
                 {"name":"a"}
                 """,
-                SchemaValidationMessageKeys.MIN_LENGTH
+                SchemaValidationMessageKeys.fromKeyword("minLength")
         );
     }
 
@@ -157,7 +157,7 @@ class ResourceSchemaValidatorTest {
                 """
                 {"unexpected":"value"}
                 """,
-                SchemaValidationMessageKeys.ADDITIONAL_PROPERTIES
+                SchemaValidationMessageKeys.fromKeyword("additionalProperties")
         );
     }
 
@@ -179,7 +179,7 @@ class ResourceSchemaValidatorTest {
 
         assertEquals(
                 expectedMessageKey,
-                exception.getValidationResult().getDetails().getFirst().messageKey()
+                exception.getDetails().getFirst().messageKey()
         );
     }
 
