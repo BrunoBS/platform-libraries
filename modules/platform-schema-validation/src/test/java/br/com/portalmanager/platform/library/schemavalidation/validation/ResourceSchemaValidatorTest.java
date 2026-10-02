@@ -161,6 +161,46 @@ class ResourceSchemaValidatorTest {
         );
     }
 
+    @Test
+    void shouldMapRealNetworkntMinimumError() {
+        assertValidationMessage(
+                "{\"type\":\"number\",\"minimum\":10}",
+                "5",
+                SchemaValidationMessageKeys.fromKeyword("minimum")
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntMinItemsError() {
+        assertValidationMessage(
+                "{\"type\":\"array\",\"minItems\":2}",
+                "[1]",
+                SchemaValidationMessageKeys.fromKeyword("minItems")
+        );
+    }
+
+    @Test
+    void shouldMapRealNetworkntAnyOfCompositionError() {
+        assertValidationMessage(
+                "{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"number\"}]}",
+                "true",
+                SchemaValidationMessageKeys.fromKeyword("anyOf")
+        );
+    }
+
+    @Test
+    void shouldKeepFormatAsMessageContractWithoutAssumingAssertionIsEnabled() throws Exception {
+        ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
+        when(resolver.resolve("APPLICATION", "application"))
+                .thenReturn(new ResourceSchema(
+                        "APPLICATION", "application", 1,
+                        "{\"type\":\"string\",\"format\":\"email\"}"
+                ));
+
+        ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
+        validator.validate("APPLICATION", "application", objectMapper.readTree("\"not-an-email\""));
+    }
+
     private void assertValidationMessage(String definition, String payload, String expectedMessageKey) {
         ResourceSchemaResolver resolver = mock(ResourceSchemaResolver.class);
         when(resolver.resolve("APPLICATION", "application"))
