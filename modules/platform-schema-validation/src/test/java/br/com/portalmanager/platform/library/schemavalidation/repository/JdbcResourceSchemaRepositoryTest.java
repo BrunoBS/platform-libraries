@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.schemavalidation.repository;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +61,12 @@ class JdbcResourceSchemaRepositoryTest {
                 org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
         )).thenThrow(new DataAccessResourceFailureException("view unavailable"));
 
-        assertThrows(DataAccessResourceFailureException.class, repository::validateSource);
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
+                repository::validateSource
+        );
+
+        assertTrue(exception.getCause() instanceof DataAccessResourceFailureException);
     }
 
     @Test
