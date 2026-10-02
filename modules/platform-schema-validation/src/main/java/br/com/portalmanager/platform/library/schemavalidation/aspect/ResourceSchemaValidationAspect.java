@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.schemavalidation.aspect;
 
 import br.com.portalmanager.platform.library.schemavalidation.annotation.SchemaPayload;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchema;
-import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
+import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -20,12 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Aspect
 public class ResourceSchemaValidationAspect {
 
-    private final ResourceSchemaValidator validator;
+    private final SchemaValidator validator;
     private final ObjectMapper objectMapper;
     private final Map<Method, Integer> payloadParameterIndexes = new ConcurrentHashMap<>();
 
     public ResourceSchemaValidationAspect(
-            ResourceSchemaValidator validator,
+            SchemaValidator validator,
             ObjectMapper objectMapper
     ) {
         this.validator = validator;
