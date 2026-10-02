@@ -56,6 +56,29 @@ Integer sortOrder
 JsonNode settings
 ```
 
+## Contrato público Golden
+
+O consumidor deve compor um catálogo usando apenas os contratos necessários ao seu modelo:
+
+```text
+CatalogEntity
+CatalogRepository
+CatalogDTO
+CatalogController
+EnumCatalogService | IncludedCatalogService
+CatalogEnum        (somente Enum Catalog)
+AbstractCatalogCode (quando o domínio precisar de um VO de referência)
+CatalogSettingsValidator (quando houver settings validados)
+```
+
+`CatalogMapper`, `AbstractCatalogService`, `AbstractCatalogValidator` e
+`EnumCatalogValidator` sustentam a implementação da library. Não são pontos
+de extensão do microserviço consumidor.
+
+A regra Golden é preferir composição pelos contratos acima e não criar camadas
+intermediárias no microserviço para substituir comportamento já fornecido pela
+library.
+
 ## API HTTP padrão
 
 ```text
