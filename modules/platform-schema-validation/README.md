@@ -149,3 +149,28 @@ A resolução continua consultando a fonte configurada em cada validação para 
 Após a resolução, a definição publicada é parseada e compilada para a validação corrente. O módulo não mantém cache de resolução, versão ou JSON Schema compilado.
 
 Essa decisão mantém a VIEW como fonte de verdade imediata e evita TTL, invalidação e retenção de versões históricas em memória. O cache existente no módulo é restrito ao metadado estático de reflection do contrato AOP (método → posição do parâmetro `@SchemaPayload`). Cache de schema poderá ser introduzido futuramente apenas se medições demonstrarem necessidade.
+
+
+## Contrato de mensagens de validação
+
+A implementação do engine JSON Schema é detalhe interno da library. Mensagens produzidas pelo NetworkNT não fazem parte do contrato público e não são propagadas diretamente ao consumidor.
+
+```text
+NetworkNT Error
+        ↓
+SchemaValidationErrorMapper
+        ↓
+schemavalidation.*
+        ↓
+ValidationResult
+        ↓
+platform-messaging
+        ↓
+bundle default / override central
+```
+
+Keywords conhecidas são convertidas para chaves estáveis do módulo, como `schemavalidation.required`, `schemavalidation.type`, `schemavalidation.min-length` e `schemavalidation.additional-properties`. Keywords não mapeadas usam `schemavalidation.invalid` como fallback.
+
+Essas mensagens estruturais pertencem ao fluxo normal do `platform-messaging`: possuem definição default nos bundles `schemavalidation_*.properties` e podem ser sobrescritas pelo mecanismo central de mensagens sem alterar a library ou o serviço consumidor.
+
+Erros técnicos `PLT-SCHEMA-001` a `PLT-SCHEMA-004` são diferentes: representam configuração ou integridade da plataforma, usam `PlatformErrorDefinition` e permanecem como contrato técnico estável, fora do mecanismo de override das mensagens estruturais.
