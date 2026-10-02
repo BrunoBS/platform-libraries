@@ -11,6 +11,8 @@ import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @AutoConfiguration(
         after = {DataSourceAutoConfiguration.class, JdbcTemplateAutoConfiguration.class},
@@ -21,6 +23,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @ConditionalOnProperty(prefix = "platform.messaging.datasource", name = "enabled", havingValue = "true")
 public class PlatformMessagingJdbcAutoConfiguration {
 
+    private static final Logger log = LoggerFactory.getLogger(PlatformMessagingJdbcAutoConfiguration.class);
+
     @Bean
     @ConditionalOnBean(JdbcTemplate.class)
     @ConditionalOnMissingBean(ApiMessageRepository.class)
@@ -29,6 +33,12 @@ public class PlatformMessagingJdbcAutoConfiguration {
             PlatformMessagingProperties properties
     ) {
         SqlIdentifierValidator.validate(properties.getDatasource().getViewName());
-        return new JdbcApiMessageRepository(jdbc, properties);
+        JdbcApiMessageRepository repository = new JdbcApiMessageRepository(jdbc, properties);
+        try {
+            repository.validateSource();
+        } catch (RuntimeException exception) {
+            log.error("Platform messaging datasource health check failed; runtime resolution will continue through fallbacks", exception);
+        }
+        return repository;
     }
 }
