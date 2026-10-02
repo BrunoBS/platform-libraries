@@ -47,7 +47,7 @@ class AbstractCatalogServiceTest {
         verify(repository, never()).existsByCodeAndActiveTrue(org.mockito.ArgumentMatchers.anyString());
     }
 
-    private static final class TestCatalogService extends DynamicCatalogService<TestCatalogEntity> {
+    private static final class TestCatalogService extends IncludedCatalogService<TestCatalogEntity> {
 
         private TestCatalogService(TestCatalogRepository repository) {
             super(repository, new ObjectMapper(), TestCatalogEntity.class);
