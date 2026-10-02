@@ -20,6 +20,16 @@ public class JdbcResourceSchemaRepository implements ResourceSchemaRepository {
         this.properties = properties;
     }
 
+    public void validateSource() {
+        String sql = """
+                SELECT resource_type, resource_code, schema_version, definition
+                FROM %s
+                WHERE 1 = 0
+                """.formatted(properties.resolveViewName());
+
+        jdbcTemplate.query(sql, rs -> null);
+    }
+
     @Override
     public Optional<ResourceSchema> find(String resourceType, String resourceCode) {
         String viewName = properties.resolveViewName();
