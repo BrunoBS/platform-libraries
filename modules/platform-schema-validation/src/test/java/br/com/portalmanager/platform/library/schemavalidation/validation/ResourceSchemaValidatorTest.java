@@ -180,11 +180,26 @@ class ResourceSchemaValidatorTest {
     }
 
     @Test
-    void shouldMapRealNetworkntAnyOfCompositionError() {
-        assertValidationMessage(
-                "{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"number\"}]}",
-                "true",
-                SchemaValidationMessageKeys.fromKeyword("anyOf")
+    void shouldExposeStructuredBranchErrorsForRealNetworkntAnyOf() {
+        String schema = """
+                {
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
+                  "anyOf": [
+                    { "type": "string" },
+                    { "type": "integer" }
+                  ]
+                }
+                """;
+
+        BusinessValidationException exception = assertThrows(
+                BusinessValidationException.class,
+                () -> validator.validate(schema, mapper.valueToTree(true))
+        );
+
+        assertEquals(2, exception.getDetails().size());
+        org.junit.jupiter.api.Assertions.assertTrue(
+                exception.getDetails().stream()
+                        .allMatch(detail -> "schemavalidation.type".equals(detail.messageKey()))
         );
     }
 
