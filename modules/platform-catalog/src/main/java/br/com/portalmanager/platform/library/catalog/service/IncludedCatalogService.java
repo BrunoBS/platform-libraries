@@ -3,48 +3,41 @@ package br.com.portalmanager.platform.library.catalog.service;
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
 import br.com.portalmanager.platform.library.catalog.mapper.CatalogMapper;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
-import br.com.portalmanager.platform.library.catalog.model.CatalogEnum;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
+import br.com.portalmanager.platform.library.catalog.validation.AbstractCatalogValidator;
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
-import br.com.portalmanager.platform.library.catalog.validation.EnumCatalogValidator;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import tools.jackson.databind.ObjectMapper;
 
-public abstract non-sealed class EnumCatalogService<
-        E extends CatalogEntity,
-        C extends Enum<C> & CatalogEnum<C>>
+public abstract non-sealed class IncludedCatalogService<E extends CatalogEntity>
         extends AbstractCatalogService<E> {
 
-    protected EnumCatalogService(
-            CatalogRepository<E> repository, ObjectMapper objectMapper,
-            Class<E> entityClass, Class<C> enumClass) {
-        this(repository, objectMapper, entityClass, enumClass, CatalogSettingsValidator.none());
+    protected IncludedCatalogService(
+            CatalogRepository<E> repository, ObjectMapper objectMapper, Class<E> entityClass) {
+        this(repository, objectMapper, entityClass, CatalogSettingsValidator.none());
     }
 
-    protected EnumCatalogService(
-            CatalogRepository<E> repository, ObjectMapper objectMapper,
-            Class<E> entityClass, Class<C> enumClass,
+    protected IncludedCatalogService(
+            CatalogRepository<E> repository, ObjectMapper objectMapper, Class<E> entityClass,
             String schemaResourceCode, SchemaValidator schemaValidator) {
-        this(repository, objectMapper, entityClass, enumClass,
+        this(repository, objectMapper, entityClass,
                 CatalogSettingsValidator.schema(schemaResourceCode, schemaValidator));
     }
 
-    protected EnumCatalogService(
-            CatalogRepository<E> repository, ObjectMapper objectMapper,
-            Class<E> entityClass, Class<C> enumClass,
+    protected IncludedCatalogService(
+            CatalogRepository<E> repository, ObjectMapper objectMapper, Class<E> entityClass,
             CatalogSettingsValidator settingsValidator) {
         super(repository, new CatalogMapper<>(entityClass, objectMapper),
-                validator(repository, entityClass, enumClass, settingsValidator));
+                validator(repository, entityClass, settingsValidator));
     }
 
-    private static <E extends CatalogEntity, C extends Enum<C> & CatalogEnum<C>>
-    EnumCatalogValidator<C> validator(
+    private static <E extends CatalogEntity> AbstractCatalogValidator validator(
             CatalogRepository<E> repository, Class<E> entityClass,
-            Class<C> enumClass, CatalogSettingsValidator settingsValidator) {
+            CatalogSettingsValidator settingsValidator) {
         CatalogSettingsValidator resolved =
                 settingsValidator == null ? CatalogSettingsValidator.none() : settingsValidator;
-        return new EnumCatalogValidator<>(repository, enumClass) {
+        return new AbstractCatalogValidator(repository) {
             @Override
             protected void validateSettings(CatalogDTO dto, ValidationResult result) {
                 resolved.validate(dto, result);

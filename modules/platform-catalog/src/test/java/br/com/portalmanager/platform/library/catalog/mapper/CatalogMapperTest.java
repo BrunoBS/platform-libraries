@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.catalog.mapper;
 
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
+import br.com.portalmanager.platform.library.catalog.exception.CatalogTechnicalException;
+import br.com.portalmanager.platform.library.catalog.message.CatalogMessageKeys;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
@@ -48,12 +50,39 @@ class CatalogMapperTest {
                 new CatalogMapper<>(TestCatalog.class, new ObjectMapper());
 
         assertThatThrownBy(() -> mapper.toDTO(entity))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Invalid catalog settings JSON stored in database");
+                .isInstanceOfSatisfying(CatalogTechnicalException.class, exception -> {
+                    assertThat(exception.getMessageKey())
+                            .isEqualTo(CatalogMessageKeys.SETTINGS_INVALID_STORED_JSON);
+                    assertThat(exception.getCause()).isNotNull();
+                });
+    }
+
+    @Test
+    void shouldFailWithStandardTechnicalExceptionWhenEntityCannotBeInstantiated() {
+        CatalogMapper<InvalidCatalog> mapper =
+                new CatalogMapper<>(InvalidCatalog.class, new ObjectMapper());
+
+        assertThatThrownBy(() -> mapper.toEntity(new CatalogDTO(
+                "ONE",
+                "One",
+                "Descrição válida",
+                1,
+                JSON.createObjectNode()
+        )))
+                .isInstanceOfSatisfying(CatalogTechnicalException.class, exception -> {
+                    assertThat(exception.getMessageKey())
+                            .isEqualTo(CatalogMessageKeys.ENTITY_INSTANTIATION_FAILED);
+                    assertThat(exception.getCause()).isNotNull();
+                });
     }
 
     public static class TestCatalog extends CatalogEntity {
         public TestCatalog() {
+        }
+    }
+
+    public static class InvalidCatalog extends CatalogEntity {
+        private InvalidCatalog(String ignored) {
         }
     }
 }

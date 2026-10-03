@@ -25,6 +25,17 @@ class CatalogMessageBundleTest {
     }
 
     @Test
+    void shouldResolveTechnicalCatalogMessageFromModuleBundle() {
+        var message = provider.find(
+                CatalogMessageKeys.SETTINGS_INVALID_STORED_JSON,
+                Locale.forLanguageTag("pt-BR")
+        ).orElseThrow();
+
+        assertEquals("CAT-500-001", message.code());
+        assertEquals(500, message.httpStatus());
+    }
+
+    @Test
     void shouldResolveEnglishCatalogMessageFromModuleBundle() {
         var message = provider.find(
                 CatalogMessageKeys.NOT_FOUND,

@@ -25,9 +25,9 @@ Exemplos: `JAVA`, `MANAGER`, `WORKSPACE_REGISTRATION`, `OPEN_API`.
 
 O `code` é imutável depois da criação.
 
-## 2. Dynamic ou Enum
+## 2. Included ou Enum
 
-Use `DynamicCatalogService` quando novos códigos podem ser criados em runtime.
+Use `IncludedCatalogService` para o modelo Included, quando novos códigos podem ser incluídos em runtime.
 
 Use `EnumCatalogService` quando o código da aplicação define os valores permitidos. Nesse caso, o `code` precisa existir no enum que implementa `CatalogEnum`.
 
@@ -70,9 +70,44 @@ public class LanguageTypeService
 }
 ```
 
-## 4. Dynamic Catalog
+## 4. Included Catalog
 
-O Dynamic Catalog usa `DynamicCatalogService` e não possui enum. Novos `code` podem ser criados via API.
+O Included Catalog usa `IncludedCatalogService` e não possui enum. Novos `code` podem ser criados via API.
+
+### Settings validados por JSON Schema
+
+Quando o catálogo possui `settings` governado por JSON Schema, o consumidor não
+precisa criar uma ponte própria de validação. Injete o `SchemaValidator` e informe
+somente o código do recurso de schema:
+
+```java
+@Service
+public class LanguageTypeService
+        extends EnumCatalogService<LanguageType, LanguageTypeEnum> {
+
+    public LanguageTypeService(
+            LanguageTypeRepository repository,
+            ObjectMapper objectMapper,
+            SchemaValidator schemaValidator) {
+        super(
+                repository,
+                objectMapper,
+                LanguageType.class,
+                LanguageTypeEnum.class,
+                "language-type",
+                schemaValidator
+        );
+    }
+}
+```
+
+O `platform-catalog` define internamente `resourceType = CATALOG`, valida
+`CatalogDTO.settings` por `platform-schema-validation` e converte erros de
+payload para campos `settings.*`. Erros técnicos de resolução/compilação do
+schema não são convertidos em erros funcionais.
+
+Use `CatalogSettingsValidator` diretamente apenas quando existir uma regra de
+settings que não seja JSON Schema.
 
 ## 5. DTO padrão
 
@@ -116,7 +151,7 @@ POST   /api/v1/<catalog>/{code}/restore
 - `code` aceita somente `A-Z`, `0-9` e `_`, inicia por letra e tem no máximo 50 caracteres;
 - `code` não é alterado em updates;
 - `EnumCatalogService` valida o código contra o enum;
-- `DynamicCatalogService` permite novos códigos em runtime;
+- `IncludedCatalogService` permite novos códigos em runtime;
 - `active=false` representa soft delete;
 - restore revalida o registro;
 - `sortOrder` é calculado quando ausente ou menor que 1;
@@ -132,27 +167,56 @@ application.language_type_code
 type_languages.code
 ```
 
-## 9. Extension points
+## 9. Value Objects de código
+
+`AbstractCatalogCode` é o contrato compartilhado para referências semânticas a códigos de catálogo dentro dos domínios consumidores. Ele não representa a regra de criação do `CatalogEntity`: VOs dinâmicos podem aceitar valores como `workspace-service`, enquanto o `code` administrável do catálogo mantém o formato uppercase/underscore desta documentação.
+
+## 10. Extension points
 
 Os únicos pontos oficiais de extensão direta de service são:
 
 ```text
 EnumCatalogService
-DynamicCatalogService
+IncludedCatalogService
 ```
 
 `AbstractCatalogService` permanece `sealed`.
 
-## 10. Checklist
+## 11. Checklist
 
 Para qualquer catálogo:
 
 1. migration com `code VARCHAR(50) PRIMARY KEY`;
 2. entity;
 3. repository;
-4. service `EnumCatalogService` ou `DynamicCatalogService`;
+4. service `EnumCatalogService` ou `IncludedCatalogService`;
 5. controller;
 6. autorização;
 7. testes.
 
 No Enum Catalog, adicione também o enum implementando `CatalogEnum`.
+
+## 12. Contrato público Golden
+
+No microserviço consumidor, use diretamente os contratos fornecidos pela library:
+
+```text
+CatalogEntity
+CatalogRepository
+CatalogDTO
+CatalogController
+EnumCatalogService | IncludedCatalogService
+CatalogEnum        (somente Enum Catalog)
+AbstractCatalogCode (quando necessário como VO)
+CatalogSettingsValidator (quando houver settings)
+```
+
+Não estenda nem replique `CatalogMapper`, `AbstractCatalogService`,
+`AbstractCatalogValidator` ou `EnumCatalogValidator`. Essas classes fazem
+parte da implementação interna do fluxo padrão.
+
+O microserviço é responsável por declarar qual catálogo existe, seu enum quando
+aplicável, schema de settings, autorização e regras de domínio. A library é
+responsável pelo comportamento comum de persistência, CRUD, lifecycle,
+ordenação e validação estrutural do catálogo.
+

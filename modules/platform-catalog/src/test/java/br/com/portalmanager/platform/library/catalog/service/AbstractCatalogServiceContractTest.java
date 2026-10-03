@@ -98,6 +98,24 @@ class AbstractCatalogServiceContractTest {
     }
 
     @Test
+    void deveRetornarDtosAoBuscarPorCodes() {
+        when(repository.findByCodeInAndActiveTrue(List.of("ONE", "TWO")))
+                .thenReturn(List.of(entity("ONE", 1), entity("TWO", 2)));
+
+        List<CatalogDTO> result = service.findByCodes(List.of("ONE", "TWO"));
+
+        assertThat(result)
+                .extracting(CatalogDTO::code)
+                .containsExactly("ONE", "TWO");
+    }
+
+    @Test
+    void deveRejeitarUpdateComBodyNuloPeloContratoDeValidacao() {
+        assertThatThrownBy(() -> service.update("ONE", null))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
     void deveAplicarSoftDelete() {
         TestEntity current = entity("ONE", 1);
         when(repository.findByCodeAndActiveTrue("ONE")).thenReturn(Optional.of(current));
@@ -150,7 +168,7 @@ class AbstractCatalogServiceContractTest {
     }
 
     private static final class TestService
-            extends DynamicCatalogService<TestEntity> {
+            extends IncludedCatalogService<TestEntity> {
 
         private TestService(TestRepository repository) {
             super(repository, JSON, TestEntity.class);
