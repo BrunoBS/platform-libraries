@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.configuration;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
@@ -7,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @ConfigurationProperties(prefix = "platform.message-queue")
-public class MessageQueueProperties {
+public class MessageQueueProperties implements InitializingBean {
 
     private MessageQueueProvider provider;
     private Duration shutdownTimeout = Duration.ofSeconds(30);
@@ -50,6 +51,88 @@ public class MessageQueueProperties {
 
     public Map<String, Destination> getDestinations() {
         return destinations;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        validate();
+    }
+
+    void validate() {
+        if (provider == null) {
+            throw invalid("provider is required");
+        }
+        if (destinations.isEmpty()) {
+            throw invalid("at least one destination is required");
+        }
+        validateDuration("shutdown-timeout", shutdownTimeout, 0, Long.MAX_VALUE);
+        validateDuration("poll-failure-backoff", pollFailureBackoff, 0, Long.MAX_VALUE);
+
+        if (provider == MessageQueueProvider.AWS) {
+            if (aws.region == null || aws.region.isBlank()) {
+                throw invalid("aws.region is required when provider is AWS");
+            }
+            validateConsumer("aws.defaults", aws.defaults);
+        } else {
+            if (azure.namespace == null || azure.namespace.isBlank()) {
+                throw invalid("azure.namespace is required when provider is AZURE");
+            }
+            validateConsumer("azure.defaults", azure.defaults);
+        }
+
+        destinations.forEach((name, destination) -> validateDestination(name, destination));
+    }
+
+    private void validateDestination(String name, Destination destination) {
+        if (name == null || name.isBlank()) {
+            throw invalid("destination name must not be blank");
+        }
+        if (destination == null || destination.queue == null || destination.queue.isBlank()) {
+            throw invalid("destination '" + name + "' requires a physical queue");
+        }
+
+        validateConsumer(name + ".consumer", destination.consumer);
+        if (provider == MessageQueueProvider.AWS) {
+            validateConsumer(name + ".aws", destination.aws);
+            String deadLetterQueue = destination.aws.deadLetterQueue;
+            if (deadLetterQueue != null && !deadLetterQueue.isBlank() && deadLetterQueue.equals(destination.queue)) {
+                throw invalid("destination '" + name + "' source and dead-letter queues must be different");
+            }
+        } else {
+            validateConsumer(name + ".azure", destination.azure);
+        }
+    }
+
+    private void validateConsumer(String name, Consumer consumer) {
+        if (consumer == null) {
+            throw invalid(name + " settings are required");
+        }
+        if (consumer.concurrency != null && consumer.concurrency < 1) {
+            throw invalid(name + ".concurrency must be greater than zero");
+        }
+        if (provider == MessageQueueProvider.AWS) {
+            validateDuration(name + ".wait-time", consumer.waitTime, 0, 20);
+            validateDuration(name + ".visibility-timeout", consumer.visibilityTimeout, 0, 43200);
+        } else {
+            validateDuration(name + ".wait-time", consumer.waitTime, 1, Long.MAX_VALUE);
+        }
+    }
+
+    private void validateDuration(String name, Duration value, long minSeconds, long maxSeconds) {
+        if (value == null) {
+            return;
+        }
+        if (value.isNegative() || value.getNano() != 0) {
+            throw invalid(name + " must be a whole number of seconds and non-negative");
+        }
+        long seconds = value.getSeconds();
+        if (seconds < minSeconds || seconds > maxSeconds) {
+            throw invalid(name + " must be between " + minSeconds + " and " + maxSeconds + " seconds");
+        }
+    }
+
+    private MessageQueueConfigurationException invalid(String reason) {
+        return new MessageQueueConfigurationException("Invalid platform.message-queue configuration: " + reason);
     }
 
     public static class Aws {
