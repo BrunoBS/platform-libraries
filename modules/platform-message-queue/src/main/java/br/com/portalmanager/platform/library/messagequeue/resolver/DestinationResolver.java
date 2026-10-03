@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.messagequeue.resolver;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties.AwsQueueType;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 
 public class DestinationResolver {
@@ -27,14 +28,17 @@ public class DestinationResolver {
 
         var providerDefaults = providerDefaults(properties.getProvider());
         var providerOverride = providerOverride(properties.getProvider(), configured);
+        boolean fifo = properties.getProvider() == MessageQueueProvider.AWS
+                && configured.getAws().getQueueType() == AwsQueueType.FIFO;
 
         return new ResolvedDestination(
                 destination,
                 properties.getProvider(),
                 configured.getQueue(),
-                resolveDeadLetterReference(properties.getProvider(), configured),
+                resolveDeadLetterReference(properties.getProvider(), configured, fifo),
                 configured.getPublisher().isEnabled(),
                 configured.getConsumer().isEnabled(),
+                fifo,
                 resolveVisibilityTimeout(properties.getProvider(), configured),
                 firstNonNull(providerOverride.getWaitTime(), configured.getConsumer().getWaitTime(), providerDefaults.getWaitTime()),
                 firstNonNull(providerOverride.getConcurrency(), configured.getConsumer().getConcurrency(), providerDefaults.getConcurrency())
@@ -44,30 +48,24 @@ public class DestinationResolver {
     private java.time.Duration resolveVisibilityTimeout(
             MessageQueueProvider provider,
             MessageQueueProperties.Destination destination) {
-        if (provider != MessageQueueProvider.AWS) {
-            return null;
-        }
-        return firstNonNull(
-                destination.getAws().getVisibilityTimeout(),
+        if (provider != MessageQueueProvider.AWS) return null;
+        return firstNonNull(destination.getAws().getVisibilityTimeout(),
                 properties.getAws().getDefaults().getVisibilityTimeout());
     }
 
     private String resolveDeadLetterReference(
             MessageQueueProvider provider,
-            MessageQueueProperties.Destination destination) {
-        if (provider != MessageQueueProvider.AWS) {
-            return null;
-        }
+            MessageQueueProperties.Destination destination,
+            boolean fifo) {
+        if (provider != MessageQueueProvider.AWS) return null;
         String configuredQueue = destination.getAws().getDeadLetterQueue();
-        return configuredQueue == null || configuredQueue.isBlank()
-                ? destination.getQueue() + "-dlq"
-                : configuredQueue;
+        if (configuredQueue != null && !configuredQueue.isBlank()) return configuredQueue;
+        String queue = destination.getQueue();
+        return fifo ? queue.substring(0, queue.length() - ".fifo".length()) + "-dlq.fifo" : queue + "-dlq";
     }
 
     private MessageQueueProperties.ConsumerOptions providerDefaults(MessageQueueProvider provider) {
-        return provider == MessageQueueProvider.AWS
-                ? properties.getAws().getDefaults()
-                : properties.getAzure().getDefaults();
+        return provider == MessageQueueProvider.AWS ? properties.getAws().getDefaults() : properties.getAzure().getDefaults();
     }
 
     private MessageQueueProperties.ConsumerOptions providerOverride(
@@ -78,11 +76,7 @@ public class DestinationResolver {
 
     @SafeVarargs
     private static <T> T firstNonNull(T... values) {
-        for (T value : values) {
-            if (value != null) {
-                return value;
-            }
-        }
+        for (T value : values) if (value != null) return value;
         return null;
     }
 }
