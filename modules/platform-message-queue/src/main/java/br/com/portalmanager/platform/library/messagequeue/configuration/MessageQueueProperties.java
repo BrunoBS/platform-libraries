@@ -79,6 +79,11 @@ public class MessageQueueProperties implements InitializingBean {
                 throw invalid("azure.namespace is required when provider is AZURE");
             }
             validateConsumer("azure.defaults", azure.defaults);
+            validateDuration(
+                    "azure.max-auto-lock-renewal-duration",
+                    azure.maxAutoLockRenewalDuration,
+                    0,
+                    43200);
         }
 
         destinations.forEach((name, destination) -> validateDestination(name, destination));
@@ -159,6 +164,7 @@ public class MessageQueueProperties implements InitializingBean {
 
     public static class Azure {
         private String namespace;
+        private Duration maxAutoLockRenewalDuration = Duration.ofMinutes(5);
         private final ConsumerOptions defaults = new ConsumerOptions();
 
         public String getNamespace() {
@@ -167,6 +173,14 @@ public class MessageQueueProperties implements InitializingBean {
 
         public void setNamespace(String namespace) {
             this.namespace = namespace;
+        }
+
+        public Duration getMaxAutoLockRenewalDuration() {
+            return maxAutoLockRenewalDuration;
+        }
+
+        public void setMaxAutoLockRenewalDuration(Duration maxAutoLockRenewalDuration) {
+            this.maxAutoLockRenewalDuration = maxAutoLockRenewalDuration;
         }
 
         public ConsumerOptions getDefaults() {
