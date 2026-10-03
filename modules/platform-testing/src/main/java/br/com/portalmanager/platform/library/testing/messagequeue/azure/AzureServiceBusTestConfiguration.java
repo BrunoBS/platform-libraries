@@ -59,8 +59,8 @@ public class AzureServiceBusTestConfiguration {
     }
 
     @Bean(destroyMethod = "stop")
-    MSSQLServerContainer<?> azureServiceBusSqlServer(Network azureServiceBusNetwork) {
-        return new MSSQLServerContainer<>(SQL_SERVER_IMAGE)
+    MSSQLServerContainer azureServiceBusSqlServer(Network azureServiceBusNetwork) {
+        return new MSSQLServerContainer(SQL_SERVER_IMAGE)
                 .acceptLicense()
                 .withPassword(SQL_PASSWORD)
                 .withNetwork(azureServiceBusNetwork);
@@ -69,7 +69,7 @@ public class AzureServiceBusTestConfiguration {
     @Bean(destroyMethod = "stop")
     ServiceBusEmulatorContainer azureServiceBusContainer(
             Network azureServiceBusNetwork,
-            MSSQLServerContainer<?> azureServiceBusSqlServer) {
+            MSSQLServerContainer azureServiceBusSqlServer) {
         return new ServiceBusEmulatorContainer(SERVICE_BUS_IMAGE)
                 .acceptLicense()
                 .withConfig(Transferable.of(SERVICE_BUS_CONFIG))
