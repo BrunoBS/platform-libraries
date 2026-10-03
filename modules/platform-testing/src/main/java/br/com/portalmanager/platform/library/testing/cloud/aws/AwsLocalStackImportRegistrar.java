@@ -70,7 +70,9 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
                 continue;
             }
             if (deadLetterQueue == null || deadLetterQueue.isBlank()) {
-                deadLetterQueue = name + "-dlq";
+                deadLetterQueue = name.endsWith(".fifo")
+                    ? name.substring(0, name.length() - ".fifo".length()) + "-dlq.fifo"
+                    : name + "-dlq";
             }
             requireName(deadLetterQueue, "SQS dead-letter queue");
             if (name.equals(deadLetterQueue)) {
