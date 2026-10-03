@@ -13,7 +13,7 @@ operação de negócio
     ↓
 AuditEvent
     ↓
-durable store (Redis por padrão)
+AuditEventQueue (Redis por padrão)
     ↓
 operação pode concluir
     ↓
@@ -26,7 +26,7 @@ sucesso → remove do store
 
 A indisponibilidade da Audit API não derruba a operação de negócio. O evento já está persistido e permanece pendente para reenvio.
 
-A gravação no durable store faz parte da aceitação do evento. Se essa gravação falhar, a falha é propagada: a biblioteca não confirma silenciosamente um evento que não conseguiu reter.
+A gravação no fila de auditoria faz parte da aceitação do evento. Se essa gravação falhar, a falha é propagada: a biblioteca não confirma silenciosamente um evento que não conseguiu reter.
 
 Este contrato não promete atomicidade entre a transação de negócio e a auditoria. Garantia transacional entre banco de negócio e evento exigiria um padrão como Transactional Outbox e não faz parte desta versão Golden.
 
@@ -44,7 +44,7 @@ Reenvios podem acontecer. A identidade/idempotência do evento é tratada separa
 
 ## Configuração padrão
 
-O durable store Redis é habilitado por padrão no modo assíncrono.
+O fila de auditoria Redis é habilitado por padrão no modo assíncrono.
 
 ```yaml
 platform:
@@ -57,7 +57,7 @@ platform:
     http:
       connect-timeout: 5s
       read-timeout: 5s
-    fallback:
+    queue:
       enabled: true
       key-prefix: platform:audit:pending:
       recovery-interval: 1s
@@ -67,9 +67,9 @@ platform:
         ttl: 2m
 ```
 
-O nome `fallback` é mantido nesta etapa por compatibilidade da configuração existente, mas seu papel no modo assíncrono é de **durable store**, não de fallback posterior à chamada HTTP.
+O nome `queue` é mantido nesta etapa por compatibilidade da configuração existente, mas seu papel no modo assíncrono é de **fila de auditoria**, não de queue posterior à chamada HTTP.
 
-O consumidor deve disponibilizar Redis no classpath e configurar `StringRedisTemplate`, ou fornecer uma implementação própria de `AuditFallbackStore`.
+O consumidor deve disponibilizar Redis no classpath e configurar `StringRedisTemplate`, ou fornecer uma implementação própria de `AuditEventQueue`.
 
 ```xml
 <dependency>
@@ -78,7 +78,7 @@ O consumidor deve disponibilizar Redis no classpath e configurar `StringRedisTem
 </dependency>
 ```
 
-Se `fail-on-error=false` e nenhum durable store estiver disponível, a aplicação falha no startup com `PLT-AUD-002`.
+Se `fail-on-error=false` e nenhum fila de auditoria estiver disponível, a aplicação falha no startup com `PLT-AUD-002`.
 
 ## Modo estrito
 
@@ -88,11 +88,11 @@ Quando `fail-on-error=true`, a publicação é síncrona e a chamada à Audit AP
 platform:
   audit:
     fail-on-error: true
-    fallback:
+    queue:
       enabled: false
 ```
 
-Nesse modo, uma falha HTTP é propagada e o durable store não é obrigatório.
+Nesse modo, uma falha HTTP é propagada e o fila de auditoria não é obrigatório.
 
 ## Recovery
 
@@ -127,11 +127,11 @@ O fluxo atual é FIFO. Retry, poison event/DLQ, renovação do lock e idempotên
 | `platform.audit.fail-on-error` | `false` | Usa modo síncrono estrito quando `true` |
 | `platform.audit.http.connect-timeout` | `5s` | Timeout de conexão |
 | `platform.audit.http.read-timeout` | `5s` | Timeout de leitura |
-| `platform.audit.fallback.enabled` | `true` | Habilita durable store/recovery padrão |
-| `platform.audit.fallback.key-prefix` | `platform:audit:pending:` | Prefixo da fila Redis |
-| `platform.audit.fallback.recovery-interval` | `1s` | Intervalo de recovery |
-| `platform.audit.fallback.batch-size` | `50` | Máximo por ciclo |
-| `platform.audit.fallback.lock.ttl` | `2m` | TTL do lock distribuído |
+| `platform.audit.queue.enabled` | `true` | Habilita fila de auditoria/recovery padrão |
+| `platform.audit.queue.key-prefix` | `platform:audit:pending:` | Prefixo da fila Redis |
+| `platform.audit.queue.recovery-interval` | `1s` | Intervalo de recovery |
+| `platform.audit.queue.batch-size` | `50` | Máximo por ciclo |
+| `platform.audit.queue.lock.ttl` | `2m` | TTL do lock distribuído |
 
 ## Limites ainda abertos
 
