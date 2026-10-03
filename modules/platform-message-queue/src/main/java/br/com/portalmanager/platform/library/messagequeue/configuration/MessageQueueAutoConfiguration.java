@@ -15,6 +15,7 @@ import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -28,31 +29,37 @@ import java.time.Clock;
 public class MessageQueueAutoConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean(Clock.class)
     Clock messageQueueClock() {
         return Clock.systemUTC();
     }
 
     @Bean
+    @ConditionalOnMissingBean
     DestinationResolver destinationResolver(MessageQueueProperties properties) {
         return new DestinationResolver(properties);
     }
 
     @Bean
+    @ConditionalOnMissingBean
     MessageEnvelopeFactory messageEnvelopeFactory(Clock messageQueueClock) {
         return new MessageEnvelopeFactory(messageQueueClock);
     }
 
     @Bean
+    @ConditionalOnMissingBean
     MessageQueueSerializer messageQueueSerializer(ObjectMapper objectMapper) {
         return new MessageQueueSerializer(objectMapper);
     }
 
     @Bean
+    @ConditionalOnMissingBean
     MessageQueueListenerRegistry messageQueueListenerRegistry() {
         return new MessageQueueListenerRegistry();
     }
 
     @Bean(destroyMethod = "close")
+    @ConditionalOnMissingBean(SqsClient.class)
     @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AWS")
     SqsClient messageQueueSqsClient(MessageQueueProperties properties) {
         return SqsClient.builder()
@@ -61,12 +68,14 @@ public class MessageQueueAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(MessageQueueTransport.class)
     @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AWS")
     MessageQueueTransport awsMessageQueueTransport(SqsClient messageQueueSqsClient) {
         return new SqsMessageQueueTransport(messageQueueSqsClient);
     }
 
     @Bean
+    @ConditionalOnMissingBean(SqsMessageQueueConsumer.class)
     @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AWS")
     SqsMessageQueueConsumer awsMessageQueueConsumer(
             SqsClient messageQueueSqsClient,
@@ -83,6 +92,7 @@ public class MessageQueueAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(ServiceBusClientBuilder.class)
     @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AZURE")
     ServiceBusClientBuilder messageQueueAzureServiceBusClientBuilder(MessageQueueProperties properties) {
         return new ServiceBusClientBuilder()
@@ -92,12 +102,14 @@ public class MessageQueueAutoConfiguration {
     }
 
     @Bean(destroyMethod = "close")
+    @ConditionalOnMissingBean(MessageQueueTransport.class)
     @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AZURE")
     MessageQueueTransport azureMessageQueueTransport(ServiceBusClientBuilder messageQueueAzureServiceBusClientBuilder) {
         return new AzureServiceBusMessageQueueTransport(messageQueueAzureServiceBusClientBuilder);
     }
 
     @Bean
+    @ConditionalOnMissingBean(AzureServiceBusMessageQueueConsumer.class)
     @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AZURE")
     AzureServiceBusMessageQueueConsumer azureMessageQueueConsumer(
             ServiceBusClientBuilder messageQueueAzureServiceBusClientBuilder,
@@ -114,6 +126,7 @@ public class MessageQueueAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(MessageQueuePublisher.class)
     MessageQueuePublisher messageQueuePublisher(
             DestinationResolver destinationResolver,
             MessageEnvelopeFactory messageEnvelopeFactory,
