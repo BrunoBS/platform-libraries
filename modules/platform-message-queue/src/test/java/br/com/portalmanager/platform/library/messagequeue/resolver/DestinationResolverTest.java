@@ -39,6 +39,21 @@ class DestinationResolverTest {
     }
 
     @Test
+    void shouldResolveConventionalAwsDeadLetterQueueNameWhenNoOverrideIsSet() {
+        var properties = new MessageQueueProperties();
+        properties.setProvider(MessageQueueProvider.AWS);
+        properties.getAws().setRegion("sa-east-1");
+
+        var destination = new MessageQueueProperties.Destination();
+        destination.setQueue("pm-product-updated");
+        properties.getDestinations().put("product-updated", destination);
+
+        var resolved = new DestinationResolver(properties).resolve("product-updated");
+
+        assertThat(resolved.deadLetterReference()).isEqualTo("pm-product-updated-dlq");
+    }
+
+    @Test
     void shouldNotExposeIndependentDeadLetterReferenceForAzure() {
         var properties = new MessageQueueProperties();
         properties.setProvider(MessageQueueProvider.AZURE);
