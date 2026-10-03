@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class DestinationResolverTest {
 
     @Test
-    void shouldResolveProviderDefaultsAndDestinationOverride() {
+    void shouldResolveAwsDefaultsOverridesAndDeadLetterReference() {
         var properties = new MessageQueueProperties();
         properties.setProvider(MessageQueueProvider.AWS);
         properties.getAws().setRegion("sa-east-1");
@@ -23,7 +23,7 @@ class DestinationResolverTest {
 
         var destination = new MessageQueueProperties.Destination();
         destination.setQueue("pm-product-updated");
-        destination.setDeadLetterQueue("pm-product-updated-dlq");
+        destination.getAws().setDeadLetterQueue("pm-product-updated-dlq");
         destination.getAws().setVisibilityTimeout(Duration.ofSeconds(120));
         destination.getAws().setConcurrency(10);
         properties.getDestinations().put("product-updated", destination);
@@ -32,10 +32,27 @@ class DestinationResolverTest {
 
         assertThat(resolved.provider()).isEqualTo(MessageQueueProvider.AWS);
         assertThat(resolved.queue()).isEqualTo("pm-product-updated");
-        assertThat(resolved.deadLetterQueue()).isEqualTo("pm-product-updated-dlq");
+        assertThat(resolved.deadLetterReference()).isEqualTo("pm-product-updated-dlq");
         assertThat(resolved.visibilityTimeout()).isEqualTo(Duration.ofSeconds(120));
         assertThat(resolved.waitTime()).isEqualTo(Duration.ofSeconds(20));
         assertThat(resolved.concurrency()).isEqualTo(10);
+    }
+
+    @Test
+    void shouldNotExposeIndependentDeadLetterReferenceForAzure() {
+        var properties = new MessageQueueProperties();
+        properties.setProvider(MessageQueueProvider.AZURE);
+        properties.getAzure().setNamespace("pm.servicebus.windows.net");
+
+        var destination = new MessageQueueProperties.Destination();
+        destination.setQueue("pm-product-updated");
+        properties.getDestinations().put("product-updated", destination);
+
+        var resolved = new DestinationResolver(properties).resolve("product-updated");
+
+        assertThat(resolved.provider()).isEqualTo(MessageQueueProvider.AZURE);
+        assertThat(resolved.queue()).isEqualTo("pm-product-updated");
+        assertThat(resolved.deadLetterReference()).isNull();
     }
 
     @Test
