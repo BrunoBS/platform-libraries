@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.audit.recovery;
 
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ public final class AuditRecoveryService implements InitializingBean, DisposableB
     private static final Logger log = LoggerFactory.getLogger(AuditRecoveryService.class);
 
     private final AuditPublisher publisher;
-    private final AuditFallbackStore fallbackStore;
+    private final AuditEventQueue eventQueue;
     private final AuditRecoveryLock recoveryLock;
     private final ThreadPoolTaskScheduler scheduler;
     private final PlatformAuditProperties properties;
@@ -26,13 +26,13 @@ public final class AuditRecoveryService implements InitializingBean, DisposableB
 
     public AuditRecoveryService(
             AuditPublisher publisher,
-            AuditFallbackStore fallbackStore,
+            AuditEventQueue eventQueue,
             AuditRecoveryLock recoveryLock,
             ThreadPoolTaskScheduler scheduler,
             PlatformAuditProperties properties
     ) {
         this.publisher = publisher;
-        this.fallbackStore = fallbackStore;
+        this.eventQueue = eventQueue;
         this.recoveryLock = recoveryLock;
         this.scheduler = scheduler;
         this.properties = properties;
@@ -42,7 +42,7 @@ public final class AuditRecoveryService implements InitializingBean, DisposableB
     public void afterPropertiesSet() {
         future = scheduler.scheduleWithFixedDelay(
                 this::recover,
-                properties.getFallback().getRecoveryInterval()
+                properties.getQueue().getRecoveryInterval()
         );
     }
 
@@ -64,22 +64,22 @@ public final class AuditRecoveryService implements InitializingBean, DisposableB
     }
 
     private void recoverBatch() {
-        if (!fallbackStore.hasPending()) {
+        if (!eventQueue.hasPending()) {
             return;
         }
 
         int recovered = 0;
-        int batchSize = properties.getFallback().getBatchSize();
+        int batchSize = properties.getQueue().getBatchSize();
 
         while (recovered < batchSize) {
-            AuditEventRequest event = fallbackStore.peek();
+            AuditEventRequest event = eventQueue.peek();
             if (event == null) {
                 return;
             }
 
             try {
                 publisher.publishDirect(event);
-                fallbackStore.removeHead();
+                eventQueue.removeHead();
                 recovered++;
             } catch (Exception exception) {
                 log.warn(
