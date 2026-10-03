@@ -53,13 +53,13 @@ public class DestinationResolver {
                 : configuredQueue;
     }
 
-    private MessageQueueProperties.Consumer providerDefaults(MessageQueueProvider provider) {
+    private MessageQueueProperties.ConsumerOptions providerDefaults(MessageQueueProvider provider) {
         return provider == MessageQueueProvider.AWS
                 ? properties.getAws().getDefaults()
                 : properties.getAzure().getDefaults();
     }
 
-    private MessageQueueProperties.Consumer providerOverride(
+    private MessageQueueProperties.ConsumerOptions providerOverride(
             MessageQueueProvider provider,
             MessageQueueProperties.Destination destination) {
         return provider == MessageQueueProvider.AWS ? destination.getAws() : destination.getAzure();
