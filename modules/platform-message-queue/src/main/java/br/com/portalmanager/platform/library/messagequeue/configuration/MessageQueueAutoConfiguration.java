@@ -68,12 +68,14 @@ public class MessageQueueAutoConfiguration {
             SqsClient messageQueueSqsClient,
             MessageQueueListenerRegistry messageQueueListenerRegistry,
             DestinationResolver destinationResolver,
-            MessageQueueSerializer messageQueueSerializer) {
+            MessageQueueSerializer messageQueueSerializer,
+            MessageQueueProperties properties) {
         return new SqsMessageQueueConsumer(
                 messageQueueSqsClient,
                 messageQueueListenerRegistry,
                 destinationResolver,
-                messageQueueSerializer);
+                messageQueueSerializer,
+                properties);
     }
 
     @Bean
