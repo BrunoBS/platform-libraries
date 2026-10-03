@@ -30,6 +30,7 @@ class MessageQueueMetricsTest {
         metrics.recordConsume(MessageQueueProvider.AWS, "orders", false, true);
         metrics.recordConsume(MessageQueueProvider.AWS, "orders", true, false);
         metrics.recordPollFailure(MessageQueueProvider.AWS, "orders", false);
+        metrics.recordAcknowledgementFailure(MessageQueueProvider.AWS, "orders", true);
 
         assertThat(registry.get("platform.message.queue.publish")
                 .tag("provider", "AWS")
@@ -41,6 +42,11 @@ class MessageQueueMetricsTest {
                 .tag("destination", "orders")
                 .tag("kind", "dead-letter")
                 .tag("outcome", "failure")
+                .counter().count()).isEqualTo(1.0);
+        assertThat(registry.get("platform.message.queue.ack.failure")
+                .tag("provider", "AWS")
+                .tag("destination", "orders")
+                .tag("kind", "dead-letter")
                 .counter().count()).isEqualTo(1.0);
         assertThat(registry.get("platform.message.queue.poll.failure")
                 .tag("provider", "AWS")
