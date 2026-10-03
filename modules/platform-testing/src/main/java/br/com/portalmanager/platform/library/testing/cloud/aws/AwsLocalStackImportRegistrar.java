@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStack;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -14,7 +15,7 @@ import java.util.Map;
 public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionRegistrar {
 
     private static final String CONTAINER_BEAN = "awsLocalStackContainer";
-    private static final AwsServiceTestSupport SQS_SUPPORT = new AwsSqsTestSupport();
+    private static final String CONNECTION_BEAN = "awsLocalStackConnection";
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
@@ -46,9 +47,8 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         }
 
         registerContainer(registry, services, queues, buckets);
-        if (sqs.length == 1) {
-            SQS_SUPPORT.register(registry);
-        }
+        registerConnection(registry);
+        registerServiceClients(registry, sqs.length == 1, s3.length == 1);
     }
 
     private void registerContainer(
@@ -61,13 +61,27 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         String[] configuredBuckets = buckets.clone();
 
         RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackContainer.class);
-        definition.setInstanceSupplier(() -> new AwsLocalStackContainer(
-                enabledServices,
-                configuredQueues,
-                configuredBuckets));
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(0, enabledServices);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(1, configuredQueues);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(2, configuredBuckets);
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(CONTAINER_BEAN, definition);
+    }
+
+    private void registerConnection(BeanDefinitionRegistry registry) {
+        RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackConnection.class);
+        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+        registry.registerBeanDefinition(CONNECTION_BEAN, definition);
+    }
+
+    private void registerServiceClients(BeanDefinitionRegistry registry, boolean sqsEnabled, boolean s3Enabled) {
+        if (sqsEnabled) {
+            AwsSqsTestSupport.register(registry);
+        }
+        if (s3Enabled) {
+            AwsS3TestSupport.register(registry);
+        }
     }
 
     @SuppressWarnings("unchecked")
