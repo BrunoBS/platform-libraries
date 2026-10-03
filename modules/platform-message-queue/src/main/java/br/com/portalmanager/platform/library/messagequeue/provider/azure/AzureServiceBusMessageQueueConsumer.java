@@ -95,17 +95,23 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
 
     private void pollListener(String workerId, MessageQueueListenerRegistry.ListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        poll(workerId, destination.queue(), false, destination.waitTime(),
+        poll(workerId, listener.destination(), destination.queue(), false, destination.waitTime(),
                 (receiver, message) -> receiveAndProcess(receiver, listener, message));
     }
 
     private void pollDeadLetter(String workerId, MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        poll(workerId, destination.queue(), true, destination.waitTime(),
+        poll(workerId, listener.destination(), destination.queue(), true, destination.waitTime(),
                 (receiver, message) -> receiveAndProcessDeadLetter(receiver, listener, message));
     }
 
-    private void poll(String workerId, String queueName, boolean deadLetter, Duration waitTime, ReceiverWork work) {
+    private void poll(
+            String workerId,
+            String destination,
+            String queueName,
+            boolean deadLetter,
+            Duration waitTime,
+            ReceiverWork work) {
         if (waitTime == null || waitTime.isZero() || waitTime.isNegative()) {
             waitTime = Duration.ofSeconds(20);
         }
@@ -129,7 +135,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                metrics.recordPollFailure(MessageQueueProvider.AZURE, queueName, deadLetter);
+                metrics.recordPollFailure(MessageQueueProvider.AZURE, destination, deadLetter);
                 LOGGER.warn(
                         "Technical failure while polling Azure Service Bus queue {}; worker will retry",
                         queueName,
