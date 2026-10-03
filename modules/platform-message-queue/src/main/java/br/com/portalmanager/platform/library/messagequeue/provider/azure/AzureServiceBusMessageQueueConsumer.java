@@ -171,7 +171,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             correlationId = message.correlationId();
             listener.invoke(message);
             metrics.recordConsume(MessageQueueProvider.AZURE, listener.destination(), false, true);
-            complete(receiver, received, listener.destination(), message);
+            complete(receiver, received, listener.destination(), message, false);
         } catch (RuntimeException exception) {
             metrics.recordConsume(MessageQueueProvider.AZURE, listener.destination(), false, false);
             LOGGER.warn(
@@ -201,7 +201,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                     providerMetadata(received));
             listener.invoke(deadLetterMessage);
             metrics.recordConsume(MessageQueueProvider.AZURE, listener.destination(), true, true);
-            complete(receiver, received, listener.destination(), message);
+            complete(receiver, received, listener.destination(), message, true);
         } catch (RuntimeException exception) {
             metrics.recordConsume(MessageQueueProvider.AZURE, listener.destination(), true, false);
             LOGGER.warn(
@@ -226,10 +226,12 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             ServiceBusReceiverClient receiver,
             ServiceBusReceivedMessage received,
             String destination,
-            MessageQueueMessage<?> envelope) {
+            MessageQueueMessage<?> envelope,
+            boolean deadLetter) {
         try {
             receiver.complete(received);
         } catch (RuntimeException exception) {
+            metrics.recordAcknowledgementFailure(MessageQueueProvider.AZURE, destination, deadLetter);
             LOGGER.warn(
                     "Message was processed but could not be completed for Azure destination {}; "
                             + "messageId={} correlationId={}; duplicate delivery is possible",
