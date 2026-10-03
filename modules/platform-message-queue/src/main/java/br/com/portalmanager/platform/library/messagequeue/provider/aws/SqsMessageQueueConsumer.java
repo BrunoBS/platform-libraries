@@ -82,21 +82,22 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
 
     private void startDeadLetterWorker(MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        if (destination.deadLetterQueue() == null || destination.deadLetterQueue().isBlank()) {
+        if (destination.deadLetterReference() == null || destination.deadLetterReference().isBlank()) {
             throw new MessageQueueConfigurationException(
-                    "Dead-letter queue is required for destination with dead-letter listener: "
+                    "AWS dead-letter queue is required for destination with dead-letter listener: "
                             + listener.destination());
         }
 
+        String deadLetterQueue = destination.deadLetterReference();
         String workerId = listener.destination() + "#dead-letter";
         workers.put(workerId, executor.submit(() -> poll(
                 listener.destination(),
-                destination.deadLetterQueue(),
+                deadLetterQueue,
                 destination.waitTime(),
                 destination.visibilityTimeout(),
                 (queueUrl, message) -> processDeadLetter(
                         listener,
-                        destination.deadLetterQueue(),
+                        deadLetterQueue,
                         queueUrl,
                         message))));
     }
