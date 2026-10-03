@@ -88,10 +88,9 @@ public class MessageQueueProperties {
 
     public static class Destination {
         private String queue;
-        private String deadLetterQueue;
         private final Toggle publisher = new Toggle();
         private final Consumer consumer = new Consumer();
-        private final Consumer aws = new Consumer();
+        private final AwsDestination aws = new AwsDestination();
         private final Consumer azure = new Consumer();
 
         public String getQueue() {
@@ -102,14 +101,6 @@ public class MessageQueueProperties {
             this.queue = queue;
         }
 
-        public String getDeadLetterQueue() {
-            return deadLetterQueue;
-        }
-
-        public void setDeadLetterQueue(String deadLetterQueue) {
-            this.deadLetterQueue = deadLetterQueue;
-        }
-
         public Toggle getPublisher() {
             return publisher;
         }
@@ -118,7 +109,7 @@ public class MessageQueueProperties {
             return consumer;
         }
 
-        public Consumer getAws() {
+        public AwsDestination getAws() {
             return aws;
         }
 
@@ -166,6 +157,18 @@ public class MessageQueueProperties {
 
         public void setConcurrency(Integer concurrency) {
             this.concurrency = concurrency;
+        }
+    }
+
+    public static class AwsDestination extends Consumer {
+        private String deadLetterQueue;
+
+        public String getDeadLetterQueue() {
+            return deadLetterQueue;
+        }
+
+        public void setDeadLetterQueue(String deadLetterQueue) {
+            this.deadLetterQueue = deadLetterQueue;
         }
     }
 }
