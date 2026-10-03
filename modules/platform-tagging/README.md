@@ -1,100 +1,39 @@
 # Platform Tagging
 
-Motor reutilizável de tags, independente de Spring, JPA, tabela e domínio consumidor.
+Tagging reutilizável com Spring Data JPA, mantendo uma tabela própria por recurso.
 
-## Modelo simples
+## Objetivo
 
-O módulo possui quatro conceitos:
+O serviço consumidor define somente a entidade específica, a associação JPA com o owner/FK, a factory e um repository que estende `TagRepository`. A library centraliza normalização, reconciliação, consultas e persistência comum.
 
-- `TagManager`: reconcilia e consulta tags;
-- `Tag`: contrato mínimo implementado pela entidade do serviço;
-- `TagName`: nome válido e normalizado da tag;
-- `TagPersistence`: porta de persistência implementada pelo serviço.
+## Contratos
 
-`TagOriginType` identifica a origem como `MANUAL` ou `SYSTEM`.
+- `TagOwner`: owner com `id` interno e `identifier` público;
+- `Tag`: `@MappedSuperclass` com `id`, `TagName` e `TagOriginType`;
+- `TagRepository`: repository JPA genérico com as consultas comuns;
+- `TagManager`: reconciliação e consultas;
+- `TagFactory`: criação da entidade específica.
 
-## Normalização
+`TagName` normaliza trim, lowercase e espaços para hífen. `TagNameConverter` persiste o value object em coluna VARCHAR.
 
-A API do `TagManager` aceita `String` na fronteira para facilitar requests e use cases. A String é convertida imediatamente para `TagName`. A partir daí, o motor e a persistência trabalham com `TagName`.
+## Entidade do consumidor
 
-`TagName` aplica `trim`, lowercase com `Locale.ROOT` e converte sequências de espaços em `-`. O value object não aceita valor nulo ou vazio.
+A entidade específica estende `Tag<Workspace>`, mantém somente a associação `owner` anotada com `@ManyToOne`/`@JoinColumn`, chama `super(name, originType)` e implementa `getOwner()`. A propriedade da associação deve se chamar `owner`; a coluna continua específica, como `workspace_id` ou `application_id`.
 
-Valores nulos ou em branco dentro das coleções recebidas por `reconcile` são ignorados.
+## Repository do consumidor
+
+O repository fica reduzido a `WorkspaceTagRepository extends TagRepository<WorkspaceTag, Workspace>`. Não é necessário repetir queries, `saveAll`, `deleteAll` ou adapters de persistência.
+
+## Manager
+
+A configuração cria `new TagManager<>(repository, WorkspaceTag::new)`.
 
 ## Regras
 
-- `MANUAL` prevalece sobre `SYSTEM` quando a mesma tag aparece nas duas coleções;
-- a reconciliação preserva o registro quando muda apenas a origem;
-- deve existir no máximo uma tag por `(owner, name)`;
-- o banco do serviço consumidor deve proteger `(owner_id, name)` com constraint única;
-- consultas de tags manuais retornam nomes em ordem determinística;
-- `findManualByOwnerKeys` retorna somente owners solicitados e inclui lista vazia para owner sem tag;
-- `findOwnerKeysByTag` faz igualdade exata após a normalização;
-- busca por prefixo, contains ou LIKE não pertence a esse contrato.
-
-Erros como owner sem ID, tag persistida sem nome ou estado persistido duplicado são violações do contrato de programação, por isso o módulo usa exceções Java e não mensagens de negócio.
-
-## Implementação no serviço
-
-Exemplo mínimo:
-
-```java
-final class ApplicationTag implements Tag {
-
-    private final Application application;
-    private final TagName name;
-    private TagOriginType originType;
-
-    ApplicationTag(Application application, TagName name, TagOriginType originType) {
-        this.application = application;
-        this.name = name;
-        this.originType = originType;
-    }
-
-    @Override
-    public TagName getName() {
-        return name;
-    }
-
-    @Override
-    public TagOriginType getOriginType() {
-        return originType;
-    }
-
-    @Override
-    public void changeOrigin(TagOriginType originType) {
-        this.originType = originType;
-    }
-}
-```
-
-A persistência do recurso implementa a porta com tipos explícitos:
-
-```java
-final class ApplicationTagPersistence
-        implements TagPersistence<ApplicationTag, Application, Long, String> {
-
-    // ownerId, ownerKey, newTag e operações de persistência
-}
-```
-
-E o serviço monta o manager:
-
-```java
-@Bean
-TagManager<ApplicationTag, Application, Long, String> applicationTags(
-        ApplicationTagPersistence persistence) {
-    return new TagManager<>(persistence);
-}
-```
-
-Os parâmetros genéricos representam, nesta ordem:
-
-```text
-TAG       = entidade de tag do recurso
-OWNER     = recurso proprietário da tag
-OWNER_ID  = identificador interno usado na persistência
-OWNER_KEY = chave usada nas consultas agrupadas
-```
-
-A library não cria entidade JPA, tabela, repository Spring ou auto-configuration. Cada serviço mantém sua tabela e suas FKs reais, por exemplo `workspace_tag.workspace_id -> workspaces.id` e `application_tag.application_id -> applications.id`.
+- cada recurso mantém sua própria tabela e FK;
+- deve existir constraint única `(owner_id, name)`;
+- `MANUAL` prevalece sobre `SYSTEM`;
+- mudança de origem é salva explicitamente e não depende de dirty checking;
+- buscas por tag são exatas depois da normalização;
+- normalização pertence ao `platform-tagging`, não ao normalizer do domínio consumidor;
+- command services consumidores chamam `reconcile` dentro da transação da operação de negócio.
