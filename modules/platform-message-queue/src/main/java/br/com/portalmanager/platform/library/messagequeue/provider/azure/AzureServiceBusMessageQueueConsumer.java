@@ -75,6 +75,9 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
 
     private void startDeadLetterWorkers(MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
+        if (!destination.consumerEnabled()) {
+            return;
+        }
         int concurrency = concurrency(destination.concurrency());
         for (int index = 0; index < concurrency; index++) {
             String workerId = "dead-letter:" + listener.destination() + "#" + index;
@@ -84,18 +87,20 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
 
     private void pollListener(String workerId, MessageQueueListenerRegistry.ListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        poll(workerId, destination.queue(), false,
+        poll(workerId, destination.queue(), false, destination.waitTime(),
                 (receiver, message) -> receiveAndProcess(receiver, listener, message));
     }
 
     private void pollDeadLetter(String workerId, MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        poll(workerId, destination.queue(), true,
+        poll(workerId, destination.queue(), true, destination.waitTime(),
                 (receiver, message) -> receiveAndProcessDeadLetter(receiver, listener, message));
     }
 
-    private void poll(String workerId, String queueName, boolean deadLetter, ReceiverWork work) {
-        Duration waitTime = resolveWaitTime();
+    private void poll(String workerId, String queueName, boolean deadLetter, Duration waitTime, ReceiverWork work) {
+        if (waitTime == null || waitTime.isZero() || waitTime.isNegative()) {
+            waitTime = Duration.ofSeconds(20);
+        }
 
         while (running && !Thread.currentThread().isInterrupted()) {
             ServiceBusReceiverClient receiver = null;
@@ -213,14 +218,6 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
 
     private int concurrency(Integer configured) {
         return configured == null ? 1 : Math.max(1, configured);
-    }
-
-    private Duration resolveWaitTime() {
-        Duration configured = properties.getAzure().getDefaults().getWaitTime();
-        if (configured == null || configured.isZero() || configured.isNegative()) {
-            return Duration.ofSeconds(20);
-        }
-        return configured;
     }
 
     private void backoff() {
