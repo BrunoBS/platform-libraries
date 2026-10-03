@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = MessageQueueContractTestApplication.class)
 @TestPropertySource(properties = {
         "platform.message-queue.provider=AWS",
+        "spring.application.name=platform-message-queue-test",
         "platform.message-queue.destinations.contract.queue=contract-queue"
 })
 @WithAwsLocalStack(
