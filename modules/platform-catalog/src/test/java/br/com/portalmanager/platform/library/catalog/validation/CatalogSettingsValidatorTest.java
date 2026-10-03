@@ -19,13 +19,14 @@ class CatalogSettingsValidatorTest {
     @Test
     void shouldValidateSettingsAsCatalogResource() {
         RecordingSchemaValidator schemaValidator = new RecordingSchemaValidator();
+        CatalogDTO dto = dto();
 
         CatalogSettingsValidator.schema("workspace-type", schemaValidator)
-                .validate(dto(), new ValidationResult());
+                .validate(dto, new ValidationResult());
 
         assertThat(schemaValidator.resourceType).isEqualTo("CATALOG");
         assertThat(schemaValidator.resourceCode).isEqualTo("workspace-type");
-        assertThat(schemaValidator.payload).isSameAs(dto().settings());
+        assertThat(schemaValidator.payload).isSameAs(dto.settings());
     }
 
     @Test
