@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 public abstract class AbstractCatalogValidator {
 
     public static final String CODE_FORMAT = "^[A-Z][A-Z0-9_]{0,49}$";
+    private static final int LABEL_MAX_LENGTH = 100;
     private static final Pattern CODE_PATTERN = Pattern.compile(CODE_FORMAT);
     private final CatalogRepository<?> repository;
 
@@ -52,6 +53,9 @@ public abstract class AbstractCatalogValidator {
         validateCode(dto, result);
         if (dto.label() == null || dto.label().isBlank()) {
             result.addError("label", CatalogMessageKeys.LABEL_REQUIRED, Map.of("0", entityName()));
+        } else if (dto.label().length() > LABEL_MAX_LENGTH) {
+            result.addError("label", CatalogMessageKeys.LABEL_INVALID_LENGTH,
+                    Map.of("0", entityName(), "1", LABEL_MAX_LENGTH));
         }
         if (dto.description() == null || dto.description().isBlank()) {
             result.addError("description", CatalogMessageKeys.DESCRIPTION_REQUIRED, Map.of("0", entityName()));
