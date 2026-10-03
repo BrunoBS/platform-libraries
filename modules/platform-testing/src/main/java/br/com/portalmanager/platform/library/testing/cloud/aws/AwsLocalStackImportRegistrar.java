@@ -1,14 +1,11 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStack;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import software.amazon.awssdk.services.sqs.SqsClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +14,7 @@ import java.util.Map;
 public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionRegistrar {
 
     private static final String CONTAINER_BEAN = "awsLocalStackContainer";
-    private static final String SQS_CLIENT_BEAN = "awsLocalStackSqsClient";
+    private static final AwsServiceTestSupport SQS_SUPPORT = new AwsSqsTestSupport();
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
@@ -50,7 +47,7 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
 
         registerContainer(registry, services, queues, buckets);
         if (sqs.length == 1) {
-            registerSqsClient(registry);
+            SQS_SUPPORT.register(registry);
         }
     }
 
@@ -71,14 +68,6 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(CONTAINER_BEAN, definition);
-    }
-
-    private void registerSqsClient(BeanDefinitionRegistry registry) {
-        RootBeanDefinition definition = new RootBeanDefinition(AwsSqsClientFactoryBean.class);
-        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-        definition.setDestroyMethodName("close");
-        definition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, SqsClient.class);
-        registry.registerBeanDefinition(SQS_CLIENT_BEAN, definition);
     }
 
     @SuppressWarnings("unchecked")
