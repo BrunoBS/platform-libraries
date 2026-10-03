@@ -5,7 +5,9 @@ import br.com.portalmanager.platform.library.messagequeue.annotation.MessageQueu
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageConsumeException;
-import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueMessageKeys;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueTechnicalErrors;
 import org.springframework.beans.BeansException;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -33,7 +35,7 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
                     AnnotatedElementUtils.findMergedAnnotation(method, MessageQueueDeadLetterListener.class);
 
             if (listener != null && deadLetterListener != null) {
-                throw new MessageQueueConfigurationException(
+                throw configurationError(
                         "Message queue method cannot be both listener and dead-letter listener: " + method.getName());
             }
             if (listener != null) {
@@ -57,7 +59,7 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
     private void registerListener(String destination, Object bean, Method method) {
         validateDestination(destination, "listener");
         if (listeners.containsKey(destination)) {
-            throw new MessageQueueConfigurationException(
+            throw configurationError(
                     "Duplicate message queue listener for destination: " + destination);
         }
         Class<?> payloadType = resolvePayloadType(method, destination, MessageQueueMessage.class, "MessageQueueMessage<T>");
@@ -68,7 +70,7 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
     private void registerDeadLetterListener(String destination, Object bean, Method method) {
         validateDestination(destination, "dead-letter listener");
         if (deadLetterListeners.containsKey(destination)) {
-            throw new MessageQueueConfigurationException(
+            throw configurationError(
                     "Duplicate message queue dead-letter listener for destination: " + destination);
         }
         Class<?> payloadType = resolvePayloadType(method, destination, DeadLetterMessage.class, "DeadLetterMessage<T>");
@@ -80,7 +82,7 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
         try {
             return AopUtils.selectInvocableMethod(method, bean.getClass());
         } catch (IllegalStateException exception) {
-            throw new MessageQueueConfigurationException(
+            throw configurationError(
                     "Message queue listener for destination '" + destination
                             + "' must be exposed by the Spring proxy: " + method.getName(),
                     exception);
@@ -89,7 +91,7 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
 
     private void validateDestination(String destination, String listenerType) {
         if (destination == null || destination.isBlank()) {
-            throw new MessageQueueConfigurationException(
+            throw configurationError(
                     "Message queue " + listenerType + " destination is required");
         }
     }
@@ -117,9 +119,16 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
         return payloadClass;
     }
 
-    private MessageQueueConfigurationException invalidListener(String destination, String reason) {
-        return new MessageQueueConfigurationException(
-                "Invalid message queue listener for destination '" + destination + "': " + reason);
+    private PlatformConfigurationException invalidListener(String destination, String reason) {
+        return configurationError("Invalid message queue listener for destination '" + destination + "': " + reason);
+    }
+
+    private PlatformConfigurationException configurationError(String reason) {
+        return new PlatformConfigurationException(MessageQueueTechnicalErrors.invalidConfiguration(reason));
+    }
+
+    private PlatformConfigurationException configurationError(String reason, Throwable cause) {
+        return new PlatformConfigurationException(MessageQueueTechnicalErrors.invalidConfiguration(reason), cause);
     }
 
     private static void invoke(Object bean, Method method, Object message, String destination) {
@@ -134,11 +143,13 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
                 throw error;
             }
             throw new MessageConsumeException(
-                    "Listener invocation failed for destination: " + destination,
+                    MessageQueueMessageKeys.LISTENER_INVOCATION_FAILED,
+                    Map.of("0", destination),
                     cause == null ? exception : cause);
         } catch (IllegalAccessException exception) {
             throw new MessageConsumeException(
-                    "Listener invocation is not accessible for destination: " + destination,
+                    MessageQueueMessageKeys.LISTENER_INVOCATION_FAILED,
+                    Map.of("0", destination),
                     exception);
         }
     }

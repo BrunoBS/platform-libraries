@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.configuration;
 
-import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -133,7 +133,7 @@ class MessageQueuePropertiesValidationTest {
 
     private void assertInvalid(Throwable failure, String message) {
         assertThat(failure).isNotNull();
-        assertThat(failure).hasRootCauseInstanceOf(MessageQueueConfigurationException.class);
+        assertThat(failure).hasRootCauseInstanceOf(PlatformConfigurationException.class);
         assertThat(failure).hasStackTraceContaining(message);
     }
 

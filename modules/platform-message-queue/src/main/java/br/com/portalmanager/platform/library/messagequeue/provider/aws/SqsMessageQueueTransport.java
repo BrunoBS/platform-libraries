@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.resolver.ResolvedDestination;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -54,7 +55,9 @@ public class SqsMessageQueueTransport implements MessageQueueTransport {
             sqsClient.sendMessage(request.build());
         } catch (RuntimeException exception) {
             throw new MessagePublishException(
-                    "Failed to publish message to destination: " + destination.logicalName(), exception);
+                    MessageQueueMessageKeys.PUBLISH_FAILED,
+                    Map.of("0", destination.logicalName()),
+                    exception);
         }
     }
 

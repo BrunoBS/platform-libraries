@@ -1,12 +1,14 @@
 package br.com.portalmanager.platform.library.messagequeue.exception;
 
-public class MessagePublishException extends RuntimeException {
+import java.util.Map;
 
-    public MessagePublishException(String message) {
-        super(message);
+public class MessagePublishException extends MessageQueueException {
+
+    public MessagePublishException(String messageKey, Throwable cause) {
+        super(messageKey, cause);
     }
 
-    public MessagePublishException(String message, Throwable cause) {
-        super(message, cause);
+    public MessagePublishException(String messageKey, Map<String, Object> parameters, Throwable cause) {
+        super(messageKey, parameters, cause);
     }
 }

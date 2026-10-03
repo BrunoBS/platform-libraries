@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.messagequeue.resolver;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
-import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -93,7 +93,7 @@ class DestinationResolverTest {
         properties.setProvider(MessageQueueProvider.AWS);
 
         assertThatThrownBy(() -> new DestinationResolver(properties).resolve("missing"))
-                .isInstanceOf(MessageQueueConfigurationException.class)
+                .isInstanceOf(PlatformConfigurationException.class)
                 .hasMessageContaining("missing");
     }
 }

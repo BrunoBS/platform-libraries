@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.messagequeue.publisher;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
@@ -46,7 +47,10 @@ public class DefaultMessageQueuePublisher implements MessageQueuePublisher {
         var resolved = destinationResolver.resolve(destination);
         try {
             if (!resolved.publisherEnabled()) {
-                throw new MessagePublishException("Publisher is disabled for destination: " + destination);
+                throw new MessagePublishException(
+                        MessageQueueMessageKeys.PUBLISHER_DISABLED,
+                        Map.of("0", destination),
+                        null);
             }
 
             var safeOptions = options == null ? MessageQueuePublishOptions.defaults() : options;

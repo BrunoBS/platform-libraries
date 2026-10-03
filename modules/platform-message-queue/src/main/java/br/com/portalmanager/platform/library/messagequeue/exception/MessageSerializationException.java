@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.library.messagequeue.exception;
 
-public class MessageSerializationException extends RuntimeException {
+public class MessageSerializationException extends MessageQueueException {
 
-    public MessageSerializationException(String message, Throwable cause) {
-        super(message, cause);
+    public MessageSerializationException(String messageKey, Throwable cause) {
+        super(messageKey, cause);
     }
 }

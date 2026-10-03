@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.resolver.ResolvedDestination;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
@@ -45,7 +46,8 @@ public class AzureServiceBusMessageQueueTransport implements MessageQueueTranspo
             sender(destination.queue()).sendMessage(message);
         } catch (RuntimeException exception) {
             throw new MessagePublishException(
-                    "Failed to publish message to destination: " + destination.logicalName(),
+                    MessageQueueMessageKeys.PUBLISH_FAILED,
+                    Map.of("0", destination.logicalName()),
                     exception);
         }
     }

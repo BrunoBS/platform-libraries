@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.messagequeue.configuration;
 
-import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueTechnicalErrors;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -104,8 +105,8 @@ public class MessageQueueProperties implements InitializingBean {
         }
     }
 
-    private MessageQueueConfigurationException invalid(String reason) {
-        return new MessageQueueConfigurationException(reason);
+    private PlatformConfigurationException invalid(String reason) {
+        return new PlatformConfigurationException(MessageQueueTechnicalErrors.invalidConfiguration(reason));
     }
 
     public static class Aws {

@@ -2,7 +2,8 @@ package br.com.portalmanager.platform.library.messagequeue.resolver;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
-import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueTechnicalErrors;
 
 public class DestinationResolver {
 
@@ -14,15 +15,15 @@ public class DestinationResolver {
 
     public ResolvedDestination resolve(String destination) {
         if (properties.getProvider() == null) {
-            throw new MessageQueueConfigurationException("Message queue provider is required");
+            throw configurationError("Message queue provider is required");
         }
 
         var configured = properties.getDestinations().get(destination);
         if (configured == null) {
-            throw new MessageQueueConfigurationException("Message queue destination not found: " + destination);
+            throw configurationError("Message queue destination not found: " + destination);
         }
         if (configured.getQueue() == null || configured.getQueue().isBlank()) {
-            throw new MessageQueueConfigurationException("Physical queue is required for destination: " + destination);
+            throw configurationError("Physical queue is required for destination: " + destination);
         }
 
         var providerDefaults = providerDefaults(properties.getProvider());
@@ -76,5 +77,9 @@ public class DestinationResolver {
     private static <T> T firstNonNull(T... values) {
         for (T value : values) if (value != null) return value;
         return null;
+    }
+
+    private PlatformConfigurationException configurationError(String reason) {
+        return new PlatformConfigurationException(MessageQueueTechnicalErrors.invalidConfiguration(reason));
     }
 }

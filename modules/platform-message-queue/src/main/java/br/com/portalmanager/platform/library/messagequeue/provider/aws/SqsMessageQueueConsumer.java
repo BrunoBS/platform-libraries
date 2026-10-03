@@ -5,7 +5,8 @@ import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQ
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
-import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueTechnicalErrors;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
 import org.slf4j.Logger;
@@ -95,9 +96,9 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             return;
         }
         if (destination.deadLetterReference() == null || destination.deadLetterReference().isBlank()) {
-            throw new MessageQueueConfigurationException(
+            throw new PlatformConfigurationException(MessageQueueTechnicalErrors.invalidConfiguration(
                     "AWS dead-letter queue is required for destination with dead-letter listener: "
-                            + listener.destination());
+                            + listener.destination()));
         }
 
         String deadLetterQueue = destination.deadLetterReference();
