@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 class RestAuditPublisherTest {
 
     private final AuditEventRequest event = new AuditEventRequest(
+            java.util.UUID.randomUUID().toString(),
             Instant.now(), "account", "account-1", "application-1", "dev",
             "account", "123", "UPDATE", "user", "correlation-1", 200,
             Map.of("id", "123"), Map.of()
