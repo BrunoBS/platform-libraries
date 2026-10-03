@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Map;
 
 public record AuditEventRequest(
+        String eventId,
         Instant timestamp,
         String service,
         String accountId,

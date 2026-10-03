@@ -43,9 +43,9 @@ class AuditMessageBundleTest {
 
         assertEquals("AUD-500-001", provider.find(AuditMessageKeys.SERVICE_URL_REQUIRED, locale).orElseThrow().code());
         assertEquals("AUD-500-002", provider.find(AuditMessageKeys.USER_CONTEXT_MISSING, locale).orElseThrow().code());
-        assertEquals("AUD-500-003", provider.find(AuditMessageKeys.FALLBACK_STORE_MISSING, locale).orElseThrow().code());
+        assertEquals("AUD-500-003", provider.find(AuditMessageKeys.QUEUE_MISSING, locale).orElseThrow().code());
         assertEquals("AUD-500-004", provider.find(AuditMessageKeys.REDIS_NOT_CONFIGURED, locale).orElseThrow().code());
-        assertEquals("AUD-500-005", provider.find(AuditMessageKeys.FALLBACK_PERSIST_FAILED, locale).orElseThrow().code());
-        assertEquals("AUD-500-006", provider.find(AuditMessageKeys.FALLBACK_DESERIALIZE_FAILED, locale).orElseThrow().code());
+        assertEquals("AUD-500-005", provider.find(AuditMessageKeys.QUEUE_PERSIST_FAILED, locale).orElseThrow().code());
+        assertEquals("AUD-500-006", provider.find(AuditMessageKeys.QUEUE_DESERIALIZE_FAILED, locale).orElseThrow().code());
     }
 }
