@@ -35,37 +35,16 @@ public class PlatformAuditAutoConfiguration {
             throw new PlatformConfigurationException(AuditTechnicalErrors.SERVICE_URL_REQUIRED);
         }
 
-        return new RestAuditPublisher(
-                builder,
-                properties,
-                fallbackStoreProvider
-        );
+        return new RestAuditPublisher(builder, properties, fallbackStoreProvider);
     }
 
     @Bean
-    @ConditionalOnProperty(
-            prefix = "platform.audit",
-            name = {"fail-on-error", "fallback.enabled"},
-            havingValue = "false",
-            matchIfMissing = false
-    )
-    SmartInitializingSingleton auditDurableStoreConfigurationGuard(
+    SmartInitializingSingleton auditDeliveryConfigurationGuard(
+            PlatformAuditProperties properties,
             ObjectProvider<AuditFallbackStore> fallbackStoreProvider
     ) {
         return () -> {
-            if (fallbackStoreProvider.getIfAvailable() == null) {
-                throw new PlatformConfigurationException(AuditTechnicalErrors.FALLBACK_STORE_MISSING);
-            }
-        };
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "platform.audit.fallback", name = "enabled", havingValue = "true", matchIfMissing = true)
-    SmartInitializingSingleton auditFallbackConfigurationGuard(
-            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
-    ) {
-        return () -> {
-            if (fallbackStoreProvider.getIfAvailable() == null) {
+            if (!properties.isFailOnError() && fallbackStoreProvider.getIfAvailable() == null) {
                 throw new PlatformConfigurationException(AuditTechnicalErrors.FALLBACK_STORE_MISSING);
             }
         };
