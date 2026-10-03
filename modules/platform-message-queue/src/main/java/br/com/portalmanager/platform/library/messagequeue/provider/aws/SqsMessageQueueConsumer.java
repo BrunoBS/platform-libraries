@@ -126,18 +126,19 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             boolean deadLetter,
             BiConsumer<String, Message> messageProcessor) {
         int waitTimeSeconds = seconds(waitTime, 20, 0, 20);
-        int visibilityTimeoutSeconds = seconds(visibilityTimeout, 30, 0, 43200);
 
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
                 String queueUrl = queueUrls.computeIfAbsent(queueName, this::resolveQueueUrl);
-                var response = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
+                var request = ReceiveMessageRequest.builder()
                         .queueUrl(queueUrl)
                         .maxNumberOfMessages(1)
                         .messageSystemAttributeNames(MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT)
-                        .waitTimeSeconds(waitTimeSeconds)
-                        .visibilityTimeout(visibilityTimeoutSeconds)
-                        .build());
+                        .waitTimeSeconds(waitTimeSeconds);
+                if (visibilityTimeout != null) {
+                    request.visibilityTimeout(seconds(visibilityTimeout, 30, 0, 43200));
+                }
+                var response = sqsClient.receiveMessage(request.build());
 
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
