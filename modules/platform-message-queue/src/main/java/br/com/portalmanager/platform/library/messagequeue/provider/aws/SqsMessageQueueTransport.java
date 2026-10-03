@@ -21,6 +21,11 @@ public class SqsMessageQueueTransport implements MessageQueueTransport {
     }
 
     @Override
+    public void send(ResolvedDestination destination, String body) {
+        send(destination, body, MessageQueuePublishOptions.defaults());
+    }
+
+    @Override
     public void send(
             ResolvedDestination destination,
             String body,
