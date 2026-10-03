@@ -72,7 +72,7 @@ TagManager<WorkspaceTag, Workspace> workspaceTags(WorkspaceTagRepository reposit
 - a FK para o owner deve ser obrigatória;
 - consultas por tag são exatas após normalização;
 - o owner precisa estar previamente persistido e possuir `id` e `identifier` válidos;
-- a factory é validada: não pode devolver `null`, trocar owner, nome ou origem;
+- a factory não pode devolver `null`;
 - command services devem executar `reconcile` dentro da transação da operação de negócio.
 
 ## Segurança e escopo
@@ -90,10 +90,11 @@ Cada tabela de tags deve manter:
 ```sql
 UNIQUE (owner_id, name)
 INDEX (name)
-INDEX (owner_id)
 ```
 
-A FK e os nomes físicos continuam sob responsabilidade do recurso para preservar integridade referencial e permitir otimização específica.
+Em MySQL, `UNIQUE (owner_id, name)` já atende consultas cujo prefixo é `owner_id`; não é necessário criar outro índice apenas para `owner_id`. A FK e os nomes físicos continuam sob responsabilidade do recurso para preservar integridade referencial e permitir otimização específica.
+
+`findManualByOwnerKeys` deve receber um conjunto previamente limitado/paginado pelo domínio consumidor; o módulo não transforma essa consulta em busca massiva nem adiciona paginação própria.
 
 ## Testes da library
 
