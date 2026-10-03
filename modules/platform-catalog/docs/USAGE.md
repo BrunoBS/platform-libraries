@@ -74,6 +74,41 @@ public class LanguageTypeService
 
 O Included Catalog usa `IncludedCatalogService` e não possui enum. Novos `code` podem ser criados via API.
 
+### Settings validados por JSON Schema
+
+Quando o catálogo possui `settings` governado por JSON Schema, o consumidor não
+precisa criar uma ponte própria de validação. Injete o `SchemaValidator` e informe
+somente o código do recurso de schema:
+
+```java
+@Service
+public class LanguageTypeService
+        extends EnumCatalogService<LanguageType, LanguageTypeEnum> {
+
+    public LanguageTypeService(
+            LanguageTypeRepository repository,
+            ObjectMapper objectMapper,
+            SchemaValidator schemaValidator) {
+        super(
+                repository,
+                objectMapper,
+                LanguageType.class,
+                LanguageTypeEnum.class,
+                "language-type",
+                schemaValidator
+        );
+    }
+}
+```
+
+O `platform-catalog` define internamente `resourceType = CATALOG`, valida
+`CatalogDTO.settings` por `platform-schema-validation` e converte erros de
+payload para campos `settings.*`. Erros técnicos de resolução/compilação do
+schema não são convertidos em erros funcionais.
+
+Use `CatalogSettingsValidator` diretamente apenas quando existir uma regra de
+settings que não seja JSON Schema.
+
 ## 5. DTO padrão
 
 `CatalogDTO` possui:
