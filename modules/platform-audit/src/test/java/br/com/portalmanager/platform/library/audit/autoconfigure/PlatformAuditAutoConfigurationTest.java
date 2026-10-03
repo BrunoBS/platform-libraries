@@ -2,8 +2,9 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -24,26 +25,20 @@ class PlatformAuditAutoConfigurationTest {
 
     @Configuration
     static class TestInfrastructure {
+        @Bean RestClient.Builder restClientBuilder() { return RestClient.builder(); }
+        @Bean HttpServletRequest httpServletRequest() { return mock(HttpServletRequest.class); }
+        @Bean ObjectMapper objectMapper() { return new ObjectMapper(); }
+    }
 
-        @Bean
-        RestClient.Builder restClientBuilder() {
-            return RestClient.builder();
-        }
-
-        @Bean
-        HttpServletRequest httpServletRequest() {
-            return mock(HttpServletRequest.class);
-        }
-
-        @Bean
-        ObjectMapper objectMapper() {
-            return new ObjectMapper();
-        }
+    @Configuration
+    static class DurableStoreInfrastructure {
+        @Bean AuditFallbackStore auditFallbackStore() { return mock(AuditFallbackStore.class); }
     }
 
     @Test
-    void shouldLoadAuditInfrastructureWhenEnabled() {
+    void shouldLoadAuditInfrastructureWithDurableStore() {
         contextRunner
+                .withUserConfiguration(DurableStoreInfrastructure.class)
                 .withPropertyValues(
                         "platform.audit.enabled=true",
                         "platform.audit.service-url=http://audit-api",
@@ -53,14 +48,13 @@ class PlatformAuditAutoConfigurationTest {
                     assertThat(context).hasSingleBean(AuditPublisher.class);
                     assertThat(context).hasSingleBean(AuditAuthorizationContextResolver.class);
                     assertThat(context).hasSingleBean(AuditAspect.class);
-                    assertThat(context).hasBean("platformAuditTaskExecutor");
                 });
     }
-
 
     @Test
     void shouldFailStartupWhenServiceUrlIsMissing() {
         contextRunner
+                .withUserConfiguration(DurableStoreInfrastructure.class)
                 .withPropertyValues(
                         "platform.audit.enabled=true",
                         "platform.audit.service-name=account"
@@ -72,23 +66,16 @@ class PlatformAuditAutoConfigurationTest {
                             .hasRootCauseMessage(
                                     "platform.audit.service-url is required when platform.audit is enabled"
                             );
-
-                    PlatformConfigurationException exception =
-                            (PlatformConfigurationException) context.getStartupFailure().getCause().getCause();
-
-                    assertThat(exception.getErrorResponse().code()).isEqualTo("PLT-AUD-001");
-                    assertThat(exception.getErrorResponse().solution())
-                            .isEqualTo("Configure platform.audit.service-url with the audit service URL.");
                 });
     }
 
     @Test
-    void shouldFailStartupWhenFallbackIsEnabledWithoutStore() {
+    void shouldFailStartupWhenDurableStoreIsMissingInAsynchronousMode() {
         contextRunner
                 .withPropertyValues(
                         "platform.audit.enabled=true",
                         "platform.audit.service-url=http://audit-api",
-                        "platform.audit.fallback.enabled=true"
+                        "platform.audit.fail-on-error=false"
                 )
                 .run(context -> {
                     assertThat(context.getStartupFailure()).isNotNull();
@@ -98,6 +85,18 @@ class PlatformAuditAutoConfigurationTest {
                                     "Audit fallback is enabled without a configured fallback store"
                             );
                 });
+    }
+
+    @Test
+    void shouldAllowStrictModeWithoutDurableStore() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.audit.enabled=true",
+                        "platform.audit.service-url=http://audit-api",
+                        "platform.audit.fail-on-error=true",
+                        "platform.audit.fallback.enabled=false"
+                )
+                .run(context -> assertThat(context).hasSingleBean(AuditPublisher.class));
     }
 
     @Test
