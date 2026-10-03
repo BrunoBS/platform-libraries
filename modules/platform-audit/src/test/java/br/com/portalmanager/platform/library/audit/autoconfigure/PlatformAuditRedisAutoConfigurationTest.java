@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.audit.autoconfigure;
 
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.audit.recovery.AuditRecoveryLock;
 import br.com.portalmanager.platform.library.audit.recovery.AuditRecoveryService;
@@ -41,17 +41,17 @@ class PlatformAuditRedisAutoConfigurationTest {
     }
 
     @Test
-    void shouldCreateRedisFallbackBeansWhenEnabled() {
+    void shouldCreateRedisQueueBeansWhenEnabled() {
         contextRunner
                 .withPropertyValues(
                         "platform.audit.enabled=true",
                         "platform.audit.service-name=account",
-                        "platform.audit.fallback.enabled=true",
-                        "platform.audit.fallback.recovery-interval=PT5M",
-                        "platform.audit.fallback.batch-size=25"
+                        "platform.audit.queue.enabled=true",
+                        "platform.audit.queue.recovery-interval=PT5M",
+                        "platform.audit.queue.batch-size=25"
                 )
                 .run(context -> {
-                    assertThat(context).hasSingleBean(AuditFallbackStore.class);
+                    assertThat(context).hasSingleBean(AuditEventQueue.class);
                     assertThat(context).hasSingleBean(AuditRecoveryLock.class);
                     assertThat(context).hasSingleBean(AuditRecoveryService.class);
                     assertThat(context).hasBean("platformAuditRecoveryTaskScheduler");
@@ -59,14 +59,14 @@ class PlatformAuditRedisAutoConfigurationTest {
     }
 
     @Test
-    void shouldNotCreateRedisFallbackBeansWhenDisabled() {
+    void shouldNotCreateRedisQueueBeansWhenDisabled() {
         contextRunner
                 .withPropertyValues(
                         "platform.audit.enabled=true",
-                        "platform.audit.fallback.enabled=false"
+                        "platform.audit.queue.enabled=false"
                 )
                 .run(context -> {
-                    assertThat(context).doesNotHaveBean(AuditFallbackStore.class);
+                    assertThat(context).doesNotHaveBean(AuditEventQueue.class);
                     assertThat(context).doesNotHaveBean(AuditRecoveryLock.class);
                     assertThat(context).doesNotHaveBean(AuditRecoveryService.class);
                     assertThat(context).doesNotHaveBean("platformAuditRecoveryTaskScheduler");
