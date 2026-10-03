@@ -6,8 +6,10 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class AwsLocalStackContainer extends LocalStackContainer implements CloudTestContainer {
 
@@ -15,9 +17,18 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
 
     private final String[] queues;
     private final String[] buckets;
+    private final String[][] redrivePolicies;
 
     public AwsLocalStackContainer(AwsService[] services, String[] queues, String[] buckets) {
-        this(DEFAULT_IMAGE, services, queues, buckets);
+        this(DEFAULT_IMAGE, services, queues, buckets, new String[0][]);
+    }
+
+    public AwsLocalStackContainer(
+            AwsService[] services,
+            String[] queues,
+            String[] buckets,
+            String[][] redrivePolicies) {
+        this(DEFAULT_IMAGE, services, queues, buckets, redrivePolicies);
     }
 
     public AwsLocalStackContainer(
@@ -25,10 +36,20 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
             AwsService[] services,
             String[] queues,
             String[] buckets) {
+        this(image, services, queues, buckets, new String[0][]);
+    }
+
+    public AwsLocalStackContainer(
+            DockerImageName image,
+            AwsService[] services,
+            String[] queues,
+            String[] buckets,
+            String[][] redrivePolicies) {
         super(image);
         requireServices(services);
         this.queues = copyAndValidate(queues, "AWS queue");
         this.buckets = copyAndValidate(buckets, "AWS bucket");
+        this.redrivePolicies = copyPolicies(redrivePolicies, this.queues);
         withServices(Arrays.stream(services)
                 .map(AwsService::localStackName)
                 .toArray(String[]::new));
@@ -39,6 +60,7 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
         super.start();
         try {
             provisionQueues();
+            provisionRedrivePolicies();
             provisionBuckets();
         } catch (RuntimeException exception) {
             super.stop();
@@ -52,13 +74,42 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
         }
     }
 
+    private void provisionRedrivePolicies() {
+        for (String[] policy : redrivePolicies) {
+            String sourceQueueUrl = queueUrl(policy[0]);
+            String deadLetterQueueArn = queueArn(policy[1]);
+            String redrivePolicy = "{\\"deadLetterTargetArn\\":\\"%s\\",\\"maxReceiveCount\\":\\"%s\\"}"
+                    .formatted(deadLetterQueueArn, policy[2]);
+            exec("sqs", "set-queue-attributes",
+                    "--queue-url", sourceQueueUrl,
+                    "--attributes", "RedrivePolicy=" + redrivePolicy);
+        }
+    }
+
+    private String queueUrl(String queue) {
+        return exec("sqs", "get-queue-url", "--queue-name", queue, "--query", "QueueUrl", "--output", "text")
+                .trim();
+    }
+
+    private String queueArn(String queue) {
+        String arn = exec("sqs", "get-queue-attributes",
+                "--queue-url", queueUrl(queue),
+                "--attribute-names", "QueueArn",
+                "--query", "Attributes.QueueArn",
+                "--output", "text").trim();
+        if (arn.isBlank() || "None".equals(arn)) {
+            throw new IllegalStateException("Failed to resolve ARN for dead-letter queue: " + queue);
+        }
+        return arn;
+    }
+
     private void provisionBuckets() {
         for (String bucket : buckets) {
             exec("s3api", "create-bucket", "--bucket", bucket);
         }
     }
 
-    private void exec(String... command) {
+    private String exec(String... command) {
         String[] arguments = new String[command.length + 1];
         arguments[0] = "awslocal";
         System.arraycopy(command, 0, arguments, 1, command.length);
@@ -67,6 +118,7 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
             if (result.getExitCode() != 0) {
                 throw new IllegalStateException("Failed to provision LocalStack resource: " + result.getStderr());
             }
+            return result.getStdout();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("LocalStack resource provisioning was interrupted", exception);
@@ -92,6 +144,50 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
             }
         }
         return copy;
+    }
+
+    private String[][] copyPolicies(String[][] policies, String[] configuredQueues) {
+        if (policies == null) {
+            return new String[0][];
+        }
+        Set<String> queueNames = new HashSet<>(Arrays.asList(configuredQueues));
+        Set<String> sources = new HashSet<>();
+        String[][] copy = new String[policies.length][];
+        for (int index = 0; index < policies.length; index++) {
+            String[] policy = policies[index];
+            if (policy == null || policy.length != 3) {
+                throw new IllegalArgumentException("Each SQS redrive policy must define source, DLQ, and max receive count");
+            }
+            String source = requireQueueName(policy[0], "SQS source queue");
+            String deadLetter = requireQueueName(policy[1], "SQS dead-letter queue");
+            int maxReceiveCount;
+            try {
+                maxReceiveCount = Integer.parseInt(policy[2]);
+            } catch (NumberFormatException exception) {
+                throw new IllegalArgumentException("SQS max receive count must be a positive integer", exception);
+            }
+            if (maxReceiveCount < 1) {
+                throw new IllegalArgumentException("SQS max receive count must be a positive integer");
+            }
+            if (source.equals(deadLetter)) {
+                throw new IllegalArgumentException("SQS source and dead-letter queues must be different");
+            }
+            if (!queueNames.contains(source) || !queueNames.contains(deadLetter)) {
+                throw new IllegalArgumentException("SQS source and dead-letter queues must both be provisioned");
+            }
+            if (!sources.add(source)) {
+                throw new IllegalArgumentException("Only one SQS redrive policy can be configured per source queue: " + source);
+            }
+            copy[index] = new String[]{source, deadLetter, Integer.toString(maxReceiveCount)};
+        }
+        return copy;
+    }
+
+    private String requireQueueName(String queue, String resource) {
+        if (queue == null || queue.isBlank()) {
+            throw new IllegalArgumentException(resource + " name must not be blank");
+        }
+        return queue;
     }
 
     @Override
