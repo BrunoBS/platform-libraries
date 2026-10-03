@@ -73,7 +73,8 @@ TagManager<WorkspaceTag, Workspace> workspaceTags(WorkspaceTagRepository reposit
 - consultas por tag são exatas após normalização;
 - o owner precisa estar previamente persistido e possuir `id` e `identifier` válidos;
 - a factory não pode devolver `null`;
-- command services devem executar `reconcile` dentro da transação da operação de negócio.
+- command services devem executar `reconcile` dentro da transação da operação de negócio;
+- operações de Tagging não limpam o persistence context do consumidor; o ciclo de vida da transação permanece sob responsabilidade do serviço.
 
 ## Segurança e escopo
 
