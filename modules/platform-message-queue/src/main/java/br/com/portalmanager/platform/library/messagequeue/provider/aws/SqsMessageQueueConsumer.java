@@ -176,7 +176,8 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             return;
         }
 
-        deleteProcessedMessage(listener.destination(), queueUrl, receivedMessage.receiptHandle(), messageId, correlationId);
+        deleteProcessedMessage(
+                listener.destination(), queueUrl, receivedMessage.receiptHandle(), messageId, correlationId, false);
     }
 
     private void processDeadLetter(
@@ -210,7 +211,8 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         }
 
         deleteProcessedMessage(
-                listener.destination() + " dead-letter", queueUrl, receivedMessage.receiptHandle(), messageId, correlationId);
+                listener.destination() + " dead-letter",
+                queueUrl, receivedMessage.receiptHandle(), messageId, correlationId, true);
     }
 
     private Integer approximateReceiveCount(Message message) {
@@ -231,13 +233,15 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             String queueUrl,
             String receiptHandle,
             String messageId,
-            String correlationId) {
+            String correlationId,
+            boolean deadLetter) {
         try {
             sqsClient.deleteMessage(DeleteMessageRequest.builder()
                     .queueUrl(queueUrl)
                     .receiptHandle(receiptHandle)
                     .build());
         } catch (RuntimeException exception) {
+            metrics.recordAcknowledgementFailure(MessageQueueProvider.AWS, destination, deadLetter);
             LOGGER.warn(
                     "Message was processed but could not be deleted from destination {}; "
                             + "messageId={} correlationId={}; duplicate delivery is possible",
