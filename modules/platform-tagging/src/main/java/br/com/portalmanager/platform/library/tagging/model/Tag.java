@@ -9,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
+import java.util.Objects;
+
 @MappedSuperclass
 public abstract class Tag<OWNER extends TagOwner> {
 
@@ -17,7 +19,7 @@ public abstract class Tag<OWNER extends TagOwner> {
     private Long id;
 
     @Convert(converter = TagNameConverter.class)
-    @Column(name = "name", nullable = false, length = 150)
+    @Column(name = "name", nullable = false, length = TagName.MAX_LENGTH)
     private TagName name;
 
     @Enumerated(EnumType.STRING)
@@ -28,8 +30,8 @@ public abstract class Tag<OWNER extends TagOwner> {
     }
 
     protected Tag(TagName name, TagOriginType originType) {
-        this.name = name;
-        this.originType = originType;
+        this.name = Objects.requireNonNull(name, "tag name must not be null");
+        this.originType = Objects.requireNonNull(originType, "tag origin must not be null");
     }
 
     public Long getId() {
@@ -45,7 +47,7 @@ public abstract class Tag<OWNER extends TagOwner> {
     }
 
     public void changeOrigin(TagOriginType originType) {
-        this.originType = originType;
+        this.originType = Objects.requireNonNull(originType, "tag origin must not be null");
     }
 
     public abstract OWNER getOwner();
