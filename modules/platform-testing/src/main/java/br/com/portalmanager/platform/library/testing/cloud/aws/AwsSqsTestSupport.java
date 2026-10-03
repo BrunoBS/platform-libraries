@@ -6,12 +6,14 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
-final class AwsSqsTestSupport implements AwsServiceTestSupport {
+final class AwsSqsTestSupport {
 
     private static final String SQS_CLIENT_BEAN = "awsLocalStackSqsClient";
 
-    @Override
-    public void register(BeanDefinitionRegistry registry) {
+    private AwsSqsTestSupport() {
+    }
+
+    static void register(BeanDefinitionRegistry registry) {
         RootBeanDefinition definition = new RootBeanDefinition(AwsSqsClientFactoryBean.class);
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
         definition.setDestroyMethodName("close");
