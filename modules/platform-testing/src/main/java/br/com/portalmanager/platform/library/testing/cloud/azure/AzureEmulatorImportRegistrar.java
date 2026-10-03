@@ -8,6 +8,8 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionRegistrar {
 
@@ -34,7 +36,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         }
 
         if (serviceBus.length == 1) {
-            registerServiceBus(registry, serviceBus[0].getStringArray("queues"));
+            registerServiceBus(registry, serviceBus[0]);
             SERVICE_BUS_SUPPORT.register(registry);
         }
         if (blobStorage.length == 1) {
@@ -43,7 +45,8 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         }
     }
 
-    private void registerServiceBus(BeanDefinitionRegistry registry, String[] queues) {
+    private void registerServiceBus(BeanDefinitionRegistry registry, AnnotationAttributes serviceBus) {
+        AnnotationAttributes[] queues = annotations(serviceBus.get("queues"));
         String configuration = serviceBusConfiguration(queues);
         RootBeanDefinition definition = new RootBeanDefinition(AzureServiceBusContainer.class);
         definition.setInstanceSupplier(() -> new AzureServiceBusContainer(configuration));
@@ -61,9 +64,19 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         registry.registerBeanDefinition(BLOB_STORAGE_BEAN, definition);
     }
 
-    private String serviceBusConfiguration(String[] queues) {
+    private String serviceBusConfiguration(AnnotationAttributes[] queues) {
         StringBuilder configuredQueues = new StringBuilder();
+        Set<String> queueNames = new HashSet<>();
         for (int index = 0; index < queues.length; index++) {
+            String name = json(queues[index].getString("name"));
+            if (!queueNames.add(name)) {
+                throw new IllegalArgumentException("Duplicate Azure Service Bus queue name: " + name);
+            }
+            int maxDeliveryCount = queues[index].getNumber("maxDeliveryCount").intValue();
+            if (maxDeliveryCount < 1) {
+                throw new IllegalArgumentException(
+                        "Azure Service Bus maxDeliveryCount must be a positive integer");
+            }
             if (index > 0) {
                 configuredQueues.append(',');
             }
@@ -77,12 +90,12 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
                         "ForwardDeadLetteredMessagesTo": "",
                         "ForwardTo": "",
                         "LockDuration": "PT1M",
-                        "MaxDeliveryCount": 3,
+                        "MaxDeliveryCount": %d,
                         "RequiresDuplicateDetection": false,
                         "RequiresSession": false
                       }
                     }
-                    """.formatted(json(queues[index])));
+                    """.formatted(name, maxDeliveryCount));
         }
 
         return """
