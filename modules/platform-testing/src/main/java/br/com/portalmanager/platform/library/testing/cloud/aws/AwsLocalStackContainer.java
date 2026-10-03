@@ -72,7 +72,7 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
         for (String queue : queues) {
             if (queue.endsWith(".fifo")) {
                 exec("sqs", "create-queue", "--queue-name", queue,
-                        "--attributes", "{\\"FifoQueue\\":\\"true\\",\\"ContentBasedDeduplication\\":\\"true\\"}");
+                        "--attributes", "{\"FifoQueue\":\"true\",\"ContentBasedDeduplication\":\"true\"}");
             } else {
                 exec("sqs", "create-queue", "--queue-name", queue);
             }
