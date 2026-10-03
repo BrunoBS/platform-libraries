@@ -67,6 +67,11 @@ class JdbcResourceSchemaRepositoryTest {
         );
 
         assertTrue(exception.getCause() instanceof DataAccessResourceFailureException);
+        assertEquals("PLT-SCHEMA-005", exception.getError().code());
+        assertTrue(exception.getError().message().contains("vw_platform_resource_schemas"));
+        assertTrue(exception.getError().solution().contains("platform.schema-validation.view-name"));
+        assertTrue(exception.getError().solution().contains("ResourceSchemaRepository"));
+        assertTrue(exception.getError().solution().contains("resource_type, resource_code, schema_version, definition"));
     }
 
     @Test
