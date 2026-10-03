@@ -27,7 +27,7 @@ public final class RedisAuditRecoveryLock implements AuditRecoveryLock {
     ) {
         this.redisTemplate = redisTemplate;
         this.properties = properties;
-        this.lockKey = properties.getFallback().getLock().getKeyPrefix()
+        this.lockKey = properties.getQueue().getLock().getKeyPrefix()
                 + properties.getServiceName();
     }
 
@@ -37,7 +37,7 @@ public final class RedisAuditRecoveryLock implements AuditRecoveryLock {
         Boolean acquired = redisTemplate.opsForValue().setIfAbsent(
                 lockKey,
                 token,
-                properties.getFallback().getLock().getTtl()
+                properties.getQueue().getLock().getTtl()
         );
         return Boolean.TRUE.equals(acquired)
                 ? Optional.of(token)
