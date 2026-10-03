@@ -17,4 +17,8 @@ import java.lang.annotation.Target;
 public @interface WithAwsLocalStack {
 
     AwsService[] services();
+
+    String[] queues() default {};
+
+    String[] buckets() default {};
 }
