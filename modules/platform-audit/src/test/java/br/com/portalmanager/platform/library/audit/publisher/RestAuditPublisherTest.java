@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.audit.publisher;
 
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
@@ -32,12 +32,12 @@ class RestAuditPublisherTest {
     @Test
     void shouldPersistBeforeAsynchronousDelivery() {
         PlatformAuditProperties properties = properties();
-        AuditFallbackStore store = mock(AuditFallbackStore.class);
+        AuditEventQueue store = mock(AuditEventQueue.class);
 
         RestAuditPublisher publisher = new RestAuditPublisher(
                 failingBuilder(),
                 properties,
-                fallbackProvider(store)
+                queueProvider(store)
         );
 
         publisher.publish(event);
@@ -48,14 +48,14 @@ class RestAuditPublisherTest {
     @Test
     void shouldNotCallAuditApiFromBusinessThreadInDurableMode() {
         PlatformAuditProperties properties = properties();
-        AuditFallbackStore store = mock(AuditFallbackStore.class);
+        AuditEventQueue store = mock(AuditEventQueue.class);
         RestClient.Builder builder = mock(RestClient.Builder.class);
         RestClient restClient = mock(RestClient.class, RETURNS_DEEP_STUBS);
         when(builder.baseUrl(anyString())).thenReturn(builder);
         when(builder.requestFactory(any(ClientHttpRequestFactory.class))).thenReturn(builder);
         when(builder.build()).thenReturn(restClient);
 
-        RestAuditPublisher publisher = new RestAuditPublisher(builder, properties, fallbackProvider(store));
+        RestAuditPublisher publisher = new RestAuditPublisher(builder, properties, queueProvider(store));
 
         publisher.publish(event);
 
@@ -64,15 +64,15 @@ class RestAuditPublisherTest {
     }
 
     @Test
-    void shouldPropagateDurableStoreFailure() {
+    void shouldPropagateQueueFailure() {
         PlatformAuditProperties properties = properties();
-        AuditFallbackStore store = mock(AuditFallbackStore.class);
+        AuditEventQueue store = mock(AuditEventQueue.class);
         whenStoreSaveFails(store);
 
         RestAuditPublisher publisher = new RestAuditPublisher(
                 failingBuilder(),
                 properties,
-                fallbackProvider(store)
+                queueProvider(store)
         );
 
         assertThatThrownBy(() -> publisher.publish(event))
@@ -88,7 +88,7 @@ class RestAuditPublisherTest {
         RestAuditPublisher publisher = new RestAuditPublisher(
                 failingBuilder(),
                 properties,
-                emptyFallbackProvider()
+                emptyQueueProvider()
         );
 
         assertThatThrownBy(() -> publisher.publish(event))
@@ -96,7 +96,7 @@ class RestAuditPublisherTest {
                 .hasMessage("audit unavailable");
     }
 
-    private void whenStoreSaveFails(AuditFallbackStore store) {
+    private void whenStoreSaveFails(AuditEventQueue store) {
         org.mockito.Mockito.doThrow(new IllegalStateException("redis unavailable"))
                 .when(store).save(event);
     }
@@ -121,13 +121,13 @@ class RestAuditPublisherTest {
     }
 
     @SuppressWarnings("unchecked")
-    private ObjectProvider<AuditFallbackStore> emptyFallbackProvider() {
+    private ObjectProvider<AuditEventQueue> emptyQueueProvider() {
         return mock(ObjectProvider.class);
     }
 
     @SuppressWarnings("unchecked")
-    private ObjectProvider<AuditFallbackStore> fallbackProvider(AuditFallbackStore store) {
-        ObjectProvider<AuditFallbackStore> provider = mock(ObjectProvider.class);
+    private ObjectProvider<AuditEventQueue> queueProvider(AuditEventQueue store) {
+        ObjectProvider<AuditEventQueue> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(store);
         return provider;
     }
