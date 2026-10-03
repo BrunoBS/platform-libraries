@@ -80,9 +80,11 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
             String deadLetterQueueArn = queueArn(policy[1]);
             String redrivePolicy = "{\"deadLetterTargetArn\":\"%s\",\"maxReceiveCount\":\"%s\"}"
                     .formatted(deadLetterQueueArn, policy[2]);
+            String escapedPolicy = redrivePolicy.replace("\\", "\\\\").replace("\"", "\\\"");
+            String attributes = "{\"RedrivePolicy\":\"%s\"}".formatted(escapedPolicy);
             exec("sqs", "set-queue-attributes",
                     "--queue-url", sourceQueueUrl,
-                    "--attributes", "RedrivePolicy=" + redrivePolicy);
+                    "--attributes", attributes);
         }
     }
 
