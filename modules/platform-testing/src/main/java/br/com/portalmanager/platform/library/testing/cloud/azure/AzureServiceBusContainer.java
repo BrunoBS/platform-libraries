@@ -50,12 +50,11 @@ public final class AzureServiceBusContainer implements CloudTestContainer, AutoC
     }
 
     public void start() {
-        sqlServer.start();
         try {
+            sqlServer.start();
             emulator.start();
         } catch (RuntimeException exception) {
-            sqlServer.stop();
-            network.close();
+            stop();
             throw exception;
         }
     }
