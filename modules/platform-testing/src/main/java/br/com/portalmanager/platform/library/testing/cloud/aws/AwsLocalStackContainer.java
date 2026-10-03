@@ -78,7 +78,7 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
         for (String[] policy : redrivePolicies) {
             String sourceQueueUrl = queueUrl(policy[0]);
             String deadLetterQueueArn = queueArn(policy[1]);
-            String redrivePolicy = "{\\"deadLetterTargetArn\\":\\"%s\\",\\"maxReceiveCount\\":\\"%s\\"}"
+            String redrivePolicy = "{\"deadLetterTargetArn\":\"%s\",\"maxReceiveCount\":\"%s\"}"
                     .formatted(deadLetterQueueArn, policy[2]);
             exec("sqs", "set-queue-attributes",
                     "--queue-url", sourceQueueUrl,
