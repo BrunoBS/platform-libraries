@@ -1,7 +1,9 @@
 package br.com.portalmanager.platform.library.messagequeue.configuration;
 
+import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
+import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueConsumer;
 import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.publisher.DefaultMessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.publisher.MessageEnvelopeFactory;
@@ -41,6 +43,11 @@ public class MessageQueueAutoConfiguration {
         return new MessageQueueSerializer(objectMapper);
     }
 
+    @Bean
+    MessageQueueListenerRegistry messageQueueListenerRegistry() {
+        return new MessageQueueListenerRegistry();
+    }
+
     @Bean(destroyMethod = "close")
     @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AWS")
     SqsClient messageQueueSqsClient(MessageQueueProperties properties) {
@@ -53,6 +60,20 @@ public class MessageQueueAutoConfiguration {
     @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AWS")
     MessageQueueTransport awsMessageQueueTransport(SqsClient messageQueueSqsClient) {
         return new SqsMessageQueueTransport(messageQueueSqsClient);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AWS")
+    SqsMessageQueueConsumer awsMessageQueueConsumer(
+            SqsClient messageQueueSqsClient,
+            MessageQueueListenerRegistry messageQueueListenerRegistry,
+            DestinationResolver destinationResolver,
+            MessageQueueSerializer messageQueueSerializer) {
+        return new SqsMessageQueueConsumer(
+                messageQueueSqsClient,
+                messageQueueListenerRegistry,
+                destinationResolver,
+                messageQueueSerializer);
     }
 
     @Bean
