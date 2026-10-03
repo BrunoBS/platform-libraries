@@ -24,6 +24,28 @@ class MessageQueuePropertiesValidationTest {
     }
 
     @Test
+    void shouldStartWhenAwsFifoQueueHasTheRequiredNameSuffix() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.message-queue.provider=AWS",
+                        "platform.message-queue.aws.region=sa-east-1",
+                        "platform.message-queue.destinations.orders.queue=orders.fifo",
+                        "platform.message-queue.destinations.orders.aws.queue-type=FIFO")
+                .run(context -> assertThat(context).hasNotFailed());
+    }
+
+    @Test
+    void shouldRejectFifoConfigurationWithoutFifoQueueName() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.message-queue.provider=AWS",
+                        "platform.message-queue.aws.region=sa-east-1",
+                        "platform.message-queue.destinations.orders.queue=orders",
+                        "platform.message-queue.destinations.orders.aws.queue-type=FIFO")
+                .run(context -> assertInvalid(context.getStartupFailure(), "must end with .fifo"));
+    }
+
+    @Test
     void shouldStartWhenAzureConfigurationIsComplete() {
         contextRunner
                 .withPropertyValues(
