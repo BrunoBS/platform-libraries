@@ -33,9 +33,4 @@ public final class AzureBlobServiceClientFactoryBean implements FactoryBean<Blob
         return true;
     }
 
-    public void close() {
-        if (client != null) {
-            client.close();
-        }
-    }
 }
