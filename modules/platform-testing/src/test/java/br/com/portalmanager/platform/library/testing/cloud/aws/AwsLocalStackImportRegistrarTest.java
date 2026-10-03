@@ -40,7 +40,7 @@ class AwsLocalStackImportRegistrarTest {
     @WithAwsLocalStack(
             sqs = @AwsSqs(queues = {
                     @AwsSqs.Queue(name = "audit-events"),
-                    @AwsSqs.Queue(name = "order-events", deadLetterQueue = "order-events-dlq", maxReceiveCount = 3)
+                    @AwsSqs.Queue(name = "order-events", deadLetterEnabled = true, maxReceiveCount = 3)
             }),
             s3 = @AwsS3(buckets = "documents")
     )
