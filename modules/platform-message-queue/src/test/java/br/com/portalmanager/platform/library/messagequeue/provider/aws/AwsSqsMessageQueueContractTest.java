@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
         "platform.message-queue.destinations.contract.queue=contract-queue",
         "platform.message-queue.destinations.consumer-contract.queue=consumer-contract",
         "platform.message-queue.destinations.failing-contract.queue=failing-contract",
-        "platform.message-queue.destinations.failing-contract.aws.dead-letter-queue=failing-contract-dlq",
         "platform.message-queue.destinations.failing-contract.aws.visibility-timeout=PT1S"
 })
 @WithAwsLocalStack(
