@@ -34,16 +34,17 @@ class MessageQueuePropertiesValidationTest {
     }
 
     @Test
-    void shouldFailAtStartupWhenAzureVisibilityTimeoutIsConfigured() {
+    void shouldRejectAzureVisibilityTimeoutAsUnknownConfiguration() {
         contextRunner
                 .withPropertyValues(
                         "platform.message-queue.provider=AZURE",
                         "platform.message-queue.azure.namespace=orders.servicebus.windows.net",
                         "platform.message-queue.azure.defaults.visibility-timeout=60s",
                         "platform.message-queue.destinations.orders.queue=orders")
-                .run(context -> assertInvalid(
-                        context.getStartupFailure(),
-                        "visibility-timeout is not supported for Azure"));
+                .run(context -> {
+                    assertThat(context.getStartupFailure()).isNotNull();
+                    assertThat(context.getStartupFailure()).hasStackTraceContaining("visibility-timeout");
+                });
     }
 
     @Test
