@@ -79,6 +79,9 @@ public abstract sealed class AbstractCatalogService<E extends CatalogEntity>
 
     @Transactional
     public CatalogDTO update(String code, CatalogDTO dto) {
+        if (dto == null) {
+            return update((CatalogDTO) null);
+        }
         return update(dto.withCode(code));
     }
 
