@@ -14,6 +14,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
     private static final String SERVICE_BUS_CONTAINER_BEAN = "azureServiceBusContainer";
     private static final String BLOB_STORAGE_BEAN = "azureBlobStorageContainer";
     private static final AzureServiceTestSupport SERVICE_BUS_SUPPORT = new AzureServiceBusTestSupport();
+    private static final AzureBlobStorageTestSupport BLOB_STORAGE_SUPPORT = new AzureBlobStorageTestSupport();
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
@@ -38,6 +39,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         }
         if (blobStorage.length == 1) {
             registerBlobStorage(registry, blobStorage[0].getStringArray("containers"));
+            BLOB_STORAGE_SUPPORT.register(registry);
         }
     }
 
