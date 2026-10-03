@@ -76,9 +76,7 @@ O Included Catalog usa `IncludedCatalogService` e não possui enum. Novos `code`
 
 ### Settings validados por JSON Schema
 
-Quando o catálogo possui `settings` governado por JSON Schema, o consumidor não
-precisa criar uma ponte própria de validação. Injete o `SchemaValidator` e informe
-somente o código do recurso de schema:
+`platform-catalog` depende oficialmente de `platform-schema-validation`. Para `settings` governado por contrato, JSON Schema é o mecanismo Golden e o consumidor não precisa criar uma ponte própria de validação. Injete o `SchemaValidator` e informe somente o código do recurso de schema:
 
 ```java
 @Service
@@ -106,8 +104,11 @@ O `platform-catalog` define internamente `resourceType = CATALOG`, valida
 payload para campos `settings.*`. Erros técnicos de resolução/compilação do
 schema não são convertidos em erros funcionais.
 
-Use `CatalogSettingsValidator` diretamente apenas quando existir uma regra de
-settings que não seja JSON Schema.
+`platform-schema-validation` precisa de uma fonte de schemas no startup. O Golden Default consulta `vw_platform_resource_schemas` (`resource_type`, `resource_code`, `schema_version`, `definition`). Para customizar, altere `platform.schema-validation.view-name` ou forneça `ResourceSchemaRepository`. Se nenhuma fonte estiver disponível, o startup falha de forma descritiva com `PLT-SCHEMA-005/007`.
+
+Configurações de cache local/Redis continuam pertencendo exclusivamente ao `platform-schema-validation`; o Catalog não duplica essas properties.
+
+Use `CatalogSettingsValidator` diretamente apenas quando existir uma regra adicional ou uma regra de settings que não seja JSON Schema.
 
 ## 5. DTO padrão
 
@@ -208,7 +209,8 @@ CatalogController
 EnumCatalogService | IncludedCatalogService
 CatalogEnum        (somente Enum Catalog)
 AbstractCatalogCode (quando necessário como VO)
-CatalogSettingsValidator (quando houver settings)
+SchemaValidator     (settings governado por JSON Schema)
+CatalogSettingsValidator (regra adicional/não-schema)
 ```
 
 Não estenda nem replique `CatalogMapper`, `AbstractCatalogService`,

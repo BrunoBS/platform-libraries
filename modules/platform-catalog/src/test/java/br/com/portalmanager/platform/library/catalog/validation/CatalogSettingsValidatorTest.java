@@ -4,6 +4,8 @@ import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
+import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
@@ -66,6 +68,42 @@ class CatalogSettingsValidatorTest {
     }
 
     @Test
+    void shouldIntegrateWithRealSchemaValidationForValidAndInvalidSettings() {
+        SchemaValidator schemaValidator = new ResourceSchemaValidator(
+                (type, code) -> new ResourceSchema(
+                        type,
+                        code,
+                        1,
+                        """
+                        {
+                          "type": "object",
+                          "properties": {
+                            "enabled": { "type": "boolean" }
+                          },
+                          "required": ["enabled"],
+                          "additionalProperties": false
+                        }
+                        """
+                ),
+                JSON
+        );
+
+        ValidationResult validResult = new ValidationResult();
+        CatalogSettingsValidator.schema("workspace-type", schemaValidator)
+                .validate(dto(JSON.createObjectNode().put("enabled", true)), validResult);
+        assertThat(validResult.hasErrors()).isFalse();
+
+        ValidationResult invalidResult = new ValidationResult();
+        CatalogSettingsValidator.schema("workspace-type", schemaValidator)
+                .validate(dto(JSON.createObjectNode().put("enabled", "yes")), invalidResult);
+
+        assertThat(invalidResult.hasErrors()).isTrue();
+        assertThat(invalidResult.getDetails())
+                .extracting(ValidationDetail::field)
+                .allMatch(field -> field.startsWith("settings"));
+    }
+
+    @Test
     void shouldNotHideTechnicalSchemaErrors() {
         SchemaValidator schemaValidator = (type, code, payload) -> {
             throw new IllegalStateException("schema unavailable");
@@ -78,12 +116,16 @@ class CatalogSettingsValidatorTest {
     }
 
     private CatalogDTO dto() {
+        return dto(JSON.createObjectNode());
+    }
+
+    private CatalogDTO dto(JsonNode settings) {
         return new CatalogDTO(
                 "MANAGER",
                 "Manager",
                 "Descrição válida para catálogo",
                 1,
-                JSON.createObjectNode()
+                settings
         );
     }
 

@@ -2,6 +2,20 @@
 
 Infraestrutura reutilizável para catálogos persistidos e administráveis pelos microserviços da plataforma.
 
+## Dependência arquitetural: Schema Validation
+
+`platform-catalog` depende oficialmente de `platform-schema-validation`. Essa é uma decisão do Golden Platform Foundation, não um detalhe opcional escondido pela library.
+
+Quando um catálogo possui `settings` governado por contrato, a validação padrão é JSON Schema via `SchemaValidator`, com `resourceType = CATALOG`. O consumidor informa o código do recurso de schema; o Catalog executa a validação no fluxo padrão.
+
+A infraestrutura de Schema Validation precisa ter uma fonte de schemas disponível. O Golden Default usa a view `vw_platform_resource_schemas`, com as colunas `resource_type`, `resource_code`, `schema_version` e `definition`. O consumidor pode:
+
+- disponibilizar a view default;
+- alterar `platform.schema-validation.view-name`;
+- fornecer uma implementação de `ResourceSchemaRepository`.
+
+Na ausência de uma fonte válida, a aplicação falha no startup com diagnóstico `PLT-SCHEMA-005/007`. Cache local/Redis e demais detalhes de resolução pertencem ao `platform-schema-validation`; o Catalog não replica essas configurações.
+
 ## Identidade padrão
 
 Todos os catálogos usam `code` como identidade semântica e chave primária:
@@ -66,9 +80,10 @@ CatalogRepository
 CatalogDTO
 CatalogController
 EnumCatalogService | IncludedCatalogService
-CatalogEnum        (somente Enum Catalog)
+CatalogEnum         (somente Enum Catalog)
 AbstractCatalogCode (quando o domínio precisar de um VO de referência)
-CatalogSettingsValidator (quando houver settings validados)
+SchemaValidator     (contrato padrão para settings governado por JSON Schema)
+CatalogSettingsValidator (somente para regra adicional/não-schema)
 ```
 
 `CatalogMapper`, `AbstractCatalogService`, `AbstractCatalogValidator` e
@@ -102,7 +117,8 @@ POST   /api/v1/<catalog>/{code}/restore
 - validação do formato e duplicidade do `code`;
 - no `EnumCatalogService`, validação do `code` contra o enum;
 - no `IncludedCatalogService`, criação de novos códigos em runtime;
-- validação opcional de `settings` por `CatalogSettingsValidator`.
+- settings governado por contrato usa `platform-schema-validation`;
+- `CatalogSettingsValidator` fica reservado a regras adicionais ou não baseadas em JSON Schema.
 
 ## Relacionamentos
 
@@ -130,8 +146,9 @@ IncludedCatalogService
 ## Ownership
 
 ```text
-platform-catalog = COMO um catálogo persistido e administrável funciona
-microserviço     = QUAL catálogo existe e suas regras de domínio
+platform-catalog             = COMO um catálogo persistido e administrável funciona
+platform-schema-validation   = COMO o contrato JSON Schema é resolvido e validado
+microserviço                 = QUAL catálogo existe, qual schema usa e suas regras de domínio
 ```
 
 Veja também `docs/USAGE.md`.

@@ -4,6 +4,9 @@ import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefini
 
 public final class SchemaValidationTechnicalErrors {
 
+    private static final String REQUIRED_VIEW_COLUMNS =
+            "resource_type, resource_code, schema_version, definition";
+
     public static final PlatformErrorDefinition PAYLOAD_BINDING_INVALID =
             new PlatformErrorDefinition(
                     "PLT-SCHEMA-001",
@@ -46,8 +49,12 @@ public final class SchemaValidationTechnicalErrors {
     public static PlatformErrorDefinition schemaSourceUnavailable(String viewName) {
         return new PlatformErrorDefinition(
                 "PLT-SCHEMA-005",
-                "Schema validation source is unavailable: " + viewName,
-                "Verify that the schema view exists, exposes the required columns, and is accessible by the application datasource.",
+                "Schema Validation could not initialize because the schema source '" + viewName
+                        + "' is unavailable. Expected columns: [" + REQUIRED_VIEW_COLUMNS
+                        + "]. Fix: create/grant access to this view, configure platform.schema-validation.view-name "
+                        + "with an existing compatible view, or provide a ResourceSchemaRepository implementation.",
+                "Create or grant access to the configured schema view, override platform.schema-validation.view-name, "
+                        + "or provide ResourceSchemaRepository.",
                 500
         );
     }
@@ -61,13 +68,18 @@ public final class SchemaValidationTechnicalErrors {
         );
     }
 
-    public static final PlatformErrorDefinition SCHEMA_SOURCE_MISSING =
-            new PlatformErrorDefinition(
-                    "PLT-SCHEMA-007",
-                    "No schema validation source is available",
-                    "Configure a JdbcTemplate for the default schema view or provide a ResourceSchemaRepository implementation.",
-                    500
-            );
+    public static PlatformErrorDefinition schemaSourceMissing(String viewName) {
+        return new PlatformErrorDefinition(
+                "PLT-SCHEMA-007",
+                "Schema Validation could not initialize because no schema source is available. The JDBC path expects view '"
+                        + viewName + "' with columns [" + REQUIRED_VIEW_COLUMNS
+                        + "]. Fix: configure the application datasource/JdbcTemplate and create this view, "
+                        + "configure platform.schema-validation.view-name with an existing compatible view, "
+                        + "or provide a ResourceSchemaRepository implementation.",
+                "Configure the JDBC schema source or provide ResourceSchemaRepository.",
+                500
+        );
+    }
 
     private SchemaValidationTechnicalErrors() {
     }

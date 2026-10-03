@@ -58,11 +58,39 @@ class PlatformSchemaValidationAutoConfigurationTest {
     }
 
     @Test
+    void shouldUseConfiguredViewNameInJdbcSourceValidation() {
+        contextRunner
+                .withPropertyValues("platform.schema-validation.view-name=vw_custom_resource_schemas")
+                .withUserConfiguration(JdbcConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    org.mockito.Mockito.verify(JdbcConfiguration.JDBC_TEMPLATE).query(
+                            org.mockito.ArgumentMatchers.<String>argThat(sql ->
+                                    sql.contains("FROM vw_custom_resource_schemas")
+                                            && sql.contains("WHERE 1 = 0")
+                            ),
+                            org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
+                    );
+                });
+    }
+
+    @Test
     void shouldFailStartupWithoutRepositoryOrJdbcTemplate() {
         contextRunner.run(context -> {
             assertThat(context).hasFailed();
             assertThat(context.getStartupFailure())
                     .hasRootCauseInstanceOf(PlatformConfigurationException.class);
+
+            Throwable cause = context.getStartupFailure();
+            while (cause.getCause() != null) {
+                cause = cause.getCause();
+            }
+
+            assertThat(cause.getMessage())
+                    .contains("vw_platform_resource_schemas")
+                    .contains("resource_type, resource_code, schema_version, definition")
+                    .contains("platform.schema-validation.view-name")
+                    .contains("ResourceSchemaRepository");
         });
     }
 
@@ -126,9 +154,11 @@ class PlatformSchemaValidationAutoConfigurationTest {
     @Configuration(proxyBeanMethods = false)
     static class JdbcConfiguration {
 
+        private static final JdbcTemplate JDBC_TEMPLATE = mock(JdbcTemplate.class);
+
         @Bean
         JdbcTemplate jdbcTemplate() {
-            return mock(JdbcTemplate.class);
+            return JDBC_TEMPLATE;
         }
 
         @Bean
