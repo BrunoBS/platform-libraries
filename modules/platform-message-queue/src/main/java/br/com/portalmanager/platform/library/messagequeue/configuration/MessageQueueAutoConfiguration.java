@@ -54,7 +54,7 @@ public class MessageQueueAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    MessageQueueListenerRegistry messageQueueListenerRegistry() {
+    static MessageQueueListenerRegistry messageQueueListenerRegistry() {
         return new MessageQueueListenerRegistry();
     }
 
