@@ -5,7 +5,6 @@ import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
@@ -13,63 +12,72 @@ import org.springframework.web.client.RestClient;
 import java.time.Instant;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class RestAuditPublisherTest {
 
     private final AuditEventRequest event = new AuditEventRequest(
-            Instant.now(),
-            "account",
-            "account-1",
-            "application-1",
-            "dev",
-            "account",
-            "123",
-            "UPDATE",
-            "user",
-            "correlation-1",
-            200,
-            Map.of("id", "123"),
-            Map.of()
+            Instant.now(), "account", "account-1", "application-1", "dev",
+            "account", "123", "UPDATE", "user", "correlation-1", 200,
+            Map.of("id", "123"), Map.of()
     );
 
     @Test
-    void shouldNotPropagateHttpFailureByDefault() {
+    void shouldPersistBeforeAsynchronousDelivery() {
         PlatformAuditProperties properties = properties();
-        RestClient.Builder builder = failingBuilder();
-
-        RestAuditPublisher publisher = new RestAuditPublisher(
-                builder,
-                new SyncTaskExecutor(),
-                properties,
-                emptyFallbackProvider()
-        );
-
-        assertThatCode(() -> publisher.publish(event)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void shouldPersistEventInFallbackWhenHttpFails() {
-        PlatformAuditProperties properties = properties();
-        AuditFallbackStore fallbackStore = mock(AuditFallbackStore.class);
+        AuditFallbackStore store = mock(AuditFallbackStore.class);
 
         RestAuditPublisher publisher = new RestAuditPublisher(
                 failingBuilder(),
-                new SyncTaskExecutor(),
                 properties,
-                fallbackProvider(fallbackStore)
+                fallbackProvider(store)
         );
 
         publisher.publish(event);
 
-        verify(fallbackStore).save(event);
+        verify(store).save(event);
+    }
+
+    @Test
+    void shouldNotCallAuditApiFromBusinessThreadInDurableMode() {
+        PlatformAuditProperties properties = properties();
+        AuditFallbackStore store = mock(AuditFallbackStore.class);
+        RestClient.Builder builder = mock(RestClient.Builder.class);
+        RestClient restClient = mock(RestClient.class, RETURNS_DEEP_STUBS);
+        when(builder.baseUrl(anyString())).thenReturn(builder);
+        when(builder.requestFactory(any(ClientHttpRequestFactory.class))).thenReturn(builder);
+        when(builder.build()).thenReturn(restClient);
+
+        RestAuditPublisher publisher = new RestAuditPublisher(builder, properties, fallbackProvider(store));
+
+        publisher.publish(event);
+
+        verify(store).save(event);
+        verifyNoInteractions(restClient);
+    }
+
+    @Test
+    void shouldPropagateDurableStoreFailure() {
+        PlatformAuditProperties properties = properties();
+        AuditFallbackStore store = mock(AuditFallbackStore.class);
+        whenStoreSaveFails(store);
+
+        RestAuditPublisher publisher = new RestAuditPublisher(
+                failingBuilder(),
+                properties,
+                fallbackProvider(store)
+        );
+
+        assertThatThrownBy(() -> publisher.publish(event))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("redis unavailable");
     }
 
     @Test
@@ -79,7 +87,6 @@ class RestAuditPublisherTest {
 
         RestAuditPublisher publisher = new RestAuditPublisher(
                 failingBuilder(),
-                new SyncTaskExecutor(),
                 properties,
                 emptyFallbackProvider()
         );
@@ -89,6 +96,11 @@ class RestAuditPublisherTest {
                 .hasMessage("audit unavailable");
     }
 
+    private void whenStoreSaveFails(AuditFallbackStore store) {
+        org.mockito.Mockito.doThrow(new IllegalStateException("redis unavailable"))
+                .when(store).save(event);
+    }
+
     private RestClient.Builder failingBuilder() {
         RestClient.Builder builder = mock(RestClient.Builder.class);
         RestClient restClient = mock(RestClient.class, RETURNS_DEEP_STUBS);
@@ -96,15 +108,9 @@ class RestAuditPublisherTest {
         when(builder.baseUrl(anyString())).thenReturn(builder);
         when(builder.requestFactory(any(ClientHttpRequestFactory.class))).thenReturn(builder);
         when(builder.build()).thenReturn(restClient);
-
-        when(restClient.post()
-                .uri(anyString())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(any(Object.class))
-                .retrieve()
-                .toBodilessEntity())
+        when(restClient.post().uri(anyString()).contentType(MediaType.APPLICATION_JSON)
+                .body(any(Object.class)).retrieve().toBodilessEntity())
                 .thenThrow(new IllegalStateException("audit unavailable"));
-
         return builder;
     }
 
@@ -120,9 +126,9 @@ class RestAuditPublisherTest {
     }
 
     @SuppressWarnings("unchecked")
-    private ObjectProvider<AuditFallbackStore> fallbackProvider(AuditFallbackStore fallbackStore) {
+    private ObjectProvider<AuditFallbackStore> fallbackProvider(AuditFallbackStore store) {
         ObjectProvider<AuditFallbackStore> provider = mock(ObjectProvider.class);
-        when(provider.getIfAvailable()).thenReturn(fallbackStore);
+        when(provider.getIfAvailable()).thenReturn(store);
         return provider;
     }
 }
