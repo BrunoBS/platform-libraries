@@ -71,7 +71,17 @@ TagManager<WorkspaceTag, Workspace> workspaceTags(WorkspaceTagRepository reposit
 - o banco consumidor deve possuir `UNIQUE(owner_id, name)`;
 - a FK para o owner deve ser obrigatória;
 - consultas por tag são exatas após normalização;
+- o owner precisa estar previamente persistido e possuir `id` e `identifier` válidos;
+- a factory é validada: não pode devolver `null`, trocar owner, nome ou origem;
 - command services devem executar `reconcile` dentro da transação da operação de negócio.
+
+## Segurança e escopo
+
+`platform-tagging` gerencia tags; ele não decide autorização nem visibilidade do recurso. Métodos como `findOwnerKeysByTag` podem retornar identifiers de qualquer owner persistido na tabela do recurso. O serviço consumidor deve sempre aplicar sua regra de autorização/`ResourceVisibility` na consulta final antes de expor recursos ao cliente.
+
+O vínculo também deve partir da entidade de domínio já carregada e validada pelo fluxo do consumidor. Não monte uma Tag diretamente a partir de um `ownerId` recebido no request. O fluxo esperado é: request -> autorização/finder -> owner existente e permitido -> `TagManager.reconcile(owner, ...)` -> FK do banco.
+
+A FK garante integridade referencial e `UNIQUE(owner_id, name)` impede duplicidade inclusive sob concorrência. Conflitos concorrentes de constraint devem ser tratados pelo padrão de exceções do serviço consumidor; o módulo não adiciona lock pessimista nem cria uma transação própria.
 
 ## Índices mínimos recomendados
 
