@@ -121,6 +121,16 @@ public void onDeadLetter(DeadLetterMessage<OrderCreated> deadLetter) {
 
 Na AWS, esse listener consome a fila DLQ física indicada pela configuração (ou `<fila>-dlq`). No Azure, consome a subfila dead-letter nativa. A mensagem é confirmada/removida da DLQ somente quando o handler retorna normalmente. Se falhar, ela permanece para nova tentativa. Os campos `reason`, `description` e `deadLetteredAt` podem ser nulos. `deliveryCount` é informado pelo broker e tem semântica específica de cada provider; não o trate como um contador normalizado das falhas na fila original. Defina se o handler vai registrar, corrigir e republicar, ou encaminhar para tratamento manual; não descarte mensagens sem uma decisão explícita.
 
+## Observabilidade
+
+Quando a aplicação disponibiliza um `MeterRegistry`, a lib registra os counters:
+
+- `platform.message.queue.publish`: publicação com resultado;
+- `platform.message.queue.consume`: processamento com destino, provider, tipo de fila e resultado;
+- `platform.message.queue.poll.failure`: falha técnica ao consultar o broker.
+
+Os logs de falha incluem destino e, quando o envelope já foi lido, `messageId` e `correlationId`. A aplicação deve exportar as métricas e configurar alertas conforme seus SLOs.
+
 ## Testes
 
 Use `platform-testing` no escopo de testes. O suporte de emuladores e fixtures pertence ao ambiente de teste; não é dependência de runtime da aplicação.
