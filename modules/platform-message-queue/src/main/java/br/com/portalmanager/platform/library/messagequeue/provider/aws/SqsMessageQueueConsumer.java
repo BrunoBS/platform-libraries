@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.MessageSystemAttributeName;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
 import java.time.Duration;
@@ -82,6 +83,9 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
 
     private void startDeadLetterWorker(MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
+        if (!destination.consumerEnabled()) {
+            return;
+        }
         if (destination.deadLetterReference() == null || destination.deadLetterReference().isBlank()) {
             throw new MessageQueueConfigurationException(
                     "AWS dead-letter queue is required for destination with dead-letter listener: "
@@ -108,15 +112,16 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             Duration waitTime,
             Duration visibilityTimeout,
             BiConsumer<String, Message> messageProcessor) {
-        String queueUrl = queueUrls.computeIfAbsent(queueName, this::resolveQueueUrl);
         int waitTimeSeconds = seconds(waitTime, 20, 0, 20);
         int visibilityTimeoutSeconds = seconds(visibilityTimeout, 30, 0, 43200);
 
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
+                String queueUrl = queueUrls.computeIfAbsent(queueName, this::resolveQueueUrl);
                 var response = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
                         .queueUrl(queueUrl)
                         .maxNumberOfMessages(1)
+                        .messageSystemAttributeNames(MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT)
                         .waitTimeSeconds(waitTimeSeconds)
                         .visibilityTimeout(visibilityTimeoutSeconds)
                         .build());
@@ -163,11 +168,12 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             Message receivedMessage) {
         try {
             var message = serializer.deserialize(receivedMessage.body(), listener.payloadType());
+            Integer deliveryCount = approximateReceiveCount(receivedMessage);
             var deadLetterMessage = new DeadLetterMessage<>(
                     message,
                     null,
                     null,
-                    null,
+                    deliveryCount,
                     null,
                     Map.of("provider", "AWS", "queue", deadLetterQueue));
             listener.invoke(deadLetterMessage);
@@ -180,6 +186,19 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         }
 
         deleteProcessedMessage(listener.destination() + " dead-letter", queueUrl, receivedMessage.receiptHandle());
+    }
+
+    private Integer approximateReceiveCount(Message message) {
+        String value = message.attributes().get(MessageSystemAttributeName.APPROXIMATE_RECEIVE_COUNT);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(value);
+        } catch (NumberFormatException exception) {
+            LOGGER.log(System.Logger.Level.WARNING, "Invalid SQS ApproximateReceiveCount value: " + value, exception);
+            return null;
+        }
     }
 
     private void deleteProcessedMessage(String destination, String queueUrl, String receiptHandle) {
