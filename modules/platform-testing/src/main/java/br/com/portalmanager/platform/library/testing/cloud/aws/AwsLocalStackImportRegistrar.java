@@ -9,10 +9,8 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionRegistrar {
 
@@ -66,9 +64,13 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             requireName(name, "SQS queue");
             addUnique(queues, name, "SQS queue");
 
+            boolean deadLetterEnabled = queue.getBoolean("deadLetterEnabled");
             String deadLetterQueue = queue.getString("deadLetterQueue");
-            if (deadLetterQueue == null || deadLetterQueue.isBlank()) {
+            if (!deadLetterEnabled && (deadLetterQueue == null || deadLetterQueue.isBlank())) {
                 continue;
+            }
+            if (deadLetterQueue == null || deadLetterQueue.isBlank()) {
+                deadLetterQueue = name + "-dlq";
             }
             requireName(deadLetterQueue, "SQS dead-letter queue");
             if (name.equals(deadLetterQueue)) {
