@@ -13,7 +13,7 @@ import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationRe
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
