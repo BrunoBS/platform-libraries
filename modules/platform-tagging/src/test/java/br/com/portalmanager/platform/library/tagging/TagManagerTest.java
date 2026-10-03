@@ -141,14 +141,18 @@ class TagManagerTest {
 
         public Long ownerId(Owner owner) { return owner.id(); }
         public String ownerKey(TestTag tag) { return String.valueOf(tag.owner.id()); }
-        public TestTag newTag(Owner owner, TagName name, TagOriginType origin) {\n            return new TestTag(owner, name.value(), origin);\n        }
+        public TestTag newTag(Owner owner, TagName name, TagOriginType origin) {
+            return new TestTag(owner, name.value(), origin);
+        }
         public List<TestTag> findByOwnerId(Long ownerId) {
             return tags.stream().filter(t -> t.owner.id().equals(ownerId)).toList();
         }
         public List<TestTag> findByOwnerKeysAndOrigin(Collection<String> keys, TagOriginType origin) {
             return tags.stream().filter(t -> keys.contains(ownerKey(t)) && t.origin == origin).toList();
         }
-        public List<String> findOwnerKeysByTag(TagName name) {\n            return tags.stream().filter(t -> t.name.equals(name)).map(this::ownerKey).distinct().toList();\n        }
+        public List<String> findOwnerKeysByTag(TagName name) {
+            return tags.stream().filter(t -> t.name.equals(name)).map(this::ownerKey).distinct().toList();
+        }
         public void saveAllTags(Collection<TestTag> values) { tags.addAll(values); }
         public void deleteAllTags(Collection<TestTag> values) { tags.removeAll(values); }
         public void deleteByOwnerId(Long ownerId) { tags.removeIf(t -> t.owner.id().equals(ownerId)); }
