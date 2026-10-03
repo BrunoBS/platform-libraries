@@ -32,13 +32,13 @@ public final class AzureBlobStorageContainer extends AzuriteContainer implements
     }
 
     private void provisionContainers() {
-        try (var blobServiceClient = new BlobServiceClientBuilder()
+        var blobServiceClient = new BlobServiceClientBuilder()
                 .connectionString(getConnectionString())
-                .buildClient()) {
-            for (String container : containers) {
-                requireName(container);
-                blobServiceClient.createBlobContainerIfNotExists(container);
-            }
+                .buildClient();
+
+        for (String container : containers) {
+            requireName(container);
+            blobServiceClient.createBlobContainerIfNotExists(container);
         }
     }
 
