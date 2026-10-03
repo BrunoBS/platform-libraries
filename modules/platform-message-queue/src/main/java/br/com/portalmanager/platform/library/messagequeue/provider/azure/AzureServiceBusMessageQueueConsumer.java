@@ -152,7 +152,8 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
         var builder = clientBuilder.receiver()
                 .queueName(queueName)
                 .receiveMode(ServiceBusReceiveMode.PEEK_LOCK)
-                .disableAutoComplete();
+                .disableAutoComplete()
+                .maxAutoLockRenewDuration(properties.getAzure().getMaxAutoLockRenewalDuration());
         if (deadLetter) {
             builder.subQueue(SubQueue.DEAD_LETTER_QUEUE);
         }
