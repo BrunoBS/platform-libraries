@@ -93,6 +93,7 @@ class AuditRecoveryServiceTest {
 
     private AuditEventRequest event(String id) {
         return new AuditEventRequest(
+                java.util.UUID.randomUUID().toString(),
                 Instant.now(),
                 "account",
                 "account-1",
