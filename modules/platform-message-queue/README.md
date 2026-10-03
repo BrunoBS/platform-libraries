@@ -17,7 +17,7 @@ Inclua o módulo no serviço consumidor. Se o projeto importa o BOM das librarie
 
 Toda aplicação deve definir um provider e pelo menos um destino. O nome sob `destinations` é lógico e é o valor usado por `publish` e pelas annotations de listener. `queue` é o nome físico provisionado no broker.
 
-Cada destino permite habilitar/desabilitar publicação e consumo. Concorrência e tempo de espera podem ser definidos como defaults do provider, por destino, ou como override específico do provider. O override específico do provider tem precedência sobre a configuração comum do destino, que tem precedência sobre o default do provider. O visibility timeout é específico do SQS e pode ser configurado nos mesmos níveis. No Azure, o tempo do lock é configurado na fila do Service Bus; a biblioteca não renova o lock automaticamente.
+Cada destino permite habilitar/desabilitar publicação e consumo. Concorrência e tempo de espera podem ser definidos como defaults do provider, por destino, ou como override específico do provider. O override específico do provider tem precedência sobre a configuração comum do destino, que tem precedência sobre o default do provider. O visibility timeout existe somente na configuração AWS (`aws.defaults.visibility-timeout` ou `destinations.<destino>.aws.visibility-timeout`). No Azure, o tempo do lock é configurado na fila do Service Bus; a biblioteca não renova o lock automaticamente.
 
 ## Escopo desta versão
 
