@@ -1,59 +1,100 @@
 # Platform Tagging
 
-Motor reutilizável de tagging, independente de JPA, tabela e tipo de recurso.
+Motor reutilizável de tags, independente de Spring, JPA, tabela e domínio consumidor.
 
-## Responsabilidade
+## Modelo simples
 
-O módulo concentra a regra transversal:
+O módulo possui quatro conceitos:
 
-- normalização;
-- reconciliação por diff;
-- precedência de tag `MANUAL` sobre `SYSTEM`;
-- preservação do registro quando muda apenas a origem;
-- leitura de tags manuais;
-- busca de owners por tag;
-- remoção das tags de um owner.
+- `TagManager`: reconcilia e consulta tags;
+- `Tag`: contrato mínimo implementado pela entidade do serviço;
+- `TagName`: nome válido e normalizado da tag;
+- `TagPersistence`: porta de persistência implementada pelo serviço.
 
-A persistência pertence ao serviço consumidor. A library não cria entidade `Tag`, não registra entidade JPA e não assume uma tabela genérica `tags`.
+`TagOriginType` identifica a origem como `MANUAL` ou `SYSTEM`.
 
-## Contratos
+## Normalização
 
-O recurso implementa `TagRecord` em sua entidade de tag e expõe sua persistência através de `TagPersistence<T, O, ID, KEY>`.
+A API do `TagManager` aceita `String` na fronteira para facilitar requests e use cases. A String é convertida imediatamente para `TagName`. A partir daí, o motor e a persistência trabalham com `TagName`.
 
-Isso permite tabelas físicas e FKs reais por recurso, por exemplo:
+`TagName` aplica `trim`, lowercase com `Locale.ROOT` e converte sequências de espaços em `-`. O value object não aceita valor nulo ou vazio.
 
-- `workspace_tag.workspace_id -> workspaces.id`;
-- `application_tag.application_id -> applications.id`.
+Valores nulos ou em branco dentro das coleções recebidas por `reconcile` são ignorados.
 
-O serviço cria um `TagManager` tipado para cada recurso:
+## Regras
+
+- `MANUAL` prevalece sobre `SYSTEM` quando a mesma tag aparece nas duas coleções;
+- a reconciliação preserva o registro quando muda apenas a origem;
+- deve existir no máximo uma tag por `(owner, name)`;
+- o banco do serviço consumidor deve proteger `(owner_id, name)` com constraint única;
+- consultas de tags manuais retornam nomes em ordem determinística;
+- `findManualByOwnerKeys` retorna somente owners solicitados e inclui lista vazia para owner sem tag;
+- `findOwnerKeysByTag` faz igualdade exata após a normalização;
+- busca por prefixo, contains ou LIKE não pertence a esse contrato.
+
+Erros como owner sem ID, tag persistida sem nome ou estado persistido duplicado são violações do contrato de programação, por isso o módulo usa exceções Java e não mensagens de negócio.
+
+## Implementação no serviço
+
+Exemplo mínimo:
+
+```java
+final class ApplicationTag implements Tag {
+
+    private final Application application;
+    private final TagName name;
+    private TagOriginType originType;
+
+    ApplicationTag(Application application, TagName name, TagOriginType originType) {
+        this.application = application;
+        this.name = name;
+        this.originType = originType;
+    }
+
+    @Override
+    public TagName getName() {
+        return name;
+    }
+
+    @Override
+    public TagOriginType getOriginType() {
+        return originType;
+    }
+
+    @Override
+    public void changeOrigin(TagOriginType originType) {
+        this.originType = originType;
+    }
+}
+```
+
+A persistência do recurso implementa a porta com tipos explícitos:
+
+```java
+final class ApplicationTagPersistence
+        implements TagPersistence<ApplicationTag, Application, Long, String> {
+
+    // ownerId, ownerKey, newTag e operações de persistência
+}
+```
+
+E o serviço monta o manager:
 
 ```java
 @Bean
 TagManager<ApplicationTag, Application, Long, String> applicationTags(
-        ApplicationTagRepository repository) {
-    return new TagManager<>(repository);
+        ApplicationTagPersistence persistence) {
+    return new TagManager<>(persistence);
 }
 ```
 
-As system tags continuam sendo responsabilidade do domínio do recurso. O motor recebe apenas as coleções manual/system e não conhece Application, Workspace ou qualquer outro domínio.
+Os parâmetros genéricos representam, nesta ordem:
 
+```text
+TAG       = entidade de tag do recurso
+OWNER     = recurso proprietário da tag
+OWNER_ID  = identificador interno usado na persistência
+OWNER_KEY = chave usada nas consultas agrupadas
+```
 
-## Contrato Golden
-
-A fronteira pública pode receber tags como `String`, mas o motor converte imediatamente cada valor para o value object `TagName`. A partir desse ponto, comparação, precedência e diff trabalham somente com nomes normalizados.
-
-A normalização aplica `trim`, lowercase com `Locale.ROOT` e converte sequências de espaços em `-`. Valores nulos ou em branco são ignorados nas coleções de entrada. `TagName` não aceita valor vazio.
-
-A persistência possui invariantes simples:
-
-- nomes devolvidos por `TagPersistence` devem estar normalizados;
-- deve existir no máximo uma tag por `(owner, name)`; o banco consumidor deve proteger essa regra com constraint única;
-- `findByOwnerKeysAndOrigin` deve respeitar os owners solicitados;
-- `newTag` recebe sempre o nome já normalizado;
-- `MANUAL` possui precedência sobre `SYSTEM` quando a mesma tag aparece nas duas entradas.
-
-O motor valida inconsistências de nomes e duplicidade no estado corrente em vez de corrigi-las silenciosamente.
-
-As consultas de tags manuais retornam nomes em ordem determinística. `findManualByOwnerKeys` mantém apenas as keys solicitadas, incluindo owners sem tags com lista vazia. A busca `findOwnerKeysByTag` continua sendo igualdade exata após normalização; buscas por prefixo, contains ou LIKE não fazem parte desse contrato.
-
-`TagManager` permanece o orquestrador pequeno do motor: normaliza a entrada, calcula o diff, aplica precedência e delega persistência. A library não cria auto-configuration Spring e não conhece JPA, JDBC, tabelas ou entidades dos serviços consumidores.
+A library não cria entidade JPA, tabela, repository Spring ou auto-configuration. Cada serviço mantém sua tabela e suas FKs reais, por exemplo `workspace_tag.workspace_id -> workspaces.id` e `application_tag.application_id -> applications.id`.
