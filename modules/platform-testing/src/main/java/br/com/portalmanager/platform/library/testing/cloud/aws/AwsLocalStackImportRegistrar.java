@@ -1,0 +1,83 @@
+package br.com.portalmanager.platform.library.testing.cloud.aws;
+
+import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStack;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.type.AnnotationMetadata;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionRegistrar {
+
+    private static final String BEAN_NAME = "awsLocalStackContainer";
+
+    @Override
+    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+        Map<String, Object> attributes = importingClassMetadata.getAnnotationAttributes(
+                WithAwsLocalStack.class.getName(), false);
+        if (attributes == null) {
+            return;
+        }
+
+        AnnotationAttributes[] sqs = annotations(attributes.get("sqs"));
+        AnnotationAttributes[] s3 = annotations(attributes.get("s3"));
+        requireSingle("AwsSqs", sqs);
+        requireSingle("AwsS3", s3);
+
+        List<AwsService> services = new ArrayList<>();
+        String[] queues = new String[0];
+        String[] buckets = new String[0];
+
+        if (sqs.length == 1) {
+            services.add(AwsService.SQS);
+            queues = sqs[0].getStringArray("queues");
+        }
+        if (s3.length == 1) {
+            services.add(AwsService.S3);
+            buckets = s3[0].getStringArray("buckets");
+        }
+        if (services.isEmpty()) {
+            throw new IllegalArgumentException("At least one AWS service annotation must be configured");
+        }
+
+        AwsService[] enabledServices = services.toArray(AwsService[]::new);
+        String[] configuredQueues = queues;
+        String[] configuredBuckets = buckets;
+
+        RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackContainer.class);
+        definition.setInstanceSupplier(() -> new AwsLocalStackContainer(
+                enabledServices,
+                configuredQueues,
+                configuredBuckets));
+        definition.setInitMethodName("start");
+        definition.setDestroyMethodName("stop");
+        registry.registerBeanDefinition(BEAN_NAME, definition);
+    }
+
+    private AnnotationAttributes[] annotations(Object value) {
+        if (value == null) {
+            return new AnnotationAttributes[0];
+        }
+        if (value instanceof AnnotationAttributes[] annotationAttributes) {
+            return annotationAttributes;
+        }
+        if (value instanceof Map<?, ?>[] maps) {
+            AnnotationAttributes[] result = new AnnotationAttributes[maps.length];
+            for (int index = 0; index < maps.length; index++) {
+                result[index] = AnnotationAttributes.fromMap((Map<String, Object>) maps[index]);
+            }
+            return result;
+        }
+        throw new IllegalArgumentException("Unsupported nested AWS service annotation metadata");
+    }
+
+    private void requireSingle(String annotationName, AnnotationAttributes[] annotations) {
+        if (annotations.length > 1) {
+            throw new IllegalArgumentException(annotationName + " may be declared only once");
+        }
+    }
+}
