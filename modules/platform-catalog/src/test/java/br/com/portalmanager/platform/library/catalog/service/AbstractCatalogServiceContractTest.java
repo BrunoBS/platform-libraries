@@ -98,6 +98,12 @@ class AbstractCatalogServiceContractTest {
     }
 
     @Test
+    void deveRejeitarUpdateComBodyNuloPeloContratoDeValidacao() {
+        assertThatThrownBy(() -> service.update("ONE", null))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
     void deveAplicarSoftDelete() {
         TestEntity current = entity("ONE", 1);
         when(repository.findByCodeAndActiveTrue("ONE")).thenReturn(Optional.of(current));
