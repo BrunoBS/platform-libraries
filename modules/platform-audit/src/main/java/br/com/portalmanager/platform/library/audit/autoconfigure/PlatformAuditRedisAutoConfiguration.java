@@ -4,11 +4,11 @@ import br.com.portalmanager.platform.library.audit.config.PlatformAuditPropertie
 import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
 import br.com.portalmanager.platform.library.audit.fallback.RedisAuditFallbackStore;
 import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.audit.recovery.AuditRecoveryLock;
 import br.com.portalmanager.platform.library.audit.recovery.AuditRecoveryService;
 import br.com.portalmanager.platform.library.audit.recovery.RedisAuditRecoveryLock;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -25,7 +25,7 @@ import tools.jackson.databind.ObjectMapper;
 @EnableConfigurationProperties(PlatformAuditProperties.class)
 @ConditionalOnClass(StringRedisTemplate.class)
 @ConditionalOnProperty(prefix = "platform.audit", name = "enabled", havingValue = "true", matchIfMissing = true)
-@ConditionalOnProperty(prefix = "platform.audit.fallback", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "platform.audit.fallback", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlatformAuditRedisAutoConfiguration {
 
     @Bean
