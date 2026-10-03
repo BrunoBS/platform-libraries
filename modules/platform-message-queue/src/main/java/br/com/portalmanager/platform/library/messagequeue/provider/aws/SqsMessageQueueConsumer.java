@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
-import br.com.portalmanager.platform.library.messagequeue.exception.MessageConsumeException;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
 import org.springframework.context.SmartLifecycle;
@@ -16,35 +16,44 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class SqsMessageQueueConsumer implements SmartLifecycle {
+
+    private static final System.Logger LOGGER = System.getLogger(SqsMessageQueueConsumer.class.getName());
 
     private final SqsClient sqsClient;
     private final MessageQueueListenerRegistry registry;
     private final DestinationResolver destinationResolver;
     private final MessageQueueSerializer serializer;
+    private final MessageQueueProperties properties;
     private final Map<String, String> queueUrls = new ConcurrentHashMap<>();
     private final Map<String, Future<?>> workers = new ConcurrentHashMap<>();
-    private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+
+    private volatile ExecutorService executor;
     private volatile boolean running;
 
     public SqsMessageQueueConsumer(
             SqsClient sqsClient,
             MessageQueueListenerRegistry registry,
             DestinationResolver destinationResolver,
-            MessageQueueSerializer serializer) {
+            MessageQueueSerializer serializer,
+            MessageQueueProperties properties) {
         this.sqsClient = sqsClient;
         this.registry = registry;
         this.destinationResolver = destinationResolver;
         this.serializer = serializer;
+        this.properties = properties;
     }
 
     @Override
-    public void start() {
+    public synchronized void start() {
         if (running) {
             return;
         }
+        executor = Executors.newVirtualThreadPerTaskExecutor();
         running = true;
+
         registry.listeners().forEach(listener -> {
             var destination = destinationResolver.resolve(listener.destination());
             if (!destination.consumerEnabled()) {
@@ -73,11 +82,16 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                         .visibilityTimeout(visibilityTimeoutSeconds)
                         .build());
 
-                response.messages().forEach(message -> process(listener, queueUrl, message.body(), message.receiptHandle()));
+                response.messages().forEach(message ->
+                        process(listener, queueUrl, message.body(), message.receiptHandle()));
             } catch (RuntimeException exception) {
-                if (running) {
-                    throw new MessageConsumeException("Failed to consume destination: " + listener.destination(), exception);
+                if (!running || Thread.currentThread().isInterrupted()) {
+                    break;
                 }
+                LOGGER.log(System.Logger.Level.WARNING,
+                        "Technical failure while polling destination {0}; worker will retry",
+                        listener.destination());
+                backoff();
             }
         }
     }
@@ -90,12 +104,22 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         try {
             var message = serializer.deserialize(body, listener.payloadType());
             listener.invoke(message);
+        } catch (RuntimeException exception) {
+            LOGGER.log(System.Logger.Level.WARNING,
+                    "Message processing failed for destination {0}; message will not be deleted and can be redelivered",
+                    listener.destination());
+            return;
+        }
+
+        try {
             sqsClient.deleteMessage(DeleteMessageRequest.builder()
                     .queueUrl(queueUrl)
                     .receiptHandle(receiptHandle)
                     .build());
-        } catch (ReflectiveOperationException exception) {
-            throw new MessageConsumeException("Listener invocation failed for destination: " + listener.destination(), exception);
+        } catch (RuntimeException exception) {
+            LOGGER.log(System.Logger.Level.WARNING,
+                    "Message was processed but could not be deleted from destination {0}; duplicate delivery is possible",
+                    listener.destination());
         }
     }
 
@@ -117,12 +141,48 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         return Math.toIntExact(seconds);
     }
 
+    private void backoff() {
+        Duration backoff = properties.getPollFailureBackoff();
+        if (backoff == null || backoff.isZero() || backoff.isNegative()) {
+            return;
+        }
+        try {
+            Thread.sleep(backoff);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     @Override
-    public void stop() {
+    public synchronized void stop() {
+        if (!running) {
+            return;
+        }
         running = false;
-        workers.values().forEach(worker -> worker.cancel(true));
-        workers.clear();
-        executor.shutdown();
+
+        ExecutorService currentExecutor = executor;
+        if (currentExecutor == null) {
+            workers.clear();
+            return;
+        }
+
+        currentExecutor.shutdown();
+        Duration shutdownTimeout = properties.getShutdownTimeout();
+        long timeoutMillis = shutdownTimeout == null ? 30_000L : Math.max(0L, shutdownTimeout.toMillis());
+
+        try {
+            if (!currentExecutor.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                workers.values().forEach(worker -> worker.cancel(true));
+                currentExecutor.shutdownNow();
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            workers.values().forEach(worker -> worker.cancel(true));
+            currentExecutor.shutdownNow();
+        } finally {
+            workers.clear();
+            executor = null;
+        }
     }
 
     @Override
