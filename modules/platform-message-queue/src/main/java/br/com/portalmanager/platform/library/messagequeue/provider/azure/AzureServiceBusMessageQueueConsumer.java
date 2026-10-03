@@ -8,6 +8,8 @@ import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueu
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
+import com.azure.core.amqp.exception.AmqpErrorCondition;
+import com.azure.core.amqp.exception.AmqpException;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
@@ -182,7 +184,22 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                 sessionReceivers.put(workerId, sessionReceiver);
 
                 while (running && !Thread.currentThread().isInterrupted()) {
-                    receiver = sessionReceiver.acceptNextSession();
+                    try {
+                        receiver = sessionReceiver.acceptNextSession();
+                    } catch (AmqpException exception) {
+                        if (!running || Thread.currentThread().isInterrupted()) {
+                            break;
+                        }
+                        if (!isSessionAcquisitionTimeout(exception)) {
+                            throw exception;
+                        }
+                        LOGGER.debug(
+                                "Timed out while acquiring an Azure Service Bus session for queue {}; worker will retry",
+                                queueName,
+                                exception);
+                        backoff();
+                        continue;
+                    }
                     receivers.put(workerId, receiver);
 
                     while (running && !Thread.currentThread().isInterrupted()) {
@@ -216,6 +233,10 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                 close(sessionReceiver);
             }
         }
+    }
+
+    static boolean isSessionAcquisitionTimeout(AmqpException exception) {
+        return exception.getErrorCondition() == AmqpErrorCondition.TIMEOUT_ERROR;
     }
 
     private ServiceBusReceiverClient createReceiver(String queueName, boolean deadLetter) {
