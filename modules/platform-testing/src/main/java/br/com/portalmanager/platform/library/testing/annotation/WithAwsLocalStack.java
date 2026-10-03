@@ -1,7 +1,6 @@
 package br.com.portalmanager.platform.library.testing.annotation;
 
 import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackImportRegistrar;
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsService;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -16,9 +15,7 @@ import java.lang.annotation.Target;
 @Import(AwsLocalStackImportRegistrar.class)
 public @interface WithAwsLocalStack {
 
-    AwsService[] services();
+    AwsSqs[] sqs() default {};
 
-    String[] queues() default {};
-
-    String[] buckets() default {};
+    AwsS3[] s3() default {};
 }
