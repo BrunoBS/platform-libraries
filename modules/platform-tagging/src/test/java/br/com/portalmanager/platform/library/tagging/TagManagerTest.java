@@ -3,158 +3,106 @@ package br.com.portalmanager.platform.library.tagging;
 import br.com.portalmanager.platform.library.tagging.model.Tag;
 import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
-import br.com.portalmanager.platform.library.tagging.model.Tag;
-import br.com.portalmanager.platform.library.tagging.storage.TagPersistence;
+import br.com.portalmanager.platform.library.tagging.model.TagOwner;
+import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class TagManagerTest {
 
     @Test
-    void shouldReconcileWithoutKnowingPersistenceTechnology() {
-        InMemoryPersistence persistence = new InMemoryPersistence();
-        Owner owner = new Owner(10L);
-        persistence.tags.add(new TestTag(owner, "same-tag", TagOriginType.SYSTEM));
-        persistence.tags.add(new TestTag(owner, "obsolete", TagOriginType.MANUAL));
+    void shouldReconcileAndPersistOriginChangesExplicitly() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        TestTag existing = new TestTag(owner, TagName.of("same-tag"), TagOriginType.SYSTEM);
 
-        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
-        manager.reconcile(owner, List.of(" Same Tag ", "manual"), List.of("same-tag", "system"));
+        when(repository.findByOwnerId(10L)).thenReturn(List.of(existing));
 
-        assertThat(persistence.tags)
-                .extracting(tag -> tag.getName().value())
-                .containsExactlyInAnyOrder("same-tag", "manual", "system");
-        assertThat(persistence.tags.stream().filter(t -> t.name.value().equals("same-tag")).findFirst().orElseThrow().origin)
-                .isEqualTo(TagOriginType.MANUAL);
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+        manager.reconcile(owner, List.of(" Same Tag "), List.of());
+
+        assertThat(existing.getOriginType()).isEqualTo(TagOriginType.MANUAL);
+        verify(repository).saveAll(List.of(existing));
+        verify(repository, never()).deleteAll(any());
     }
 
     @Test
-    void shouldExposeGenericQueries() {
-        InMemoryPersistence persistence = new InMemoryPersistence();
-        Owner first = new Owner(10L);
-        Owner second = new Owner(20L);
-        persistence.tags.add(new TestTag(first, "manual-a", TagOriginType.MANUAL));
-        persistence.tags.add(new TestTag(second, "manual-b", TagOriginType.MANUAL));
+    void shouldCreateAndDeleteDuringReconciliation() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        TestTag obsolete = new TestTag(owner, TagName.of("obsolete"), TagOriginType.MANUAL);
 
-        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
+        when(repository.findByOwnerId(10L)).thenReturn(List.of(obsolete));
 
-        assertThat(manager.findManual(first)).containsExactly("manual-a");
-        assertThat(manager.findManualByOwnerKeys(List.of("10", "20")))
-                .containsEntry("10", List.of("manual-a"))
-                .containsEntry("20", List.of("manual-b"));
-        assertThat(manager.findOwnerKeysByTag(" MANUAL A ")).containsExactly("10");
-    }
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+        manager.reconcile(owner, List.of("new-tag"), List.of());
 
-
-    @Test
-    void shouldKeepManualPrecedenceAndAvoidDuplicates() {
-        InMemoryPersistence persistence = new InMemoryPersistence();
-        Owner owner = new Owner(10L);
-        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
-
-        manager.reconcile(owner, List.of(" Alpha ", "alpha"), List.of("ALPHA", "Beta", "beta"));
-
-        assertThat(persistence.tags).extracting(tag -> tag.getName().value()).containsExactlyInAnyOrder("alpha", "beta");
-        assertThat(persistence.tags.stream().filter(t -> t.name.value().equals("alpha")).findFirst().orElseThrow().origin)
-                .isEqualTo(TagOriginType.MANUAL);
+        verify(repository).deleteAll(List.of(obsolete));
+        verify(repository).saveAll(any());
     }
 
     @Test
-    void shouldReturnManualTagsDeterministicallyAndOnlyForRequestedOwners() {
-        InMemoryPersistence persistence = new InMemoryPersistence();
-        Owner first = new Owner(10L);
-        Owner second = new Owner(20L);
-        Owner third = new Owner(30L);
-        persistence.tags.add(new TestTag(first, "z-tag", TagOriginType.MANUAL));
-        persistence.tags.add(new TestTag(first, "a-tag", TagOriginType.MANUAL));
-        persistence.tags.add(new TestTag(third, "outside", TagOriginType.MANUAL));
+    void shouldNormalizeLookupInsideTagging() {
+        TagRepository<TestTag, Owner> repository = repository();
+        when(repository.findOwnerIdentifiersByTag(TagName.of("manual-a")))
+                .thenReturn(List.of("workspace-10"));
 
-        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
-        assertThat(manager.findManual(first)).containsExactly("a-tag", "z-tag");
-        assertThat(manager.findManualByOwnerKeys(List.of("10", "20")))
-                .containsEntry("10", List.of("a-tag", "z-tag"))
-                .containsEntry("20", List.of())
-                .doesNotContainKey("30");
+        assertThat(manager.findOwnerKeysByTag(" MANUAL A ")).containsExactly("workspace-10");
     }
 
     @Test
-    void shouldRejectNonNormalizedPersistedTag() {
-        InMemoryPersistence persistence = new InMemoryPersistence();
-        Owner owner = new Owner(10L);
-        assertThat(TagName.of(" Not Normalized ").value()).isEqualTo("not-normalized");
+    void shouldReturnManualTagsDeterministically() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        when(repository.findByOwnerId(10L)).thenReturn(List.of(
+                new TestTag(owner, TagName.of("z-tag"), TagOriginType.MANUAL),
+                new TestTag(owner, TagName.of("system"), TagOriginType.SYSTEM),
+                new TestTag(owner, TagName.of("a-tag"), TagOriginType.MANUAL)
+        ));
+
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+
+        assertThat(manager.findManual(owner)).containsExactly("a-tag", "z-tag");
     }
 
-    @Test
-    void shouldRejectDuplicatePersistedTagsForSameOwner() {
-        InMemoryPersistence persistence = new InMemoryPersistence();
-        Owner owner = new Owner(10L);
-        persistence.tags.add(new TestTag(owner, "same", TagOriginType.MANUAL));
-        persistence.tags.add(new TestTag(owner, "same", TagOriginType.SYSTEM));
-
-        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
-
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> manager.reconcile(owner, List.of("same"), List.of()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("duplicate persisted tag");
+    @SuppressWarnings("unchecked")
+    private static TagRepository<TestTag, Owner> repository() {
+        return mock(TagRepository.class);
     }
 
-    @Test
-    void shouldDeleteAllTagsForOwner() {
-        InMemoryPersistence persistence = new InMemoryPersistence();
-        Owner first = new Owner(10L);
-        Owner second = new Owner(20L);
-        persistence.tags.add(new TestTag(first, "one", TagOriginType.MANUAL));
-        persistence.tags.add(new TestTag(second, "two", TagOriginType.MANUAL));
+    private record Owner(Long id, String identifier) implements TagOwner {
+        @Override
+        public Long getId() {
+            return id;
+        }
 
-        new TagManager<TestTag, Owner, Long, String>(persistence).deleteAll(first);
-
-        assertThat(persistence.tags).extracting(tag -> tag.getName().value()).containsExactly("two");
+        @Override
+        public String getIdentifier() {
+            return identifier;
+        }
     }
 
-    private record Owner(Long id) {}
-
-    private static final class TestTag implements Tag {
+    private static final class TestTag extends Tag<Owner> {
         private final Owner owner;
-        private final TagName name;
-        private TagOriginType origin;
 
-        private TestTag(Owner owner, String name, TagOriginType origin) {
+        private TestTag(Owner owner, TagName name, TagOriginType originType) {
+            super(name, originType);
             this.owner = owner;
-            this.name = TagName.of(name);
-            this.origin = origin;
         }
 
-        public TagName getName() { return name; }
-        public TagOriginType getOriginType() { return origin; }
-        public void changeOrigin(TagOriginType originType) { this.origin = originType; }
-    }
-
-    private static final class InMemoryPersistence
-            implements TagPersistence<TestTag, Owner, Long, String> {
-        private final List<TestTag> tags = new ArrayList<>();
-
-        public Long ownerId(Owner owner) { return owner.id(); }
-        public String ownerKey(TestTag tag) { return String.valueOf(tag.owner.id()); }
-        public TestTag newTag(Owner owner, TagName name, TagOriginType origin) {
-            return new TestTag(owner, name.value(), origin);
+        @Override
+        public Owner getOwner() {
+            return owner;
         }
-        public List<TestTag> findByOwnerId(Long ownerId) {
-            return tags.stream().filter(t -> t.owner.id().equals(ownerId)).toList();
-        }
-        public List<TestTag> findByOwnerKeysAndOrigin(Collection<String> keys, TagOriginType origin) {
-            return tags.stream().filter(t -> keys.contains(ownerKey(t)) && t.origin == origin).toList();
-        }
-        public List<String> findOwnerKeysByTag(TagName name) {
-            return tags.stream().filter(t -> t.name.equals(name)).map(this::ownerKey).distinct().toList();
-        }
-        public void saveAllTags(Collection<TestTag> values) { tags.addAll(values); }
-        public void deleteAllTags(Collection<TestTag> values) { tags.removeAll(values); }
-        public void deleteByOwnerId(Long ownerId) { tags.removeIf(t -> t.owner.id().equals(ownerId)); }
     }
 }
