@@ -1,28 +1,29 @@
 package br.com.portalmanager.platform.library.tagging.storage;
 
+import br.com.portalmanager.platform.library.tagging.model.Tag;
+import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
-import br.com.portalmanager.platform.library.tagging.model.TagRecord;
 
 import java.util.Collection;
 import java.util.List;
 
-public interface TagPersistence<T extends TagRecord, O, ID, KEY> {
+public interface TagPersistence<TAG extends Tag, OWNER, OWNER_ID, OWNER_KEY> {
 
-    ID ownerId(O owner);
+    OWNER_ID ownerId(OWNER owner);
 
-    KEY ownerKey(T tag);
+    OWNER_KEY ownerKey(TAG tag);
 
-    T newTag(O owner, String name, TagOriginType originType);
+    TAG newTag(OWNER owner, TagName name, TagOriginType originType);
 
-    List<T> findByOwnerId(ID ownerId);
+    List<TAG> findByOwnerId(OWNER_ID ownerId);
 
-    List<T> findByOwnerKeysAndOrigin(Collection<KEY> ownerKeys, TagOriginType originType);
+    List<TAG> findByOwnerKeysAndOrigin(Collection<OWNER_KEY> ownerKeys, TagOriginType originType);
 
-    List<KEY> findOwnerKeysByTag(String normalizedTag);
+    List<OWNER_KEY> findOwnerKeysByTag(TagName name);
 
-    void saveAllTags(Collection<T> tags);
+    void saveAllTags(Collection<TAG> tags);
 
-    void deleteAllTags(Collection<T> tags);
+    void deleteAllTags(Collection<TAG> tags);
 
-    void deleteByOwnerId(ID ownerId);
+    void deleteByOwnerId(OWNER_ID ownerId);
 }
