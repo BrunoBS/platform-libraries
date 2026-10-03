@@ -82,6 +82,10 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                         .visibilityTimeout(visibilityTimeoutSeconds)
                         .build());
 
+                if (!running || Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+
                 response.messages().forEach(message ->
                         process(listener, queueUrl, message.body(), message.receiptHandle()));
             } catch (RuntimeException exception) {
@@ -89,8 +93,8 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                     break;
                 }
                 LOGGER.log(System.Logger.Level.WARNING,
-                        "Technical failure while polling destination {0}; worker will retry",
-                        listener.destination());
+                        "Technical failure while polling destination " + listener.destination() + "; worker will retry",
+                        exception);
                 backoff();
             }
         }
@@ -106,8 +110,9 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             listener.invoke(message);
         } catch (RuntimeException exception) {
             LOGGER.log(System.Logger.Level.WARNING,
-                    "Message processing failed for destination {0}; message will not be deleted and can be redelivered",
-                    listener.destination());
+                    "Message processing failed for destination " + listener.destination()
+                            + "; message will not be deleted and can be redelivered",
+                    exception);
             return;
         }
 
@@ -118,8 +123,9 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                     .build());
         } catch (RuntimeException exception) {
             LOGGER.log(System.Logger.Level.WARNING,
-                    "Message was processed but could not be deleted from destination {0}; duplicate delivery is possible",
-                    listener.destination());
+                    "Message was processed but could not be deleted from destination " + listener.destination()
+                            + "; duplicate delivery is possible",
+                    exception);
         }
     }
 
