@@ -73,6 +73,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
                 throw new IllegalArgumentException("Duplicate Azure Service Bus queue name: " + name);
             }
             int maxDeliveryCount = queues[index].getNumber("maxDeliveryCount").intValue();
+            boolean sessionsEnabled = queues[index].getBoolean("sessionsEnabled");
             if (maxDeliveryCount < 1) {
                 throw new IllegalArgumentException(
                         "Azure Service Bus maxDeliveryCount must be a positive integer");
@@ -92,10 +93,10 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
                         "LockDuration": "PT1M",
                         "MaxDeliveryCount": %d,
                         "RequiresDuplicateDetection": false,
-                        "RequiresSession": false
+                        "RequiresSession": %s
                       }
                     }
-                    """.formatted(name, maxDeliveryCount));
+                    """.formatted(name, maxDeliveryCount, sessionsEnabled));
         }
 
         return """

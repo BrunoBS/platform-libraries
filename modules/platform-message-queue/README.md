@@ -21,8 +21,9 @@ Cada destino permite habilitar/desabilitar publicação e consumo. Concorrência
 
 ## Escopo desta versão
 
-- AWS SQS Standard e FIFO. Filas FIFO exigem `messageGroupId` e `deduplicationId` explícitos em cada publicação.
-- Azure Service Bus sem sessões. Filas com sessões exigem um receiver próprio e não são suportadas nesta versão.
+- AWS SQS Standard e FIFO, e Azure Service Bus sem sessões ou com sessões habilitadas.
+- Destinos ordenados exigem `orderingKey` em cada publicação; a chave é mapeada para `MessageGroupId` no SQS e `SessionId` no Azure.
+- `deduplicationId` permanece específico do SQS FIFO; o Azure tem configuração e semântica próprias de detecção de duplicatas.
 - A biblioteca não oferece ordenação global de mensagens.
 
 ## Exemplo: AWS SQS
@@ -59,7 +60,7 @@ Por padrão, o listener de dead-letter procura a fila física `<fila principal>-
 
 ### Fila FIFO na AWS
 
-Declare o tipo no destino e use o sufixo exigido pelo SQS:
+Marque o destino como ordenado e use o sufixo exigido pelo SQS:
 
 ```yaml
 platform:
@@ -70,11 +71,10 @@ platform:
     destinations:
       ordered-orders:
         queue: orders.fifo
-        aws:
-          queue-type: FIFO
+        ordered: true
 ```
 
-Na publicação, informe um grupo para preservar a ordem dentro desse grupo e um ID de deduplicação estável para a operação lógica. O ID é obrigatório: cada envelope recebe um `messageId` e timestamp novos, então a deduplicação baseada no conteúdo não identifica republicações equivalentes:
+Na publicação, informe uma chave de ordenação para agrupar mensagens e um ID de deduplicação estável para a operação lógica. O ID é obrigatório: cada envelope recebe um `messageId` e timestamp novos, então a deduplicação baseada no conteúdo não identifica republicações equivalentes:
 
 ```java
 publisher.publish(
@@ -83,7 +83,7 @@ publisher.publish(
         new MessageQueuePublishOptions(correlationId, Map.of(), orderId, eventId));
 ```
 
-A ordem é garantida pelo SQS apenas dentro de cada grupo; grupos diferentes podem ser processados em paralelo. A infraestrutura da aplicação deve criar a fila FIFO e a DLQ FIFO correspondentes, com redrive configurado.
+A ordem é garantida pelo SQS apenas dentro de cada chave; chaves diferentes podem ser processadas em paralelo. `orderingKey` tem no máximo 128 caracteres para manter o mesmo contrato entre provedores. A infraestrutura da aplicação deve criar a fila FIFO e a DLQ FIFO correspondentes, com redrive configurado.
 
 ## Exemplo: Azure Service Bus
 
@@ -106,6 +106,22 @@ platform:
 ```
 
 A aplicação usa `DefaultAzureCredential`; forneça uma identidade de workload e as permissões de Service Bus necessárias no namespace. No Azure, dead-letter é a subfila nativa da fila. Configure `MaxDeliveryCount` na entidade da fila conforme a política operacional. O módulo não provisiona nem configura a fila.
+
+Para preservar a ordem por grupo, habilite sessões na entidade Azure e marque o destino como ordenado:
+
+```yaml
+platform:
+  message-queue:
+    provider: AZURE
+    azure:
+      namespace: my-namespace.servicebus.windows.net
+    destinations:
+      ordered-orders:
+        queue: orders
+        ordered: true
+```
+
+Publique com o mesmo contrato de opções usado pela AWS. A `orderingKey` será enviada como `SessionId`. Cada worker recebe uma sessão por vez e processa sequencialmente as mensagens daquela sessão; quando não encontra novas mensagens, libera a sessão para que outro worker ou outra instância possa adquiri-la. A infraestrutura precisa criar a entidade com sessões habilitadas antes do envio e do consumo.
 
 ## Publicação e consumo
 
@@ -180,7 +196,7 @@ class OrderQueueTest {
 }
 ```
 
-O nome padrão da DLQ no mock é `orders-dlq`; é possível informar `deadLetterQueue = "custom-dlq"`. Para Azure Service Bus, configure o limite de entregas do emulador junto da fila: `@WithAzureEmulator(serviceBus = @AzureServiceBus(queues = @AzureServiceBus.Queue(name = "orders", maxDeliveryCount = 3)))`; a DLQ é a subfila nativa. Filas cujo nome termina em `.fifo` são provisionadas como FIFO pelo mock; a DLQ padrão correspondente também termina em `.fifo`. A fixture não habilita deduplicação baseada no conteúdo, para que os testes usem sempre IDs explícitos.
+O nome padrão da DLQ no mock é `orders-dlq`; é possível informar `deadLetterQueue = "custom-dlq"`. Para Azure Service Bus, configure o limite de entregas do emulador junto da fila: `@WithAzureEmulator(serviceBus = @AzureServiceBus(queues = @AzureServiceBus.Queue(name = "orders", maxDeliveryCount = 3)))`; a DLQ é a subfila nativa. Para testar um destino ordenado, marque também a fixture com `sessionsEnabled = true`. Filas AWS cujo nome termina em `.fifo` são provisionadas como FIFO pelo mock; a DLQ padrão correspondente também termina em `.fifo`. A fixture não habilita deduplicação baseada no conteúdo, para que os testes usem sempre IDs explícitos.
 
 ## Checklist antes de produção
 

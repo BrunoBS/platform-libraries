@@ -35,20 +35,20 @@ public class SqsMessageQueueTransport implements MessageQueueTransport {
                     .queueUrl(queueUrls.computeIfAbsent(destination.queue(), this::resolveQueueUrl))
                     .messageBody(body);
 
-            if (destination.fifo()) {
-                if (options.messageGroupId() == null || options.messageGroupId().isBlank()) {
-                    throw new IllegalArgumentException("messageGroupId is required for an AWS SQS FIFO destination");
+            if (destination.ordered()) {
+                if (options.orderingKey() == null || options.orderingKey().isBlank()) {
+                    throw new IllegalArgumentException("orderingKey is required for an ordered destination");
                 }
-                validateFifoId("messageGroupId", options.messageGroupId());
-                request.messageGroupId(options.messageGroupId());
+                validateFifoId("orderingKey", options.orderingKey());
+                request.messageGroupId(options.orderingKey());
                 if (options.deduplicationId() == null || options.deduplicationId().isBlank()) {
                     throw new IllegalArgumentException(
                             "deduplicationId is required for an AWS SQS FIFO destination");
                 }
                 validateFifoId("deduplicationId", options.deduplicationId());
                 request.messageDeduplicationId(options.deduplicationId());
-            } else if (options.messageGroupId() != null || options.deduplicationId() != null) {
-                throw new IllegalArgumentException("FIFO publish options can only be used with an AWS SQS FIFO destination");
+            } else if (options.orderingKey() != null || options.deduplicationId() != null) {
+                throw new IllegalArgumentException("Ordering and deduplication options require an ordered AWS destination");
             }
 
             sqsClient.sendMessage(request.build());

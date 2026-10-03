@@ -4,12 +4,14 @@ import java.util.Map;
 
 /**
  * Optional metadata used when publishing a message.
- * FIFO routing fields are supported by AWS SQS FIFO destinations.
+ * Provider-neutral message metadata. {@code orderingKey} maps to the provider's
+ * per-group ordering field (SQS MessageGroupId or Service Bus SessionId).
+ * Deduplication remains provider-specific and is currently supported by AWS SQS FIFO.
  */
 public record MessageQueuePublishOptions(
         String correlationId,
         Map<String, String> headers,
-        String messageGroupId,
+        String orderingKey,
         String deduplicationId) {
 
     public MessageQueuePublishOptions {
@@ -19,4 +21,5 @@ public record MessageQueuePublishOptions(
     public static MessageQueuePublishOptions defaults() {
         return new MessageQueuePublishOptions(null, Map.of(), null, null);
     }
+
 }

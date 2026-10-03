@@ -30,7 +30,7 @@ class MessageQueuePropertiesValidationTest {
                         "platform.message-queue.provider=AWS",
                         "platform.message-queue.aws.region=sa-east-1",
                         "platform.message-queue.destinations.orders.queue=orders.fifo",
-                        "platform.message-queue.destinations.orders.aws.queue-type=FIFO")
+                        "platform.message-queue.destinations.orders.ordered=true")
                 .run(context -> assertThat(context).hasNotFailed());
     }
 
@@ -41,7 +41,7 @@ class MessageQueuePropertiesValidationTest {
                         "platform.message-queue.provider=AWS",
                         "platform.message-queue.aws.region=sa-east-1",
                         "platform.message-queue.destinations.orders.queue=orders",
-                        "platform.message-queue.destinations.orders.aws.queue-type=FIFO")
+                        "platform.message-queue.destinations.orders.ordered=true")
                 .run(context -> assertInvalid(context.getStartupFailure(), "must end with .fifo"));
     }
 
@@ -51,7 +51,8 @@ class MessageQueuePropertiesValidationTest {
                 .withPropertyValues(
                         "platform.message-queue.provider=AZURE",
                         "platform.message-queue.azure.namespace=orders.servicebus.windows.net",
-                        "platform.message-queue.destinations.orders.queue=orders")
+                        "platform.message-queue.destinations.orders.queue=orders",
+                        "platform.message-queue.destinations.orders.ordered=true")
                 .run(context -> assertThat(context).hasNotFailed());
     }
 

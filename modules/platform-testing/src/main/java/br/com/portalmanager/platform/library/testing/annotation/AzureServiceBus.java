@@ -17,5 +17,7 @@ public @interface AzureServiceBus {
         String name();
 
         int maxDeliveryCount() default 3;
+
+        boolean sessionsEnabled() default false;
     }
 }

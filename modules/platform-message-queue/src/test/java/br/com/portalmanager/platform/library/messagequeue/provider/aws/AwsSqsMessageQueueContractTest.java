@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         "platform.message-queue.destinations.failing-contract.queue=failing-contract",
         "platform.message-queue.destinations.failing-contract.aws.visibility-timeout=PT1S",
         "platform.message-queue.destinations.fifo-contract.queue=fifo-contract.fifo",
-        "platform.message-queue.destinations.fifo-contract.aws.queue-type=FIFO"
+        "platform.message-queue.destinations.fifo-contract.ordered=true"
 })
 @WithAwsLocalStack(
         sqs = @AwsSqs(queues = {
@@ -84,7 +84,7 @@ class AwsSqsMessageQueueContractTest {
     }
 
     @Test
-    void shouldPublishToFifoQueueWithRequiredGroupAndDeduplicationMetadata() {
+    void shouldPublishToFifoQueueWithRequiredOrderingAndDeduplicationMetadata() {
         publisher.publish("fifo-contract", new ContractPayload("fifo-1"),
                 new MessageQueuePublishOptions(null, java.util.Map.of(), "orders", "fifo-1"));
 

@@ -20,6 +20,11 @@ public class MessageQueueContractListeners {
         RECEIVED.offer(message);
     }
 
+    @MessageQueueListener("ordered-consumer-contract")
+    public void consumeOrdered(MessageQueueMessage<ContractPayload> message) {
+        RECEIVED.offer(message);
+    }
+
     @MessageQueueListener("failing-contract")
     public void fail(MessageQueueMessage<ContractPayload> message) {
         FAILED_DELIVERIES.incrementAndGet();

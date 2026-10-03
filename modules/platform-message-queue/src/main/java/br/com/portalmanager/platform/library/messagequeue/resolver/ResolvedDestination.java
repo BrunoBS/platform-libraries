@@ -11,7 +11,7 @@ public record ResolvedDestination(
         String deadLetterReference,
         boolean publisherEnabled,
         boolean consumerEnabled,
-        boolean fifo,
+        boolean ordered,
         Duration visibilityTimeout,
         Duration waitTime,
         Integer concurrency
@@ -30,4 +30,5 @@ public record ResolvedDestination(
         this(logicalName, provider, queue, deadLetterReference, publisherEnabled, consumerEnabled,
                 false, visibilityTimeout, waitTime, concurrency);
     }
+
 }

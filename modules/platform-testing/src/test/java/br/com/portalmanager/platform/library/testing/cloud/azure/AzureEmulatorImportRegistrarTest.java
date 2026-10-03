@@ -49,7 +49,10 @@ class AzureEmulatorImportRegistrarTest {
     }
 
     @WithAzureEmulator(
-            serviceBus = @AzureServiceBus(queues = @AzureServiceBus.Queue(name = "orders")),
+            serviceBus = @AzureServiceBus(queues = {
+                    @AzureServiceBus.Queue(name = "orders"),
+                    @AzureServiceBus.Queue(name = "ordered-orders", sessionsEnabled = true)
+            }),
             blobStorage = @AzureBlobStorage(containers = "documents")
     )
     private static final class AzureCloudTest {

@@ -10,8 +10,8 @@ public interface MessageQueuePublisher {
 
     default void publish(String destination, Object payload, MessageQueuePublishOptions options) {
         var safeOptions = options == null ? MessageQueuePublishOptions.defaults() : options;
-        if (safeOptions.messageGroupId() != null || safeOptions.deduplicationId() != null) {
-            throw new UnsupportedOperationException("This publisher does not support FIFO publish options");
+        if (safeOptions.orderingKey() != null || safeOptions.deduplicationId() != null) {
+            throw new UnsupportedOperationException("This publisher does not support ordered publish options");
         }
         publish(destination, payload, safeOptions.correlationId(), safeOptions.headers());
     }

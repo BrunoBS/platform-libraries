@@ -28,14 +28,31 @@ public class AzureServiceBusMessageQueueTransport implements MessageQueueTranspo
     @Override
     public void send(ResolvedDestination destination, String body, MessageQueuePublishOptions options) {
         try {
-            if (options.messageGroupId() != null || options.deduplicationId() != null) {
-                throw new IllegalArgumentException("AWS FIFO publish options are not supported by Azure Service Bus");
+            if (options.deduplicationId() != null) {
+                throw new IllegalArgumentException(
+                        "deduplicationId is an AWS SQS FIFO option and is not supported by Azure Service Bus");
             }
-            sender(destination.queue()).sendMessage(new ServiceBusMessage(body));
+            ServiceBusMessage message = new ServiceBusMessage(body);
+            if (destination.ordered()) {
+                if (options.orderingKey() == null || options.orderingKey().isBlank()) {
+                    throw new IllegalArgumentException("orderingKey is required for an ordered destination");
+                }
+                validateOrderingKey(options.orderingKey());
+                message.setSessionId(options.orderingKey());
+            } else if (options.orderingKey() != null) {
+                throw new IllegalArgumentException("orderingKey can only be used with an ordered destination");
+            }
+            sender(destination.queue()).sendMessage(message);
         } catch (RuntimeException exception) {
             throw new MessagePublishException(
                     "Failed to publish message to destination: " + destination.logicalName(),
                     exception);
+        }
+    }
+
+    private void validateOrderingKey(String orderingKey) {
+        if (orderingKey.length() > 128) {
+            throw new IllegalArgumentException("orderingKey must contain between 1 and 128 characters");
         }
     }
 

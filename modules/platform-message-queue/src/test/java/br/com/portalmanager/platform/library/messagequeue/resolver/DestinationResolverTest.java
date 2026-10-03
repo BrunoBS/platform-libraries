@@ -2,7 +2,6 @@ package br.com.portalmanager.platform.library.messagequeue.resolver;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
-import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties.AwsQueueType;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 import org.junit.jupiter.api.Test;
 
@@ -62,12 +61,12 @@ class DestinationResolverTest {
 
         var destination = new MessageQueueProperties.Destination();
         destination.setQueue("orders.fifo");
-        destination.getAws().setQueueType(AwsQueueType.FIFO);
+        destination.setOrdered(true);
         properties.getDestinations().put("orders", destination);
 
         var resolved = new DestinationResolver(properties).resolve("orders");
 
-        assertThat(resolved.fifo()).isTrue();
+        assertThat(resolved.ordered()).isTrue();
         assertThat(resolved.deadLetterReference()).isEqualTo("orders-dlq.fifo");
     }
 

@@ -11,6 +11,7 @@ import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQ
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
+import com.azure.messaging.servicebus.ServiceBusSessionReceiverClient;
 import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
 import com.azure.messaging.servicebus.models.SubQueue;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
     private final MessageQueueMetrics metrics;
     private final Map<String, Future<?>> workers = new ConcurrentHashMap<>();
     private final Map<String, ServiceBusReceiverClient> receivers = new ConcurrentHashMap<>();
+    private final Map<String, ServiceBusSessionReceiverClient> sessionReceivers = new ConcurrentHashMap<>();
 
     private volatile ExecutorService executor;
     private volatile boolean running;
@@ -95,14 +97,22 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
 
     private void pollListener(String workerId, MessageQueueListenerRegistry.ListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        poll(workerId, listener.destination(), destination.queue(), false, destination.waitTime(),
-                (receiver, message) -> receiveAndProcess(receiver, listener, message));
+        ReceiverWork work = (receiver, message) -> receiveAndProcess(receiver, listener, message);
+        if (destination.ordered()) {
+            pollOrdered(workerId, listener.destination(), destination.queue(), false, destination.waitTime(), work);
+        } else {
+            poll(workerId, listener.destination(), destination.queue(), false, destination.waitTime(), work);
+        }
     }
 
     private void pollDeadLetter(String workerId, MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        poll(workerId, listener.destination(), destination.queue(), true, destination.waitTime(),
-                (receiver, message) -> receiveAndProcessDeadLetter(receiver, listener, message));
+        ReceiverWork work = (receiver, message) -> receiveAndProcessDeadLetter(receiver, listener, message);
+        if (destination.ordered()) {
+            pollOrdered(workerId, listener.destination(), destination.queue(), true, destination.waitTime(), work);
+        } else {
+            poll(workerId, listener.destination(), destination.queue(), true, destination.waitTime(), work);
+        }
     }
 
     private void poll(
@@ -148,8 +158,79 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
         }
     }
 
+    /**
+     * A Service Bus receiver belongs to one session. Each worker acquires one session,
+     * processes its messages sequentially, then releases it so another worker/task can
+     * acquire it. This preserves ordering within a session without pinning idle sessions.
+     */
+    private void pollOrdered(
+            String workerId,
+            String destination,
+            String queueName,
+            boolean deadLetter,
+            Duration waitTime,
+            ReceiverWork work) {
+        if (waitTime == null || waitTime.isZero() || waitTime.isNegative()) {
+            waitTime = Duration.ofSeconds(20);
+        }
+
+        while (running && !Thread.currentThread().isInterrupted()) {
+            ServiceBusSessionReceiverClient sessionReceiver = null;
+            ServiceBusReceiverClient receiver = null;
+            try {
+                sessionReceiver = createSessionReceiver(queueName, deadLetter);
+                sessionReceivers.put(workerId, sessionReceiver);
+
+                while (running && !Thread.currentThread().isInterrupted()) {
+                    receiver = sessionReceiver.acceptNextSession();
+                    receivers.put(workerId, receiver);
+
+                    while (running && !Thread.currentThread().isInterrupted()) {
+                        var messages = receiver.receiveMessages(1, waitTime);
+                        if (messages.isEmpty()) {
+                            break;
+                        }
+                        for (ServiceBusReceivedMessage message : messages) {
+                            work.process(receiver, message);
+                        }
+                    }
+                    receivers.remove(workerId);
+                    close(receiver);
+                    receiver = null;
+                }
+            } catch (RuntimeException exception) {
+                if (!running || Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+                metrics.recordPollFailure(MessageQueueProvider.AZURE, destination, deadLetter);
+                LOGGER.warn(
+                        "Technical failure while polling ordered Azure Service Bus queue {}; worker will retry",
+                        queueName,
+                        exception);
+                backoff();
+            } finally {
+                receivers.remove(workerId);
+                close(receiver);
+                sessionReceivers.remove(workerId);
+                close(sessionReceiver);
+            }
+        }
+    }
+
     private ServiceBusReceiverClient createReceiver(String queueName, boolean deadLetter) {
         var builder = clientBuilder.receiver()
+                .queueName(queueName)
+                .receiveMode(ServiceBusReceiveMode.PEEK_LOCK)
+                .disableAutoComplete()
+                .maxAutoLockRenewDuration(properties.getAzure().getMaxAutoLockRenewalDuration());
+        if (deadLetter) {
+            builder.subQueue(SubQueue.DEAD_LETTER_QUEUE);
+        }
+        return builder.buildClient();
+    }
+
+    private ServiceBusSessionReceiverClient createSessionReceiver(String queueName, boolean deadLetter) {
+        var builder = clientBuilder.sessionReceiver()
                 .queueName(queueName)
                 .receiveMode(ServiceBusReceiveMode.PEEK_LOCK)
                 .disableAutoComplete()
@@ -311,6 +392,8 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
     private void closeReceivers() {
         receivers.values().forEach(this::close);
         receivers.clear();
+        sessionReceivers.values().forEach(this::close);
+        sessionReceivers.clear();
     }
 
     private void close(ServiceBusReceiverClient receiver) {
@@ -321,6 +404,17 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             receiver.close();
         } catch (RuntimeException exception) {
             LOGGER.warn("Failed to close Azure Service Bus receiver", exception);
+        }
+    }
+
+    private void close(ServiceBusSessionReceiverClient receiver) {
+        if (receiver == null) {
+            return;
+        }
+        try {
+            receiver.close();
+        } catch (RuntimeException exception) {
+            LOGGER.warn("Failed to close Azure Service Bus session receiver", exception);
         }
     }
 

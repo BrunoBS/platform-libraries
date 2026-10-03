@@ -61,18 +61,17 @@ public class MessageQueueProperties implements InitializingBean {
         validateConsumer(name + ".consumer", destination.consumer);
         if (provider == MessageQueueProvider.AWS) {
             validateAwsConsumer(name + ".aws", destination.aws, destination.aws.visibilityTimeout);
-            boolean fifo = destination.aws.queueType == AwsQueueType.FIFO;
-            if (fifo != destination.queue.endsWith(".fifo")) {
-                throw invalid(name + ".queue must " + (fifo ? "end with .fifo when aws.queue-type is FIFO" :
-                        "not end with .fifo when aws.queue-type is STANDARD"));
+            if (destination.ordered != destination.queue.endsWith(".fifo")) {
+                throw invalid(name + ".queue must " + (destination.ordered ?
+                        "end with .fifo when ordered is true" : "not end with .fifo when ordered is false"));
             }
             String deadLetterQueue = destination.aws.deadLetterQueue;
             if (deadLetterQueue != null && !deadLetterQueue.isBlank()) {
                 if (deadLetterQueue.equals(destination.queue)) {
                     throw invalid("destination '" + name + "' source and dead-letter queues must be different");
                 }
-                if (fifo != deadLetterQueue.endsWith(".fifo")) {
-                    throw invalid(name + ".aws.dead-letter-queue must use the same FIFO type as the source queue");
+                if (destination.ordered != deadLetterQueue.endsWith(".fifo")) {
+                    throw invalid(name + ".aws.dead-letter-queue must use the same ordered type as the source queue");
                 }
             }
         } else {
@@ -130,12 +129,15 @@ public class MessageQueueProperties implements InitializingBean {
 
     public static class Destination {
         private String queue;
+        private boolean ordered;
         private final Toggle publisher = new Toggle();
         private final Consumer consumer = new Consumer();
         private final AwsDestination aws = new AwsDestination();
         private final ConsumerOptions azure = new ConsumerOptions();
         public String getQueue() { return queue; }
         public void setQueue(String queue) { this.queue = queue; }
+        public boolean isOrdered() { return ordered; }
+        public void setOrdered(boolean ordered) { this.ordered = ordered; }
         public Toggle getPublisher() { return publisher; }
         public Consumer getConsumer() { return consumer; }
         public AwsDestination getAws() { return aws; }
@@ -170,16 +172,12 @@ public class MessageQueueProperties implements InitializingBean {
     }
 
     public static class AwsDestination extends ConsumerOptions {
-        private AwsQueueType queueType = AwsQueueType.STANDARD;
         private String deadLetterQueue;
         private Duration visibilityTimeout;
-        public AwsQueueType getQueueType() { return queueType; }
-        public void setQueueType(AwsQueueType queueType) { this.queueType = queueType; }
         public Duration getVisibilityTimeout() { return visibilityTimeout; }
         public void setVisibilityTimeout(Duration visibilityTimeout) { this.visibilityTimeout = visibilityTimeout; }
         public String getDeadLetterQueue() { return deadLetterQueue; }
         public void setDeadLetterQueue(String deadLetterQueue) { this.deadLetterQueue = deadLetterQueue; }
     }
 
-    public enum AwsQueueType { STANDARD, FIFO }
 }

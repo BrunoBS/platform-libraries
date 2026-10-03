@@ -2,7 +2,6 @@ package br.com.portalmanager.platform.library.messagequeue.resolver;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
-import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties.AwsQueueType;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 
 public class DestinationResolver {
@@ -28,8 +27,7 @@ public class DestinationResolver {
 
         var providerDefaults = providerDefaults(properties.getProvider());
         var providerOverride = providerOverride(properties.getProvider(), configured);
-        boolean fifo = properties.getProvider() == MessageQueueProvider.AWS
-                && configured.getAws().getQueueType() == AwsQueueType.FIFO;
+        boolean fifo = properties.getProvider() == MessageQueueProvider.AWS && configured.isOrdered();
 
         return new ResolvedDestination(
                 destination,
@@ -38,7 +36,7 @@ public class DestinationResolver {
                 resolveDeadLetterReference(properties.getProvider(), configured, fifo),
                 configured.getPublisher().isEnabled(),
                 configured.getConsumer().isEnabled(),
-                fifo,
+                configured.isOrdered(),
                 resolveVisibilityTimeout(properties.getProvider(), configured),
                 firstNonNull(providerOverride.getWaitTime(), configured.getConsumer().getWaitTime(), providerDefaults.getWaitTime()),
                 firstNonNull(providerOverride.getConcurrency(), configured.getConsumer().getConcurrency(), providerDefaults.getConcurrency())
