@@ -1,7 +1,6 @@
 package br.com.portalmanager.platform.library.testing.annotation;
 
 import br.com.portalmanager.platform.library.testing.cloud.azure.AzureEmulatorImportSelector;
-import br.com.portalmanager.platform.library.testing.cloud.azure.AzureService;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -16,9 +15,7 @@ import java.lang.annotation.Target;
 @Import(AzureEmulatorImportSelector.class)
 public @interface WithAzureEmulator {
 
-    AzureService[] services();
+    AzureServiceBus[] serviceBus() default {};
 
-    String[] queues() default {};
-
-    String[] containers() default {};
+    AzureBlobStorage[] blobStorage() default {};
 }
