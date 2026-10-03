@@ -1,12 +1,14 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStack;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +77,7 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         RootBeanDefinition definition = new RootBeanDefinition(AwsSqsClientFactoryBean.class);
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
         definition.setDestroyMethodName("close");
+        definition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, SqsClient.class);
         registry.registerBeanDefinition(SQS_CLIENT_BEAN, definition);
     }
 
