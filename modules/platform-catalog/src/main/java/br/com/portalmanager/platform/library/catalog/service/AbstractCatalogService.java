@@ -103,8 +103,11 @@ public abstract sealed class AbstractCatalogService<E extends CatalogEntity>
     }
 
     @Transactional(readOnly = true)
-    public List<E> findByCodes(List<String> codes) {
-        return repository.findByCodeInAndActiveTrue(codes);
+    public List<CatalogDTO> findByCodes(List<String> codes) {
+        return repository.findByCodeInAndActiveTrue(codes)
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
     }
 
     private List<E> findAllEntities(Map<String, String> filters) {
