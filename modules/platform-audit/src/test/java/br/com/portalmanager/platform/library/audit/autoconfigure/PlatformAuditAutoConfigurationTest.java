@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,14 +31,14 @@ class PlatformAuditAutoConfigurationTest {
     }
 
     @Configuration
-    static class DurableStoreInfrastructure {
-        @Bean AuditFallbackStore auditFallbackStore() { return mock(AuditFallbackStore.class); }
+    static class QueueInfrastructure {
+        @Bean AuditEventQueue auditEventQueue() { return mock(AuditEventQueue.class); }
     }
 
     @Test
-    void shouldLoadAuditInfrastructureWithDurableStore() {
+    void shouldLoadAuditInfrastructureWithQueue() {
         contextRunner
-                .withUserConfiguration(DurableStoreInfrastructure.class)
+                .withUserConfiguration(QueueInfrastructure.class)
                 .withPropertyValues(
                         "platform.audit.enabled=true",
                         "platform.audit.service-url=http://audit-api",
@@ -54,7 +54,7 @@ class PlatformAuditAutoConfigurationTest {
     @Test
     void shouldFailStartupWhenServiceUrlIsMissing() {
         contextRunner
-                .withUserConfiguration(DurableStoreInfrastructure.class)
+                .withUserConfiguration(QueueInfrastructure.class)
                 .withPropertyValues(
                         "platform.audit.enabled=true",
                         "platform.audit.service-name=account"
@@ -70,7 +70,7 @@ class PlatformAuditAutoConfigurationTest {
     }
 
     @Test
-    void shouldFailStartupWhenDurableStoreIsMissingInAsynchronousMode() {
+    void shouldFailStartupWhenQueueIsMissingInAsynchronousMode() {
         contextRunner
                 .withPropertyValues(
                         "platform.audit.enabled=true",
@@ -88,13 +88,13 @@ class PlatformAuditAutoConfigurationTest {
     }
 
     @Test
-    void shouldAllowStrictModeWithoutDurableStore() {
+    void shouldAllowStrictModeWithoutQueue() {
         contextRunner
                 .withPropertyValues(
                         "platform.audit.enabled=true",
                         "platform.audit.service-url=http://audit-api",
                         "platform.audit.fail-on-error=true",
-                        "platform.audit.fallback.enabled=false"
+                        "platform.audit.queue.enabled=false"
                 )
                 .run(context -> assertThat(context).hasSingleBean(AuditPublisher.class));
     }
