@@ -82,7 +82,7 @@ class PlatformAuditAutoConfigurationTest {
                     assertThat(context.getStartupFailure())
                             .isInstanceOf(PlatformConfigurationException.class)
                             .hasMessage(
-                                    "Audit fallback is enabled without a configured fallback store"
+                                    "Durable audit store is required for asynchronous at-least-once delivery"
                             );
                 });
     }
