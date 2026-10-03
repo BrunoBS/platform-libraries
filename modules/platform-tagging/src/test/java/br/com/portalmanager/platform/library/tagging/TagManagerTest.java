@@ -106,8 +106,11 @@ class TagManagerTest {
         when(repository.findByOwnerId(10L)).thenReturn(List.of());
         new TagManager<TestTag, Owner>(repository, TestTag::new)
                 .reconcile(owner, List.of("shared"), List.of("shared"));
-        verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags ->
-                java.util.stream.StreamSupport.stream(tags.spliterator(), false).count() == 1 && tags.iterator().next().getOriginType() == TagOriginType.MANUAL));
+        verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
+            List<TestTag> saved = new java.util.ArrayList<>();
+            tags.forEach(saved::add);
+            return saved.size() == 1 && saved.getFirst().getOriginType() == TagOriginType.MANUAL;
+        }));
     }
 
     @Test
@@ -117,7 +120,11 @@ class TagManagerTest {
         when(repository.findByOwnerId(10L)).thenReturn(List.of());
         new TagManager<TestTag, Owner>(repository, TestTag::new)
                 .reconcile(owner, List.of("My Tag", " my   tag ", "my-tag"), List.of());
-        verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> java.util.stream.StreamSupport.stream(tags.spliterator(), false).count() == 1));
+        verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
+            List<TestTag> saved = new java.util.ArrayList<>();
+            tags.forEach(saved::add);
+            return saved.size() == 1 && saved.getFirst().getName().equals(TagName.of("my-tag"));
+        }));
     }
 
     @Test
