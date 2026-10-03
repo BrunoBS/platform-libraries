@@ -35,10 +35,21 @@ public class DestinationResolver {
                 resolveDeadLetterReference(properties.getProvider(), configured),
                 configured.getPublisher().isEnabled(),
                 configured.getConsumer().isEnabled(),
-                firstNonNull(providerOverride.getVisibilityTimeout(), configured.getConsumer().getVisibilityTimeout(), providerDefaults.getVisibilityTimeout()),
+                resolveVisibilityTimeout(properties.getProvider(), configured),
                 firstNonNull(providerOverride.getWaitTime(), configured.getConsumer().getWaitTime(), providerDefaults.getWaitTime()),
                 firstNonNull(providerOverride.getConcurrency(), configured.getConsumer().getConcurrency(), providerDefaults.getConcurrency())
         );
+    }
+
+    private java.time.Duration resolveVisibilityTimeout(
+            MessageQueueProvider provider,
+            MessageQueueProperties.Destination destination) {
+        if (provider != MessageQueueProvider.AWS) {
+            return null;
+        }
+        return firstNonNull(
+                destination.getAws().getVisibilityTimeout(),
+                properties.getAws().getDefaults().getVisibilityTimeout());
     }
 
     private String resolveDeadLetterReference(
