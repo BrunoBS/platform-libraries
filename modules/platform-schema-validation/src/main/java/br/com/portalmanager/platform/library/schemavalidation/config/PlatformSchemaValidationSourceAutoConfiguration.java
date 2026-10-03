@@ -15,9 +15,11 @@ public class PlatformSchemaValidationSourceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ResourceSchemaRepository.class)
-    Object schemaValidationSourceRequired() {
+    Object schemaValidationSourceRequired(PlatformSchemaValidationProperties properties) {
         throw new PlatformConfigurationException(
-                SchemaValidationTechnicalErrors.SCHEMA_SOURCE_MISSING
+                SchemaValidationTechnicalErrors.schemaSourceMissing(
+                        properties.resolveViewName()
+                )
         );
     }
 }
