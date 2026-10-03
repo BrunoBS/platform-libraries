@@ -104,7 +104,7 @@ public class MessageQueueProperties implements InitializingBean {
         }
     }
 
-    private void validateConsumer(String name, Consumer consumer) {
+    private void validateConsumer(String name, ConsumerOptions consumer) {
         if (consumer == null) {
             throw invalid(name + " settings are required");
         }
@@ -138,7 +138,7 @@ public class MessageQueueProperties implements InitializingBean {
 
     public static class Aws {
         private String region;
-        private final Consumer defaults = new Consumer();
+        private final ConsumerOptions defaults = new ConsumerOptions();
 
         public String getRegion() {
             return region;
@@ -148,7 +148,7 @@ public class MessageQueueProperties implements InitializingBean {
             this.region = region;
         }
 
-        public Consumer getDefaults() {
+        public ConsumerOptions getDefaults() {
             return defaults;
         }
     }
@@ -175,7 +175,7 @@ public class MessageQueueProperties implements InitializingBean {
         private final Toggle publisher = new Toggle();
         private final Consumer consumer = new Consumer();
         private final AwsDestination aws = new AwsDestination();
-        private final Consumer azure = new Consumer();
+        private final ConsumerOptions azure = new ConsumerOptions();
 
         public String getQueue() {
             return queue;
@@ -197,7 +197,7 @@ public class MessageQueueProperties implements InitializingBean {
             return aws;
         }
 
-        public Consumer getAzure() {
+        public ConsumerOptions getAzure() {
             return azure;
         }
     }
@@ -214,7 +214,19 @@ public class MessageQueueProperties implements InitializingBean {
         }
     }
 
-    public static class Consumer extends Toggle {
+    public static class Consumer extends ConsumerOptions {
+        private boolean enabled = true;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+    }
+
+    public static class ConsumerOptions {
         private Duration visibilityTimeout;
         private Duration waitTime;
         private Integer concurrency;
@@ -244,7 +256,7 @@ public class MessageQueueProperties implements InitializingBean {
         }
     }
 
-    public static class AwsDestination extends Consumer {
+    public static class AwsDestination extends ConsumerOptions {
         private String deadLetterQueue;
 
         public String getDeadLetterQueue() {
