@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 @Aspect
 public final class AuditAspect {
@@ -118,6 +119,7 @@ public final class AuditAspect {
         }
 
         AuditEventRequest event = new AuditEventRequest(
+                UUID.randomUUID().toString(),
                 Instant.now(),
                 properties.getServiceName(),
                 context.accountId(),
