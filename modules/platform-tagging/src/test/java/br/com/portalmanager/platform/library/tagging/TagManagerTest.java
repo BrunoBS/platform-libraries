@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -73,6 +74,64 @@ class TagManagerTest {
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
         assertThat(manager.findManual(owner)).containsExactly("a-tag", "z-tag");
+    }
+
+
+    @Test
+    void shouldRejectBlankOwnerIdentifier() {
+        TagRepository<TestTag, Owner> repository = repository();
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+
+        assertThatThrownBy(() -> manager.reconcile(new Owner(10L, "   "), List.of(), List.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("identifier");
+    }
+
+    @Test
+    void shouldRejectNullTagFromFactory() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        when(repository.findByOwnerId(10L)).thenReturn(List.of());
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, (ignoredOwner, name, origin) -> null);
+
+        assertThatThrownBy(() -> manager.reconcile(owner, List.of("tag-a"), List.of()))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("factory");
+    }
+
+    @Test
+    void shouldRejectTagCreatedForDifferentOwner() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        Owner other = new Owner(11L, "workspace-11");
+        when(repository.findByOwnerId(10L)).thenReturn(List.of());
+        TagManager<TestTag, Owner> manager =
+                new TagManager<>(repository, (ignoredOwner, name, origin) -> new TestTag(other, name, origin));
+
+        assertThatThrownBy(() -> manager.reconcile(owner, List.of("tag-a"), List.of()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("different owner");
+    }
+
+    @Test
+    void shouldRejectTagCreatedWithDifferentNameOrOrigin() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        when(repository.findByOwnerId(10L)).thenReturn(List.of());
+
+        TagManager<TestTag, Owner> wrongName =
+                new TagManager<>(repository, (sameOwner, name, origin) ->
+                        new TestTag(sameOwner, TagName.of("other"), origin));
+        assertThatThrownBy(() -> wrongName.reconcile(owner, List.of("tag-a"), List.of()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("different name");
+
+        TagManager<TestTag, Owner> wrongOrigin =
+                new TagManager<>(repository, (sameOwner, name, origin) ->
+                        new TestTag(sameOwner, name, TagOriginType.SYSTEM));
+        assertThatThrownBy(() -> wrongOrigin.reconcile(owner, List.of("tag-a"), List.of()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("different origin");
     }
 
     @SuppressWarnings("unchecked")
