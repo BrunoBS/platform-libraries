@@ -50,7 +50,7 @@ public interface TagRepository<TAG extends Tag<OWNER>, OWNER extends TagOwner>
             """)
     List<String> findOwnerIdentifiersByTag(@Param("name") TagName name);
 
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("delete from #{#entityName} t where t.owner.id = :ownerId")
     int deleteByOwnerId(@Param("ownerId") Long ownerId);
 }
