@@ -33,6 +33,17 @@ public final class MessageQueueMetrics {
                 "outcome", outcome(success));
     }
 
+    public void recordAcknowledgementFailure(
+            MessageQueueProvider provider,
+            String destination,
+            boolean deadLetter) {
+        increment(
+                "platform.message.queue.ack.failure",
+                "provider", provider.name(),
+                "destination", destination,
+                "kind", deadLetter ? "dead-letter" : "queue");
+    }
+
     public void recordPollFailure(MessageQueueProvider provider, String destination, boolean deadLetter) {
         increment(
                 "platform.message.queue.poll.failure",
