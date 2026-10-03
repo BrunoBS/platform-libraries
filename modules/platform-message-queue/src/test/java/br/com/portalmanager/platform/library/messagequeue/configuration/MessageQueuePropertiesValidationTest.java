@@ -65,9 +65,19 @@ class MessageQueuePropertiesValidationTest {
                         "platform.message-queue.provider=AWS",
                         "platform.message-queue.aws.region=sa-east-1",
                         "platform.message-queue.destinations.orders.queue=orders",
-                        "platform.message-queue.destinations.orders.aws.wait-time=21s",
-                        "platform.message-queue.destinations.orders.consumer.concurrency=0")
+                        "platform.message-queue.destinations.orders.aws.wait-time=21s")
                 .run(context -> assertInvalid(context.getStartupFailure(), "wait-time"));
+    }
+
+    @Test
+    void shouldFailAtStartupWhenConcurrencyIsNotPositive() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.message-queue.provider=AWS",
+                        "platform.message-queue.aws.region=sa-east-1",
+                        "platform.message-queue.destinations.orders.queue=orders",
+                        "platform.message-queue.destinations.orders.consumer.concurrency=0")
+                .run(context -> assertInvalid(context.getStartupFailure(), "concurrency"));
     }
 
     private void assertInvalid(Throwable failure, String message) {
