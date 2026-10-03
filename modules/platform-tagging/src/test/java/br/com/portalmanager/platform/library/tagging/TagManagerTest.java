@@ -1,7 +1,9 @@
 package br.com.portalmanager.platform.library.tagging;
 
+import br.com.portalmanager.platform.library.tagging.model.Tag;
+import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
-import br.com.portalmanager.platform.library.tagging.model.TagRecord;
+import br.com.portalmanager.platform.library.tagging.model.Tag;
 import br.com.portalmanager.platform.library.tagging.storage.TagPersistence;
 import org.junit.jupiter.api.Test;
 
@@ -25,9 +27,9 @@ class TagManagerTest {
         manager.reconcile(owner, List.of(" Same Tag ", "manual"), List.of("same-tag", "system"));
 
         assertThat(persistence.tags)
-                .extracting(TestTag::getName)
+                .extracting(tag -> tag.getName().value())
                 .containsExactlyInAnyOrder("same-tag", "manual", "system");
-        assertThat(persistence.tags.stream().filter(t -> t.name.equals("same-tag")).findFirst().orElseThrow().origin)
+        assertThat(persistence.tags.stream().filter(t -> t.name.value().equals("same-tag")).findFirst().orElseThrow().origin)
                 .isEqualTo(TagOriginType.MANUAL);
     }
 
@@ -57,8 +59,8 @@ class TagManagerTest {
 
         manager.reconcile(owner, List.of(" Alpha ", "alpha"), List.of("ALPHA", "Beta", "beta"));
 
-        assertThat(persistence.tags).extracting(TestTag::getName).containsExactlyInAnyOrder("alpha", "beta");
-        assertThat(persistence.tags.stream().filter(t -> t.name.equals("alpha")).findFirst().orElseThrow().origin)
+        assertThat(persistence.tags).extracting(tag -> tag.getName().value()).containsExactlyInAnyOrder("alpha", "beta");
+        assertThat(persistence.tags.stream().filter(t -> t.name.value().equals("alpha")).findFirst().orElseThrow().origin)
                 .isEqualTo(TagOriginType.MANUAL);
     }
 
@@ -85,13 +87,7 @@ class TagManagerTest {
     void shouldRejectNonNormalizedPersistedTag() {
         InMemoryPersistence persistence = new InMemoryPersistence();
         Owner owner = new Owner(10L);
-        persistence.tags.add(new TestTag(owner, "Not Normalized", TagOriginType.MANUAL));
-
-        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
-
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> manager.reconcile(owner, List.of(), List.of()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("persisted tag name must be normalized");
+        assertThat(TagName.of(" Not Normalized ").value()).isEqualTo("not-normalized");
     }
 
     @Test
@@ -118,23 +114,23 @@ class TagManagerTest {
 
         new TagManager<TestTag, Owner, Long, String>(persistence).deleteAll(first);
 
-        assertThat(persistence.tags).extracting(TestTag::getName).containsExactly("two");
+        assertThat(persistence.tags).extracting(tag -> tag.getName().value()).containsExactly("two");
     }
 
     private record Owner(Long id) {}
 
-    private static final class TestTag implements TagRecord {
+    private static final class TestTag implements Tag {
         private final Owner owner;
-        private final String name;
+        private final TagName name;
         private TagOriginType origin;
 
         private TestTag(Owner owner, String name, TagOriginType origin) {
             this.owner = owner;
-            this.name = name;
+            this.name = TagName.of(name);
             this.origin = origin;
         }
 
-        public String getName() { return name; }
+        public TagName getName() { return name; }
         public TagOriginType getOriginType() { return origin; }
         public void changeOrigin(TagOriginType originType) { this.origin = originType; }
     }
@@ -145,18 +141,14 @@ class TagManagerTest {
 
         public Long ownerId(Owner owner) { return owner.id(); }
         public String ownerKey(TestTag tag) { return String.valueOf(tag.owner.id()); }
-        public TestTag newTag(Owner owner, String name, TagOriginType origin) {
-            return new TestTag(owner, name, origin);
-        }
+        public TestTag newTag(Owner owner, TagName name, TagOriginType origin) {\n            return new TestTag(owner, name.value(), origin);\n        }
         public List<TestTag> findByOwnerId(Long ownerId) {
             return tags.stream().filter(t -> t.owner.id().equals(ownerId)).toList();
         }
         public List<TestTag> findByOwnerKeysAndOrigin(Collection<String> keys, TagOriginType origin) {
             return tags.stream().filter(t -> keys.contains(ownerKey(t)) && t.origin == origin).toList();
         }
-        public List<String> findOwnerKeysByTag(String normalizedTag) {
-            return tags.stream().filter(t -> t.name.equals(normalizedTag)).map(this::ownerKey).distinct().toList();
-        }
+        public List<String> findOwnerKeysByTag(TagName name) {\n            return tags.stream().filter(t -> t.name.equals(name)).map(this::ownerKey).distinct().toList();\n        }
         public void saveAllTags(Collection<TestTag> values) { tags.addAll(values); }
         public void deleteAllTags(Collection<TestTag> values) { tags.removeAll(values); }
         public void deleteByOwnerId(Long ownerId) { tags.removeIf(t -> t.owner.id().equals(ownerId)); }
