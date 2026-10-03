@@ -8,12 +8,15 @@ import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessag
 import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureServiceBusMessageQueueConsumer;
 import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureServiceBusMessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.publisher.DefaultMessageQueuePublisher;
+import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.publisher.MessageEnvelopeFactory;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
 import com.azure.identity.DefaultAzureCredentialBuilder;
+import io.micrometer.core.instrument.MeterRegistry;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import tools.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -27,6 +30,12 @@ import java.time.Clock;
 @AutoConfiguration
 @EnableConfigurationProperties(MessageQueueProperties.class)
 public class MessageQueueAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    MessageQueueMetrics messageQueueMetrics(ObjectProvider<MeterRegistry> meterRegistries) {
+        return new MessageQueueMetrics(meterRegistries.getIfAvailable());
+    }
 
     @Bean
     @ConditionalOnMissingBean(Clock.class)
@@ -82,13 +91,15 @@ public class MessageQueueAutoConfiguration {
             MessageQueueListenerRegistry messageQueueListenerRegistry,
             DestinationResolver destinationResolver,
             MessageQueueSerializer messageQueueSerializer,
-            MessageQueueProperties properties) {
+            MessageQueueProperties properties,
+            MessageQueueMetrics messageQueueMetrics) {
         return new SqsMessageQueueConsumer(
                 messageQueueSqsClient,
                 messageQueueListenerRegistry,
                 destinationResolver,
                 messageQueueSerializer,
-                properties);
+                properties,
+                messageQueueMetrics);
     }
 
     @Bean
@@ -116,13 +127,15 @@ public class MessageQueueAutoConfiguration {
             MessageQueueListenerRegistry messageQueueListenerRegistry,
             DestinationResolver destinationResolver,
             MessageQueueSerializer messageQueueSerializer,
-            MessageQueueProperties properties) {
+            MessageQueueProperties properties,
+            MessageQueueMetrics messageQueueMetrics) {
         return new AzureServiceBusMessageQueueConsumer(
                 messageQueueAzureServiceBusClientBuilder,
                 messageQueueListenerRegistry,
                 destinationResolver,
                 messageQueueSerializer,
-                properties);
+                properties,
+                messageQueueMetrics);
     }
 
     @Bean
@@ -131,11 +144,13 @@ public class MessageQueueAutoConfiguration {
             DestinationResolver destinationResolver,
             MessageEnvelopeFactory messageEnvelopeFactory,
             MessageQueueSerializer messageQueueSerializer,
-            MessageQueueTransport messageQueueTransport) {
+            MessageQueueTransport messageQueueTransport,
+            MessageQueueMetrics messageQueueMetrics) {
         return new DefaultMessageQueuePublisher(
                 destinationResolver,
                 messageEnvelopeFactory,
                 messageQueueSerializer,
-                messageQueueTransport);
+                messageQueueTransport,
+                messageQueueMetrics);
     }
 }
