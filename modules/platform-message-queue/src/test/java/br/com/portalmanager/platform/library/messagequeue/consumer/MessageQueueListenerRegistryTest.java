@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.messagequeue.annotation.MessageQueu
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.framework.ProxyFactory;
 
 import java.time.Instant;
 import java.util.Map;
@@ -25,6 +26,23 @@ class MessageQueueListenerRegistryTest {
         var exception = assertThrows(IllegalStateException.class, () -> definition.invoke(message));
 
         assertEquals("business failure", exception.getMessage());
+    }
+
+    @Test
+    void shouldDiscoverAndInvokeListenerThroughJdkProxy() {
+        var target = new JdkProxyListener();
+        var proxyFactory = new ProxyFactory(target);
+        proxyFactory.setInterfaces(ProductListener.class);
+        proxyFactory.setProxyTargetClass(false);
+        Object proxy = proxyFactory.getProxy();
+
+        var registry = new MessageQueueListenerRegistry();
+        registry.postProcessAfterInitialization(proxy, "jdkProxyListener");
+        var message = message();
+
+        registry.listeners().iterator().next().invoke(message);
+
+        assertEquals(message, target.received);
     }
 
     @Test
@@ -60,6 +78,20 @@ class MessageQueueListenerRegistryTest {
                 "correlation-id",
                 Map.of(),
                 new ProductUpdatedEvent("123"));
+    }
+
+    interface ProductListener {
+        void consume(MessageQueueMessage<ProductUpdatedEvent> message);
+    }
+
+    static class JdkProxyListener implements ProductListener {
+        private MessageQueueMessage<ProductUpdatedEvent> received;
+
+        @Override
+        @MessageQueueListener("product-updated")
+        public void consume(MessageQueueMessage<ProductUpdatedEvent> message) {
+            received = message;
+        }
     }
 
     static class FailingListener {
