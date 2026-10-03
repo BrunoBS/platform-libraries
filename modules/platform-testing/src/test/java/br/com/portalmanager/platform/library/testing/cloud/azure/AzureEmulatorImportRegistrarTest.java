@@ -6,13 +6,12 @@ import br.com.portalmanager.platform.library.testing.annotation.WithAzureEmulato
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.type.AnnotationMetadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AzureEmulatorImportRegistrarTest {
