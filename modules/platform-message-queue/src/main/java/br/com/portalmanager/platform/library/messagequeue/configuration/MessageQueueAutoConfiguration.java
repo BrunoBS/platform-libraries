@@ -5,10 +5,14 @@ import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueP
 import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueConsumer;
 import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueTransport;
+import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureServiceBusMessageQueueConsumer;
+import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureServiceBusMessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.publisher.DefaultMessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.publisher.MessageEnvelopeFactory;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
+import com.azure.identity.DefaultAzureCredentialBuilder;
+import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -72,6 +76,37 @@ public class MessageQueueAutoConfiguration {
             MessageQueueProperties properties) {
         return new SqsMessageQueueConsumer(
                 messageQueueSqsClient,
+                messageQueueListenerRegistry,
+                destinationResolver,
+                messageQueueSerializer,
+                properties);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AZURE")
+    ServiceBusClientBuilder messageQueueAzureServiceBusClientBuilder(MessageQueueProperties properties) {
+        return new ServiceBusClientBuilder()
+                .credential(
+                        properties.getAzure().getNamespace(),
+                        new DefaultAzureCredentialBuilder().build());
+    }
+
+    @Bean(destroyMethod = "close")
+    @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AZURE")
+    MessageQueueTransport azureMessageQueueTransport(ServiceBusClientBuilder messageQueueAzureServiceBusClientBuilder) {
+        return new AzureServiceBusMessageQueueTransport(messageQueueAzureServiceBusClientBuilder);
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AZURE")
+    AzureServiceBusMessageQueueConsumer azureMessageQueueConsumer(
+            ServiceBusClientBuilder messageQueueAzureServiceBusClientBuilder,
+            MessageQueueListenerRegistry messageQueueListenerRegistry,
+            DestinationResolver destinationResolver,
+            MessageQueueSerializer messageQueueSerializer,
+            MessageQueueProperties properties) {
+        return new AzureServiceBusMessageQueueConsumer(
+                messageQueueAzureServiceBusClientBuilder,
                 messageQueueListenerRegistry,
                 destinationResolver,
                 messageQueueSerializer,
