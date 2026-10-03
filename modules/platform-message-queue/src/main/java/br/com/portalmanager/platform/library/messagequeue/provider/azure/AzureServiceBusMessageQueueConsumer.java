@@ -108,7 +108,9 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                     if (!running || Thread.currentThread().isInterrupted()) {
                         break;
                     }
-                    messages.forEach(message -> work.process(receiver, message));
+                    for (ServiceBusReceivedMessage message : messages) {
+                        work.process(receiver, message);
+                    }
                 }
             } catch (RuntimeException exception) {
                 if (!running || Thread.currentThread().isInterrupted()) {
