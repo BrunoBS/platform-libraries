@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
 import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.audit.publisher.RestAuditPublisher;
@@ -29,23 +29,23 @@ public class PlatformAuditAutoConfiguration {
     AuditPublisher auditPublisher(
             RestClient.Builder builder,
             PlatformAuditProperties properties,
-            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
+            ObjectProvider<AuditEventQueue> eventQueueProvider
     ) {
         if (properties.getServiceUrl() == null || properties.getServiceUrl().isBlank()) {
             throw new PlatformConfigurationException(AuditTechnicalErrors.SERVICE_URL_REQUIRED);
         }
 
-        return new RestAuditPublisher(builder, properties, fallbackStoreProvider);
+        return new RestAuditPublisher(builder, properties, eventQueueProvider);
     }
 
     @Bean
-    SmartInitializingSingleton auditDeliveryConfigurationGuard(
+    SmartInitializingSingleton auditQueueConfigurationGuard(
             PlatformAuditProperties properties,
-            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
+            ObjectProvider<AuditEventQueue> eventQueueProvider
     ) {
         return () -> {
-            if (!properties.isFailOnError() && fallbackStoreProvider.getIfAvailable() == null) {
-                throw new PlatformConfigurationException(AuditTechnicalErrors.FALLBACK_STORE_MISSING);
+            if (!properties.isFailOnError() && eventQueueProvider.getIfAvailable() == null) {
+                throw new PlatformConfigurationException(AuditTechnicalErrors.QUEUE_MISSING);
             }
         };
     }
