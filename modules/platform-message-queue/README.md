@@ -127,7 +127,8 @@ Quando a aplicação disponibiliza um `MeterRegistry`, a lib registra os counter
 
 - `platform.message.queue.publish`: publicação com resultado;
 - `platform.message.queue.consume`: processamento com destino, provider, tipo de fila e resultado;
-- `platform.message.queue.poll.failure`: falha técnica ao consultar o broker.
+- `platform.message.queue.poll.failure`: falha técnica ao consultar o broker;
+- `platform.message.queue.ack.failure`: falha ao confirmar/remover uma mensagem processada.
 
 Os logs de falha incluem destino e, quando o envelope já foi lido, `messageId` e `correlationId`. A aplicação deve exportar as métricas e configurar alertas conforme seus SLOs.
 
