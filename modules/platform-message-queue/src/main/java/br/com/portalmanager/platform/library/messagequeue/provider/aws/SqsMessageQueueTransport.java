@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
+import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
 import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.resolver.ResolvedDestination;
@@ -20,16 +21,39 @@ public class SqsMessageQueueTransport implements MessageQueueTransport {
     }
 
     @Override
-    public void send(ResolvedDestination destination, String body) {
+    public void send(
+            ResolvedDestination destination,
+            String body,
+            MessageQueuePublishOptions options) {
         try {
-            String queueUrl = queueUrls.computeIfAbsent(destination.queue(), this::resolveQueueUrl);
-            sqsClient.sendMessage(SendMessageRequest.builder()
-                    .queueUrl(queueUrl)
-                    .messageBody(body)
-                    .build());
+            var request = SendMessageRequest.builder()
+                    .queueUrl(queueUrls.computeIfAbsent(destination.queue(), this::resolveQueueUrl))
+                    .messageBody(body);
+
+            if (destination.fifo()) {
+                if (options.messageGroupId() == null || options.messageGroupId().isBlank()) {
+                    throw new IllegalArgumentException("messageGroupId is required for an AWS SQS FIFO destination");
+                }
+                validateFifoId("messageGroupId", options.messageGroupId());
+                request.messageGroupId(options.messageGroupId());
+                if (options.deduplicationId() != null) {
+                    validateFifoId("deduplicationId", options.deduplicationId());
+                    request.messageDeduplicationId(options.deduplicationId());
+                }
+            } else if (options.messageGroupId() != null || options.deduplicationId() != null) {
+                throw new IllegalArgumentException("FIFO publish options can only be used with an AWS SQS FIFO destination");
+            }
+
+            sqsClient.sendMessage(request.build());
         } catch (RuntimeException exception) {
             throw new MessagePublishException(
                     "Failed to publish message to destination: " + destination.logicalName(), exception);
+        }
+    }
+
+    private void validateFifoId(String name, String value) {
+        if (value.isBlank() || value.length() > 128) {
+            throw new IllegalArgumentException(name + " must contain between 1 and 128 characters");
         }
     }
 
