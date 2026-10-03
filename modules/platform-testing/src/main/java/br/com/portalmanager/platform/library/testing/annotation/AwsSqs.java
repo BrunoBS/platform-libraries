@@ -9,16 +9,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AwsSqs {
 
-    String[] queues() default {};
-
-    RedrivePolicy[] redrivePolicies() default {};
+    Queue[] queues() default {};
 
     @Target({})
     @Retention(RetentionPolicy.RUNTIME)
-    @interface RedrivePolicy {
-        String sourceQueue();
+    @interface Queue {
+        String name();
 
-        String deadLetterQueue();
+        /**
+         * Empty uses the standard name {@code <queue-name>-dlq}.
+         */
+        String deadLetterQueue() default "";
 
         int maxReceiveCount() default 5;
     }
