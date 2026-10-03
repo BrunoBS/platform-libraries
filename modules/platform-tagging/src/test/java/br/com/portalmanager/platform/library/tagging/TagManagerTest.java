@@ -92,7 +92,7 @@ class TagManagerTest {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
         when(repository.findByOwnerId(10L)).thenReturn(List.of());
-        TagManager<TestTag, Owner> manager = new TagManager<>(repository, (ignoredOwner, name, origin) -> null);
+        TagManager<TestTag, Owner> manager = new TagManager<TestTag, Owner>(repository, (ignoredOwner, name, origin) -> null);
 
         assertThatThrownBy(() -> manager.reconcile(owner, List.of("tag-a"), List.of()))
                 .isInstanceOf(NullPointerException.class)
@@ -106,7 +106,7 @@ class TagManagerTest {
         Owner other = new Owner(11L, "workspace-11");
         when(repository.findByOwnerId(10L)).thenReturn(List.of());
         TagManager<TestTag, Owner> manager =
-                new TagManager<>(repository, (ignoredOwner, name, origin) -> new TestTag(other, name, origin));
+                new TagManager<TestTag, Owner>(repository, (ignoredOwner, name, origin) -> new TestTag(other, name, origin));
 
         assertThatThrownBy(() -> manager.reconcile(owner, List.of("tag-a"), List.of()))
                 .isInstanceOf(IllegalStateException.class)
@@ -120,14 +120,14 @@ class TagManagerTest {
         when(repository.findByOwnerId(10L)).thenReturn(List.of());
 
         TagManager<TestTag, Owner> wrongName =
-                new TagManager<>(repository, (sameOwner, name, origin) ->
+                new TagManager<TestTag, Owner>(repository, (sameOwner, name, origin) ->
                         new TestTag(sameOwner, TagName.of("other"), origin));
         assertThatThrownBy(() -> wrongName.reconcile(owner, List.of("tag-a"), List.of()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("different name");
 
         TagManager<TestTag, Owner> wrongOrigin =
-                new TagManager<>(repository, (sameOwner, name, origin) ->
+                new TagManager<TestTag, Owner>(repository, (sameOwner, name, origin) ->
                         new TestTag(sameOwner, name, TagOriginType.SYSTEM));
         assertThatThrownBy(() -> wrongOrigin.reconcile(owner, List.of("tag-a"), List.of()))
                 .isInstanceOf(IllegalStateException.class)
