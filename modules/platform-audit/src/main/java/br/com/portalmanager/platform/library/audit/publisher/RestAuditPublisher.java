@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.audit.publisher;
 
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.MediaType;
@@ -13,12 +13,12 @@ public final class RestAuditPublisher implements AuditPublisher {
     private final RestClient restClient;
     private final String publishPath;
     private final PlatformAuditProperties properties;
-    private final ObjectProvider<AuditFallbackStore> fallbackStoreProvider;
+    private final ObjectProvider<AuditEventQueue> eventQueueProvider;
 
     public RestAuditPublisher(
             RestClient.Builder builder,
             PlatformAuditProperties properties,
-            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
+            ObjectProvider<AuditEventQueue> eventQueueProvider
     ) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(Math.toIntExact(properties.getHttp().getConnectTimeout().toMillis()));
@@ -30,7 +30,7 @@ public final class RestAuditPublisher implements AuditPublisher {
                 .build();
         this.publishPath = properties.getPublishPath();
         this.properties = properties;
-        this.fallbackStoreProvider = fallbackStoreProvider;
+        this.eventQueueProvider = eventQueueProvider;
     }
 
     @Override
@@ -40,7 +40,7 @@ public final class RestAuditPublisher implements AuditPublisher {
             return;
         }
 
-        AuditFallbackStore store = fallbackStoreProvider.getIfAvailable();
+        AuditEventQueue store = eventQueueProvider.getIfAvailable();
         if (store == null) {
             throw new IllegalStateException(
                     "Durable audit store is required for asynchronous at-least-once delivery"
