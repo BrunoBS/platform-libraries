@@ -10,4 +10,16 @@ import java.lang.annotation.Target;
 public @interface AwsSqs {
 
     String[] queues() default {};
+
+    RedrivePolicy[] redrivePolicies() default {};
+
+    @Target({})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface RedrivePolicy {
+        String sourceQueue();
+
+        String deadLetterQueue();
+
+        int maxReceiveCount() default 5;
+    }
 }
