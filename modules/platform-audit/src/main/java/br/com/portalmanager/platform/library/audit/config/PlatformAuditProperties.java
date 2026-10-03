@@ -12,9 +12,6 @@ public class PlatformAuditProperties {
     private String publishPath = "/api/v1/events";
     private String serviceName = "unknown";
     private boolean failOnError = false;
-    private int corePoolSize = 2;
-    private int maxPoolSize = 4;
-    private int queueCapacity = 500;
     private final Http http = new Http();
     private final Fallback fallback = new Fallback();
 
@@ -33,15 +30,6 @@ public class PlatformAuditProperties {
     public boolean isFailOnError() { return failOnError; }
     public void setFailOnError(boolean failOnError) { this.failOnError = failOnError; }
 
-    public int getCorePoolSize() { return corePoolSize; }
-    public void setCorePoolSize(int corePoolSize) { this.corePoolSize = corePoolSize; }
-
-    public int getMaxPoolSize() { return maxPoolSize; }
-    public void setMaxPoolSize(int maxPoolSize) { this.maxPoolSize = maxPoolSize; }
-
-    public int getQueueCapacity() { return queueCapacity; }
-    public void setQueueCapacity(int queueCapacity) { this.queueCapacity = queueCapacity; }
-
     public Http getHttp() { return http; }
     public Fallback getFallback() { return fallback; }
 
@@ -57,9 +45,9 @@ public class PlatformAuditProperties {
     }
 
     public static class Fallback {
-        private boolean enabled = false;
+        private boolean enabled = true;
         private String keyPrefix = "platform:audit:pending:";
-        private Duration recoveryInterval = Duration.ofMinutes(5);
+        private Duration recoveryInterval = Duration.ofSeconds(1);
         private int batchSize = 50;
         private final Lock lock = new Lock();
 
