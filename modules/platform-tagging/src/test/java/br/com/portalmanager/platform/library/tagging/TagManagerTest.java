@@ -48,6 +48,79 @@ class TagManagerTest {
         assertThat(manager.findOwnerKeysByTag(" MANUAL A ")).containsExactly("10");
     }
 
+
+    @Test
+    void shouldKeepManualPrecedenceAndAvoidDuplicates() {
+        InMemoryPersistence persistence = new InMemoryPersistence();
+        Owner owner = new Owner(10L);
+        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
+
+        manager.reconcile(owner, List.of(" Alpha ", "alpha"), List.of("ALPHA", "Beta", "beta"));
+
+        assertThat(persistence.tags).extracting(TestTag::getName).containsExactlyInAnyOrder("alpha", "beta");
+        assertThat(persistence.tags.stream().filter(t -> t.name.equals("alpha")).findFirst().orElseThrow().origin)
+                .isEqualTo(TagOriginType.MANUAL);
+    }
+
+    @Test
+    void shouldReturnManualTagsDeterministicallyAndOnlyForRequestedOwners() {
+        InMemoryPersistence persistence = new InMemoryPersistence();
+        Owner first = new Owner(10L);
+        Owner second = new Owner(20L);
+        Owner third = new Owner(30L);
+        persistence.tags.add(new TestTag(first, "z-tag", TagOriginType.MANUAL));
+        persistence.tags.add(new TestTag(first, "a-tag", TagOriginType.MANUAL));
+        persistence.tags.add(new TestTag(third, "outside", TagOriginType.MANUAL));
+
+        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
+
+        assertThat(manager.findManual(first)).containsExactly("a-tag", "z-tag");
+        assertThat(manager.findManualByOwnerKeys(List.of("10", "20")))
+                .containsEntry("10", List.of("a-tag", "z-tag"))
+                .containsEntry("20", List.of())
+                .doesNotContainKey("30");
+    }
+
+    @Test
+    void shouldRejectNonNormalizedPersistedTag() {
+        InMemoryPersistence persistence = new InMemoryPersistence();
+        Owner owner = new Owner(10L);
+        persistence.tags.add(new TestTag(owner, "Not Normalized", TagOriginType.MANUAL));
+
+        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> manager.reconcile(owner, List.of(), List.of()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("persisted tag name must be normalized");
+    }
+
+    @Test
+    void shouldRejectDuplicatePersistedTagsForSameOwner() {
+        InMemoryPersistence persistence = new InMemoryPersistence();
+        Owner owner = new Owner(10L);
+        persistence.tags.add(new TestTag(owner, "same", TagOriginType.MANUAL));
+        persistence.tags.add(new TestTag(owner, "same", TagOriginType.SYSTEM));
+
+        TagManager<TestTag, Owner, Long, String> manager = new TagManager<>(persistence);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> manager.reconcile(owner, List.of("same"), List.of()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("duplicate persisted tag");
+    }
+
+    @Test
+    void shouldDeleteAllTagsForOwner() {
+        InMemoryPersistence persistence = new InMemoryPersistence();
+        Owner first = new Owner(10L);
+        Owner second = new Owner(20L);
+        persistence.tags.add(new TestTag(first, "one", TagOriginType.MANUAL));
+        persistence.tags.add(new TestTag(second, "two", TagOriginType.MANUAL));
+
+        new TagManager<TestTag, Owner, Long, String>(persistence).deleteAll(first);
+
+        assertThat(persistence.tags).extracting(TestTag::getName).containsExactly("two");
+    }
+
     private record Owner(Long id) {}
 
     private static final class TestTag implements TagRecord {
