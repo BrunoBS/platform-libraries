@@ -70,7 +70,12 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
 
     private void provisionQueues() {
         for (String queue : queues) {
-            exec("sqs", "create-queue", "--queue-name", queue);
+            if (queue.endsWith(".fifo")) {
+                exec("sqs", "create-queue", "--queue-name", queue,
+                        "--attributes", "{\\"FifoQueue\\":\\"true\\",\\"ContentBasedDeduplication\\":\\"true\\"}");
+            } else {
+                exec("sqs", "create-queue", "--queue-name", queue);
+            }
         }
     }
 
@@ -173,6 +178,9 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
             }
             if (source.equals(deadLetter)) {
                 throw new IllegalArgumentException("SQS source and dead-letter queues must be different");
+            }
+            if (source.endsWith(".fifo") != deadLetter.endsWith(".fifo")) {
+                throw new IllegalArgumentException("SQS source and dead-letter queues must use the same queue type");
             }
             if (!queueNames.contains(source) || !queueNames.contains(deadLetter)) {
                 throw new IllegalArgumentException("SQS source and dead-letter queues must both be provisioned");
