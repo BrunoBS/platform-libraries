@@ -70,6 +70,25 @@ class AuditRecoveryServiceTest {
         assertThat(store.peek().resourceId()).isEqualTo("3");
     }
 
+
+    @Test
+    void shouldPreserveEventIdDuringRecovery() {
+        PlatformAuditProperties properties = properties(1);
+        InMemoryEventQueue queue = new InMemoryEventQueue();
+        AuditEventRequest event = event("1");
+        queue.save(event);
+
+        java.util.concurrent.atomic.AtomicReference<String> publishedEventId =
+                new java.util.concurrent.atomic.AtomicReference<>();
+        AuditPublisher publisher = published -> publishedEventId.set(published.eventId());
+
+        AuditRecoveryService recovery = recoveryService(publisher, queue, new AlwaysAvailableLock(), properties);
+        recovery.recover();
+
+        assertThat(publishedEventId.get()).isEqualTo(event.eventId());
+        assertThat(queue.size()).isZero();
+    }
+
     private AuditRecoveryService recoveryService(
             AuditPublisher publisher,
             AuditEventQueue store,
