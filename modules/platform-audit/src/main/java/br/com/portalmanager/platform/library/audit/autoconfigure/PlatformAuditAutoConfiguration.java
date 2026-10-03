@@ -5,20 +5,17 @@ import br.com.portalmanager.platform.library.audit.config.PlatformAuditPropertie
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
 import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.audit.publisher.RestAuditPublisher;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
 
@@ -27,23 +24,10 @@ import tools.jackson.databind.ObjectMapper;
 @ConditionalOnProperty(prefix = "platform.audit", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlatformAuditAutoConfiguration {
 
-    @Bean(name = "platformAuditTaskExecutor")
-    @ConditionalOnMissingBean(name = "platformAuditTaskExecutor")
-    TaskExecutor platformAuditTaskExecutor(PlatformAuditProperties properties) {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("platform-audit-");
-        executor.setCorePoolSize(properties.getCorePoolSize());
-        executor.setMaxPoolSize(properties.getMaxPoolSize());
-        executor.setQueueCapacity(properties.getQueueCapacity());
-        executor.initialize();
-        return executor;
-    }
-
     @Bean
     @ConditionalOnMissingBean(AuditPublisher.class)
     AuditPublisher auditPublisher(
             RestClient.Builder builder,
-            @Qualifier("platformAuditTaskExecutor") TaskExecutor platformAuditTaskExecutor,
             PlatformAuditProperties properties,
             ObjectProvider<AuditFallbackStore> fallbackStoreProvider
     ) {
@@ -53,14 +37,30 @@ public class PlatformAuditAutoConfiguration {
 
         return new RestAuditPublisher(
                 builder,
-                platformAuditTaskExecutor,
                 properties,
                 fallbackStoreProvider
         );
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "platform.audit.fallback", name = "enabled", havingValue = "true")
+    @ConditionalOnProperty(
+            prefix = "platform.audit",
+            name = {"fail-on-error", "fallback.enabled"},
+            havingValue = "false",
+            matchIfMissing = false
+    )
+    SmartInitializingSingleton auditDurableStoreConfigurationGuard(
+            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
+    ) {
+        return () -> {
+            if (fallbackStoreProvider.getIfAvailable() == null) {
+                throw new PlatformConfigurationException(AuditTechnicalErrors.FALLBACK_STORE_MISSING);
+            }
+        };
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "platform.audit.fallback", name = "enabled", havingValue = "true", matchIfMissing = true)
     SmartInitializingSingleton auditFallbackConfigurationGuard(
             ObjectProvider<AuditFallbackStore> fallbackStoreProvider
     ) {
