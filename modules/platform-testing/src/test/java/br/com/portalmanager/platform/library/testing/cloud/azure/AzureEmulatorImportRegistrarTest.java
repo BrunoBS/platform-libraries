@@ -6,6 +6,8 @@ import br.com.portalmanager.platform.library.testing.annotation.WithAzureEmulato
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.type.AnnotationMetadata;
@@ -16,6 +18,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AzureEmulatorImportRegistrarTest {
 
     private final AzureEmulatorImportRegistrar registrar = new AzureEmulatorImportRegistrar();
+
+    @Test
+    void shouldRejectNonPositiveMaxDeliveryCount() {
+        DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> registrar.registerBeanDefinitions(
+                        AnnotationMetadata.introspect(InvalidAzureCloudTest.class), registry));
+
+        assertEquals("Azure Service Bus maxDeliveryCount must be a positive integer", exception.getMessage());
+    }
 
     @Test
     void shouldRegisterTypedClientsForConfiguredAzureServices() {
@@ -36,9 +50,16 @@ class AzureEmulatorImportRegistrarTest {
     }
 
     @WithAzureEmulator(
-            serviceBus = @AzureServiceBus(queues = "orders"),
+            serviceBus = @AzureServiceBus(queues = @AzureServiceBus.Queue(name = "orders")),
             blobStorage = @AzureBlobStorage(containers = "documents")
     )
     private static final class AzureCloudTest {
+    }
+
+    @WithAzureEmulator(
+            serviceBus = @AzureServiceBus(queues =
+                    @AzureServiceBus.Queue(name = "orders", maxDeliveryCount = 0))
+    )
+    private static final class InvalidAzureCloudTest {
     }
 }
