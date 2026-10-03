@@ -80,7 +80,13 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
         LinkedHashSet<String> requested = ownerKeys.stream()
                 .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(key -> !key.isEmpty())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (requested.isEmpty()) {
+            return Map.of();
+        }
 
         Map<String, List<String>> result = new LinkedHashMap<>();
         requested.forEach(key -> result.put(key, new ArrayList<>()));
@@ -106,7 +112,10 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         if (tag == null || tag.isBlank()) {
             return List.of();
         }
-        return repository.findOwnerIdentifiersByTag(TagName.of(tag)).stream().distinct().toList();
+        return repository.findOwnerIdentifiersByTag(TagName.of(tag)).stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
     }
 
     public void deleteAll(OWNER owner) {
