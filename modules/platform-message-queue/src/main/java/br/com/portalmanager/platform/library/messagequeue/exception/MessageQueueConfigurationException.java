@@ -1,12 +1,15 @@
 package br.com.portalmanager.platform.library.messagequeue.exception;
 
-public class MessageQueueConfigurationException extends RuntimeException {
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueTechnicalErrors;
 
-    public MessageQueueConfigurationException(String message) {
-        super(message);
+public class MessageQueueConfigurationException extends PlatformConfigurationException {
+
+    public MessageQueueConfigurationException(String reason) {
+        this(reason, null);
     }
 
-    public MessageQueueConfigurationException(String message, Throwable cause) {
-        super(message, cause);
+    public MessageQueueConfigurationException(String reason, Throwable cause) {
+        super(MessageQueueTechnicalErrors.invalidConfiguration(reason), cause);
     }
 }

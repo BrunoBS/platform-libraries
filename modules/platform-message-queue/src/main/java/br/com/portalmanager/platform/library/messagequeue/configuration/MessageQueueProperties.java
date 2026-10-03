@@ -105,7 +105,7 @@ public class MessageQueueProperties implements InitializingBean {
     }
 
     private MessageQueueConfigurationException invalid(String reason) {
-        return new MessageQueueConfigurationException("Invalid platform.message-queue configuration: " + reason);
+        return new MessageQueueConfigurationException(reason);
     }
 
     public static class Aws {
