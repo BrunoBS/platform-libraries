@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@ConfigurationProperties(prefix = "platform.message-queue")
+@ConfigurationProperties(prefix = "platform.message-queue", ignoreUnknownFields = false)
 public class MessageQueueProperties implements InitializingBean {
 
     private MessageQueueProvider provider;
