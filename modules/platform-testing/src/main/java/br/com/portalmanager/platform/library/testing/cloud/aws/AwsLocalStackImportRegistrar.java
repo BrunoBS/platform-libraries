@@ -21,8 +21,11 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         }
 
         AwsService[] services = (AwsService[]) attributes.get("services");
+        String[] queues = (String[]) attributes.get("queues");
+        String[] buckets = (String[]) attributes.get("buckets");
+
         RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackContainer.class);
-        definition.setInstanceSupplier(() -> new AwsLocalStackContainer(services));
+        definition.setInstanceSupplier(() -> new AwsLocalStackContainer(services, queues, buckets));
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(BEAN_NAME, definition);
