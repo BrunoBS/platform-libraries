@@ -13,7 +13,6 @@ final class AzureBlobStorageTestSupport {
     void register(BeanDefinitionRegistry registry) {
         RootBeanDefinition definition = new RootBeanDefinition(AzureBlobServiceClientFactoryBean.class);
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
-        definition.setDestroyMethodName("close");
         definition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, BlobServiceClient.class);
         registry.registerBeanDefinition(BLOB_CLIENT_BEAN, definition);
     }
