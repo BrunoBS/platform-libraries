@@ -44,9 +44,13 @@ public class DestinationResolver {
     private String resolveDeadLetterReference(
             MessageQueueProvider provider,
             MessageQueueProperties.Destination destination) {
-        return provider == MessageQueueProvider.AWS
-                ? destination.getAws().getDeadLetterQueue()
-                : null;
+        if (provider != MessageQueueProvider.AWS) {
+            return null;
+        }
+        String configuredQueue = destination.getAws().getDeadLetterQueue();
+        return configuredQueue == null || configuredQueue.isBlank()
+                ? destination.getQueue() + "-dlq"
+                : configuredQueue;
     }
 
     private MessageQueueProperties.Consumer providerDefaults(MessageQueueProvider provider) {
