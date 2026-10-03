@@ -3,7 +3,8 @@ package br.com.portalmanager.platform.library.tagging;
 import br.com.portalmanager.platform.library.tagging.model.Tag;
 import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
-import br.com.portalmanager.platform.library.tagging.storage.TagPersistence;
+import br.com.portalmanager.platform.library.tagging.model.TagOwner;
+import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,23 +15,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.TriFunction;
 import java.util.stream.Collectors;
 
-public final class TagManager<TAG extends Tag, OWNER, OWNER_ID, OWNER_KEY> {
+public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
-    private final TagPersistence<TAG, OWNER, OWNER_ID, OWNER_KEY> persistence;
+    private final TagRepository<TAG, OWNER> repository;
+    private final TagFactory<TAG, OWNER> factory;
 
-    public TagManager(TagPersistence<TAG, OWNER, OWNER_ID, OWNER_KEY> persistence) {
-        this.persistence = Objects.requireNonNull(persistence, "tag persistence must not be null");
+    public TagManager(TagRepository<TAG, OWNER> repository, TagFactory<TAG, OWNER> factory) {
+        this.repository = Objects.requireNonNull(repository, "tag repository must not be null");
+        this.factory = Objects.requireNonNull(factory, "tag factory must not be null");
     }
 
     public void reconcile(OWNER owner, Collection<String> manualTags, Collection<String> systemTags) {
-        OWNER_ID ownerId = requireOwnerId(owner);
+        requireOwner(owner);
         Map<TagName, TagOriginType> desired = desiredTags(manualTags, systemTags);
-        List<TAG> current = persistence.findByOwnerId(ownerId);
+        List<TAG> current = repository.findByOwnerId(owner.getId());
         validateCurrent(current);
 
         List<TAG> obsolete = new ArrayList<>();
+        List<TAG> changed = new ArrayList<>();
+
         for (TAG tag : current) {
             TagName name = requireTagName(tag);
             TagOriginType desiredOrigin = desired.remove(name);
@@ -38,24 +44,29 @@ public final class TagManager<TAG extends Tag, OWNER, OWNER_ID, OWNER_KEY> {
                 obsolete.add(tag);
             } else if (tag.getOriginType() != desiredOrigin) {
                 tag.changeOrigin(desiredOrigin);
+                changed.add(tag);
             }
         }
 
         if (!obsolete.isEmpty()) {
-            persistence.deleteAllTags(obsolete);
+            repository.deleteAll(obsolete);
         }
 
         List<TAG> created = desired.entrySet().stream()
-                .map(entry -> persistence.newTag(owner, entry.getKey(), entry.getValue()))
+                .map(entry -> factory.create(owner, entry.getKey(), entry.getValue()))
                 .toList();
 
-        if (!created.isEmpty()) {
-            persistence.saveAllTags(created);
+        if (!changed.isEmpty() || !created.isEmpty()) {
+            List<TAG> toSave = new ArrayList<>(changed.size() + created.size());
+            toSave.addAll(changed);
+            toSave.addAll(created);
+            repository.saveAll(toSave);
         }
     }
 
     public List<String> findManual(OWNER owner) {
-        return persistence.findByOwnerId(requireOwnerId(owner)).stream()
+        requireOwner(owner);
+        return repository.findByOwnerId(owner.getId()).stream()
                 .filter(tag -> tag.getOriginType() == TagOriginType.MANUAL)
                 .map(this::requireTagName)
                 .map(TagName::value)
@@ -63,17 +74,20 @@ public final class TagManager<TAG extends Tag, OWNER, OWNER_ID, OWNER_KEY> {
                 .toList();
     }
 
-    public Map<OWNER_KEY, List<String>> findManualByOwnerKeys(Collection<OWNER_KEY> ownerKeys) {
+    public Map<String, List<String>> findManualByOwnerKeys(Collection<String> ownerKeys) {
         if (ownerKeys == null || ownerKeys.isEmpty()) {
             return Map.of();
         }
 
-        LinkedHashSet<OWNER_KEY> requested = new LinkedHashSet<>(ownerKeys);
-        Map<OWNER_KEY, List<String>> result = new LinkedHashMap<>();
+        LinkedHashSet<String> requested = ownerKeys.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        Map<String, List<String>> result = new LinkedHashMap<>();
         requested.forEach(key -> result.put(key, new ArrayList<>()));
 
-        persistence.findByOwnerKeysAndOrigin(requested, TagOriginType.MANUAL).forEach(tag -> {
-            OWNER_KEY key = persistence.ownerKey(tag);
+        repository.findByOwnerIdentifiersAndOrigin(requested, TagOriginType.MANUAL).forEach(tag -> {
+            String key = requireOwner(tag.getOwner()).getIdentifier();
             List<String> tags = result.get(key);
             if (tags != null) {
                 tags.add(requireTagName(tag).value());
@@ -89,25 +103,31 @@ public final class TagManager<TAG extends Tag, OWNER, OWNER_ID, OWNER_KEY> {
                 ));
     }
 
-    public List<OWNER_KEY> findOwnerKeysByTag(String tag) {
+    public List<String> findOwnerKeysByTag(String tag) {
         if (tag == null || tag.isBlank()) {
             return List.of();
         }
-        return persistence.findOwnerKeysByTag(TagName.of(tag)).stream().distinct().toList();
+        return repository.findOwnerIdentifiersByTag(TagName.of(tag)).stream().distinct().toList();
     }
 
     public void deleteAll(OWNER owner) {
-        persistence.deleteByOwnerId(requireOwnerId(owner));
+        requireOwner(owner);
+        repository.deleteByOwnerId(owner.getId());
     }
 
-    private OWNER_ID requireOwnerId(OWNER owner) {
-        return Objects.requireNonNull(persistence.ownerId(owner), "tag owner id must not be null");
+    private OWNER requireOwner(OWNER owner) {
+        Objects.requireNonNull(owner, "tag owner must not be null");
+        Objects.requireNonNull(owner.getId(), "tag owner id must not be null");
+        Objects.requireNonNull(owner.getIdentifier(), "tag owner identifier must not be null");
+        return owner;
     }
 
     private void validateCurrent(Collection<TAG> tags) {
+        Objects.requireNonNull(tags, "persisted tags must not be null");
         Set<TagName> names = new HashSet<>();
         for (TAG tag : tags) {
             TagName name = requireTagName(tag);
+            Objects.requireNonNull(tag.getOriginType(), "persisted tag origin must not be null");
             if (!names.add(name)) {
                 throw new IllegalStateException("duplicate persisted tag for owner: " + name.value());
             }
@@ -119,10 +139,7 @@ public final class TagManager<TAG extends Tag, OWNER, OWNER_ID, OWNER_KEY> {
         return Objects.requireNonNull(tag.getName(), "persisted tag name must not be null");
     }
 
-    private static Map<TagName, TagOriginType> desiredTags(
-            Collection<String> manualTags,
-            Collection<String> systemTags) {
-
+    private static Map<TagName, TagOriginType> desiredTags(Collection<String> manualTags, Collection<String> systemTags) {
         Map<TagName, TagOriginType> desired = new LinkedHashMap<>();
         tagNames(manualTags).forEach(name -> desired.put(name, TagOriginType.MANUAL));
         tagNames(systemTags).forEach(name -> desired.putIfAbsent(name, TagOriginType.SYSTEM));
@@ -133,7 +150,6 @@ public final class TagManager<TAG extends Tag, OWNER, OWNER_ID, OWNER_KEY> {
         if (values == null) {
             return Set.of();
         }
-
         Set<TagName> names = new LinkedHashSet<>();
         values.stream()
                 .filter(Objects::nonNull)
