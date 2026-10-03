@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
 import br.com.portalmanager.platform.library.testing.annotation.WithAzureEmulator;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -11,7 +12,8 @@ import java.util.Map;
 
 public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionRegistrar {
 
-    private static final String SERVICE_BUS_BEAN = "azureServiceBusContainer";
+    private static final String SERVICE_BUS_CONTAINER_BEAN = "azureServiceBusContainer";
+    private static final String SERVICE_BUS_CLIENT_BUILDER_BEAN = "azureServiceBusClientBuilder";
     private static final String BLOB_STORAGE_BEAN = "azureBlobStorageContainer";
 
     @Override
@@ -33,6 +35,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
 
         if (serviceBus.length == 1) {
             registerServiceBus(registry, serviceBus[0].getStringArray("queues"));
+            registerServiceBusClientBuilder(registry);
         }
         if (blobStorage.length == 1) {
             registerBlobStorage(registry, blobStorage[0].getStringArray("containers"));
@@ -45,7 +48,13 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         definition.setInstanceSupplier(() -> new AzureServiceBusContainer(configuration));
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
-        registry.registerBeanDefinition(SERVICE_BUS_BEAN, definition);
+        registry.registerBeanDefinition(SERVICE_BUS_CONTAINER_BEAN, definition);
+    }
+
+    private void registerServiceBusClientBuilder(BeanDefinitionRegistry registry) {
+        RootBeanDefinition definition = new RootBeanDefinition(AzureServiceBusClientBuilderFactoryBean.class);
+        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+        registry.registerBeanDefinition(SERVICE_BUS_CLIENT_BUILDER_BEAN, definition);
     }
 
     private void registerBlobStorage(BeanDefinitionRegistry registry, String[] containers) {
