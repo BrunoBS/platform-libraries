@@ -1,12 +1,16 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
+import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
 import org.springframework.context.SmartLifecycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
@@ -25,13 +29,14 @@ import java.util.function.BiConsumer;
 
 public class SqsMessageQueueConsumer implements SmartLifecycle {
 
-    private static final System.Logger LOGGER = System.getLogger(SqsMessageQueueConsumer.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqsMessageQueueConsumer.class);
 
     private final SqsClient sqsClient;
     private final MessageQueueListenerRegistry registry;
     private final DestinationResolver destinationResolver;
     private final MessageQueueSerializer serializer;
     private final MessageQueueProperties properties;
+    private final MessageQueueMetrics metrics;
     private final Map<String, String> queueUrls = new ConcurrentHashMap<>();
     private final Map<String, Future<?>> workers = new ConcurrentHashMap<>();
 
@@ -43,12 +48,14 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             MessageQueueListenerRegistry registry,
             DestinationResolver destinationResolver,
             MessageQueueSerializer serializer,
-            MessageQueueProperties properties) {
+            MessageQueueProperties properties,
+            MessageQueueMetrics metrics) {
         this.sqsClient = sqsClient;
         this.registry = registry;
         this.destinationResolver = destinationResolver;
         this.serializer = serializer;
         this.properties = properties;
+        this.metrics = metrics;
     }
 
     @Override
@@ -69,7 +76,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             return;
         }
 
-        int concurrency = destination.concurrency() == null ? 1 : Math.max(1, destination.concurrency());
+        int concurrency = destination.concurrency() == null ? 1 : destination.concurrency();
         for (int index = 0; index < concurrency; index++) {
             String workerId = listener.destination() + "#consumer#" + index;
             workers.put(workerId, executor.submit(() -> poll(
@@ -77,6 +84,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                     destination.queue(),
                     destination.waitTime(),
                     destination.visibilityTimeout(),
+                    false,
                     (queueUrl, message) -> process(listener, queueUrl, message))));
         }
     }
@@ -93,17 +101,21 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         }
 
         String deadLetterQueue = destination.deadLetterReference();
-        String workerId = listener.destination() + "#dead-letter";
-        workers.put(workerId, executor.submit(() -> poll(
-                listener.destination(),
-                deadLetterQueue,
-                destination.waitTime(),
-                destination.visibilityTimeout(),
-                (queueUrl, message) -> processDeadLetter(
-                        listener,
-                        deadLetterQueue,
-                        queueUrl,
-                        message))));
+        int concurrency = destination.concurrency() == null ? 1 : destination.concurrency();
+        for (int index = 0; index < concurrency; index++) {
+            String workerId = listener.destination() + "#dead-letter#" + index;
+            workers.put(workerId, executor.submit(() -> poll(
+                    listener.destination(),
+                    deadLetterQueue,
+                    destination.waitTime(),
+                    destination.visibilityTimeout(),
+                    true,
+                    (queueUrl, message) -> processDeadLetter(
+                            listener,
+                            deadLetterQueue,
+                            queueUrl,
+                            message))));
+        }
     }
 
     private void poll(
@@ -111,6 +123,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             String queueName,
             Duration waitTime,
             Duration visibilityTimeout,
+            boolean deadLetter,
             BiConsumer<String, Message> messageProcessor) {
         int waitTimeSeconds = seconds(waitTime, 20, 0, 20);
         int visibilityTimeoutSeconds = seconds(visibilityTimeout, 30, 0, 43200);
@@ -135,9 +148,8 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                LOGGER.log(System.Logger.Level.WARNING,
-                        "Technical failure while polling destination " + destination + "; worker will retry",
-                        exception);
+                metrics.recordPollFailure(MessageQueueProvider.AWS, destination, deadLetter);
+                LOGGER.warn("Technical failure while polling destination {}; worker will retry", destination, exception);
                 backoff();
             }
         }
@@ -147,18 +159,24 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             MessageQueueListenerRegistry.ListenerDefinition listener,
             String queueUrl,
             Message receivedMessage) {
+        String messageId = null;
+        String correlationId = null;
         try {
             var message = serializer.deserialize(receivedMessage.body(), listener.payloadType());
+            messageId = message.messageId();
+            correlationId = message.correlationId();
             listener.invoke(message);
+            metrics.recordConsume(MessageQueueProvider.AWS, listener.destination(), false, true);
         } catch (RuntimeException exception) {
-            LOGGER.log(System.Logger.Level.WARNING,
-                    "Message processing failed for destination " + listener.destination()
-                            + "; message will not be deleted and can be redelivered",
-                    exception);
+            metrics.recordConsume(MessageQueueProvider.AWS, listener.destination(), false, false);
+            LOGGER.warn(
+                    "Message processing failed for destination {}; messageId={} correlationId={}; "
+                            + "message will not be deleted and can be redelivered",
+                    listener.destination(), messageId, correlationId, exception);
             return;
         }
 
-        deleteProcessedMessage(listener.destination(), queueUrl, receivedMessage.receiptHandle());
+        deleteProcessedMessage(listener.destination(), queueUrl, receivedMessage.receiptHandle(), messageId, correlationId);
     }
 
     private void processDeadLetter(
@@ -166,8 +184,12 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             String deadLetterQueue,
             String queueUrl,
             Message receivedMessage) {
+        String messageId = null;
+        String correlationId = null;
         try {
             var message = serializer.deserialize(receivedMessage.body(), listener.payloadType());
+            messageId = message.messageId();
+            correlationId = message.correlationId();
             Integer deliveryCount = approximateReceiveCount(receivedMessage);
             var deadLetterMessage = new DeadLetterMessage<>(
                     message,
@@ -177,15 +199,18 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                     null,
                     Map.of("provider", "AWS", "queue", deadLetterQueue));
             listener.invoke(deadLetterMessage);
+            metrics.recordConsume(MessageQueueProvider.AWS, listener.destination(), true, true);
         } catch (RuntimeException exception) {
-            LOGGER.log(System.Logger.Level.WARNING,
-                    "Dead-letter processing failed for destination " + listener.destination()
-                            + "; message will remain in the dead-letter queue",
-                    exception);
+            metrics.recordConsume(MessageQueueProvider.AWS, listener.destination(), true, false);
+            LOGGER.warn(
+                    "Dead-letter processing failed for destination {}; messageId={} correlationId={}; "
+                            + "message will remain in the dead-letter queue",
+                    listener.destination(), messageId, correlationId, exception);
             return;
         }
 
-        deleteProcessedMessage(listener.destination() + " dead-letter", queueUrl, receivedMessage.receiptHandle());
+        deleteProcessedMessage(
+                listener.destination() + " dead-letter", queueUrl, receivedMessage.receiptHandle(), messageId, correlationId);
     }
 
     private Integer approximateReceiveCount(Message message) {
@@ -196,22 +221,27 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         try {
             return Integer.valueOf(value);
         } catch (NumberFormatException exception) {
-            LOGGER.log(System.Logger.Level.WARNING, "Invalid SQS ApproximateReceiveCount value: " + value, exception);
+            LOGGER.warn("Invalid SQS ApproximateReceiveCount value: {}", value, exception);
             return null;
         }
     }
 
-    private void deleteProcessedMessage(String destination, String queueUrl, String receiptHandle) {
+    private void deleteProcessedMessage(
+            String destination,
+            String queueUrl,
+            String receiptHandle,
+            String messageId,
+            String correlationId) {
         try {
             sqsClient.deleteMessage(DeleteMessageRequest.builder()
                     .queueUrl(queueUrl)
                     .receiptHandle(receiptHandle)
                     .build());
         } catch (RuntimeException exception) {
-            LOGGER.log(System.Logger.Level.WARNING,
-                    "Message was processed but could not be deleted from destination " + destination
-                            + "; duplicate delivery is possible",
-                    exception);
+            LOGGER.warn(
+                    "Message was processed but could not be deleted from destination {}; "
+                            + "messageId={} correlationId={}; duplicate delivery is possible",
+                    destination, messageId, correlationId, exception);
         }
     }
 
