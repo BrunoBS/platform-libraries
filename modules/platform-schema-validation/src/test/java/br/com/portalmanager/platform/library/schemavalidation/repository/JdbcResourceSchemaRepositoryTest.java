@@ -71,7 +71,7 @@ class JdbcResourceSchemaRepositoryTest {
         assertTrue(exception.getErrorResponse().message().contains("vw_platform_resource_schemas"));
         assertTrue(exception.getErrorResponse().solution().contains("platform.schema-validation.view-name"));
         assertTrue(exception.getErrorResponse().solution().contains("ResourceSchemaRepository"));
-        assertTrue(exception.getErrorResponse().solution().contains("resource_type, resource_code, schema_version, definition"));
+        assertTrue(exception.getMessage().contains("resource_type, resource_code, schema_version, definition"));
     }
 
     @Test
