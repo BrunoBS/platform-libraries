@@ -5,4 +5,8 @@ public class MessageQueueConfigurationException extends RuntimeException {
     public MessageQueueConfigurationException(String message) {
         super(message);
     }
+
+    public MessageQueueConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
