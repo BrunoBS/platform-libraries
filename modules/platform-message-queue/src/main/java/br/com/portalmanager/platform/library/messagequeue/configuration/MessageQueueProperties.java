@@ -155,7 +155,7 @@ public class MessageQueueProperties implements InitializingBean {
 
     public static class Azure {
         private String namespace;
-        private final Consumer defaults = new Consumer();
+        private final ConsumerOptions defaults = new ConsumerOptions();
 
         public String getNamespace() {
             return namespace;
@@ -165,7 +165,7 @@ public class MessageQueueProperties implements InitializingBean {
             this.namespace = namespace;
         }
 
-        public Consumer getDefaults() {
+        public ConsumerOptions getDefaults() {
             return defaults;
         }
     }
