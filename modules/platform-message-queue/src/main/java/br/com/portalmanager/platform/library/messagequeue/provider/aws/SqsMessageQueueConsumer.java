@@ -2,15 +2,15 @@ package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
-import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
+import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
-import org.springframework.context.SmartLifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.SmartLifecycle;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
