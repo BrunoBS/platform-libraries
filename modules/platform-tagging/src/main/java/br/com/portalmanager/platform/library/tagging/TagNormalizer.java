@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.tagging;
 
-import java.util.Locale;
+import br.com.portalmanager.platform.library.tagging.model.TagName;
 
 public final class TagNormalizer {
 
@@ -8,13 +8,9 @@ public final class TagNormalizer {
     }
 
     public static String normalize(String value) {
-        if (value == null) {
+        if (value == null || value.isBlank()) {
             return null;
         }
-        String normalized = value.trim();
-        if (normalized.isBlank()) {
-            return null;
-        }
-        return normalized.toLowerCase(Locale.ROOT).replaceAll("\\s+", "-");
+        return TagName.of(value).value();
     }
 }
