@@ -49,10 +49,12 @@ public final class SchemaValidationTechnicalErrors {
     public static PlatformErrorDefinition schemaSourceUnavailable(String viewName) {
         return new PlatformErrorDefinition(
                 "PLT-SCHEMA-005",
-                "Schema Validation could not initialize because the schema source '" + viewName + "' is unavailable",
-                "Create or grant access to view '" + viewName + "' with columns [" + REQUIRED_VIEW_COLUMNS
-                        + "], configure platform.schema-validation.view-name with an existing compatible view, "
-                        + "or provide a ResourceSchemaRepository implementation.",
+                "Schema Validation could not initialize because the schema source '" + viewName
+                        + "' is unavailable. Expected columns: [" + REQUIRED_VIEW_COLUMNS
+                        + "]. Fix: create/grant access to this view, configure platform.schema-validation.view-name "
+                        + "with an existing compatible view, or provide a ResourceSchemaRepository implementation.",
+                "Create or grant access to the configured schema view, override platform.schema-validation.view-name, "
+                        + "or provide ResourceSchemaRepository.",
                 500
         );
     }
@@ -69,11 +71,12 @@ public final class SchemaValidationTechnicalErrors {
     public static PlatformErrorDefinition schemaSourceMissing(String viewName) {
         return new PlatformErrorDefinition(
                 "PLT-SCHEMA-007",
-                "Schema Validation could not initialize because no schema source is available",
-                "The JDBC path expects view '" + viewName + "' with columns [" + REQUIRED_VIEW_COLUMNS
-                        + "]. Configure the application datasource/JdbcTemplate and create that view, "
+                "Schema Validation could not initialize because no schema source is available. The JDBC path expects view '"
+                        + viewName + "' with columns [" + REQUIRED_VIEW_COLUMNS
+                        + "]. Fix: configure the application datasource/JdbcTemplate and create this view, "
                         + "configure platform.schema-validation.view-name with an existing compatible view, "
                         + "or provide a ResourceSchemaRepository implementation.",
+                "Configure the JDBC schema source or provide ResourceSchemaRepository.",
                 500
         );
     }
