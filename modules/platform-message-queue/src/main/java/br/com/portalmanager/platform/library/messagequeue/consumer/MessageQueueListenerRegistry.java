@@ -2,11 +2,13 @@ package br.com.portalmanager.platform.library.messagequeue.consumer;
 
 import br.com.portalmanager.platform.library.messagequeue.annotation.MessageQueueListener;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
+import br.com.portalmanager.platform.library.messagequeue.exception.MessageConsumeException;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -68,8 +70,25 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
     }
 
     public record ListenerDefinition(String destination, Object bean, Method method, Class<?> payloadType) {
-        public void invoke(MessageQueueMessage<?> message) throws ReflectiveOperationException {
-            method.invoke(bean, message);
+        public void invoke(MessageQueueMessage<?> message) {
+            try {
+                method.invoke(bean, message);
+            } catch (InvocationTargetException exception) {
+                Throwable cause = exception.getCause();
+                if (cause instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                }
+                if (cause instanceof Error error) {
+                    throw error;
+                }
+                throw new MessageConsumeException(
+                        "Listener invocation failed for destination: " + destination,
+                        cause == null ? exception : cause);
+            } catch (IllegalAccessException exception) {
+                throw new MessageConsumeException(
+                        "Listener invocation is not accessible for destination: " + destination,
+                        exception);
+            }
         }
     }
 }
