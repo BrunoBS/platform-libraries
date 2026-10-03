@@ -82,7 +82,7 @@ class PlatformAuditAutoConfigurationTest {
                     assertThat(context.getStartupFailure())
                             .isInstanceOf(PlatformConfigurationException.class)
                             .hasMessage(
-                                    "Durable audit store is required for asynchronous at-least-once delivery"
+                                    "Audit event queue is required for asynchronous at-least-once delivery"
                             );
                 });
     }
