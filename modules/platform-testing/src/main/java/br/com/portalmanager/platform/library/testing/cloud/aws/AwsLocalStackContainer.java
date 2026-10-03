@@ -26,11 +26,9 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
             String[] queues,
             String[] buckets) {
         super(image);
-        if (services == null || services.length == 0) {
-            throw new IllegalArgumentException("At least one AWS service must be configured");
-        }
-        this.queues = queues == null ? new String[0] : queues.clone();
-        this.buckets = buckets == null ? new String[0] : buckets.clone();
+        requireServices(services);
+        this.queues = copyAndValidate(queues, "AWS queue");
+        this.buckets = copyAndValidate(buckets, "AWS bucket");
         withServices(Arrays.stream(services)
                 .map(AwsService::localStackName)
                 .toArray(String[]::new));
@@ -50,14 +48,12 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
 
     private void provisionQueues() {
         for (String queue : queues) {
-            requireName(queue, "AWS queue");
             exec("sqs", "create-queue", "--queue-name", queue);
         }
     }
 
     private void provisionBuckets() {
         for (String bucket : buckets) {
-            requireName(bucket, "AWS bucket");
             exec("s3api", "create-bucket", "--bucket", bucket);
         }
     }
@@ -71,16 +67,31 @@ public class AwsLocalStackContainer extends LocalStackContainer implements Cloud
             if (result.getExitCode() != 0) {
                 throw new IllegalStateException("Failed to provision LocalStack resource: " + result.getStderr());
             }
-        } catch (IOException | InterruptedException exception) {
+        } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
+            throw new IllegalStateException("LocalStack resource provisioning was interrupted", exception);
+        } catch (IOException exception) {
             throw new IllegalStateException("Failed to provision LocalStack resource", exception);
         }
     }
 
-    private void requireName(String value, String resource) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(resource + " name must not be blank");
+    private void requireServices(AwsService[] services) {
+        if (services == null || services.length == 0) {
+            throw new IllegalArgumentException("At least one AWS service must be configured");
         }
+    }
+
+    private String[] copyAndValidate(String[] values, String resource) {
+        if (values == null) {
+            return new String[0];
+        }
+        String[] copy = values.clone();
+        for (String value : copy) {
+            if (value == null || value.isBlank()) {
+                throw new IllegalArgumentException(resource + " name must not be blank");
+            }
+        }
+        return copy;
     }
 
     @Override
