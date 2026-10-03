@@ -96,7 +96,7 @@ class AwsSqsMessageQueueContractTest {
                 .build()).messages();
 
         assertThat(messages).hasSize(1);
-        assertThat(messages.getFirst().body()).contains("\\"id\\":\\"fifo-1\\"");
+        assertThat(messages.getFirst().body()).contains("\"id\":\"fifo-1\"");
         sqsClient.deleteMessage(DeleteMessageRequest.builder()
                 .queueUrl(queueUrl)
                 .receiptHandle(messages.getFirst().receiptHandle())
