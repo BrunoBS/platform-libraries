@@ -27,6 +27,7 @@ public final class AzureEmulatorImportSelector implements ImportSelector {
     private String configurationClass(AzureService service) {
         return switch (service) {
             case SERVICE_BUS -> AzureServiceBusTestConfiguration.class.getName();
+            case BLOB_STORAGE -> AzureBlobStorageTestConfiguration.class.getName();
         };
     }
 }
