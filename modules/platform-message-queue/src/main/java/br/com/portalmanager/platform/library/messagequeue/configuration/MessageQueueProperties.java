@@ -115,6 +115,9 @@ public class MessageQueueProperties implements InitializingBean {
             validateDuration(name + ".wait-time", consumer.waitTime, 0, 20);
             validateDuration(name + ".visibility-timeout", consumer.visibilityTimeout, 0, 43200);
         } else {
+            if (consumer.visibilityTimeout != null) {
+                throw invalid(name + ".visibility-timeout is not supported for Azure; configure the queue lock duration in Azure Service Bus");
+            }
             validateDuration(name + ".wait-time", consumer.waitTime, 1, Long.MAX_VALUE);
         }
     }
