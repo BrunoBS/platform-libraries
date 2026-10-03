@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
 import br.com.portalmanager.platform.library.testing.annotation.WithAzureEmulator;
+import com.azure.messaging.servicebus.ServiceBusClientBuilder;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -54,6 +56,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
     private void registerServiceBusClientBuilder(BeanDefinitionRegistry registry) {
         RootBeanDefinition definition = new RootBeanDefinition(AzureServiceBusClientBuilderFactoryBean.class);
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+        definition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, ServiceBusClientBuilder.class);
         registry.registerBeanDefinition(SERVICE_BUS_CLIENT_BUILDER_BEAN, definition);
     }
 
