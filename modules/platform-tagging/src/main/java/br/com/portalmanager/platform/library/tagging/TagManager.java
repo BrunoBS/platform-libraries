@@ -52,7 +52,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         }
 
         List<TAG> created = desired.entrySet().stream()
-                .map(entry -> createTag(owner, entry.getKey(), entry.getValue()))
+                .map(entry -> Objects.requireNonNull(factory.create(owner, entry.getKey(), entry.getValue()), "tag factory must not return null"))
                 .toList();
 
         if (!changed.isEmpty() || !created.isEmpty()) {
@@ -132,25 +132,6 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
             throw new IllegalArgumentException("tag owner identifier must not be blank");
         }
         return owner;
-    }
-
-    private TAG createTag(OWNER owner, TagName name, TagOriginType originType) {
-        TAG tag = Objects.requireNonNull(
-                factory.create(owner, name, originType),
-                "tag factory must not return null");
-
-        OWNER tagOwner = requireOwner(tag.getOwner());
-        if (!Objects.equals(owner.getId(), tagOwner.getId())
-                || !Objects.equals(owner.getIdentifier(), tagOwner.getIdentifier())) {
-            throw new IllegalStateException("tag factory returned a tag for a different owner");
-        }
-        if (!name.equals(requireTagName(tag))) {
-            throw new IllegalStateException("tag factory returned a tag with a different name");
-        }
-        if (tag.getOriginType() != originType) {
-            throw new IllegalStateException("tag factory returned a tag with a different origin");
-        }
-        return tag;
     }
 
     private void validateCurrent(Collection<TAG> tags) {
