@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
         before = PlatformSchemaValidationAutoConfiguration.class
 )
 @ConditionalOnClass(JdbcTemplate.class)
+@EnableConfigurationProperties(PlatformSchemaValidationProperties.class)
 public class PlatformSchemaValidationJdbcAutoConfiguration {
 
     @Bean
