@@ -29,7 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
         "platform.message-queue.destinations.failing-contract.azure.wait-time=PT1S"
 })
 @WithAzureEmulator(
-        serviceBus = @AzureServiceBus(queues = {"contract-queue", "consumer-contract", "failing-contract"})
+        serviceBus = @AzureServiceBus(queues = {
+                @AzureServiceBus.Queue(name = "contract-queue"),
+                @AzureServiceBus.Queue(name = "consumer-contract"),
+                @AzureServiceBus.Queue(name = "failing-contract", maxDeliveryCount = 3)
+        })
 )
 class AzureServiceBusMessageQueueContractTest {
 
