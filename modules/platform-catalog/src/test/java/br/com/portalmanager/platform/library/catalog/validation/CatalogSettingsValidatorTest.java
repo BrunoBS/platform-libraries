@@ -6,15 +6,27 @@ import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CatalogSettingsValidatorTest {
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
+
+    @Test
+    void shouldValidateSettingsAsCatalogResource() {
+        RecordingSchemaValidator schemaValidator = new RecordingSchemaValidator();
+
+        CatalogSettingsValidator.schema("workspace-type", schemaValidator)
+                .validate(dto(), new ValidationResult());
+
+        assertThat(schemaValidator.resourceType).isEqualTo("CATALOG");
+        assertThat(schemaValidator.resourceCode).isEqualTo("workspace-type");
+        assertThat(schemaValidator.payload).isSameAs(dto().settings());
+    }
 
     @Test
     void shouldPrefixSchemaErrorsWithSettingsField() {
@@ -52,6 +64,18 @@ class CatalogSettingsValidatorTest {
                 .containsExactly("settings");
     }
 
+    @Test
+    void shouldNotHideTechnicalSchemaErrors() {
+        SchemaValidator schemaValidator = (type, code, payload) -> {
+            throw new IllegalStateException("schema unavailable");
+        };
+
+        assertThatThrownBy(() -> CatalogSettingsValidator.schema("workspace-type", schemaValidator)
+                .validate(dto(), new ValidationResult()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("schema unavailable");
+    }
+
     private CatalogDTO dto() {
         return new CatalogDTO(
                 "MANAGER",
@@ -60,5 +84,18 @@ class CatalogSettingsValidatorTest {
                 1,
                 JSON.createObjectNode()
         );
+    }
+
+    private static final class RecordingSchemaValidator implements SchemaValidator {
+        private String resourceType;
+        private String resourceCode;
+        private JsonNode payload;
+
+        @Override
+        public void validate(String resourceType, String resourceCode, JsonNode payload) {
+            this.resourceType = resourceType;
+            this.resourceCode = resourceCode;
+            this.payload = payload;
+        }
     }
 }
