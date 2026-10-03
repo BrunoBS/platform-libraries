@@ -100,38 +100,45 @@ class TagManagerTest {
     }
 
     @Test
-    void shouldRejectTagCreatedForDifferentOwner() {
+    void shouldPreferManualOverSystem() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
-        Owner other = new Owner(11L, "workspace-11");
         when(repository.findByOwnerId(10L)).thenReturn(List.of());
-        TagManager<TestTag, Owner> manager =
-                new TagManager<TestTag, Owner>(repository, (ignoredOwner, name, origin) -> new TestTag(other, name, origin));
-
-        assertThatThrownBy(() -> manager.reconcile(owner, List.of("tag-a"), List.of()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("different owner");
+        new TagManager<TestTag, Owner>(repository, TestTag::new)
+                .reconcile(owner, List.of("shared"), List.of("shared"));
+        verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags ->
+                tags.size() == 1 && tags.iterator().next().getOriginType() == TagOriginType.MANUAL));
     }
 
     @Test
-    void shouldRejectTagCreatedWithDifferentNameOrOrigin() {
+    void shouldDeduplicateNormalizedTags() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
         when(repository.findByOwnerId(10L)).thenReturn(List.of());
+        new TagManager<TestTag, Owner>(repository, TestTag::new)
+                .reconcile(owner, List.of("My Tag", " my   tag ", "my-tag"), List.of());
+        verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> tags.size() == 1));
+    }
 
-        TagManager<TestTag, Owner> wrongName =
-                new TagManager<TestTag, Owner>(repository, (sameOwner, name, origin) ->
-                        new TestTag(sameOwner, TagName.of("other"), origin));
-        assertThatThrownBy(() -> wrongName.reconcile(owner, List.of("tag-a"), List.of()))
+    @Test
+    void shouldRejectDuplicatePersistedTags() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        when(repository.findByOwnerId(10L)).thenReturn(List.of(
+                new TestTag(owner, TagName.of("same"), TagOriginType.MANUAL),
+                new TestTag(owner, TagName.of("same"), TagOriginType.SYSTEM)));
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+        assertThatThrownBy(() -> manager.reconcile(owner, List.of("same"), List.of()))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("different name");
+                .hasMessageContaining("duplicate persisted tag");
+    }
 
-        TagManager<TestTag, Owner> wrongOrigin =
-                new TagManager<TestTag, Owner>(repository, (sameOwner, name, origin) ->
-                        new TestTag(sameOwner, name, TagOriginType.SYSTEM));
-        assertThatThrownBy(() -> wrongOrigin.reconcile(owner, List.of("tag-a"), List.of()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("different origin");
+    @Test
+    void shouldDeleteAllByOwnerId() {
+        TagRepository<TestTag, Owner> repository = repository();
+        new TagManager<TestTag, Owner>(repository, TestTag::new)
+                .deleteAll(new Owner(10L, "workspace-10"));
+        verify(repository).deleteByOwnerId(10L);
     }
 
     @SuppressWarnings("unchecked")
