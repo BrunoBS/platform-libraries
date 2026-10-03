@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.TriFunction;
 import java.util.stream.Collectors;
 
 public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
