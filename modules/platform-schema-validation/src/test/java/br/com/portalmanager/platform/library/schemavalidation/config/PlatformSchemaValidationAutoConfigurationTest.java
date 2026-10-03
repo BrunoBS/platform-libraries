@@ -63,6 +63,17 @@ class PlatformSchemaValidationAutoConfigurationTest {
             assertThat(context).hasFailed();
             assertThat(context.getStartupFailure())
                     .hasRootCauseInstanceOf(PlatformConfigurationException.class);
+
+            Throwable cause = context.getStartupFailure();
+            while (cause.getCause() != null) {
+                cause = cause.getCause();
+            }
+
+            assertThat(cause.getMessage())
+                    .contains("vw_platform_resource_schemas")
+                    .contains("resource_type, resource_code, schema_version, definition")
+                    .contains("platform.schema-validation.view-name")
+                    .contains("ResourceSchemaRepository");
         });
     }
 
