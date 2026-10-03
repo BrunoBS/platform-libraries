@@ -38,7 +38,7 @@ public class AzureServiceBusTestConfiguration {
             }
             """;
 
-    @Bean(destroyMethod = "stop")
+    @Bean(initMethod = "start", destroyMethod = "stop")
     AzureServiceBusContainer azureServiceBusContainer() {
         return new AzureServiceBusContainer(SERVICE_BUS_CONFIG);
     }
