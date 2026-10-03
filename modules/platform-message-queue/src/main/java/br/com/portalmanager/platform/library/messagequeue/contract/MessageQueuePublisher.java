@@ -6,7 +6,5 @@ public interface MessageQueuePublisher {
 
     void publish(String destination, Object payload);
 
-    default void publish(String destination, Object payload, String correlationId, Map<String, String> headers) {
-        publish(destination, payload);
-    }
+    void publish(String destination, Object payload, String correlationId, Map<String, String> headers);
 }
