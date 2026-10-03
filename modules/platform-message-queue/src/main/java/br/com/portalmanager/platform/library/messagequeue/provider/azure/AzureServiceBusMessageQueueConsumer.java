@@ -84,12 +84,14 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
 
     private void pollListener(String workerId, MessageQueueListenerRegistry.ListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        poll(workerId, destination.queue(), false, receiver -> receiveAndProcess(receiver, listener));
+        poll(workerId, destination.queue(), false,
+                (receiver, message) -> receiveAndProcess(receiver, listener, message));
     }
 
     private void pollDeadLetter(String workerId, MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
-        poll(workerId, destination.queue(), true, receiver -> receiveAndProcessDeadLetter(receiver, listener));
+        poll(workerId, destination.queue(), true,
+                (receiver, message) -> receiveAndProcessDeadLetter(receiver, listener, message));
     }
 
     private void poll(String workerId, String queueName, boolean deadLetter, ReceiverWork work) {
