@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.configuration;
 
+import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
