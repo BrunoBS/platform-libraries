@@ -7,14 +7,14 @@ import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessag
 import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureServiceBusMessageQueueConsumer;
 import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureServiceBusMessageQueueTransport;
-import br.com.portalmanager.platform.library.messagequeue.publisher.DefaultMessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
+import br.com.portalmanager.platform.library.messagequeue.publisher.DefaultMessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.publisher.MessageEnvelopeFactory;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
 import com.azure.identity.DefaultAzureCredentialBuilder;
-import io.micrometer.core.instrument.MeterRegistry;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
+import io.micrometer.core.instrument.MeterRegistry;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
