@@ -12,19 +12,19 @@ public final class AuditTechnicalErrors {
                     500
             );
 
-    public static final PlatformErrorDefinition FALLBACK_STORE_MISSING =
+    public static final PlatformErrorDefinition QUEUE_MISSING =
             new PlatformErrorDefinition(
                     "PLT-AUD-002",
-                    "Durable audit store is required for asynchronous at-least-once delivery",
-                    "Configure Redis or provide an AuditFallbackStore bean. Use fail-on-error=true only for strict synchronous delivery.",
+                    "Audit event queue is required for asynchronous at-least-once delivery",
+                    "Configure Redis or provide an AuditEventQueue bean. Use fail-on-error=true only for strict synchronous delivery.",
                     500
             );
 
     public static final PlatformErrorDefinition REDIS_NOT_CONFIGURED =
             new PlatformErrorDefinition(
                     "PLT-AUD-003",
-                    "Redis is required for the default durable audit store",
-                    "Configure StringRedisTemplate, provide an AuditFallbackStore bean, or use strict synchronous delivery.",
+                    "Redis is required for the default audit event queue",
+                    "Configure StringRedisTemplate, provide an AuditEventQueue bean, or use strict synchronous delivery.",
                     500
             );
 
