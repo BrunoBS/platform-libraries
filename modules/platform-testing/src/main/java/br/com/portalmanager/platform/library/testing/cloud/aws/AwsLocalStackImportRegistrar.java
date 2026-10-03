@@ -4,11 +4,12 @@ import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStac
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionRegistrar {
 
@@ -22,30 +23,61 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             return;
         }
 
-        AwsService[] services = (AwsService[]) attributes.get("services");
-        String[] queues = (String[]) attributes.get("queues");
-        String[] buckets = (String[]) attributes.get("buckets");
+        AnnotationAttributes[] sqs = annotations(attributes.get("sqs"));
+        AnnotationAttributes[] s3 = annotations(attributes.get("s3"));
+        requireSingle("AwsSqs", sqs);
+        requireSingle("AwsS3", s3);
 
-        validateTopology(services, queues, buckets);
+        List<AwsService> services = new ArrayList<>();
+        String[] queues = new String[0];
+        String[] buckets = new String[0];
+
+        if (sqs.length == 1) {
+            services.add(AwsService.SQS);
+            queues = sqs[0].getStringArray("queues");
+        }
+        if (s3.length == 1) {
+            services.add(AwsService.S3);
+            buckets = s3[0].getStringArray("buckets");
+        }
+        if (services.isEmpty()) {
+            throw new IllegalArgumentException("At least one AWS service annotation must be configured");
+        }
+
+        AwsService[] enabledServices = services.toArray(AwsService[]::new);
+        String[] configuredQueues = queues;
+        String[] configuredBuckets = buckets;
 
         RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackContainer.class);
-        definition.setInstanceSupplier(() -> new AwsLocalStackContainer(services, queues, buckets));
+        definition.setInstanceSupplier(() -> new AwsLocalStackContainer(
+                enabledServices,
+                configuredQueues,
+                configuredBuckets));
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(BEAN_NAME, definition);
     }
 
-    private void validateTopology(AwsService[] services, String[] queues, String[] buckets) {
-        if (services == null || services.length == 0) {
-            throw new IllegalArgumentException("At least one AWS service must be configured");
+    private AnnotationAttributes[] annotations(Object value) {
+        if (value == null) {
+            return new AnnotationAttributes[0];
         }
+        if (value instanceof AnnotationAttributes[] annotationAttributes) {
+            return annotationAttributes;
+        }
+        if (value instanceof Map<?, ?>[] maps) {
+            AnnotationAttributes[] result = new AnnotationAttributes[maps.length];
+            for (int index = 0; index < maps.length; index++) {
+                result[index] = AnnotationAttributes.fromMap((Map<String, Object>) maps[index]);
+            }
+            return result;
+        }
+        throw new IllegalArgumentException("Unsupported nested AWS service annotation metadata");
+    }
 
-        Set<AwsService> enabled = Set.copyOf(Arrays.asList(services));
-        if (queues != null && queues.length > 0 && !enabled.contains(AwsService.SQS)) {
-            throw new IllegalArgumentException("AWS queues require AwsService.SQS to be enabled");
-        }
-        if (buckets != null && buckets.length > 0 && !enabled.contains(AwsService.S3)) {
-            throw new IllegalArgumentException("AWS buckets require AwsService.S3 to be enabled");
+    private void requireSingle(String annotationName, AnnotationAttributes[] annotations) {
+        if (annotations.length > 1) {
+            throw new IllegalArgumentException(annotationName + " may be declared only once");
         }
     }
 }
