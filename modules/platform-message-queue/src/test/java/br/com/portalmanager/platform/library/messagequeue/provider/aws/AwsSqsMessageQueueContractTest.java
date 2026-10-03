@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
                 @AwsSqs.Queue(name = "consumer-contract"),
                 @AwsSqs.Queue(
                         name = "failing-contract",
-                        deadLetterQueue = "failing-contract-dlq",
+                        deadLetterEnabled = true,
                         maxReceiveCount = 2)
         })
 )
