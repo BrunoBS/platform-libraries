@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.messagequeue.resolver;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties.AwsQueueType;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +52,23 @@ class DestinationResolverTest {
         var resolved = new DestinationResolver(properties).resolve("product-updated");
 
         assertThat(resolved.deadLetterReference()).isEqualTo("pm-product-updated-dlq");
+    }
+
+    @Test
+    void shouldResolveFifoQueueAndConventionalFifoDeadLetterName() {
+        var properties = new MessageQueueProperties();
+        properties.setProvider(MessageQueueProvider.AWS);
+        properties.getAws().setRegion("sa-east-1");
+
+        var destination = new MessageQueueProperties.Destination();
+        destination.setQueue("orders.fifo");
+        destination.getAws().setQueueType(AwsQueueType.FIFO);
+        properties.getDestinations().put("orders", destination);
+
+        var resolved = new DestinationResolver(properties).resolve("orders");
+
+        assertThat(resolved.fifo()).isTrue();
+        assertThat(resolved.deadLetterReference()).isEqualTo("orders-dlq.fifo");
     }
 
     @Test
