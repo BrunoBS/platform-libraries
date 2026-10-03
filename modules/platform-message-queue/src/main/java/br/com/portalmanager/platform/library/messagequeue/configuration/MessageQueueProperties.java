@@ -73,7 +73,7 @@ public class MessageQueueProperties implements InitializingBean {
             if (aws.region == null || aws.region.isBlank()) {
                 throw invalid("aws.region is required when provider is AWS");
             }
-            validateConsumer("aws.defaults", aws.defaults);
+            validateAwsConsumer("aws.defaults", aws.defaults, aws.defaults.visibilityTimeout);
         } else {
             if (azure.namespace == null || azure.namespace.isBlank()) {
                 throw invalid("azure.namespace is required when provider is AZURE");
@@ -94,7 +94,7 @@ public class MessageQueueProperties implements InitializingBean {
 
         validateConsumer(name + ".consumer", destination.consumer);
         if (provider == MessageQueueProvider.AWS) {
-            validateConsumer(name + ".aws", destination.aws);
+            validateAwsConsumer(name + ".aws", destination.aws, destination.aws.visibilityTimeout);
             String deadLetterQueue = destination.aws.deadLetterQueue;
             if (deadLetterQueue != null && !deadLetterQueue.isBlank() && deadLetterQueue.equals(destination.queue)) {
                 throw invalid("destination '" + name + "' source and dead-letter queues must be different");
@@ -113,13 +113,14 @@ public class MessageQueueProperties implements InitializingBean {
         }
         if (provider == MessageQueueProvider.AWS) {
             validateDuration(name + ".wait-time", consumer.waitTime, 0, 20);
-            validateDuration(name + ".visibility-timeout", consumer.visibilityTimeout, 0, 43200);
         } else {
-            if (consumer.visibilityTimeout != null) {
-                throw invalid(name + ".visibility-timeout is not supported for Azure; configure the queue lock duration in Azure Service Bus");
-            }
             validateDuration(name + ".wait-time", consumer.waitTime, 1, Long.MAX_VALUE);
         }
+    }
+
+    private void validateAwsConsumer(String name, ConsumerOptions consumer, Duration visibilityTimeout) {
+        validateConsumer(name, consumer);
+        validateDuration(name + ".visibility-timeout", visibilityTimeout, 0, 43200);
     }
 
     private void validateDuration(String name, Duration value, long minSeconds, long maxSeconds) {
@@ -141,7 +142,7 @@ public class MessageQueueProperties implements InitializingBean {
 
     public static class Aws {
         private String region;
-        private final ConsumerOptions defaults = new ConsumerOptions();
+        private final AwsConsumerOptions defaults = new AwsConsumerOptions();
 
         public String getRegion() {
             return region;
@@ -151,7 +152,7 @@ public class MessageQueueProperties implements InitializingBean {
             this.region = region;
         }
 
-        public ConsumerOptions getDefaults() {
+        public AwsConsumerOptions getDefaults() {
             return defaults;
         }
     }
@@ -230,17 +231,8 @@ public class MessageQueueProperties implements InitializingBean {
     }
 
     public static class ConsumerOptions {
-        private Duration visibilityTimeout;
         private Duration waitTime;
         private Integer concurrency;
-
-        public Duration getVisibilityTimeout() {
-            return visibilityTimeout;
-        }
-
-        public void setVisibilityTimeout(Duration visibilityTimeout) {
-            this.visibilityTimeout = visibilityTimeout;
-        }
 
         public Duration getWaitTime() {
             return waitTime;
@@ -259,8 +251,29 @@ public class MessageQueueProperties implements InitializingBean {
         }
     }
 
+    public static class AwsConsumerOptions extends ConsumerOptions {
+        private Duration visibilityTimeout;
+
+        public Duration getVisibilityTimeout() {
+            return visibilityTimeout;
+        }
+
+        public void setVisibilityTimeout(Duration visibilityTimeout) {
+            this.visibilityTimeout = visibilityTimeout;
+        }
+    }
+
     public static class AwsDestination extends ConsumerOptions {
         private String deadLetterQueue;
+        private Duration visibilityTimeout;
+
+        public Duration getVisibilityTimeout() {
+            return visibilityTimeout;
+        }
+
+        public void setVisibilityTimeout(Duration visibilityTimeout) {
+            this.visibilityTimeout = visibilityTimeout;
+        }
 
         public String getDeadLetterQueue() {
             return deadLetterQueue;
