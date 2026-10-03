@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.audit.recovery;
 
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ class AuditRecoveryServiceTest {
     @Test
     void shouldStopCycleWhenFirstPendingEventStillFails() {
         PlatformAuditProperties properties = properties(10);
-        InMemoryFallbackStore store = new InMemoryFallbackStore();
+        InMemoryEventQueue store = new InMemoryEventQueue();
         store.save(event("1"));
         store.save(event("2"));
 
@@ -38,7 +38,7 @@ class AuditRecoveryServiceTest {
     @Test
     void shouldSkipRecoveryWhenDistributedLockIsUnavailable() {
         PlatformAuditProperties properties = properties(10);
-        InMemoryFallbackStore store = new InMemoryFallbackStore();
+        InMemoryEventQueue store = new InMemoryEventQueue();
         store.save(event("1"));
 
         AtomicInteger published = new AtomicInteger();
@@ -54,7 +54,7 @@ class AuditRecoveryServiceTest {
     @Test
     void shouldRecoverUpToConfiguredBatchSize() {
         PlatformAuditProperties properties = properties(2);
-        InMemoryFallbackStore store = new InMemoryFallbackStore();
+        InMemoryEventQueue store = new InMemoryEventQueue();
         store.save(event("1"));
         store.save(event("2"));
         store.save(event("3"));
@@ -72,7 +72,7 @@ class AuditRecoveryServiceTest {
 
     private AuditRecoveryService recoveryService(
             AuditPublisher publisher,
-            AuditFallbackStore store,
+            AuditEventQueue store,
             AuditRecoveryLock lock,
             PlatformAuditProperties properties
     ) {
@@ -87,7 +87,7 @@ class AuditRecoveryServiceTest {
 
     private PlatformAuditProperties properties(int batchSize) {
         PlatformAuditProperties properties = new PlatformAuditProperties();
-        properties.getFallback().setBatchSize(batchSize);
+        properties.getQueue().setBatchSize(batchSize);
         return properties;
     }
 
@@ -131,7 +131,7 @@ class AuditRecoveryServiceTest {
         }
     }
 
-    private static final class InMemoryFallbackStore implements AuditFallbackStore {
+    private static final class InMemoryEventQueue implements AuditEventQueue {
 
         private final Deque<AuditEventRequest> events = new ArrayDeque<>();
 
