@@ -9,8 +9,10 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionRegistrar {
 
@@ -33,10 +35,13 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         List<AwsService> services = new ArrayList<>();
         String[] queues = new String[0];
         String[] buckets = new String[0];
+        String[][] redrivePolicies = new String[0][];
 
         if (sqs.length == 1) {
             services.add(AwsService.SQS);
-            queues = sqs[0].getStringArray("queues");
+            var configuration = sqsConfiguration(sqs[0]);
+            queues = configuration.queues();
+            redrivePolicies = configuration.redrivePolicies();
         }
         if (s3.length == 1) {
             services.add(AwsService.S3);
@@ -46,24 +51,65 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             throw new IllegalArgumentException("At least one AWS service annotation must be configured");
         }
 
-        registerContainer(registry, services, queues, buckets);
+        registerContainer(registry, services, queues, buckets, redrivePolicies);
         registerConnection(registry);
         registerServiceClients(registry, sqs.length == 1, s3.length == 1);
+    }
+
+    private SqsConfiguration sqsConfiguration(AnnotationAttributes sqs) {
+        AnnotationAttributes[] queueDefinitions = annotations(sqs.get("queues"));
+        List<String> queues = new ArrayList<>();
+        List<String[]> redrivePolicies = new ArrayList<>();
+
+        for (AnnotationAttributes queue : queueDefinitions) {
+            String name = queue.getString("name");
+            requireName(name, "SQS queue");
+            addUnique(queues, name, "SQS queue");
+
+            String deadLetterQueue = queue.getString("deadLetterQueue");
+            if (deadLetterQueue == null || deadLetterQueue.isBlank()) {
+                continue;
+            }
+            requireName(deadLetterQueue, "SQS dead-letter queue");
+            if (name.equals(deadLetterQueue)) {
+                throw new IllegalArgumentException("SQS source and dead-letter queues must be different");
+            }
+            int maxReceiveCount = queue.getNumber("maxReceiveCount").intValue();
+            if (maxReceiveCount < 1) {
+                throw new IllegalArgumentException("SQS maxReceiveCount must be a positive integer");
+            }
+            addUnique(queues, deadLetterQueue, "SQS queue");
+            redrivePolicies.add(new String[]{name, deadLetterQueue, Integer.toString(maxReceiveCount)});
+        }
+
+        return new SqsConfiguration(queues.toArray(String[]::new), redrivePolicies.toArray(String[][]::new));
+    }
+
+    private void requireName(String name, String type) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException(type + " name must not be blank");
+        }
+    }
+
+    private void addUnique(List<String> values, String value, String type) {
+        if (values.contains(value)) {
+            throw new IllegalArgumentException("Duplicate " + type + " name: " + value);
+        }
+        values.add(value);
     }
 
     private void registerContainer(
             BeanDefinitionRegistry registry,
             List<AwsService> services,
             String[] queues,
-            String[] buckets) {
+            String[] buckets,
+            String[][] redrivePolicies) {
         AwsService[] enabledServices = services.toArray(AwsService[]::new);
-        String[] configuredQueues = queues.clone();
-        String[] configuredBuckets = buckets.clone();
-
         RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackContainer.class);
         definition.getConstructorArgumentValues().addIndexedArgumentValue(0, enabledServices);
-        definition.getConstructorArgumentValues().addIndexedArgumentValue(1, configuredQueues);
-        definition.getConstructorArgumentValues().addIndexedArgumentValue(2, configuredBuckets);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(1, queues.clone());
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(2, buckets.clone());
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(3, redrivePolicies.clone());
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(CONTAINER_BEAN, definition);
@@ -106,5 +152,8 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         if (annotations.length > 1) {
             throw new IllegalArgumentException(annotationName + " may be declared only once");
         }
+    }
+
+    private record SqsConfiguration(String[] queues, String[][] redrivePolicies) {
     }
 }
