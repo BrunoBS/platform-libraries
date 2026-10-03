@@ -11,6 +11,7 @@ public record ResolvedDestination(
         String deadLetterReference,
         boolean publisherEnabled,
         boolean consumerEnabled,
+        boolean fifo,
         Duration visibilityTimeout,
         Duration waitTime,
         Integer concurrency
