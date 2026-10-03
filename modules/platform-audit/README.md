@@ -30,7 +30,9 @@ A gravação no fila de auditoria faz parte da aceitação do evento. Se essa gr
 
 Este contrato não promete atomicidade entre a transação de negócio e a auditoria. Garantia transacional entre banco de negócio e evento exigiria um padrão como Transactional Outbox e não faz parte desta versão Golden.
 
-Reenvios podem acontecer. A identidade/idempotência do evento é tratada separadamente no próximo refinamento do contrato.
+Reenvios podem acontecer. Cada ocorrência auditável recebe um `eventId` UUID imutável na origem, antes de entrar na fila. Redis, recovery e publicação HTTP preservam exatamente o mesmo identificador em todas as tentativas.
+
+A library garante a identidade estável do evento. A Audit API deve tratar `eventId` como chave de idempotência e manter unicidade persistente: a primeira entrega grava o evento e entregas repetidas do mesmo `eventId` devem ser consideradas já processadas, sem criar uma segunda auditoria. O `eventId` não é derivado do payload; duas ocorrências legítimas com conteúdo igual recebem identificadores diferentes.
 
 ## Dependência
 
@@ -139,10 +141,9 @@ Esta etapa fecha apenas a garantia de entrega do item 1 da auditoria.
 
 Ainda precisam ser tratados explicitamente:
 
-1. eventId e idempotência;
-2. poison event, retry e DLQ;
-3. expiração/renovação do lock;
-4. política de payload;
-5. falhas silenciosas de resolução do Aspect;
-6. validações adicionais de configuração.
+1. poison event, retry e DLQ;
+2. expiração/renovação do lock;
+3. política de payload;
+4. falhas silenciosas de resolução do Aspect;
+5. validações adicionais de configuração.
 
