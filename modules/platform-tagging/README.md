@@ -87,4 +87,4 @@ A FK e os nomes físicos continuam sob responsabilidade do recurso para preserva
 
 ## Testes da library
 
-Além dos testes unitários do `TagManager` e `TagName`, o módulo possui teste JPA com banco embarcado para validar o contrato real de `TagRepository`, incluindo converter, consultas por owner, consulta por identifier/tag e exclusão. Isso evita que erros de JPQL apareçam somente no serviço consumidor.
+O módulo mantém testes unitários do `TagManager` e do `TagName`. A integração real do repository deve ser validada contra a tecnologia de banco homologada pela plataforma; banco embarcado alternativo não faz parte deste módulo.
