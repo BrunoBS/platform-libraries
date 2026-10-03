@@ -211,7 +211,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         }
 
         deleteProcessedMessage(
-                listener.destination() + " dead-letter",
+                listener.destination(),
                 queueUrl, receivedMessage.receiptHandle(), messageId, correlationId, true);
     }
 
