@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
-import br.com.portalmanager.platform.library.audit.fallback.RedisAuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
+import br.com.portalmanager.platform.library.audit.queue.RedisAuditEventQueue;
 import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.audit.recovery.AuditRecoveryLock;
@@ -25,12 +25,12 @@ import tools.jackson.databind.ObjectMapper;
 @EnableConfigurationProperties(PlatformAuditProperties.class)
 @ConditionalOnClass(StringRedisTemplate.class)
 @ConditionalOnProperty(prefix = "platform.audit", name = "enabled", havingValue = "true", matchIfMissing = true)
-@ConditionalOnProperty(prefix = "platform.audit.fallback", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "platform.audit.queue", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlatformAuditRedisAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(AuditFallbackStore.class)
-    AuditFallbackStore auditFallbackStore(
+    @ConditionalOnMissingBean(AuditEventQueue.class)
+    AuditEventQueue auditEventQueue(
             ObjectProvider<StringRedisTemplate> redisTemplateProvider,
             ObjectMapper objectMapper,
             PlatformAuditProperties properties
@@ -39,7 +39,7 @@ public class PlatformAuditRedisAutoConfiguration {
         if (redisTemplate == null) {
             throw new PlatformConfigurationException(AuditTechnicalErrors.REDIS_NOT_CONFIGURED);
         }
-        return new RedisAuditFallbackStore(redisTemplate, objectMapper, properties);
+        return new RedisAuditEventQueue(redisTemplate, objectMapper, properties);
     }
 
     @Bean
@@ -69,7 +69,7 @@ public class PlatformAuditRedisAutoConfiguration {
     @ConditionalOnMissingBean(AuditRecoveryService.class)
     AuditRecoveryService auditRecoveryService(
             AuditPublisher publisher,
-            AuditFallbackStore fallbackStore,
+            AuditEventQueue eventQueue,
             AuditRecoveryLock recoveryLock,
             @Qualifier("platformAuditRecoveryTaskScheduler")
             ThreadPoolTaskScheduler platformAuditRecoveryTaskScheduler,
@@ -77,7 +77,7 @@ public class PlatformAuditRedisAutoConfiguration {
     ) {
         return new AuditRecoveryService(
                 publisher,
-                fallbackStore,
+                eventQueue,
                 recoveryLock,
                 platformAuditRecoveryTaskScheduler,
                 properties
