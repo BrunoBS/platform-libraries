@@ -3,8 +3,12 @@ package br.com.portalmanager.platform.library.messagequeue.monitoring;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
 import br.com.portalmanager.platform.library.messagequeue.resolver.ResolvedDestination;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class MessageQueueMetrics {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageQueueMetrics.class);
 
     private final MeterRegistry meterRegistry;
 
@@ -53,8 +57,13 @@ public final class MessageQueueMetrics {
     }
 
     private void increment(String name, String... tags) {
-        if (meterRegistry != null) {
+        if (meterRegistry == null) {
+            return;
+        }
+        try {
             meterRegistry.counter(name, tags).increment();
+        } catch (RuntimeException exception) {
+            LOGGER.warn("Could not record message queue metric '{}'", name, exception);
         }
     }
 
