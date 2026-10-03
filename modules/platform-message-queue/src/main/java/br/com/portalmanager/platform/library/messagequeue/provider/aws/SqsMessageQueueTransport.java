@@ -41,10 +41,12 @@ public class SqsMessageQueueTransport implements MessageQueueTransport {
                 }
                 validateFifoId("messageGroupId", options.messageGroupId());
                 request.messageGroupId(options.messageGroupId());
-                if (options.deduplicationId() != null) {
-                    validateFifoId("deduplicationId", options.deduplicationId());
-                    request.messageDeduplicationId(options.deduplicationId());
+                if (options.deduplicationId() == null || options.deduplicationId().isBlank()) {
+                    throw new IllegalArgumentException(
+                            "deduplicationId is required for an AWS SQS FIFO destination");
                 }
+                validateFifoId("deduplicationId", options.deduplicationId());
+                request.messageDeduplicationId(options.deduplicationId());
             } else if (options.messageGroupId() != null || options.deduplicationId() != null) {
                 throw new IllegalArgumentException("FIFO publish options can only be used with an AWS SQS FIFO destination");
             }
