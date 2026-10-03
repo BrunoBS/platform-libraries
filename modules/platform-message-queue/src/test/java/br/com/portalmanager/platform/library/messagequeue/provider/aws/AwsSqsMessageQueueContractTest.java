@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractLi
 import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractTestApplication;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
+import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
 import br.com.portalmanager.platform.library.testing.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStack;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,7 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(classes = MessageQueueContractTestApplication.class)
 @TestPropertySource(properties = {
@@ -101,6 +103,14 @@ class AwsSqsMessageQueueContractTest {
                 .queueUrl(queueUrl)
                 .receiptHandle(messages.getFirst().receiptHandle())
                 .build());
+    }
+
+    @Test
+    void shouldRequireExplicitDeduplicationIdForFifoQueue() {
+        assertThatThrownBy(() -> publisher.publish("fifo-contract", new ContractPayload("fifo-no-dedup"),
+                new MessageQueuePublishOptions(null, java.util.Map.of(), "orders", null)))
+                .isInstanceOf(MessagePublishException.class)
+                .hasRootCauseMessage("deduplicationId is required for an AWS SQS FIFO destination");
     }
 
     @Test
