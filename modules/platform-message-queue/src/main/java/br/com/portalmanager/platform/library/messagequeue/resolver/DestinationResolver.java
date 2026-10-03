@@ -4,8 +4,6 @@ import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQ
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 
-import java.time.Duration;
-
 public class DestinationResolver {
 
     private final MessageQueueProperties properties;
@@ -34,13 +32,21 @@ public class DestinationResolver {
                 destination,
                 properties.getProvider(),
                 configured.getQueue(),
-                configured.getDeadLetterQueue(),
+                resolveDeadLetterReference(properties.getProvider(), configured),
                 configured.getPublisher().isEnabled(),
                 configured.getConsumer().isEnabled(),
                 firstNonNull(providerOverride.getVisibilityTimeout(), configured.getConsumer().getVisibilityTimeout(), providerDefaults.getVisibilityTimeout()),
                 firstNonNull(providerOverride.getWaitTime(), configured.getConsumer().getWaitTime(), providerDefaults.getWaitTime()),
                 firstNonNull(providerOverride.getConcurrency(), configured.getConsumer().getConcurrency(), providerDefaults.getConcurrency())
         );
+    }
+
+    private String resolveDeadLetterReference(
+            MessageQueueProvider provider,
+            MessageQueueProperties.Destination destination) {
+        return provider == MessageQueueProvider.AWS
+                ? destination.getAws().getDeadLetterQueue()
+                : null;
     }
 
     private MessageQueueProperties.Consumer providerDefaults(MessageQueueProvider provider) {
@@ -55,6 +61,7 @@ public class DestinationResolver {
         return provider == MessageQueueProvider.AWS ? destination.getAws() : destination.getAzure();
     }
 
+    @SafeVarargs
     private static <T> T firstNonNull(T... values) {
         for (T value : values) {
             if (value != null) {
