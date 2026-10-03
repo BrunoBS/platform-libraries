@@ -55,6 +55,14 @@ class AbstractCatalogValidatorContractTest {
     }
 
     @Test
+    void deveValidarLimitePersistidoDoLabel() {
+        assertValidation(
+                () -> validator.validateForCreate(dto("ONE", "L".repeat(101), "Descrição válida")),
+                "label"
+        );
+    }
+
+    @Test
     void deveValidarLimitesDaDescricao() {
         assertValidation(
                 () -> validator.validateForCreate(dto("ONE", "Label", "D")),
