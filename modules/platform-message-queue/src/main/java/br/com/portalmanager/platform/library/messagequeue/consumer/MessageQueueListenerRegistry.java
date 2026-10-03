@@ -7,6 +7,7 @@ import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueM
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageConsumeException;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessageQueueConfigurationException;
 import org.springframework.beans.BeansException;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
@@ -25,7 +26,8 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        for (Method method : bean.getClass().getMethods()) {
+        Class<?> targetClass = AopUtils.getTargetClass(bean);
+        for (Method method : targetClass.getMethods()) {
             MessageQueueListener listener = AnnotatedElementUtils.findMergedAnnotation(method, MessageQueueListener.class);
             MessageQueueDeadLetterListener deadLetterListener =
                     AnnotatedElementUtils.findMergedAnnotation(method, MessageQueueDeadLetterListener.class);
@@ -59,7 +61,8 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
                     "Duplicate message queue listener for destination: " + destination);
         }
         Class<?> payloadType = resolvePayloadType(method, destination, MessageQueueMessage.class, "MessageQueueMessage<T>");
-        listeners.put(destination, new ListenerDefinition(destination, bean, method, payloadType));
+        Method invocableMethod = selectInvocableMethod(method, bean, destination);
+        listeners.put(destination, new ListenerDefinition(destination, bean, invocableMethod, payloadType));
     }
 
     private void registerDeadLetterListener(String destination, Object bean, Method method) {
@@ -69,7 +72,19 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
                     "Duplicate message queue dead-letter listener for destination: " + destination);
         }
         Class<?> payloadType = resolvePayloadType(method, destination, DeadLetterMessage.class, "DeadLetterMessage<T>");
-        deadLetterListeners.put(destination, new DeadLetterListenerDefinition(destination, bean, method, payloadType));
+        Method invocableMethod = selectInvocableMethod(method, bean, destination);
+        deadLetterListeners.put(destination, new DeadLetterListenerDefinition(destination, bean, invocableMethod, payloadType));
+    }
+
+    private Method selectInvocableMethod(Method method, Object bean, String destination) {
+        try {
+            return AopUtils.selectInvocableMethod(method, bean.getClass());
+        } catch (IllegalStateException exception) {
+            throw new MessageQueueConfigurationException(
+                    "Message queue listener for destination '" + destination
+                            + "' must be exposed by the Spring proxy: " + method.getName(),
+                    exception);
+        }
     }
 
     private void validateDestination(String destination, String listenerType) {
