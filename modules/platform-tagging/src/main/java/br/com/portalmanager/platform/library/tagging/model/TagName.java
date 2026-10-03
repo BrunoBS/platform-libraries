@@ -1,14 +1,18 @@
 package br.com.portalmanager.platform.library.tagging.model;
 
 import java.util.Locale;
-import java.util.Objects;
 
-public record TagName(String value) implements Comparable<TagName> {
+public record TagName(String value) {
+
+    public static final int MAX_LENGTH = 150;
 
     public TagName {
         value = normalize(value);
         if (value == null) {
             throw new IllegalArgumentException("tag name must not be blank");
+        }
+        if (value.length() > MAX_LENGTH) {
+            throw new IllegalArgumentException("tag name must not exceed " + MAX_LENGTH + " characters");
         }
     }
 
@@ -25,11 +29,6 @@ public record TagName(String value) implements Comparable<TagName> {
             return null;
         }
         return normalized.toLowerCase(Locale.ROOT).replaceAll("\\s+", "-");
-    }
-
-    @Override
-    public int compareTo(TagName other) {
-        return value.compareTo(Objects.requireNonNull(other, "tag name must not be null").value);
     }
 
     @Override
