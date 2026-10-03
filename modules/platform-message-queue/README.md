@@ -21,7 +21,7 @@ Cada destino permite habilitar/desabilitar publicação e consumo. Concorrência
 
 ## Escopo desta versão
 
-- AWS SQS Standard e FIFO. Filas FIFO exigem um ID de grupo por mensagem; configure também a deduplicação explícita ou habilite content-based deduplication na infraestrutura.
+- AWS SQS Standard e FIFO. Filas FIFO exigem `messageGroupId` e `deduplicationId` explícitos em cada publicação.
 - Azure Service Bus sem sessões. Filas com sessões exigem um receiver próprio e não são suportadas nesta versão.
 - A biblioteca não oferece ordenação global de mensagens.
 
@@ -74,7 +74,7 @@ platform:
           queue-type: FIFO
 ```
 
-Na publicação, informe um grupo para preservar a ordem dentro desse grupo. O ID de deduplicação pode ser omitido somente quando a fila estiver configurada com content-based deduplication:
+Na publicação, informe um grupo para preservar a ordem dentro desse grupo e um ID de deduplicação estável para a operação lógica. O ID é obrigatório: cada envelope recebe um `messageId` e timestamp novos, então a deduplicação baseada no conteúdo não identifica republicações equivalentes:
 
 ```java
 publisher.publish(
@@ -180,7 +180,7 @@ class OrderQueueTest {
 }
 ```
 
-O nome padrão da DLQ no mock é `orders-dlq`; é possível informar `deadLetterQueue = "custom-dlq"`. Para Azure Service Bus, configure o limite de entregas do emulador junto da fila: `@WithAzureEmulator(serviceBus = @AzureServiceBus(queues = @AzureServiceBus.Queue(name = "orders", maxDeliveryCount = 3)))`; a DLQ é a subfila nativa. Filas cujo nome termina em `.fifo` são provisionadas como FIFO pelo mock; a DLQ padrão correspondente também termina em `.fifo`.
+O nome padrão da DLQ no mock é `orders-dlq`; é possível informar `deadLetterQueue = "custom-dlq"`. Para Azure Service Bus, configure o limite de entregas do emulador junto da fila: `@WithAzureEmulator(serviceBus = @AzureServiceBus(queues = @AzureServiceBus.Queue(name = "orders", maxDeliveryCount = 3)))`; a DLQ é a subfila nativa. Filas cujo nome termina em `.fifo` são provisionadas como FIFO pelo mock; a DLQ padrão correspondente também termina em `.fifo`. A fixture não habilita deduplicação baseada no conteúdo, para que os testes usem sempre IDs explícitos.
 
 ## Checklist antes de produção
 
