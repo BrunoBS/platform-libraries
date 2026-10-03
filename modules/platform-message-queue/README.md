@@ -17,7 +17,13 @@ Inclua o módulo no serviço consumidor. Se o projeto importa o BOM das librarie
 
 Toda aplicação deve definir um provider e pelo menos um destino. O nome sob `destinations` é lógico e é o valor usado por `publish` e pelas annotations de listener. `queue` é o nome físico provisionado no broker.
 
-Cada destino permite habilitar/desabilitar publicação e consumo. Concorrência, tempos de espera e visibility timeout podem ser definidos como defaults do provider, por destino, ou como override específico do provider. O override específico do provider tem precedência sobre a configuração comum do destino, que tem precedência sobre o default do provider.
+Cada destino permite habilitar/desabilitar publicação e consumo. Concorrência e tempo de espera podem ser definidos como defaults do provider, por destino, ou como override específico do provider. O override específico do provider tem precedência sobre a configuração comum do destino, que tem precedência sobre o default do provider. O visibility timeout é específico do SQS e pode ser configurado nos mesmos níveis. No Azure, o tempo do lock é configurado na fila do Service Bus; a biblioteca não renova o lock automaticamente.
+
+## Escopo desta versão
+
+- AWS SQS Standard. Filas FIFO não são suportadas nesta versão, pois o publisher não configura `MessageGroupId` nem deduplicação.
+- Azure Service Bus sem sessões. Filas com sessões exigem um receiver próprio e não são suportadas nesta versão.
+- A biblioteca não oferece ordenação global de mensagens.
 
 ## Exemplo: AWS SQS
 
@@ -82,7 +88,7 @@ Anote o tipo de payload com `@QueueMessage` para definir metadados estáveis no 
 public record OrderCreated(String orderId) {}
 ```
 
-Publique pelo destino lógico:
+Publique pelo destino lógico. A chamada é síncrona e retorna depois que o SDK conclui o envio ao broker (ou lança uma exceção); o processamento pelo consumidor ocorre de forma desacoplada:
 
 ```java
 publisher.publish("orders", new OrderCreated("123"));
@@ -103,7 +109,7 @@ public void onOrder(MessageQueueMessage<OrderCreated> message) {
 }
 ```
 
-O processamento é confirmado somente quando o listener retorna normalmente. Se lançar uma exceção em runtime, a mensagem não é confirmada e o broker pode entregá-la novamente. Isso implica entrega *at least once*: handlers precisam ser idempotentes, pois duplicatas também podem ocorrer se o processamento concluir e a confirmação falhar.
+O processamento é confirmado somente quando o listener retorna normalmente. Se lançar uma exceção em runtime, a mensagem não é confirmada e o broker pode entregá-la novamente. Isso implica entrega *at least once*: handlers precisam ser idempotentes, pois duplicatas também podem ocorrer se o processamento concluir e a confirmação falhar. O listener deve terminar antes de expirar a visibilidade no SQS ou o lock da fila no Azure; a biblioteca não renova esses prazos automaticamente.
 
 ## Consumir mensagens da dead-letter
 
