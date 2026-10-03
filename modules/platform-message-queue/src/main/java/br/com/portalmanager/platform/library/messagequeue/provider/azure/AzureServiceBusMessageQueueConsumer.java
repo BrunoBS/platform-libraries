@@ -187,12 +187,13 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
 
                     while (running && !Thread.currentThread().isInterrupted()) {
                         var messages = receiver.receiveMessages(1, waitTime);
-                        if (messages.isEmpty()) {
+                        var iterator = messages.iterator();
+                        if (!iterator.hasNext()) {
                             break;
                         }
-                        for (ServiceBusReceivedMessage message : messages) {
-                            work.process(receiver, message);
-                        }
+                        do {
+                            work.process(receiver, iterator.next());
+                        } while (iterator.hasNext());
                     }
                     receivers.remove(workerId);
                     close(receiver);
