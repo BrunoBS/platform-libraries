@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStack;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -13,7 +14,8 @@ import java.util.Map;
 
 public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionRegistrar {
 
-    private static final String BEAN_NAME = "awsLocalStackContainer";
+    private static final String CONTAINER_BEAN = "awsLocalStackContainer";
+    private static final String SQS_CLIENT_BEAN = "awsLocalStackSqsClient";
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
@@ -44,9 +46,20 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             throw new IllegalArgumentException("At least one AWS service annotation must be configured");
         }
 
+        registerContainer(registry, services, queues, buckets);
+        if (sqs.length == 1) {
+            registerSqsClient(registry);
+        }
+    }
+
+    private void registerContainer(
+            BeanDefinitionRegistry registry,
+            List<AwsService> services,
+            String[] queues,
+            String[] buckets) {
         AwsService[] enabledServices = services.toArray(AwsService[]::new);
-        String[] configuredQueues = queues;
-        String[] configuredBuckets = buckets;
+        String[] configuredQueues = queues.clone();
+        String[] configuredBuckets = buckets.clone();
 
         RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackContainer.class);
         definition.setInstanceSupplier(() -> new AwsLocalStackContainer(
@@ -55,9 +68,17 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
                 configuredBuckets));
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
-        registry.registerBeanDefinition(BEAN_NAME, definition);
+        registry.registerBeanDefinition(CONTAINER_BEAN, definition);
     }
 
+    private void registerSqsClient(BeanDefinitionRegistry registry) {
+        RootBeanDefinition definition = new RootBeanDefinition(AwsSqsClientFactoryBean.class);
+        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+        definition.setDestroyMethodName("close");
+        registry.registerBeanDefinition(SQS_CLIENT_BEAN, definition);
+    }
+
+    @SuppressWarnings("unchecked")
     private AnnotationAttributes[] annotations(Object value) {
         if (value == null) {
             return new AnnotationAttributes[0];
