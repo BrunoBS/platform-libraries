@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 
+import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
 import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.resolver.ResolvedDestination;
@@ -20,8 +21,11 @@ public class AzureServiceBusMessageQueueTransport implements MessageQueueTranspo
     }
 
     @Override
-    public void send(ResolvedDestination destination, String body) {
+    public void send(ResolvedDestination destination, String body, MessageQueuePublishOptions options) {
         try {
+            if (options.messageGroupId() != null || options.deduplicationId() != null) {
+                throw new IllegalArgumentException("AWS FIFO publish options are not supported by Azure Service Bus");
+            }
             sender(destination.queue()).sendMessage(new ServiceBusMessage(body));
         } catch (RuntimeException exception) {
             throw new MessagePublishException(
@@ -35,9 +39,7 @@ public class AzureServiceBusMessageQueueTransport implements MessageQueueTranspo
     }
 
     private ServiceBusSenderClient createSender(String queueName) {
-        return clientBuilder.sender()
-                .queueName(queueName)
-                .buildClient();
+        return clientBuilder.sender().queueName(queueName).buildClient();
     }
 
     @Override
