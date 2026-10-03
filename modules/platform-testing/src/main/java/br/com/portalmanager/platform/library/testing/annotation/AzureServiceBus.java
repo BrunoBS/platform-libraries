@@ -9,5 +9,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AzureServiceBus {
 
-    String[] queues() default {};
+    Queue[] queues() default {};
+
+    @Target({})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Queue {
+        String name();
+
+        int maxDeliveryCount() default 3;
+    }
 }
