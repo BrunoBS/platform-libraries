@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
 import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractListeners;
 import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractTestApplication;
+import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import br.com.portalmanager.platform.library.testing.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStack;
@@ -27,11 +28,14 @@ import static org.assertj.core.api.Assertions.assertThat;
         "platform.message-queue.destinations.contract.queue=contract-queue",
         "platform.message-queue.destinations.consumer-contract.queue=consumer-contract",
         "platform.message-queue.destinations.failing-contract.queue=failing-contract",
-        "platform.message-queue.destinations.failing-contract.aws.visibility-timeout=PT1S"
+        "platform.message-queue.destinations.failing-contract.aws.visibility-timeout=PT1S",
+        "platform.message-queue.destinations.fifo-contract.queue=fifo-contract.fifo",
+        "platform.message-queue.destinations.fifo-contract.aws.queue-type=FIFO"
 })
 @WithAwsLocalStack(
         sqs = @AwsSqs(queues = {
                 @AwsSqs.Queue(name = "contract-queue"),
+                @AwsSqs.Queue(name = "fifo-contract.fifo"),
                 @AwsSqs.Queue(name = "consumer-contract"),
                 @AwsSqs.Queue(
                         name = "failing-contract",
@@ -71,6 +75,28 @@ class AwsSqsMessageQueueContractTest {
                 .contains("\"payload\"")
                 .contains("\"id\":\"message-1\"");
 
+        sqsClient.deleteMessage(DeleteMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .receiptHandle(messages.getFirst().receiptHandle())
+                .build());
+    }
+
+    @Test
+    void shouldPublishToFifoQueueWithRequiredGroupAndDeduplicationMetadata() {
+        publisher.publish("fifo-contract", new ContractPayload("fifo-1"),
+                new MessageQueuePublishOptions(null, java.util.Map.of(), "orders", "fifo-1"));
+
+        String queueUrl = sqsClient.getQueueUrl(GetQueueUrlRequest.builder()
+                .queueName("fifo-contract.fifo")
+                .build()).queueUrl();
+        var messages = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .maxNumberOfMessages(1)
+                .waitTimeSeconds(5)
+                .build()).messages();
+
+        assertThat(messages).hasSize(1);
+        assertThat(messages.getFirst().body()).contains("\\"id\\":\\"fifo-1\\"");
         sqsClient.deleteMessage(DeleteMessageRequest.builder()
                 .queueUrl(queueUrl)
                 .receiptHandle(messages.getFirst().receiptHandle())
