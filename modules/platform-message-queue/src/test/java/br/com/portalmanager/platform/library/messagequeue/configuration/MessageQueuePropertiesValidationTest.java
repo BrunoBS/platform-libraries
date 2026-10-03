@@ -70,6 +70,20 @@ class MessageQueuePropertiesValidationTest {
     }
 
     @Test
+    void shouldFailAtStartupWhenUnusedProviderToggleIsConfigured() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.message-queue.provider=AWS",
+                        "platform.message-queue.aws.region=sa-east-1",
+                        "platform.message-queue.aws.defaults.enabled=false",
+                        "platform.message-queue.destinations.orders.queue=orders")
+                .run(context -> {
+                    assertThat(context.getStartupFailure()).isNotNull();
+                    assertThat(context.getStartupFailure()).hasStackTraceContaining("enabled");
+                });
+    }
+
+    @Test
     void shouldFailAtStartupWhenConcurrencyIsNotPositive() {
         contextRunner
                 .withPropertyValues(
