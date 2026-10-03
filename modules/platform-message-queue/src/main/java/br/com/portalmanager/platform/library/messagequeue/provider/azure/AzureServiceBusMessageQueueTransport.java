@@ -21,6 +21,11 @@ public class AzureServiceBusMessageQueueTransport implements MessageQueueTranspo
     }
 
     @Override
+    public void send(ResolvedDestination destination, String body) {
+        send(destination, body, MessageQueuePublishOptions.defaults());
+    }
+
+    @Override
     public void send(ResolvedDestination destination, String body, MessageQueuePublishOptions options) {
         try {
             if (options.messageGroupId() != null || options.deduplicationId() != null) {
