@@ -2,9 +2,9 @@ package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
+import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
 import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
-import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
@@ -13,9 +13,9 @@ import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceiverClient;
 import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
 import com.azure.messaging.servicebus.models.SubQueue;
-import org.springframework.context.SmartLifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.SmartLifecycle;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
