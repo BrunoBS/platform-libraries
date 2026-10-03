@@ -17,6 +17,11 @@ import java.util.List;
 public interface TagRepository<TAG extends Tag<OWNER>, OWNER extends TagOwner>
         extends JpaRepository<TAG, Long> {
 
+    /*
+     * Contract for consumer entities:
+     * the JPA association to OWNER is named "owner".
+     * Keeping this single convention lets every consumer repository stay empty.
+     */
     @Query("""
             select t
               from #{#entityName} t
@@ -45,7 +50,7 @@ public interface TagRepository<TAG extends Tag<OWNER>, OWNER extends TagOwner>
             """)
     List<String> findOwnerIdentifiersByTag(@Param("name") TagName name);
 
-    @Modifying(flushAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from #{#entityName} t where t.owner.id = :ownerId")
     int deleteByOwnerId(@Param("ownerId") Long ownerId);
 }
