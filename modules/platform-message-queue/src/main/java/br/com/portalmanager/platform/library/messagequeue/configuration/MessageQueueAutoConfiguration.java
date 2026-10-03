@@ -1,10 +1,19 @@
 package br.com.portalmanager.platform.library.messagequeue.configuration;
 
+import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
+import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
+import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueTransport;
+import br.com.portalmanager.platform.library.messagequeue.publisher.DefaultMessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.publisher.MessageEnvelopeFactory;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
+import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 import java.time.Clock;
 
@@ -25,5 +34,37 @@ public class MessageQueueAutoConfiguration {
     @Bean
     MessageEnvelopeFactory messageEnvelopeFactory(Clock messageQueueClock) {
         return new MessageEnvelopeFactory(messageQueueClock);
+    }
+
+    @Bean
+    MessageQueueSerializer messageQueueSerializer(ObjectMapper objectMapper) {
+        return new MessageQueueSerializer(objectMapper);
+    }
+
+    @Bean(destroyMethod = "close")
+    @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AWS")
+    SqsClient messageQueueSqsClient(MessageQueueProperties properties) {
+        return SqsClient.builder()
+                .region(Region.of(properties.getAws().getRegion()))
+                .build();
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "platform.message-queue", name = "provider", havingValue = "AWS")
+    MessageQueueTransport awsMessageQueueTransport(SqsClient messageQueueSqsClient) {
+        return new SqsMessageQueueTransport(messageQueueSqsClient);
+    }
+
+    @Bean
+    MessageQueuePublisher messageQueuePublisher(
+            DestinationResolver destinationResolver,
+            MessageEnvelopeFactory messageEnvelopeFactory,
+            MessageQueueSerializer messageQueueSerializer,
+            MessageQueueTransport messageQueueTransport) {
+        return new DefaultMessageQueuePublisher(
+                destinationResolver,
+                messageEnvelopeFactory,
+                messageQueueSerializer,
+                messageQueueTransport);
     }
 }
