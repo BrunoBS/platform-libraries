@@ -10,6 +10,8 @@ import java.util.Map;
 public class MessageQueueProperties {
 
     private MessageQueueProvider provider;
+    private Duration shutdownTimeout = Duration.ofSeconds(30);
+    private Duration pollFailureBackoff = Duration.ofSeconds(1);
     private final Aws aws = new Aws();
     private final Azure azure = new Azure();
     private final Map<String, Destination> destinations = new LinkedHashMap<>();
@@ -20,6 +22,22 @@ public class MessageQueueProperties {
 
     public void setProvider(MessageQueueProvider provider) {
         this.provider = provider;
+    }
+
+    public Duration getShutdownTimeout() {
+        return shutdownTimeout;
+    }
+
+    public void setShutdownTimeout(Duration shutdownTimeout) {
+        this.shutdownTimeout = shutdownTimeout;
+    }
+
+    public Duration getPollFailureBackoff() {
+        return pollFailureBackoff;
+    }
+
+    public void setPollFailureBackoff(Duration pollFailureBackoff) {
+        this.pollFailureBackoff = pollFailureBackoff;
     }
 
     public Aws getAws() {
