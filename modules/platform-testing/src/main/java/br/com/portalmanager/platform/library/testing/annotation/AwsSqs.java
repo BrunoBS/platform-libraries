@@ -16,6 +16,8 @@ public @interface AwsSqs {
     @interface Queue {
         String name();
 
+        boolean deadLetterEnabled() default false;
+
         /**
          * Empty uses the standard name {@code <queue-name>-dlq}.
          */
