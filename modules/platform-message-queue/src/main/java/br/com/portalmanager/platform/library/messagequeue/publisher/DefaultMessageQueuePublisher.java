@@ -28,12 +28,17 @@ public class DefaultMessageQueuePublisher implements MessageQueuePublisher {
 
     @Override
     public void publish(String destination, Object payload) {
+        publish(destination, payload, null, Map.of());
+    }
+
+    @Override
+    public void publish(String destination, Object payload, String correlationId, Map<String, String> headers) {
         var resolved = destinationResolver.resolve(destination);
         if (!resolved.publisherEnabled()) {
             throw new MessagePublishException("Publisher is disabled for destination: " + destination);
         }
 
-        var envelope = envelopeFactory.create(destination, payload, null, Map.of());
+        var envelope = envelopeFactory.create(destination, payload, correlationId, headers);
         transport.send(resolved, serializer.serialize(envelope));
     }
 }
