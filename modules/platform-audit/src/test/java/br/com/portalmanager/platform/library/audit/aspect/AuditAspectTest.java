@@ -5,6 +5,9 @@ import br.com.portalmanager.platform.library.audit.annotation.AuditFieldSource;
 import br.com.portalmanager.platform.library.audit.annotation.Auditable;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
+import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
+import br.com.portalmanager.platform.library.audit.event.AuditFieldResolver;
+import br.com.portalmanager.platform.library.audit.exception.AuditException;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
@@ -16,11 +19,13 @@ import org.springframework.http.ResponseEntity;
 import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,10 +37,12 @@ class AuditAspectTest {
     private final PlatformAuditProperties properties = new PlatformAuditProperties();
     private final AuditAspect aspect = new AuditAspect(
             properties,
-            publisher,
-            contextResolver,
-            new ObjectMapper(),
-            mock(HttpServletRequest.class)
+            new AuditEventFactory(
+                    properties,
+                    contextResolver,
+                    new AuditFieldResolver(new ObjectMapper(), mock(HttpServletRequest.class))
+            ),
+            publisher
     );
 
     @Test
@@ -43,16 +50,14 @@ class AuditAspectTest {
         when(contextResolver.resolve()).thenReturn(
                 new AuditContext("account-1", "application-1", "dev", "user-1", "trace-1"));
 
-        ProceedingJoinPoint joinPoint = joinPoint(
+        aspect.audit(joinPoint(
                 "update",
                 ResponseEntity.ok(Map.of(
                         "id", "resource-1",
                         "name", "Account",
                         "secret", "must-not-be-published"
                 ))
-        );
-
-        aspect.audit(joinPoint);
+        ));
 
         var event = org.mockito.ArgumentCaptor.forClass(AuditEventRequest.class);
         verify(publisher).publish(event.capture());
@@ -65,12 +70,10 @@ class AuditAspectTest {
         when(contextResolver.resolve()).thenReturn(
                 new AuditContext("account-1", "application-1", "dev", "user-1", "trace-1"));
 
-        ProceedingJoinPoint joinPoint = joinPoint(
+        aspect.audit(joinPoint(
                 "updateWithoutPayload",
                 ResponseEntity.ok(Map.of("id", "resource-1", "secret", "must-not-be-published"))
-        );
-
-        aspect.audit(joinPoint);
+        ));
 
         var event = org.mockito.ArgumentCaptor.forClass(AuditEventRequest.class);
         verify(publisher).publish(event.capture());
@@ -78,12 +81,40 @@ class AuditAspectTest {
     }
 
     @Test
-    void shouldFailWhenResourceIdentifierCannotBeResolvedByDefault() throws Throwable {
+    void shouldUseStandardAuditExceptionWhenResourceIdentifierIsMissing() throws Throwable {
         ProceedingJoinPoint joinPoint = joinPoint("update", ResponseEntity.ok(Map.of("name", "Account")));
 
         assertThatThrownBy(() -> aspect.audit(joinPoint))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("resource identifier is missing");
+                .isInstanceOf(AuditException.class);
+        verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void shouldSkipNonSuccessfulHttpResponses() throws Throwable {
+        aspect.audit(joinPoint("update", ResponseEntity.badRequest().body(Map.of("id", "resource-1"))));
+
+        verify(contextResolver, times(0)).resolve();
+        verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void shouldPublishOneEventForEachItemInACollection() throws Throwable {
+        when(contextResolver.resolve()).thenReturn(
+                new AuditContext("account-1", "application-1", "dev", "user-1", "trace-1"));
+
+        aspect.audit(joinPoint(
+                "updateWithoutPayload",
+                ResponseEntity.ok(List.of(
+                        Map.of("id", "resource-1"),
+                        Map.of("id", "resource-2")
+                ))
+        ));
+
+        var events = org.mockito.ArgumentCaptor.forClass(AuditEventRequest.class);
+        verify(publisher, times(2)).publish(events.capture());
+        assertThat(events.getAllValues())
+                .extracting(AuditEventRequest::resourceId)
+                .containsExactly("resource-1", "resource-2");
     }
 
     private ProceedingJoinPoint joinPoint(String methodName, Object result) throws Throwable {
@@ -94,6 +125,7 @@ class AuditAspectTest {
         ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
         when(joinPoint.proceed()).thenReturn(result);
         when(joinPoint.getSignature()).thenReturn(signature);
+        when(joinPoint.getTarget()).thenReturn(new TestController());
         when(joinPoint.getArgs()).thenReturn(new Object[0]);
         return joinPoint;
     }
