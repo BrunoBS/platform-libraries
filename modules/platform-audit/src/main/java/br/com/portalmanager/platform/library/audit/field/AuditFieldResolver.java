@@ -165,9 +165,13 @@ public final class AuditFieldResolver {
         if (value == null || value.isNull() || value.isContainerNode()) {
             return null;
         }
-        return value.isTextual() ? value.asText() : value.numberValue() != null
-                ? value.numberValue()
-                : value.booleanValue();
+        if (value.isTextual()) {
+            return value.asText();
+        }
+        if (value.isNumber()) {
+            return value.numberValue();
+        }
+        return value.isBoolean() ? value.booleanValue() : null;
     }
 
     private String stringify(Object value) {
