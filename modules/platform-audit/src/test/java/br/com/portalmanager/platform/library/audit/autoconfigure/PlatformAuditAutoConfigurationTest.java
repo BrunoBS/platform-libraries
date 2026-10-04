@@ -55,6 +55,16 @@ class PlatformAuditAutoConfigurationTest {
     }
 
     @Test
+    void shouldFailStartupWhenAuditDestinationDoesNotExist() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.audit.enabled=true",
+                        "platform.audit.destination=missing"
+                )
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
     void shouldNotLoadAuditInfrastructureWhenDisabled() {
         contextRunner
                 .withPropertyValues("platform.audit.enabled=false")
