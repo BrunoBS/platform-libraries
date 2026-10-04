@@ -43,6 +43,11 @@ class PlatformAuditAutoConfigurationTest {
     }
 
     @Configuration
+    static class CustomFactoryConfiguration {
+        @Bean AuditEventFactory customAuditEventFactory() { return mock(AuditEventFactory.class); }
+    }
+
+    @Configuration
     static class CustomPublisherConfiguration {
         @Bean AuditPublisher customAuditPublisher() { return mock(AuditPublisher.class); }
     }
@@ -78,6 +83,14 @@ class PlatformAuditAutoConfigurationTest {
     void shouldRequireServiceNameEvenWithCustomPublisher() {
         contextRunner
                 .withUserConfiguration(CustomPublisherConfiguration.class)
+                .withPropertyValues("platform.audit.enabled=true")
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void shouldRequireServiceNameEvenWithCustomFactory() {
+        contextRunner
+                .withUserConfiguration(CustomPublisherConfiguration.class, CustomFactoryConfiguration.class)
                 .withPropertyValues("platform.audit.enabled=true")
                 .run(context -> assertThat(context).hasFailed());
     }
