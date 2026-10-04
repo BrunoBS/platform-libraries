@@ -40,7 +40,7 @@ class AuditAspectTest {
             new AuditEventFactory(
                     properties,
                     contextResolver,
-                    new AuditFieldResolver(properties, new ObjectMapper(), mock(HttpServletRequest.class)),
+                    new AuditFieldResolver(properties, mock(HttpServletRequest.class)),
                     new ObjectMapper()
             ),
             publisher
