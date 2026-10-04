@@ -26,7 +26,7 @@ public final class AuditFieldResolver {
     private static final Set<String> SENSITIVE_NAME_PARTS = Set.of(
             "authorization", "cookie", "password", "passwd", "secret", "token",
             "apikey", "privatekey", "clientsecret", "credential", "jwt", "ssn",
-            "taxid", "accesskey", "refresh", "bearer", "cardnumber", "creditcard", "cvv", "cvc"
+            "taxid", "accesskey", "refresh", "bearer", "cardnumber", "creditcard", "pincode", "cvv", "cvc"
     );
 
     private final PlatformAuditProperties properties;
