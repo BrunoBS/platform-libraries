@@ -7,60 +7,49 @@ import br.com.portalmanager.platform.library.audit.config.PlatformAuditPropertie
 import br.com.portalmanager.platform.library.audit.exception.AuditException;
 import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.time.temporal.TemporalAccessor;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public final class AuditFieldResolver {
 
     private static final Set<String> SENSITIVE_NAME_PARTS = Set.of(
             "authorization", "cookie", "password", "passwd", "secret", "token",
             "apikey", "privatekey", "clientsecret", "credential", "jwt", "ssn",
-            "taxid", "accesskey", "refresh", "bearer", "cardnumber", "cvv", "cvc"
+            "taxid", "accesskey", "refresh", "bearer", "cardnumber", "creditcard", "cvv", "cvc"
     );
 
     private final PlatformAuditProperties properties;
-    private final ObjectMapper objectMapper;
     private final HttpServletRequest request;
 
-    public AuditFieldResolver(
-            PlatformAuditProperties properties,
-            ObjectMapper objectMapper,
-            HttpServletRequest request
-    ) {
+    public AuditFieldResolver(PlatformAuditProperties properties, HttpServletRequest request) {
         this.properties = properties;
-        this.objectMapper = objectMapper;
         this.request = request;
     }
 
     public ResolvedFields resolve(Method method, Object[] arguments, Object responseBody, Auditable auditable) {
-        boolean needsResponse = auditable.resourceId().source() == AuditFieldSource.RESPONSE
-                || auditable.environment().source() == AuditFieldSource.RESPONSE
-                || java.util.Arrays.stream(auditable.payload())
-                .anyMatch(field -> field.source() == AuditFieldSource.RESPONSE);
-        JsonNode response = needsResponse ? toTree(responseBody) : null;
-        boolean needsBody = auditable.resourceId().source() == AuditFieldSource.BODY
-                || auditable.environment().source() == AuditFieldSource.BODY
-                || java.util.Arrays.stream(auditable.payload())
-                .anyMatch(field -> field.source() == AuditFieldSource.BODY);
-        JsonNode requestBody = needsBody ? requestBody(method, arguments) : null;
+        Object requestBody = requestBody(method, arguments);
+        String resourceId = stringify(resolveValue(
+                method, arguments, responseBody, requestBody, auditable.resourceId()));
+        String environmentId = stringify(resolveValue(
+                method, arguments, responseBody, requestBody, auditable.environment()));
 
-        String resourceId = stringify(resolveValue(method, arguments, response, requestBody, auditable.resourceId()));
-        String environmentId = stringify(resolveValue(method, arguments, response, requestBody, auditable.environment()));
         Map<String, Object> payload = new LinkedHashMap<>();
         for (AuditField field : auditable.payload()) {
             if (field.field().isBlank()) {
                 continue;
             }
-            Object value = resolveValue(method, arguments, response, requestBody, field);
+            Object value = resolveValue(method, arguments, responseBody, requestBody, field);
             if (value != null) {
                 payload.put(field.field(), value);
             }
@@ -71,8 +60,8 @@ public final class AuditFieldResolver {
     private Object resolveValue(
             Method method,
             Object[] arguments,
-            JsonNode response,
-            JsonNode body,
+            Object responseBody,
+            Object requestBody,
             AuditField field
     ) {
         if (field == null || field.field().isBlank()) {
@@ -81,8 +70,8 @@ public final class AuditFieldResolver {
         rejectSensitiveName(field.field());
         return switch (field.source()) {
             case PATH -> resolvePathParameter(method, arguments, field.field());
-            case BODY -> read(body, field.field());
-            case RESPONSE -> read(response, field.field());
+            case BODY -> read(requestBody, field.field());
+            case RESPONSE -> read(responseBody, field.field());
             case HEADER -> resolveHeader(field.field());
         };
     }
@@ -90,6 +79,7 @@ public final class AuditFieldResolver {
     private Object resolveHeader(String name) {
         String normalized = normalize(name);
         if (isSensitive(normalized) || allowedHeaders().stream()
+                .filter(java.util.Objects::nonNull)
                 .map(this::normalize)
                 .noneMatch(normalized::equals)) {
             throw new AuditException(AuditMessageKeys.FIELD_NOT_ALLOWED);
@@ -134,34 +124,45 @@ public final class AuditFieldResolver {
         return null;
     }
 
-    private JsonNode requestBody(Method method, Object[] arguments) {
+    private Object requestBody(Method method, Object[] arguments) {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int index = 0; index < arguments.length; index++) {
             for (Annotation annotation : parameterAnnotations[index]) {
                 if (annotation instanceof RequestBody) {
-                    return toTree(arguments[index]);
+                    return arguments[index];
                 }
             }
         }
         return null;
     }
 
-    private JsonNode toTree(Object source) {
+    private Object read(Object source, String fieldName) {
         if (source == null) {
             return null;
         }
         try {
-            return objectMapper.valueToTree(source);
+            if (source instanceof JsonNode node) {
+                return scalar(node.get(fieldName));
+            }
+            Object value;
+            if (source instanceof Map<?, ?> map) {
+                value = map.get(fieldName);
+            } else {
+                BeanWrapperImpl bean = new BeanWrapperImpl(source);
+                if (!bean.isReadableProperty(fieldName)) {
+                    return null;
+                }
+                value = bean.getPropertyValue(fieldName);
+            }
+            return scalar(value);
+        } catch (AuditException exception) {
+            throw exception;
         } catch (RuntimeException exception) {
             throw new AuditException(AuditMessageKeys.FIELD_RESOLUTION_FAILED, exception);
         }
     }
 
-    private Object read(JsonNode source, String fieldName) {
-        if (source == null) {
-            return null;
-        }
-        JsonNode value = source.get(fieldName);
+    private Object scalar(JsonNode value) {
         if (value == null || value.isNull() || value.isContainerNode()) {
             return null;
         }
@@ -172,6 +173,16 @@ public final class AuditFieldResolver {
             return value.numberValue();
         }
         return value.isBoolean() ? value.booleanValue() : null;
+    }
+
+    private Object scalar(Object value) {
+        if (value instanceof CharSequence || value instanceof Character
+                || value instanceof Number || value instanceof Boolean
+                || value instanceof Enum<?> || value instanceof UUID
+                || value instanceof TemporalAccessor) {
+            return value instanceof Enum<?> enumValue ? enumValue.name() : value;
+        }
+        return null;
     }
 
     private String stringify(Object value) {
