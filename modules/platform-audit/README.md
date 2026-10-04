@@ -93,6 +93,26 @@ platform:
 
 A infraestrutura provisiona a entidade Service Bus com sessões habilitadas. A identidade da aplicação precisa da permissão de envio.
 
+## Uso e payload
+
+O corpo completo da requisição ou da resposta nunca é copiado automaticamente para o evento. O payload inicia vazio e recebe somente os campos declarados explicitamente na anotação:
+
+```java
+@Auditable(
+    resource = "account",
+    action = "UPDATE",
+    resourceId = @AuditField(source = AuditFieldSource.PATH, field = "accountId"),
+    payload = {
+        @AuditField(source = AuditFieldSource.RESPONSE, field = "name"),
+        @AuditField(source = AuditFieldSource.BODY, field = "status")
+    }
+)
+```
+
+Escolha apenas campos necessários para comprovar a ação. `AuditFieldSource` permite selecionar um campo de PATH, BODY, RESPONSE ou HEADER. Para reduzir exposição de dados, não inclua tokens, credenciais ou dados pessoais desnecessários.
+
+Um identificador do recurso é obrigatório. Se não puder ser resolvido, o evento não será publicado. Com `fail-on-error=true` (padrão), a operação falha explicitamente; com `false`, o evento é descartado e a ocorrência é registrada em log de erro.
+
 ## Consumo pelo audit-api
 
 O consumidor deve registrar um listener para o destino `audit-events` e processar `MessageQueueMessage<AuditEventRequest>`. O handler confirma a mensagem ao retornar normalmente; portanto, deve confirmar a persistência idempotente antes do retorno. Falhas devem ser propagadas para permitir redelivery e encaminhamento à DLQ após o limite configurado no broker.
@@ -107,6 +127,8 @@ O consumidor deve registrar um listener para o destino `audit-events` e processa
 - `environmentId` → environmentId;
 - `traceId` → correlationId.
 
+A ausência do contexto autorizado interrompe a operação por padrão. Se `fail-on-error=false`, o evento é ignorado e a ocorrência é registrada em log de erro.
+
 ## Propriedades
 
 | Propriedade | Default | Descrição |
@@ -114,7 +136,7 @@ O consumidor deve registrar um listener para o destino `audit-events` e processa
 | `platform.audit.enabled` | `true` | Habilita auditoria |
 | `platform.audit.service-name` | `unknown` | Identifica o serviço produtor no evento |
 | `platform.audit.destination` | `audit-events` | Destino lógico configurado em `platform.message-queue.destinations` |
-| `platform.audit.fail-on-error` | `false` | Propaga falha ao resolver o contexto autorizado; falhas de publicação na fila sempre são propagadas |
+| `platform.audit.fail-on-error` | `true` | Propaga falhas ao resolver o contexto ou identificador do recurso; falhas de publicação na fila sempre são propagadas |
 
 O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos.
 
