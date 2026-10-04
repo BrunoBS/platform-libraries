@@ -1,25 +1,23 @@
 package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
+import br.com.portalmanager.platform.library.audit.config.AuditPropertiesValidator;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.platform.library.audit.fallback.AuditFallbackStore;
+import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
+import br.com.portalmanager.platform.library.audit.field.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
-import br.com.portalmanager.platform.library.audit.publisher.RestAuditPublisher;
+import br.com.portalmanager.platform.library.audit.publisher.MessageQueueAuditPublisher;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
+import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
@@ -27,48 +25,25 @@ import tools.jackson.databind.ObjectMapper;
 @ConditionalOnProperty(prefix = "platform.audit", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlatformAuditAutoConfiguration {
 
-    @Bean(name = "platformAuditTaskExecutor")
-    @ConditionalOnMissingBean(name = "platformAuditTaskExecutor")
-    TaskExecutor platformAuditTaskExecutor(PlatformAuditProperties properties) {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setThreadNamePrefix("platform-audit-");
-        executor.setCorePoolSize(properties.getCorePoolSize());
-        executor.setMaxPoolSize(properties.getMaxPoolSize());
-        executor.setQueueCapacity(properties.getQueueCapacity());
-        executor.initialize();
-        return executor;
-    }
-
     @Bean
     @ConditionalOnMissingBean(AuditPublisher.class)
     AuditPublisher auditPublisher(
-            RestClient.Builder builder,
-            @Qualifier("platformAuditTaskExecutor") TaskExecutor platformAuditTaskExecutor,
-            PlatformAuditProperties properties,
-            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
+            MessageQueuePublisher messageQueuePublisher,
+            PlatformAuditProperties auditProperties,
+            MessageQueueProperties messageQueueProperties
     ) {
-        if (properties.getServiceUrl() == null || properties.getServiceUrl().isBlank()) {
-            throw new PlatformConfigurationException(AuditTechnicalErrors.SERVICE_URL_REQUIRED);
-        }
-
-        return new RestAuditPublisher(
-                builder,
-                platformAuditTaskExecutor,
-                properties,
-                fallbackStoreProvider
+        String destinationName = auditProperties.getDestination();
+        validateDestination(destinationName, messageQueueProperties);
+        return new MessageQueueAuditPublisher(
+                messageQueuePublisher,
+                destinationName,
+                messageQueueProperties.getProvider()
         );
     }
 
     @Bean
-    @ConditionalOnProperty(prefix = "platform.audit.fallback", name = "enabled", havingValue = "true")
-    SmartInitializingSingleton auditFallbackConfigurationGuard(
-            ObjectProvider<AuditFallbackStore> fallbackStoreProvider
-    ) {
-        return () -> {
-            if (fallbackStoreProvider.getIfAvailable() == null) {
-                throw new PlatformConfigurationException(AuditTechnicalErrors.FALLBACK_STORE_MISSING);
-            }
-        };
+    AuditPropertiesValidator auditPropertiesValidator(PlatformAuditProperties properties) {
+        return new AuditPropertiesValidator(properties);
     }
 
     @Bean
@@ -78,14 +53,44 @@ public class PlatformAuditAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(AuditFieldResolver.class)
+    AuditFieldResolver auditFieldResolver(
+            PlatformAuditProperties properties,
+            HttpServletRequest request
+    ) {
+        return new AuditFieldResolver(properties, request);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuditEventFactory.class)
+    AuditEventFactory auditEventFactory(
+            PlatformAuditProperties properties,
+            AuditAuthorizationContextResolver contextResolver,
+            AuditFieldResolver fieldResolver,
+            ObjectMapper objectMapper
+    ) {
+        return new AuditEventFactory(properties, contextResolver, fieldResolver, objectMapper);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(AuditAspect.class)
     AuditAspect auditAspect(
             PlatformAuditProperties properties,
-            AuditPublisher publisher,
-            AuditAuthorizationContextResolver contextResolver,
-            ObjectMapper objectMapper,
-            HttpServletRequest request
+            AuditEventFactory eventFactory,
+            AuditPublisher publisher
     ) {
-        return new AuditAspect(properties, publisher, contextResolver, objectMapper, request);
+        return new AuditAspect(properties, eventFactory, publisher);
+    }
+
+    private void validateDestination(String destinationName, MessageQueueProperties properties) {
+        if (destinationName == null || destinationName.isBlank()) {
+            throw new PlatformConfigurationException(AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_REQUIRED);
+        }
+
+        MessageQueueProperties.Destination destination = properties.getDestinations().get(destinationName);
+        if (destination == null || !destination.isOrdered() || !destination.getPublisher().isEnabled()) {
+            throw new PlatformConfigurationException(
+                    AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED);
+        }
     }
 }

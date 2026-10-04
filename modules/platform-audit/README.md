@@ -1,256 +1,142 @@
 # platform-audit
 
-Biblioteca de integração transparente entre microserviços e a Audit API da plataforma.
+Biblioteca que cria eventos de auditoria nos serviços produtores e os publica na `platform-message-queue`. O `audit-api` consome o destino lógico `audit-events` e persiste os eventos.
 
-## Objetivo
-
-O módulo abstrai a publicação de eventos de auditoria. O serviço consumidor declara
-o evento com `@Auditable`; a biblioteca resolve contexto, identificadores e payload
-e envia o evento para a Audit API.
-
-A biblioteca não possui entidade JPA, repository ou tabela própria.
-
-## Fluxo principal
+## Fluxo de publicação
 
 ```text
-Microserviço
+operação de negócio
     ↓
 @Auditable
     ↓
-AuditAspect
+AuditEvent (eventId estável)
     ↓
-AuditPublisher
+platform-audit
     ↓
-RestAuditPublisher
+destino lógico audit-events
     ↓
-Audit API
+AWS SQS FIFO ou Azure Service Bus Sessions
+    ↓
+audit-api consome e persiste
 ```
 
-## Dependência
+A chamada ao publisher da fila é síncrona e retorna depois que o provider confirma o envio (ou propaga a falha). O processamento pelo `audit-api` é desacoplado. A biblioteca não chama o endpoint HTTP de ingestão da Audit API nem mantém uma fila local Redis; a durabilidade após a confirmação é responsabilidade do broker.
+
+## Estrutura do código
+
+- `annotation`: declara `@Auditable` e as origens de campo aceitas.
+- `aspect`: intercepta a operação, trata o status de sucesso e delega a criação do evento.
+- `field`: `AuditFieldResolver` projeta os campos configurados a partir dos argumentos e da resposta.
+- `event`: `AuditEventFactory` monta, valida e limita o tamanho serializado do evento.
+- `publisher`: publica o evento no destino lógico e define as opções de ordenação e deduplicação.
+- `autoconfigure` e `config`: validam as propriedades e registram os beans do módulo.
+
+O fluxo de leitura do código segue essa ordem: `AuditAspect → AuditEventFactory → AuditFieldResolver` e depois `AuditPublisher → MessageQueueAuditPublisher`.
+
+Antes da primeira chamada ao broker, todos os eventos da invocação são construídos e validados; assim, erro de dados ou tamanho não publica apenas parte do lote. Se o broker falhar durante os envios sequenciais, ainda pode haver publicação parcial. A falha é propagada e garantia transacional exigiria um Transactional Outbox no serviço produtor, fora deste módulo.
+
+## Idempotência e ordenação
+
+Cada ocorrência recebe um `eventId` UUID imutável na origem. O mesmo valor é preservado no payload e usado como `deduplicationId` para AWS SQS FIFO. Azure Service Bus não recebe esse campo, pois sua deduplicação tem configuração própria. Em ambos os providers, a entrega é *at least once*; o `audit-api` deve impor unicidade persistente por `eventId` e tratar redeliveries como já processadas.
+
+A publicação calcula um `orderingKey` estável a partir de `resourceType` e `resourceIdentifier`. O SHA-256 limita a chave a 64 caracteres e evita expor o identificador do recurso como metadado do broker. A ordem é por recurso e não global.
+
+O destino `audit-events` deve ser configurado como ordenado. No AWS, a fila e sua DLQ precisam ser FIFO. No Azure, a fila precisa ter sessões habilitadas. Retentativa, redelivery e DLQ são gerenciados pelo broker e pela `platform-message-queue`.
+
+## Dependências
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.platform</groupId>
+    <groupId>br.com.portalmanager.platform.library</groupId>
     <artifactId>platform-audit</artifactId>
-    <version>1.0.0</version>
 </dependency>
-```
-
-## Configuração básica — sem Redis
-
-O fallback Redis é opcional e vem desabilitado por padrão.
-
-```yaml
-platform:
-  audit:
-    enabled: true
-    service-url: http://audit-api
-    service-name: account
-    publish-path: /api/v1/events
-    fail-on-error: false
-    http:
-      connect-timeout: 5s
-      read-timeout: 5s
-    fallback:
-      enabled: false
-```
-
-Nesse modo:
-
-```text
-evento
-  ↓
-Audit API
-  ├─ sucesso → fim
-  └─ falha   → erro é logado
-```
-
-Com `fail-on-error=false`, a publicação é assíncrona e uma falha da Audit API
-não derruba a operação principal.
-
-Com `fail-on-error=true`, a publicação é síncrona e a falha é propagada.
-Nesse modo estrito, o fallback Redis não é utilizado.
-
-## Configuração com fallback Redis
-
-Quando o consumidor quiser retenção temporária dos eventos que falharam no HTTP,
-deve habilitar explicitamente o fallback:
-
-```yaml
-platform:
-  audit:
-    enabled: true
-    service-url: http://audit-api
-    service-name: account
-    publish-path: /api/v1/events
-    fail-on-error: false
-    http:
-      connect-timeout: 5s
-      read-timeout: 5s
-
-    fallback:
-      enabled: true
-      key-prefix: platform:audit:pending:
-      recovery-interval: 5m
-      batch-size: 50
-      lock:
-        key-prefix: platform:audit:recovery:lock:
-        ttl: 2m
-```
-
-Como o suporte Redis é opcional na biblioteca, o serviço consumidor também deve
-ter Redis disponível no classpath, por exemplo:
-
-```xml
 <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-data-redis</artifactId>
+    <groupId>br.com.portalmanager.platform.library</groupId>
+    <artifactId>platform-message-queue</artifactId>
 </dependency>
 ```
 
-E configurar o Redis normalmente pelo Spring Boot:
-
-```yaml
-spring:
-  data:
-    redis:
-      host: localhost
-      port: 6379
-```
-
-Se `platform.audit.fallback.enabled=true` e não existir um
-`AuditFallbackStore` válido / Redis configurado, a aplicação falha no startup.
-A biblioteca não sobe silenciosamente sem a resiliência solicitada.
-
-## Como o fallback funciona
-
-A implementação padrão usa Redis convencional com uma lista por serviço.
-
-Exemplo de chave:
-
-```text
-platform:audit:pending:account
-```
-
-Quando a Audit API falha:
-
-```text
-evento
-  ↓
-Audit API
-  ↓ falha
-Redis List
-```
-
-O evento completo é serializado em JSON e colocado no final da lista.
-
-Não existe TTL automático nessa fila. O evento permanece pendente até ser
-reenviado com sucesso ou removido administrativamente.
-
-## Recovery
-
-Quando o fallback está habilitado, o módulo cria um scheduler dedicado.
-
-Antes de drenar a fila, cada instância tenta adquirir um lock distribuído no Redis:
-
-```text
-platform:audit:recovery:lock:<service-name>
-```
-
-O lock usa `SET NX` com TTL. Apenas a instância que adquiriu o lock executa
-o recovery. A liberação usa comparação do token do proprietário + `DEL` em
-script Redis atômico, evitando que uma instância remova o lock de outra.
-
-Por padrão:
-
-```text
-a cada 5 minutos
-    ↓
-tenta adquirir lock
-    ├─ não conseguiu → encerra o ciclo
-    └─ conseguiu
-         ↓
-       existem eventos pendentes?
-         ├─ não → libera lock e encerra
-         └─ sim
-              ↓
-            tenta o primeiro
-              ├─ falhou → encerra e libera lock
-              └─ sucesso
-                   ↓
-                 remove do Redis
-                   ↓
-                 continua até batch-size
-```
-
-O primeiro evento funciona como teste real de disponibilidade da Audit API.
-Se ele ainda falhar, o worker não continua disparando o restante do lote.
-
-Exemplo:
+## Configuração AWS
 
 ```yaml
 platform:
   audit:
-    fallback:
-      enabled: true
-      recovery-interval: 5m
-      batch-size: 20
-      lock:
-        ttl: 2m
+    enabled: true
+    service-name: account
+    destination: audit-events
+  message-queue:
+    provider: AWS
+    aws:
+      region: sa-east-1
+    destinations:
+      audit-events:
+        queue: audit-events.fifo
+        ordered: true
+        publisher:
+          enabled: true
+        consumer:
+          enabled: false
 ```
 
-Nesse caso, cada ciclo recupera no máximo 20 eventos.
+A infraestrutura provisiona a fila FIFO e sua DLQ com redrive policy. A aplicação precisa de permissão mínima para enviar mensagens e resolver a URL da fila.
 
-## Beans condicionais
+## Configuração Azure
 
-Com fallback desabilitado:
-
-```text
-AuditPublisher
-RestAuditPublisher
-AuditAuthorizationContextResolver
-AuditAspect
-platformAuditTaskExecutor
+```yaml
+platform:
+  audit:
+    enabled: true
+    service-name: account
+    destination: audit-events
+  message-queue:
+    provider: AZURE
+    azure:
+      namespace: my-namespace.servicebus.windows.net
+    destinations:
+      audit-events:
+        queue: audit-events
+        ordered: true
+        publisher:
+          enabled: true
+        consumer:
+          enabled: false
 ```
 
-Nenhum bean Redis de fallback do `platform-audit` é criado.
+A infraestrutura provisiona a entidade Service Bus com sessões habilitadas. A identidade da aplicação precisa da permissão de envio.
 
-Com fallback habilitado:
+## Uso e payload
 
-```text
-AuditFallbackStore
-RedisAuditFallbackStore
-AuditRecoveryLock
-RedisAuditRecoveryLock
-AuditRecoveryService
-platformAuditRecoveryTaskScheduler
-```
-
-também são criados.
-
-## Uso
+O corpo completo da requisição ou da resposta nunca é copiado automaticamente para o evento. O payload de negócio inicia vazio e recebe somente os campos declarados explicitamente na anotação:
 
 ```java
 @Auditable(
     resource = "account",
     action = "UPDATE",
-    resourceId = @AuditField(
-        source = AuditFieldSource.PATH,
-        field = "accountId"
-    )
+    resourceId = @AuditField(source = AuditFieldSource.PATH, field = "accountId"),
+    payload = {
+        @AuditField(source = AuditFieldSource.RESPONSE, field = "name"),
+        @AuditField(source = AuditFieldSource.BODY, field = "status")
+    }
 )
-public ResponseEntity<AccountResponse> update(String accountId, ...) {
-    ...
+public ResponseEntity<AccountResponse> update(
+        @PathVariable("accountId") String accountId,
+        @RequestBody UpdateAccountRequest request
+) {
+    // ...
 }
 ```
 
-## Contexto de autorização
+Escolha apenas campos necessários para comprovar a ação. `AuditFieldSource` permite selecionar um campo de PATH, BODY, RESPONSE ou HEADER. Para PATH, use o nome declarado em `@PathVariable`; o nome do parâmetro Java também funciona quando o compilador preserva esses nomes. BODY busca apenas parâmetros marcados com `@RequestBody`. O campo `metadata` do evento é reservado para metadados adicionais e fica vazio nesta implementação. Campos com nomes que indicam credenciais ou segredos são bloqueados. Cabeçalhos são negados por padrão, exceto `correlation-id`; nomes adicionais precisam constar em `platform.audit.allowed-headers`. Mesmo com a allowlist, informe somente dados necessários para comprovar a ação.
 
-`platform-audit` depende diretamente de `platform-authorization`.
+Um identificador do recurso é obrigatório. Se não puder ser resolvido, o evento não será publicado. Com `fail-on-error=true` (padrão), a operação falha explicitamente; com `false`, o evento é descartado e a ocorrência é registrada em log de erro.
 
-Toda publicação auditável usa o `UserContext` já validado pela autorização.
-O `AuditAuthorizationContextResolver` transforma o `UserSession` em contexto
-de auditoria usando:
+## Consumo pelo audit-api
+
+O consumidor deve registrar um listener para o destino `audit-events` e processar `MessageQueueMessage<AuditEventRequest>`. O handler confirma a mensagem ao retornar normalmente; portanto, deve confirmar a persistência idempotente antes do retorno. Falhas devem ser propagadas para permitir redelivery e encaminhamento à DLQ após o limite configurado no broker.
+
+## Contexto do evento
+
+`platform-audit` depende de `platform-authorization`. O `AuditAuthorizationContextResolver` deriva do `UserContext`:
 
 - `userName` → actor;
 - `accountId` → accountId;
@@ -258,56 +144,25 @@ de auditoria usando:
 - `environmentId` → environmentId;
 - `traceId` → correlationId.
 
-A biblioteca não relê esses dados dos headers para montar o contexto do evento.
-
-Se não existir `UserContext`:
-- com `fail-on-error=false`, o evento é descartado e o erro é registrado;
-- com `fail-on-error=true`, a ausência de contexto é propagada como erro.
-
-## Timeouts HTTP
-
-A chamada para a Audit API possui limites explícitos:
-
-```yaml
-platform:
-  audit:
-    http:
-      connect-timeout: 5s
-      read-timeout: 5s
-```
-
-Os dois valores são máximos. Se conexão ou resposta ocorrerem antes, o fluxo
-continua imediatamente. O consumidor pode sobrescrever ambos.
+A ausência do contexto autorizado interrompe a operação por padrão. Se `fail-on-error=false`, o evento é ignorado e a ocorrência é registrada em log de erro.
 
 ## Propriedades
 
 | Propriedade | Default | Descrição |
 | --- | --- | --- |
-| `platform.audit.enabled` | `true` | Habilita o módulo |
-| `platform.audit.service-url` | — | URL da Audit API |
-| `platform.audit.service-name` | `unknown` | Nome lógico do serviço consumidor |
-| `platform.audit.publish-path` | `/api/v1/events` | Endpoint de publicação |
-| `platform.audit.fail-on-error` | `false` | Propaga falha da auditoria quando habilitado |
-| `platform.audit.http.connect-timeout` | `5s` | Tempo máximo para estabelecer conexão HTTP |
-| `platform.audit.http.read-timeout` | `5s` | Tempo máximo para aguardar leitura da resposta |
-| `platform.audit.core-pool-size` | `2` | Threads mínimas da publicação assíncrona |
-| `platform.audit.max-pool-size` | `4` | Threads máximas da publicação assíncrona |
-| `platform.audit.queue-capacity` | `500` | Capacidade da fila assíncrona local |
-| `platform.audit.fallback.enabled` | `false` | Habilita fallback Redis |
-| `platform.audit.fallback.key-prefix` | `platform:audit:pending:` | Prefixo da lista no Redis |
-| `platform.audit.fallback.recovery-interval` | `5m` | Intervalo entre ciclos de recovery |
-| `platform.audit.fallback.batch-size` | `50` | Máximo recuperado por ciclo |
-| `platform.audit.fallback.lock.key-prefix` | `platform:audit:recovery:lock:` | Prefixo do lock distribuído |
-| `platform.audit.fallback.lock.ttl` | `2m` | TTL do lock de recovery |
+| `platform.audit.enabled` | `true` | Habilita auditoria |
+| `platform.audit.service-name` | Obrigatório | Identifica o serviço produtor no evento |
+| `platform.audit.destination` | `audit-events` | Destino lógico configurado em `platform.message-queue.destinations` |
+| `platform.audit.fail-on-error` | `true` | Propaga falhas de resolução/validação; falhas de publicação na fila sempre são propagadas |
+| `platform.audit.allowed-headers` | `[correlation-id]` | Allowlist explícita de cabeçalhos auditáveis |
+| `platform.audit.max-event-size-bytes` | `65536` | Limite do evento JSON serializado |
+| `platform.audit.max-events-per-invocation` | `100` | Limite de eventos antes de publicar qualquer item da coleção |
 
-## Limites atuais
+O nome do serviço deve ser informado. O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos. O tamanho é medido sobre o JSON do evento antes do envelope do broker; mantenha o limite abaixo do máximo da plataforma escolhida. Se uma coleção exceder o limite de eventos, nenhuma publicação daquela chamada é iniciada.
 
-Esta primeira versão não implementa hash/eventId determinístico nem deduplicação.
-A idempotência será definida junto com o contrato definitivo da Audit API.
+## Limites desta etapa
 
-Em ambientes com múltiplas instâncias do mesmo serviço, a Audit API deverá ser
-preparada para receber reenvios/duplicidades quando a estratégia de idempotência
-for introduzida.
-
-Se a Audit API e o Redis estiverem indisponíveis simultaneamente, a biblioteca
-não consegue garantir retenção do evento.
+- O contrato do consumidor e do broker é *at least once*; `audit-api` precisa deduplicar pelo `eventId`.
+- Não há outbox transacional entre banco de negócio e broker.
+- Ainda é necessário validar redelivery, DLQ, permissões, conectividade e tempos de processamento em homologação com AWS e Azure reais.
+- A `platform-message-queue` não foi submetida a teste de carga para um throughput específico.

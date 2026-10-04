@@ -2,15 +2,18 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
+import br.com.portalmanager.platform.library.audit.field.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
+import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,80 +27,90 @@ class PlatformAuditAutoConfigurationTest {
 
     @Configuration
     static class TestInfrastructure {
-
-        @Bean
-        RestClient.Builder restClientBuilder() {
-            return RestClient.builder();
-        }
-
-        @Bean
-        HttpServletRequest httpServletRequest() {
-            return mock(HttpServletRequest.class);
-        }
-
-        @Bean
-        ObjectMapper objectMapper() {
-            return new ObjectMapper();
+        @Bean HttpServletRequest httpServletRequest() { return mock(HttpServletRequest.class); }
+        @Bean ObjectMapper objectMapper() { return new ObjectMapper(); }
+        @Bean MessageQueuePublisher messageQueuePublisher() { return mock(MessageQueuePublisher.class); }
+        @Bean MessageQueueProperties messageQueueProperties() {
+            MessageQueueProperties properties = new MessageQueueProperties();
+            properties.setProvider(MessageQueueProvider.AWS);
+            properties.getAws().setRegion("sa-east-1");
+            MessageQueueProperties.Destination destination = new MessageQueueProperties.Destination();
+            destination.setQueue("audit-events.fifo");
+            destination.setOrdered(true);
+            properties.getDestinations().put("audit-events", destination);
+            return properties;
         }
     }
 
+    @Configuration
+    static class CustomFactoryConfiguration {
+        @Bean AuditEventFactory customAuditEventFactory() { return mock(AuditEventFactory.class); }
+    }
+
+    @Configuration
+    static class CustomPublisherConfiguration {
+        @Bean AuditPublisher customAuditPublisher() { return mock(AuditPublisher.class); }
+    }
+
     @Test
-    void shouldLoadAuditInfrastructureWhenEnabled() {
+    void shouldLoadAuditInfrastructureWithOrderedMessageQueueDestination() {
         contextRunner
                 .withPropertyValues(
                         "platform.audit.enabled=true",
-                        "platform.audit.service-url=http://audit-api",
                         "platform.audit.service-name=account"
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(AuditPublisher.class);
                     assertThat(context).hasSingleBean(AuditAuthorizationContextResolver.class);
+                    assertThat(context).hasSingleBean(AuditFieldResolver.class);
+                    assertThat(context).hasSingleBean(AuditEventFactory.class);
                     assertThat(context).hasSingleBean(AuditAspect.class);
-                    assertThat(context).hasBean("platformAuditTaskExecutor");
-                });
-    }
-
-
-    @Test
-    void shouldFailStartupWhenServiceUrlIsMissing() {
-        contextRunner
-                .withPropertyValues(
-                        "platform.audit.enabled=true",
-                        "platform.audit.service-name=account"
-                )
-                .run(context -> {
-                    assertThat(context.getStartupFailure()).isNotNull();
-                    assertThat(context.getStartupFailure())
-                            .hasRootCauseInstanceOf(PlatformConfigurationException.class)
-                            .hasRootCauseMessage(
-                                    "platform.audit.service-url is required when platform.audit is enabled"
-                            );
-
-                    PlatformConfigurationException exception =
-                            (PlatformConfigurationException) context.getStartupFailure().getCause().getCause();
-
-                    assertThat(exception.getErrorResponse().code()).isEqualTo("PLT-AUD-001");
-                    assertThat(exception.getErrorResponse().solution())
-                            .isEqualTo("Configure platform.audit.service-url with the audit service URL.");
                 });
     }
 
     @Test
-    void shouldFailStartupWhenFallbackIsEnabledWithoutStore() {
+    void shouldFailStartupWhenAuditDestinationDoesNotExist() {
         contextRunner
                 .withPropertyValues(
                         "platform.audit.enabled=true",
-                        "platform.audit.service-url=http://audit-api",
-                        "platform.audit.fallback.enabled=true"
+                        "platform.audit.service-name=account",
+                        "platform.audit.destination=missing"
                 )
-                .run(context -> {
-                    assertThat(context.getStartupFailure()).isNotNull();
-                    assertThat(context.getStartupFailure())
-                            .isInstanceOf(PlatformConfigurationException.class)
-                            .hasMessage(
-                                    "Audit fallback is enabled without a configured fallback store"
-                            );
-                });
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void shouldRequireServiceNameEvenWithCustomPublisher() {
+        contextRunner
+                .withUserConfiguration(CustomPublisherConfiguration.class)
+                .withPropertyValues("platform.audit.enabled=true")
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void shouldRequireServiceNameEvenWithCustomFactory() {
+        contextRunner
+                .withUserConfiguration(CustomPublisherConfiguration.class, CustomFactoryConfiguration.class)
+                .withPropertyValues("platform.audit.enabled=true")
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void shouldFailStartupWhenServiceNameIsMissing() {
+        contextRunner
+                .withPropertyValues("platform.audit.enabled=true")
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void shouldRejectNonPositiveBoundsAtStartup() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.audit.enabled=true",
+                        "platform.audit.service-name=account",
+                        "platform.audit.max-event-size-bytes=0"
+                )
+                .run(context -> assertThat(context).hasFailed());
     }
 
     @Test
