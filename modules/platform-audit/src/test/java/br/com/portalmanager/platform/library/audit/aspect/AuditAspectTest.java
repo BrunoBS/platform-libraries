@@ -143,6 +143,21 @@ class AuditAspectTest {
     }
 
     @Test
+    void shouldValidateEveryEventBeforePublishingAnyItem() throws Throwable {
+        when(contextResolver.resolve()).thenReturn(
+                new AuditContext("account-1", "application-1", "dev", "user-1", "trace-1"));
+
+        assertThatThrownBy(() -> aspect.audit(joinPoint(
+                "updateWithoutPayload",
+                ResponseEntity.ok(List.of(
+                        Map.of("id", "resource-1"),
+                        Map.of("name", "missing identifier")
+                ))
+        ))).isInstanceOf(AuditException.class);
+        verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
     void shouldRejectCollectionBeforePublishingWhenFanOutLimitIsExceeded() throws Throwable {
         properties.setMaxEventsPerInvocation(1);
         ProceedingJoinPoint joinPoint = joinPoint(
