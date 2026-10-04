@@ -1,9 +1,12 @@
 package br.com.portalmanager.platform.library.audit.publisher;
 
+import br.com.portalmanager.platform.library.audit.exception.AuditException;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
+import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
+import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueMessageKeys;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -63,7 +66,7 @@ class MessageQueueAuditPublisherTest {
     }
 
     @Test
-    void shouldPropagateBrokerFailure() {
+    void shouldWrapUnexpectedPublisherFailureInAuditException() {
         MessageQueuePublisher queue = mock(MessageQueuePublisher.class);
         doThrow(new IllegalStateException("broker unavailable")).when(queue).publish(
                 org.mockito.ArgumentMatchers.anyString(),
@@ -73,7 +76,37 @@ class MessageQueueAuditPublisherTest {
                 queue, "audit-events", MessageQueueProvider.AWS);
 
         assertThatThrownBy(() -> publisher.publish(event))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("broker unavailable");
+                .isInstanceOf(AuditException.class)
+                .hasRootCauseMessage("broker unavailable");
+    }
+
+    @Test
+    void shouldPreserveStandardMessageQueueException() {
+        MessageQueuePublisher queue = mock(MessageQueuePublisher.class);
+        MessagePublishException failure = new MessagePublishException(
+                MessageQueueMessageKeys.PUBLISH_FAILED, new IllegalStateException("broker unavailable"));
+        doThrow(failure).when(queue).publish(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(MessageQueuePublishOptions.class));
+        MessageQueueAuditPublisher publisher = new MessageQueueAuditPublisher(
+                queue, "audit-events", MessageQueueProvider.AWS);
+
+        assertThatThrownBy(() -> publisher.publish(event))
+                .isSameAs(failure);
+    }
+
+    @Test
+    void shouldRejectMissingResourceIdentifierUsingAuditException() {
+        MessageQueuePublisher queue = mock(MessageQueuePublisher.class);
+        MessageQueueAuditPublisher publisher = new MessageQueueAuditPublisher(
+                queue, "audit-events", MessageQueueProvider.AWS);
+        AuditEventRequest invalidEvent = new AuditEventRequest(
+                UUID.randomUUID().toString(), Instant.now(), "account", "account-1", "application-1", "dev",
+                "account", null, "UPDATE", "user", "correlation-1", 200,
+                Map.of("id", "123"), Map.of());
+
+        assertThatThrownBy(() -> publisher.publish(invalidEvent))
+                .isInstanceOf(AuditException.class);
     }
 }
