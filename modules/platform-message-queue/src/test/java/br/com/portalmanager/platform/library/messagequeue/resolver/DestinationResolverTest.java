@@ -54,19 +54,18 @@ class DestinationResolverTest {
     }
 
     @Test
-    void shouldResolveFifoQueueAndConventionalFifoDeadLetterName() {
+    void shouldResolveConventionalFifoDeadLetterQueueNameFromPhysicalQueue() {
         var properties = new MessageQueueProperties();
         properties.setProvider(MessageQueueProvider.AWS);
         properties.getAws().setRegion("sa-east-1");
 
         var destination = new MessageQueueProperties.Destination();
         destination.setQueue("orders.fifo");
-        destination.setOrdered(true);
         properties.getDestinations().put("orders", destination);
 
         var resolved = new DestinationResolver(properties).resolve("orders");
 
-        assertThat(resolved.ordered()).isTrue();
+        assertThat(resolved.queue()).isEqualTo("orders.fifo");
         assertThat(resolved.deadLetterReference()).isEqualTo("orders-dlq.fifo");
     }
 
