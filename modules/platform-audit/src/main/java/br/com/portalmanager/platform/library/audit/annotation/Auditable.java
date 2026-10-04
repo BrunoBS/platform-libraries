@@ -20,4 +20,10 @@ public @interface Auditable {
     AuditField resourceId();
 
     AuditField environment() default @AuditField;
+
+    /**
+     * Explicit allowlist of fields included in the audit payload.
+     * The full request or response body is never published automatically.
+     */
+    AuditField[] payload() default {};
 }

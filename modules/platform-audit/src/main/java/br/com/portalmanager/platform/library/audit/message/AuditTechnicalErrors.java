@@ -4,27 +4,43 @@ import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefini
 
 public final class AuditTechnicalErrors {
 
-    public static final PlatformErrorDefinition SERVICE_URL_REQUIRED =
+    public static final PlatformErrorDefinition MESSAGE_QUEUE_DESTINATION_REQUIRED =
             new PlatformErrorDefinition(
                     "PLT-AUD-001",
-                    "platform.audit.service-url is required when platform.audit is enabled",
-                    "Configure platform.audit.service-url with the audit service URL.",
+                    "platform.audit.destination is required",
+                    "Configure platform.audit.destination with a logical platform-message-queue destination.",
                     500
             );
 
-    public static final PlatformErrorDefinition FALLBACK_STORE_MISSING =
+    public static final PlatformErrorDefinition MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED =
             new PlatformErrorDefinition(
                     "PLT-AUD-002",
-                    "Audit fallback is enabled without a configured fallback store",
-                    "Configure Redis or provide an AuditFallbackStore bean.",
+                    "The audit destination is not configured for ordered publishing",
+                    "Configure the audit destination in platform.message-queue.destinations with ordered=true and publisher.enabled=true.",
                     500
             );
 
-    public static final PlatformErrorDefinition REDIS_NOT_CONFIGURED =
+    public static final PlatformErrorDefinition SERVICE_NAME_REQUIRED =
             new PlatformErrorDefinition(
                     "PLT-AUD-003",
-                    "Redis is required when platform.audit.fallback is enabled",
-                    "Configure StringRedisTemplate or disable platform.audit.fallback.enabled.",
+                    "platform.audit.service-name is required",
+                    "Set platform.audit.service-name to the logical name of the producing service.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition EVENT_SIZE_LIMIT_INVALID =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-004",
+                    "platform.audit.max-event-size-bytes must be positive",
+                    "Set platform.audit.max-event-size-bytes to a positive number.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition EVENT_COUNT_LIMIT_INVALID =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-005",
+                    "platform.audit.max-events-per-invocation must be positive",
+                    "Set platform.audit.max-events-per-invocation to a positive number.",
                     500
             );
 

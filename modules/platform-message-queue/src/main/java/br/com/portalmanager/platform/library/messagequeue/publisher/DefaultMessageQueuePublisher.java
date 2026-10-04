@@ -5,7 +5,6 @@ import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueP
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
 import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
-import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
 
@@ -17,19 +16,16 @@ public class DefaultMessageQueuePublisher implements MessageQueuePublisher {
     private final MessageEnvelopeFactory envelopeFactory;
     private final MessageQueueSerializer serializer;
     private final MessageQueueTransport transport;
-    private final MessageQueueMetrics metrics;
 
     public DefaultMessageQueuePublisher(
             DestinationResolver destinationResolver,
             MessageEnvelopeFactory envelopeFactory,
             MessageQueueSerializer serializer,
-            MessageQueueTransport transport,
-            MessageQueueMetrics metrics) {
+            MessageQueueTransport transport) {
         this.destinationResolver = destinationResolver;
         this.envelopeFactory = envelopeFactory;
         this.serializer = serializer;
         this.transport = transport;
-        this.metrics = metrics;
     }
 
     @Override
@@ -45,22 +41,16 @@ public class DefaultMessageQueuePublisher implements MessageQueuePublisher {
     @Override
     public void publish(String destination, Object payload, MessageQueuePublishOptions options) {
         var resolved = destinationResolver.resolve(destination);
-        try {
-            if (!resolved.publisherEnabled()) {
-                throw new MessagePublishException(
-                        MessageQueueMessageKeys.PUBLISHER_DISABLED,
-                        Map.of("0", destination),
-                        null);
-            }
-
-            var safeOptions = options == null ? MessageQueuePublishOptions.defaults() : options;
-            var envelope = envelopeFactory.create(
-                    destination, payload, safeOptions.correlationId(), safeOptions.headers());
-            transport.send(resolved, serializer.serialize(envelope), safeOptions);
-            metrics.recordPublish(resolved, true);
-        } catch (RuntimeException exception) {
-            metrics.recordPublish(resolved, false);
-            throw exception;
+        if (!resolved.publisherEnabled()) {
+            throw new MessagePublishException(
+                    MessageQueueMessageKeys.PUBLISHER_DISABLED,
+                    Map.of("0", destination),
+                    null);
         }
+
+        var safeOptions = options == null ? MessageQueuePublishOptions.defaults() : options;
+        var envelope = envelopeFactory.create(
+                destination, payload, safeOptions.correlationId(), safeOptions.headers());
+        transport.send(resolved, serializer.serialize(envelope), safeOptions);
     }
 }
