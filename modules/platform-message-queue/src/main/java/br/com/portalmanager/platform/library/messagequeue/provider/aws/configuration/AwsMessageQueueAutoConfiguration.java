@@ -50,12 +50,14 @@ public class AwsMessageQueueAutoConfiguration {
             MessageQueueListenerRegistry messageQueueListenerRegistry,
             DestinationResolver destinationResolver,
             MessageQueueSerializer messageQueueSerializer,
-            MessageQueueProperties properties) {
+            MessageQueueProperties properties,
+            QueueCapabilitiesRegistry capabilitiesRegistry) {
         return new SqsMessageQueueConsumer(
                 messageQueueSqsClient,
                 messageQueueListenerRegistry,
                 destinationResolver,
                 messageQueueSerializer,
-                properties);
+                properties,
+                capabilitiesRegistry);
     }
 }
