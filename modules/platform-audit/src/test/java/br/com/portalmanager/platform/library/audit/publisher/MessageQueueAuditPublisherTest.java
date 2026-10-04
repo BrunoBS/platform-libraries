@@ -14,8 +14,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class MessageQueueAuditPublisherTest {
 
@@ -65,9 +65,10 @@ class MessageQueueAuditPublisherTest {
     @Test
     void shouldPropagateBrokerFailure() {
         MessageQueuePublisher queue = mock(MessageQueuePublisher.class);
-        when(queue.publish(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(),
-                org.mockito.ArgumentMatchers.any(MessageQueuePublishOptions.class)))
-                .thenThrow(new IllegalStateException("broker unavailable"));
+        doThrow(new IllegalStateException("broker unavailable")).when(queue).publish(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(MessageQueuePublishOptions.class));
         MessageQueueAuditPublisher publisher = new MessageQueueAuditPublisher(
                 queue, "audit-events", MessageQueueProvider.AWS);
 
