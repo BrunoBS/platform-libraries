@@ -28,16 +28,14 @@ public class DestinationResolver {
 
         var providerDefaults = providerDefaults(properties.getProvider());
         var providerOverride = providerOverride(properties.getProvider(), configured);
-        boolean fifo = properties.getProvider() == MessageQueueProvider.AWS && configured.isOrdered();
 
         return new ResolvedDestination(
                 destination,
                 properties.getProvider(),
                 configured.getQueue(),
-                resolveDeadLetterReference(properties.getProvider(), configured, fifo),
+                resolveDeadLetterReference(properties.getProvider(), configured),
                 configured.getPublisher().isEnabled(),
                 configured.getConsumer().isEnabled(),
-                configured.isOrdered(),
                 resolveVisibilityTimeout(properties.getProvider(), configured),
                 firstNonNull(providerOverride.getWaitTime(), configured.getConsumer().getWaitTime(), providerDefaults.getWaitTime()),
                 firstNonNull(providerOverride.getConcurrency(), configured.getConsumer().getConcurrency(), providerDefaults.getConcurrency())
@@ -54,12 +52,12 @@ public class DestinationResolver {
 
     private String resolveDeadLetterReference(
             MessageQueueProvider provider,
-            MessageQueueProperties.Destination destination,
-            boolean fifo) {
+            MessageQueueProperties.Destination destination) {
         if (provider != MessageQueueProvider.AWS) return null;
         String configuredQueue = destination.getAws().getDeadLetterQueue();
         if (configuredQueue != null && !configuredQueue.isBlank()) return configuredQueue;
         String queue = destination.getQueue();
+        boolean fifo = queue.endsWith(".fifo");
         return fifo ? queue.substring(0, queue.length() - ".fifo".length()) + "-dlq.fifo" : queue + "-dlq";
     }
 

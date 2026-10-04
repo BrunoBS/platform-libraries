@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
+import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
@@ -35,6 +36,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
     private final DestinationResolver destinationResolver;
     private final MessageQueueSerializer serializer;
     private final MessageQueueProperties properties;
+    private final QueueCapabilitiesRegistry capabilitiesRegistry;
     private final Map<String, String> queueUrls = new ConcurrentHashMap<>();
     private final Map<String, Future<?>> workers = new ConcurrentHashMap<>();
 
@@ -46,12 +48,14 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             MessageQueueListenerRegistry registry,
             DestinationResolver destinationResolver,
             MessageQueueSerializer serializer,
-            MessageQueueProperties properties) {
+            MessageQueueProperties properties,
+            QueueCapabilitiesRegistry capabilitiesRegistry) {
         this.sqsClient = sqsClient;
         this.registry = registry;
         this.destinationResolver = destinationResolver;
         this.serializer = serializer;
         this.properties = properties;
+        this.capabilitiesRegistry = capabilitiesRegistry;
     }
 
     @Override
@@ -145,7 +149,9 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                LOGGER.warn("Technical failure while polling destination {}; worker will retry", destination, exception);
+                capabilitiesRegistry.invalidate(queueName);
+                queueUrls.remove(queueName);
+                LOGGER.warn("Technical failure while polling destination {}; queue metadata will be refreshed", destination, exception);
                 backoff();
             }
         }

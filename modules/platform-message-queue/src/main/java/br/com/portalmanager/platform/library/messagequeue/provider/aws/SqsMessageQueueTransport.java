@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
+import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
 import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueMessageKeys;
@@ -15,10 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SqsMessageQueueTransport implements MessageQueueTransport {
 
     private final SqsClient sqsClient;
+    private final QueueCapabilitiesRegistry capabilitiesRegistry;
     private final Map<String, String> queueUrls = new ConcurrentHashMap<>();
 
-    public SqsMessageQueueTransport(SqsClient sqsClient) {
+    public SqsMessageQueueTransport(SqsClient sqsClient, QueueCapabilitiesRegistry capabilitiesRegistry) {
         this.sqsClient = sqsClient;
+        this.capabilitiesRegistry = capabilitiesRegistry;
     }
 
     @Override
@@ -27,33 +30,36 @@ public class SqsMessageQueueTransport implements MessageQueueTransport {
     }
 
     @Override
-    public void send(
-            ResolvedDestination destination,
-            String body,
-            MessageQueuePublishOptions options) {
+    public void send(ResolvedDestination destination, String body, MessageQueuePublishOptions options) {
         try {
+            var capabilities = capabilitiesRegistry.get(destination);
             var request = SendMessageRequest.builder()
                     .queueUrl(queueUrls.computeIfAbsent(destination.queue(), this::resolveQueueUrl))
                     .messageBody(body);
 
-            if (destination.ordered()) {
+            if (capabilities.ordered()) {
                 if (options.orderingKey() == null || options.orderingKey().isBlank()) {
                     throw new IllegalArgumentException("orderingKey is required for an ordered destination");
                 }
                 validateFifoId("orderingKey", options.orderingKey());
                 request.messageGroupId(options.orderingKey());
-                if (options.deduplicationId() == null || options.deduplicationId().isBlank()) {
+
+                if (options.deduplicationId() != null && !options.deduplicationId().isBlank()) {
+                    validateFifoId("deduplicationId", options.deduplicationId());
+                    request.messageDeduplicationId(options.deduplicationId());
+                } else if (capabilities.deduplication()) {
                     throw new IllegalArgumentException(
-                            "deduplicationId is required for an AWS SQS FIFO destination");
+                            "deduplicationId is required for this AWS SQS FIFO destination");
                 }
-                validateFifoId("deduplicationId", options.deduplicationId());
-                request.messageDeduplicationId(options.deduplicationId());
             } else if (options.orderingKey() != null || options.deduplicationId() != null) {
                 throw new IllegalArgumentException("Ordering and deduplication options require an ordered AWS destination");
             }
 
             sqsClient.sendMessage(request.build());
         } catch (RuntimeException exception) {
+            if (!(exception instanceof IllegalArgumentException)) {
+                capabilitiesRegistry.invalidate(destination.queue());
+            }
             throw new MessagePublishException(
                     MessageQueueMessageKeys.PUBLISH_FAILED,
                     Map.of("0", destination.logicalName()),

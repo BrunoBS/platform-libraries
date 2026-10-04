@@ -11,6 +11,7 @@ import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.audit.publisher.MessageQueueAuditPublisher;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
+import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -30,10 +31,11 @@ public class PlatformAuditAutoConfiguration {
     AuditPublisher auditPublisher(
             MessageQueuePublisher messageQueuePublisher,
             PlatformAuditProperties auditProperties,
-            MessageQueueProperties messageQueueProperties
+            MessageQueueProperties messageQueueProperties,
+            QueueCapabilitiesRegistry capabilitiesRegistry
     ) {
         String destinationName = auditProperties.getDestination();
-        validateDestination(destinationName, messageQueueProperties);
+        validateDestination(destinationName, messageQueueProperties, capabilitiesRegistry);
         return new MessageQueueAuditPublisher(
                 messageQueuePublisher,
                 destinationName,
@@ -82,13 +84,18 @@ public class PlatformAuditAutoConfiguration {
         return new AuditAspect(properties, eventFactory, publisher);
     }
 
-    private void validateDestination(String destinationName, MessageQueueProperties properties) {
+    private void validateDestination(
+            String destinationName,
+            MessageQueueProperties properties,
+            QueueCapabilitiesRegistry capabilitiesRegistry) {
         if (destinationName == null || destinationName.isBlank()) {
             throw new PlatformConfigurationException(AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_REQUIRED);
         }
 
         MessageQueueProperties.Destination destination = properties.getDestinations().get(destinationName);
-        if (destination == null || !destination.isOrdered() || !destination.getPublisher().isEnabled()) {
+        if (destination == null
+                || !destination.getPublisher().isEnabled()
+                || !capabilitiesRegistry.get(destination.getQueue()).ordered()) {
             throw new PlatformConfigurationException(
                     AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED);
         }

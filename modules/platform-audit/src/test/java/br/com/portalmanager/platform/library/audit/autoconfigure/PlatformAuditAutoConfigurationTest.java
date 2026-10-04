@@ -5,6 +5,8 @@ import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationCon
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
 import br.com.portalmanager.platform.library.audit.field.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
+import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilities;
+import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
@@ -36,9 +38,13 @@ class PlatformAuditAutoConfigurationTest {
             properties.getAws().setRegion("sa-east-1");
             MessageQueueProperties.Destination destination = new MessageQueueProperties.Destination();
             destination.setQueue("audit-events.fifo");
-            destination.setOrdered(true);
             properties.getDestinations().put("audit-events", destination);
             return properties;
+        }
+        @Bean QueueCapabilitiesRegistry queueCapabilitiesRegistry(MessageQueueProperties properties) {
+            return new QueueCapabilitiesRegistry(
+                    properties,
+                    queue -> new QueueCapabilities(true, true));
         }
     }
 
