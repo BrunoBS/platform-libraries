@@ -64,10 +64,9 @@ class AuditAspectSpringProxyTest {
         }
         @Bean AuditFieldResolver fieldResolver(
                 PlatformAuditProperties properties,
-                ObjectMapper objectMapper,
                 HttpServletRequest request
         ) {
-            return new AuditFieldResolver(properties, objectMapper, request);
+            return new AuditFieldResolver(properties, request);
         }
         @Bean AuditEventFactory eventFactory(
                 PlatformAuditProperties properties,
