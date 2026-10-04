@@ -60,5 +60,15 @@ class AuditMessageBundleTest {
                 AuditMessageKeys.USER_CONTEXT_MISSING, locale).orElseThrow().code());
         assertEquals("AUD-500-004", provider.find(
                 AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING, locale).orElseThrow().code());
+        assertEquals("AUD-500-005", provider.find(
+                AuditMessageKeys.FIELD_NOT_ALLOWED, locale).orElseThrow().code());
+        assertEquals("AUD-500-006", provider.find(
+                AuditMessageKeys.RESOURCE_ACTION_REQUIRED, locale).orElseThrow().code());
+        assertEquals("AUD-500-007", provider.find(
+                AuditMessageKeys.EVENT_TOO_LARGE, locale).orElseThrow().code());
+        assertEquals("AUD-500-008", provider.find(
+                AuditMessageKeys.EVENT_SERIALIZATION_FAILED, locale).orElseThrow().code());
+        assertEquals("AUD-500-009", provider.find(
+                AuditMessageKeys.EVENT_COUNT_EXCEEDED, locale).orElseThrow().code());
     }
 }
