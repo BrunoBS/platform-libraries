@@ -50,10 +50,9 @@ public class PlatformAuditAutoConfiguration {
     @ConditionalOnMissingBean(AuditFieldResolver.class)
     AuditFieldResolver auditFieldResolver(
             PlatformAuditProperties properties,
-            ObjectMapper objectMapper,
             HttpServletRequest request
     ) {
-        return new AuditFieldResolver(properties, objectMapper, request);
+        return new AuditFieldResolver(properties, request);
     }
 
     @Bean
