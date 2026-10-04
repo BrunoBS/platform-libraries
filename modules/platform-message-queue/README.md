@@ -153,9 +153,18 @@ platform:
           enabled: true
 ```
 
-A aplicação usa `DefaultAzureCredential`. Atribua a role integrada **Azure Service Bus Data Owner** diretamente à identidade da workload (managed identity ou service principal) no escopo do namespace, em **Access control (IAM)**. Não é necessário criar um grupo nem atribuir as roles **Data Sender** e **Data Receiver** separadamente: Data Owner cobre a consulta de propriedades da fila feita no startup, além de publicação e consumo. Como Data Owner concede acesso amplo às entidades do namespace, limite a atribuição à identidade da aplicação. Não confunda essa role de dados do Service Bus com as roles gerais `Owner` ou `Contributor` da assinatura.
+A aplicação usa `DefaultAzureCredential`. Para dar acesso ao módulo, solicite uma atribuição Azure RBAC diretamente ao principal da aplicação (managed identity ou service principal):
 
-O módulo consulta as propriedades de todas as filas configuradas ao iniciar para detectar automaticamente se exigem sessões. Por isso, mesmo uma aplicação que só publica precisa da role de descoberta. No Azure, dead-letter é a subfila nativa; a mesma role permite consumir a DLQ quando um listener estiver configurado. Configure `MaxDeliveryCount` na entidade conforme a política operacional. O módulo não provisiona nem configura filas.
+| Campo da solicitação | Valor |
+| --- | --- |
+| Role | **Azure Service Bus Data Owner** |
+| Escopo | Namespace do Service Bus usado pela aplicação |
+| Principal | Identidade vinculada à workload |
+| Motivo | Descobrir as propriedades das filas no startup e publicar/consumir mensagens |
+
+A atribuição é feita em **Access control (IAM)** no namespace; não é necessário criar um grupo. A biblioteca consulta as propriedades de todas as filas configuradas ao iniciar para detectar automaticamente se exigem sessões. Por isso, mesmo uma aplicação que só publica precisa dessa role de descoberta. **Data Sender** e **Data Receiver**, separadamente, não autorizam a consulta; Data Owner também cobre envio e recebimento, mas concede acesso amplo às entidades do namespace. Atribua-a somente à identidade da aplicação. Essa é uma role de dados do Service Bus, diferente das roles gerais `Owner` ou `Contributor` da assinatura. Consulte [as roles internas do Service Bus](https://learn.microsoft.com/en-us/azure/service-bus-messaging/authenticate-application) e [como atribuir uma role RBAC](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal).
+
+No Azure, dead-letter é a subfila nativa; a mesma role permite consumi-la quando houver um listener configurado. Configure `MaxDeliveryCount` na entidade conforme a política operacional. O módulo não provisiona nem configura filas.
 
 A fila Azure com sessões habilitadas é detectada automaticamente. Não declare uma flag de ordenação:
 
@@ -222,14 +231,9 @@ Na AWS, esse listener consome a fila DLQ física indicada pela configuração (o
 
 ## Observabilidade
 
-Quando a aplicação disponibiliza um `MeterRegistry`, a lib registra os counters:
+Este módulo **não registra métricas próprias no Micrometer**: ele não cria counters de publicação, consumo, polling ou confirmação, mesmo quando a aplicação disponibiliza um `MeterRegistry`.
 
-- `platform.message.queue.publish`: publicação com resultado;
-- `platform.message.queue.consume`: processamento com destino, provider, tipo de fila e resultado;
-- `platform.message.queue.poll.failure`: falha técnica ao consultar o broker;
-- `platform.message.queue.ack.failure`: falha ao confirmar/remover uma mensagem processada.
-
-Os logs de falha incluem destino e, quando o envelope já foi lido, `messageId` e `correlationId`. A aplicação deve exportar as métricas e configurar alertas conforme seus SLOs.
+A biblioteca registra logs SLF4J para falhas técnicas de polling, processamento e confirmação. Quando disponíveis, os logs incluem o destino, `messageId` e `correlationId`. Para acompanhar volume, backlog, idade das mensagens e DLQs, use as métricas nativas do SQS/CloudWatch ou do Service Bus/Azure Monitor; a exportação e os alertas dessas métricas são configurados fora deste módulo.
 
 ## Testes
 
