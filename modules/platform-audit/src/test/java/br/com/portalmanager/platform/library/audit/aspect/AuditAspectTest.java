@@ -158,6 +158,19 @@ class AuditAspectTest {
         verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
     }
 
+    @Test
+    void shouldRejectSerializedEventsAboveConfiguredByteLimit() throws Throwable {
+        properties.setMaxEventSizeBytes(512);
+        when(contextResolver.resolve()).thenReturn(
+                new AuditContext("account-1", "application-1", "dev", "user-1", "trace-1"));
+
+        assertThatThrownBy(() -> aspect.audit(joinPoint(
+                "updateWithLargePayload",
+                ResponseEntity.ok(Map.of("id", "resource-1", "data", "x".repeat(2_000)))
+        ))).isInstanceOf(AuditException.class);
+        verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
+    }
+
     private ProceedingJoinPoint joinPoint(String methodName, Object result) throws Throwable {
         Method method = TestController.class.getDeclaredMethod(methodName);
         MethodSignature signature = mock(MethodSignature.class);
@@ -187,6 +200,15 @@ class AuditAspectTest {
                 resourceId = @AuditField(source = AuditFieldSource.RESPONSE, field = "id")
         )
         void updateWithoutPayload() {
+        }
+
+        @Auditable(
+                resource = "account",
+                action = "UPDATE",
+                resourceId = @AuditField(source = AuditFieldSource.RESPONSE, field = "id"),
+                payload = @AuditField(source = AuditFieldSource.RESPONSE, field = "data")
+        )
+        void updateWithLargePayload() {
         }
     }
 }
