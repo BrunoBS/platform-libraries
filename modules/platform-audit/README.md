@@ -1,114 +1,103 @@
 # platform-audit
 
-Biblioteca de integração transparente entre microserviços e a Audit API da plataforma.
+Biblioteca que cria eventos de auditoria nos serviços produtores e os publica na `platform-message-queue`. O `audit-api` consome o destino lógico `audit-events` e persiste os eventos.
 
-## Contrato Golden de entrega
-
-O modo padrão é **assíncrono at-least-once com persistência durável antes da entrega HTTP**.
+## Fluxo de publicação
 
 ```text
 operação de negócio
     ↓
 @Auditable
     ↓
-AuditEvent
+AuditEvent (eventId estável)
     ↓
-AuditEventQueue (Redis por padrão)
+platform-audit
     ↓
-operação pode concluir
+destino lógico audit-events
     ↓
-recovery/publisher
+AWS SQS FIFO ou Azure Service Bus Sessions
     ↓
-Audit API
-    ↓
-sucesso → remove do store
+audit-api consome e persiste
 ```
 
-A indisponibilidade da Audit API não derruba a operação de negócio. O evento já está persistido e permanece pendente para reenvio.
+A chamada ao publisher da fila é síncrona e retorna depois que o provider confirma o envio (ou propaga a falha). O processamento pelo `audit-api` é desacoplado. A biblioteca não chama o endpoint HTTP de ingestão da Audit API nem mantém uma fila local Redis; a durabilidade após a confirmação é responsabilidade do broker.
 
-A gravação no fila de auditoria faz parte da aceitação do evento. Se essa gravação falhar, a falha é propagada: a biblioteca não confirma silenciosamente um evento que não conseguiu reter.
+Não há atomicidade entre a transação de negócio e a publicação no broker. Se a publicação falhar, a falha é propagada para que o evento não seja descartado silenciosamente. Garantia transacional exigiria um Transactional Outbox no serviço produtor e permanece fora deste módulo.
 
-Este contrato não promete atomicidade entre a transação de negócio e a auditoria. Garantia transacional entre banco de negócio e evento exigiria um padrão como Transactional Outbox e não faz parte desta versão Golden.
+## Idempotência e ordenação
 
-Reenvios podem acontecer. Cada ocorrência auditável recebe um `eventId` UUID imutável na origem, antes de entrar na fila. Redis, recovery e publicação HTTP preservam exatamente o mesmo identificador em todas as tentativas.
+Cada ocorrência recebe um `eventId` UUID imutável na origem. O mesmo valor é preservado no payload e usado como `deduplicationId` para AWS SQS FIFO. Azure Service Bus não recebe esse campo, pois sua deduplicação tem configuração própria. Em ambos os providers, a entrega é *at least once*; o `audit-api` deve impor unicidade persistente por `eventId` e tratar redeliveries como já processadas.
 
-A library garante a identidade estável do evento. A Audit API deve tratar `eventId` como chave de idempotência e manter unicidade persistente: a primeira entrega grava o evento e entregas repetidas do mesmo `eventId` devem ser consideradas já processadas, sem criar uma segunda auditoria. O `eventId` não é derivado do payload; duas ocorrências legítimas com conteúdo igual recebem identificadores diferentes.
+A publicação calcula um `orderingKey` estável a partir de `resourceType` e `resourceIdentifier`. O SHA-256 limita a chave a 64 caracteres e evita expor o identificador do recurso como metadado do broker. A ordem é por recurso e não global.
 
-## Dependência
+O destino `audit-events` deve ser configurado como ordenado. No AWS, a fila e sua DLQ precisam ser FIFO. No Azure, a fila precisa ter sessões habilitadas. Retentativa, redelivery e DLQ são gerenciados pelo broker e pela `platform-message-queue`.
+
+## Dependências
 
 ```xml
 <dependency>
     <groupId>br.com.portalmanager.platform.library</groupId>
     <artifactId>platform-audit</artifactId>
-    <version>1.0.0</version>
+</dependency>
+<dependency>
+    <groupId>br.com.portalmanager.platform.library</groupId>
+    <artifactId>platform-message-queue</artifactId>
 </dependency>
 ```
 
-## Configuração padrão
-
-O fila de auditoria Redis é habilitado por padrão no modo assíncrono.
+## Configuração AWS
 
 ```yaml
 platform:
   audit:
     enabled: true
-    service-url: http://audit-api
     service-name: account
-    publish-path: /api/v1/events
-    fail-on-error: false
-    http:
-      connect-timeout: 5s
-      read-timeout: 5s
-    queue:
-      enabled: true
-      key-prefix: platform:audit:pending:
-      recovery-interval: 1s
-      batch-size: 50
-      lock:
-        key-prefix: platform:audit:recovery:lock:
-        ttl: 2m
+    destination: audit-events
+  message-queue:
+    provider: AWS
+    aws:
+      region: sa-east-1
+    destinations:
+      audit-events:
+        queue: audit-events.fifo
+        ordered: true
+        publisher:
+          enabled: true
+        consumer:
+          enabled: false
 ```
 
-O nome `queue` é mantido nesta etapa por compatibilidade da configuração existente, mas seu papel no modo assíncrono é de **fila de auditoria**, não de queue posterior à chamada HTTP.
+A infraestrutura provisiona a fila FIFO e sua DLQ com redrive policy. A aplicação precisa de permissão mínima para enviar mensagens e resolver a URL da fila.
 
-O consumidor deve disponibilizar Redis no classpath e configurar `StringRedisTemplate`, ou fornecer uma implementação própria de `AuditEventQueue`.
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-data-redis</artifactId>
-</dependency>
-```
-
-Se `fail-on-error=false` e nenhum fila de auditoria estiver disponível, a aplicação falha no startup com `PLT-AUD-002`.
-
-## Modo estrito
-
-Quando `fail-on-error=true`, a publicação é síncrona e a chamada à Audit API participa do fluxo da requisição.
+## Configuração Azure
 
 ```yaml
 platform:
   audit:
-    fail-on-error: true
-    queue:
-      enabled: false
+    enabled: true
+    service-name: account
+    destination: audit-events
+  message-queue:
+    provider: AZURE
+    azure:
+      namespace: my-namespace.servicebus.windows.net
+    destinations:
+      audit-events:
+        queue: audit-events
+        ordered: true
+        publisher:
+          enabled: true
+        consumer:
+          enabled: false
 ```
 
-Nesse modo, uma falha HTTP é propagada e o fila de auditoria não é obrigatório.
+A infraestrutura provisiona a entidade Service Bus com sessões habilitadas. A identidade da aplicação precisa da permissão de envio.
 
-## Recovery
+## Consumo pelo audit-api
 
-O Redis mantém uma lista por serviço:
+O consumidor deve registrar um listener para o destino `audit-events` e processar `MessageQueueMessage<AuditEventRequest>`. O handler confirma a mensagem ao retornar normalmente; portanto, deve confirmar a persistência idempotente antes do retorno. Falhas devem ser propagadas para permitir redelivery e encaminhamento à DLQ após o limite configurado no broker.
 
-```text
-platform:audit:pending:<service-name>
-```
-
-O recovery usa lock distribuído Redis e processa até `batch-size` eventos por ciclo. Um evento só é removido depois de a Audit API confirmar a publicação.
-
-O fluxo atual é FIFO. Retry, poison event/DLQ, renovação do lock e idempotência serão endurecidos nos próximos itens da auditoria; não são considerados resolvidos por esta mudança.
-
-## Contexto
+## Contexto do evento
 
 `platform-audit` depende de `platform-authorization`. O `AuditAuthorizationContextResolver` deriva do `UserContext`:
 
@@ -118,32 +107,20 @@ O fluxo atual é FIFO. Retry, poison event/DLQ, renovação do lock e idempotên
 - `environmentId` → environmentId;
 - `traceId` → correlationId.
 
-## Propriedades principais
+## Propriedades
 
 | Propriedade | Default | Descrição |
 | --- | --- | --- |
 | `platform.audit.enabled` | `true` | Habilita auditoria |
-| `platform.audit.service-url` | — | URL da Audit API |
-| `platform.audit.service-name` | `unknown` | Serviço consumidor |
-| `platform.audit.publish-path` | `/api/v1/events` | Endpoint de publicação |
-| `platform.audit.fail-on-error` | `false` | Usa modo síncrono estrito quando `true` |
-| `platform.audit.http.connect-timeout` | `5s` | Timeout de conexão |
-| `platform.audit.http.read-timeout` | `5s` | Timeout de leitura |
-| `platform.audit.queue.enabled` | `true` | Habilita fila de auditoria/recovery padrão |
-| `platform.audit.queue.key-prefix` | `platform:audit:pending:` | Prefixo da fila Redis |
-| `platform.audit.queue.recovery-interval` | `1s` | Intervalo de recovery |
-| `platform.audit.queue.batch-size` | `50` | Máximo por ciclo |
-| `platform.audit.queue.lock.ttl` | `2m` | TTL do lock distribuído |
+| `platform.audit.service-name` | `unknown` | Identifica o serviço produtor no evento |
+| `platform.audit.destination` | `audit-events` | Destino lógico configurado em `platform.message-queue.destinations` |
+| `platform.audit.fail-on-error` | `false` | Propaga falha ao resolver o contexto autorizado; falhas de publicação na fila sempre são propagadas |
 
-## Limites ainda abertos
+O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos.
 
-Esta etapa fecha apenas a garantia de entrega do item 1 da auditoria.
+## Limites desta etapa
 
-Ainda precisam ser tratados explicitamente:
-
-1. poison event, retry e DLQ;
-2. expiração/renovação do lock;
-3. política de payload;
-4. falhas silenciosas de resolução do Aspect;
-5. validações adicionais de configuração.
-
+- O contrato do consumidor e do broker é *at least once*; `audit-api` precisa deduplicar pelo `eventId`.
+- Não há outbox transacional entre banco de negócio e broker.
+- Ainda é necessário validar redelivery, DLQ, permissões, conectividade e tempos de processamento em homologação com AWS e Azure reais.
+- A `platform-message-queue` não foi submetida a teste de carga para um throughput específico.

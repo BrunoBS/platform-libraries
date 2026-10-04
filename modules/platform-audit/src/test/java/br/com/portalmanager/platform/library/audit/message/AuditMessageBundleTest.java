@@ -12,27 +12,27 @@ class AuditMessageBundleTest {
     private final PlatformDefaultMessageProvider provider = new PlatformDefaultMessageProvider();
 
     @Test
-    void shouldResolveAuditMessageFromPortugueseBundle() {
+    void shouldResolveDestinationMessageFromPortugueseBundle() {
         var message = provider.find(
-                AuditMessageKeys.SERVICE_URL_REQUIRED,
+                AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED,
                 Locale.forLanguageTag("pt-BR")
         ).orElseThrow();
 
-        assertEquals("AUD-500-001", message.code());
-        assertEquals("URL do serviço de auditoria não configurada.", message.message());
+        assertEquals("AUD-500-002", message.code());
+        assertEquals("O destino de auditoria precisa estar configurado para publicação ordenada.", message.message());
         assertEquals(500, message.httpStatus());
         assertEquals("pt-BR", message.locale());
     }
 
     @Test
-    void shouldResolveAuditMessageFromEnglishBundle() {
+    void shouldResolveDestinationMessageFromEnglishBundle() {
         var message = provider.find(
-                AuditMessageKeys.SERVICE_URL_REQUIRED,
+                AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED,
                 Locale.ENGLISH
         ).orElseThrow();
 
-        assertEquals("AUD-500-001", message.code());
-        assertEquals("Audit service URL is not configured.", message.message());
+        assertEquals("AUD-500-002", message.code());
+        assertEquals("The audit destination must be configured for ordered publishing.", message.message());
         assertEquals(500, message.httpStatus());
         assertEquals("en", message.locale());
     }
@@ -41,11 +41,11 @@ class AuditMessageBundleTest {
     void shouldResolveAllAuditMessageKeys() {
         var locale = Locale.forLanguageTag("pt-BR");
 
-        assertEquals("AUD-500-001", provider.find(AuditMessageKeys.SERVICE_URL_REQUIRED, locale).orElseThrow().code());
-        assertEquals("AUD-500-002", provider.find(AuditMessageKeys.USER_CONTEXT_MISSING, locale).orElseThrow().code());
-        assertEquals("AUD-500-003", provider.find(AuditMessageKeys.QUEUE_MISSING, locale).orElseThrow().code());
-        assertEquals("AUD-500-004", provider.find(AuditMessageKeys.REDIS_NOT_CONFIGURED, locale).orElseThrow().code());
-        assertEquals("AUD-500-005", provider.find(AuditMessageKeys.QUEUE_PERSIST_FAILED, locale).orElseThrow().code());
-        assertEquals("AUD-500-006", provider.find(AuditMessageKeys.QUEUE_DESERIALIZE_FAILED, locale).orElseThrow().code());
+        assertEquals("AUD-500-001", provider.find(
+                AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_REQUIRED, locale).orElseThrow().code());
+        assertEquals("AUD-500-002", provider.find(
+                AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED, locale).orElseThrow().code());
+        assertEquals("AUD-500-003", provider.find(
+                AuditMessageKeys.USER_CONTEXT_MISSING, locale).orElseThrow().code());
     }
 }

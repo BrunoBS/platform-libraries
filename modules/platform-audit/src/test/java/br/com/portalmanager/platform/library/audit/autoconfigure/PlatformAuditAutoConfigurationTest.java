@@ -2,16 +2,16 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
-import br.com.portalmanager.platform.library.audit.queue.AuditEventQueue;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
+import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
+import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,23 +25,26 @@ class PlatformAuditAutoConfigurationTest {
 
     @Configuration
     static class TestInfrastructure {
-        @Bean RestClient.Builder restClientBuilder() { return RestClient.builder(); }
         @Bean HttpServletRequest httpServletRequest() { return mock(HttpServletRequest.class); }
         @Bean ObjectMapper objectMapper() { return new ObjectMapper(); }
-    }
-
-    @Configuration
-    static class QueueInfrastructure {
-        @Bean AuditEventQueue auditEventQueue() { return mock(AuditEventQueue.class); }
+        @Bean MessageQueuePublisher messageQueuePublisher() { return mock(MessageQueuePublisher.class); }
+        @Bean MessageQueueProperties messageQueueProperties() {
+            MessageQueueProperties properties = new MessageQueueProperties();
+            properties.setProvider(MessageQueueProvider.AWS);
+            properties.getAws().setRegion("sa-east-1");
+            MessageQueueProperties.Destination destination = new MessageQueueProperties.Destination();
+            destination.setQueue("audit-events.fifo");
+            destination.setOrdered(true);
+            properties.getDestinations().put("audit-events", destination);
+            return properties;
+        }
     }
 
     @Test
-    void shouldLoadAuditInfrastructureWithQueue() {
+    void shouldLoadAuditInfrastructureWithOrderedMessageQueueDestination() {
         contextRunner
-                .withUserConfiguration(QueueInfrastructure.class)
                 .withPropertyValues(
                         "platform.audit.enabled=true",
-                        "platform.audit.service-url=http://audit-api",
                         "platform.audit.service-name=account"
                 )
                 .run(context -> {
@@ -49,54 +52,6 @@ class PlatformAuditAutoConfigurationTest {
                     assertThat(context).hasSingleBean(AuditAuthorizationContextResolver.class);
                     assertThat(context).hasSingleBean(AuditAspect.class);
                 });
-    }
-
-    @Test
-    void shouldFailStartupWhenServiceUrlIsMissing() {
-        contextRunner
-                .withUserConfiguration(QueueInfrastructure.class)
-                .withPropertyValues(
-                        "platform.audit.enabled=true",
-                        "platform.audit.service-name=account"
-                )
-                .run(context -> {
-                    assertThat(context.getStartupFailure()).isNotNull();
-                    assertThat(context.getStartupFailure())
-                            .hasRootCauseInstanceOf(PlatformConfigurationException.class)
-                            .hasRootCauseMessage(
-                                    "platform.audit.service-url is required when platform.audit is enabled"
-                            );
-                });
-    }
-
-    @Test
-    void shouldFailStartupWhenQueueIsMissingInAsynchronousMode() {
-        contextRunner
-                .withPropertyValues(
-                        "platform.audit.enabled=true",
-                        "platform.audit.service-url=http://audit-api",
-                        "platform.audit.fail-on-error=false"
-                )
-                .run(context -> {
-                    assertThat(context.getStartupFailure()).isNotNull();
-                    assertThat(context.getStartupFailure())
-                            .isInstanceOf(PlatformConfigurationException.class)
-                            .hasMessage(
-                                    "Audit event queue is required for asynchronous at-least-once delivery"
-                            );
-                });
-    }
-
-    @Test
-    void shouldAllowStrictModeWithoutQueue() {
-        contextRunner
-                .withPropertyValues(
-                        "platform.audit.enabled=true",
-                        "platform.audit.service-url=http://audit-api",
-                        "platform.audit.fail-on-error=true",
-                        "platform.audit.queue.enabled=false"
-                )
-                .run(context -> assertThat(context).hasSingleBean(AuditPublisher.class));
     }
 
     @Test
