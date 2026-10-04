@@ -62,17 +62,13 @@ public class MessageQueueProperties implements InitializingBean {
         validateConsumer(name + ".consumer", destination.consumer);
         if (provider == MessageQueueProvider.AWS) {
             validateAwsConsumer(name + ".aws", destination.aws, destination.aws.visibilityTimeout);
-            if (destination.ordered != destination.queue.endsWith(".fifo")) {
-                throw invalid(name + ".queue must " + (destination.ordered ?
-                        "end with .fifo when ordered is true" : "not end with .fifo when ordered is false"));
-            }
             String deadLetterQueue = destination.aws.deadLetterQueue;
             if (deadLetterQueue != null && !deadLetterQueue.isBlank()) {
                 if (deadLetterQueue.equals(destination.queue)) {
                     throw invalid("destination '" + name + "' source and dead-letter queues must be different");
                 }
-                if (destination.ordered != deadLetterQueue.endsWith(".fifo")) {
-                    throw invalid(name + ".aws.dead-letter-queue must use the same ordered type as the source queue");
+                if (destination.queue.endsWith(".fifo") != deadLetterQueue.endsWith(".fifo")) {
+                    throw invalid(name + ".aws.dead-letter-queue must use the same SQS queue type as the source queue");
                 }
             }
         } else {
@@ -130,15 +126,12 @@ public class MessageQueueProperties implements InitializingBean {
 
     public static class Destination {
         private String queue;
-        private boolean ordered;
         private final Toggle publisher = new Toggle();
         private final Consumer consumer = new Consumer();
         private final AwsDestination aws = new AwsDestination();
         private final ConsumerOptions azure = new ConsumerOptions();
         public String getQueue() { return queue; }
         public void setQueue(String queue) { this.queue = queue; }
-        public boolean isOrdered() { return ordered; }
-        public void setOrdered(boolean ordered) { this.ordered = ordered; }
         public Toggle getPublisher() { return publisher; }
         public Consumer getConsumer() { return consumer; }
         public AwsDestination getAws() { return aws; }
@@ -180,5 +173,4 @@ public class MessageQueueProperties implements InitializingBean {
         public String getDeadLetterQueue() { return deadLetterQueue; }
         public void setDeadLetterQueue(String deadLetterQueue) { this.deadLetterQueue = deadLetterQueue; }
     }
-
 }

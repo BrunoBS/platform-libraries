@@ -1,1 +1,3 @@
 br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueAutoConfiguration
+br.com.portalmanager.platform.library.messagequeue.provider.aws.configuration.AwsMessageQueueAutoConfiguration
+br.com.portalmanager.platform.library.messagequeue.provider.azure.configuration.AzureMessageQueueAutoConfiguration

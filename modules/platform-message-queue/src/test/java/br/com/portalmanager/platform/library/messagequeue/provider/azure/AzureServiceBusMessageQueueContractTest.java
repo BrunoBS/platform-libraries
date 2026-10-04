@@ -2,6 +2,8 @@ package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 
 import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractListeners;
 import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractTestApplication;
+import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilities;
+import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesResolver;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
@@ -13,6 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.Duration;
@@ -29,12 +34,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         "platform.message-queue.destinations.contract.queue=contract-queue",
         "platform.message-queue.destinations.consumer-contract.queue=consumer-contract",
         "platform.message-queue.destinations.ordered-consumer-contract.queue=ordered-consumer-contract",
-        "platform.message-queue.destinations.ordered-consumer-contract.ordered=true",
         "platform.message-queue.destinations.ordered-publish-contract.queue=ordered-publish-contract",
-        "platform.message-queue.destinations.ordered-publish-contract.ordered=true",
         "platform.message-queue.destinations.failing-contract.queue=failing-contract",
         "platform.message-queue.destinations.failing-contract.azure.wait-time=PT1S"
 })
+@Import(AzureServiceBusMessageQueueContractTest.AzureQueueCapabilitiesTestConfiguration.class)
 @WithAzureEmulator(
         serviceBus = @AzureServiceBus(queues = {
                 @AzureServiceBus.Queue(name = "contract-queue"),
@@ -45,6 +49,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         })
 )
 class AzureServiceBusMessageQueueContractTest {
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class AzureQueueCapabilitiesTestConfiguration {
+
+        @Bean
+        QueueCapabilitiesResolver queueCapabilitiesResolver() {
+            var sessionEnabledQueues = java.util.Set.of(
+                    "ordered-consumer-contract",
+                    "ordered-publish-contract");
+            // The Service Bus emulator exposes AMQP, not its administration API.
+            return queue -> new QueueCapabilities(sessionEnabledQueues.contains(queue), false);
+        }
+    }
 
     @Autowired
     private MessageQueuePublisher publisher;

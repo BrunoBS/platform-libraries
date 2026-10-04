@@ -24,25 +24,13 @@ class MessageQueuePropertiesValidationTest {
     }
 
     @Test
-    void shouldStartWhenAwsFifoQueueHasTheRequiredNameSuffix() {
+    void shouldStartWhenAwsFifoQueueUsesFifoNameSuffix() {
         contextRunner
                 .withPropertyValues(
                         "platform.message-queue.provider=AWS",
                         "platform.message-queue.aws.region=sa-east-1",
-                        "platform.message-queue.destinations.orders.queue=orders.fifo",
-                        "platform.message-queue.destinations.orders.ordered=true")
+                        "platform.message-queue.destinations.orders.queue=orders.fifo")
                 .run(context -> assertThat(context).hasNotFailed());
-    }
-
-    @Test
-    void shouldRejectFifoConfigurationWithoutFifoQueueName() {
-        contextRunner
-                .withPropertyValues(
-                        "platform.message-queue.provider=AWS",
-                        "platform.message-queue.aws.region=sa-east-1",
-                        "platform.message-queue.destinations.orders.queue=orders",
-                        "platform.message-queue.destinations.orders.ordered=true")
-                .run(context -> assertInvalid(context.getStartupFailure(), "must end with .fifo"));
     }
 
     @Test
@@ -51,8 +39,7 @@ class MessageQueuePropertiesValidationTest {
                 .withPropertyValues(
                         "platform.message-queue.provider=AZURE",
                         "platform.message-queue.azure.namespace=orders.servicebus.windows.net",
-                        "platform.message-queue.destinations.orders.queue=orders",
-                        "platform.message-queue.destinations.orders.ordered=true")
+                        "platform.message-queue.destinations.orders.queue=orders")
                 .run(context -> assertThat(context).hasNotFailed());
     }
 
