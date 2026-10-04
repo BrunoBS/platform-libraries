@@ -176,11 +176,16 @@ public final class AuditFieldResolver {
     }
 
     private Object scalar(Object value) {
+        if (value instanceof JsonNode node) {
+            return scalar(node);
+        }
+        if (value instanceof Number || value instanceof Boolean) {
+            return value;
+        }
         if (value instanceof CharSequence || value instanceof Character
-                || value instanceof Number || value instanceof Boolean
                 || value instanceof Enum<?> || value instanceof UUID
                 || value instanceof TemporalAccessor) {
-            return value instanceof Enum<?> enumValue ? enumValue.name() : value;
+            return value instanceof Enum<?> enumValue ? enumValue.name() : value.toString();
         }
         return null;
     }
