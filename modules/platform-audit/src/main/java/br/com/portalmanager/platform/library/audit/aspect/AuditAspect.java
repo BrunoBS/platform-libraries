@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Aspect
@@ -54,7 +55,7 @@ public final class AuditAspect {
         Auditable[] annotations = method.getAnnotationsByType(Auditable.class);
         Collection<?> items = responseBody instanceof Collection<?> collection
                 ? collection
-                : List.of(responseBody);
+                : Collections.singletonList(responseBody);
         long eventCount = (long) annotations.length * items.size();
         if (eventCount > properties.getMaxEventsPerInvocation()) {
             handleAuditException(
