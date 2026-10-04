@@ -26,7 +26,8 @@ A chamada ao publisher da fila é síncrona e retorna depois que o provider conf
 
 - `annotation`: declara `@Auditable` e as origens de campo aceitas.
 - `aspect`: intercepta a operação, trata o status de sucesso e delega a criação do evento.
-- `event`: `AuditFieldResolver` extrai os campos configurados; `AuditEventFactory` monta o evento e resolve o contexto autorizado.
+- `field`: `AuditFieldResolver` projeta os campos configurados a partir dos argumentos e da resposta.
+- `event`: `AuditEventFactory` monta, valida e limita o tamanho serializado do evento.
 - `publisher`: publica o evento no destino lógico e define as opções de ordenação e deduplicação.
 - `autoconfigure` e `config`: validam as propriedades e registram os beans do módulo.
 
@@ -125,7 +126,7 @@ public ResponseEntity<AccountResponse> update(
 }
 ```
 
-Escolha apenas campos necessários para comprovar a ação. `AuditFieldSource` permite selecionar um campo de PATH, BODY, RESPONSE ou HEADER. Para PATH, use o nome declarado em `@PathVariable`; o nome do parâmetro Java também funciona quando o compilador preserva esses nomes. BODY busca apenas parâmetros marcados com `@RequestBody`. O campo `metadata` do evento é reservado para metadados adicionais e fica vazio nesta implementação. Para reduzir exposição de dados, não inclua tokens, credenciais ou dados pessoais desnecessários.
+Escolha apenas campos necessários para comprovar a ação. `AuditFieldSource` permite selecionar um campo de PATH, BODY, RESPONSE ou HEADER. Para PATH, use o nome declarado em `@PathVariable`; o nome do parâmetro Java também funciona quando o compilador preserva esses nomes. BODY busca apenas parâmetros marcados com `@RequestBody`. O campo `metadata` do evento é reservado para metadados adicionais e fica vazio nesta implementação. Campos com nomes que indicam credenciais ou segredos são bloqueados. Cabeçalhos são negados por padrão, exceto `correlation-id`; nomes adicionais precisam constar em `platform.audit.allowed-headers`. Mesmo com a allowlist, informe somente dados necessários para comprovar a ação.
 
 Um identificador do recurso é obrigatório. Se não puder ser resolvido, o evento não será publicado. Com `fail-on-error=true` (padrão), a operação falha explicitamente; com `false`, o evento é descartado e a ocorrência é registrada em log de erro.
 
@@ -152,7 +153,10 @@ A ausência do contexto autorizado interrompe a operação por padrão. Se `fail
 | `platform.audit.enabled` | `true` | Habilita auditoria |
 | `platform.audit.service-name` | Obrigatório | Identifica o serviço produtor no evento |
 | `platform.audit.destination` | `audit-events` | Destino lógico configurado em `platform.message-queue.destinations` |
-| `platform.audit.fail-on-error` | `true` | Propaga falhas ao resolver o contexto ou identificador do recurso; falhas de publicação na fila sempre são propagadas |
+| `platform.audit.fail-on-error` | `true` | Propaga falhas de resolução/validação; falhas de publicação na fila sempre são propagadas |
+| `platform.audit.allowed-headers` | `[correlation-id]` | Allowlist explícita de cabeçalhos auditáveis |
+| `platform.audit.max-event-size-bytes` | `65536` | Limite do evento JSON serializado |
+| `platform.audit.max-events-per-invocation` | `100` | Limite de eventos antes de publicar qualquer item da coleção |
 
 O nome do serviço deve ser informado. O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos.
 
