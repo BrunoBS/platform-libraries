@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class PlatformAuditProperties {
 
     private boolean enabled = true;
-    private String serviceName = "unknown";
+    private String serviceName;
     private String destination = "audit-events";
     private boolean failOnError = true;
 
