@@ -15,6 +15,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,7 +23,8 @@ public final class AuditFieldResolver {
 
     private static final Set<String> SENSITIVE_NAME_PARTS = Set.of(
             "authorization", "cookie", "password", "passwd", "secret", "token",
-            "apikey", "privatekey", "clientsecret", "credential", "jwt"
+            "apikey", "privatekey", "clientsecret", "credential", "jwt", "ssn",
+            "taxid", "accesskey", "refresh", "bearer", "cardnumber", "cvv", "cvc"
     );
 
     private final PlatformAuditProperties properties;
@@ -102,7 +104,8 @@ public final class AuditFieldResolver {
     }
 
     private boolean isSensitive(String normalizedName) {
-        return SENSITIVE_NAME_PARTS.stream().anyMatch(normalizedName::contains);
+        return normalizedName.equals("pin")
+                || SENSITIVE_NAME_PARTS.stream().anyMatch(normalizedName::contains);
     }
 
     private Set<String> allowedHeaders() {
@@ -111,7 +114,7 @@ public final class AuditFieldResolver {
     }
 
     private String normalize(String value) {
-        return value.toLowerCase().replaceAll("[^a-z0-9]", "");
+        return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
     }
 
     private Object resolvePathParameter(Method method, Object[] arguments, String fieldName) {
