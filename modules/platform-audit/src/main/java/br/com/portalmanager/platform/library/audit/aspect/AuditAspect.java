@@ -17,7 +17,9 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.http.ResponseEntity;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Aspect
 public final class AuditAspect {
@@ -50,8 +52,10 @@ public final class AuditAspect {
         Object responseBody = result instanceof ResponseEntity<?> response ? response.getBody() : result;
         Method method = resolveMethod(joinPoint);
         Auditable[] annotations = method.getAnnotationsByType(Auditable.class);
-        int resultCount = responseBody instanceof Collection<?> collection ? collection.size() : 1;
-        long eventCount = (long) annotations.length * resultCount;
+        Collection<?> items = responseBody instanceof Collection<?> collection
+                ? collection
+                : List.of(responseBody);
+        long eventCount = (long) annotations.length * items.size();
         if (eventCount > properties.getMaxEventsPerInvocation()) {
             handleAuditException(
                     new AuditException(AuditMessageKeys.EVENT_COUNT_EXCEEDED),
@@ -60,43 +64,23 @@ public final class AuditAspect {
             return result;
         }
 
+        List<AuditEventRequest> events = new ArrayList<>();
         for (Auditable auditable : annotations) {
-            publishForResult(method, joinPoint.getArgs(), auditable, responseBody, status);
+            for (Object item : items) {
+                try {
+                    events.add(eventFactory.create(method, joinPoint.getArgs(), auditable, item, status));
+                } catch (AuditException exception) {
+                    handleAuditException(exception, auditable);
+                }
+            }
+        }
+
+        // Validate the complete batch before the first broker call. Broker failures can still
+        // leave a partial batch; transactional delivery belongs in an outbox at the caller.
+        for (AuditEventRequest event : events) {
+            publisher.publish(event);
         }
         return result;
-    }
-
-    private void publishForResult(
-            Method method,
-            Object[] arguments,
-            Auditable auditable,
-            Object responseBody,
-            Integer status
-    ) {
-        if (responseBody instanceof Collection<?> collection) {
-            for (Object item : collection) {
-                publish(method, arguments, auditable, item, status);
-            }
-            return;
-        }
-        publish(method, arguments, auditable, responseBody, status);
-    }
-
-    private void publish(
-            Method method,
-            Object[] arguments,
-            Auditable auditable,
-            Object responseBody,
-            Integer status
-    ) {
-        AuditEventRequest event;
-        try {
-            event = eventFactory.create(method, arguments, auditable, responseBody, status);
-        } catch (AuditException exception) {
-            handleAuditException(exception, auditable);
-            return;
-        }
-        publisher.publish(event);
     }
 
     private void handleAuditException(AuditException exception, Auditable auditable) {
