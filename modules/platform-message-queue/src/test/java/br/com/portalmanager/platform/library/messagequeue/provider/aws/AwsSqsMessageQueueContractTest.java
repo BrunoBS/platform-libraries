@@ -30,11 +30,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         "platform.message-queue.destinations.contract.queue=contract-queue",
         "platform.message-queue.destinations.consumer-contract.queue=consumer-contract",
         "platform.message-queue.destinations.ordered-consumer-contract.queue=ordered-consumer-contract.fifo",
-        "platform.message-queue.destinations.ordered-consumer-contract.ordered=true",
         "platform.message-queue.destinations.failing-contract.queue=failing-contract",
         "platform.message-queue.destinations.failing-contract.aws.visibility-timeout=PT1S",
         "platform.message-queue.destinations.fifo-contract.queue=fifo-contract.fifo",
-        "platform.message-queue.destinations.fifo-contract.ordered=true"
 })
 @WithAwsLocalStack(
         sqs = @AwsSqs(queues = {

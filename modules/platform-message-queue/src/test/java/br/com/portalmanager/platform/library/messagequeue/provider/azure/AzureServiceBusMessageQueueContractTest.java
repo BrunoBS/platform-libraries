@@ -29,9 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         "platform.message-queue.destinations.contract.queue=contract-queue",
         "platform.message-queue.destinations.consumer-contract.queue=consumer-contract",
         "platform.message-queue.destinations.ordered-consumer-contract.queue=ordered-consumer-contract",
-        "platform.message-queue.destinations.ordered-consumer-contract.ordered=true",
         "platform.message-queue.destinations.ordered-publish-contract.queue=ordered-publish-contract",
-        "platform.message-queue.destinations.ordered-publish-contract.ordered=true",
         "platform.message-queue.destinations.failing-contract.queue=failing-contract",
         "platform.message-queue.destinations.failing-contract.azure.wait-time=PT1S"
 })
