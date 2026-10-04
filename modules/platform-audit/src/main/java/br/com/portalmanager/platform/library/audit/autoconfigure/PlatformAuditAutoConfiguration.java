@@ -31,17 +31,9 @@ public class PlatformAuditAutoConfiguration {
             PlatformAuditProperties auditProperties,
             MessageQueueProperties messageQueueProperties
     ) {
+        validateServiceName(auditProperties);
         String destinationName = auditProperties.getDestination();
-        if (destinationName == null || destinationName.isBlank()) {
-            throw new PlatformConfigurationException(AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_REQUIRED);
-        }
-
-        MessageQueueProperties.Destination destination =
-                messageQueueProperties.getDestinations().get(destinationName);
-        if (destination == null || !destination.isOrdered() || !destination.getPublisher().isEnabled()) {
-            throw new PlatformConfigurationException(
-                    AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED);
-        }
+        validateDestination(destinationName, messageQueueProperties);
 
         return new MessageQueueAuditPublisher(
                 messageQueuePublisher,
@@ -80,5 +72,23 @@ public class PlatformAuditAutoConfiguration {
             AuditPublisher publisher
     ) {
         return new AuditAspect(properties, eventFactory, publisher);
+    }
+
+    private void validateServiceName(PlatformAuditProperties properties) {
+        if (properties.getServiceName() == null || properties.getServiceName().isBlank()) {
+            throw new PlatformConfigurationException(AuditTechnicalErrors.SERVICE_NAME_REQUIRED);
+        }
+    }
+
+    private void validateDestination(String destinationName, MessageQueueProperties properties) {
+        if (destinationName == null || destinationName.isBlank()) {
+            throw new PlatformConfigurationException(AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_REQUIRED);
+        }
+
+        MessageQueueProperties.Destination destination = properties.getDestinations().get(destinationName);
+        if (destination == null || !destination.isOrdered() || !destination.getPublisher().isEnabled()) {
+            throw new PlatformConfigurationException(
+                    AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED);
+        }
     }
 }
