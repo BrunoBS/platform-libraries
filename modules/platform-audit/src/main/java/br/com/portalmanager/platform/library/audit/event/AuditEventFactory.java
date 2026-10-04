@@ -12,6 +12,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -77,9 +78,29 @@ public final class AuditEventFactory {
         return event;
     }
 
+    private Map<String, Object> toJsonFields(AuditEventRequest event) {
+        Map<String, Object> fields = new LinkedHashMap<>();
+        fields.put("eventId", event.eventId());
+        fields.put("timestamp", event.timestamp().toString());
+        fields.put("service", event.service());
+        fields.put("accountId", event.accountId());
+        fields.put("applicationId", event.applicationId());
+        fields.put("environmentId", event.environmentId());
+        fields.put("resource", event.resource());
+        fields.put("resourceId", event.resourceId());
+        fields.put("action", event.action());
+        fields.put("actor", event.actor());
+        fields.put("correlationId", event.correlationId());
+        fields.put("httpStatus", event.httpStatus());
+        fields.put("payload", event.payload());
+        fields.put("metadata", event.metadata());
+        return fields;
+    }
+
     private void enforceSizeLimit(AuditEventRequest event) {
         try {
-            int serializedSize = objectMapper.writeValueAsBytes(event).length;
+            // ISO timestamp is a conservative portable JSON representation of Instant.
+            int serializedSize = objectMapper.writeValueAsBytes(toJsonFields(event)).length;
             if (serializedSize > properties.getMaxEventSizeBytes()) {
                 throw new AuditException(AuditMessageKeys.EVENT_TOO_LARGE);
             }
