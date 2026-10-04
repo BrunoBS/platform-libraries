@@ -111,7 +111,7 @@ class AwsSqsMessageQueueContractTest {
         assertThatThrownBy(() -> publisher.publish("fifo-contract", new ContractPayload("fifo-no-dedup"),
                 new MessageQueuePublishOptions(null, java.util.Map.of(), "orders", null)))
                 .isInstanceOf(MessagePublishException.class)
-                .hasRootCauseMessage("deduplicationId is required for an AWS SQS FIFO destination");
+                .hasRootCauseMessage("deduplicationId is required for this AWS SQS FIFO destination");
     }
 
     @Test
