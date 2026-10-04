@@ -17,7 +17,6 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class AuditFieldResolver {
 
@@ -41,22 +40,16 @@ public final class AuditFieldResolver {
     }
 
     public ResolvedFields resolve(Method method, Object[] arguments, Object responseBody, Auditable auditable) {
-        JsonNode requestBody = requestBody(method, arguments);
-        JsonNode response = null;
         boolean needsResponse = auditable.resourceId().source() == AuditFieldSource.RESPONSE
                 || auditable.environment().source() == AuditFieldSource.RESPONSE
                 || java.util.Arrays.stream(auditable.payload())
                 .anyMatch(field -> field.source() == AuditFieldSource.RESPONSE);
-        if (needsResponse) {
-            response = toTree(responseBody);
-        }
+        JsonNode response = needsResponse ? toTree(responseBody) : null;
         boolean needsBody = auditable.resourceId().source() == AuditFieldSource.BODY
                 || auditable.environment().source() == AuditFieldSource.BODY
                 || java.util.Arrays.stream(auditable.payload())
                 .anyMatch(field -> field.source() == AuditFieldSource.BODY);
-        if (!needsBody) {
-            requestBody = null;
-        }
+        JsonNode requestBody = needsBody ? requestBody(method, arguments) : null;
 
         String resourceId = stringify(resolveValue(method, arguments, response, requestBody, auditable.resourceId()));
         String environmentId = stringify(resolveValue(method, arguments, response, requestBody, auditable.environment()));
