@@ -70,5 +70,7 @@ class AuditMessageBundleTest {
                 AuditMessageKeys.EVENT_SERIALIZATION_FAILED, locale).orElseThrow().code());
         assertEquals("AUD-500-009", provider.find(
                 AuditMessageKeys.EVENT_COUNT_EXCEEDED, locale).orElseThrow().code());
+        assertEquals("AUD-500-010", provider.find(
+                AuditMessageKeys.FIELD_RESOLUTION_FAILED, locale).orElseThrow().code());
     }
 }
