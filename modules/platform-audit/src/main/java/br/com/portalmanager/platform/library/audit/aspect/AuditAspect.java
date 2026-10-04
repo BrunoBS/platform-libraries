@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.audit.annotation.Auditable;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
 import br.com.portalmanager.platform.library.audit.exception.AuditException;
+import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -46,55 +47,68 @@ public final class AuditAspect {
             return result;
         }
 
-        Object responseBody = result instanceof ResponseEntity<?> response
-                ? response.getBody()
-                : result;
-
+        Object responseBody = result instanceof ResponseEntity<?> response ? response.getBody() : result;
         Method method = resolveMethod(joinPoint);
-        for (Auditable auditable : method.getAnnotationsByType(Auditable.class)) {
-            publishForResult(joinPoint, auditable, responseBody, status);
+        Auditable[] annotations = method.getAnnotationsByType(Auditable.class);
+        int resultCount = responseBody instanceof Collection<?> collection ? collection.size() : 1;
+        long eventCount = (long) annotations.length * resultCount;
+        if (eventCount > properties.getMaxEventsPerInvocation()) {
+            handleAuditException(
+                    new AuditException(AuditMessageKeys.EVENT_COUNT_EXCEEDED),
+                    annotations.length == 0 ? null : annotations[0]
+            );
+            return result;
+        }
+
+        for (Auditable auditable : annotations) {
+            publishForResult(method, joinPoint.getArgs(), auditable, responseBody, status);
         }
         return result;
     }
 
     private void publishForResult(
-            ProceedingJoinPoint joinPoint,
+            Method method,
+            Object[] arguments,
             Auditable auditable,
             Object responseBody,
             Integer status
     ) {
         if (responseBody instanceof Collection<?> collection) {
             for (Object item : collection) {
-                publish(joinPoint, auditable, item, status);
+                publish(method, arguments, auditable, item, status);
             }
             return;
         }
-        publish(joinPoint, auditable, responseBody, status);
+        publish(method, arguments, auditable, responseBody, status);
     }
 
     private void publish(
-            ProceedingJoinPoint joinPoint,
+            Method method,
+            Object[] arguments,
             Auditable auditable,
             Object responseBody,
             Integer status
     ) {
         AuditEventRequest event;
         try {
-            event = eventFactory.create(joinPoint, auditable, responseBody, status);
+            event = eventFactory.create(method, arguments, auditable, responseBody, status);
         } catch (AuditException exception) {
-            if (properties.isFailOnError()) {
-                throw exception;
-            }
-            log.error(
-                    "Audit event skipped | resource={} | action={}",
-                    auditable.resource(),
-                    auditable.action(),
-                    exception
-            );
+            handleAuditException(exception, auditable);
             return;
         }
-
         publisher.publish(event);
+    }
+
+    private void handleAuditException(AuditException exception, Auditable auditable) {
+        if (properties.isFailOnError()) {
+            throw exception;
+        }
+        log.error(
+                "Audit event skipped | resource={} | action={}",
+                auditable == null ? "unknown" : auditable.resource(),
+                auditable == null ? "unknown" : auditable.action(),
+                exception
+        );
     }
 
     private Method resolveMethod(ProceedingJoinPoint joinPoint) {
