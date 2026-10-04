@@ -24,6 +24,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -91,6 +92,13 @@ public final class AuditAspect {
                 resolveField(joinPoint, responseBody, auditable.resourceId())
         );
         if (resourceId == null || resourceId.isBlank()) {
+            String message = "Audit event skipped because resource identifier is missing"
+                    + " | resource=" + auditable.resource()
+                    + " | action=" + auditable.action();
+            if (properties.isFailOnError()) {
+                throw new IllegalStateException(message);
+            }
+            log.error(message);
             return;
         }
 
@@ -131,11 +139,29 @@ public final class AuditAspect {
                 context.actor(),
                 context.correlationId(),
                 status,
-                responseBody,
+                resolvePayload(joinPoint, auditable, responseBody),
                 Map.of()
         );
 
         publisher.publish(event);
+    }
+
+    private Map<String, Object> resolvePayload(
+            ProceedingJoinPoint joinPoint,
+            Auditable auditable,
+            Object responseBody
+    ) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        for (AuditField field : auditable.payload()) {
+            if (field.field() == null || field.field().isBlank()) {
+                continue;
+            }
+            Object value = resolveField(joinPoint, responseBody, field);
+            if (value != null) {
+                payload.put(field.field(), value);
+            }
+        }
+        return Map.copyOf(payload);
     }
 
     private Integer resolveStatus(Object result) {
