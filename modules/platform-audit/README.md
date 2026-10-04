@@ -117,9 +117,15 @@ O corpo completo da requisição ou da resposta nunca é copiado automaticamente
         @AuditField(source = AuditFieldSource.BODY, field = "status")
     }
 )
+public ResponseEntity<AccountResponse> update(
+        @PathVariable("accountId") String accountId,
+        @RequestBody UpdateAccountRequest request
+) {
+    // ...
+}
 ```
 
-Escolha apenas campos necessários para comprovar a ação. `AuditFieldSource` permite selecionar um campo de PATH, BODY, RESPONSE ou HEADER. O campo `metadata` do evento é reservado para metadados adicionais e fica vazio nesta implementação. Para reduzir exposição de dados, não inclua tokens, credenciais ou dados pessoais desnecessários.
+Escolha apenas campos necessários para comprovar a ação. `AuditFieldSource` permite selecionar um campo de PATH, BODY, RESPONSE ou HEADER. Para PATH, use o nome declarado em `@PathVariable`; o nome do parâmetro Java também funciona quando o compilador preserva esses nomes. BODY busca apenas parâmetros marcados com `@RequestBody`. O campo `metadata` do evento é reservado para metadados adicionais e fica vazio nesta implementação. Para reduzir exposição de dados, não inclua tokens, credenciais ou dados pessoais desnecessários.
 
 Um identificador do recurso é obrigatório. Se não puder ser resolvido, o evento não será publicado. Com `fail-on-error=true` (padrão), a operação falha explicitamente; com `false`, o evento é descartado e a ocorrência é registrada em log de erro.
 
