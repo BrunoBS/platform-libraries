@@ -86,7 +86,7 @@ class AuditAspectTest {
                 .hasMessageContaining("resource identifier is missing");
     }
 
-    private ProceedingJoinPoint joinPoint(String methodName, Object result) throws Exception {
+    private ProceedingJoinPoint joinPoint(String methodName, Object result) throws Throwable {
         Method method = TestController.class.getDeclaredMethod(methodName);
         MethodSignature signature = mock(MethodSignature.class);
         when(signature.getMethod()).thenReturn(method);
