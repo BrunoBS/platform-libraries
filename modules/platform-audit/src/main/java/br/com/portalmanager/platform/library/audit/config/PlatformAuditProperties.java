@@ -8,7 +8,7 @@ public class PlatformAuditProperties {
     private boolean enabled = true;
     private String serviceName = "unknown";
     private String destination = "audit-events";
-    private boolean failOnError = false;
+    private boolean failOnError = true;
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
