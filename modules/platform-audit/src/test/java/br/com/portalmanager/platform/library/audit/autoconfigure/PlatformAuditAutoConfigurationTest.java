@@ -2,6 +2,8 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
+import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
+import br.com.portalmanager.platform.library.audit.event.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
@@ -50,6 +52,8 @@ class PlatformAuditAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasSingleBean(AuditPublisher.class);
                     assertThat(context).hasSingleBean(AuditAuthorizationContextResolver.class);
+                    assertThat(context).hasSingleBean(AuditFieldResolver.class);
+                    assertThat(context).hasSingleBean(AuditEventFactory.class);
                     assertThat(context).hasSingleBean(AuditAspect.class);
                 });
     }
@@ -59,8 +63,17 @@ class PlatformAuditAutoConfigurationTest {
         contextRunner
                 .withPropertyValues(
                         "platform.audit.enabled=true",
+                        "platform.audit.service-name=account",
                         "platform.audit.destination=missing"
                 )
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+
+    @Test
+    void shouldFailStartupWhenServiceNameIsMissing() {
+        contextRunner
+                .withPropertyValues("platform.audit.enabled=true")
                 .run(context -> assertThat(context).hasFailed());
     }
 
