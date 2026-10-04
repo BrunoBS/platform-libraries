@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         "platform.message-queue.destinations.failing-contract.queue=failing-contract",
         "platform.message-queue.destinations.failing-contract.azure.wait-time=PT1S"
 })
-@Import(AzureQueueCapabilitiesTestConfiguration.class)
+@Import(AzureServiceBusMessageQueueContractTest.AzureQueueCapabilitiesTestConfiguration.class)
 @WithAzureEmulator(
         serviceBus = @AzureServiceBus(queues = {
                 @AzureServiceBus.Queue(name = "contract-queue"),
