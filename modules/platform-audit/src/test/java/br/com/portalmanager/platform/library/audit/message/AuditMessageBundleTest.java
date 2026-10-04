@@ -38,6 +38,17 @@ class AuditMessageBundleTest {
     }
 
     @Test
+    void shouldResolveResourceIdentifierMessageInPortuguese() {
+        var message = provider.find(
+                AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING,
+                Locale.forLanguageTag("pt-BR")
+        ).orElseThrow();
+
+        assertEquals("AUD-500-004", message.code());
+        assertEquals("Não foi possível resolver o identificador do recurso para auditoria.", message.message());
+    }
+
+    @Test
     void shouldResolveAllAuditMessageKeys() {
         var locale = Locale.forLanguageTag("pt-BR");
 
@@ -47,5 +58,7 @@ class AuditMessageBundleTest {
                 AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED, locale).orElseThrow().code());
         assertEquals("AUD-500-003", provider.find(
                 AuditMessageKeys.USER_CONTEXT_MISSING, locale).orElseThrow().code());
+        assertEquals("AUD-500-004", provider.find(
+                AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING, locale).orElseThrow().code());
     }
 }
