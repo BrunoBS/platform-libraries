@@ -1,10 +1,10 @@
 package br.com.portalmanager.platform.library.audit.event;
 
 import br.com.portalmanager.platform.library.audit.annotation.AuditField;
-import br.com.portalmanager.platform.library.audit.annotation.AuditFieldSource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -36,19 +36,29 @@ public final class AuditFieldResolver {
 
     private Object resolvePathParameter(ProceedingJoinPoint joinPoint, String fieldName) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Annotation[][] parameterAnnotations = signature.getMethod().getParameterAnnotations();
         String[] parameterNames = signature.getParameterNames();
         Object[] arguments = joinPoint.getArgs();
 
-        if (parameterNames == null) {
-            return null;
-        }
-
-        for (int index = 0; index < parameterNames.length; index++) {
-            if (fieldName.equals(parameterNames[index])) {
+        for (int index = 0; index < arguments.length; index++) {
+            if (hasPathVariableName(parameterAnnotations[index], fieldName)) {
+                return arguments[index];
+            }
+            if (parameterNames != null && fieldName.equals(parameterNames[index])) {
                 return arguments[index];
             }
         }
         return null;
+    }
+
+    private boolean hasPathVariableName(Annotation[] annotations, String fieldName) {
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof PathVariable pathVariable
+                    && (fieldName.equals(pathVariable.name()) || fieldName.equals(pathVariable.value()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Object requestBody(ProceedingJoinPoint joinPoint) {
