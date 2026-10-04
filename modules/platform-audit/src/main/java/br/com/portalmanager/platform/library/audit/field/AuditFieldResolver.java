@@ -153,7 +153,7 @@ public final class AuditFieldResolver {
         try {
             return objectMapper.valueToTree(source);
         } catch (RuntimeException exception) {
-            return null;
+            throw new AuditException(AuditMessageKeys.FIELD_RESOLUTION_FAILED, exception);
         }
     }
 
