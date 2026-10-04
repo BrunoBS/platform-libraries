@@ -4,7 +4,6 @@ import br.com.portalmanager.platform.library.testing.annotation.AzureBlobStorage
 import br.com.portalmanager.platform.library.testing.annotation.AzureServiceBus;
 import br.com.portalmanager.platform.library.testing.annotation.WithAzureEmulator;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
-import com.azure.messaging.servicebus.administration.ServiceBusAdministrationClient;
 import com.azure.storage.blob.BlobServiceClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.FactoryBean;
@@ -40,13 +39,9 @@ class AzureEmulatorImportRegistrarTest {
         assertTrue(registry.containsBeanDefinition("azureServiceBusContainer"));
         assertTrue(registry.containsBeanDefinition("azureBlobStorageContainer"));
         assertTrue(registry.containsBeanDefinition("azureServiceBusClientBuilder"));
-        assertTrue(registry.containsBeanDefinition("azureServiceBusAdministrationClient"));
         assertTrue(registry.containsBeanDefinition("azureBlobServiceClient"));
         assertEquals(ServiceBusClientBuilder.class,
                 registry.getBeanDefinition("azureServiceBusClientBuilder")
-                        .getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE));
-        assertEquals(ServiceBusAdministrationClient.class,
-                registry.getBeanDefinition("azureServiceBusAdministrationClient")
                         .getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE));
         assertEquals(BlobServiceClient.class,
                 registry.getBeanDefinition("azureBlobServiceClient")
