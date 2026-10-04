@@ -6,8 +6,8 @@ import br.com.portalmanager.platform.library.audit.annotation.Auditable;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
-import br.com.portalmanager.platform.library.audit.event.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.exception.AuditException;
+import br.com.portalmanager.platform.library.audit.field.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
@@ -40,7 +40,8 @@ class AuditAspectTest {
             new AuditEventFactory(
                     properties,
                     contextResolver,
-                    new AuditFieldResolver(new ObjectMapper(), mock(HttpServletRequest.class))
+                    new AuditFieldResolver(properties, new ObjectMapper(), mock(HttpServletRequest.class)),
+                    new ObjectMapper()
             ),
             publisher
     );
@@ -84,8 +85,7 @@ class AuditAspectTest {
     void shouldUseStandardAuditExceptionWhenResourceIdentifierIsMissing() throws Throwable {
         ProceedingJoinPoint joinPoint = joinPoint("update", ResponseEntity.ok(Map.of("name", "Account")));
 
-        assertThatThrownBy(() -> aspect.audit(joinPoint))
-                .isInstanceOf(AuditException.class);
+        assertThatThrownBy(() -> aspect.audit(joinPoint)).isInstanceOf(AuditException.class);
         verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
     }
 
@@ -97,12 +97,9 @@ class AuditAspectTest {
         verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
     }
 
-
     @Test
     void shouldPropagateMissingContextWhenStrictModeIsEnabled() throws Throwable {
-        when(contextResolver.resolve()).thenThrow(
-                new AuditException("audit.context.user.missing")
-        );
+        when(contextResolver.resolve()).thenThrow(new AuditException("audit.context.user.missing"));
 
         assertThatThrownBy(() -> aspect.audit(joinPoint(
                 "updateWithoutPayload",
@@ -115,9 +112,7 @@ class AuditAspectTest {
     @Test
     void shouldSkipEventWhenPermissiveModeIsEnabledAndContextIsMissing() throws Throwable {
         properties.setFailOnError(false);
-        when(contextResolver.resolve()).thenThrow(
-                new AuditException("audit.context.user.missing")
-        );
+        when(contextResolver.resolve()).thenThrow(new AuditException("audit.context.user.missing"));
 
         aspect.audit(joinPoint(
                 "updateWithoutPayload",
@@ -145,6 +140,22 @@ class AuditAspectTest {
         assertThat(events.getAllValues())
                 .extracting(AuditEventRequest::resourceId)
                 .containsExactly("resource-1", "resource-2");
+    }
+
+    @Test
+    void shouldRejectCollectionBeforePublishingWhenFanOutLimitIsExceeded() throws Throwable {
+        properties.setMaxEventsPerInvocation(1);
+        ProceedingJoinPoint joinPoint = joinPoint(
+                "updateWithoutPayload",
+                ResponseEntity.ok(List.of(
+                        Map.of("id", "resource-1"),
+                        Map.of("id", "resource-2")
+                ))
+        );
+
+        assertThatThrownBy(() -> aspect.audit(joinPoint))
+                .isInstanceOf(AuditException.class);
+        verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
     }
 
     private ProceedingJoinPoint joinPoint(String methodName, Object result) throws Throwable {
