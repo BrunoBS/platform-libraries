@@ -3,6 +3,8 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
+import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
+import br.com.portalmanager.platform.library.audit.event.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.audit.publisher.MessageQueueAuditPublisher;
@@ -55,14 +57,28 @@ public class PlatformAuditAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(AuditFieldResolver.class)
+    AuditFieldResolver auditFieldResolver(ObjectMapper objectMapper, HttpServletRequest request) {
+        return new AuditFieldResolver(objectMapper, request);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuditEventFactory.class)
+    AuditEventFactory auditEventFactory(
+            PlatformAuditProperties properties,
+            AuditAuthorizationContextResolver contextResolver,
+            AuditFieldResolver fieldResolver
+    ) {
+        return new AuditEventFactory(properties, contextResolver, fieldResolver);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(AuditAspect.class)
     AuditAspect auditAspect(
             PlatformAuditProperties properties,
-            AuditPublisher publisher,
-            AuditAuthorizationContextResolver contextResolver,
-            ObjectMapper objectMapper,
-            HttpServletRequest request
+            AuditEventFactory eventFactory,
+            AuditPublisher publisher
     ) {
-        return new AuditAspect(properties, publisher, contextResolver, objectMapper, request);
+        return new AuditAspect(properties, eventFactory, publisher);
     }
 }
