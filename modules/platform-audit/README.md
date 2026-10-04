@@ -33,7 +33,7 @@ A chamada ao publisher da fila é síncrona e retorna depois que o provider conf
 
 O fluxo de leitura do código segue essa ordem: `AuditAspect → AuditEventFactory → AuditFieldResolver` e depois `AuditPublisher → MessageQueueAuditPublisher`.
 
-Não há atomicidade entre a transação de negócio e a publicação no broker. Se a publicação falhar, a falha é propagada para que o evento não seja descartado silenciosamente. Garantia transacional exigiria um Transactional Outbox no serviço produtor e permanece fora deste módulo.
+Antes da primeira chamada ao broker, todos os eventos da invocação são construídos e validados; assim, erro de dados ou tamanho não publica apenas parte do lote. Se o broker falhar durante os envios sequenciais, ainda pode haver publicação parcial. A falha é propagada e garantia transacional exigiria um Transactional Outbox no serviço produtor, fora deste módulo.
 
 ## Idempotência e ordenação
 
@@ -158,7 +158,7 @@ A ausência do contexto autorizado interrompe a operação por padrão. Se `fail
 | `platform.audit.max-event-size-bytes` | `65536` | Limite do evento JSON serializado |
 | `platform.audit.max-events-per-invocation` | `100` | Limite de eventos antes de publicar qualquer item da coleção |
 
-O nome do serviço deve ser informado. O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos.
+O nome do serviço deve ser informado. O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos. O tamanho é medido sobre o JSON do evento antes do envelope do broker; mantenha o limite abaixo do máximo da plataforma escolhida. Se uma coleção exceder o limite de eventos, nenhuma publicação daquela chamada é iniciada.
 
 ## Limites desta etapa
 
