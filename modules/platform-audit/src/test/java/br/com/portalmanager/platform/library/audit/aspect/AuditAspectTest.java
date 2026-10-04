@@ -97,6 +97,36 @@ class AuditAspectTest {
         verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
     }
 
+
+    @Test
+    void shouldPropagateMissingContextWhenStrictModeIsEnabled() throws Throwable {
+        when(contextResolver.resolve()).thenThrow(
+                new AuditException("audit.context.user.missing")
+        );
+
+        assertThatThrownBy(() -> aspect.audit(joinPoint(
+                "updateWithoutPayload",
+                ResponseEntity.ok(Map.of("id", "resource-1"))
+        ))).isInstanceOf(AuditException.class);
+
+        verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void shouldSkipEventWhenPermissiveModeIsEnabledAndContextIsMissing() throws Throwable {
+        properties.setFailOnError(false);
+        when(contextResolver.resolve()).thenThrow(
+                new AuditException("audit.context.user.missing")
+        );
+
+        aspect.audit(joinPoint(
+                "updateWithoutPayload",
+                ResponseEntity.ok(Map.of("id", "resource-1"))
+        ));
+
+        verify(publisher, times(0)).publish(org.mockito.ArgumentMatchers.any());
+    }
+
     @Test
     void shouldPublishOneEventForEachItemInACollection() throws Throwable {
         when(contextResolver.resolve()).thenReturn(
