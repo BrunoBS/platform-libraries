@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 
+import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
@@ -36,6 +37,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
     private final DestinationResolver destinationResolver;
     private final MessageQueueSerializer serializer;
     private final MessageQueueProperties properties;
+    private final QueueCapabilitiesRegistry capabilitiesRegistry;
     private final Map<String, Future<?>> workers = new ConcurrentHashMap<>();
     private final Map<String, ServiceBusReceiverClient> receivers = new ConcurrentHashMap<>();
     private final Map<String, ServiceBusSessionReceiverClient> sessionReceivers = new ConcurrentHashMap<>();
@@ -48,12 +50,14 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             MessageQueueListenerRegistry registry,
             DestinationResolver destinationResolver,
             MessageQueueSerializer serializer,
-            MessageQueueProperties properties) {
+            MessageQueueProperties properties,
+            QueueCapabilitiesRegistry capabilitiesRegistry) {
         this.clientBuilder = clientBuilder;
         this.registry = registry;
         this.destinationResolver = destinationResolver;
         this.serializer = serializer;
         this.properties = properties;
+        this.capabilitiesRegistry = capabilitiesRegistry;
     }
 
     @Override
@@ -64,8 +68,8 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
         executor = Executors.newVirtualThreadPerTaskExecutor();
         running = true;
 
-        registry.listeners().forEach(listener -> startListenerWorkers(listener));
-        registry.deadLetterListeners().forEach(listener -> startDeadLetterWorkers(listener));
+        registry.listeners().forEach(this::startListenerWorkers);
+        registry.deadLetterListeners().forEach(this::startDeadLetterWorkers);
     }
 
     private void startListenerWorkers(MessageQueueListenerRegistry.ListenerDefinition listener) {
@@ -95,7 +99,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
     private void pollListener(String workerId, MessageQueueListenerRegistry.ListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
         ReceiverWork work = (receiver, message) -> receiveAndProcess(receiver, listener, message);
-        if (destination.ordered()) {
+        if (capabilitiesRegistry.get(destination).ordered()) {
             pollOrdered(workerId, listener.destination(), destination.queue(), false, destination.waitTime(), work);
         } else {
             poll(workerId, listener.destination(), destination.queue(), false, destination.waitTime(), work);
@@ -105,7 +109,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
     private void pollDeadLetter(String workerId, MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
         ReceiverWork work = (receiver, message) -> receiveAndProcessDeadLetter(receiver, listener, message);
-        if (destination.ordered()) {
+        if (capabilitiesRegistry.get(destination).ordered()) {
             pollOrdered(workerId, listener.destination(), destination.queue(), true, destination.waitTime(), work);
         } else {
             poll(workerId, listener.destination(), destination.queue(), true, destination.waitTime(), work);
@@ -142,8 +146,9 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
+                capabilitiesRegistry.invalidate(queueName);
                 LOGGER.warn(
-                        "Technical failure while polling Azure Service Bus queue {}; worker will retry",
+                        "Technical failure while polling Azure Service Bus queue {}; queue capabilities will be refreshed on retry",
                         queueName,
                         exception);
                 backoff();
@@ -154,11 +159,6 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
         }
     }
 
-    /**
-     * A Service Bus receiver belongs to one session. Each worker acquires one session,
-     * processes its messages sequentially, then releases it so another worker/task can
-     * acquire it. This preserves ordering within a session without pinning idle sessions.
-     */
     private void pollOrdered(
             String workerId,
             String destination,
@@ -214,8 +214,9 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
+                capabilitiesRegistry.invalidate(queueName);
                 LOGGER.warn(
-                        "Technical failure while polling ordered Azure Service Bus queue {}; worker will retry",
+                        "Technical failure while polling ordered Azure Service Bus queue {}; queue capabilities will be refreshed on retry",
                         queueName,
                         exception);
                 backoff();
