@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
-import br.com.portalmanager.platform.library.audit.event.AuditFieldResolver;
+import br.com.portalmanager.platform.library.audit.field.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
@@ -42,6 +42,11 @@ class PlatformAuditAutoConfigurationTest {
         }
     }
 
+    @Configuration
+    static class CustomPublisherConfiguration {
+        @Bean AuditPublisher customAuditPublisher() { return mock(AuditPublisher.class); }
+    }
+
     @Test
     void shouldLoadAuditInfrastructureWithOrderedMessageQueueDestination() {
         contextRunner
@@ -69,11 +74,29 @@ class PlatformAuditAutoConfigurationTest {
                 .run(context -> assertThat(context).hasFailed());
     }
 
+    @Test
+    void shouldRequireServiceNameEvenWithCustomPublisher() {
+        contextRunner
+                .withUserConfiguration(CustomPublisherConfiguration.class)
+                .withPropertyValues("platform.audit.enabled=true")
+                .run(context -> assertThat(context).hasFailed());
+    }
 
     @Test
     void shouldFailStartupWhenServiceNameIsMissing() {
         contextRunner
                 .withPropertyValues("platform.audit.enabled=true")
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void shouldRejectNonPositiveBoundsAtStartup() {
+        contextRunner
+                .withPropertyValues(
+                        "platform.audit.enabled=true",
+                        "platform.audit.service-name=account",
+                        "platform.audit.max-event-size-bytes=0"
+                )
                 .run(context -> assertThat(context).hasFailed());
     }
 
