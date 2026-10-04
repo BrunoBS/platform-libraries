@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
-import br.com.portalmanager.platform.library.audit.event.AuditFieldResolver;
+import br.com.portalmanager.platform.library.audit.field.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
 import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
 import br.com.portalmanager.platform.library.audit.publisher.MessageQueueAuditPublisher;
@@ -31,10 +31,8 @@ public class PlatformAuditAutoConfiguration {
             PlatformAuditProperties auditProperties,
             MessageQueueProperties messageQueueProperties
     ) {
-        validateServiceName(auditProperties);
         String destinationName = auditProperties.getDestination();
         validateDestination(destinationName, messageQueueProperties);
-
         return new MessageQueueAuditPublisher(
                 messageQueuePublisher,
                 destinationName,
@@ -50,8 +48,12 @@ public class PlatformAuditAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AuditFieldResolver.class)
-    AuditFieldResolver auditFieldResolver(ObjectMapper objectMapper, HttpServletRequest request) {
-        return new AuditFieldResolver(objectMapper, request);
+    AuditFieldResolver auditFieldResolver(
+            PlatformAuditProperties properties,
+            ObjectMapper objectMapper,
+            HttpServletRequest request
+    ) {
+        return new AuditFieldResolver(properties, objectMapper, request);
     }
 
     @Bean
@@ -59,9 +61,11 @@ public class PlatformAuditAutoConfiguration {
     AuditEventFactory auditEventFactory(
             PlatformAuditProperties properties,
             AuditAuthorizationContextResolver contextResolver,
-            AuditFieldResolver fieldResolver
+            AuditFieldResolver fieldResolver,
+            ObjectMapper objectMapper
     ) {
-        return new AuditEventFactory(properties, contextResolver, fieldResolver);
+        validateProperties(properties);
+        return new AuditEventFactory(properties, contextResolver, fieldResolver, objectMapper);
     }
 
     @Bean
@@ -74,9 +78,15 @@ public class PlatformAuditAutoConfiguration {
         return new AuditAspect(properties, eventFactory, publisher);
     }
 
-    private void validateServiceName(PlatformAuditProperties properties) {
+    private void validateProperties(PlatformAuditProperties properties) {
         if (properties.getServiceName() == null || properties.getServiceName().isBlank()) {
             throw new PlatformConfigurationException(AuditTechnicalErrors.SERVICE_NAME_REQUIRED);
+        }
+        if (properties.getMaxEventSizeBytes() <= 0 || properties.getMaxEventsPerInvocation() <= 0) {
+            throw new PlatformConfigurationException("platform.audit size and collection limits must be positive");
+        }
+        if (properties.getAllowedHeaders() == null) {
+            throw new PlatformConfigurationException("platform.audit.allowed-headers must not be null");
         }
     }
 
