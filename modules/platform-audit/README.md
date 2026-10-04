@@ -41,7 +41,7 @@ Cada ocorrência recebe um `eventId` UUID imutável na origem. O mesmo valor é 
 
 A publicação calcula um `orderingKey` estável a partir de `resourceType` e `resourceIdentifier`. O SHA-256 limita a chave a 64 caracteres e evita expor o identificador do recurso como metadado do broker. A ordem é por recurso e não global.
 
-O destino `audit-events` deve ser configurado como ordenado. No AWS, a fila e sua DLQ precisam ser FIFO. No Azure, a fila precisa ter sessões habilitadas. Retentativa, redelivery e DLQ são gerenciados pelo broker e pela `platform-message-queue`.
+A biblioteca detecta as capacidades da fila provisionada: no AWS, `audit-events` precisa ser FIFO; no Azure, a entidade precisa exigir sessões. Não declare `ordered` na configuração. Retentativa, redelivery e DLQ são gerenciados pelo broker e pela `platform-message-queue`.
 
 ## Dependências
 
@@ -71,14 +71,13 @@ platform:
     destinations:
       audit-events:
         queue: audit-events.fifo
-        ordered: true
         publisher:
           enabled: true
         consumer:
           enabled: false
 ```
 
-A infraestrutura provisiona a fila FIFO e sua DLQ com redrive policy. A aplicação precisa de permissão mínima para enviar mensagens e resolver a URL da fila.
+A infraestrutura provisiona a fila FIFO e sua DLQ com redrive policy. A role IAM da workload precisa de `sqs:GetQueueUrl` e `sqs:GetQueueAttributes` na fila principal para a descoberta automática, além de `sqs:SendMessage` para publicação. Se a aplicação consumir mensagens ou a DLQ, conceda também `sqs:ReceiveMessage` e `sqs:DeleteMessage` nos recursos correspondentes. Consulte o exemplo de policy IAM no README de `platform-message-queue`.
 
 ## Configuração Azure
 
@@ -95,14 +94,13 @@ platform:
     destinations:
       audit-events:
         queue: audit-events
-        ordered: true
         publisher:
           enabled: true
         consumer:
           enabled: false
 ```
 
-A infraestrutura provisiona a entidade Service Bus com sessões habilitadas. A identidade da aplicação precisa da permissão de envio.
+A infraestrutura provisiona a entidade Service Bus com sessões habilitadas. A identidade da workload precisa da role **Azure Service Bus Data Owner** no namespace: além de enviar, a biblioteca consulta a descrição da fila no startup para detectar sessões automaticamente. **Data Sender** sozinho não permite essa consulta. Se houver consumidores ou listener de dead-letter, Data Owner também cobre o recebimento.
 
 ## Uso e payload
 
@@ -158,7 +156,7 @@ A ausência do contexto autorizado interrompe a operação por padrão. Se `fail
 | `platform.audit.max-event-size-bytes` | `65536` | Limite do evento JSON serializado |
 | `platform.audit.max-events-per-invocation` | `100` | Limite de eventos antes de publicar qualquer item da coleção |
 
-O nome do serviço deve ser informado. O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos. O tamanho é medido sobre o JSON do evento antes do envelope do broker; mantenha o limite abaixo do máximo da plataforma escolhida. Se uma coleção exceder o limite de eventos, nenhuma publicação daquela chamada é iniciada.
+O nome do serviço deve ser informado. O destino precisa existir, estar habilitado para publicação e ter capacidade de ordenação no broker (fila FIFO no AWS ou sessões habilitadas no Azure); a aplicação falha no startup se esses requisitos não forem atendidos. O tamanho é medido sobre o JSON do evento antes do envelope do broker; mantenha o limite abaixo do máximo da plataforma escolhida. Se uma coleção exceder o limite de eventos, nenhuma publicação daquela chamada é iniciada.
 
 ## Limites desta etapa
 
