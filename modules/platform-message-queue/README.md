@@ -50,34 +50,56 @@ platform:
           dead-letter-queue: orders-dlq
 ```
 
-A aplicação usa as credenciais AWS do SDK, normalmente associadas à role da workload (por exemplo, ECS task role ou role do service account no EKS). No startup, a biblioteca consulta os atributos de cada fila configurada para detectar FIFO e deduplicação. Portanto, a role precisa de `sqs:GetQueueUrl` e `sqs:GetQueueAttributes` nas filas principais configuradas, mesmo quando o destino é somente de publicação. Some `sqs:SendMessage` para destinos com publicação e `sqs:ReceiveMessage`/`sqs:DeleteMessage` para destinos consumidos. O listener de dead-letter também precisa de `sqs:ReceiveMessage` e `sqs:DeleteMessage` na DLQ.
+A aplicação usa as credenciais AWS do SDK associadas à identidade da workload. Em ECS, use a **task role** da aplicação (não a task execution role); no EKS, use a role vinculada à identidade do pod. O módulo não cria filas nem altera políticas de redrive.
 
-Exemplo de policy IAM para uma aplicação que publica, consome e lê a DLQ (ajuste os recursos aos destinos usados):
+A role precisa destas permissões, conforme as filas e operações habilitadas:
+
+| Recurso/uso | Ações IAM necessárias |
+| --- | --- |
+| Descoberta de capacidades, sempre, em cada fila principal configurada | `sqs:GetQueueUrl`, `sqs:GetQueueAttributes` |
+| Publicação em uma fila principal | `sqs:SendMessage` |
+| Consumo de uma fila principal | `sqs:ReceiveMessage`, `sqs:DeleteMessage` |
+| Listener de dead-letter | `sqs:GetQueueUrl`, `sqs:ReceiveMessage`, `sqs:DeleteMessage` na DLQ |
+
+A descoberta ocorre no startup para todos os destinos configurados, inclusive quando um destino é somente produtor ou está desabilitado para consumo. `GetQueueUrl` também é necessário para a DLQ quando há listener de dead-letter. Não é necessário conceder `sqs:CreateQueue`: o provisionamento fica com a infraestrutura.
+
+Policy IAM de exemplo para uma aplicação que publica e consome nas filas principais e consome suas DLQs. Troque os ARNs pelos recursos reais. Mantenha a descoberta para todas as filas principais; retire permissões de publicação/consumo não usadas e o statement de DLQ se não houver listener:
 
 ```json
 {
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "DiscoverMainQueues",
       "Effect": "Allow",
       "Action": ["sqs:GetQueueUrl", "sqs:GetQueueAttributes"],
-      "Resource": "arn:aws:sqs:<region>:<account-id>:<queue-name>"
+      "Resource": [
+        "arn:aws:sqs:<region>:<account-id>:<main-queue-1>",
+        "arn:aws:sqs:<region>:<account-id>:<main-queue-2>"
+      ]
     },
     {
+      "Sid": "PublishAndConsumeMainQueues",
       "Effect": "Allow",
       "Action": ["sqs:SendMessage", "sqs:ReceiveMessage", "sqs:DeleteMessage"],
-      "Resource": "arn:aws:sqs:<region>:<account-id>:<queue-name>"
+      "Resource": [
+        "arn:aws:sqs:<region>:<account-id>:<main-queue-1>",
+        "arn:aws:sqs:<region>:<account-id>:<main-queue-2>"
+      ]
     },
     {
+      "Sid": "ResolveAndConsumeDeadLetterQueues",
       "Effect": "Allow",
-      "Action": ["sqs:ReceiveMessage", "sqs:DeleteMessage"],
-      "Resource": "arn:aws:sqs:<region>:<account-id>:<dead-letter-queue-name>"
+      "Action": ["sqs:GetQueueUrl", "sqs:ReceiveMessage", "sqs:DeleteMessage"],
+      "Resource": [
+        "arn:aws:sqs:<region>:<account-id>:<main-queue-1-dlq>",
+        "arn:aws:sqs:<region>:<account-id>:<main-queue-2-dlq>"
+      ]
     }
   ]
 }
 ```
 
-Para menor privilégio, separe as ações por recurso: descoberta na fila principal, publicação/consumo conforme habilitado, e consumo somente na DLQ quando houver listener de dead-letter.
 
 ### Fila principal e DLQ na AWS
 
@@ -131,7 +153,9 @@ platform:
           enabled: true
 ```
 
-A aplicação usa `DefaultAzureCredential`. A identidade da workload precisa da role **Azure Service Bus Data Owner** no namespace, pois a detecção automática consulta a descrição de cada fila no startup; essa role também permite publicar e consumir. **Data Sender** e **Data Receiver**, isoladamente, não autorizam essa consulta. Data Owner concede acesso amplo ao namespace; atribua-a somente à identidade da workload e revise o escopo conforme a política de segurança. No Azure, dead-letter é a subfila nativa da fila. Configure `MaxDeliveryCount` na entidade conforme a política operacional. O módulo não provisiona nem configura filas.
+A aplicação usa `DefaultAzureCredential`. Atribua a role integrada **Azure Service Bus Data Owner** diretamente à identidade da workload (managed identity ou service principal) no escopo do namespace, em **Access control (IAM)**. Não é necessário criar um grupo nem atribuir as roles **Data Sender** e **Data Receiver** separadamente: Data Owner cobre a consulta de propriedades da fila feita no startup, além de publicação e consumo. Como Data Owner concede acesso amplo às entidades do namespace, limite a atribuição à identidade da aplicação. Não confunda essa role de dados do Service Bus com as roles gerais `Owner` ou `Contributor` da assinatura.
+
+O módulo consulta as propriedades de todas as filas configuradas ao iniciar para detectar automaticamente se exigem sessões. Por isso, mesmo uma aplicação que só publica precisa da role de descoberta. No Azure, dead-letter é a subfila nativa; a mesma role permite consumir a DLQ quando um listener estiver configurado. Configure `MaxDeliveryCount` na entidade conforme a política operacional. O módulo não provisiona nem configura filas.
 
 A fila Azure com sessões habilitadas é detectada automaticamente. Não declare uma flag de ordenação:
 

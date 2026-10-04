@@ -77,7 +77,7 @@ platform:
           enabled: false
 ```
 
-A infraestrutura provisiona a fila FIFO e sua DLQ com redrive policy. A role IAM da workload precisa de `sqs:GetQueueUrl` e `sqs:GetQueueAttributes` na fila principal para a descoberta automática, além de `sqs:SendMessage` para publicação. Se a aplicação consumir mensagens ou a DLQ, conceda também `sqs:ReceiveMessage` e `sqs:DeleteMessage` nos recursos correspondentes. Consulte o exemplo de policy IAM no README de `platform-message-queue`.
+A infraestrutura provisiona a fila FIFO e sua DLQ com redrive policy. Para o publisher de auditoria, a role da workload precisa de `sqs:GetQueueUrl`, `sqs:GetQueueAttributes` e `sqs:SendMessage` na fila principal. Se o serviço também consumir filas ou tiver listener de dead-letter, conceda `sqs:ReceiveMessage` e `sqs:DeleteMessage` nas filas consumidas e também `sqs:GetQueueUrl` na DLQ. O README de `platform-message-queue` traz a policy completa para publisher, consumer e DLQ listener.
 
 ## Configuração Azure
 
@@ -100,7 +100,7 @@ platform:
           enabled: false
 ```
 
-A infraestrutura provisiona a entidade Service Bus com sessões habilitadas. A identidade da workload precisa da role **Azure Service Bus Data Owner** no namespace: além de enviar, a biblioteca consulta a descrição da fila no startup para detectar sessões automaticamente. **Data Sender** sozinho não permite essa consulta. Se houver consumidores ou listener de dead-letter, Data Owner também cobre o recebimento.
+A infraestrutura provisiona a entidade Service Bus com sessões habilitadas. Atribua **Azure Service Bus Data Owner** diretamente à managed identity ou ao service principal da workload, no namespace; não é necessário criar um grupo. Essa role permite a consulta de propriedades no startup e já cobre envio e recebimento. O README de `platform-message-queue` descreve a role do módulo e o motivo pelo qual `Data Sender`/`Data Receiver` isoladas não bastam.
 
 ## Uso e payload
 
