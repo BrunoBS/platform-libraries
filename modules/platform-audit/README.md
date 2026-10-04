@@ -22,6 +22,16 @@ audit-api consome e persiste
 
 A chamada ao publisher da fila é síncrona e retorna depois que o provider confirma o envio (ou propaga a falha). O processamento pelo `audit-api` é desacoplado. A biblioteca não chama o endpoint HTTP de ingestão da Audit API nem mantém uma fila local Redis; a durabilidade após a confirmação é responsabilidade do broker.
 
+## Estrutura do código
+
+- `annotation`: declara `@Auditable` e as origens de campo aceitas.
+- `aspect`: intercepta a operação, trata o status de sucesso e delega a criação do evento.
+- `event`: `AuditFieldResolver` extrai os campos configurados; `AuditEventFactory` monta o evento e resolve o contexto autorizado.
+- `publisher`: publica o evento no destino lógico e define as opções de ordenação e deduplicação.
+- `autoconfigure` e `config`: validam as propriedades e registram os beans do módulo.
+
+O fluxo de leitura do código segue essa ordem: `AuditAspect → AuditEventFactory → AuditFieldResolver` e depois `AuditPublisher → MessageQueueAuditPublisher`.
+
 Não há atomicidade entre a transação de negócio e a publicação no broker. Se a publicação falhar, a falha é propagada para que o evento não seja descartado silenciosamente. Garantia transacional exigiria um Transactional Outbox no serviço produtor e permanece fora deste módulo.
 
 ## Idempotência e ordenação
@@ -95,7 +105,7 @@ A infraestrutura provisiona a entidade Service Bus com sessões habilitadas. A i
 
 ## Uso e payload
 
-O corpo completo da requisição ou da resposta nunca é copiado automaticamente para o evento. O payload inicia vazio e recebe somente os campos declarados explicitamente na anotação:
+O corpo completo da requisição ou da resposta nunca é copiado automaticamente para o evento. O payload de negócio inicia vazio e recebe somente os campos declarados explicitamente na anotação:
 
 ```java
 @Auditable(
@@ -109,7 +119,7 @@ O corpo completo da requisição ou da resposta nunca é copiado automaticamente
 )
 ```
 
-Escolha apenas campos necessários para comprovar a ação. `AuditFieldSource` permite selecionar um campo de PATH, BODY, RESPONSE ou HEADER. Para reduzir exposição de dados, não inclua tokens, credenciais ou dados pessoais desnecessários.
+Escolha apenas campos necessários para comprovar a ação. `AuditFieldSource` permite selecionar um campo de PATH, BODY, RESPONSE ou HEADER. O campo `metadata` do evento é reservado para metadados adicionais e fica vazio nesta implementação. Para reduzir exposição de dados, não inclua tokens, credenciais ou dados pessoais desnecessários.
 
 Um identificador do recurso é obrigatório. Se não puder ser resolvido, o evento não será publicado. Com `fail-on-error=true` (padrão), a operação falha explicitamente; com `false`, o evento é descartado e a ocorrência é registrada em log de erro.
 
@@ -134,11 +144,11 @@ A ausência do contexto autorizado interrompe a operação por padrão. Se `fail
 | Propriedade | Default | Descrição |
 | --- | --- | --- |
 | `platform.audit.enabled` | `true` | Habilita auditoria |
-| `platform.audit.service-name` | `unknown` | Identifica o serviço produtor no evento |
+| `platform.audit.service-name` | Obrigatório | Identifica o serviço produtor no evento |
 | `platform.audit.destination` | `audit-events` | Destino lógico configurado em `platform.message-queue.destinations` |
 | `platform.audit.fail-on-error` | `true` | Propaga falhas ao resolver o contexto ou identificador do recurso; falhas de publicação na fila sempre são propagadas |
 
-O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos.
+O nome do serviço deve ser informado. O destino precisa existir, estar habilitado para publicação e estar marcado com `ordered: true`; a aplicação falha no startup se esses requisitos não forem atendidos.
 
 ## Limites desta etapa
 
