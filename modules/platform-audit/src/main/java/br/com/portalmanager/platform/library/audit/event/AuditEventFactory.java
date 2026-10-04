@@ -1,17 +1,17 @@
 package br.com.portalmanager.platform.library.audit.event;
 
-import br.com.portalmanager.platform.library.audit.annotation.AuditField;
 import br.com.portalmanager.platform.library.audit.annotation.Auditable;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.exception.AuditException;
+import br.com.portalmanager.platform.library.audit.field.AuditFieldResolver;
 import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
-import org.aspectj.lang.ProceedingJoinPoint;
+import tools.jackson.databind.ObjectMapper;
 
+import java.lang.reflect.Method;
 import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,35 +20,44 @@ public final class AuditEventFactory {
     private final PlatformAuditProperties properties;
     private final AuditAuthorizationContextResolver contextResolver;
     private final AuditFieldResolver fieldResolver;
+    private final ObjectMapper objectMapper;
 
     public AuditEventFactory(
             PlatformAuditProperties properties,
             AuditAuthorizationContextResolver contextResolver,
-            AuditFieldResolver fieldResolver
+            AuditFieldResolver fieldResolver,
+            ObjectMapper objectMapper
     ) {
         this.properties = properties;
         this.contextResolver = contextResolver;
         this.fieldResolver = fieldResolver;
+        this.objectMapper = objectMapper;
     }
 
     public AuditEventRequest create(
-            ProceedingJoinPoint joinPoint,
+            Method method,
+            Object[] arguments,
             Auditable auditable,
             Object responseBody,
             Integer status
     ) {
-        String resourceId = stringify(fieldResolver.resolve(joinPoint, responseBody, auditable.resourceId()));
+        AuditFieldResolver.ResolvedFields fields =
+                fieldResolver.resolve(method, arguments, responseBody, auditable);
+        String resourceId = fields.resourceId();
         if (resourceId == null || resourceId.isBlank()) {
             throw new AuditException(AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING);
         }
+        if (auditable.resource().isBlank() || auditable.action().isBlank()) {
+            throw new AuditException(AuditMessageKeys.RESOURCE_ACTION_REQUIRED);
+        }
 
         AuditContext context = contextResolver.resolve();
-        String environmentId = stringify(fieldResolver.resolve(joinPoint, responseBody, auditable.environment()));
+        String environmentId = fields.environmentId();
         if (environmentId == null || environmentId.isBlank()) {
             environmentId = context.environmentId();
         }
 
-        return new AuditEventRequest(
+        AuditEventRequest event = new AuditEventRequest(
                 UUID.randomUUID().toString(),
                 Instant.now(),
                 properties.getServiceName(),
@@ -61,31 +70,23 @@ public final class AuditEventFactory {
                 context.actor(),
                 context.correlationId(),
                 status,
-                resolvePayload(joinPoint, auditable, responseBody),
+                fields.payload(),
                 Map.of()
         );
+        enforceSizeLimit(event);
+        return event;
     }
 
-    private Map<String, Object> resolvePayload(
-            ProceedingJoinPoint joinPoint,
-            Auditable auditable,
-            Object responseBody
-    ) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        for (AuditField field : auditable.payload()) {
-            if (field.field().isBlank()) {
-                continue;
+    private void enforceSizeLimit(AuditEventRequest event) {
+        try {
+            int serializedSize = objectMapper.writeValueAsBytes(event).length;
+            if (serializedSize > properties.getMaxEventSizeBytes()) {
+                throw new AuditException(AuditMessageKeys.EVENT_TOO_LARGE);
             }
-
-            Object value = fieldResolver.resolve(joinPoint, responseBody, field);
-            if (value != null) {
-                payload.put(field.field(), value);
-            }
+        } catch (AuditException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new AuditException(AuditMessageKeys.EVENT_SERIALIZATION_FAILED, exception);
         }
-        return Map.copyOf(payload);
-    }
-
-    private String stringify(Object value) {
-        return value == null ? null : value.toString();
     }
 }
