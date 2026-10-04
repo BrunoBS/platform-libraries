@@ -3,8 +3,8 @@ package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
-import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
+import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
 import com.azure.core.amqp.exception.AmqpErrorCondition;
@@ -99,26 +99,55 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
     private void pollListener(String workerId, MessageQueueListenerRegistry.ListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
         ReceiverWork work = (receiver, message) -> receiveAndProcess(receiver, listener, message);
-        if (capabilitiesRegistry.get(destination).ordered()) {
-            pollOrdered(workerId, listener.destination(), destination.queue(), false, destination.waitTime(), work);
-        } else {
-            poll(workerId, listener.destination(), destination.queue(), false, destination.waitTime(), work);
+
+        while (running && !Thread.currentThread().isInterrupted()) {
+            try {
+                if (capabilitiesRegistry.get(destination).ordered()) {
+                    pollOrdered(workerId, destination.queue(), false, destination.waitTime(), work);
+                } else {
+                    poll(workerId, destination.queue(), false, destination.waitTime(), work);
+                }
+            } catch (RuntimeException exception) {
+                if (!running || Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+                capabilitiesRegistry.invalidate(destination.queue());
+                LOGGER.warn(
+                        "Failed to resolve or apply Azure queue capabilities for {}; worker will retry",
+                        destination.queue(),
+                        exception);
+                backoff();
+            }
         }
     }
 
     private void pollDeadLetter(String workerId, MessageQueueListenerRegistry.DeadLetterListenerDefinition listener) {
         var destination = destinationResolver.resolve(listener.destination());
         ReceiverWork work = (receiver, message) -> receiveAndProcessDeadLetter(receiver, listener, message);
-        if (capabilitiesRegistry.get(destination).ordered()) {
-            pollOrdered(workerId, listener.destination(), destination.queue(), true, destination.waitTime(), work);
-        } else {
-            poll(workerId, listener.destination(), destination.queue(), true, destination.waitTime(), work);
+
+        while (running && !Thread.currentThread().isInterrupted()) {
+            try {
+                if (capabilitiesRegistry.get(destination).ordered()) {
+                    pollOrdered(workerId, destination.queue(), true, destination.waitTime(), work);
+                } else {
+                    poll(workerId, destination.queue(), true, destination.waitTime(), work);
+                }
+            } catch (RuntimeException exception) {
+                if (!running || Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+                capabilitiesRegistry.invalidate(destination.queue());
+                LOGGER.warn(
+                        "Failed to resolve or apply Azure dead-letter queue capabilities for {}; worker will retry",
+                        destination.queue(),
+                        exception);
+                backoff();
+            }
         }
     }
 
     private void poll(
             String workerId,
-            String destination,
             String queueName,
             boolean deadLetter,
             Duration waitTime,
@@ -127,41 +156,37 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             waitTime = Duration.ofSeconds(20);
         }
 
-        while (running && !Thread.currentThread().isInterrupted()) {
-            ServiceBusReceiverClient receiver = null;
-            try {
-                receiver = createReceiver(queueName, deadLetter);
-                receivers.put(workerId, receiver);
+        ServiceBusReceiverClient receiver = null;
+        try {
+            receiver = createReceiver(queueName, deadLetter);
+            receivers.put(workerId, receiver);
 
-                while (running && !Thread.currentThread().isInterrupted()) {
-                    var messages = receiver.receiveMessages(1, waitTime);
-                    if (!running || Thread.currentThread().isInterrupted()) {
-                        break;
-                    }
-                    for (ServiceBusReceivedMessage message : messages) {
-                        work.process(receiver, message);
-                    }
-                }
-            } catch (RuntimeException exception) {
+            while (running && !Thread.currentThread().isInterrupted()) {
+                var messages = receiver.receiveMessages(1, waitTime);
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                capabilitiesRegistry.invalidate(queueName);
-                LOGGER.warn(
-                        "Technical failure while polling Azure Service Bus queue {}; queue capabilities will be refreshed on retry",
-                        queueName,
-                        exception);
-                backoff();
-            } finally {
-                receivers.remove(workerId);
-                close(receiver);
+                for (ServiceBusReceivedMessage message : messages) {
+                    work.process(receiver, message);
+                }
             }
+        } catch (RuntimeException exception) {
+            if (!running || Thread.currentThread().isInterrupted()) {
+                return;
+            }
+            capabilitiesRegistry.invalidate(queueName);
+            LOGGER.warn(
+                    "Technical failure while polling Azure Service Bus queue {}; receiver will be remounted",
+                    queueName,
+                    exception);
+        } finally {
+            receivers.remove(workerId);
+            close(receiver);
         }
     }
 
     private void pollOrdered(
             String workerId,
-            String destination,
             String queueName,
             boolean deadLetter,
             Duration waitTime,
@@ -170,62 +195,59 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             waitTime = Duration.ofSeconds(20);
         }
 
-        while (running && !Thread.currentThread().isInterrupted()) {
-            ServiceBusSessionReceiverClient sessionReceiver = null;
-            ServiceBusReceiverClient receiver = null;
-            try {
-                sessionReceiver = createSessionReceiver(queueName, deadLetter);
-                sessionReceivers.put(workerId, sessionReceiver);
+        ServiceBusSessionReceiverClient sessionReceiver = null;
+        ServiceBusReceiverClient receiver = null;
+        try {
+            sessionReceiver = createSessionReceiver(queueName, deadLetter);
+            sessionReceivers.put(workerId, sessionReceiver);
+
+            while (running && !Thread.currentThread().isInterrupted()) {
+                try {
+                    receiver = sessionReceiver.acceptNextSession();
+                } catch (AmqpException exception) {
+                    if (!running || Thread.currentThread().isInterrupted()) {
+                        break;
+                    }
+                    if (!isSessionAcquisitionTimeout(exception)) {
+                        throw exception;
+                    }
+                    LOGGER.debug(
+                            "Timed out while acquiring an Azure Service Bus session for queue {}; worker will retry",
+                            queueName,
+                            exception);
+                    backoff();
+                    continue;
+                }
+                receivers.put(workerId, receiver);
 
                 while (running && !Thread.currentThread().isInterrupted()) {
-                    try {
-                        receiver = sessionReceiver.acceptNextSession();
-                    } catch (AmqpException exception) {
-                        if (!running || Thread.currentThread().isInterrupted()) {
-                            break;
-                        }
-                        if (!isSessionAcquisitionTimeout(exception)) {
-                            throw exception;
-                        }
-                        LOGGER.debug(
-                                "Timed out while acquiring an Azure Service Bus session for queue {}; worker will retry",
-                                queueName,
-                                exception);
-                        backoff();
-                        continue;
+                    var messages = receiver.receiveMessages(1, waitTime);
+                    var iterator = messages.iterator();
+                    if (!iterator.hasNext()) {
+                        break;
                     }
-                    receivers.put(workerId, receiver);
-
-                    while (running && !Thread.currentThread().isInterrupted()) {
-                        var messages = receiver.receiveMessages(1, waitTime);
-                        var iterator = messages.iterator();
-                        if (!iterator.hasNext()) {
-                            break;
-                        }
-                        do {
-                            work.process(receiver, iterator.next());
-                        } while (iterator.hasNext());
-                    }
-                    receivers.remove(workerId);
-                    close(receiver);
-                    receiver = null;
+                    do {
+                        work.process(receiver, iterator.next());
+                    } while (iterator.hasNext());
                 }
-            } catch (RuntimeException exception) {
-                if (!running || Thread.currentThread().isInterrupted()) {
-                    break;
-                }
-                capabilitiesRegistry.invalidate(queueName);
-                LOGGER.warn(
-                        "Technical failure while polling ordered Azure Service Bus queue {}; queue capabilities will be refreshed on retry",
-                        queueName,
-                        exception);
-                backoff();
-            } finally {
                 receivers.remove(workerId);
                 close(receiver);
-                sessionReceivers.remove(workerId);
-                close(sessionReceiver);
+                receiver = null;
             }
+        } catch (RuntimeException exception) {
+            if (!running || Thread.currentThread().isInterrupted()) {
+                return;
+            }
+            capabilitiesRegistry.invalidate(queueName);
+            LOGGER.warn(
+                    "Technical failure while polling ordered Azure Service Bus queue {}; receiver will be remounted",
+                    queueName,
+                    exception);
+        } finally {
+            receivers.remove(workerId);
+            close(receiver);
+            sessionReceivers.remove(workerId);
+            close(sessionReceiver);
         }
     }
 
