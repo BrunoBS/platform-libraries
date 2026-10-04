@@ -1,6 +1,9 @@
 package br.com.portalmanager.platform.library.audit.publisher;
 
+import br.com.portalmanager.platform.library.audit.exception.AuditException;
+import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.model.AuditEventRequest;
+import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
@@ -39,13 +42,19 @@ public final class MessageQueueAuditPublisher implements AuditPublisher {
                 deduplicationId
         );
 
-        messageQueuePublisher.publish(destination, event, options);
+        try {
+            messageQueuePublisher.publish(destination, event, options);
+        } catch (ApiException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new AuditException(AuditMessageKeys.PUBLISH_FAILED, exception);
+        }
     }
 
     private String orderingKey(String resourceType, String resourceIdentifier) {
         if (resourceType == null || resourceType.isBlank()
                 || resourceIdentifier == null || resourceIdentifier.isBlank()) {
-            throw new IllegalArgumentException("Audit resource type and identifier are required for ordered publication");
+            throw new AuditException(AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING);
         }
 
         String aggregateIdentity = resourceType + "\u0000" + resourceIdentifier;
@@ -54,7 +63,7 @@ public final class MessageQueueAuditPublisher implements AuditPublisher {
                     .digest(aggregateIdentity.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest);
         } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("SHA-256 is unavailable", exception);
+            throw new AuditException(AuditMessageKeys.PUBLISH_FAILED, exception);
         }
     }
 }
