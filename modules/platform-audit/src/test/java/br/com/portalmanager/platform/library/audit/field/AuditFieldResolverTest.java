@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -24,7 +23,7 @@ class AuditFieldResolverTest {
     private final HttpServletRequest request = mock(HttpServletRequest.class);
     private final PlatformAuditProperties properties = new PlatformAuditProperties();
     private final AuditFieldResolver resolver =
-            new AuditFieldResolver(properties, new ObjectMapper(), request);
+            new AuditFieldResolver(properties, request);
 
     @Test
     void shouldResolvePathVariableUsingItsDeclaredName() throws Exception {
@@ -45,6 +44,14 @@ class AuditFieldResolverTest {
                 "name", "Operations",
                 "correlation-id", "trace-9"
         ));
+    }
+
+    @Test
+    void shouldReadSelectedPojoPropertyWithoutSerializingTheWholeObject() throws Exception {
+        var resolved = resolver.resolve(method(), new Object[]{"account-7", Map.of("status", "ACTIVE")},
+                new ResponseView("Operations"), annotation());
+
+        assertThat(resolved.payload()).containsEntry("name", "Operations");
     }
 
     @Test
@@ -83,6 +90,18 @@ class AuditFieldResolverTest {
     private Auditable authorizationAnnotation() throws Exception {
         return TestEndpoint.class.getDeclaredMethod("authorization", String.class)
                 .getAnnotation(Auditable.class);
+    }
+
+    static class ResponseView {
+        private final String name;
+
+        ResponseView(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
     static class TestEndpoint {
