@@ -163,7 +163,7 @@ public final class AuditFieldResolver {
     }
 
     private Object scalar(JsonNode value) {
-        if (value == null || value.isNull() || value.isContainerNode()) {
+        if (value == null || value.isNull()) {
             return null;
         }
         if (value.isTextual()) {
