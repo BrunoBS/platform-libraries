@@ -1,10 +1,8 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
-import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
-import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
@@ -38,7 +36,6 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
     private final DestinationResolver destinationResolver;
     private final MessageQueueSerializer serializer;
     private final MessageQueueProperties properties;
-    private final MessageQueueMetrics metrics;
     private final Map<String, Future<?>> workers = new ConcurrentHashMap<>();
     private final Map<String, ServiceBusReceiverClient> receivers = new ConcurrentHashMap<>();
     private final Map<String, ServiceBusSessionReceiverClient> sessionReceivers = new ConcurrentHashMap<>();
@@ -51,14 +48,12 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             MessageQueueListenerRegistry registry,
             DestinationResolver destinationResolver,
             MessageQueueSerializer serializer,
-            MessageQueueProperties properties,
-            MessageQueueMetrics metrics) {
+            MessageQueueProperties properties) {
         this.clientBuilder = clientBuilder;
         this.registry = registry;
         this.destinationResolver = destinationResolver;
         this.serializer = serializer;
         this.properties = properties;
-        this.metrics = metrics;
     }
 
     @Override
@@ -147,7 +142,6 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                metrics.recordPollFailure(MessageQueueProvider.AZURE, destination, deadLetter);
                 LOGGER.warn(
                         "Technical failure while polling Azure Service Bus queue {}; worker will retry",
                         queueName,
@@ -220,7 +214,6 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                metrics.recordPollFailure(MessageQueueProvider.AZURE, destination, deadLetter);
                 LOGGER.warn(
                         "Technical failure while polling ordered Azure Service Bus queue {}; worker will retry",
                         queueName,
@@ -274,10 +267,8 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             messageId = message.messageId();
             correlationId = message.correlationId();
             listener.invoke(message);
-            metrics.recordConsume(MessageQueueProvider.AZURE, listener.destination(), false, true);
             complete(receiver, received, listener.destination(), message, false);
         } catch (RuntimeException exception) {
-            metrics.recordConsume(MessageQueueProvider.AZURE, listener.destination(), false, false);
             LOGGER.warn(
                     "Message processing failed for Azure destination {}; messageId={} correlationId={}; "
                             + "message will be abandoned for redelivery",
@@ -304,10 +295,8 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                     null,
                     providerMetadata(received));
             listener.invoke(deadLetterMessage);
-            metrics.recordConsume(MessageQueueProvider.AZURE, listener.destination(), true, true);
             complete(receiver, received, listener.destination(), message, true);
         } catch (RuntimeException exception) {
-            metrics.recordConsume(MessageQueueProvider.AZURE, listener.destination(), true, false);
             LOGGER.warn(
                     "Dead-letter message processing failed for Azure destination {}; "
                             + "messageId={} correlationId={}; message will be abandoned in the dead-letter subqueue",
@@ -335,7 +324,6 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
         try {
             receiver.complete(received);
         } catch (RuntimeException exception) {
-            metrics.recordAcknowledgementFailure(MessageQueueProvider.AZURE, destination, deadLetter);
             LOGGER.warn(
                     "Message was processed but could not be completed for Azure destination {}; "
                             + "messageId={} correlationId={}; duplicate delivery is possible",

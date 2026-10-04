@@ -1,9 +1,7 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
 import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
-import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProvider;
 import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
-import br.com.portalmanager.platform.library.messagequeue.monitoring.MessageQueueMetrics;
 import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueTechnicalErrors;
@@ -37,7 +35,6 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
     private final DestinationResolver destinationResolver;
     private final MessageQueueSerializer serializer;
     private final MessageQueueProperties properties;
-    private final MessageQueueMetrics metrics;
     private final Map<String, String> queueUrls = new ConcurrentHashMap<>();
     private final Map<String, Future<?>> workers = new ConcurrentHashMap<>();
 
@@ -49,14 +46,12 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             MessageQueueListenerRegistry registry,
             DestinationResolver destinationResolver,
             MessageQueueSerializer serializer,
-            MessageQueueProperties properties,
-            MessageQueueMetrics metrics) {
+            MessageQueueProperties properties) {
         this.sqsClient = sqsClient;
         this.registry = registry;
         this.destinationResolver = destinationResolver;
         this.serializer = serializer;
         this.properties = properties;
-        this.metrics = metrics;
     }
 
     @Override
@@ -150,7 +145,6 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                 if (!running || Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                metrics.recordPollFailure(MessageQueueProvider.AWS, destination, deadLetter);
                 LOGGER.warn("Technical failure while polling destination {}; worker will retry", destination, exception);
                 backoff();
             }
@@ -168,9 +162,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             messageId = message.messageId();
             correlationId = message.correlationId();
             listener.invoke(message);
-            metrics.recordConsume(MessageQueueProvider.AWS, listener.destination(), false, true);
         } catch (RuntimeException exception) {
-            metrics.recordConsume(MessageQueueProvider.AWS, listener.destination(), false, false);
             LOGGER.warn(
                     "Message processing failed for destination {}; messageId={} correlationId={}; "
                             + "message will not be deleted and can be redelivered",
@@ -202,9 +194,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                     null,
                     Map.of("provider", "AWS", "queue", deadLetterQueue));
             listener.invoke(deadLetterMessage);
-            metrics.recordConsume(MessageQueueProvider.AWS, listener.destination(), true, true);
         } catch (RuntimeException exception) {
-            metrics.recordConsume(MessageQueueProvider.AWS, listener.destination(), true, false);
             LOGGER.warn(
                     "Dead-letter processing failed for destination {}; messageId={} correlationId={}; "
                             + "message will remain in the dead-letter queue",
@@ -243,7 +233,6 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                     .receiptHandle(receiptHandle)
                     .build());
         } catch (RuntimeException exception) {
-            metrics.recordAcknowledgementFailure(MessageQueueProvider.AWS, destination, deadLetter);
             LOGGER.warn(
                     "Message was processed but could not be deleted from destination {}; "
                             + "messageId={} correlationId={}; duplicate delivery is possible",
