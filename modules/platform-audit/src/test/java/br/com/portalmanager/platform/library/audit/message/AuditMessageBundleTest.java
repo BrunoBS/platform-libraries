@@ -12,65 +12,35 @@ class AuditMessageBundleTest {
     private final PlatformDefaultMessageProvider provider = new PlatformDefaultMessageProvider();
 
     @Test
-    void shouldResolveDestinationMessageFromPortugueseBundle() {
-        var message = provider.find(
-                AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED,
-                Locale.forLanguageTag("pt-BR")
-        ).orElseThrow();
+    void shouldResolveTransactionRequirementInBothBundles() {
+        var portuguese = provider.find(AuditMessageKeys.TRANSACTION_REQUIRED, Locale.forLanguageTag("pt-BR"))
+                .orElseThrow();
+        var english = provider.find(AuditMessageKeys.TRANSACTION_REQUIRED, Locale.ENGLISH).orElseThrow();
 
-        assertEquals("AUD-500-002", message.code());
-        assertEquals("O destino de auditoria precisa estar configurado para publicação ordenada.", message.message());
-        assertEquals(500, message.httpStatus());
-        assertEquals("pt-BR", message.locale());
+        assertEquals("AUD-500-014", portuguese.code());
+        assertEquals("A operação auditável precisa executar dentro de uma transação ativa.", portuguese.message());
+        assertEquals("AUD-500-014", english.code());
+        assertEquals("The auditable operation must run inside an active transaction.", english.message());
     }
 
     @Test
-    void shouldResolveDestinationMessageFromEnglishBundle() {
-        var message = provider.find(
-                AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED,
-                Locale.ENGLISH
-        ).orElseThrow();
-
-        assertEquals("AUD-500-002", message.code());
-        assertEquals("The audit destination must be configured for ordered publishing.", message.message());
-        assertEquals(500, message.httpStatus());
-        assertEquals("en", message.locale());
-    }
-
-    @Test
-    void shouldResolveResourceIdentifierMessageInPortuguese() {
-        var message = provider.find(
+    void shouldResolveEveryAuditMessageKeyForPortugueseAndEnglish() {
+        var keys = new String[]{
+                AuditMessageKeys.USER_CONTEXT_MISSING,
                 AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING,
-                Locale.forLanguageTag("pt-BR")
-        ).orElseThrow();
+                AuditMessageKeys.EVENT_DEFINITION_REQUIRED,
+                AuditMessageKeys.SNAPSHOT_REQUIRED,
+                AuditMessageKeys.TRANSACTION_REQUIRED,
+                AuditMessageKeys.BEFORE_SNAPSHOT_PROVIDER_REQUIRED,
+                AuditMessageKeys.CUSTOM_ACTION_NOT_CONFIGURED,
+                AuditMessageKeys.EVENT_TOO_LARGE,
+                AuditMessageKeys.EVENT_SERIALIZATION_FAILED,
+                AuditMessageKeys.EVENT_COUNT_EXCEEDED
+        };
 
-        assertEquals("AUD-500-004", message.code());
-        assertEquals("Não foi possível resolver o identificador do recurso para auditoria.", message.message());
-    }
-
-    @Test
-    void shouldResolveAllAuditMessageKeys() {
-        var locale = Locale.forLanguageTag("pt-BR");
-
-        assertEquals("AUD-500-001", provider.find(
-                AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_REQUIRED, locale).orElseThrow().code());
-        assertEquals("AUD-500-002", provider.find(
-                AuditMessageKeys.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED, locale).orElseThrow().code());
-        assertEquals("AUD-500-003", provider.find(
-                AuditMessageKeys.USER_CONTEXT_MISSING, locale).orElseThrow().code());
-        assertEquals("AUD-500-004", provider.find(
-                AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING, locale).orElseThrow().code());
-        assertEquals("AUD-500-005", provider.find(
-                AuditMessageKeys.FIELD_NOT_ALLOWED, locale).orElseThrow().code());
-        assertEquals("AUD-500-006", provider.find(
-                AuditMessageKeys.RESOURCE_ACTION_REQUIRED, locale).orElseThrow().code());
-        assertEquals("AUD-500-007", provider.find(
-                AuditMessageKeys.EVENT_TOO_LARGE, locale).orElseThrow().code());
-        assertEquals("AUD-500-008", provider.find(
-                AuditMessageKeys.EVENT_SERIALIZATION_FAILED, locale).orElseThrow().code());
-        assertEquals("AUD-500-009", provider.find(
-                AuditMessageKeys.EVENT_COUNT_EXCEEDED, locale).orElseThrow().code());
-        assertEquals("AUD-500-010", provider.find(
-                AuditMessageKeys.FIELD_RESOLUTION_FAILED, locale).orElseThrow().code());
+        for (String key : keys) {
+            assertEquals(true, provider.find(key, Locale.forLanguageTag("pt-BR")).isPresent(), key);
+            assertEquals(true, provider.find(key, Locale.ENGLISH).isPresent(), key);
+        }
     }
 }

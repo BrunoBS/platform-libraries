@@ -5,43 +5,27 @@ import br.com.portalmanager.platform.library.audit.config.AuditPropertiesValidat
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
-import br.com.portalmanager.platform.library.audit.field.AuditFieldResolver;
-import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
-import br.com.portalmanager.platform.library.audit.publisher.AuditPublisher;
-import br.com.portalmanager.platform.library.audit.publisher.MessageQueueAuditPublisher;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
-import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
-import jakarta.servlet.http.HttpServletRequest;
+import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
+import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxEntry;
+import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxStore;
+import br.com.portalmanager.platform.library.audit.outbox.JpaAuditOutboxStore;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import tools.jackson.databind.ObjectMapper;
 
 @AutoConfiguration
+@AutoConfigurationPackage(basePackageClasses = AuditOutboxEntry.class)
+@EnableTransactionManagement(order = 100)
 @EnableConfigurationProperties(PlatformAuditProperties.class)
 @ConditionalOnProperty(prefix = "platform.audit", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlatformAuditAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(AuditPublisher.class)
-    AuditPublisher auditPublisher(
-            MessageQueuePublisher messageQueuePublisher,
-            PlatformAuditProperties auditProperties,
-            MessageQueueProperties messageQueueProperties,
-            QueueCapabilitiesRegistry capabilitiesRegistry
-    ) {
-        String destinationName = auditProperties.getDestination();
-        validateDestination(destinationName, messageQueueProperties, capabilitiesRegistry);
-        return new MessageQueueAuditPublisher(
-                messageQueuePublisher,
-                destinationName,
-                messageQueueProperties.getProvider()
-        );
-    }
 
     @Bean
     AuditPropertiesValidator auditPropertiesValidator(PlatformAuditProperties properties) {
@@ -55,49 +39,29 @@ public class PlatformAuditAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuditFieldResolver.class)
-    AuditFieldResolver auditFieldResolver(
-            PlatformAuditProperties properties,
-            HttpServletRequest request
-    ) {
-        return new AuditFieldResolver(properties, request);
-    }
-
-    @Bean
     @ConditionalOnMissingBean(AuditEventFactory.class)
     AuditEventFactory auditEventFactory(
             PlatformAuditProperties properties,
             AuditAuthorizationContextResolver contextResolver,
-            AuditFieldResolver fieldResolver,
             ObjectMapper objectMapper
     ) {
-        return new AuditEventFactory(properties, contextResolver, fieldResolver, objectMapper);
+        return new AuditEventFactory(properties, contextResolver, objectMapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuditOutboxStore.class)
+    AuditOutboxStore auditOutboxStore(EntityManagerFactory entityManagerFactory) {
+        return new JpaAuditOutboxStore(SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory));
     }
 
     @Bean
     @ConditionalOnMissingBean(AuditAspect.class)
     AuditAspect auditAspect(
-            PlatformAuditProperties properties,
             AuditEventFactory eventFactory,
-            AuditPublisher publisher
+            AuditOutboxStore outboxStore,
+            PlatformAuditProperties properties,
+            org.springframework.beans.factory.ObjectProvider<AuditBeforeSnapshotProvider> beforeSnapshotProviders
     ) {
-        return new AuditAspect(properties, eventFactory, publisher);
-    }
-
-    private void validateDestination(
-            String destinationName,
-            MessageQueueProperties properties,
-            QueueCapabilitiesRegistry capabilitiesRegistry) {
-        if (destinationName == null || destinationName.isBlank()) {
-            throw new PlatformConfigurationException(AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_REQUIRED);
-        }
-
-        MessageQueueProperties.Destination destination = properties.getDestinations().get(destinationName);
-        if (destination == null
-                || !destination.getPublisher().isEnabled()
-                || !capabilitiesRegistry.get(destination.getQueue()).ordered()) {
-            throw new PlatformConfigurationException(
-                    AuditTechnicalErrors.MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED);
-        }
+        return new AuditAspect(eventFactory, outboxStore, beforeSnapshotProviders.getIfAvailable(), properties);
     }
 }

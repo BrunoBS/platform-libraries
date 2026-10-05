@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.audit.annotation;
 
+import br.com.portalmanager.platform.library.audit.model.AuditAction;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -7,23 +9,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/** Declares the business fact captured by platform-audit for a use case. */
 @Repeatable(Auditables.class)
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Auditable {
 
-    String resource();
+    AuditAction action();
 
-    String action();
+    String event();
 
-    AuditField resourceId();
-
-    AuditField environment() default @AuditField;
-
-    /**
-     * Explicit allowlist of fields included in the audit payload.
-     * The full request or response body is never published automatically.
-     */
-    AuditField[] payload() default {};
+    String resourceType();
 }
