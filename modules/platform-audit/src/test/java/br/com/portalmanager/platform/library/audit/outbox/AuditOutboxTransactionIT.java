@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(
         classes = AuditOutboxTransactionIT.TestApplication.class,
         properties = {
+                "spring.application.name=platform-audit-transaction-test",
                 "platform.audit.enabled=true",
                 "platform.audit.service-name=transaction-test",
                 "spring.datasource.url=jdbc:h2:mem:audit_outbox;DB_CLOSE_DELAY=-1;MODE=MySQL",
