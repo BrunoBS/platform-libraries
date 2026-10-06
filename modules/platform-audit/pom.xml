@@ -13,16 +13,26 @@
     <packaging>jar</packaging>
     <name>platform-audit</name>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-libraries-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-authorization</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-messaging</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -40,7 +50,6 @@
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-testing</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
