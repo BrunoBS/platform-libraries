@@ -34,7 +34,12 @@ public final class AuditEventFactory {
             throw new AuditException(AuditMessageKeys.EVENT_DEFINITION_REQUIRED);
         }
 
-        JsonNode payload = objectMapper.valueToTree(snapshot);
+        JsonNode payload;
+        try {
+            payload = objectMapper.valueToTree(snapshot);
+        } catch (Exception exception) {
+            throw new AuditException(AuditMessageKeys.EVENT_SERIALIZATION_FAILED, exception);
+        }
         if (payload == null || payload.isNull() || !payload.isObject()) {
             throw new AuditException(AuditMessageKeys.SNAPSHOT_REQUIRED);
         }
@@ -57,7 +62,6 @@ public final class AuditEventFactory {
                 Instant.now()
         );
         JsonNode metadataNode = toMetadataNode(metadata);
-        enforceSizeLimit(payload, metadataNode);
         return new CapturedAuditEvent(payload, metadataNode);
     }
 
@@ -89,21 +93,6 @@ public final class AuditEventFactory {
             node.putNull(name);
         } else {
             node.put(name, value);
-        }
-    }
-
-    private void enforceSizeLimit(JsonNode payload, JsonNode metadata) {
-        try {
-            ObjectNode envelope = objectMapper.createObjectNode();
-            envelope.set("payload", payload);
-            envelope.set("metadata", metadata);
-            if (objectMapper.writeValueAsBytes(envelope).length > properties.getMaxEventSizeBytes()) {
-                throw new AuditException(AuditMessageKeys.EVENT_TOO_LARGE);
-            }
-        } catch (AuditException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new AuditException(AuditMessageKeys.EVENT_SERIALIZATION_FAILED, exception);
         }
     }
 

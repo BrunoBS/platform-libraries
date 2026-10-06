@@ -51,11 +51,9 @@ platform:
   audit:
     enabled: true
     service-name: key-service
-    max-event-size-bytes: 65536
-    max-events-per-invocation: 100
 ```
 
-`platform.audit.service-name` é obrigatório quando a capacidade está habilitada. Use um banco com suporte a JPA e JSON; a library registra a entidade da outbox automaticamente. O Use Case auditável precisa executar dentro de uma transação ativa. Sem transação, a library falha antes de executar a regra de negócio.
+`platform.audit.service-name` é obrigatório quando a capacidade está habilitada. A library não limita o tamanho dos snapshots nem a quantidade de eventos por invocação. Use um banco com suporte a JPA e JSON; a library registra a entidade da outbox automaticamente. O Use Case auditável precisa executar dentro de uma transação ativa. Sem transação, a library falha antes de executar a regra de negócio.
 
 ## Etapas seguintes
 

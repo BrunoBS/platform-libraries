@@ -43,17 +43,6 @@ class PlatformAuditAutoConfigurationTest {
     }
 
     @Test
-    void shouldRejectNonPositiveBoundsAtStartup() {
-        contextRunner
-                .withPropertyValues(
-                        "platform.audit.enabled=true",
-                        "platform.audit.service-name=account",
-                        "platform.audit.max-event-size-bytes=0"
-                )
-                .run(context -> assertThat(context).hasFailed());
-    }
-
-    @Test
     void shouldNotLoadAuditInfrastructureWhenDisabled() {
         contextRunner
                 .withPropertyValues("platform.audit.enabled=false")

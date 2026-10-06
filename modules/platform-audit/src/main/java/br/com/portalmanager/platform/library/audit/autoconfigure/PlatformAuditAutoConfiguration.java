@@ -70,7 +70,7 @@ public class PlatformAuditAutoConfiguration {
             AuditEventFactory eventFactory,
             PlatformAuditProperties properties
     ) {
-        return new AuditInvocationEventFactory(eventFactory, properties);
+        return new AuditInvocationEventFactory(eventFactory);
     }
 
     @Bean

@@ -12,22 +12,6 @@ public final class AuditTechnicalErrors {
                     500
             );
 
-    public static final PlatformErrorDefinition EVENT_SIZE_LIMIT_INVALID =
-            new PlatformErrorDefinition(
-                    "PLT-AUD-004",
-                    "platform.audit.max-event-size-bytes must be positive",
-                    "Set platform.audit.max-event-size-bytes to a positive number.",
-                    500
-            );
-
-    public static final PlatformErrorDefinition EVENT_COUNT_LIMIT_INVALID =
-            new PlatformErrorDefinition(
-                    "PLT-AUD-005",
-                    "platform.audit.max-events-per-invocation must be positive",
-                    "Set platform.audit.max-events-per-invocation to a positive number.",
-                    500
-            );
-
     private AuditTechnicalErrors() {
     }
 }

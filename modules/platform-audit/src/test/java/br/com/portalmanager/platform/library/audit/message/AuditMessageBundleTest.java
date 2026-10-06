@@ -33,9 +33,7 @@ class AuditMessageBundleTest {
                 AuditMessageKeys.TRANSACTION_REQUIRED,
                 AuditMessageKeys.BEFORE_SNAPSHOT_PROVIDER_REQUIRED,
                 AuditMessageKeys.CUSTOM_ACTION_NOT_CONFIGURED,
-                AuditMessageKeys.EVENT_TOO_LARGE,
-                AuditMessageKeys.EVENT_SERIALIZATION_FAILED,
-                AuditMessageKeys.EVENT_COUNT_EXCEEDED
+                AuditMessageKeys.EVENT_SERIALIZATION_FAILED
         };
 
         for (String key : keys) {
