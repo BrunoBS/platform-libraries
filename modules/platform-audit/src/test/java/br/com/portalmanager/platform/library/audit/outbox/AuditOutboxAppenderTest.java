@@ -23,7 +23,8 @@ class AuditOutboxAppenderTest {
     @Test
     void shouldCreateAndAppendTheSingleMappedOutboxEntity() throws Exception {
         when(entityManager.getMetamodel()).thenReturn(metamodel);
-        when(metamodel.getEntities()).thenReturn(Set.of(entityType(TestAuditOutboxEntity.class)));
+        Set<EntityType<?>> entities = Set.of(entityType(TestAuditOutboxEntity.class));
+        when(metamodel.getEntities()).thenReturn(entities);
         AuditOutboxRepository<TestAuditOutboxEntity> repository = mock(AuditOutboxRepository.class);
         AuditOutboxAppender appender = new AuditOutboxAppender(repository, entityManager);
         var mapper = new ObjectMapper();
@@ -51,10 +52,11 @@ class AuditOutboxAppenderTest {
     @Test
     void shouldFailWithConfigurationErrorWhenMultipleOutboxEntitiesAreMapped() {
         when(entityManager.getMetamodel()).thenReturn(metamodel);
-        when(metamodel.getEntities()).thenReturn(Set.of(
+        Set<EntityType<?>> entities = Set.of(
                 entityType(TestAuditOutboxEntity.class),
                 entityType(OtherAuditOutboxEntity.class)
-        ));
+        );
+        when(metamodel.getEntities()).thenReturn(entities);
 
         assertThatThrownBy(() -> new AuditOutboxAppender(mockRepository(), entityManager))
                 .isInstanceOf(PlatformConfigurationException.class);
