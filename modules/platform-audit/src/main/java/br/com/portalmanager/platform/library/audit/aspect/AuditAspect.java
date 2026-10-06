@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.audit.annotation.Auditable;
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
 import br.com.portalmanager.platform.library.audit.exception.AuditException;
 import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
-import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxStore;
+import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxAppender;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,16 +23,16 @@ public final class AuditAspect {
 
     private final AuditSnapshotCollector snapshotCollector;
     private final AuditInvocationEventFactory eventFactory;
-    private final AuditOutboxStore outboxStore;
+    private final AuditOutboxAppender outboxAppender;
 
     public AuditAspect(
             AuditSnapshotCollector snapshotCollector,
             AuditInvocationEventFactory eventFactory,
-            AuditOutboxStore outboxStore
+            AuditOutboxAppender outboxAppender
     ) {
         this.snapshotCollector = snapshotCollector;
         this.eventFactory = eventFactory;
-        this.outboxStore = outboxStore;
+        this.outboxAppender = outboxAppender;
     }
 
     @Around("@annotation(br.com.portalmanager.platform.library.audit.annotation.Auditable) || "
@@ -49,7 +49,7 @@ public final class AuditAspect {
         Object result = joinPoint.proceed();
         snapshots.addAll(snapshotCollector.captureAfter(result, annotations));
         for (AuditEventFactory.CapturedAuditEvent event : eventFactory.create(snapshots)) {
-            outboxStore.append(event.payload(), event.metadata());
+            outboxAppender.append(event.payload(), event.metadata());
         }
         return result;
     }
