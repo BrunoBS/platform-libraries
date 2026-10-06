@@ -1,27 +1,27 @@
 package br.com.portalmanager.platform.library.audit.outbox;
 
 import br.com.portalmanager.platform.library.audit.annotation.Auditable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import tools.jackson.databind.JsonNode;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +62,7 @@ class AuditOutboxTransactionIT {
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isEqualTo(1);
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM AUDIT_OUTBOX", Integer.class)).isEqualTo(1);
         String payload = jdbcTemplate.queryForObject("SELECT payload FROM AUDIT_OUTBOX", String.class);
-        assertThat(payload).contains("\"identifier\":\"resource-1\"");
+        assertThat(payload).contains("\\"identifier\\":\\"resource-1\\"");
     }
 
     @Test
@@ -108,11 +108,6 @@ class AuditOutboxTransactionIT {
 
     @Configuration(proxyBeanMethods = false)
     static class TestBeans {
-        @Bean
-        AuditOutboxStore auditOutboxStore(TestAuditOutboxRepository repository) {
-            return new TestAuditOutboxStore(repository);
-        }
-
         @Bean
         AuditOutboxStore auditOutboxStore(TestAuditOutboxRepository repository) {
             return new AbstractAuditOutboxStore<TestAuditOutboxEntity>(repository) {
