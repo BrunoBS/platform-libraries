@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
+import br.com.portalmanager.platform.library.audit.aspect.AuditInvocationEventFactory;
+import br.com.portalmanager.platform.library.audit.aspect.AuditSnapshotCollector;
 import br.com.portalmanager.platform.library.audit.config.AuditPropertiesValidator;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
@@ -55,13 +57,29 @@ public class PlatformAuditAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuditAspect.class)
-    AuditAspect auditAspect(
-            AuditEventFactory eventFactory,
-            AuditOutboxStore outboxStore,
-            PlatformAuditProperties properties,
+    @ConditionalOnMissingBean(AuditSnapshotCollector.class)
+    AuditSnapshotCollector auditSnapshotCollector(
             org.springframework.beans.factory.ObjectProvider<AuditBeforeSnapshotProvider> beforeSnapshotProviders
     ) {
-        return new AuditAspect(eventFactory, outboxStore, beforeSnapshotProviders.getIfAvailable(), properties);
+        return new AuditSnapshotCollector(beforeSnapshotProviders.getIfAvailable());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuditInvocationEventFactory.class)
+    AuditInvocationEventFactory auditInvocationEventFactory(
+            AuditEventFactory eventFactory,
+            PlatformAuditProperties properties
+    ) {
+        return new AuditInvocationEventFactory(eventFactory, properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuditAspect.class)
+    AuditAspect auditAspect(
+            AuditSnapshotCollector snapshotCollector,
+            AuditInvocationEventFactory eventFactory,
+            AuditOutboxStore outboxStore
+    ) {
+        return new AuditAspect(snapshotCollector, eventFactory, outboxStore);
     }
 }

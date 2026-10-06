@@ -38,11 +38,12 @@ class AuditAspectTest {
     private final AuditAuthorizationContextResolver contextResolver = mock(AuditAuthorizationContextResolver.class);
     private final AuditOutboxStore outboxStore = mock(AuditOutboxStore.class);
     private final AuditBeforeSnapshotProvider beforeSnapshotProvider = mock(AuditBeforeSnapshotProvider.class);
+    private final AuditEventFactory singleEventFactory =
+            new AuditEventFactory(properties, contextResolver, new ObjectMapper());
     private final AuditAspect aspect = new AuditAspect(
-            new AuditEventFactory(properties, contextResolver, new ObjectMapper()),
-            outboxStore,
-            beforeSnapshotProvider,
-            properties
+            new AuditSnapshotCollector(beforeSnapshotProvider),
+            new AuditInvocationEventFactory(singleEventFactory, properties),
+            outboxStore
     );
 
     @BeforeEach
