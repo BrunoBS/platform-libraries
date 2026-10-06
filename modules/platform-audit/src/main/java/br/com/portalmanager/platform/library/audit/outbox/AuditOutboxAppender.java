@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.audit.outbox;
 
+import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.BeanUtils;
 import tools.jackson.databind.JsonNode;
@@ -32,15 +34,13 @@ public final class AuditOutboxAppender {
                 continue;
             }
             if (resolvedEntityType != null) {
-                throw new IllegalStateException(
-                        "Multiple JPA entities extend AuditOutboxEntity; exactly one is required");
+                throw new PlatformConfigurationException(AuditTechnicalErrors.MULTIPLE_OUTBOX_ENTITIES);
             }
             resolvedEntityType = candidateType.asSubclass(AuditOutboxEntity.class);
         }
 
         if (resolvedEntityType == null) {
-            throw new IllegalStateException(
-                    "No JPA entity extends AuditOutboxEntity; register a concrete audit outbox entity");
+            throw new PlatformConfigurationException(AuditTechnicalErrors.OUTBOX_ENTITY_REQUIRED);
         }
 
         return resolvedEntityType;
