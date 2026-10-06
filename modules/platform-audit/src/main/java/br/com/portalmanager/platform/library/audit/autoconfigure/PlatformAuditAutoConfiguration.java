@@ -10,12 +10,12 @@ import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
 import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
 import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxStore;
 import br.com.portalmanager.platform.library.audit.outbox.JpaAuditOutboxStore;
+import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import jakarta.persistence.EntityManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import tools.jackson.databind.ObjectMapper;
 
