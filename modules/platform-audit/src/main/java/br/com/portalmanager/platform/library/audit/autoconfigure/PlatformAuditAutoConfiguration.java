@@ -8,8 +8,8 @@ import br.com.portalmanager.platform.library.audit.config.PlatformAuditPropertie
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
 import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
-import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxStore;
-import br.com.portalmanager.platform.library.audit.outbox.JpaAuditOutboxStore;
+import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxAppender;
+import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -55,9 +55,12 @@ public class PlatformAuditAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(AuditOutboxStore.class)
-    AuditOutboxStore auditOutboxStore(EntityManager entityManager) {
-        return new JpaAuditOutboxStore(entityManager);
+    @ConditionalOnMissingBean(AuditOutboxAppender.class)
+    AuditOutboxAppender auditOutboxAppender(
+            AuditOutboxRepository<?> repository,
+            EntityManager entityManager
+    ) {
+        return new AuditOutboxAppender(repository, entityManager);
     }
 
     @Bean
@@ -71,8 +74,8 @@ public class PlatformAuditAutoConfiguration {
     AuditAspect auditAspect(
             AuditSnapshotCollector snapshotCollector,
             AuditInvocationEventFactory eventFactory,
-            AuditOutboxStore outboxStore
+            AuditOutboxAppender outboxAppender
     ) {
-        return new AuditAspect(snapshotCollector, eventFactory, outboxStore);
+        return new AuditAspect(snapshotCollector, eventFactory, outboxAppender);
     }
 }
