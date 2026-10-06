@@ -2,15 +2,13 @@ package br.com.portalmanager.platform.library.audit.outbox;
 
 import br.com.portalmanager.platform.library.audit.model.AuditOutboxStatus;
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import tools.jackson.databind.JsonNode;
@@ -18,10 +16,9 @@ import tools.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "audit_outbox", uniqueConstraints = @UniqueConstraint(
-        name = "UK_AUDIT_OUTBOX_IDENTIFIER", columnNames = "identifier"))
-public class AuditOutboxEntry {
+/** Shared persistence mapping for a service-owned audit outbox entity. */
+@MappedSuperclass
+public abstract class AuditOutboxEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,10 +57,10 @@ public class AuditOutboxEntry {
     @Column(name = "processed_at")
     private Instant processedAt;
 
-    protected AuditOutboxEntry() {
+    protected AuditOutboxEntity() {
     }
 
-    public AuditOutboxEntry(JsonNode payload, JsonNode metadata) {
+    protected AuditOutboxEntity(JsonNode payload, JsonNode metadata) {
         this.identifier = UUID.randomUUID().toString();
         this.payload = payload;
         this.metadata = metadata;
@@ -72,7 +69,7 @@ public class AuditOutboxEntry {
     }
 
     @PrePersist
-    void initializeTechnicalFields() {
+    protected void initializeTechnicalFields() {
         if (identifier == null) {
             identifier = UUID.randomUUID().toString();
         }

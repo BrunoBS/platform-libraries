@@ -1,6 +1,9 @@
 package br.com.portalmanager.platform.library.audit.outbox;
 
 import br.com.portalmanager.platform.library.audit.annotation.Auditable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
@@ -9,10 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import tools.jackson.databind.JsonNode;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
@@ -76,14 +83,46 @@ class AuditOutboxTransactionIT {
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM AUDIT_OUTBOX", Integer.class)).isZero();
     }
 
+    @Entity
+    @Table(name = "audit_outbox", uniqueConstraints = @UniqueConstraint(
+            name = "UK_AUDIT_OUTBOX_IDENTIFIER", columnNames = "identifier"))
+    public static class TestAuditOutboxEntity extends AuditOutboxEntity {
+        protected TestAuditOutboxEntity() {
+        }
+
+        TestAuditOutboxEntity(JsonNode payload, JsonNode metadata) {
+            super(payload, metadata);
+        }
+    }
+
+    public interface TestAuditOutboxRepository extends AuditOutboxRepository<TestAuditOutboxEntity> {
+    }
+
     @SpringBootConfiguration
     @EnableAutoConfiguration
+    @EntityScan(basePackageClasses = AuditOutboxTransactionIT.class)
+    @EnableJpaRepositories(basePackageClasses = AuditOutboxTransactionIT.class, considerNestedRepositories = true)
     @Import(TestBeans.class)
     static class TestApplication {
     }
 
     @Configuration(proxyBeanMethods = false)
     static class TestBeans {
+        @Bean
+        AuditOutboxStore auditOutboxStore(TestAuditOutboxRepository repository) {
+            return new TestAuditOutboxStore(repository);
+        }
+
+        @Bean
+        AuditOutboxStore auditOutboxStore(TestAuditOutboxRepository repository) {
+            return new AbstractAuditOutboxStore<TestAuditOutboxEntity>(repository) {
+                @Override
+                protected TestAuditOutboxEntity createEntry(JsonNode payload, JsonNode metadata) {
+                    return new TestAuditOutboxEntity(payload, metadata);
+                }
+            };
+        }
+
         @Bean
         AuditAuthorizationContextResolver auditAuthorizationContextResolver() {
             AuditAuthorizationContextResolver resolver = mock(AuditAuthorizationContextResolver.class);
