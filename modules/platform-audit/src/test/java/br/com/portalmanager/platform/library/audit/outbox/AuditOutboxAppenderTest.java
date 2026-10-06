@@ -1,0 +1,84 @@
+package br.com.portalmanager.platform.library.audit.outbox;
+
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.Metamodel;
+import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+class AuditOutboxAppenderTest {
+
+    private final EntityManager entityManager = mock(EntityManager.class);
+    private final Metamodel metamodel = mock(Metamodel.class);
+
+    @Test
+    void shouldCreateAndAppendTheSingleMappedOutboxEntity() throws Exception {
+        when(entityManager.getMetamodel()).thenReturn(metamodel);
+        when(metamodel.getEntities()).thenReturn(Set.of(entityType(TestAuditOutboxEntity.class)));
+        AuditOutboxRepository<TestAuditOutboxEntity> repository = mock(AuditOutboxRepository.class);
+        AuditOutboxAppender appender = new AuditOutboxAppender(repository, entityManager);
+        var mapper = new ObjectMapper();
+        var payload = mapper.readTree("{\"identifier\":\"resource-1\"}");
+        var metadata = mapper.readTree("{\"eventType\":\"CREATED\"}");
+
+        appender.append(payload, metadata);
+
+        var entry = org.mockito.ArgumentCaptor.forClass(TestAuditOutboxEntity.class);
+        verify(repository).append(entry.capture());
+        assertThat(entry.getValue().getIdentifier()).isNotBlank();
+        assertThat(entry.getValue().getPayload()).isEqualTo(payload);
+        assertThat(entry.getValue().getMetadata()).isEqualTo(metadata);
+    }
+
+    @Test
+    void shouldFailWithConfigurationErrorWhenNoOutboxEntityIsMapped() {
+        when(entityManager.getMetamodel()).thenReturn(metamodel);
+        when(metamodel.getEntities()).thenReturn(Set.of());
+
+        assertThatThrownBy(() -> new AuditOutboxAppender(mockRepository(), entityManager))
+                .isInstanceOf(PlatformConfigurationException.class);
+    }
+
+    @Test
+    void shouldFailWithConfigurationErrorWhenMultipleOutboxEntitiesAreMapped() {
+        when(entityManager.getMetamodel()).thenReturn(metamodel);
+        when(metamodel.getEntities()).thenReturn(Set.of(
+                entityType(TestAuditOutboxEntity.class),
+                entityType(OtherAuditOutboxEntity.class)
+        ));
+
+        assertThatThrownBy(() -> new AuditOutboxAppender(mockRepository(), entityManager))
+                .isInstanceOf(PlatformConfigurationException.class);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static EntityType<?> entityType(Class<?> javaType) {
+        EntityType entityType = mock(EntityType.class);
+        when(entityType.getJavaType()).thenReturn(javaType);
+        return entityType;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static AuditOutboxRepository<?> mockRepository() {
+        return mock(AuditOutboxRepository.class);
+    }
+
+    public static class TestAuditOutboxEntity extends AuditOutboxEntity {
+        protected TestAuditOutboxEntity() {
+        }
+    }
+
+    public static class OtherAuditOutboxEntity extends AuditOutboxEntity {
+        protected OtherAuditOutboxEntity() {
+        }
+    }
+}
