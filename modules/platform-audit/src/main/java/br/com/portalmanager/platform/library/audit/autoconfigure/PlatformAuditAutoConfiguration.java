@@ -66,10 +66,7 @@ public class PlatformAuditAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AuditInvocationEventFactory.class)
-    AuditInvocationEventFactory auditInvocationEventFactory(
-            AuditEventFactory eventFactory,
-            PlatformAuditProperties properties
-    ) {
+    AuditInvocationEventFactory auditInvocationEventFactory(AuditEventFactory eventFactory) {
         return new AuditInvocationEventFactory(eventFactory);
     }
 
