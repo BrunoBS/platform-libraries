@@ -5,7 +5,6 @@ import br.com.portalmanager.platform.library.audit.exception.AuditException;
 import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
-import org.springframework.http.ResponseEntity;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -41,8 +40,7 @@ public final class AuditSnapshotCollector {
     }
 
     public List<CapturedAuditSnapshot> captureAfter(Object result, Auditable[] annotations) {
-        Object responseBody = responseBody(result);
-        Collection<?> values = snapshots(responseBody);
+        Collection<?> values = snapshots(result);
         List<CapturedAuditSnapshot> snapshots = new ArrayList<>();
 
         for (Auditable annotation : annotations) {
@@ -68,10 +66,6 @@ public final class AuditSnapshotCollector {
         if (beforeSnapshotProvider == null) {
             throw new AuditException(AuditMessageKeys.BEFORE_SNAPSHOT_PROVIDER_REQUIRED);
         }
-    }
-
-    private Object responseBody(Object result) {
-        return result instanceof ResponseEntity<?> response ? response.getBody() : result;
     }
 
     private Collection<?> snapshots(Object responseBody) {
