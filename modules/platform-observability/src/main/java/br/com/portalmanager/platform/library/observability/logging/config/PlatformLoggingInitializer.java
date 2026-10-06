@@ -1,12 +1,5 @@
 package br.com.portalmanager.platform.library.observability.logging.config;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.ConsoleAppender;
-import ch.qos.logback.core.status.NopStatusListener;
 import br.com.portalmanager.platform.library.observability.logging.converter.JsonErrorMdcConverter;
 import br.com.portalmanager.platform.library.observability.logging.converter.JsonMdcConverter;
 import br.com.portalmanager.platform.library.observability.logging.converter.JsonMessageConverter;
@@ -14,6 +7,14 @@ import br.com.portalmanager.platform.library.observability.logging.converter.Jso
 import br.com.portalmanager.platform.library.observability.logging.converter.MaskingConverter;
 import br.com.portalmanager.platform.library.observability.logging.metadata.BuildVersionResolver;
 import br.com.portalmanager.platform.library.observability.logging.metadata.HostResolver;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.CoreConstants;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.status.NopStatusListener;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -61,37 +62,29 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         }
     }
 
-    private ConsoleAppender<ILoggingEvent> createJsonConsoleAppender(LoggerContext loggerContext, ConfigurableEnvironment env) {
+    private ConsoleAppender<ILoggingEvent> createJsonConsoleAppender(
+            LoggerContext loggerContext,
+            ConfigurableEnvironment env
+    ) {
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
         String appVersion = BuildVersionResolver.resolve(env);
         String host = HostResolver.resolve(env);
-        boolean maskingEnabled = env.getProperty("platform.observability.logging.masking.enabled", Boolean.class, true);
+        boolean maskingEnabled = env.getProperty(
+                "platform.observability.logging.masking.enabled",
+                Boolean.class,
+                true
+        );
 
-        // Captura o mapa de conversores customizados do usuário informados no YAML
         Map<String, String> customConverters = Binder.get(env)
-                .bind("platform.observability.logging.custom-converters", Bindable.mapOf(String.class, String.class))
+                .bind(
+                        "platform.observability.logging.custom-converters",
+                        Bindable.mapOf(String.class, String.class)
+                )
                 .orElse(new HashMap<>());
 
-        PatternLayoutEncoder encoder = new PatternLayoutEncoder() {
-            @Override
-            public void start() {
-                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMessage", JsonMessageConverter.class.getName());
-                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonMdc", JsonMdcConverter.class.getName());
-                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonError", JsonErrorMdcConverter.class.getName());
-                ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("jsonThrowable", JsonThrowableConverter.class.getName());
-                if (maskingEnabled) {
-                    ch.qos.logback.classic.PatternLayout.defaultConverterMap.put("corporateLgpdMask", MaskingConverter.class.getName());
-                }
+        registerPatternConverters(loggerContext, maskingEnabled, customConverters);
 
-                        customConverters.forEach((wordTag, className) -> {
-                    validateCustomConverter(wordTag, className);
-                    ch.qos.logback.classic.PatternLayout.defaultConverterMap.put(wordTag, className);
-                });
-
-                super.start();
-            }
-        };
-
+        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(loggerContext);
         encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, maskingEnabled, customConverters));
         encoder.start();
@@ -105,9 +98,38 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         return appender;
     }
 
-    /**
-     * Monta a String do template estruturado do JSON aplicando o envelopamento infinito em cascata.
-     */
+    @SuppressWarnings("unchecked")
+    private void registerPatternConverters(
+            LoggerContext loggerContext,
+            boolean maskingEnabled,
+            Map<String, String> customConverters
+    ) {
+        Map<String, String> converters = new HashMap<>();
+        Object registeredConverters = loggerContext.getObject(CoreConstants.PATTERN_RULE_REGISTRY);
+        if (registeredConverters instanceof Map<?, ?> existingConverters) {
+            existingConverters.forEach((key, value) -> {
+                if (key instanceof String converterName && value instanceof String converterClass) {
+                    converters.put(converterName, converterClass);
+                }
+            });
+        }
+
+        converters.put("jsonMessage", JsonMessageConverter.class.getName());
+        converters.put("jsonMdc", JsonMdcConverter.class.getName());
+        converters.put("jsonError", JsonErrorMdcConverter.class.getName());
+        converters.put("jsonThrowable", JsonThrowableConverter.class.getName());
+        if (maskingEnabled) {
+            converters.put("corporateLgpdMask", MaskingConverter.class.getName());
+        }
+
+        customConverters.forEach((wordTag, className) -> {
+            validateCustomConverter(wordTag, className);
+            converters.put(wordTag, className);
+        });
+
+        loggerContext.putObject(CoreConstants.PATTERN_RULE_REGISTRY, converters);
+    }
+
     private void validateCustomConverter(String wordTag, String className) {
         if (wordTag == null || wordTag.isBlank() || className == null || className.isBlank()) {
             throw new IllegalStateException("Custom logging converter tag and class must not be blank");
@@ -122,7 +144,16 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         }
     }
 
-    private String buildJsonPattern(String serviceName, String appVersion, String host, boolean maskingEnabled, Map<String, String> customConverters) {
+    /**
+     * Monta a String do template estruturado do JSON aplicando o envelopamento infinito em cascata.
+     */
+    private String buildJsonPattern(
+            String serviceName,
+            String appVersion,
+            String host,
+            boolean maskingEnabled,
+            Map<String, String> customConverters
+    ) {
         String messageToken = maskingEnabled ? "%corporateLgpdMask" : "%jsonMessage";
         for (String userTag : customConverters.keySet()) {
             messageToken = String.format("%%%s({%s})", userTag, messageToken);
@@ -130,13 +161,16 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
 
         return String.format(
                 "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"context\":%%jsonMdc,\"error\":%%jsonError,\"exception\":%%jsonThrowable}%%n",
-                messageToken, serviceName, appVersion, host
+                messageToken,
+                serviceName,
+                appVersion,
+                host
         );
     }
 
-
     private void registerAppender(LoggerContext loggerContext, ConsoleAppender<ILoggingEvent> appender) {
-        ch.qos.logback.classic.Logger rootLogger = loggerContext.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        ch.qos.logback.classic.Logger rootLogger =
+                loggerContext.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         Appender<ILoggingEvent> previousPlatformAppender = rootLogger.getAppender(APPENDER_NAME);
         if (previousPlatformAppender != null) {
             rootLogger.detachAppender(previousPlatformAppender);
