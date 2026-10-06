@@ -8,7 +8,7 @@ import br.com.portalmanager.platform.library.audit.exception.AuditException;
 import br.com.portalmanager.platform.library.audit.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
 import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
-import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxStore;
+import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxAppender;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.AfterEach;
@@ -35,14 +35,14 @@ class AuditAspectTest {
 
     private final PlatformAuditProperties properties = new PlatformAuditProperties();
     private final AuditAuthorizationContextResolver contextResolver = mock(AuditAuthorizationContextResolver.class);
-    private final AuditOutboxStore outboxStore = mock(AuditOutboxStore.class);
+    private final AuditOutboxAppender outboxAppender = mock(AuditOutboxAppender.class);
     private final AuditBeforeSnapshotProvider beforeSnapshotProvider = mock(AuditBeforeSnapshotProvider.class);
     private final AuditEventFactory singleEventFactory =
             new AuditEventFactory(properties, contextResolver, new ObjectMapper());
     private final AuditAspect aspect = new AuditAspect(
             new AuditSnapshotCollector(beforeSnapshotProvider),
             new AuditInvocationEventFactory(singleEventFactory),
-            outboxStore
+            outboxAppender
     );
 
     @BeforeEach
@@ -64,7 +64,7 @@ class AuditAspectTest {
 
         var payload = org.mockito.ArgumentCaptor.forClass(tools.jackson.databind.JsonNode.class);
         var metadata = org.mockito.ArgumentCaptor.forClass(tools.jackson.databind.JsonNode.class);
-        verify(outboxStore).append(payload.capture(), metadata.capture());
+        verify(outboxAppender).append(payload.capture(), metadata.capture());
         assertThat(payload.getValue().get("name").asText()).isEqualTo("api.timeout");
         assertThat(metadata.getValue().get("service").asText()).isEqualTo("key-service");
         assertThat(metadata.getValue().get("resourceType").asText()).isEqualTo("KEY");
@@ -89,7 +89,7 @@ class AuditAspectTest {
         aspect.audit(joinPoint);
 
         assertThat(order).containsExactly("capture", "proceed");
-        verify(outboxStore).append(any(), any());
+        verify(outboxAppender).append(any(), any());
     }
 
     @Test
@@ -101,7 +101,7 @@ class AuditAspectTest {
 
         aspect.audit(joinPoint("updateMany", items));
 
-        verify(outboxStore, org.mockito.Mockito.times(101)).append(any(), any());
+        verify(outboxAppender, org.mockito.Mockito.times(101)).append(any(), any());
     }
 
     @Test
@@ -110,7 +110,7 @@ class AuditAspectTest {
         aspect.audit(joinPoint("update", Map.of("identifier", "key-1", "data", largeValue)));
 
         var payload = org.mockito.ArgumentCaptor.forClass(tools.jackson.databind.JsonNode.class);
-        verify(outboxStore).append(payload.capture(), any());
+        verify(outboxAppender).append(payload.capture(), any());
         assertThat(payload.getValue().get("data").asText()).hasSize(70_000);
     }
 
@@ -120,7 +120,7 @@ class AuditAspectTest {
         when(joinPoint.proceed()).thenThrow(new IllegalStateException("business failure"));
 
         assertThatThrownBy(() -> aspect.audit(joinPoint)).isInstanceOf(IllegalStateException.class);
-        verify(outboxStore, never()).append(any(), any());
+        verify(outboxAppender, never()).append(any(), any());
     }
 
     @Test
@@ -138,7 +138,7 @@ class AuditAspectTest {
                 Map.of("identifier", "key-1"), Map.of("name", "missing identifier")))))
                 .isInstanceOf(AuditException.class);
 
-        verify(outboxStore, never()).append(any(), any());
+        verify(outboxAppender, never()).append(any(), any());
     }
 
     @Test
@@ -146,7 +146,7 @@ class AuditAspectTest {
         aspect.audit(joinPoint("activate", Map.of("identifier", "key-1")));
 
         var metadata = org.mockito.ArgumentCaptor.forClass(tools.jackson.databind.JsonNode.class);
-        org.mockito.Mockito.verify(outboxStore, org.mockito.Mockito.times(2)).append(any(), metadata.capture());
+        org.mockito.Mockito.verify(outboxAppender, org.mockito.Mockito.times(2)).append(any(), metadata.capture());
         assertThat(metadata.getAllValues())
                 .extracting(node -> node.get("eventType").asText())
                 .containsExactly("UPDATED", "ACTIVATED");
