@@ -19,6 +19,7 @@
         <jna.version>5.17.0</jna.version>
         <jna-platform.version>5.17.0</jna-platform.version>
         <logback.version>1.6.5</logback.version>
+        <tomcat.version>11.0.26</tomcat.version>
         <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
         <json-schema-validator.version>3.0.7</json-schema-validator.version>
         <rest-assured.version>6.0.1</rest-assured.version>
@@ -38,6 +39,21 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
                 <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
