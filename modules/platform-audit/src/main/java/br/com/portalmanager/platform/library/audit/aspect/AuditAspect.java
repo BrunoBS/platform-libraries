@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.audit.aspect;
 
 import br.com.portalmanager.platform.library.audit.annotation.Auditable;
+import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
 import br.com.portalmanager.platform.library.audit.exception.AuditException;
 import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxStore;
