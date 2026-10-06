@@ -17,10 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.JsonNode;
 
 import java.util.Map;
 
@@ -90,34 +88,17 @@ class AuditOutboxTransactionIT {
         protected TestAuditOutboxEntity() {
         }
 
-        TestAuditOutboxEntity(JsonNode payload, JsonNode metadata) {
-            super(payload, metadata);
-        }
-    }
-
-    public interface TestAuditOutboxRepository extends AuditOutboxRepository<TestAuditOutboxEntity> {
     }
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
     @EntityScan(basePackageClasses = AuditOutboxTransactionIT.class)
-    @EnableJpaRepositories(basePackageClasses = AuditOutboxTransactionIT.class, considerNestedRepositories = true)
     @Import(TestBeans.class)
     static class TestApplication {
     }
 
     @Configuration(proxyBeanMethods = false)
     static class TestBeans {
-        @Bean
-        AuditOutboxStore auditOutboxStore(TestAuditOutboxRepository repository) {
-            return new AbstractAuditOutboxStore<TestAuditOutboxEntity>(repository) {
-                @Override
-                protected TestAuditOutboxEntity createEntry(JsonNode payload, JsonNode metadata) {
-                    return new TestAuditOutboxEntity(payload, metadata);
-                }
-            };
-        }
-
         @Bean
         AuditAuthorizationContextResolver auditAuthorizationContextResolver() {
             AuditAuthorizationContextResolver resolver = mock(AuditAuthorizationContextResolver.class);
