@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.audit.annotation.Auditable;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
+import br.com.portalmanager.platform.library.testing.annotation.WithMySql;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -28,15 +29,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@WithMySql
 @SpringBootTest(
         classes = AuditOutboxTransactionIT.TestApplication.class,
         properties = {
                 "spring.application.name=platform-audit-transaction-test",
                 "platform.audit.enabled=true",
                 "platform.audit.service-name=transaction-test",
-                "spring.datasource.url=jdbc:h2:mem:audit_outbox;DB_CLOSE_DELAY=-1;MODE=MySQL",
-                "spring.datasource.username=sa",
-                "spring.datasource.password=",
                 "spring.jpa.hibernate.ddl-auto=create-drop",
                 "spring.flyway.enabled=false"
         }
@@ -48,7 +47,6 @@ class AuditOutboxTransactionIT {
 
     @BeforeEach
     void prepareDomainTable() {
-        jdbcTemplate.execute("ALTER TABLE AUDIT_OUTBOX DROP CONSTRAINT IF EXISTS CK_AUDIT_OUTBOX_TEST");
         jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS DOMAIN_CHANGE (IDENTIFIER VARCHAR(36) PRIMARY KEY)");
         jdbcTemplate.update("DELETE FROM DOMAIN_CHANGE");
         jdbcTemplate.update("DELETE FROM AUDIT_OUTBOX");
@@ -76,10 +74,14 @@ class AuditOutboxTransactionIT {
     void shouldRollbackDomainChangeWhenOutboxInsertFails() {
         jdbcTemplate.execute("ALTER TABLE AUDIT_OUTBOX ADD CONSTRAINT CK_AUDIT_OUTBOX_TEST CHECK (status <> 'PENDING')");
 
-        assertThatThrownBy(() -> useCase.execute(false)).isInstanceOf(RuntimeException.class);
+        try {
+            assertThatThrownBy(() -> useCase.execute(false)).isInstanceOf(RuntimeException.class);
 
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isZero();
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM AUDIT_OUTBOX", Integer.class)).isZero();
+            assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isZero();
+            assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM AUDIT_OUTBOX", Integer.class)).isZero();
+        } finally {
+            jdbcTemplate.execute("ALTER TABLE AUDIT_OUTBOX DROP CHECK CK_AUDIT_OUTBOX_TEST");
+        }
     }
 
     @Entity
