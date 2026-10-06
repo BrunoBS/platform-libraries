@@ -62,7 +62,7 @@ class AuditOutboxTransactionIT {
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isEqualTo(1);
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM AUDIT_OUTBOX", Integer.class)).isEqualTo(1);
         String payload = jdbcTemplate.queryForObject("SELECT payload FROM AUDIT_OUTBOX", String.class);
-        assertThat(payload).contains("\\"identifier\\":\\"resource-1\\"");
+        assertThat(payload).contains("\\\"identifier\\\":\\\"resource-1\\\"");
     }
 
     @Test
