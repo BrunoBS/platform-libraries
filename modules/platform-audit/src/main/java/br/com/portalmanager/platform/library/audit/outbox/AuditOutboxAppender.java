@@ -1,11 +1,9 @@
 package br.com.portalmanager.platform.library.audit.outbox;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.metamodel.EntityType;
 import org.springframework.beans.BeanUtils;
 import tools.jackson.databind.JsonNode;
 
-import java.util.List;
 import java.util.Objects;
 
 /** Creates and stores an entry using the concrete outbox entity registered by the consumer. */
@@ -26,16 +24,25 @@ public final class AuditOutboxAppender {
     }
 
     private static Class<? extends AuditOutboxEntity> resolveEntityType(EntityManager entityManager) {
-        List<Class<?>> entityTypes = entityManager.getMetamodel().getEntities().stream()
-                .map(EntityType::getJavaType)
-                .filter(AuditOutboxEntity.class::isAssignableFrom)
-                .toList();
+        Class<? extends AuditOutboxEntity> resolvedEntityType = null;
 
-        if (entityTypes.size() != 1) {
-            throw new IllegalStateException(
-                    "Expected exactly one JPA entity extending AuditOutboxEntity, but found " + entityTypes.size());
+        for (var entityType : entityManager.getMetamodel().getEntities()) {
+            Class<?> candidateType = entityType.getJavaType();
+            if (!AuditOutboxEntity.class.isAssignableFrom(candidateType)) {
+                continue;
+            }
+            if (resolvedEntityType != null) {
+                throw new IllegalStateException(
+                        "Multiple JPA entities extend AuditOutboxEntity; exactly one is required");
+            }
+            resolvedEntityType = candidateType.asSubclass(AuditOutboxEntity.class);
         }
 
-        return entityTypes.getFirst().asSubclass(AuditOutboxEntity.class);
+        if (resolvedEntityType == null) {
+            throw new IllegalStateException(
+                    "No JPA entity extends AuditOutboxEntity; register a concrete audit outbox entity");
+        }
+
+        return resolvedEntityType;
     }
 }
