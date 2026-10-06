@@ -11,7 +11,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.lang.reflect.Method;
@@ -48,10 +47,6 @@ public final class AuditAspect {
         );
 
         Object result = joinPoint.proceed();
-        if (!isSuccessful(result)) {
-            return result;
-        }
-
         snapshots.addAll(snapshotCollector.captureAfter(result, annotations));
         for (AuditEventFactory.CapturedAuditEvent event : eventFactory.create(snapshots)) {
             outboxStore.append(event.payload(), event.metadata());
@@ -63,14 +58,6 @@ public final class AuditAspect {
         if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new AuditException(AuditMessageKeys.TRANSACTION_REQUIRED);
         }
-    }
-
-    private boolean isSuccessful(Object result) {
-        if (result instanceof ResponseEntity<?> response) {
-            int status = response.getStatusCode().value();
-            return status >= 200 && status < 300;
-        }
-        return true;
     }
 
     private Method resolveMethod(ProceedingJoinPoint joinPoint) {

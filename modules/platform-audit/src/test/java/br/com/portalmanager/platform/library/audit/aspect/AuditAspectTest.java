@@ -14,7 +14,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.databind.ObjectMapper;
 
@@ -99,13 +98,6 @@ class AuditAspectTest {
         when(joinPoint.proceed()).thenThrow(new IllegalStateException("business failure"));
 
         assertThatThrownBy(() -> aspect.audit(joinPoint)).isInstanceOf(IllegalStateException.class);
-        verify(outboxStore, never()).append(any(), any());
-    }
-
-    @Test
-    void shouldNotWriteOutboxForUnsuccessfulHttpResult() throws Throwable {
-        aspect.audit(joinPoint("update", ResponseEntity.badRequest().body(Map.of("identifier", "key-1"))));
-
         verify(outboxStore, never()).append(any(), any());
     }
 
