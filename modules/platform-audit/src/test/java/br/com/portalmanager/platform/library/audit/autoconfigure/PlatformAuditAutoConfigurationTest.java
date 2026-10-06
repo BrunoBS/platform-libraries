@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.audit.autoconfigure;
 
 import br.com.portalmanager.platform.library.audit.aspect.AuditAspect;
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
-import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxStore;
+import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxAppender;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -22,7 +22,7 @@ class PlatformAuditAutoConfigurationTest {
     @Configuration
     static class TestInfrastructure {
         @Bean ObjectMapper objectMapper() { return new ObjectMapper(); }
-        @Bean AuditOutboxStore auditOutboxStore() { return mock(AuditOutboxStore.class); }
+        @Bean AuditOutboxAppender auditOutboxAppender() { return mock(AuditOutboxAppender.class); }
     }
 
     @Test
