@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,9 +91,13 @@ class AuditOutboxTransactionIT {
 
     }
 
+    public interface TestAuditOutboxRepository extends AuditOutboxRepository<TestAuditOutboxEntity> {
+    }
+
     @SpringBootConfiguration
     @EnableAutoConfiguration
     @EntityScan(basePackageClasses = AuditOutboxTransactionIT.class)
+    @EnableJpaRepositories(basePackageClasses = AuditOutboxTransactionIT.class, considerNestedRepositories = true)
     @Import(TestBeans.class)
     static class TestApplication {
     }
