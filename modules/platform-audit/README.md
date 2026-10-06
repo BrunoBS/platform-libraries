@@ -42,7 +42,7 @@ O snapshot deve ser um objeto JSON com `identifier` ou `id`. `AuditMetadata` reg
 
 A migration MySQL de referência está em `src/main/resources/platform-audit/db/mysql/create-audit-outbox.sql`. Copie o DDL para a próxima migration versionada do serviço consumidor; a library não injeta uma migration global nem escolhe números de versão que possam colidir com o histórico de cada serviço. O serviço mapeia a tabela com uma entidade concreta estendendo `AuditOutboxEntity`, no pacote escaneado pelo JPA.
 
-O modelo contém `id`, `identifier`, `payload`, `metadata`, `status` e colunas técnicas de claim/retry/retention. A tabela não duplica propriedades funcionais do evento em colunas.
+O modelo contém `id`, `identifier`, `payload`, `metadata`, `status` e colunas técnicas de claim e retry. A tabela não duplica propriedades funcionais do evento em colunas.
 
 ## Configuração
 
