@@ -53,7 +53,7 @@ platform:
     service-name: key-service
 ```
 
-`platform.audit.service-name` é obrigatório quando a capacidade está habilitada. A library não limita o tamanho dos snapshots nem a quantidade de eventos por invocação. Use um banco com suporte a JPA e JSON. A library fornece a entidade base e o store JPA. O serviço consumidor só declara a entidade concreta e o nome de sua tabela:
+`platform.audit.service-name` é obrigatório quando a capacidade está habilitada. A library não limita o tamanho dos snapshots nem a quantidade de eventos por invocação. Use um banco com suporte a JPA e JSON. A library fornece a entidade abstrata e o repositório genérico. O serviço consumidor declara sua entidade concreta, o nome da tabela e uma especialização vazia do repositório:
 
 ```java
 @Entity
@@ -62,9 +62,13 @@ public class WorkspaceAuditOutboxEntity extends AuditOutboxEntity {
     protected WorkspaceAuditOutboxEntity() {
     }
 }
+
+public interface WorkspaceAuditOutboxRepository
+        extends AuditOutboxRepository<WorkspaceAuditOutboxEntity> {
+}
 ```
 
-A entidade concreta deve estar no pacote escaneado pelo JPA. A library localiza essa entidade no metamodelo JPA e grava a entrada nela; o serviço não implementa repositório nem store. O Use Case auditável precisa executar dentro de uma transação ativa. Sem transação, a library falha antes de executar a regra de negócio.
+A entidade e o repositório devem estar nos pacotes escaneados pelo JPA e pelo Spring Data do serviço. A library cria a entidade concreta registrada no metamodelo JPA e a persiste pelo repositório genérico; o serviço não implementa a gravação. O Use Case auditável precisa executar dentro de uma transação ativa. Sem transação, a library falha antes de executar a regra de negócio.
 
 ## Etapas seguintes
 
