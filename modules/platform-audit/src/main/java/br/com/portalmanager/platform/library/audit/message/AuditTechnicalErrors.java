@@ -12,6 +12,22 @@ public final class AuditTechnicalErrors {
                     500
             );
 
+    public static final PlatformErrorDefinition OUTBOX_ENTITY_REQUIRED =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-004",
+                    "A concrete JPA entity extending AuditOutboxEntity is required",
+                    "Register exactly one concrete audit outbox entity in the JPA metamodel.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition MULTIPLE_OUTBOX_ENTITIES =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-005",
+                    "Multiple audit outbox entities are registered",
+                    "Register only one concrete audit outbox entity for this persistence unit.",
+                    500
+            );
+
     private AuditTechnicalErrors() {
     }
 }
