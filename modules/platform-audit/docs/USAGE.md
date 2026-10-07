@@ -128,6 +128,7 @@ Confirme que:
 | `service-name` obrigatório | Falta `platform.audit.service-name` |
 | Entidade de outbox não encontrada | A entidade concreta não está nos pacotes escaneados pelo JPA |
 | Mais de uma entidade de outbox encontrada | Há mais de uma entidade que estende `AuditOutboxEntity` na mesma unidade de persistência |
+| Repository de outbox incompatível | O repository injetado não gerencia a entidade concreta de outbox registrada no JPA; declare o repository tipado para essa entidade |
 | `transaction.required` | A chamada não está dentro de uma transação ativa ou não passou pelo proxy Spring |
 | `context.user.missing` | `UserContext` não está disponível durante a execução |
 | `resource.identifier.missing` | O snapshot não tem `identifier` nem `id` preenchido |
