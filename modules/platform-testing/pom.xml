@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>platform-testing</artifactId>
-    <version>${revision}</version>
     <packaging>jar</packaging>
     <name>platform-testing</name>
 
