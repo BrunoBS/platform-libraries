@@ -1,5 +1,8 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+
 import org.testcontainers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -215,7 +218,7 @@ public class AwsLocalStackContainer extends LocalStackContainer {
 
     private void requireServices(AwsService[] services) {
         if (services == null || services.length == 0) {
-            throw new IllegalArgumentException("At least one AWS service must be configured");
+            throw configurationException("At least one AWS service must be configured");
         }
     }
 
@@ -227,10 +230,10 @@ public class AwsLocalStackContainer extends LocalStackContainer {
         Set<String> unique = new HashSet<>();
         for (String value : copy) {
             if (value == null || value.isBlank()) {
-                throw new IllegalArgumentException(resource + " name must not be blank");
+                throw configurationException(resource + " name must not be blank");
             }
             if (!unique.add(value)) {
-                throw new IllegalArgumentException("Duplicate " + resource + " name: " + value);
+                throw configurationException("Duplicate " + resource + " name: " + value);
             }
         }
         return copy;
@@ -246,7 +249,7 @@ public class AwsLocalStackContainer extends LocalStackContainer {
         for (int index = 0; index < policies.length; index++) {
             String[] policy = policies[index];
             if (policy == null || policy.length != 3) {
-                throw new IllegalArgumentException("Each SQS redrive policy must define source, DLQ, and max receive count");
+                throw configurationException("Each SQS redrive policy must define source, DLQ, and max receive count");
             }
             String source = requireQueueName(policy[0], "SQS source queue");
             String deadLetter = requireQueueName(policy[1], "SQS dead-letter queue");
@@ -254,22 +257,22 @@ public class AwsLocalStackContainer extends LocalStackContainer {
             try {
                 maxReceiveCount = Integer.parseInt(policy[2]);
             } catch (NumberFormatException exception) {
-                throw new IllegalArgumentException("SQS max receive count must be a positive integer", exception);
+                throw configurationException("SQS max receive count must be a positive integer", exception);
             }
             if (maxReceiveCount < 1) {
-                throw new IllegalArgumentException("SQS max receive count must be a positive integer");
+                throw configurationException("SQS max receive count must be a positive integer");
             }
             if (source.equals(deadLetter)) {
-                throw new IllegalArgumentException("SQS source and dead-letter queues must be different");
+                throw configurationException("SQS source and dead-letter queues must be different");
             }
             if (source.endsWith(".fifo") != deadLetter.endsWith(".fifo")) {
-                throw new IllegalArgumentException("SQS source and dead-letter queues must use the same queue type");
+                throw configurationException("SQS source and dead-letter queues must use the same queue type");
             }
             if (!queueNames.contains(source) || !queueNames.contains(deadLetter)) {
-                throw new IllegalArgumentException("SQS source and dead-letter queues must both be provisioned");
+                throw configurationException("SQS source and dead-letter queues must both be provisioned");
             }
             if (!sources.add(source)) {
-                throw new IllegalArgumentException("Only one SQS redrive policy can be configured per source queue: " + source);
+                throw configurationException("Only one SQS redrive policy can be configured per source queue: " + source);
             }
             copy[index] = new String[]{source, deadLetter, Integer.toString(maxReceiveCount)};
         }
@@ -286,21 +289,21 @@ public class AwsLocalStackContainer extends LocalStackContainer {
         for (int index = 0; index < notifications.length; index++) {
             String[] notification = notifications[index];
             if (notification == null || notification.length != 2) {
-                throw new IllegalArgumentException("Each S3 notification must define a bucket and an SQS queue");
+                throw configurationException("Each S3 notification must define a bucket and an SQS queue");
             }
             String bucket = notification[0];
             String queue = requireQueueName(notification[1], "SQS notification queue");
             if (bucket == null || bucket.isBlank()) {
-                throw new IllegalArgumentException("S3 notification bucket name must not be blank");
+                throw configurationException("S3 notification bucket name must not be blank");
             }
             if (!bucketNames.contains(bucket)) {
-                throw new IllegalArgumentException("S3 notification bucket must be provisioned: " + bucket);
+                throw configurationException("S3 notification bucket must be provisioned: " + bucket);
             }
             if (!queueNames.contains(queue)) {
-                throw new IllegalArgumentException("S3 notification queue must be provisioned: " + queue);
+                throw configurationException("S3 notification queue must be provisioned: " + queue);
             }
             if (queue.endsWith(".fifo")) {
-                throw new IllegalArgumentException("S3 notifications cannot target FIFO queues: " + queue);
+                throw configurationException("S3 notifications cannot target FIFO queues: " + queue);
             }
             copy[index] = new String[]{bucket, queue};
         }
@@ -309,9 +312,17 @@ public class AwsLocalStackContainer extends LocalStackContainer {
 
     private String requireQueueName(String queue, String resource) {
         if (queue == null || queue.isBlank()) {
-            throw new IllegalArgumentException(resource + " name must not be blank");
+            throw configurationException(resource + " name must not be blank");
         }
         return queue;
+    }
+
+    private PlatformConfigurationException configurationException(String detail) {
+        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail));
+    }
+
+    private PlatformConfigurationException configurationException(String detail, Throwable cause) {
+        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail), cause);
     }
 
     private String escapeJson(String value) {

@@ -190,7 +190,7 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             }
             return result;
         }
-        throw new IllegalArgumentException("Unsupported nested AWS service annotation metadata");
+        throw configurationException("Unsupported nested AWS service annotation metadata");
     }
 
     private void requireSingle(String annotationName, AnnotationAttributes[] annotations) {
