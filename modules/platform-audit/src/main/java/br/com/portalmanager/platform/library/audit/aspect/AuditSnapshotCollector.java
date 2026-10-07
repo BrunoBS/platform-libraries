@@ -1,9 +1,6 @@
 package br.com.portalmanager.platform.library.audit.aspect;
 
 import br.com.portalmanager.platform.library.audit.annotation.Auditable;
-import br.com.portalmanager.platform.library.audit.exception.AuditException;
-import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
-import br.com.portalmanager.platform.library.audit.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
 
 import java.lang.reflect.Method;
@@ -26,8 +23,6 @@ public final class AuditSnapshotCollector {
             Object[] arguments,
             Auditable[] annotations
     ) {
-        validateActions(annotations);
-
         List<CapturedAuditSnapshot> snapshots = new ArrayList<>();
         for (Auditable annotation : annotations) {
             if (annotation.action().capturesBefore()) {
@@ -52,14 +47,6 @@ public final class AuditSnapshotCollector {
             }
         }
         return snapshots;
-    }
-
-    private void validateActions(Auditable[] annotations) {
-        for (Auditable annotation : annotations) {
-            if (annotation.action() == AuditAction.CUSTOM) {
-                throw new AuditException(AuditMessageKeys.CUSTOM_ACTION_NOT_CONFIGURED);
-            }
-        }
     }
 
     private void requireBeforeSnapshotProvider() {
