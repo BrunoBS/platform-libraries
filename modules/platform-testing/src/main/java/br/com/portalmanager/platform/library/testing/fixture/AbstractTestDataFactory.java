@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.testing.fixture;
 
-import br.com.portalmanager.platform.library.testing.fixture.TestDataBuilder;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 public abstract class AbstractTestDataFactory<
         T,
@@ -11,6 +12,17 @@ public abstract class AbstractTestDataFactory<
 
     @Override
     public T valid() {
-        return builder().build();
+        return create(ignored -> {});
+    }
+
+    protected final T create(Consumer<? super B> customization) {
+        Objects.requireNonNull(customization, "Customization must not be null");
+
+        B dataBuilder = Objects.requireNonNull(
+                builder(),
+                "builder() must not return null"
+        );
+        customization.accept(dataBuilder);
+        return dataBuilder.build();
     }
 }

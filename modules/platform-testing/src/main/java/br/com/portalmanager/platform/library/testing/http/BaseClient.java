@@ -1,8 +1,13 @@
 package br.com.portalmanager.platform.library.testing.http;
 
+import br.com.portalmanager.platform.library.testing.http.response.BaseResponse;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
+
+import java.util.Objects;
+import java.util.function.Function;
 
 public abstract class BaseClient {
 
@@ -24,6 +29,15 @@ public abstract class BaseClient {
 
     protected final RequestSpecification authorizedRequest(AuthorizationRequestData authorization) {
         return requests.createAuthorized(authorization);
+    }
+
+    protected final <R extends BaseResponse<R>> R response(
+            ValidatableResponse response,
+            Function<ValidatableResponse, R> responseFactory
+    ) {
+        Objects.requireNonNull(response, "Response must not be null");
+        Objects.requireNonNull(responseFactory, "Response factory must not be null");
+        return responseFactory.apply(response);
     }
 
     protected final String json(Object value) {

@@ -136,15 +136,11 @@ public final class ProductFactory
     }
 
     public ProductDTO withoutName() {
-        return builder()
-                .withName(null)
-                .build();
+        return create(builder -> builder.withName(null));
     }
 
     public ProductDTO duplicatedName(String name) {
-        return builder()
-                .withName(name)
-                .build();
+        return create(builder -> builder.withName(name));
     }
 }
 ```
@@ -175,23 +171,25 @@ public final class ProductClient extends BaseClient {
     }
 
     public ProductResponse create(ProductDTO request) {
-        return new ProductResponse(
+        return response(
                 given()
                         .spec(authorizedRequest())
                         .body(json(request))
                         .when()
                         .post(BASE_PATH)
-                        .then()
+                        .then(),
+                ProductResponse::new
         );
     }
 
     public ProductResponse findById(Long id) {
-        return new ProductResponse(
+        return response(
                 given()
                         .spec(authorizedRequest())
                         .when()
                         .get(BASE_PATH + "/{id}", id)
-                        .then()
+                        .then(),
+                ProductResponse::new
         );
     }
 }
