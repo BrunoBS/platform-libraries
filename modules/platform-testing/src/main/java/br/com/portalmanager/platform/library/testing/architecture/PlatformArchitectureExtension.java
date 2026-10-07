@@ -59,7 +59,7 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
                 .filter(customization -> !customization.overriddenMethods().isEmpty())
                 .filter(customization ->
                         !explicitCoverage.contains(customization.type())
-                                && !hasConventionBasedTest(customization.type(), availableTestNames))
+                                && !hasConventionBasedTest(customization.type().getName(), availableTestNames))
                 .map(this::toViolation)
                 .toList();
 
