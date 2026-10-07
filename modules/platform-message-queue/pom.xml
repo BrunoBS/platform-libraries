@@ -9,7 +9,6 @@
     </parent>
 
     <artifactId>platform-message-queue</artifactId>
-    <version>${revision}</version>
     <packaging>jar</packaging>
     <name>platform-message-queue</name>
 
