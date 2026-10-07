@@ -6,7 +6,7 @@
 
     <groupId>br.com.portalmanager.platform.library</groupId>
     <artifactId>platform-dependencies</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>Gerenciamento de Dependências da Plataforma</name>
     <description>BOM tecnológico externo da Golden Platform. Não gerencia capabilities próprias da plataforma.</description>
