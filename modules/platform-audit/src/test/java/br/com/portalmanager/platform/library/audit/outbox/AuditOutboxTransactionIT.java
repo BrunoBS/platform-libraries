@@ -42,6 +42,7 @@ import static org.mockito.Mockito.when;
                 "platform.audit.enabled=true",
                 "platform.audit.service-name=transaction-test",
                 "spring.jpa.hibernate.ddl-auto=none",
+                "spring.jpa.properties.hibernate.type.json_format_mapper=jackson3",
                 "spring.flyway.enabled=false"
         }
 )
