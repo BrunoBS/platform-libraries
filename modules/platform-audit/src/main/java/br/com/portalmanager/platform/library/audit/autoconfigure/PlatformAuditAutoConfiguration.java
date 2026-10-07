@@ -51,10 +51,9 @@ public class PlatformAuditAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(AuditSnapshotCollector.class)
     AuditSnapshotCollector auditSnapshotCollector(
-            org.springframework.beans.factory.ObjectProvider<AuditBeforeSnapshotProvider> beforeSnapshotProviders,
-            ObjectMapper objectMapper
+            org.springframework.beans.factory.ObjectProvider<AuditBeforeSnapshotProvider> beforeSnapshotProviders
     ) {
-        return new AuditSnapshotCollector(beforeSnapshotProviders.getIfAvailable(), objectMapper);
+        return new AuditSnapshotCollector(beforeSnapshotProviders.getIfAvailable());
     }
 
     @Bean
