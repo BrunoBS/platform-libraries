@@ -55,12 +55,13 @@ flowchart TB
     Scenario["Scenario do serviço"]
     ScenarioContract["TestScenario"]
 
-    Builder --> BuilderContract
-    Builder --> BuilderBase
-    Factory --> FactoryBase
-    FactoryBase --> Builder
-    Scenario --> ScenarioContract
-    Scenario --> Factory
+    Builder -->|implements| BuilderContract
+    Builder -->|extends| BuilderBase
+    BuilderBase -->|implements| BuilderContract
+    Factory -->|extends| FactoryBase
+    FactoryBase -->|obtains builder| Builder
+    Scenario -->|implements| ScenarioContract
+    Scenario -->|composes| Factory
 ```
 
 **Como ler:** o builder constrói um objeto; a factory usa o builder para expor variações semânticas; um scenario combina a massa e a preparação de pré-condições. A biblioteca não fornece scenarios de domínio prontos.
@@ -113,6 +114,7 @@ flowchart TB
     WithMySql["@WithMySql"]
     MysqlConfig["MySqlTestConfiguration"]
     MysqlContainer["MySQLContainer"]
+    DataSource["Spring DataSource"]
     MysqlExtension["MySqlTestExtension"]
     Cleaner["DatabaseCleaner"]
     Scripts["@WithDatabaseScripts"]
@@ -121,11 +123,13 @@ flowchart TB
 
     WithMySql --> MysqlConfig
     MysqlConfig --> MysqlContainer
+    MysqlContainer --> DataSource
     WithMySql --> MysqlExtension
     MysqlExtension --> Cleaner
+    Cleaner --> DataSource
     Scripts --> ScriptExtension
     ScriptExtension --> Executor
-    Executor --> MysqlContainer
+    Executor --> DataSource
 ```
 
 A limpeza do banco e a execução de scripts são mecanismos separados: **MySqlTestExtension** limpa tabelas; **DatabaseScriptExtension** executa setup e cleanup configurados.
