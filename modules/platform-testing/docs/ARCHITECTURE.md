@@ -1,0 +1,126 @@
+# Arquitetura interna do platform-testing
+
+Este documento descreve as responsabilidades do módulo, a divisão dos pacotes e como as extensões conectam JUnit, Spring, Testcontainers, WireMock e ArchUnit.
+
+## Escopo
+
+`platform-testing` oferece suporte comum para testes unitários e de integração dos serviços da plataforma. Os recursos de infraestrutura são opt-in: o consumidor ativa banco, Kafka, autorização simulada ou cloud apenas quando o teste precisa deles.
+
+O módulo não contém regras de negócio dos serviços. Builders, factories, cenários, clients e scripts específicos de domínio devem continuar no microsserviço.
+
+## Estrutura de pacotes
+
+| Pacote | Responsabilidade |
+|---|---|
+| `annotation` | Anotações públicas que ativam configurações ou extensões. |
+| `architecture` | Regra ArchUnit que exige cobertura para customizações de classes da plataforma. |
+| `authorization` | WireMock e builders para simular respostas do serviço de autorização. |
+| `cloud.aws` | LocalStack para SQS/S3, configuração de filas, DLQ e clients AWS de teste. |
+| `cloud.azure` | Emuladores Azure para Service Bus e Blob Storage e seus clients. |
+| `context` | Estado de teste associado à thread, como correlation ID. |
+| `database` | Container MySQL, limpeza de tabelas e execução de scripts SQL. |
+| `fixture` | Contratos e utilitários para builders, factories, cenários, relógio e IDs. |
+| `http` | Criação de requests RestAssured, clients base e customização de requests. |
+| `http.response` | Assertions fluentes para respostas HTTP. |
+| `kafka` | Container Kafka conectado ao contexto Spring de teste. |
+| `lifecycle` | Extensões JUnit para inicialização, isolamento e métricas dos testes. |
+
+## Fluxo de um teste de integração
+
+`@PlatformIntegrationTest` combina Spring Boot, servidor web em porta aleatória, profile `test`, configuração HTTP e extensões de ciclo de vida. As fixtures de infraestrutura são habilitadas separadamente pelas anotações do teste.
+
+1. JUnit encontra a classe anotada.
+2. Spring inicia a aplicação no profile `test` e escolhe uma porta aleatória.
+3. A extensão de integração configura um correlation ID por teste.
+4. Anotações opcionais registram seus containers, beans, clients ou scripts.
+5. O teste usa clients HTTP ou os componentes diretamente.
+6. As extensões executam limpeza e encerram os recursos ao final do ciclo de vida.
+
+```mermaid
+sequenceDiagram
+    participant JUnit
+    participant Spring
+    participant Fixture
+    participant Teste
+
+    JUnit->>Spring: inicia profile test e porta aleatória
+    Spring->>Fixture: registra recursos habilitados
+    Fixture-->>Teste: disponibiliza beans e clients
+    Teste->>Fixture: executa cenário e assertions
+    Fixture-->>JUnit: limpa dados e encerra containers
+```
+
+## Anotações e extensões
+
+### Testes Spring e JUnit
+
+- `PlatformIntegrationTest`: aplica `@SpringBootTest(RANDOM_PORT)`, profile `test`, configuração HTTP, `PlatformIntegrationExtension` e `TestPerformanceExtension`.
+- `PlatformUnitTest`: ativa Mockito e a extensão que limpa o contexto de teste entre métodos.
+- `WithMySql`: importa a configuração de container MySQL e ativa a limpeza conforme `CleanupMode`.
+- `WithDatabaseScripts`: repetível em classe e método; a extensão executa setup e cleanup nas fases configuradas.
+- `WithKafka`: importa uma configuração que cria o container Kafka e registra a conexão com Spring Boot Testcontainers.
+- `WithMockAuthorization`: instala o WireMock e reinicia os stubs entre testes.
+- `WithAwsLocalStack` e `WithAzureEmulator`: registram somente os serviços descritos nas anotações aninhadas.
+- `PlatformArchitectureTest`: ativa a regra arquitetural explicitamente no serviço consumidor.
+
+As anotações não sobem todos os serviços automaticamente. Por exemplo, `@PlatformIntegrationTest` não inicia MySQL nem Kafka por conta própria.
+
+### Banco de dados
+
+`MySqlTestConfiguration` disponibiliza o MySQL pelo Testcontainers e Service Connections do Spring Boot. `MySqlTestExtension` interpreta `CleanupMode` antes/depois de cada método. O padrão é limpar antes de cada método, preservando `flyway_schema_history`.
+
+`DatabaseCleaner` consulta tabelas base do schema MySQL, ignora as tabelas configuradas e usa `TRUNCATE` com verificações de chave estrangeira temporariamente desativadas. A descoberta de tabelas fica em cache por URL JDBC e catálogo; scripts SQL invalidam esse cache.
+
+`DatabaseScriptExtension` resolve os caminhos por `ResourceLoader`, valida se os arquivos existem e executa setup/cleanup na ordem declarada. Cleanup de classe ou método é executado na ordem inversa das anotações correspondentes.
+
+### Kafka e cloud
+
+`KafkaTestConfiguration` registra um `ConfluentKafkaContainer` como service connection. O broker só é iniciado quando o teste importa `@WithKafka`.
+
+Os registrars cloud interpretam as anotações e registram beans de container e clients correspondentes:
+
+- AWS: LocalStack com SQS e/ou S3. A anotação de fila aceita configuração de DLQ, fila FIFO pelo nome e quantidade máxima de recebimentos.
+- Azure: emulador para filas do Service Bus e containers do Blob Storage. Filas podem habilitar sessions e configurar `maxDeliveryCount`.
+
+As dependências Maven de AWS e Azure são opcionais no artefato. O serviço consumidor adiciona em escopo `test` apenas os módulos Testcontainers e SDKs que usa.
+
+## HTTP e contexto do teste
+
+`PlatformRequestSpecificationFactory` cria uma especificação RestAssured nova para cada request, com porta local, JSON, correlation ID e customizadores registrados pelo consumidor. A variante autorizada acrescenta os headers e token descritos em `AuthorizationRequestData`.
+
+`BaseClient` é um helper opcional para encapsular requests e serialização JSON com Jackson 3. `BaseResponse` oferece assertions comuns de status, campos e extração; o serviço pode estendê-lo para criar uma API fluente com vocabulário de domínio.
+
+`TestContext` mantém o correlation ID do teste na thread atual. `PlatformIntegrationExtension` isola esse valor entre métodos para evitar vazamento de contexto.
+
+## Autorização simulada
+
+`AuthorizationMockTestConfiguration` registra um WireMock local e configura a biblioteca de autorização para usar seu endpoint. `AuthorizationMockExtension` reinicia o servidor entre métodos.
+
+`AuthorizationMock` permite configurar sessões liberadas, respostas negadas, proibidas e erros; também verifica chamadas e headers. `AuthorizationSessionBuilder` cria sessões com valores de teste e oferece métodos para grupos, identidade, expiração e grupos do autorizador.
+
+## Fixtures de dados
+
+- `TestDataBuilder<T>` e `AbstractTestDataBuilder`: construção estrutural de dados.
+- `TestDataFactory<T>` e `AbstractTestDataFactory`: cenários semânticos reutilizáveis.
+- `TestScenario<R>`: contrato para preparar pré-condições.
+- `TestClock`: cria `Clock.fixed` com instante e fuso explícitos.
+- `TestIds`: gera UUID determinístico a partir de uma seed.
+
+A biblioteca mantém Datafaker disponível para consumidores que geram dados de teste. Os objetos e regras de domínio dos serviços continuam fora deste módulo.
+
+## Regra arquitetural
+
+`PlatformArchitectureExtension` importa os pacotes do serviço definidos em `basePackages`, identifica classes concretas que sobrescrevem implementação herdada dos pacotes em `observedBasePackages` e exige teste correspondente. O padrão observado é `br.com.portalmanager.platform`.
+
+A cobertura é reconhecida por `@CoversClasses` ou por convenção, com um teste no mesmo pacote cujo nome termine em `Test`, `IntegrationTest` ou `IT`. A busca por pacote respeita a fronteira entre pacotes; nomes iguais em pacotes diferentes não se cobrem.
+
+A regra é opt-in e não é executada automaticamente para todos os serviços.
+
+## Dependências e fronteiras
+
+- A dependência de `platform-testing` deve ser declarada pelo consumidor com escopo `test`.
+- Dependências de infraestrutura cloud e Kafka são opcionais e precisam ser adicionadas pelo consumidor que ativa essas fixtures.
+- MySQL, RestAssured, WireMock, ArchUnit e as extensões Spring/JUnit implementam as capacidades descritas pelas APIs públicas.
+- O módulo expõe Datafaker para compatibilidade com consumidores que já o utilizam em seus testes.
+
+Os nomes dos pacotes públicos são parte da API Java. A organização atual está documentada em [ESTRUTURA_DE_PACOTES.md](../ESTRUTURA_DE_PACOTES.md); mudanças nesses imports exigem migração dos consumidores.
