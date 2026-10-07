@@ -8,7 +8,6 @@
         <relativePath>../../platform-parent/pom.xml</relativePath>
     </parent>
     <artifactId>platform-catalog</artifactId>
-    <version>${revision}</version>
     <packaging>jar</packaging>
     <name>platform-catalog</name>
     <dependencies>
