@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>br.com.portalmanager.platform.library</groupId>
     <artifactId>platform-parent</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <properties>
         <java.version>25</java.version>
@@ -22,7 +22,7 @@
         <spring-boot-maven-plugin.version>4.1.1</spring-boot-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <flatten-maven-plugin.version>1.8.0</flatten-maven-plugin.version>
-        <platform-dependencies.version>1.0.0</platform-dependencies.version>
+        <platform-dependencies.version>${revision}</platform-dependencies.version>
     </properties>
     <dependencyManagement>
         <dependencies>
