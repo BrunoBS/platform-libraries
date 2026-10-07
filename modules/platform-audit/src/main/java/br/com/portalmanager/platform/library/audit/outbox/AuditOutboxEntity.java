@@ -2,7 +2,6 @@ package br.com.portalmanager.platform.library.audit.outbox;
 
 import br.com.portalmanager.platform.library.audit.model.AuditOutboxStatus;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -10,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import tools.jackson.databind.JsonNode;
 
 import java.time.Instant;
@@ -26,11 +27,11 @@ public abstract class AuditOutboxEntity {
     @Column(name = "identifier", nullable = false, length = 36, updatable = false)
     private String identifier;
 
-    @Convert(converter = JsonNodeAttributeConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload", nullable = false, columnDefinition = "json")
     private JsonNode payload;
 
-    @Convert(converter = JsonNodeAttributeConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata", nullable = false, columnDefinition = "json")
     private JsonNode metadata;
 
