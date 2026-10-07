@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.audit.message.AuditTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.repository.support.Repositories;
 import tools.jackson.databind.JsonNode;
 
 import java.util.Objects;
@@ -12,17 +13,31 @@ import java.util.Objects;
 public final class AuditOutboxAppender {
 
     private final AuditOutboxRepository<?> repository;
+    private final Repositories repositories;
     private final Class<? extends AuditOutboxEntity> entityType;
 
-    public AuditOutboxAppender(AuditOutboxRepository<?> repository, EntityManager entityManager) {
+    public AuditOutboxAppender(
+            AuditOutboxRepository<?> repository,
+            EntityManager entityManager,
+            Repositories repositories
+    ) {
         this.repository = Objects.requireNonNull(repository, "audit outbox repository must not be null");
+        this.repositories = Objects.requireNonNull(repositories, "repositories must not be null");
         this.entityType = resolveEntityType(entityManager);
+        validateRepository();
     }
 
     public void append(JsonNode payload, JsonNode metadata) {
         AuditOutboxEntity entry = BeanUtils.instantiateClass(entityType);
         entry.prepareForPersistence(payload, metadata);
         repository.append(entry);
+    }
+
+    private void validateRepository() {
+        Object entityRepository = repositories.getRepositoryFor(entityType).orElse(null);
+        if (entityRepository != repository) {
+            throw new PlatformConfigurationException(AuditTechnicalErrors.OUTBOX_REPOSITORY_MISMATCH);
+        }
     }
 
     private static Class<? extends AuditOutboxEntity> resolveEntityType(EntityManager entityManager) {
