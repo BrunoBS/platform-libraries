@@ -43,7 +43,7 @@ public final class AuditAspect {
         Method method = resolveMethod(joinPoint);
         Auditable[] annotations = method.getAnnotationsByType(Auditable.class);
         List<CapturedAuditSnapshot> snapshots = new ArrayList<>(
-                snapshotCollector.captureBefore(method, joinPoint.getArgs(), annotations)
+                snapshotCollector.captureBefore(joinPoint.getArgs(), annotations)
         );
 
         Object result = joinPoint.proceed();
