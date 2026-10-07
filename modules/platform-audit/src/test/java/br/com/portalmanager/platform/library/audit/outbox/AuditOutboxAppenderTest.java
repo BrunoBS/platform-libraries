@@ -71,7 +71,8 @@ class AuditOutboxAppenderTest {
     @Test
     void shouldFailWithConfigurationErrorWhenRepositoryManagesAnotherEntity() {
         when(entityManager.getMetamodel()).thenReturn(metamodel);
-        when(metamodel.getEntities()).thenReturn(Set.of(entityType(TestAuditOutboxEntity.class)));
+        Set<EntityType<?>> entities = Set.of(entityType(TestAuditOutboxEntity.class));
+        when(metamodel.getEntities()).thenReturn(entities);
         AuditOutboxRepository<?> injectedRepository = mockRepository();
         AuditOutboxRepository<?> entityRepository = mockRepository();
         Repositories repositories = mock(Repositories.class);
