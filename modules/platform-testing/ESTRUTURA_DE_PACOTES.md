@@ -48,6 +48,21 @@ A estrutura de testes acompanha os pacotes de produção para que cada teste fiq
 
 As anotações ficam no subpacote `annotation` de cada contexto: `cloud.aws.annotation`, `cloud.azure.annotation`, `database.annotation`, `kafka.annotation`, `authorization.annotation`, `architecture.annotation` e `lifecycle.annotation`. O contexto HTTP não tem anotações próprias.
 
+## Tipos reutilizáveis do core
+
+Os contratos e classes-base para os microsserviços ficam nestes arquivos:
+
+| Uso no microsserviço | Tipo no `platform-testing` |
+|---|---|
+| Builder de dados | `fixture.TestDataBuilder` e `fixture.AbstractTestDataBuilder` |
+| Factory de massa válida e variações semânticas | `fixture.TestDataFactory` e `fixture.AbstractTestDataFactory` |
+| Preparação de pré-condições | `fixture.TestScenario` |
+| Client HTTP | `http.BaseClient` |
+| Requisição HTTP | `http.PlatformRequestSpecificationFactory` |
+| Assertions e extração HTTP | `http.response.BaseResponse` |
+
+Builders, factories e cenários concretos continuam no projeto consumidor, pois usam DTOs, endpoints e pré-condições próprios do domínio. O módulo fornece os contratos, as classes-base e a infraestrutura comum para implementá-los com a mesma forma.
+
 ## Compatibilidade
 
 Os tipos públicos movidos exigem atualizar imports dos consumidores. Os módulos deste repositório foram verificados e não possuem referências aos pacotes antigos. Consumidores externos devem trocar os imports para os novos pacotes antes de adotar esta versão.
