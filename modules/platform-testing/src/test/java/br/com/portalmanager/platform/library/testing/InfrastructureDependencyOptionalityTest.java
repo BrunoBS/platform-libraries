@@ -22,7 +22,15 @@ class InfrastructureDependencyOptionalityTest {
             "org.springframework.boot:spring-boot-starter-jdbc",
             "org.springframework.boot:spring-boot-starter-kafka",
             "org.testcontainers:testcontainers-kafka",
-            "org.testcontainers:testcontainers-junit-jupiter"
+            "org.testcontainers:testcontainers-junit-jupiter",
+            "org.testcontainers:testcontainers-localstack",
+            "org.testcontainers:testcontainers-azure",
+            "org.testcontainers:testcontainers-mssqlserver",
+            "com.microsoft.sqlserver:mssql-jdbc",
+            "software.amazon.awssdk:sqs",
+            "software.amazon.awssdk:s3",
+            "com.azure:azure-messaging-servicebus",
+            "com.azure:azure-storage-blob"
     );
 
     @Test
