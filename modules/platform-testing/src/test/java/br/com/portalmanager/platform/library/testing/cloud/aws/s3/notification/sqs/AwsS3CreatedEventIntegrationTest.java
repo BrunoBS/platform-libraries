@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.s3sqs;
+package br.com.portalmanager.platform.library.testing.cloud.aws.s3.notification.sqs;
 
 import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackConnection;
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
-import br.com.portalmanager.platform.library.testing.cloud.aws.s3sqs.annotation.AwsS3SqsNotification;
+import br.com.portalmanager.platform.library.testing.cloud.aws.s3.notification.sqs.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 

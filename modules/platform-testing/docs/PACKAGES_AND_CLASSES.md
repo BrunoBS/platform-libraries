@@ -288,9 +288,9 @@ Annotation package `testing.cloud.aws.s3.annotation`: `AwsS3` declares the bucke
 
 Annotation package `testing.cloud.aws.sqs.annotation`: `AwsSqs` declares queues and optional DLQ policies; its nested `Queue` describes each queue.
 
-### AWS S3-to-SQS integration: `testing.cloud.aws.s3sqs`
+### AWS S3-to-SQS integration: `testing.cloud.aws.s3.notification.sqs`
 
-Annotation package `testing.cloud.aws.s3sqs.annotation`: `AwsS3SqsNotification` links a declared bucket to a declared standard queue. The provider registrar validates both feature declarations and the LocalStack container provisions the notification and queue policy.
+Annotation package `testing.cloud.aws.s3.notification.sqs.annotation`: `AwsS3SqsNotification` links a declared bucket to a declared standard queue. The provider registrar validates both feature declarations and the LocalStack container provisions the notification and queue policy.
 
 ### Azure shared package: `testing.cloud.azure`
 

@@ -206,7 +206,7 @@ class OrderCloudIT {
 
 O vínculo é opt-in: sem `s3SqsNotifications`, o bucket não publica eventos. A fixture configura a permissão da fila para o bucket e registra eventos `s3:ObjectCreated:*` no SQS declarado. Notificações S3 não podem ter como destino direto uma fila FIFO.
 
-Para validar o fluxo, envie um objeto usando o `S3Client`, receba a mensagem pelo `SqsClient` e use `Records[0].s3.bucket.name` e `Records[0].s3.object.key` para ler o objeto. O teste de integração interno `cloud.aws.s3sqs.AwsS3CreatedEventIntegrationTest` cobre esse percurso com LocalStack.
+Para validar o fluxo, envie um objeto usando o `S3Client`, receba a mensagem pelo `SqsClient` e use `Records[0].s3.bucket.name` e `Records[0].s3.object.key` para ler o objeto. O teste de integração interno `cloud.aws.s3.notification.sqs.AwsS3CreatedEventIntegrationTest` cobre esse percurso com LocalStack.
 
 As dependências do LocalStack e dos SDKs SQS/S3 chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor. A mensagem do LocalStack valida o comportamento integrado do emulador; confirme o formato de evento e as permissões também contra AWS real antes de assumir paridade de produção.
 
