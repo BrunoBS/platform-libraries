@@ -13,13 +13,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class InfrastructureDependencyOptionalityTest {
 
     private static final Set<String> MYSQL_FIXTURE_DEPENDENCIES = Set.of(
+            "org.springframework.boot:spring-boot-starter-jdbc",
             "com.mysql:mysql-connector-j",
+            "org.springframework.boot:spring-boot-testcontainers",
             "org.testcontainers:testcontainers-mysql"
     );
 
     private static final Set<String> OPTIONAL_INFRASTRUCTURE = Set.of(
-            "org.springframework.boot:spring-boot-starter-jdbc",
-            "org.springframework.boot:spring-boot-testcontainers",
             "org.springframework.boot:spring-boot-starter-kafka",
             "org.testcontainers:testcontainers-kafka",
             "org.testcontainers:testcontainers-junit-jupiter"
