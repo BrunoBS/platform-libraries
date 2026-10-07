@@ -32,6 +32,20 @@ class AzureEmulatorImportRegistrarTest {
     }
 
     @Test
+    void shouldRejectBlobCreatedQueueThatIsNotDeclared() {
+        DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> registrar.registerBeanDefinitions(
+                        AnnotationMetadata.introspect(InvalidBlobNotificationTest.class), registry));
+
+        assertEquals(
+                "Azure BlobCreated notification queue must be declared in AzureServiceBus: missing-events",
+                exception.getMessage());
+    }
+
+    @Test
     void shouldRegisterTypedClientsForConfiguredAzureServices() {
         DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
 
@@ -47,6 +61,16 @@ class AzureEmulatorImportRegistrarTest {
         assertEquals(BlobServiceClient.class,
                 registry.getBeanDefinition("azureBlobServiceClient")
                         .getAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE));
+    }
+
+    @WithAzureEmulator(
+            serviceBus = @AzureServiceBus(queues =
+                    @AzureServiceBus.Queue(name = "audit-events")),
+            blobStorage = @AzureBlobStorage(
+                    containers = "audit-files",
+                    blobCreatedQueue = "missing-events")
+    )
+    private static final class InvalidBlobNotificationTest {
     }
 
     @WithAzureEmulator(

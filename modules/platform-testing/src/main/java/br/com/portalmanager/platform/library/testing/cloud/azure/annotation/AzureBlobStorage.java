@@ -10,4 +10,10 @@ import java.lang.annotation.Target;
 public @interface AzureBlobStorage {
 
     String[] containers() default {};
+
+    /**
+     * When configured, successful Blob uploads publish an Event Grid compatible
+     * BlobCreated message to this Service Bus queue in tests.
+     */
+    String blobCreatedQueue() default "";
 }

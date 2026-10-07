@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
+import com.azure.messaging.servicebus.ServiceBusClientBuilder;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import org.testcontainers.azure.ServiceBusEmulatorContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.images.builder.Transferable;
@@ -71,6 +73,14 @@ public final class AzureServiceBusContainer implements AutoCloseable {
 
     public ServiceBusEmulatorContainer emulator() {
         return emulator;
+    }
+
+    public ServiceBusSenderClient sender(String queueName) {
+        return new ServiceBusClientBuilder()
+                .connectionString(emulator.getConnectionString())
+                .sender()
+                .queueName(queueName)
+                .buildClient();
     }
 
     @Override

@@ -33,6 +33,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         AnnotationAttributes[] blobStorage = annotations(attributes.get("blobStorage"));
         requireSingle("AzureServiceBus", serviceBus);
         requireSingle("AzureBlobStorage", blobStorage);
+        String blobCreatedQueue = blobCreatedQueue(blobStorage, serviceBus);
 
         if (serviceBus.length == 0 && blobStorage.length == 0) {
             throw new IllegalArgumentException("At least one Azure service annotation must be configured");
@@ -43,7 +44,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
             SERVICE_BUS_SUPPORT.register(registry);
         }
         if (blobStorage.length == 1) {
-            registerBlobStorage(registry, blobStorage[0].getStringArray("containers"));
+            registerBlobStorage(registry, blobStorage[0].getStringArray("containers"), blobCreatedQueue);
             BLOB_STORAGE_SUPPORT.register(registry);
         }
     }
@@ -58,13 +59,39 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         registry.registerBeanDefinition(SERVICE_BUS_CONTAINER_BEAN, definition);
     }
 
-    private void registerBlobStorage(BeanDefinitionRegistry registry, String[] containers) {
+    private void registerBlobStorage(BeanDefinitionRegistry registry, String[] containers, String blobCreatedQueue) {
         String[] configuredContainers = containers.clone();
         RootBeanDefinition definition = new RootBeanDefinition(AzureBlobStorageContainer.class);
-        definition.setInstanceSupplier(() -> new AzureBlobStorageContainer(configuredContainers));
+        definition.setInstanceSupplier(() -> new AzureBlobStorageContainer(configuredContainers, blobCreatedQueue));
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(BLOB_STORAGE_BEAN, definition);
+    }
+
+    private String blobCreatedQueue(
+            AnnotationAttributes[] blobStorage,
+            AnnotationAttributes[] serviceBus) {
+        if (blobStorage.length == 0) {
+            return "";
+        }
+
+        String queueName = blobStorage[0].getString("blobCreatedQueue");
+        if (queueName == null || queueName.isBlank()) {
+            return "";
+        }
+        if (serviceBus.length == 0) {
+            throw new IllegalArgumentException(
+                    "Azure BlobCreated notifications require Azure Service Bus to be configured");
+        }
+
+        AnnotationAttributes[] queues = annotations(serviceBus[0].get("queues"));
+        for (AnnotationAttributes queue : queues) {
+            if (queueName.equals(queue.getString("name"))) {
+                return queueName;
+            }
+        }
+        throw new IllegalArgumentException(
+                "Azure BlobCreated notification queue must be declared in AzureServiceBus: " + queueName);
     }
 
     private String serviceBusConfiguration(AnnotationAttributes[] queues) {

@@ -12,10 +12,20 @@ public final class AzureBlobStorageContainer extends AzuriteContainer {
     );
 
     private final String[] containers;
+    private final String blobCreatedQueue;
 
     public AzureBlobStorageContainer(String[] containers) {
+        this(containers, "");
+    }
+
+    public AzureBlobStorageContainer(String[] containers, String blobCreatedQueue) {
         super(DEFAULT_IMAGE);
         this.containers = containers == null ? new String[0] : containers.clone();
+        this.blobCreatedQueue = blobCreatedQueue == null ? "" : blobCreatedQueue.trim();
+    }
+
+    public String blobCreatedQueue() {
+        return blobCreatedQueue;
     }
 
     @Override

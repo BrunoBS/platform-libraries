@@ -227,6 +227,22 @@ As dependências do emulador Azure, SQL Server, Service Bus e Blob Storage chega
 
 Declare somente o serviço utilizado na anotação. A fixture cria os recursos declarados e disponibiliza os clients com endpoints do emulador.
 
+Para a POC local de Blob para Service Bus, configure `blobCreatedQueue` com uma fila também declarada em `serviceBus`:
+
+```java
+@WithAzureEmulator(
+    serviceBus = @AzureServiceBus(
+        queues = @AzureServiceBus.Queue(name = "blob-events")
+    ),
+    blobStorage = @AzureBlobStorage(
+        containers = "order-files",
+        blobCreatedQueue = "blob-events"
+    )
+)
+```
+
+Uploads feitos pelo `BlobServiceClient` fornecido pela fixture publicam uma mensagem compatível com o schema Event Grid `BlobCreated` após uma gravação bem-sucedida. Essa ponte é uma emulação de teste; ela valida o upload e o consumer do Service Bus, mas não emula o serviço Event Grid, suas assinaturas, filtros ou políticas de entrega.
+
 ## Validação arquitetural opt-in
 
 Use `@PlatformArchitectureTest` uma vez em uma classe do serviço:
