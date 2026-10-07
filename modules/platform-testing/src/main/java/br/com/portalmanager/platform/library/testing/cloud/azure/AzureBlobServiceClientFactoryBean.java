@@ -51,9 +51,6 @@ public final class AzureBlobServiceClientFactoryBean implements FactoryBean<Blob
 
     @Override
     public void destroy() {
-        if (client != null) {
-            client.close();
-        }
         if (eventPolicy != null) {
             eventPolicy.close();
         }
