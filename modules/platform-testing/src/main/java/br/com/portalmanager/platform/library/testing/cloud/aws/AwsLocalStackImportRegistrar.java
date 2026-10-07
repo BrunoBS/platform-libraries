@@ -1,5 +1,9 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3;
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsSqs;
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
+
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;

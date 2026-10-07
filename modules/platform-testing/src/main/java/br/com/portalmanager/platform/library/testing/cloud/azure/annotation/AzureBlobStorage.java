@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.azure.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target({})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AwsS3 {
+public @interface AzureBlobStorage {
 
-    String[] buckets() default {};
+    String[] containers() default {};
 }

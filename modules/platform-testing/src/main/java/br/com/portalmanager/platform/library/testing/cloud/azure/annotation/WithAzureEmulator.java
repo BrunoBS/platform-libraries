@@ -1,4 +1,6 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure;
+package br.com.portalmanager.platform.library.testing.cloud.azure.annotation;
+
+import br.com.portalmanager.platform.library.testing.cloud.azure.AzureEmulatorImportRegistrar;
 
 import org.springframework.context.annotation.Import;
 

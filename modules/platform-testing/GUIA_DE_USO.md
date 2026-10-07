@@ -122,7 +122,7 @@ O teste mínimo para uma API HTTP é:
 ```java
 package com.empresa.product.integration;
 
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 @PlatformIntegrationTest
@@ -930,10 +930,10 @@ class ProductCompleteFlowIT {
 ```java
 package com.empresa.product.integration;
 
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformIntegrationTest;
-import br.com.portalmanager.platform.library.testing.database.WithDatabaseScripts;
-import br.com.portalmanager.platform.library.testing.authorization.WithMockAuthorization;
-import br.com.portalmanager.platform.library.testing.database.WithMySql;
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.database.annotation.WithDatabaseScripts;
+import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
+import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMock;
 import com.empresa.product.client.ProductClient;
 import com.empresa.product.config.ProductAuthorizationTestConfiguration;
@@ -1113,7 +1113,7 @@ Testes unitários não devem inicializar Spring, MySQL, Kafka, WireMock ou servi
 ```java
 package com.empresa.product.core;
 
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformUnitTest;
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformUnitTest;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

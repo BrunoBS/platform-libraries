@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.testing.database;
 
+import br.com.portalmanager.platform.library.testing.database.annotation.WithDatabaseScripts;
+
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;

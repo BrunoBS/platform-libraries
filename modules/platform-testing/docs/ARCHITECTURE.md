@@ -12,19 +12,19 @@ O módulo não contém regras de negócio dos serviços. Builders, factories, ce
 
 | Pacote | Responsabilidade |
 |---|---|
-| `architecture` | Anotação e regra ArchUnit que exige cobertura para customizações de classes da plataforma. |
-| `authorization` | Anotação, WireMock e builders para simular respostas do serviço de autorização. |
-| `cloud.aws` | Anotações e suporte LocalStack para SQS/S3, configuração de filas, DLQ e clients AWS de teste. |
-| `cloud.azure` | Anotações e suporte aos emuladores Azure para Service Bus e Blob Storage e seus clients. |
+| `architecture` / `architecture.annotation` | Regra ArchUnit e anotação que exige cobertura para customizações de classes da plataforma. |
+| `authorization` / `authorization.annotation` | WireMock, builders e anotação para simular respostas do serviço de autorização. |
+| `cloud.aws` / `cloud.aws.annotation` | Suporte LocalStack para SQS/S3, configuração de filas, DLQ e clients AWS de teste; anotações ficam em `annotation`. |
+| `cloud.azure` / `cloud.azure.annotation` | Suporte aos emuladores Azure para Service Bus e Blob Storage e seus clients; anotações ficam em `annotation`. |
 | `context` | Estado de teste associado à thread, como correlation ID. |
-| `database` | Anotações, container MySQL, limpeza de tabelas e execução de scripts SQL. |
+| `database` / `database.annotation` | Container MySQL, limpeza de tabelas e execução de scripts SQL; anotações ficam em `annotation`. |
 | `fixture` | Contratos e utilitários para builders, factories, cenários, relógio e IDs. |
 | `http` | Criação de requests RestAssured, clients base e customização de requests. |
 | `http.response` | Assertions fluentes para respostas HTTP. |
-| `kafka` | Anotação e container Kafka conectado ao contexto Spring de teste. |
-| `lifecycle` | Anotações e extensões JUnit para inicialização, isolamento e métricas dos testes. |
+| `kafka` / `kafka.annotation` | Container Kafka conectado ao contexto Spring de teste; anotações ficam em `annotation`. |
+| `lifecycle` / `lifecycle.annotation` | Extensões JUnit para inicialização, isolamento e métricas dos testes; anotações ficam em `annotation`. |
 
-As anotações ficam no pacote do contexto que ativam; `annotation` não é um pacote público separado. `PlatformIntegrationTest`/`PlatformUnitTest` ficam em `lifecycle`, enquanto as anotações de infraestrutura ficam em seus contextos específicos.
+Cada contexto mantém suas anotações em um subpacote `annotation`, separado das configurações e extensões: `architecture.annotation`, `authorization.annotation`, `cloud.aws.annotation`, `cloud.azure.annotation`, `database.annotation`, `kafka.annotation` e `lifecycle.annotation`. HTTP não possui anotações próprias.
 
 ## Fluxo de um teste de integração
 

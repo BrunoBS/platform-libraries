@@ -1,4 +1,7 @@
-package br.com.portalmanager.platform.library.testing.lifecycle;
+package br.com.portalmanager.platform.library.testing.lifecycle.annotation;
+
+import br.com.portalmanager.platform.library.testing.lifecycle.PlatformIntegrationExtension;
+import br.com.portalmanager.platform.library.testing.lifecycle.TestPerformanceExtension;
 
 import br.com.portalmanager.platform.library.testing.http.PlatformHttpTestConfiguration;
 import org.junit.jupiter.api.extension.ExtendWith;

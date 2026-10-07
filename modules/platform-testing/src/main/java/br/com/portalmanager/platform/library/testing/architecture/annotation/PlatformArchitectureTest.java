@@ -1,4 +1,6 @@
-package br.com.portalmanager.platform.library.testing.architecture;
+package br.com.portalmanager.platform.library.testing.architecture.annotation;
+
+import br.com.portalmanager.platform.library.testing.architecture.PlatformArchitectureExtension;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 

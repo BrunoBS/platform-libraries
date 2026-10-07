@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.testing.database;
 
+import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
+
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;

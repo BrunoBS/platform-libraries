@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.azure.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target({})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AwsSqs {
+public @interface AzureServiceBus {
 
     Queue[] queues() default {};
 
@@ -16,13 +16,8 @@ public @interface AwsSqs {
     @interface Queue {
         String name();
 
-        boolean deadLetterEnabled() default false;
+        int maxDeliveryCount() default 3;
 
-        /**
-         * Empty uses the standard name {@code <queue-name>-dlq}.
-         */
-        String deadLetterQueue() default "";
-
-        int maxReceiveCount() default 5;
+        boolean sessionsEnabled() default false;
     }
 }

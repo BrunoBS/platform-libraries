@@ -1,4 +1,8 @@
-package br.com.portalmanager.platform.library.testing.authorization;
+package br.com.portalmanager.platform.library.testing.authorization.annotation;
+
+import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockExtension;
+import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockResult;
+import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockTestConfiguration;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.Import;

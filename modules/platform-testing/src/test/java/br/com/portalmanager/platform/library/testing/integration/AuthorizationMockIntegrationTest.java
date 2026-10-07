@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.integration;
 
-import br.com.portalmanager.platform.library.testing.authorization.WithMockAuthorization;
+import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMock;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationSessionCustomizer;
 import org.junit.jupiter.api.Test;

@@ -30,7 +30,7 @@ A biblioteca mantém Datafaker transitivamente disponível para consumidores que
 `@PlatformIntegrationTest` inicializa Spring Boot com servidor HTTP em porta aleatória e profile `test`:
 
 ```java
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 @PlatformIntegrationTest
@@ -49,7 +49,7 @@ Configure valores específicos do profile em `src/test/resources/application-tes
 Use `@PlatformUnitTest` em testes que não precisam inicializar Spring:
 
 ```java
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformUnitTest;
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformUnitTest;
 import org.junit.jupiter.api.Test;
 
 @PlatformUnitTest
@@ -68,8 +68,8 @@ A anotação habilita Mockito e a extensão de isolamento do módulo. Mantenha o
 `@WithMySql` é opt-in e inicializa o MySQL pelo Testcontainers. A limpeza padrão ocorre antes de cada método e preserva `flyway_schema_history`:
 
 ```java
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformIntegrationTest;
-import br.com.portalmanager.platform.library.testing.database.WithMySql;
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
 
 @PlatformIntegrationTest
 @WithMySql

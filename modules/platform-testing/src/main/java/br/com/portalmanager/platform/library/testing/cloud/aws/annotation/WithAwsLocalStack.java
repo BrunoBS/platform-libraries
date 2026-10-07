@@ -1,4 +1,6 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.aws.annotation;
+
+import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackImportRegistrar;
 
 import org.springframework.context.annotation.Import;
 

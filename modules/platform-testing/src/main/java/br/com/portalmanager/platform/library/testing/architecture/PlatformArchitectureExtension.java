@@ -1,5 +1,8 @@
 package br.com.portalmanager.platform.library.testing.architecture;
 
+import br.com.portalmanager.platform.library.testing.architecture.annotation.CoversClasses;
+import br.com.portalmanager.platform.library.testing.architecture.annotation.PlatformArchitectureTest;
+
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
