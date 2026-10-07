@@ -6,5 +6,5 @@ import tools.jackson.databind.JsonNode;
 @FunctionalInterface
 public interface AuditBeforeSnapshotProvider {
 
-    JsonNode capture(String resourceIdentifier);
+    JsonNode capture(Object[] sourceArguments);
 }
