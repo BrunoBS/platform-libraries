@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.audit.outbox;
 
 import br.com.portalmanager.platform.library.audit.model.AuditOutboxStatus;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -9,10 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ObjectNode;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -28,13 +26,13 @@ public abstract class AuditOutboxEntity {
     @Column(name = "identifier", nullable = false, length = 36, updatable = false)
     private String identifier;
 
-    @JdbcTypeCode(SqlTypes.JSON)
+    @Convert(converter = JsonNodeAttributeConverter.class)
     @Column(name = "payload", nullable = false, columnDefinition = "json")
-    private ObjectNode payload;
+    private JsonNode payload;
 
-    @JdbcTypeCode(SqlTypes.JSON)
+    @Convert(converter = JsonNodeAttributeConverter.class)
     @Column(name = "metadata", nullable = false, columnDefinition = "json")
-    private ObjectNode metadata;
+    private JsonNode metadata;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
@@ -61,7 +59,7 @@ public abstract class AuditOutboxEntity {
     protected AuditOutboxEntity() {
     }
 
-    void prepareForPersistence(ObjectNode payload, ObjectNode metadata) {
+    void prepareForPersistence(JsonNode payload, JsonNode metadata) {
         this.identifier = UUID.randomUUID().toString();
         this.payload = payload;
         this.metadata = metadata;
