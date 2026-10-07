@@ -89,7 +89,7 @@ platform-starter
 platform-schema-validation -> platform-messaging
 ```
 
-`platform-testing` possui integrações opcionais e não deve introduzir JDBC/MySQL/Kafka/Testcontainers transitivamente quando essas capacidades não forem declaradas.
+`platform-testing` mantém fixtures opt-in para MySQL, Kafka e cloud, com as dependências dos containers fornecidas transitivamente. O starter JDBC é opcional para não ativar auto-configuração de `DataSource` em consumidores sem banco.
 
 ## Consumo alvo
 

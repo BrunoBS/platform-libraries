@@ -23,7 +23,7 @@ Declare a biblioteca com escopo `test`. Quando o BOM estiver importado, não inf
 
 Sem o BOM, declare a versão alinhada à release de `platform-libraries`.
 
-A biblioteca mantém transitivamente disponíveis as dependências necessárias para as fixtures de MySQL, Kafka, AWS e Azure. O consumidor declara apenas `platform-testing` com escopo `test`; os recursos continuam sendo ativados pelas anotações de cada teste.
+Kafka, AWS, Azure e as dependências do container MySQL são fornecidos transitivamente. O consumidor declara apenas `platform-testing` com escopo `test`; os recursos continuam opt-in pelas anotações. O starter JDBC permanece opcional para não ativar a auto-configuração de `DataSource` em serviços sem banco. Serviços que já usam JPA normalmente já recebem JDBC pela dependência de persistência.
 
 ## Teste de integração básico
 

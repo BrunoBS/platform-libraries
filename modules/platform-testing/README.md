@@ -19,7 +19,7 @@ O `platform-testing` reúne convenções e fixtures reutilizáveis para testes u
 - utilitários para requests HTTP, respostas, builders, factories, cenários, relógio e IDs;
 - regras arquiteturais para validar testes focados.
 
-Kafka e serviços cloud são opt-in pelas anotações correspondentes. As dependências necessárias já são fornecidas transitivamente por `platform-testing`.
+Kafka, serviços cloud e containers de MySQL são opt-in pelas anotações correspondentes, com dependências fornecidas transitivamente por `platform-testing`. O starter JDBC é opcional para não ativar `DataSource` em serviços sem banco; aplicações com JPA já o recebem pela dependência de persistência.
 
 ## Pré-requisitos
 

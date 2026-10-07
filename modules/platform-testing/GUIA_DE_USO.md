@@ -401,23 +401,28 @@ Importe a configuração no teste:
 
 ## 10. Usando `BaseClient`
 
-O uso de herança é opcional. Caso o projeto prefira um client base, utilize:
+O uso de herança é opcional. Caso o projeto prefira `BaseClient`, injete o `JsonMapper` configurado pelo Spring Boot; o helper `json(...)` usa as mesmas regras da aplicação:
 
 ```java
+import tools.jackson.databind.json.JsonMapper;
+
 @Component
 public final class ProductClient extends BaseClient {
 
     private static final String BASE_PATH = "/api/v1/products";
 
-    public ProductClient(PlatformRequestSpecificationFactory requests) {
-        super(requests);
+    public ProductClient(
+            PlatformRequestSpecificationFactory requests,
+            JsonMapper jsonMapper
+    ) {
+        super(requests, jsonMapper);
     }
 
     public ProductResponse create(CreateProductRequest body) {
         return new ProductResponse(
             RestAssured.given()
                 .spec(authorizedRequest())
-                .body(body)
+                .body(json(body))
                 .when()
                 .post(BASE_PATH)
                 .then()

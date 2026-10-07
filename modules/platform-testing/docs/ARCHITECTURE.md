@@ -92,7 +92,7 @@ As dependências de Kafka, AWS e Azure são incluídas no artefato sem marcaçã
 
 `PlatformRequestSpecificationFactory` cria uma especificação RestAssured nova para cada request, com porta local, JSON, correlation ID e customizadores registrados pelo consumidor. A variante autorizada acrescenta os headers e token descritos em `AuthorizationRequestData`.
 
-`BaseClient` é um helper opcional para encapsular requests e serialização JSON com Jackson 3. `BaseResponse` oferece assertions comuns de status, campos e extração; o serviço pode estendê-lo para criar uma API fluente com vocabulário de domínio.
+`BaseClient` é um helper opcional para encapsular requests e serialização JSON com o `JsonMapper` configurado pela aplicação Spring Boot. `BaseResponse` oferece assertions comuns de status, campos e extração; o serviço pode estendê-lo para criar uma API fluente com vocabulário de domínio.
 
 `TestContext` mantém o correlation ID do teste na thread atual. `PlatformIntegrationExtension` isola esse valor entre métodos para evitar vazamento de contexto.
 
@@ -123,8 +123,9 @@ A regra é opt-in e não é executada automaticamente para todos os serviços.
 ## Dependências e fronteiras
 
 - A dependência de `platform-testing` deve ser declarada pelo consumidor com escopo `test`.
-- Dependências de infraestrutura cloud e Kafka são fornecidas transitivamente por `platform-testing`; o consumidor declara apenas essa biblioteca com escopo `test`.
-- MySQL, RestAssured, WireMock, ArchUnit e as extensões Spring/JUnit implementam as capacidades descritas pelas APIs públicas.
+- Dependências de infraestrutura cloud, Kafka e os containers de MySQL são fornecidas transitivamente por `platform-testing`; o consumidor declara apenas essa biblioteca com escopo `test`.
+- `spring-boot-starter-jdbc` permanece opcional para evitar ativar `DataSource` em aplicações sem banco. Serviços com JPA normalmente já recebem JDBC por sua dependência de persistência.
+- RestAssured, WireMock, ArchUnit e as extensões Spring/JUnit implementam as capacidades descritas pelas APIs públicas.
 - O módulo expõe Datafaker para compatibilidade com consumidores que já o utilizam em seus testes.
 
 Os nomes dos pacotes públicos são parte da API Java. A organização atual está documentada em [ESTRUTURA_DE_PACOTES.md](../ESTRUTURA_DE_PACOTES.md); mudanças nesses imports exigem migração dos consumidores.

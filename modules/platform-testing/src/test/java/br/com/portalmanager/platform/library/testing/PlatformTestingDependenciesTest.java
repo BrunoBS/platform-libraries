@@ -17,7 +17,6 @@ class PlatformTestingDependenciesTest {
             "org.springframework.boot:spring-boot-starter-web",
             "org.springframework.boot:spring-boot-starter-kafka",
             "org.testcontainers:testcontainers-kafka",
-            "org.testcontainers:testcontainers-junit-jupiter",
             "org.testcontainers:testcontainers-localstack",
             "org.testcontainers:testcontainers-azure",
             "org.testcontainers:testcontainers-mssqlserver",

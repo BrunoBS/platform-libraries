@@ -1,15 +1,13 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
-import br.com.portalmanager.platform.library.testing.cloud.CloudTestContainer;
 import org.testcontainers.azure.ServiceBusEmulatorContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.mssqlserver.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.Map;
 
-public final class AzureServiceBusContainer implements CloudTestContainer, AutoCloseable {
+public final class AzureServiceBusContainer implements AutoCloseable {
 
     public static final DockerImageName DEFAULT_SQL_SERVER_IMAGE = DockerImageName.parse(
             "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04"
@@ -73,11 +71,6 @@ public final class AzureServiceBusContainer implements CloudTestContainer, AutoC
 
     public ServiceBusEmulatorContainer emulator() {
         return emulator;
-    }
-
-    @Override
-    public Map<String, String> connectionProperties() {
-        return Map.of("connection-string", emulator.getConnectionString());
     }
 
     @Override

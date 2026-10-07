@@ -156,41 +156,30 @@ Não transforme a Factory em um segundo Builder.
 
 ## 7. Client
 
-O Client esconde os detalhes do HTTP:
+O Client esconde os detalhes do HTTP. Para começar, prefira composição com `PlatformRequestSpecificationFactory`; `BaseClient` é um helper opcional quando reduzir repetição.
 
 ```java
 @Component
-public final class ProductClient extends BaseClient {
+public final class ProductClient {
 
     private static final String BASE_PATH = "/api/v1/products";
+    private final PlatformRequestSpecificationFactory requests;
 
-    public ProductClient(
-            PlatformRequestSpecificationFactory requests
-    ) {
-        super(requests);
+    public ProductClient(PlatformRequestSpecificationFactory requests) {
+        this.requests = requests;
     }
 
     public ProductResponse create(ProductDTO request) {
-        return response(
-                given()
-                        .spec(authorizedRequest())
-                        .body(json(request))
-                        .when()
-                        .post(BASE_PATH)
-                        .then(),
-                ProductResponse::new
-        );
+        return new ProductResponse(RestAssured.given()
+                .spec(requests.createAuthorized())
+                .body(request)
+                .when().post(BASE_PATH).then());
     }
 
     public ProductResponse findById(Long id) {
-        return response(
-                given()
-                        .spec(authorizedRequest())
-                        .when()
-                        .get(BASE_PATH + "/{id}", id)
-                        .then(),
-                ProductResponse::new
-        );
+        return new ProductResponse(RestAssured.given()
+                .spec(requests.createAuthorized())
+                .when().get(BASE_PATH + "/{id}", id).then());
     }
 }
 ```
