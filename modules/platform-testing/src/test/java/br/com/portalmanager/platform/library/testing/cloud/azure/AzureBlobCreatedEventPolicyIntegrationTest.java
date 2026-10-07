@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -109,9 +108,9 @@ class AzureBlobCreatedEventPolicyIntegrationTest {
     }
 
     private Set<String> fieldNames(JsonNode node) {
-        Set<String> names = new HashSet<>();
-        node.fieldNames().forEachRemaining(names::add);
-        return names;
+        return node.properties().stream()
+                .map(java.util.Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
     @Configuration(proxyBeanMethods = false)
