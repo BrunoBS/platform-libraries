@@ -42,7 +42,7 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
 
         Set<String> availableTestNames = StreamSupport.stream(classes.spliterator(), false)
                 .filter(this::isTestClass)
-                .map(JavaClass::getSimpleName)
+                .map(JavaClass::getName)
                 .collect(
                         LinkedHashSet::new,
                         LinkedHashSet::add,
@@ -224,7 +224,7 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
     ) {
         String packageName = type.getPackageName();
         return Arrays.stream(observedBasePackages)
-                .anyMatch(packageName::startsWith);
+                .anyMatch(basePackage -> packageMatches(packageName, basePackage));
     }
 
     private Set<Class<?>> findExplicitCoverage(JavaClasses classes) {
@@ -243,14 +243,25 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
         return Set.copyOf(covered);
     }
 
-    private boolean hasConventionBasedTest(
-            Class<?> productionType,
+    static boolean packageMatches(String packageName, String basePackage) {
+        return packageName.equals(basePackage)
+                || packageName.startsWith(basePackage + ".");
+    }
+
+    static boolean hasConventionBasedTest(
+            String productionClassName,
             Set<String> availableTestNames
     ) {
-        String simpleName = productionType.getSimpleName();
-        return availableTestNames.contains(simpleName + "Test")
-                || availableTestNames.contains(simpleName + "IntegrationTest")
-                || availableTestNames.contains(simpleName + "IT");
+        int packageSeparator = productionClassName.lastIndexOf('.');
+        String packageName = packageSeparator < 0 ? "" : productionClassName.substring(0, packageSeparator);
+        String simpleName = productionClassName.substring(packageSeparator + 1);
+        return Set.of(
+                        simpleName + "Test",
+                        simpleName + "IntegrationTest",
+                        simpleName + "IT"
+                ).stream()
+                .map(testName -> packageName.isEmpty() ? testName : packageName + "." + testName)
+                .anyMatch(availableTestNames::contains);
     }
 
     private boolean isTestClass(JavaClass javaClass) {
