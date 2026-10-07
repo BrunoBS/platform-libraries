@@ -12,6 +12,7 @@ import jakarta.persistence.PrePersist;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -29,11 +30,11 @@ public abstract class AuditOutboxEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload", nullable = false, columnDefinition = "json")
-    private JsonNode payload;
+    private ObjectNode payload;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata", nullable = false, columnDefinition = "json")
-    private JsonNode metadata;
+    private ObjectNode metadata;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
@@ -60,7 +61,7 @@ public abstract class AuditOutboxEntity {
     protected AuditOutboxEntity() {
     }
 
-    void prepareForPersistence(JsonNode payload, JsonNode metadata) {
+    void prepareForPersistence(ObjectNode payload, ObjectNode metadata) {
         this.identifier = UUID.randomUUID().toString();
         this.payload = payload;
         this.metadata = metadata;
