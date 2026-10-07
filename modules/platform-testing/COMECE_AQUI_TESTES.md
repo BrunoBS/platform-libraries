@@ -226,7 +226,7 @@ if (typeName != null) {
 
 Um `null` enviado como `?typeName=` pode mudar a semântica da consulta.
 
-## 7. Scenario
+## 8. Scenario
 
 Scenario prepara pré-condições.
 
@@ -249,7 +249,7 @@ Se você está testando criação de Product, a criação deve continuar visíve
 productClient.create(...);
 ```
 
-## 8. Primeiro teste
+## 9. Primeiro teste
 
 ```java
 @DisplayName("Integração - Product")
@@ -290,7 +290,7 @@ class ProductIntegrationTest
 }
 ```
 
-## 9. Ordem recomendada para criar uma suíte
+## 10. Ordem recomendada para criar uma suíte
 
 Quando uma feature ainda não possui testes:
 
@@ -311,7 +311,7 @@ Quando uma feature ainda não possui testes:
 14. Rode mvn verify
 ```
 
-## 10. Checklist para CRUD
+## 11. Checklist para CRUD
 
 ### CREATE
 
@@ -361,7 +361,7 @@ Quando uma feature ainda não possui testes:
 - [ ] OWNER, se houver bypass;
 - [ ] update/delete com nível correto.
 
-## 11. Limites de validação
+## 12. Limites de validação
 
 Não teste somente `null`.
 
@@ -376,7 +376,7 @@ Para uma regra `name = 3..100`:
 
 Isso protege as bordas reais da regra.
 
-## 12. Categorias de testes
+## 13. Categorias de testes
 
 Use `@DisplayName` como documentação executável:
 
@@ -400,7 +400,7 @@ Exemplo:
 
 O relatório Maven passa a mostrar claramente o que a suíte protege.
 
-## 13. Teste invariantes do domínio
+## 14. Teste invariantes do domínio
 
 Se o backend gera algo automaticamente, crie teste para isso.
 
@@ -424,7 +424,7 @@ void deveGerarTagsDefault() {
 
 Não busque apenas cobertura de linhas. Proteja regras importantes.
 
-## 14. Autorização
+## 15. Autorização
 
 Permitido:
 
@@ -455,7 +455,7 @@ authMock.allow(session ->
         session.groups("PM5_OWNER"));
 ```
 
-## 15. O que não deve ir para platform-testing
+## 16. O que não deve ir para platform-testing
 
 A lib fornece infraestrutura.
 
@@ -472,7 +472,7 @@ grupos específicos de um serviço
 
 Isso pertence ao microsserviço.
 
-## 16. Evite abstração excessiva
+## 17. Evite abstração excessiva
 
 Bom:
 
@@ -495,7 +495,7 @@ productScenario()
 
 O teste precisa continuar fácil de depurar.
 
-## 17. Como saber se a suíte está boa
+## 18. Como saber se a suíte está boa
 
 Pergunte:
 
@@ -511,7 +511,7 @@ Exemplos:
 
 Se essas mudanças quebram testes, a suíte está protegendo comportamento, não apenas linhas.
 
-## 18. Resumo rápido
+## 19. Resumo rápido
 
 | Pergunta | Use |
 |---|---|
@@ -523,7 +523,7 @@ Se essas mudanças quebram testes, a suíte está protegendo comportamento, não
 | Onde fica a regra testada? | IntegrationTest |
 | Quem sobe banco/Kafka/auth? | platform-testing |
 
-## 19. Projeto de referência
+## 20. Projeto de referência
 
 O `account-api` é o projeto piloto de referência.
 
