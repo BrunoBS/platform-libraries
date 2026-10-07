@@ -185,7 +185,7 @@ Use `create()` para chamadas sem headers de autorização da plataforma. Use `cr
 
 ## AWS LocalStack
 
-A fixture permite habilitar SQS e/ou S3 por classe:
+Declare as filas e os buckets em suas anotações próprias. Quando precisar publicar eventos de criação do S3 no SQS, declare a relação com a terceira anotação:
 
 ```java
 @PlatformIntegrationTest
@@ -194,19 +194,17 @@ A fixture permite habilitar SQS e/ou S3 por classe:
         @AwsSqs.Queue(name = "orders"),
         @AwsSqs.Queue(name = "order-events")
     }),
-    s3 = @AwsS3(
-        buckets = "order-files",
-        notifications = @AwsS3.QueueNotification(
-            bucket = "order-files",
-            queue = "order-events"
-        )
+    s3 = @AwsS3(buckets = "order-files"),
+    s3SqsNotifications = @AwsS3SqsNotification(
+        bucket = "order-files",
+        queue = "order-events"
     )
 )
 class OrderCloudIT {
 }
 ```
 
-O vínculo é opt-in: sem `notifications`, o bucket não publica eventos. A fixture configura a permissão da fila para o bucket e registra eventos `s3:ObjectCreated:*` no SQS declarado. Notificações S3 não podem ter como destino direto uma fila FIFO.
+O vínculo é opt-in: sem `s3SqsNotifications`, o bucket não publica eventos. A fixture configura a permissão da fila para o bucket e registra eventos `s3:ObjectCreated:*` no SQS declarado. Notificações S3 não podem ter como destino direto uma fila FIFO.
 
 Para validar o fluxo, envie um objeto usando o `S3Client`, receba a mensagem pelo `SqsClient` e use `Records[0].s3.bucket.name` e `Records[0].s3.object.key` para ler o objeto. O teste de integração interno `AwsS3CreatedEventIntegrationTest` cobre esse percurso com LocalStack.
 

@@ -19,4 +19,6 @@ public @interface WithAwsLocalStack {
     AwsSqs[] sqs() default {};
 
     AwsS3[] s3() default {};
+
+    AwsS3SqsNotification[] s3SqsNotifications() default {};
 }

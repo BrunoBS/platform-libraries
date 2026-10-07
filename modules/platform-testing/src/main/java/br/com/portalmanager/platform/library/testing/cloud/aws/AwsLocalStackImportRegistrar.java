@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3;
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 
@@ -31,6 +32,7 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
 
         AnnotationAttributes[] sqs = annotations(attributes.get("sqs"));
         AnnotationAttributes[] s3 = annotations(attributes.get("s3"));
+        AnnotationAttributes[] s3SqsNotifications = annotations(attributes.get("s3SqsNotifications"));
         requireSingle("AwsSqs", sqs);
         requireSingle("AwsS3", s3);
 
@@ -49,7 +51,9 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         if (s3.length == 1) {
             services.add(AwsService.S3);
             buckets = s3[0].getStringArray("buckets");
-            bucketNotifications = s3Notifications(s3[0], buckets, queues);
+        }
+        if (s3SqsNotifications.length > 0) {
+            bucketNotifications = s3Notifications(s3SqsNotifications, buckets, queues);
         }
         if (services.isEmpty()) {
             throw new IllegalArgumentException("At least one AWS service annotation must be configured");
@@ -95,8 +99,7 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         return new SqsConfiguration(queues.toArray(String[]::new), redrivePolicies.toArray(String[][]::new));
     }
 
-    private String[][] s3Notifications(AnnotationAttributes s3, String[] buckets, String[] queues) {
-        AnnotationAttributes[] definitions = annotations(s3.get("notifications"));
+    private String[][] s3Notifications(AnnotationAttributes[] definitions, String[] buckets, String[] queues) {
         List<String[]> notifications = new ArrayList<>();
         for (AnnotationAttributes notification : definitions) {
             String bucket = notification.getString("bucket");

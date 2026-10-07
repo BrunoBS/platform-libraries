@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3;
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 
@@ -97,9 +98,8 @@ class AwsS3CreatedEventIntegrationTest {
     @Configuration(proxyBeanMethods = false)
     @WithAwsLocalStack(
             sqs = @AwsSqs(queues = @AwsSqs.Queue(name = QUEUE)),
-            s3 = @AwsS3(
-                    buckets = BUCKET,
-                    notifications = @AwsS3.QueueNotification(bucket = BUCKET, queue = QUEUE))
+            s3 = @AwsS3(buckets = BUCKET),
+            s3SqsNotifications = @AwsS3SqsNotification(bucket = BUCKET, queue = QUEUE)
     )
     static class AwsLocalStackConfiguration {
     }

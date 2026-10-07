@@ -5,9 +5,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Declares an S3 bucket notification that sends object-created events to an SQS queue.
+ * This annotation is nested under {@link WithAwsLocalStack} and does not apply to a test class directly.
+ */
 @Target({})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AwsS3 {
+public @interface AwsS3SqsNotification {
 
-    String[] buckets() default {};
+    String bucket();
+
+    String queue();
 }
