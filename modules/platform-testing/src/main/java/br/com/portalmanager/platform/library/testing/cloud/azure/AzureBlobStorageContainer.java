@@ -20,6 +20,8 @@ public final class AzureBlobStorageContainer extends AzuriteContainer {
 
     public AzureBlobStorageContainer(String[] containers, String blobCreatedQueue) {
         super(DEFAULT_IMAGE);
+        // The Azure SDK may send newer API versions than the pinned Azurite image recognizes.
+        withCommandOptions("--skipApiVersionCheck");
         this.containers = containers == null ? new String[0] : containers.clone();
         this.blobCreatedQueue = blobCreatedQueue == null ? "" : blobCreatedQueue.trim();
     }
