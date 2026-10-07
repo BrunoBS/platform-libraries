@@ -135,11 +135,10 @@ final class AzureBlobCreatedEventPolicy implements HttpPipelinePolicy, AutoClose
             data.put("contentLength", contentLength);
         }
         data.put("blobType", "BlockBlob");
+        data.put("accessTier", "Default");
         data.put("url", upload.url());
         data.put("sequencer", "%032x".formatted(sequencer.incrementAndGet()));
-        if (requestId != null) {
-            data.put("storageDiagnostics", Map.of("batchId", requestId));
-        }
+        data.put("storageDiagnostics", Map.of("batchId", UUID.randomUUID().toString()));
 
         String subject = "/blobServices/default/containers/" + upload.container()
                 + "/blobs/" + upload.blob();

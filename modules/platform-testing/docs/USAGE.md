@@ -241,7 +241,9 @@ Para a POC local de Blob para Service Bus, configure `blobCreatedQueue` com uma 
 )
 ```
 
-Uploads feitos pelo `BlobServiceClient` fornecido pela fixture publicam uma mensagem compatível com o schema Event Grid `BlobCreated` após uma gravação bem-sucedida. Essa ponte é uma emulação de teste; ela valida o upload e o consumer do Service Bus, mas não emula o serviço Event Grid, suas assinaturas, filtros ou políticas de entrega.
+Uploads feitos pelo `BlobServiceClient` fornecido pela fixture publicam uma mensagem no formato Event Grid Schema após uma gravação bem-sucedida. O teste de integração compara a estrutura com o exemplo de BlobCreated documentado pela Microsoft em `src/test/resources/azure/blob-created-event-grid-schema.json`, confere as propriedades de entrega do Service Bus e lê o blob pela URL do evento.
+
+Esse exemplo documenta o formato, mas não é uma captura da assinatura Azure usada em produção. A ponte continua sendo uma emulação de teste: ela não emula o Event Grid real, assinaturas, filtros ou políticas de entrega. Para confirmar paridade exata com produção, compare o teste com uma mensagem real capturada do Service Bus Azure.
 
 ## Validação arquitetural opt-in
 
