@@ -779,7 +779,7 @@ Não é necessário criar ou herdar um helper de autorização. O microsserviço
 authorizationMock.verifyCalled();
 authorizationMock.verifyCalled(1);
 authorizationMock.verifyNotCalled();
-authorizationMock.verifyCalledWithWorkspace("account-123");
+authorizationMock.verifyCalledWithWorkspace("workspace-123");
 authorizationMock.verifyCalledWithEnvironment("DEV");
 authorizationMock.verifyCalledWithApplication("product-api");
 authorizationMock.verifyCalledWithPolicy("ADMIN");
@@ -969,7 +969,7 @@ class ProductControllerIT {
             .expect("active", true);
 
         authorizationMock.verifyCalled();
-        authorizationMock.verifyCalledWithWorkspace("account-123");
+        authorizationMock.verifyCalledWithWorkspace("workspace-123");
         authorizationMock.verifyCalledWithApplication("product-api");
     }
 
