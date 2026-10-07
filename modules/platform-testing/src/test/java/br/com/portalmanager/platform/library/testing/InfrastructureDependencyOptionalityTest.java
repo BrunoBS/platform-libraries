@@ -12,24 +12,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InfrastructureDependencyOptionalityTest {
 
-    private static final Set<String> OPTIONAL_INFRASTRUCTURE = Set.of(
-            "org.springframework.boot:spring-boot-starter-jdbc",
+    private static final Set<String> MYSQL_FIXTURE_DEPENDENCIES = Set.of(
             "com.mysql:mysql-connector-j",
             "org.springframework.boot:spring-boot-testcontainers",
+            "org.testcontainers:testcontainers-mysql"
+    );
+
+    private static final Set<String> OPTIONAL_INFRASTRUCTURE = Set.of(
+            "org.springframework.boot:spring-boot-starter-jdbc",
             "org.springframework.boot:spring-boot-starter-kafka",
-            "org.testcontainers:testcontainers-mysql",
             "org.testcontainers:testcontainers-kafka",
             "org.testcontainers:testcontainers-junit-jupiter"
     );
 
     @Test
-    void shouldKeepInfrastructureDependenciesOptionalForConsumers() throws Exception {
+    void shouldKeepOptionalInfrastructureOptionalAndExposeMySqlFixtureDependencies() throws Exception {
         var document = DocumentBuilderFactory.newInstance()
                 .newDocumentBuilder()
                 .parse(Path.of("pom.xml").toFile());
 
         var dependencies = document.getElementsByTagName("dependency");
-        var verified = new HashSet<String>();
+        var verifiedOptional = new HashSet<String>();
+        var verifiedMySqlFixture = new HashSet<String>();
 
         for (int i = 0; i < dependencies.getLength(); i++) {
             var dependency = (Element) dependencies.item(i);
@@ -38,11 +42,18 @@ class InfrastructureDependencyOptionalityTest {
             if (OPTIONAL_INFRASTRUCTURE.contains(coordinate)) {
                 assertEquals("true", childText(dependency, "optional"),
                         () -> coordinate + " must remain optional");
-                verified.add(coordinate);
+                verifiedOptional.add(coordinate);
+            }
+
+            if (MYSQL_FIXTURE_DEPENDENCIES.contains(coordinate)) {
+                assertEquals("", childText(dependency, "optional"),
+                        () -> coordinate + " must be available to consumers of the MySQL fixture");
+                verifiedMySqlFixture.add(coordinate);
             }
         }
 
-        assertEquals(OPTIONAL_INFRASTRUCTURE, verified);
+        assertEquals(OPTIONAL_INFRASTRUCTURE, verifiedOptional);
+        assertEquals(MYSQL_FIXTURE_DEPENDENCIES, verifiedMySqlFixture);
     }
 
     private static String childText(Element element, String tagName) {

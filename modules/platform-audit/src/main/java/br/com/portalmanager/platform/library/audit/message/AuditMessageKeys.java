@@ -4,17 +4,13 @@ public final class AuditMessageKeys {
 
     private static final String PREFIX = "audit.";
 
-    public static final String MESSAGE_QUEUE_DESTINATION_REQUIRED = PREFIX + "destination.required";
-    public static final String PUBLISH_FAILED = PREFIX + "publish.failed";
-    public static final String MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED = PREFIX + "destination.not-configured";
     public static final String USER_CONTEXT_MISSING = PREFIX + "context.user.missing";
     public static final String RESOURCE_IDENTIFIER_MISSING = PREFIX + "resource.identifier.missing";
-    public static final String FIELD_NOT_ALLOWED = PREFIX + "field.not-allowed";
-    public static final String FIELD_RESOLUTION_FAILED = PREFIX + "field.resolve-failed";
-    public static final String RESOURCE_ACTION_REQUIRED = PREFIX + "resource-action.required";
-    public static final String EVENT_TOO_LARGE = PREFIX + "event.too-large";
+    public static final String EVENT_DEFINITION_REQUIRED = PREFIX + "event-definition.required";
+    public static final String SNAPSHOT_REQUIRED = PREFIX + "snapshot.required";
     public static final String EVENT_SERIALIZATION_FAILED = PREFIX + "event.serialization-failed";
-    public static final String EVENT_COUNT_EXCEEDED = PREFIX + "events-per-invocation.exceeded";
+    public static final String TRANSACTION_REQUIRED = PREFIX + "transaction.required";
+    public static final String BEFORE_SNAPSHOT_PROVIDER_REQUIRED = PREFIX + "before-snapshot.provider-required";
 
     private AuditMessageKeys() {
     }

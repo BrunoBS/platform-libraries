@@ -1,1 +1,43 @@
-<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><parent><groupId>br.com.portalmanager.platform.library</groupId><artifactId>platform-parent</artifactId><version>1.0.0</version><relativePath>../../platform-parent/pom.xml</relativePath></parent><artifactId>platform-starter</artifactId><version>${revision}</version><packaging>jar</packaging><name>platform-starter</name><dependencies><dependency><groupId>br.com.portalmanager.platform.library</groupId><artifactId>platform-observability</artifactId><version>${project.version}</version></dependency><dependency><groupId>br.com.portalmanager.platform.library</groupId><artifactId>platform-messaging</artifactId><version>${project.version}</version></dependency><dependency><groupId>br.com.portalmanager.platform.library</groupId><artifactId>platform-authorization</artifactId><version>${project.version}</version></dependency><dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency></dependencies><build><plugins><plugin><groupId>org.codehaus.mojo</groupId><artifactId>flatten-maven-plugin</artifactId></plugin></plugins></build></project>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>br.com.portalmanager.platform.library</groupId>
+        <artifactId>platform-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../platform-parent/pom.xml</relativePath>
+    </parent>
+    <artifactId>platform-starter</artifactId>
+    <packaging>jar</packaging>
+    <name>platform-starter</name>
+    <dependencies>
+        <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-observability</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-messaging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-authorization</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

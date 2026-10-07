@@ -4,22 +4,6 @@ import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefini
 
 public final class AuditTechnicalErrors {
 
-    public static final PlatformErrorDefinition MESSAGE_QUEUE_DESTINATION_REQUIRED =
-            new PlatformErrorDefinition(
-                    "PLT-AUD-001",
-                    "platform.audit.destination is required",
-                    "Configure platform.audit.destination with a logical platform-message-queue destination.",
-                    500
-            );
-
-    public static final PlatformErrorDefinition MESSAGE_QUEUE_DESTINATION_NOT_CONFIGURED =
-            new PlatformErrorDefinition(
-                    "PLT-AUD-002",
-                    "The audit destination is not configured for ordered publishing",
-                    "Configure the audit destination in platform.message-queue.destinations with ordered=true and publisher.enabled=true.",
-                    500
-            );
-
     public static final PlatformErrorDefinition SERVICE_NAME_REQUIRED =
             new PlatformErrorDefinition(
                     "PLT-AUD-003",
@@ -28,19 +12,27 @@ public final class AuditTechnicalErrors {
                     500
             );
 
-    public static final PlatformErrorDefinition EVENT_SIZE_LIMIT_INVALID =
+    public static final PlatformErrorDefinition OUTBOX_ENTITY_REQUIRED =
             new PlatformErrorDefinition(
                     "PLT-AUD-004",
-                    "platform.audit.max-event-size-bytes must be positive",
-                    "Set platform.audit.max-event-size-bytes to a positive number.",
+                    "A concrete JPA entity extending AuditOutboxEntity is required",
+                    "Register exactly one concrete audit outbox entity in the JPA metamodel.",
                     500
             );
 
-    public static final PlatformErrorDefinition EVENT_COUNT_LIMIT_INVALID =
+    public static final PlatformErrorDefinition MULTIPLE_OUTBOX_ENTITIES =
             new PlatformErrorDefinition(
                     "PLT-AUD-005",
-                    "platform.audit.max-events-per-invocation must be positive",
-                    "Set platform.audit.max-events-per-invocation to a positive number.",
+                    "Multiple audit outbox entities are registered",
+                    "Register only one concrete audit outbox entity for this persistence unit.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition OUTBOX_REPOSITORY_MISMATCH =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-006",
+                    "The audit outbox repository does not manage the mapped outbox entity",
+                    "Register an AuditOutboxRepository for the concrete entity extending AuditOutboxEntity.",
                     500
             );
 
