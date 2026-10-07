@@ -12,6 +12,8 @@ Os exemplos utilizam uma API fictícia de produtos, mas a mesma organização po
 | `@WithMySql` | Inicializar o MySQL e limpar as tabelas entre os testes |
 | `@WithDatabaseScripts` | Executar scripts opcionais de setup e cleanup |
 | `@WithKafka` | Inicializar um Kafka para o teste |
+| `@WithAwsLocalStack` | Inicializar SQS e/ou S3 no LocalStack |
+| `@WithAzureEmulator` | Inicializar Service Bus e/ou Blob Storage no emulador Azure |
 | `@WithMockAuthorization` | Simular o autorizador comum da plataforma |
 | `PlatformRequestSpecificationFactory` | Criar requests RestAssured sem estado global |
 | `BaseClient` | Implementação opcional para clients baseados em herança |
@@ -33,7 +35,7 @@ Adicione a biblioteca no `pom.xml` do microsserviço:
 
 <dependencies>
     <dependency>
-        <groupId>br.com.portalmanager.platform</groupId>
+        <groupId>br.com.portalmanager.platform.library</groupId>
         <artifactId>platform-testing</artifactId>
         <version>${platform-libraries.version}</version>
         <scope>test</scope>
@@ -47,7 +49,7 @@ Se o microsserviço utiliza o autorizador, ele também deve possuir a dependênc
 
 ```xml
 <dependency>
-    <groupId>br.com.portalmanager.platform</groupId>
+    <groupId>br.com.portalmanager.platform.library</groupId>
     <artifactId>platform-authorization</artifactId>
     <version>${platform-libraries.version}</version>
 </dependency>
@@ -777,7 +779,7 @@ Não é necessário criar ou herdar um helper de autorização. O microsserviço
 authorizationMock.verifyCalled();
 authorizationMock.verifyCalled(1);
 authorizationMock.verifyNotCalled();
-authorizationMock.verifyCalledWithAccount("account-123");
+authorizationMock.verifyCalledWithWorkspace("account-123");
 authorizationMock.verifyCalledWithEnvironment("DEV");
 authorizationMock.verifyCalledWithApplication("product-api");
 authorizationMock.verifyCalledWithPolicy("ADMIN");
@@ -809,7 +811,110 @@ class ProductEventPublisherIT {
 
 O endereço do broker é registrado automaticamente. As propriedades de serializers, consumers e nomes de tópicos continuam sob responsabilidade do microsserviço.
 
-### MySQL, Kafka e autorização juntos
+## 23. AWS LocalStack e Azure Emulator
+
+As fixtures cloud são opcionais. Adicione ao POM consumidor somente as dependências dos serviços usados, todas com escopo `test`.
+
+### AWS LocalStack
+
+Para SQS, inclua `testcontainers-localstack` e `software.amazon.awssdk:sqs`. Para S3, inclua também `software.amazon.awssdk:s3`.
+
+```xml
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>testcontainers-localstack</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>sqs</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>software.amazon.awssdk</groupId>
+    <artifactId>s3</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+Declare apenas os serviços e recursos necessários. O exemplo provisiona uma fila SQS com dead-letter queue e um bucket S3:
+
+```java
+@PlatformIntegrationTest
+@WithAwsLocalStack(
+        sqs = @AwsSqs(queues = @AwsSqs.Queue(
+                name = "orders",
+                deadLetterEnabled = true
+        )),
+        s3 = @AwsS3(buckets = "order-files")
+)
+class OrderCloudIT {
+
+    @Autowired
+    private SqsClient sqsClient;
+
+    @Autowired
+    private S3Client s3Client;
+}
+```
+
+Se o teste usar apenas SQS, remova o bloco `s3` da anotação e a dependência do SDK S3; vale o mesmo para o inverso. A fixture configura os clientes e endpoints locais para os serviços declarados.
+
+### Azure Emulator
+
+Para Service Bus, inclua `testcontainers-azure` e `com.azure:azure-messaging-servicebus`. Para Blob Storage, inclua também `com.azure:azure-storage-blob`. A fixture Azure ainda utiliza os módulos de container SQL Server e o driver JDBC do SQL Server para subir o emulador:
+
+```xml
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>testcontainers-azure</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>testcontainers-mssqlserver</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>com.microsoft.sqlserver</groupId>
+    <artifactId>mssql-jdbc</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>com.azure</groupId>
+    <artifactId>azure-messaging-servicebus</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>com.azure</groupId>
+    <artifactId>azure-storage-blob</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+Exemplo com fila do Service Bus e container de Blob Storage:
+
+```java
+@PlatformIntegrationTest
+@WithAzureEmulator(
+        serviceBus = @AzureServiceBus(queues = @AzureServiceBus.Queue(name = "orders")),
+        blobStorage = @AzureBlobStorage(containers = "order-files")
+)
+class OrderAzureIT {
+
+    @Autowired
+    private ServiceBusClientBuilder serviceBusClientBuilder;
+
+    @Autowired
+    private BlobServiceClient blobServiceClient;
+}
+```
+
+Se usar só um serviço Azure, declare somente o respectivo bloco e SDK. Os nomes de fila/container são criados pela fixture; o guia do serviço descreve as propriedades e os clients disponibilizados.
+
+> As versões são gerenciadas pelo BOM da plataforma. Não declare versões manualmente quando o BOM estiver importado.
+
+## 24. MySQL, Kafka e autorização juntos
 
 ```java
 @PlatformIntegrationTest
@@ -820,7 +925,7 @@ class ProductCompleteFlowIT {
 }
 ```
 
-## 17. Exemplo completo
+## 23. Exemplo completo
 
 ```java
 package com.empresa.product.integration;
@@ -864,7 +969,7 @@ class ProductControllerIT {
             .expect("active", true);
 
         authorizationMock.verifyCalled();
-        authorizationMock.verifyCalledWithAccount("account-123");
+        authorizationMock.verifyCalledWithWorkspace("account-123");
         authorizationMock.verifyCalledWithApplication("product-api");
     }
 
@@ -884,7 +989,7 @@ class ProductControllerIT {
 }
 ```
 
-## 18. Qual recurso usar
+## 24. Qual recurso usar
 
 | Necessidade | Recurso recomendado |
 |---|---|
@@ -902,7 +1007,7 @@ class ProductControllerIT {
 | Preparar vários recursos | `TestScenario<R>` |
 | Testar mensagens | `@WithKafka` |
 
-## 19. Problemas comuns
+## 23. Problemas comuns
 
 ### Docker não está disponível
 
@@ -966,7 +1071,7 @@ Confirme que `CleanupMode.NONE` não está ativo e que a tabela não foi adicion
 
 Os requests HTTP não utilizam estado global e o correlation ID é isolado por thread. Porém, testes que compartilham o mesmo banco não devem executar em paralelo quando fazem limpeza das mesmas tabelas.
 
-## 20. Checklist de adoção
+## 24. Checklist de adoção
 
 - [ ] Adicionar `platform-testing` com escopo `test`.
 - [ ] Criar `application-test.yml`.
@@ -979,9 +1084,9 @@ Os requests HTTP não utilizam estado global e o correlation ID é isolado por t
 - [ ] Criar requests autorizados explicitamente.
 - [ ] Criar um request novo em cada operação do client.
 - [ ] Manter dados e regras específicas dentro do microsserviço.
-- [ ] Executar `mvn test` com Java 21 e Docker disponíveis.
+- [ ] Executar `mvn test` com Java 25 e Docker disponíveis.
 
-## 21. Comandos de execução
+## 23. Comandos de execução
 
 Executar os testes do módulo ou microsserviço:
 
@@ -1001,7 +1106,7 @@ Executar somente um teste:
 mvn -Dtest=ProductControllerIT test
 ```
 
-## 22. Testes unitários
+## 24. Testes unitários
 
 Testes unitários não devem inicializar Spring, MySQL, Kafka, WireMock ou servidor HTTP. Utilize `@PlatformUnitTest` para configurar Mockito e o isolamento dos contextos comuns:
 
