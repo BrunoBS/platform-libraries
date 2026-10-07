@@ -114,7 +114,7 @@ Por padrão, setup e cleanup são executados antes/depois da classe. Para script
 )
 ```
 
-A anotação pode ser repetida. Scripts de cleanup devem ser idempotentes. Um recurso inexistente ou ilegível interrompe o teste.
+Os atributos `setup` e `cleanup` aceitam arrays; reúna numa mesma anotação os arquivos que compartilham configuração. Repita `@WithDatabaseScripts` apenas para grupos com fases ou `continueOnError` diferentes. Scripts de cleanup devem ser idempotentes. Um recurso inexistente ou ilegível interrompe o teste.
 
 ## Kafka
 

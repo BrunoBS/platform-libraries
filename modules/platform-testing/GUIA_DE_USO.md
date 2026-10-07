@@ -260,22 +260,26 @@ Em métodos, setup e cleanup envolvem somente aquele teste.
 
 ### Mais de um conjunto de scripts
 
-`@WithDatabaseScripts` é repetível:
+Os atributos `setup` e `cleanup` são arrays. Quando todos os scripts compartilham as mesmas fases e o mesmo `continueOnError`, declare-os juntos em uma única anotação:
 
 ```java
 @WithDatabaseScripts(
-    setup = "classpath:sql/views/create-product-views.sql",
-    cleanup = "classpath:sql/views/drop-product-views.sql"
-)
-@WithDatabaseScripts(
-    setup = "classpath:sql/scenarios/create-catalogs.sql",
-    cleanup = "classpath:sql/scenarios/delete-catalogs.sql"
+    setup = {
+        "classpath:sql/views/create-product-views.sql",
+        "classpath:sql/scenarios/create-catalogs.sql"
+    },
+    cleanup = {
+        "classpath:sql/scenarios/delete-catalogs.sql",
+        "classpath:sql/views/drop-product-views.sql"
+    }
 )
 class ProductRepositoryIT {
 }
 ```
 
-O setup segue a ordem declarada. O cleanup é executado na ordem inversa.
+Os arquivos de cada array executam na ordem declarada. Liste o cleanup na ordem necessária para desfazer as dependências, como no exemplo acima.
+
+A anotação é repetível quando grupos de scripts precisam de configurações diferentes, como fases de setup/cleanup ou valores diferentes de `continueOnError`. Nesse caso, os grupos de setup seguem a ordem das anotações e os grupos de cleanup executam na ordem inversa; os arquivos de cada array ainda seguem sua própria ordem declarada.
 
 Utilize caminhos com o prefixo `classpath:` e scripts de cleanup idempotentes, como `DROP VIEW IF EXISTS` e `DELETE` com condições seguras. Um arquivo inexistente ou ilegível interrompe o teste imediatamente.
 

@@ -307,7 +307,7 @@ flowchart TB
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
 | **WithMySql** | Opt-in do MySQL e da limpeza automática de tabelas. | Importa **MySqlTestConfiguration**, registra **MySqlTestExtension** e define **CleanupMode** e tabelas excluídas. |
-| **WithDatabaseScripts** | Declara scripts, fases de setup/cleanup e se erros podem ser ignorados. | Registra **DatabaseScriptExtension**; é repetível e usa **DatabaseScripts** como container. |
+| **WithDatabaseScripts** | Declara arrays de scripts de setup e cleanup, fases de execução e se erros podem ser ignorados. | Registra **DatabaseScriptExtension**; agrupe arquivos na mesma anotação quando compartilham configuração e repita-a só para grupos com opções diferentes; **DatabaseScripts** é o container Java da repetibilidade. |
 | **DatabaseScripts** | Contém várias declarações de **WithDatabaseScripts** no mesmo elemento Java. | É gerado pelo mecanismo de anotação repetível e lido pela extensão. |
 
 ### br.com.portalmanager.platform.library.testing.fixture
