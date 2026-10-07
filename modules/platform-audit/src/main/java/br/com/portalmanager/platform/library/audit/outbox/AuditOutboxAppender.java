@@ -5,7 +5,6 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.BeanUtils;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ObjectNode;
 
 import java.util.Objects;
 
@@ -22,15 +21,8 @@ public final class AuditOutboxAppender {
 
     public void append(JsonNode payload, JsonNode metadata) {
         AuditOutboxEntity entry = BeanUtils.instantiateClass(entityType);
-        entry.prepareForPersistence(asObjectNode(payload, "payload"), asObjectNode(metadata, "metadata"));
+        entry.prepareForPersistence(payload, metadata);
         repository.append(entry);
-    }
-
-    private static ObjectNode asObjectNode(JsonNode node, String fieldName) {
-        if (node instanceof ObjectNode objectNode) {
-            return objectNode;
-        }
-        throw new IllegalArgumentException("Audit outbox " + fieldName + " must be a JSON object");
     }
 
     private static Class<? extends AuditOutboxEntity> resolveEntityType(EntityManager entityManager) {
