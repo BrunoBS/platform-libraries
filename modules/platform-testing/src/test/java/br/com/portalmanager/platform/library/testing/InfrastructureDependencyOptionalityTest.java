@@ -9,15 +9,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InfrastructureDependencyOptionalityTest {
 
-    private static final String MYSQL_TESTCONTAINERS = "org.testcontainers:testcontainers-mysql";
+    private static final Set<String> MYSQL_FIXTURE_DEPENDENCIES = Set.of(
+            "com.mysql:mysql-connector-j",
+            "org.testcontainers:testcontainers-mysql"
+    );
 
     private static final Set<String> OPTIONAL_INFRASTRUCTURE = Set.of(
             "org.springframework.boot:spring-boot-starter-jdbc",
-            "com.mysql:mysql-connector-j",
             "org.springframework.boot:spring-boot-testcontainers",
             "org.springframework.boot:spring-boot-starter-kafka",
             "org.testcontainers:testcontainers-kafka",
@@ -25,14 +26,14 @@ class InfrastructureDependencyOptionalityTest {
     );
 
     @Test
-    void shouldKeepOptionalInfrastructureOptionalAndExposeMySqlFixtureSupport() throws Exception {
+    void shouldKeepOptionalInfrastructureOptionalAndExposeMySqlFixtureDependencies() throws Exception {
         var document = DocumentBuilderFactory.newInstance()
                 .newDocumentBuilder()
                 .parse(Path.of("pom.xml").toFile());
 
         var dependencies = document.getElementsByTagName("dependency");
         var verifiedOptional = new HashSet<String>();
-        boolean mysqlFixtureDependencyFound = false;
+        var verifiedMySqlFixture = new HashSet<String>();
 
         for (int i = 0; i < dependencies.getLength(); i++) {
             var dependency = (Element) dependencies.item(i);
@@ -44,15 +45,15 @@ class InfrastructureDependencyOptionalityTest {
                 verifiedOptional.add(coordinate);
             }
 
-            if (MYSQL_TESTCONTAINERS.equals(coordinate)) {
+            if (MYSQL_FIXTURE_DEPENDENCIES.contains(coordinate)) {
                 assertEquals("", childText(dependency, "optional"),
                         () -> coordinate + " must be available to consumers of the MySQL fixture");
-                mysqlFixtureDependencyFound = true;
+                verifiedMySqlFixture.add(coordinate);
             }
         }
 
         assertEquals(OPTIONAL_INFRASTRUCTURE, verifiedOptional);
-        assertTrue(mysqlFixtureDependencyFound, MYSQL_TESTCONTAINERS + " must be declared");
+        assertEquals(MYSQL_FIXTURE_DEPENDENCIES, verifiedMySqlFixture);
     }
 
     private static String childText(Element element, String tagName) {
