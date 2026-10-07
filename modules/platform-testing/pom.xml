@@ -36,10 +36,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
-        <!-- JDBC support is available transitively to consumers of this test library. -->
+        <!-- Keep JDBC opt-in: exposing the starter triggers datasource auto-configuration in consumers without a database. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
+            <optional>true</optional>
         </dependency>
         <!-- Required by the public MySQL Testcontainers fixture. -->
         <dependency>

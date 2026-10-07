@@ -15,7 +15,6 @@ class PlatformTestingDependenciesTest {
     private static final Set<String> FIXTURE_DEPENDENCIES = Set.of(
             "br.com.portalmanager.platform.library:platform-authorization",
             "org.springframework.boot:spring-boot-starter-web",
-            "org.springframework.boot:spring-boot-starter-jdbc",
             "org.springframework.boot:spring-boot-starter-kafka",
             "org.testcontainers:testcontainers-kafka",
             "org.testcontainers:testcontainers-junit-jupiter",
@@ -53,6 +52,21 @@ class PlatformTestingDependenciesTest {
         }
 
         assertEquals(FIXTURE_DEPENDENCIES, verifiedDependencies);
+
+        var jdbcStarter = findDependency(dependencies, "org.springframework.boot:spring-boot-starter-jdbc");
+        assertEquals("true", childText(jdbcStarter, "optional"),
+                "JDBC starter stays optional to avoid activating datasource auto-configuration in consumers without a database");
+    }
+
+    private static Element findDependency(org.w3c.dom.NodeList dependencies, String coordinate) {
+        for (int i = 0; i < dependencies.getLength(); i++) {
+            var dependency = (Element) dependencies.item(i);
+            var actual = childText(dependency, "groupId") + ":" + childText(dependency, "artifactId");
+            if (coordinate.equals(actual)) {
+                return dependency;
+            }
+        }
+        throw new AssertionError("Missing dependency " + coordinate);
     }
 
     private static String childText(Element element, String tagName) {
