@@ -100,7 +100,6 @@ O método precisa ser chamado por um bean Spring. Chamadas internas entre métod
 | --- | --- |
 | `CREATE`, `UPDATE`, `ACTIVATE`, `DEACTIVATE`, `RESTORE`, `DELETE` | Retorno do Use Case, depois da execução |
 | `PURGE` | Estado anterior à remoção física; requer um `AuditBeforeSnapshotProvider` |
-| `CUSTOM` | Não disponível |
 
 Para `PURGE`, registre um bean que implemente `AuditBeforeSnapshotProvider`. Ele recebe o método chamado, os argumentos e a anotação; deve buscar e devolver o estado salvo antes da remoção, como `JsonNode`. Esse snapshot também precisa conter `identifier` ou `id`.
 
@@ -133,4 +132,3 @@ Confirme que:
 | `context.user.missing` | `UserContext` não está disponível durante a execução |
 | `resource.identifier.missing` | O snapshot não tem `identifier` nem `id` preenchido |
 | `before-snapshot.provider-required` | A ação é `PURGE` e não há um `AuditBeforeSnapshotProvider` registrado |
-| `custom-action.not-configured` | Foi usada a ação `CUSTOM` |
