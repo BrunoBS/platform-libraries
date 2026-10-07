@@ -2,6 +2,11 @@
 
 Biblioteca que captura o estado auditável no limite do Use Case e grava a intenção de auditoria em uma `AUDIT_OUTBOX` local. A gravação participa da mesma transação da alteração de negócio. Esta etapa não publica mensagens nem envia snapshots para Object Storage.
 
+## Documentação
+
+- [Guia de uso](docs/USAGE.md): integração passo a passo em um serviço consumidor.
+- [Arquitetura interna](docs/ARCHITECTURE.md): responsabilidades das classes, pacotes e fluxo de execução.
+
 ## Fluxo da Etapa 1
 
 ```text
