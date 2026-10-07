@@ -9,7 +9,6 @@ import org.springframework.data.repository.support.Repositories;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
-
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
