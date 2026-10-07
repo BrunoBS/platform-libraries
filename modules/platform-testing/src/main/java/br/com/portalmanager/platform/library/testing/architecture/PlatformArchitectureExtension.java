@@ -253,14 +253,18 @@ public final class PlatformArchitectureExtension implements BeforeAllCallback {
             Set<String> availableTestNames
     ) {
         int packageSeparator = productionClassName.lastIndexOf('.');
-        String packageName = packageSeparator < 0 ? "" : productionClassName.substring(0, packageSeparator);
+        String packageName = packageSeparator < 0
+                ? ""
+                : productionClassName.substring(0, packageSeparator);
         String simpleName = productionClassName.substring(packageSeparator + 1);
         return Set.of(
                         simpleName + "Test",
                         simpleName + "IntegrationTest",
                         simpleName + "IT"
                 ).stream()
-                .map(testName -> packageName.isEmpty() ? testName : packageName + "." + testName)
+                .map(testName -> packageName.isEmpty()
+                        ? testName
+                        : packageName + "." + testName)
                 .anyMatch(availableTestNames::contains);
     }
 
