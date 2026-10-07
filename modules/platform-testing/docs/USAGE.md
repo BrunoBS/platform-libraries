@@ -96,8 +96,8 @@ Use `@WithDatabaseScripts` para criar views ou preparar dados específicos:
 @PlatformIntegrationTest
 @WithMySql
 @WithDatabaseScripts(
-    setup = "classpath:sql/views/create-product-views.sql",
-    cleanup = "classpath:sql/views/drop-product-views.sql"
+    setup = {"classpath:sql/views/create-product-views.sql"},
+    cleanup = {"classpath:sql/views/drop-product-views.sql"}
 )
 class ProductViewRepositoryIT {
 }
@@ -107,8 +107,8 @@ Por padrão, setup e cleanup são executados antes/depois da classe. Para script
 
 ```java
 @WithDatabaseScripts(
-    setup = "classpath:sql/scenarios/create-product.sql",
-    cleanup = "classpath:sql/scenarios/delete-products.sql",
+    setup = {"classpath:sql/scenarios/create-product.sql"},
+    cleanup = {"classpath:sql/scenarios/delete-products.sql"},
     setupPhase = DatabaseSetupPhase.BEFORE_EACH,
     cleanupPhase = DatabaseCleanupPhase.AFTER_EACH
 )

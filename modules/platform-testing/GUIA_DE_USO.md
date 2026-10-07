@@ -206,8 +206,8 @@ Use `@WithDatabaseScripts` quando o teste precisar de views, procedures, trigger
 @PlatformIntegrationTest
 @WithMySql
 @WithDatabaseScripts(
-    setup = "classpath:sql/views/create-product-views.sql",
-    cleanup = "classpath:sql/views/drop-product-views.sql"
+    setup = {"classpath:sql/views/create-product-views.sql"},
+    cleanup = {"classpath:sql/views/drop-product-views.sql"}
 )
 class ProductViewRepositoryIT {
 }
@@ -237,8 +237,8 @@ Por padrão:
 
 ```java
 @WithDatabaseScripts(
-    setup = "classpath:sql/scenarios/create-product.sql",
-    cleanup = "classpath:sql/scenarios/delete-products.sql",
+    setup = {"classpath:sql/scenarios/create-product.sql"},
+    cleanup = {"classpath:sql/scenarios/delete-products.sql"},
     setupPhase = DatabaseSetupPhase.BEFORE_EACH,
     cleanupPhase = DatabaseCleanupPhase.AFTER_EACH
 )
@@ -249,8 +249,8 @@ Por padrão:
 ```java
 @Test
 @WithDatabaseScripts(
-    setup = "classpath:sql/scenarios/create-inactive-product.sql",
-    cleanup = "classpath:sql/scenarios/delete-products.sql"
+    setup = {"classpath:sql/scenarios/create-inactive-product.sql"},
+    cleanup = {"classpath:sql/scenarios/delete-products.sql"}
 )
 void deveBuscarProdutoInativo() {
 }
@@ -910,8 +910,8 @@ import org.springframework.context.annotation.Import;
 @WithMockAuthorization
 @Import(ProductAuthorizationTestConfiguration.class)
 @WithDatabaseScripts(
-    setup = "classpath:sql/views/create-product-views.sql",
-    cleanup = "classpath:sql/views/drop-product-views.sql"
+    setup = {"classpath:sql/views/create-product-views.sql"},
+    cleanup = {"classpath:sql/views/drop-product-views.sql"}
 )
 class ProductControllerIT {
 
