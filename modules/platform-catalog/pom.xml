@@ -4,7 +4,7 @@
     <parent>
         <groupId>br.com.portalmanager.platform.library</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
         <relativePath>../../platform-parent/pom.xml</relativePath>
     </parent>
     <artifactId>platform-catalog</artifactId>
