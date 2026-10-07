@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure.annotation;
+package br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

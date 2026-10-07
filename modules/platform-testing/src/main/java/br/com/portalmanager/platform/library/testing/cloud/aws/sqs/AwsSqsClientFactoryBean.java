@@ -1,25 +1,25 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.aws.sqs;
 
+import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackConnection;
 import org.springframework.beans.factory.FactoryBean;
-import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
-public final class AwsS3ClientFactoryBean implements FactoryBean<S3Client> {
+public final class AwsSqsClientFactoryBean implements FactoryBean<SqsClient> {
 
     private final AwsLocalStackConnection connection;
-    private S3Client client;
+    private SqsClient client;
 
-    public AwsS3ClientFactoryBean(AwsLocalStackConnection connection) {
+    public AwsSqsClientFactoryBean(AwsLocalStackConnection connection) {
         this.connection = connection;
     }
 
     @Override
-    public S3Client getObject() {
+    public SqsClient getObject() {
         if (client == null) {
-            client = S3Client.builder()
+            client = SqsClient.builder()
                     .endpointOverride(connection.endpoint())
                     .region(connection.region())
                     .credentialsProvider(connection.credentialsProvider())
-                    .forcePathStyle(true)
                     .build();
         }
         return client;
@@ -27,7 +27,7 @@ public final class AwsS3ClientFactoryBean implements FactoryBean<S3Client> {
 
     @Override
     public Class<?> getObjectType() {
-        return S3Client.class;
+        return SqsClient.class;
     }
 
     @Override

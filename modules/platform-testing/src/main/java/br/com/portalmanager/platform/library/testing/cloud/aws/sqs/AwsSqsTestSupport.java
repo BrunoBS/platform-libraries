@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.aws.sqs;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -6,14 +6,14 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
-final class AwsSqsTestSupport {
+public final class AwsSqsTestSupport {
 
     private static final String SQS_CLIENT_BEAN = "awsLocalStackSqsClient";
 
     private AwsSqsTestSupport() {
     }
 
-    static void register(BeanDefinitionRegistry registry) {
+    public static void register(BeanDefinitionRegistry registry) {
         RootBeanDefinition definition = new RootBeanDefinition(AwsSqsClientFactoryBean.class);
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
         definition.setDestroyMethodName("close");

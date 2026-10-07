@@ -1,5 +1,8 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws.annotation;
 
+import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
+import br.com.portalmanager.platform.library.testing.cloud.aws.s3sqs.annotation.AwsS3SqsNotification;
+import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackImportRegistrar;
 
 import org.springframework.context.annotation.Import;

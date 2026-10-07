@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure;
+package br.com.portalmanager.platform.library.testing.cloud.azure.servicebus;
 
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import org.springframework.beans.factory.FactoryBean;

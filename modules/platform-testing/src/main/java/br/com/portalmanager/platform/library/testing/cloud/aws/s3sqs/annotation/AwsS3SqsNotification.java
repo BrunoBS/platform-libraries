@@ -1,5 +1,6 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.annotation;
+package br.com.portalmanager.platform.library.testing.cloud.aws.s3sqs.annotation;
 
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

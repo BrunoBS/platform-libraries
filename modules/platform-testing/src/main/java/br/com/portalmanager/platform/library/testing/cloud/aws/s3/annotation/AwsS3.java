@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.annotation;
+package br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

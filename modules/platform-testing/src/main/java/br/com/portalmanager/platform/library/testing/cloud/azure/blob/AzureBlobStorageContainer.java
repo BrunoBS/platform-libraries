@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure;
+package br.com.portalmanager.platform.library.testing.cloud.azure.blob;
 
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import org.testcontainers.azure.AzuriteContainer;

@@ -241,47 +241,91 @@ flowchart TB
 |---|---|---|
 | **WithMockAuthorization** | Ativa a simulação de autorização numa classe de teste e escolhe o resultado padrão. | Importa **AuthorizationMockTestConfiguration** e registra **AuthorizationMockExtension**; usa **AuthorizationMockResult**. |
 
-### br.com.portalmanager.platform.library.testing.cloud.aws
+## Cloud testing packages
 
-| Classe | O que faz | Relação com as demais |
+The provider package keeps only the shared emulator lifecycle and its registrar. Each capability lives under its own feature package; annotations follow the feature they configure.
+
+```mermaid
+flowchart TD
+    A["@WithAwsLocalStack"] --> R["AWS registrar"]
+    R --> L["LocalStack"]
+    L --> S3["aws.s3"]
+    L --> SQS["aws.sqs"]
+    S3 --> LINK["aws.s3sqs"]
+    SQS --> LINK
+```
+
+### AWS shared package: `testing.cloud.aws`
+
+| Class | Responsibility | Relationship |
 |---|---|---|
-| **AwsLocalStackConnection** | Extrai endpoint, região e credenciais do container LocalStack. | Criada pelo registrar e injetada em **AwsSqsClientFactoryBean** e **AwsS3ClientFactoryBean**. |
-| **AwsLocalStackContainer** | Inicia LocalStack e provisiona serviços, filas, DLQs e buckets configurados. | Seus argumentos vêm de **AwsLocalStackImportRegistrar**, que lê as anotações AWS. |
-| **AwsLocalStackImportRegistrar** | Interpreta os serviços AWS declarados e registra containers, conexão e clients Spring. | É importado por **WithAwsLocalStack**; delega o registro dos clients a **AwsSqsTestSupport** e **AwsS3TestSupport**. |
-| **AwsS3ClientFactoryBean** | Cria e encerra o singleton SDK **S3Client** apontado ao LocalStack. | Usa **AwsLocalStackConnection**; é registrado por **AwsS3TestSupport**. |
-| **AwsS3TestSupport** *(interno)* | Registra a definição Spring do factory bean S3. | Chamado pelo registrar somente quando **AwsS3** foi declarado. |
-| **AwsService** | Mapeia nomes de serviço usados pelo LocalStack, incluindo SQS, S3, Secrets Manager, SNS e EventBridge. | O container usa o enum para iniciar os serviços solicitados; as anotações disponíveis atualmente selecionam SQS e S3. |
-| **AwsSqsClientFactoryBean** | Cria e encerra o singleton SDK **SqsClient** apontado ao LocalStack. | Usa **AwsLocalStackConnection**; é registrado por **AwsSqsTestSupport**. |
-| **AwsSqsTestSupport** *(interno)* | Registra a definição Spring do factory bean SQS. | Chamado pelo registrar somente quando **AwsSqs** foi declarado. |
+| `AwsLocalStackImportRegistrar` | Reads the provider-level annotation and wires LocalStack plus enabled feature support. | Imported by `WithAwsLocalStack`; delegates client registration to the S3 and SQS feature packages. |
+| `AwsLocalStackContainer` | Starts LocalStack and provisions the declared queues, DLQs, buckets and notifications. | Receives normalized configuration from the registrar; feature annotations select those resources. |
+| `AwsLocalStackConnection` | Exposes endpoint, region and credentials from the running container. | Injected into S3 and SQS client factories. |
+| `AwsService` | Maps supported LocalStack services to their LocalStack names. | Used by the container to start only the requested services. |
 
-### br.com.portalmanager.platform.library.testing.cloud.aws.annotation
+### AWS provider annotation: `testing.cloud.aws.annotation`
 
-| Classe | O que faz | Relação com as demais |
+| Annotation | Responsibility | Relationship |
 |---|---|---|
-| **WithAwsLocalStack** | Anotação agregadora para habilitar SQS, S3 ou ambos no teste. | Importa **AwsLocalStackImportRegistrar** e contém configurações **AwsSqs** e **AwsS3**. |
-| **AwsSqs** | Descreve filas e configurações de DLQ, recebimentos máximos e nome da fila. | O registrar lê seus atributos para provisionar recursos no **AwsLocalStackContainer**; possui a anotação aninhada **Queue**. |
-| **AwsS3** | Descreve os buckets que o container deve criar. | O registrar passa os nomes para **AwsLocalStackContainer**. |
+| `WithAwsLocalStack` | Enables the LocalStack provider and composes optional feature declarations. | Imports the registrar; embeds feature annotations from `aws.s3.annotation`, `aws.sqs.annotation` and `aws.s3sqs.annotation`. |
 
-### br.com.portalmanager.platform.library.testing.cloud.azure
+### AWS S3: `testing.cloud.aws.s3`
 
-| Classe | O que faz | Relação com as demais |
+| Class | Responsibility | Relationship |
 |---|---|---|
-| **AzureBlobServiceClientFactoryBean** | Cria o singleton SDK **BlobServiceClient** usando a connection string do Azurite. | Recebe **AzureBlobStorageContainer** e é registrado por **AzureBlobStorageTestSupport**. |
-| **AzureBlobStorageContainer** | Inicia Azurite e cria os containers Blob declarados. | Criado por **AzureEmulatorImportRegistrar** a partir de **AzureBlobStorage**. |
-| **AzureBlobStorageTestSupport** *(interno)* | Registra no Spring o factory bean do Blob client. | É chamado pelo registrar quando Blob Storage está habilitado. |
-| **AzureEmulatorImportRegistrar** | Interpreta os serviços Azure declarados e registra somente containers e clients correspondentes. | É importado por **WithAzureEmulator**; delega o registro a **AzureServiceBusTestSupport** e **AzureBlobStorageTestSupport**. |
-| **AzureServiceBusClientBuilderFactoryBean** | Cria o singleton SDK **ServiceBusClientBuilder** configurado para o emulador. | Recebe **AzureServiceBusContainer** e é registrado por **AzureServiceBusTestSupport**. |
-| **AzureServiceBusContainer** | Coordena rede, SQL Server e Service Bus Emulator durante o teste. | É criado pelo registrar a partir de **AzureServiceBus** e fornece a connection string ao factory bean. |
-| **AzureServiceBusTestSupport** *(interno)* | Registra no Spring a definição do builder Service Bus. | É chamado pelo registrar somente quando Service Bus foi declarado; implementa **AzureServiceTestSupport**. |
-| **AzureServiceTestSupport** *(interno)* | Contrato interno para registrar o suporte Spring de um serviço Azure. | Implementado por **AzureServiceBusTestSupport** e usado pelo registrar para delegação. |
+| `AwsS3ClientFactoryBean` | Creates and closes the AWS SDK `S3Client` against LocalStack. | Uses `AwsLocalStackConnection`; registered by `AwsS3TestSupport`. |
+| `AwsS3TestSupport` | Registers the S3 client factory when the S3 feature is enabled. | Called by the provider registrar when `@AwsS3` is present. |
 
-### br.com.portalmanager.platform.library.testing.cloud.azure.annotation
+Annotation package `testing.cloud.aws.s3.annotation`: `AwsS3` declares the buckets to provision; the registrar passes them to LocalStack.
 
-| Classe | O que faz | Relação com as demais |
+### AWS SQS: `testing.cloud.aws.sqs`
+
+| Class | Responsibility | Relationship |
 |---|---|---|
-| **WithAzureEmulator** | Anotação agregadora para habilitar Service Bus, Blob Storage ou ambos. | Importa **AzureEmulatorImportRegistrar** e contém configurações **AzureServiceBus** e **AzureBlobStorage**. |
-| **AzureServiceBus** | Descreve filas, sessões e quantidade máxima de entregas. | O registrar passa seus atributos ao **AzureServiceBusContainer**; contém a anotação aninhada **Queue**. |
-| **AzureBlobStorage** | Lista os containers Blob a provisionar. | O registrar passa os nomes ao **AzureBlobStorageContainer**. |
+| `AwsSqsClientFactoryBean` | Creates and closes the AWS SDK `SqsClient` against LocalStack. | Uses `AwsLocalStackConnection`; registered by `AwsSqsTestSupport`. |
+| `AwsSqsTestSupport` | Registers the SQS client factory when the SQS feature is enabled. | Called by the provider registrar when `@AwsSqs` is present. |
+
+Annotation package `testing.cloud.aws.sqs.annotation`: `AwsSqs` declares queues and optional DLQ policies; its nested `Queue` describes each queue.
+
+### AWS S3-to-SQS integration: `testing.cloud.aws.s3sqs`
+
+Annotation package `testing.cloud.aws.s3sqs.annotation`: `AwsS3SqsNotification` links a declared bucket to a declared standard queue. The provider registrar validates both feature declarations and the LocalStack container provisions the notification and queue policy.
+
+### Azure shared package: `testing.cloud.azure`
+
+| Class | Responsibility | Relationship |
+|---|---|---|
+| `AzureEmulatorImportRegistrar` | Reads the provider annotation and registers only selected emulator services and clients. | Imported by `WithAzureEmulator`; delegates to the Blob and Service Bus feature packages. |
+| `AzureServiceTestSupport` | Shared contract for registering a service-specific Spring test client. | Implemented by the Azure Service Bus support and consumed by the registrar. |
+
+Provider annotation package `testing.cloud.azure.annotation`: `WithAzureEmulator` enables the Azure emulators and composes optional feature annotations.
+
+### Azure Blob Storage: `testing.cloud.azure.blob`
+
+| Class | Responsibility | Relationship |
+|---|---|---|
+| `AzureBlobStorageContainer` | Starts Azurite and creates the configured containers. | Created by the provider registrar from `@AzureBlobStorage`. |
+| `AzureBlobStorageTestSupport` | Registers the Blob client factory. | Called by the registrar when Blob Storage is enabled. |
+
+Feature annotation package `testing.cloud.azure.blob.annotation`: `AzureBlobStorage` lists Blob containers to provision.
+
+### Azure Service Bus: `testing.cloud.azure.servicebus`
+
+| Class | Responsibility | Relationship |
+|---|---|---|
+| `AzureServiceBusContainer` | Coordinates SQL Server and Service Bus Emulator startup. | Created from `@AzureServiceBus`; supplies connection data to the client factory. |
+| `AzureServiceBusClientBuilderFactoryBean` | Creates the SDK `ServiceBusClientBuilder` pointed to the emulator. | Uses `AzureServiceBusContainer`; registered by `AzureServiceBusTestSupport`. |
+| `AzureServiceBusTestSupport` | Registers the Service Bus client builder. | Called when the Service Bus feature is enabled. |
+
+Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureServiceBus` declares queues, sessions and delivery settings.
+
+### Azure Blob-to-Service Bus integration: `testing.cloud.azure.blobservicebus`
+
+| Class | Responsibility | Relationship |
+|---|---|---|
+| `AzureBlobServiceClientFactoryBean` | Configures the Blob SDK client to emulate the upload-created event flow used by tests. | Adds `AzureBlobCreatedEventPolicy` to the Blob client pipeline. |
+| `AzureBlobCreatedEventPolicy` | Converts a completed Blob upload into the event payload and sends it to Service Bus. | Uses the Service Bus emulator client; invoked by Blob SDK uploads in integration tests. |
 
 ### br.com.portalmanager.platform.library.testing.context
 
