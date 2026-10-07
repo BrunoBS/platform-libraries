@@ -5,7 +5,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.repository.support.Repositories;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.Optional;
 
 import java.util.Set;
 
@@ -26,7 +29,9 @@ class AuditOutboxAppenderTest {
         Set<EntityType<?>> entities = Set.of(entityType(TestAuditOutboxEntity.class));
         when(metamodel.getEntities()).thenReturn(entities);
         AuditOutboxRepository<TestAuditOutboxEntity> repository = mock(AuditOutboxRepository.class);
-        AuditOutboxAppender appender = new AuditOutboxAppender(repository, entityManager);
+        Repositories repositories = mock(Repositories.class);
+        when(repositories.getRepositoryFor(TestAuditOutboxEntity.class)).thenReturn(Optional.of(repository));
+        AuditOutboxAppender appender = new AuditOutboxAppender(repository, entityManager, repositories);
         var mapper = new ObjectMapper();
         var payload = mapper.readTree("{\"identifier\":\"resource-1\"}");
         var metadata = mapper.readTree("{\"eventType\":\"CREATED\"}");
@@ -45,8 +50,9 @@ class AuditOutboxAppenderTest {
         when(entityManager.getMetamodel()).thenReturn(metamodel);
         when(metamodel.getEntities()).thenReturn(Set.of());
 
-        assertThatThrownBy(() -> new AuditOutboxAppender(mockRepository(), entityManager))
-                .isInstanceOf(PlatformConfigurationException.class);
+        assertThatThrownBy(() -> new AuditOutboxAppender(
+                mockRepository(), entityManager, mock(Repositories.class)
+        )).isInstanceOf(PlatformConfigurationException.class);
     }
 
     @Test
@@ -58,7 +64,22 @@ class AuditOutboxAppenderTest {
         );
         when(metamodel.getEntities()).thenReturn(entities);
 
-        assertThatThrownBy(() -> new AuditOutboxAppender(mockRepository(), entityManager))
+        assertThatThrownBy(() -> new AuditOutboxAppender(
+                mockRepository(), entityManager, mock(Repositories.class)
+        )).isInstanceOf(PlatformConfigurationException.class);
+    }
+
+    @Test
+    void shouldFailWithConfigurationErrorWhenRepositoryManagesAnotherEntity() {
+        when(entityManager.getMetamodel()).thenReturn(metamodel);
+        when(metamodel.getEntities()).thenReturn(Set.of(entityType(TestAuditOutboxEntity.class)));
+        AuditOutboxRepository<?> injectedRepository = mockRepository();
+        AuditOutboxRepository<?> entityRepository = mockRepository();
+        Repositories repositories = mock(Repositories.class);
+        when(repositories.getRepositoryFor(TestAuditOutboxEntity.class))
+                .thenReturn(Optional.of(entityRepository));
+
+        assertThatThrownBy(() -> new AuditOutboxAppender(injectedRepository, entityManager, repositories))
                 .isInstanceOf(PlatformConfigurationException.class);
     }
 
