@@ -1,144 +1,381 @@
-# Responsabilidades dos pacotes e classes
+# Mapa visual de pacotes e classes do platform-testing
 
-Este documento descreve os tipos Java de produção em `src/main/java` do módulo `platform-testing`. Cada seção corresponde a um pacote. Classes de apoio com visibilidade de pacote estão identificadas como internas.
+Este guia mostra como as peças do módulo se conectam e, em seguida, descreve **todas as classes de produção, pacote por pacote**. Use os diagramas para entender o caminho de execução e as tabelas para consultar o papel e as relações de cada classe.
 
-O módulo fornece infraestrutura e contratos reutilizáveis. Os serviços consumidores implementam builders, factories, cenários, clients e regras específicas do próprio domínio.
+As setas indicam configuração, criação, chamada ou uso. Quando uma classe fica no microsserviço consumidor, isso está indicado explicitamente. Classes internas com visibilidade de pacote são identificadas como apoio interno.
 
-## Fluxo entre as principais peças
+## Visão geral: onde o teste encontra a biblioteca
 
-- Em massa de teste, o serviço implementa `TestDataBuilder`; pode agrupar variações semânticas em uma `TestDataFactory`; e usa `TestScenario` quando precisa preparar pré-condições.
-- Em HTTP, `PlatformHttpTestConfiguration` fornece `PlatformRequestSpecificationFactory`; o client do serviço compõe essa factory ou estende opcionalmente `BaseClient`; a resposta do serviço pode estender `BaseResponse`.
-- Para infraestrutura, uma anotação opt-in importa uma configuração ou registrar, que cria apenas os containers, conexões e clients associados aos recursos declarados.
-- As anotações de ciclo de vida conectam as extensões JUnit ao contexto do Spring e ao isolamento entre testes.
+```mermaid
+flowchart TB
+    Teste["IntegrationTest do serviço"]
+    PlatformTest["@PlatformIntegrationTest"]
+    HttpConfig["PlatformHttpTestConfiguration"]
+    HttpFactory["PlatformRequestSpecificationFactory"]
+    Client["Client do serviço"]
+    BaseClient["BaseClient opcional"]
+    Response["Response do serviço / BaseResponse"]
 
-## `br.com.portalmanager.platform.library.testing.architecture`
+    Teste --> PlatformTest
+    PlatformTest --> HttpConfig
+    HttpConfig --> HttpFactory
+    Client --> HttpFactory
+    Client -. "pode estender" .-> BaseClient
+    Client --> Response
+```
 
-- **PlatformArchitectureExtension** — extensão JUnit que importa as classes dos pacotes selecionados, identifica implementações concretas que sobrescrevem comportamento de tipos da plataforma e exige cobertura por teste. Usa `PlatformArchitectureTest` para definir os pacotes observados, aceita cobertura explícita por `CoversClasses` e também reconhece a convenção de nomes de testes.
+O teste seleciona os recursos de infraestrutura por anotações. A anotação importa a configuração ou o registrar correspondente; esse componente cria somente os containers e clients pedidos.
 
-## `br.com.portalmanager.platform.library.testing.architecture.annotation`
+```mermaid
+flowchart TB
+    Annotation["Anotação opt-in"]
+    Registrar["Import registrar / configuração"]
+    Container["Container de teste"]
+    ClientBean["Client ou conexão de teste"]
+    Consumer["Beans usados pelo serviço"]
 
-- **PlatformArchitectureTest** — anotação opt-in que ativa `PlatformArchitectureExtension`. `basePackages` limita a análise ao serviço; `observedBasePackages` define de quais pacotes da plataforma vêm as implementações base observadas.
-- **CoversClasses** — anotação de classe de teste para declarar tipos cobertos explicitamente, por exemplo quando um único teste cobre vários componentes. A extensão consulta esse valor além da convenção de nomes.
+    Annotation --> Registrar
+    Registrar --> Container
+    Registrar --> ClientBean
+    Container --> ClientBean
+    ClientBean --> Consumer
+```
 
-## `br.com.portalmanager.platform.library.testing.authorization`
+## Builder, factory e scenario
 
-- **AuthorizationMock** — fachada de teste sobre WireMock. Configura respostas permitidas, negadas, proibidas, expiradas ou customizadas; também cria respostas condicionadas aos headers de recurso e verifica chamadas recebidas.
-- **AuthorizationMockExtension** — extensão JUnit ativada por `WithMockAuthorization`. Antes de cada teste limpa os stubs e configura o resultado padrão; para sessões permitidas, aplica os beans `AuthorizationSessionCustomizer` registrados na aplicação de teste.
-- **AuthorizationMockResult** — enum com os resultados padrão `ALLOWED`, `DENIED`, `FORBIDDEN` e `INTERNAL_ERROR`, usados pela anotação e pela extensão.
-- **AuthorizationMockTestConfiguration** — configuração Spring importada pela anotação. Cria o servidor WireMock em porta dinâmica, o bean `AuthorizationMock` e propriedades para apontar a autorização da aplicação para esse servidor.
-- **AuthorizationResourceMatcher** — builder de headers para limitar um stub a workspace, aplicação, ambiente ou headers adicionais. É consumido por `AuthorizationMock.customResource`.
-- **AuthorizationSessionBuilder** — cria `UserSession` com valores de teste padrão e métodos fluentes para identidade, expiração, grupos e grupos do autorizador. É usado por `AuthorizationMock` e pelos customizadores de sessão.
-- **AuthorizationSessionCustomizer** — contrato funcional para ajustar um `AuthorizationSessionBuilder`. Serviços podem implementá-lo como bean para complementar todas as sessões permitidas.
+O módulo oferece os contratos e as classes-base. As implementações concretas ficam no contexto do serviço, para montar dados de domínio e preparar pré-condições.
 
-## `br.com.portalmanager.platform.library.testing.authorization.annotation`
+```mermaid
+flowchart TB
+    Builder["Builder do serviço"]
+    BuilderContract["TestDataBuilder"]
+    BuilderBase["AbstractTestDataBuilder"]
+    Factory["Factory do serviço"]
+    FactoryBase["AbstractTestDataFactory"]
+    Scenario["Scenario do serviço"]
+    ScenarioContract["TestScenario"]
 
-- **WithMockAuthorization** — anotação Spring/JUnit que importa `AuthorizationMockTestConfiguration` e registra `AuthorizationMockExtension`. O atributo `defaultResult` escolhe o comportamento padrão por classe; `AuthorizationMockResult` fornece as opções.
+    Builder --> BuilderContract
+    Builder --> BuilderBase
+    Factory --> FactoryBase
+    FactoryBase --> Builder
+    Scenario --> ScenarioContract
+    Scenario --> Factory
+```
 
-## `br.com.portalmanager.platform.library.testing.cloud.aws`
+**Como ler:** o builder constrói um objeto; a factory usa o builder para expor variações semânticas; um scenario combina a massa e a preparação de pré-condições. A biblioteca não fornece scenarios de domínio prontos.
 
-- **AwsLocalStackConnection** — extrai do container o endpoint, a região e o provedor de credenciais de teste. É a dependência comum usada pelos factory beans dos clients AWS.
-- **AwsLocalStackContainer** — especialização do LocalStack que inicia os serviços solicitados e provisiona filas, políticas de DLQ e buckets. O registrar configura os serviços e os recursos a partir das anotações.
-- **AwsLocalStackImportRegistrar** — lê `WithAwsLocalStack`, valida as anotações SQS/S3 e registra o container, a conexão e os clients apenas para os serviços selecionados.
-- **AwsS3ClientFactoryBean** — cria o singleton AWS SDK `S3Client` apontando para o endpoint LocalStack, com região, credenciais locais e path-style habilitado; fecha o client no encerramento do contexto.
-- **AwsS3TestSupport** — apoio interno do registrar: declara o factory bean do S3 no Spring quando a anotação S3 foi solicitada.
-- **AwsService** — enum que traduz os nomes dos serviços para o formato reconhecido pelo LocalStack. O registrar atual habilita SQS e S3, embora o enum também nomeie Secrets Manager, SNS e EventBridge.
-- **AwsSqsClientFactoryBean** — cria o singleton AWS SDK `SqsClient` usando `AwsLocalStackConnection` e encerra o client junto com o contexto.
-- **AwsSqsTestSupport** — apoio interno que registra o factory bean SQS quando a anotação SQS foi solicitada.
+## Anotações, extensões e recursos
 
-## `br.com.portalmanager.platform.library.testing.cloud.aws.annotation`
+```mermaid
+flowchart TB
+    Integration["@PlatformIntegrationTest"]
+    IntegrationExtension["PlatformIntegrationExtension"]
+    Perf["TestPerformanceExtension"]
+    Unit["@PlatformUnitTest"]
+    UnitExtension["PlatformUnitTestExtension"]
+    TestContext["TestContext"]
 
-- **WithAwsLocalStack** — anotação agregadora que importa `AwsLocalStackImportRegistrar`. Declara os recursos SQS e/ou S3 do teste.
-- **AwsSqs** — configuração aninhada de filas SQS. Cada `Queue` informa nome e opções de DLQ e número máximo de recebimentos; o registrar transforma os dados em recursos provisionados pelo container.
-- **AwsS3** — configuração aninhada de buckets. Os nomes são enviados ao registrar e provisionados pelo container.
+    Integration --> IntegrationExtension
+    Integration --> Perf
+    Unit --> UnitExtension
+    IntegrationExtension --> TestContext
+    UnitExtension --> TestContext
+```
 
-## `br.com.portalmanager.platform.library.testing.cloud.azure`
+## Autorização simulada
 
-- **AzureBlobServiceClientFactoryBean** — cria o singleton SDK `BlobServiceClient` usando a connection string do container Azurite.
-- **AzureBlobStorageContainer** — especialização do Azurite que cria os containers Blob declarados depois da inicialização. Se o provisionamento falhar, interrompe o container.
-- **AzureBlobStorageTestSupport** — apoio interno que registra o factory bean do client Blob solicitado.
-- **AzureEmulatorImportRegistrar** — lê `WithAzureEmulator`, valida se Service Bus e/ou Blob Storage foram configurados, cria os containers correspondentes e delega o registro dos clients aos apoios do pacote.
-- **AzureServiceBusClientBuilderFactoryBean** — fornece um singleton `ServiceBusClientBuilder` configurado com a connection string do emulador.
-- **AzureServiceBusContainer** — coordena uma rede Testcontainers, o SQL Server exigido pelo emulador e o Service Bus Emulator; inicializa e encerra os recursos juntos.
-- **AzureServiceBusTestSupport** — apoio interno que registra no Spring o factory bean do builder Service Bus quando esse serviço foi solicitado.
-- **AzureServiceTestSupport** — contrato interno de estratégia para registrar suporte de um serviço Azure no contexto Spring; é implementado pelo suporte Service Bus.
+```mermaid
+flowchart TB
+    WithAuth["@WithMockAuthorization"]
+    Config["AuthorizationMockTestConfiguration"]
+    WireMock["WireMockServer"]
+    Mock["AuthorizationMock"]
+    Extension["AuthorizationMockExtension"]
+    Session["AuthorizationSessionBuilder"]
+    Customizer["AuthorizationSessionCustomizer"]
 
-## `br.com.portalmanager.platform.library.testing.cloud.azure.annotation`
+    WithAuth --> Config
+    Config --> WireMock
+    Config --> Mock
+    WithAuth --> Extension
+    Extension --> Mock
+    Mock --> Session
+    Extension --> Customizer
+```
 
-- **WithAzureEmulator** — anotação agregadora que importa `AzureEmulatorImportRegistrar` e seleciona Service Bus e/ou Blob Storage.
-- **AzureServiceBus** — configura filas do emulador Service Bus, incluindo `maxDeliveryCount` e sessões; o registrar passa esses dados ao container.
-- **AzureBlobStorage** — fornece os nomes de containers Blob que serão criados por `AzureBlobStorageContainer`.
+A configuração cria o servidor e direciona as propriedades da aplicação para ele. A extensão limpa os stubs antes de cada teste e registra a resposta padrão. O mock também permite respostas específicas por headers de workspace, aplicação e ambiente.
 
-## `br.com.portalmanager.platform.library.testing.context`
+## Banco MySQL e scripts
 
-- **TestContext** — mantém o correlation ID na thread atual. `PlatformRequestSpecificationFactory` consulta esse valor para cada request; as extensões de ciclo de vida limpam o estado entre testes.
+```mermaid
+flowchart TB
+    WithMySql["@WithMySql"]
+    MysqlConfig["MySqlTestConfiguration"]
+    MysqlContainer["MySQLContainer"]
+    MysqlExtension["MySqlTestExtension"]
+    Cleaner["DatabaseCleaner"]
+    Scripts["@WithDatabaseScripts"]
+    ScriptExtension["DatabaseScriptExtension"]
+    Executor["DatabaseScriptExecutor"]
 
-## `br.com.portalmanager.platform.library.testing.database`
+    WithMySql --> MysqlConfig
+    MysqlConfig --> MysqlContainer
+    WithMySql --> MysqlExtension
+    MysqlExtension --> Cleaner
+    Scripts --> ScriptExtension
+    ScriptExtension --> Executor
+    Executor --> MysqlContainer
+```
 
-- **CleanupMode** — enum que seleciona limpeza do banco antes de cada teste, depois de cada teste ou nenhuma limpeza automática.
-- **DatabaseCleaner** — identifica tabelas base no schema MySQL, mantém um cache de descoberta e trunca as tabelas não excluídas. É chamado por `MySqlTestExtension`.
-- **DatabaseCleanupPhase** — define se scripts de cleanup executam depois de cada teste ou depois da classe.
-- **DatabaseScriptExecutor** — resolve resources com `ResourceLoader`, valida existência/leitura e executa SQL via `ResourceDatabasePopulator`. É chamado por `DatabaseScriptExtension`.
-- **DatabaseScriptExtension** — extensão JUnit que lê `WithDatabaseScripts` na classe e nos métodos e chama `DatabaseScriptExecutor` nas fases configuradas. Mantém ordem de setup e executa os cleanups na ordem inversa.
-- **DatabaseSetupPhase** — define se scripts de setup executam uma vez antes da classe ou antes de cada teste.
-- **MySqlTestConfiguration** — configuração de teste que declara um `MySQLContainer` como service connection do Spring Boot; é importada por `WithMySql`.
-- **MySqlTestExtension** — extensão JUnit que aplica o `CleanupMode` de `WithMySql` e delega a limpeza a `DatabaseCleaner`.
+A limpeza do banco e a execução de scripts são mecanismos separados: **MySqlTestExtension** limpa tabelas; **DatabaseScriptExtension** executa setup e cleanup configurados.
 
-## `br.com.portalmanager.platform.library.testing.database.annotation`
+## AWS LocalStack
 
-- **WithMySql** — importa a configuração do container MySQL e registra a extensão de limpeza; define modo de limpeza e tabelas excluídas, com `flyway_schema_history` preservada por padrão.
-- **WithDatabaseScripts** — declaração repetível de scripts de setup e cleanup, fases de execução e opção para continuar diante de erro; registra `DatabaseScriptExtension`.
-- **DatabaseScripts** — container de anotação gerado para permitir múltiplas declarações de `WithDatabaseScripts` na mesma classe ou método.
+```mermaid
+flowchart TB
+    WithAws["@WithAwsLocalStack"]
+    Registrar["AwsLocalStackImportRegistrar"]
+    Container["AwsLocalStackContainer"]
+    Connection["AwsLocalStackConnection"]
+    SqsSupport["AwsSqsTestSupport"]
+    S3Support["AwsS3TestSupport"]
+    SqsFactory["AwsSqsClientFactoryBean"]
+    S3Factory["AwsS3ClientFactoryBean"]
 
-## `br.com.portalmanager.platform.library.testing.fixture`
+    WithAws --> Registrar
+    Registrar --> Container
+    Registrar --> Connection
+    Registrar --> SqsSupport
+    Registrar --> S3Support
+    SqsSupport --> SqsFactory
+    S3Support --> S3Factory
+    Connection --> SqsFactory
+    Connection --> S3Factory
+```
 
-- **TestClock** — cria um `Clock.fixed` a partir de instante textual ou `Instant`, com UTC como fuso padrão e suporte a fuso explícito.
-- **TestIds** — cria UUID determinístico a partir de uma seed. Ajuda a manter IDs estáveis e reproduzíveis em fixtures.
+O registrar registra somente os apoios SQS e S3 declarados. Esses apoios criam os factory beans; os factory beans usam a conexão do LocalStack para produzir os clients do AWS SDK.
 
-## `br.com.portalmanager.platform.library.testing.fixture.builder`
+## Emuladores Azure
 
-- **TestDataBuilder** — contrato funcional genérico cujo `build()` produz o DTO ou objeto de teste.
-- **AbstractTestDataBuilder** — classe-base genérica com retorno fluente tipado por `self()`. O builder concreto do serviço herda dela e implementa `build()` pelo contrato `TestDataBuilder`.
+```mermaid
+flowchart TB
+    WithAzure["@WithAzureEmulator"]
+    Registrar["AzureEmulatorImportRegistrar"]
+    BusContainer["AzureServiceBusContainer"]
+    BlobContainer["AzureBlobStorageContainer"]
+    BusSupport["AzureServiceBusTestSupport"]
+    BlobSupport["AzureBlobStorageTestSupport"]
+    BusFactory["AzureServiceBusClientBuilderFactoryBean"]
+    BlobFactory["AzureBlobServiceClientFactoryBean"]
 
-## `br.com.portalmanager.platform.library.testing.fixture.factory`
+    WithAzure --> Registrar
+    Registrar --> BusContainer
+    Registrar --> BlobContainer
+    Registrar --> BusSupport
+    Registrar --> BlobSupport
+    BusSupport --> BusFactory
+    BlobSupport --> BlobFactory
+    BusContainer --> BusFactory
+    BlobContainer --> BlobFactory
+```
 
-- **TestDataFactory** — contrato funcional para produzir a massa válida padrão por `valid()`.
-- **AbstractTestDataFactory** — liga uma factory ao builder concreto. `valid()` constrói a instância padrão; `create(customization)` aplica variações ao builder antes de chamar `build()`. Assim a factory do serviço expressa cenários sem duplicar a construção do builder.
+Service Bus coordena o emulador e o SQL Server requerido por ele. Blob Storage usa Azurite e cria os containers especificados na anotação.
 
-## `br.com.portalmanager.platform.library.testing.fixture.scenario`
+## HTTP: criar request, chamar endpoint, validar resposta
 
-- **TestScenario** — contrato funcional cujo `setup()` prepara dependências/pré-condições e devolve o resultado da preparação. A implementação pertence ao serviço consumidor e pode reutilizar builders/factories; não é específica do HTTP.
+```mermaid
+flowchart TB
+    HttpConfig["PlatformHttpTestConfiguration"]
+    Factory["PlatformRequestSpecificationFactory"]
+    Customizer["PlatformRequestSpecificationCustomizer"]
+    AuthData["AuthorizationRequestData"]
+    Client["Client do serviço"]
+    BaseClient["BaseClient opcional"]
+    DomainResponse["Response do serviço"]
+    ResponseBase["BaseResponse"]
 
-## `br.com.portalmanager.platform.library.testing.http`
+    HttpConfig --> Factory
+    Customizer --> Factory
+    AuthData --> Factory
+    Client --> Factory
+    Client -. "opcional" .-> BaseClient
+    Client --> DomainResponse
+    DomainResponse -. "pode estender" .-> ResponseBase
+```
 
-- **AuthorizationRequestData** — record de token, account, ambiente e aplicação. O builder aninhado oferece os valores padrão e permite sobrescrever apenas os campos necessários para requests autorizados.
-- **BaseClient** — classe-base opcional que encapsula chamadas à factory para requests comuns/autorizados, criação de response tipada e serialização com o `JsonMapper` recebido por injeção. O client concreto continua no serviço.
-- **PlatformHttpTestConfiguration** — configuração importada por `PlatformIntegrationTest`; registra `PlatformRequestSpecificationFactory` com o ambiente Spring e os customizadores ordenados.
-- **PlatformRequestSpecificationCustomizer** — contrato funcional para acrescentar headers ou outras opções a um `RequestSpecBuilder`; os beans são aplicados pela factory em cada request.
-- **PlatformRequestSpecificationFactory** — cria uma nova especificação RestAssured por request com porta local, JSON, correlation ID e customizadores; suas variantes adicionam os headers de autorização usando `AuthorizationRequestData`.
+## Inventário por pacote
 
-## `br.com.portalmanager.platform.library.testing.http.response`
+### br.com.portalmanager.platform.library.testing.architecture
 
-- **BaseResponse** — classe-base fluente para responses específicas de cada serviço. Encapsula `ValidatableResponse`, oferece expectativas de status e de campos JSON e permite extrair o corpo tipado; o client do serviço cria a response concreta.
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **PlatformArchitectureExtension** | Analisa classes concretas do serviço e exige testes para customizações de comportamento herdado da plataforma. | É ativada por **PlatformArchitectureTest**; lê cobertura explícita de **CoversClasses** e também reconhece a convenção de nomes de testes. |
 
-## `br.com.portalmanager.platform.library.testing.kafka`
+### br.com.portalmanager.platform.library.testing.architecture.annotation
 
-- **KafkaTestConfiguration** — configuração de teste que declara o container Kafka como service connection. É importada apenas quando `WithKafka` é usado.
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **PlatformArchitectureTest** | Anotação opt-in que define pacotes do serviço e pacotes base observados. | Ativa **PlatformArchitectureExtension**. |
+| **CoversClasses** | Declara as classes de produção cobertas por uma classe de teste. | Lida por **PlatformArchitectureExtension** para aceitar cobertura explícita, inclusive quando um teste cobre vários tipos. |
 
-## `br.com.portalmanager.platform.library.testing.kafka.annotation`
+### br.com.portalmanager.platform.library.testing.authorization
 
-- **WithKafka** — anotação opt-in que importa `KafkaTestConfiguration`; habilita o broker para o contexto Spring do teste.
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AuthorizationMock** | Expõe operações de stubbing e verificação para o endpoint de autorização no WireMock. | Recebe o **WireMockServer** criado por **AuthorizationMockTestConfiguration**; usa **AuthorizationSessionBuilder** e **AuthorizationResourceMatcher** ao montar respostas. |
+| **AuthorizationMockExtension** | Limpa o mock e define a resposta padrão antes de cada teste. | É ativada por **WithMockAuthorization**; busca **AuthorizationMock** e os beans **AuthorizationSessionCustomizer** no contexto Spring. |
+| **AuthorizationMockResult** | Enum de resultados padrão: permitido, negado, proibido ou erro interno. | O atributo default de **WithMockAuthorization** é lido por **AuthorizationMockExtension**. |
+| **AuthorizationMockTestConfiguration** | Cria WireMock, **AuthorizationMock** e propriedades que apontam a aplicação para o servidor local. | É importada por **WithMockAuthorization**; fornece os beans consumidos pela extensão. |
+| **AuthorizationResourceMatcher** | Monta condições de headers para um stub específico por workspace, aplicação, ambiente ou header livre. | A função de configuração é passada a **AuthorizationMock.customResource** e **allowResource**. |
+| **AuthorizationSessionBuilder** | Produz **UserSession** com valores úteis para testes e customização fluente. | É usado por **AuthorizationMock** e recebe alterações de **AuthorizationSessionCustomizer**. |
+| **AuthorizationSessionCustomizer** | Contrato funcional para adicionar atributos a uma sessão de teste. | Implementações do serviço viram beans que **AuthorizationMockExtension** aplica às sessões permitidas. |
 
-## `br.com.portalmanager.platform.library.testing.lifecycle`
+### br.com.portalmanager.platform.library.testing.authorization.annotation
 
-- **PlatformIntegrationExtension** — extensão JUnit que limpa o `TestContext` antes e depois de cada teste de integração.
-- **PlatformUnitTestExtension** — extensão JUnit que limpa o `TestContext` e o MDC antes e depois de cada teste unitário.
-- **TestPerformanceExtension** — mede duração de métodos e classes, registra testes que ultrapassam o limite configurado e resume tempos ao final da classe. É ativada por `PlatformIntegrationTest`.
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **WithMockAuthorization** | Ativa a simulação de autorização numa classe de teste e escolhe o resultado padrão. | Importa **AuthorizationMockTestConfiguration** e registra **AuthorizationMockExtension**; usa **AuthorizationMockResult**. |
 
-## `br.com.portalmanager.platform.library.testing.lifecycle.annotation`
+### br.com.portalmanager.platform.library.testing.cloud.aws
 
-- **PlatformIntegrationTest** — anotação composta para integração: ativa `SpringBootTest` com servidor aleatório e profile `test`, importa a configuração HTTP e registra as extensões de contexto/performance.
-- **PlatformUnitTest** — anotação composta para teste unitário: registra Mockito e `PlatformUnitTestExtension`, sem iniciar o contexto Spring da aplicação.
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AwsLocalStackConnection** | Extrai endpoint, região e credenciais do container LocalStack. | Criada pelo registrar e injetada em **AwsSqsClientFactoryBean** e **AwsS3ClientFactoryBean**. |
+| **AwsLocalStackContainer** | Inicia LocalStack e provisiona serviços, filas, DLQs e buckets configurados. | Seus argumentos vêm de **AwsLocalStackImportRegistrar**, que lê as anotações AWS. |
+| **AwsLocalStackImportRegistrar** | Interpreta os serviços AWS declarados e registra containers, conexão e clients Spring. | É importado por **WithAwsLocalStack**; delega o registro dos clients a **AwsSqsTestSupport** e **AwsS3TestSupport**. |
+| **AwsS3ClientFactoryBean** | Cria e encerra o singleton SDK **S3Client** apontado ao LocalStack. | Usa **AwsLocalStackConnection**; é registrado por **AwsS3TestSupport**. |
+| **AwsS3TestSupport** *(interno)* | Registra a definição Spring do factory bean S3. | Chamado pelo registrar somente quando **AwsS3** foi declarado. |
+| **AwsService** | Mapeia nomes de serviço usados pelo LocalStack, incluindo SQS, S3, Secrets Manager, SNS e EventBridge. | O container usa o enum para iniciar os serviços solicitados; as anotações disponíveis atualmente selecionam SQS e S3. |
+| **AwsSqsClientFactoryBean** | Cria e encerra o singleton SDK **SqsClient** apontado ao LocalStack. | Usa **AwsLocalStackConnection**; é registrado por **AwsSqsTestSupport**. |
+| **AwsSqsTestSupport** *(interno)* | Registra a definição Spring do factory bean SQS. | Chamado pelo registrar somente quando **AwsSqs** foi declarado. |
 
-## Atualização deste inventário
+### br.com.portalmanager.platform.library.testing.cloud.aws.annotation
 
-Ao criar, remover ou mover uma classe de produção, atualize a seção do pacote correspondente e confira também os relacionamentos descritos aqui.
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **WithAwsLocalStack** | Anotação agregadora para habilitar SQS, S3 ou ambos no teste. | Importa **AwsLocalStackImportRegistrar** e contém configurações **AwsSqs** e **AwsS3**. |
+| **AwsSqs** | Descreve filas e configurações de DLQ, recebimentos máximos e nome da fila. | O registrar lê seus atributos para provisionar recursos no **AwsLocalStackContainer**; possui a anotação aninhada **Queue**. |
+| **AwsS3** | Descreve os buckets que o container deve criar. | O registrar passa os nomes para **AwsLocalStackContainer**. |
+
+### br.com.portalmanager.platform.library.testing.cloud.azure
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AzureBlobServiceClientFactoryBean** | Cria o singleton SDK **BlobServiceClient** usando a connection string do Azurite. | Recebe **AzureBlobStorageContainer** e é registrado por **AzureBlobStorageTestSupport**. |
+| **AzureBlobStorageContainer** | Inicia Azurite e cria os containers Blob declarados. | Criado por **AzureEmulatorImportRegistrar** a partir de **AzureBlobStorage**. |
+| **AzureBlobStorageTestSupport** *(interno)* | Registra no Spring o factory bean do Blob client. | É chamado pelo registrar quando Blob Storage está habilitado. |
+| **AzureEmulatorImportRegistrar** | Interpreta os serviços Azure declarados e registra somente containers e clients correspondentes. | É importado por **WithAzureEmulator**; delega o registro a **AzureServiceBusTestSupport** e **AzureBlobStorageTestSupport**. |
+| **AzureServiceBusClientBuilderFactoryBean** | Cria o singleton SDK **ServiceBusClientBuilder** configurado para o emulador. | Recebe **AzureServiceBusContainer** e é registrado por **AzureServiceBusTestSupport**. |
+| **AzureServiceBusContainer** | Coordena rede, SQL Server e Service Bus Emulator durante o teste. | É criado pelo registrar a partir de **AzureServiceBus** e fornece a connection string ao factory bean. |
+| **AzureServiceBusTestSupport** *(interno)* | Registra no Spring a definição do builder Service Bus. | É chamado pelo registrar somente quando Service Bus foi declarado; implementa **AzureServiceTestSupport**. |
+| **AzureServiceTestSupport** *(interno)* | Contrato interno para registrar o suporte Spring de um serviço Azure. | Implementado por **AzureServiceBusTestSupport** e usado pelo registrar para delegação. |
+
+### br.com.portalmanager.platform.library.testing.cloud.azure.annotation
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **WithAzureEmulator** | Anotação agregadora para habilitar Service Bus, Blob Storage ou ambos. | Importa **AzureEmulatorImportRegistrar** e contém configurações **AzureServiceBus** e **AzureBlobStorage**. |
+| **AzureServiceBus** | Descreve filas, sessões e quantidade máxima de entregas. | O registrar passa seus atributos ao **AzureServiceBusContainer**; contém a anotação aninhada **Queue**. |
+| **AzureBlobStorage** | Lista os containers Blob a provisionar. | O registrar passa os nomes ao **AzureBlobStorageContainer**. |
+
+### br.com.portalmanager.platform.library.testing.context
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **TestContext** | Mantém um correlation ID por thread e cria um ID quando ainda não existe. | A factory HTTP lê o ID; as extensões de ciclo de vida limpam o contexto ao redor de cada teste. |
+
+### br.com.portalmanager.platform.library.testing.database
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **CleanupMode** | Escolhe limpeza antes de cada teste, depois de cada teste ou nenhuma limpeza. | Configura **MySqlTestExtension** via **WithMySql**. |
+| **DatabaseCleaner** | Descobre e trunca tabelas MySQL não excluídas; mantém cache da descoberta por banco. | Chamado por **MySqlTestExtension**; os scripts podem invalidar seu cache quando alteram o schema. |
+| **DatabaseCleanupPhase** | Define execução do cleanup SQL depois de cada teste ou depois da classe. | Usado pelo atributo homônimo de **WithDatabaseScripts** e interpretado por **DatabaseScriptExtension**. |
+| **DatabaseScriptExecutor** | Resolve, valida e executa os arquivos SQL indicados. | Chamado por **DatabaseScriptExtension** em cada fase configurada. |
+| **DatabaseScriptExtension** | Executa setup e cleanup na classe ou no método e em ordem inversa para limpeza. | É ativada por **WithDatabaseScripts** e delega SQL a **DatabaseScriptExecutor**. |
+| **DatabaseSetupPhase** | Define execução do setup SQL antes da classe ou antes de cada teste. | Usado por **WithDatabaseScripts** e interpretado por **DatabaseScriptExtension**. |
+| **MySqlTestConfiguration** | Declara um MySQL Testcontainers como service connection do Spring Boot. | Importada por **WithMySql**; fornece o banco que a extensão de limpeza acessa. |
+| **MySqlTestExtension** | Aplica o modo e as exclusões definidos na anotação MySQL. | É ativada por **WithMySql** e delega a limpeza a **DatabaseCleaner**. |
+
+### br.com.portalmanager.platform.library.testing.database.annotation
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **WithMySql** | Opt-in do MySQL e da limpeza automática de tabelas. | Importa **MySqlTestConfiguration**, registra **MySqlTestExtension** e define **CleanupMode** e tabelas excluídas. |
+| **WithDatabaseScripts** | Declara scripts, fases de setup/cleanup e se erros podem ser ignorados. | Registra **DatabaseScriptExtension**; é repetível e usa **DatabaseScripts** como container. |
+| **DatabaseScripts** | Contém várias declarações de **WithDatabaseScripts** no mesmo elemento Java. | É gerado pelo mecanismo de anotação repetível e lido pela extensão. |
+
+### br.com.portalmanager.platform.library.testing.fixture
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **TestClock** | Cria relógios fixos por instante, com UTC como fuso padrão. | Usado diretamente por builders, factories ou testes de domínio que precisam de tempo previsível. |
+| **TestIds** | Gera UUID determinístico a partir de uma seed. | Usado diretamente por fixtures que precisam de identificadores reproduzíveis. |
+
+### br.com.portalmanager.platform.library.testing.fixture.builder
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **TestDataBuilder** | Contrato funcional: **build** produz o objeto ou DTO de teste. | Implementado por builders de domínio; aceito por **AbstractTestDataFactory**. |
+| **AbstractTestDataBuilder** | Classe-base para builders fluentes com tipo concreto preservado por **self**. | Implementa **TestDataBuilder** e simplifica os métodos encadeáveis do builder do serviço. |
+
+### br.com.portalmanager.platform.library.testing.fixture.factory
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **TestDataFactory** | Contrato funcional que expõe a massa válida padrão por **valid**. | Implementado diretamente ou herdado por factories de domínio. |
+| **AbstractTestDataFactory** | Cria a massa padrão ou aplica uma customização antes de construir o resultado. | Depende de um **TestDataBuilder** concreto; implementa **TestDataFactory**. |
+
+### br.com.portalmanager.platform.library.testing.fixture.scenario
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **TestScenario** | Contrato funcional para **setup** de pré-condições e retorno do resultado preparado. | Implementado no serviço consumidor; pode compor factories e clients, mas não depende de HTTP na biblioteca. |
+
+### br.com.portalmanager.platform.library.testing.http
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AuthorizationRequestData** | Agrupa token, conta, ambiente e aplicação dos headers autorizados. | Criado pelo builder aninhado ou pelos valores padrão e consumido por **PlatformRequestSpecificationFactory**. |
+| **BaseClient** | Helper de herança para criar requests, adaptar respostas e serializar corpos com o **JsonMapper** injetado. | Usa **PlatformRequestSpecificationFactory** e pode produzir classes de resposta que estendem **BaseResponse**; é opcional ao client do serviço. |
+| **PlatformHttpTestConfiguration** | Registra a factory HTTP e coleta os customizadores ordenados do contexto. | Importada por **PlatformIntegrationTest**; fornece **PlatformRequestSpecificationFactory**. |
+| **PlatformRequestSpecificationCustomizer** | Contrato para alterar um **RequestSpecBuilder** antes de cada request. | Implementado por configurações do serviço; instâncias são fornecidas à factory pela configuração HTTP. |
+| **PlatformRequestSpecificationFactory** | Cria requests RestAssured novos com porta local, JSON, correlation ID e customizações; tem variantes autorizadas. | Usa **TestContext** e **AuthorizationRequestData**; é fornecida pela configuração HTTP e consumida pelos clients. |
+
+### br.com.portalmanager.platform.library.testing.http.response
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **BaseResponse** | Oferece assertions fluentes de status e corpo JSON, extração tipada e acesso à resposta HTTP. | Estendida por responses de domínio; clients concretos encapsulam o **ValidatableResponse** nela. |
+
+### br.com.portalmanager.platform.library.testing.kafka
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **KafkaTestConfiguration** | Declara o container Kafka como service connection do Spring Boot. | Importada por **WithKafka**; disponibiliza o broker para o contexto de teste. |
+
+### br.com.portalmanager.platform.library.testing.kafka.annotation
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **WithKafka** | Habilita Kafka no contexto de teste. | Importa **KafkaTestConfiguration**; o teste que não usa a anotação não inicia esse container. |
+
+### br.com.portalmanager.platform.library.testing.lifecycle
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **PlatformIntegrationExtension** | Limpa o correlation ID antes e depois de cada teste de integração. | É registrada por **PlatformIntegrationTest** e opera sobre **TestContext**. |
+| **PlatformUnitTestExtension** | Limpa correlation ID e MDC antes e depois de cada teste unitário. | É registrada por **PlatformUnitTest** e opera sobre **TestContext** e MDC. |
+| **TestPerformanceExtension** | Mede a duração dos métodos, registra os lentos e resume tempos ao final da classe. | É registrada por **PlatformIntegrationTest** e não interfere no ciclo de negócio do teste. |
+
+### br.com.portalmanager.platform.library.testing.lifecycle.annotation
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **PlatformIntegrationTest** | Anotação composta de Spring Boot para teste HTTP de integração, profile **test** e servidor em porta aleatória. | Importa **PlatformHttpTestConfiguration** e registra **PlatformIntegrationExtension** e **TestPerformanceExtension**. |
+| **PlatformUnitTest** | Anotação composta de Mockito e isolamento leve para testes unitários. | Registra **MockitoExtension** e **PlatformUnitTestExtension**; não sobe o contexto da aplicação. |
+
+## Como manter este mapa útil
+
+Ao adicionar, remover ou mover um tipo de produção, atualize a tabela do pacote. Se mudar quem importa, cria, registra ou chama uma classe, atualize também o diagrama do subsistema afetado.
