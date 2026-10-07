@@ -910,7 +910,7 @@ class OrderAzureIT {
 }
 ```
 
-Se usar só um serviço Azure, declare somente o respectivo bloco e SDK. Os nomes de fila/container são criados pela fixture; o guia do serviço descreve as propriedades e os clients disponibilizados.
+Se usar só um serviço Azure, declare somente o respectivo bloco e SDK. A fixture cria os recursos declarados e disponibiliza os clients com os endpoints do emulador.
 
 > As versões são gerenciadas pelo BOM da plataforma. Não declare versões manualmente quando o BOM estiver importado.
 
