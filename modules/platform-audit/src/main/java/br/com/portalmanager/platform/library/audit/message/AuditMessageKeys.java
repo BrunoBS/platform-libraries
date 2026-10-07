@@ -11,7 +11,6 @@ public final class AuditMessageKeys {
     public static final String EVENT_SERIALIZATION_FAILED = PREFIX + "event.serialization-failed";
     public static final String TRANSACTION_REQUIRED = PREFIX + "transaction.required";
     public static final String BEFORE_SNAPSHOT_PROVIDER_REQUIRED = PREFIX + "before-snapshot.provider-required";
-    public static final String CUSTOM_ACTION_NOT_CONFIGURED = PREFIX + "custom-action.not-configured";
 
     private AuditMessageKeys() {
     }
