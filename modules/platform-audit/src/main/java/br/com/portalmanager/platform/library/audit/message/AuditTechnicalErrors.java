@@ -28,6 +28,14 @@ public final class AuditTechnicalErrors {
                     500
             );
 
+    public static final PlatformErrorDefinition OUTBOX_REPOSITORY_MISMATCH =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-006",
+                    "The audit outbox repository does not manage the mapped outbox entity",
+                    "Register an AuditOutboxRepository for the concrete entity extending AuditOutboxEntity.",
+                    500
+            );
+
     private AuditTechnicalErrors() {
     }
 }
