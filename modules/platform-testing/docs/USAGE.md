@@ -23,7 +23,7 @@ Declare a biblioteca com escopo `test`. Quando o BOM estiver importado, não inf
 
 Sem o BOM, declare a versão alinhada à release de `platform-libraries`.
 
-A biblioteca mantém Datafaker transitivamente disponível para consumidores que já o utilizam para gerar massa de teste. Dependências de Kafka e cloud são opcionais: adicione explicitamente os módulos indicados nas seções correspondentes.
+A biblioteca mantém transitivamente disponíveis as dependências necessárias para as fixtures de MySQL, Kafka, AWS e Azure. O consumidor declara apenas `platform-testing` com escopo `test`; os recursos continuam sendo ativados pelas anotações de cada teste.
 
 ## Teste de integração básico
 
@@ -127,20 +127,7 @@ class ProductEventsIT {
 }
 ```
 
-Como as dependências Kafka do módulo são opcionais, adicione ao consumidor as dependências de teste necessárias para a versão gerenciada pelo BOM:
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-kafka</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>testcontainers-kafka</artifactId>
-    <scope>test</scope>
-</dependency>
-```
+As dependências Kafka necessárias já chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor.
 
 O Spring Boot recebe a conexão do container por meio de Service Connection. Tópicos, serializers, producers e consumers continuam sendo responsabilidade do serviço.
 
@@ -216,27 +203,9 @@ class OrderCloudIT {
 }
 ```
 
-As dependências são opcionais no módulo. Adicione somente as usadas pelo teste, com escopo `test`:
+As dependências do LocalStack e dos SDKs SQS/S3 chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor.
 
-```xml
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>testcontainers-localstack</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>sqs</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>s3</artifactId>
-    <scope>test</scope>
-</dependency>
-```
-
-Se o teste usar apenas SQS ou apenas S3, remova a outra configuração e a dependência do respectivo SDK. A fixture registra clients configurados para o endpoint local.
+Se o teste usar apenas SQS ou apenas S3, remova a outra configuração da anotação. A fixture registra clients configurados para o endpoint local.
 
 ## Azure Emulator
 
@@ -254,37 +223,9 @@ class OrderAzureIT {
 }
 ```
 
-Adicione os módulos usados com escopo `test`. O emulador atual também requer Testcontainers e o driver SQL Server:
+As dependências do emulador Azure, SQL Server, Service Bus e Blob Storage chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor.
 
-```xml
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>testcontainers-azure</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>testcontainers-mssqlserver</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>com.microsoft.sqlserver</groupId>
-    <artifactId>mssql-jdbc</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>com.azure</groupId>
-    <artifactId>azure-messaging-servicebus</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>com.azure</groupId>
-    <artifactId>azure-storage-blob</artifactId>
-    <scope>test</scope>
-</dependency>
-```
-
-Remova o bloco e o SDK do serviço que o teste não utiliza. A fixture cria os recursos declarados e disponibiliza os clients com endpoints do emulador.
+Declare somente o serviço utilizado na anotação. A fixture cria os recursos declarados e disponibiliza os clients com endpoints do emulador.
 
 ## Validação arquitetural opt-in
 

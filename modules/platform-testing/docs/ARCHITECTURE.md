@@ -86,7 +86,7 @@ Os registrars cloud interpretam as anotações e registram beans de container e 
 - AWS: LocalStack com SQS e/ou S3. A anotação de fila aceita configuração de DLQ, fila FIFO pelo nome e quantidade máxima de recebimentos.
 - Azure: emulador para filas do Service Bus e containers do Blob Storage. Filas podem habilitar sessions e configurar `maxDeliveryCount`.
 
-As dependências Maven de AWS e Azure são opcionais no artefato. O serviço consumidor adiciona em escopo `test` apenas os módulos Testcontainers e SDKs que usa.
+As dependências de Kafka, AWS e Azure são incluídas no artefato sem marcação opcional. O consumidor declara somente `platform-testing` com escopo `test`; as anotações ativam apenas os containers e serviços usados em cada teste.
 
 ## HTTP e contexto do teste
 
@@ -123,7 +123,7 @@ A regra é opt-in e não é executada automaticamente para todos os serviços.
 ## Dependências e fronteiras
 
 - A dependência de `platform-testing` deve ser declarada pelo consumidor com escopo `test`.
-- Dependências de infraestrutura cloud e Kafka são opcionais e precisam ser adicionadas pelo consumidor que ativa essas fixtures.
+- Dependências de infraestrutura cloud e Kafka são fornecidas transitivamente por `platform-testing`; o consumidor declara apenas essa biblioteca com escopo `test`.
 - MySQL, RestAssured, WireMock, ArchUnit e as extensões Spring/JUnit implementam as capacidades descritas pelas APIs públicas.
 - O módulo expõe Datafaker para compatibilidade com consumidores que já o utilizam em seus testes.
 

@@ -19,7 +19,7 @@ O `platform-testing` reúne convenções e fixtures reutilizáveis para testes u
 - utilitários para requests HTTP, respostas, builders, factories, cenários, relógio e IDs;
 - regras arquiteturais para validar testes focados.
 
-Os serviços cloud e o Kafka são opt-in. O guia completo lista as dependências Maven específicas de cada fixture.
+Kafka e serviços cloud são opt-in pelas anotações correspondentes. As dependências necessárias já são fornecidas transitivamente por `platform-testing`.
 
 ## Pré-requisitos
 

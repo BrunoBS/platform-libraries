@@ -813,29 +813,11 @@ O endereço do broker é registrado automaticamente. As propriedades de serializ
 
 ## 17. AWS LocalStack e Azure Emulator
 
-As fixtures cloud são opcionais. Adicione ao POM consumidor somente as dependências dos serviços usados, todas com escopo `test`.
+As dependências de Kafka e dos providers cloud são incluídas transitivamente por `platform-testing`, que o consumidor declara uma única vez com escopo `test`. As anotações continuam opt-in: somente os containers descritos no teste são iniciados.
 
 ### AWS LocalStack
 
-Para SQS, inclua `testcontainers-localstack` e `software.amazon.awssdk:sqs`. Para S3, inclua também `software.amazon.awssdk:s3`.
-
-```xml
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>testcontainers-localstack</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>sqs</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>software.amazon.awssdk</groupId>
-    <artifactId>s3</artifactId>
-    <scope>test</scope>
-</dependency>
-```
+As dependências do LocalStack e dos SDKs SQS/S3 já chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor.
 
 Declare apenas os serviços e recursos necessários. O exemplo provisiona uma fila SQS com dead-letter queue e um bucket S3:
 
@@ -858,39 +840,11 @@ class OrderCloudIT {
 }
 ```
 
-Se o teste usar apenas SQS, remova o bloco `s3` da anotação e a dependência do SDK S3; vale o mesmo para o inverso. A fixture configura os clientes e endpoints locais para os serviços declarados.
+Se o teste usar apenas SQS ou apenas S3, declare somente o serviço correspondente na anotação. A fixture configura os clientes e endpoints locais para os serviços declarados.
 
 ### Azure Emulator
 
-Para Service Bus, inclua `testcontainers-azure` e `com.azure:azure-messaging-servicebus`. Para Blob Storage, inclua também `com.azure:azure-storage-blob`. A fixture Azure ainda utiliza os módulos de container SQL Server e o driver JDBC do SQL Server para subir o emulador:
-
-```xml
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>testcontainers-azure</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>org.testcontainers</groupId>
-    <artifactId>testcontainers-mssqlserver</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>com.microsoft.sqlserver</groupId>
-    <artifactId>mssql-jdbc</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>com.azure</groupId>
-    <artifactId>azure-messaging-servicebus</artifactId>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>com.azure</groupId>
-    <artifactId>azure-storage-blob</artifactId>
-    <scope>test</scope>
-</dependency>
-```
+As dependências do emulador Azure, SQL Server, Service Bus e Blob Storage também chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor.
 
 Exemplo com fila do Service Bus e container de Blob Storage:
 
@@ -910,7 +864,7 @@ class OrderAzureIT {
 }
 ```
 
-Se usar só um serviço Azure, declare somente o respectivo bloco e SDK. A fixture cria os recursos declarados e disponibiliza os clients com os endpoints do emulador.
+Declare somente os serviços usados na anotação. A fixture cria os recursos declarados e disponibiliza os clients com os endpoints do emulador.
 
 > As versões são gerenciadas pelo BOM da plataforma. Não declare versões manualmente quando o BOM estiver importado.
 

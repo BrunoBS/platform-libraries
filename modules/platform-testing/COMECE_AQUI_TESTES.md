@@ -47,7 +47,7 @@ Adicione apenas o que precisar:
 
 ## 3. Infraestrutura opcional
 
-Além de MySQL, Kafka e autorização simulada, o módulo oferece fixtures para AWS LocalStack e emuladores Azure. Cada fixture cloud exige dependências específicas no microsserviço; consulte [AWS LocalStack e Azure Emulator](GUIA_DE_USO.md#17-aws-localstack-e-azure-emulator) antes de usar essas anotações.
+Além de MySQL, Kafka e autorização simulada, o módulo oferece fixtures para AWS LocalStack e emuladores Azure. As dependências dos providers já são fornecidas transitivamente por `platform-testing`; consulte [AWS LocalStack e Azure Emulator](GUIA_DE_USO.md#17-aws-localstack-e-azure-emulator) para configurar os recursos usados.
 
 ## 4. Organização recomendada
 
