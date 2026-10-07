@@ -2,6 +2,11 @@
 
 O `platform-testing` reúne convenções e fixtures reutilizáveis para testes unitários e de integração dos microsserviços da plataforma.
 
+## Documentação do módulo
+
+- [Arquitetura](docs/ARCHITECTURE.md): pacotes, componentes e fluxo das extensões.
+- [Guia de uso](docs/USAGE.md): instalação, configuração e exemplos de consumo.
+
 ## Comece por aqui
 
 - [Guia rápido](COMECE_AQUI_TESTES.md): organização, primeiros testes e uso do módulo.
