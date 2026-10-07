@@ -32,7 +32,6 @@ class AuditMessageBundleTest {
                 AuditMessageKeys.SNAPSHOT_REQUIRED,
                 AuditMessageKeys.TRANSACTION_REQUIRED,
                 AuditMessageKeys.BEFORE_SNAPSHOT_PROVIDER_REQUIRED,
-                AuditMessageKeys.CUSTOM_ACTION_NOT_CONFIGURED,
                 AuditMessageKeys.EVENT_SERIALIZATION_FAILED
         };
 
