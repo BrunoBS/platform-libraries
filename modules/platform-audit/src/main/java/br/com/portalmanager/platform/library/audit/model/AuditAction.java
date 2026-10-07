@@ -8,8 +8,7 @@ public enum AuditAction {
     DEACTIVATE,
     RESTORE,
     DELETE,
-    PURGE,
-    CUSTOM;
+    PURGE;
 
     public boolean capturesBefore() {
         return this == PURGE;
