@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.testing.cloud.aws.s3.AwsS3TestSuppo
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.AwsSqsTestSupport;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
-import br.com.portalmanager.platform.library.testing.cloud.aws.s3.notification.sqs.annotation.AwsS3SqsNotification;
+import br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;

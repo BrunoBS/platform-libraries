@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.s3.notification.sqs.annotation;
+package br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation;
 
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 import java.lang.annotation.ElementType;
