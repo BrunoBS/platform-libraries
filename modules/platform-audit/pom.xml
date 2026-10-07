@@ -9,7 +9,6 @@
     </parent>
 
     <artifactId>platform-audit</artifactId>
-    <version>${revision}</version>
     <packaging>jar</packaging>
     <name>platform-audit</name>
 
