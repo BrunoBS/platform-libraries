@@ -13,7 +13,6 @@ import java.util.Objects;
 public final class AuditOutboxAppender {
 
     private final AuditOutboxRepository<?> repository;
-    private final Repositories repositories;
     private final Class<? extends AuditOutboxEntity> entityType;
 
     public AuditOutboxAppender(
@@ -22,9 +21,9 @@ public final class AuditOutboxAppender {
             Repositories repositories
     ) {
         this.repository = Objects.requireNonNull(repository, "audit outbox repository must not be null");
-        this.repositories = Objects.requireNonNull(repositories, "repositories must not be null");
+        Repositories repositoryRegistry = Objects.requireNonNull(repositories, "repositories must not be null");
         this.entityType = resolveEntityType(entityManager);
-        validateRepository();
+        validateRepository(repositoryRegistry);
     }
 
     public void append(JsonNode payload, JsonNode metadata) {
@@ -33,7 +32,7 @@ public final class AuditOutboxAppender {
         repository.append(entry);
     }
 
-    private void validateRepository() {
+    private void validateRepository(Repositories repositories) {
         Object entityRepository = repositories.getRepositoryFor(entityType).orElse(null);
         if (entityRepository != repository) {
             throw new PlatformConfigurationException(AuditTechnicalErrors.OUTBOX_REPOSITORY_MISMATCH);
