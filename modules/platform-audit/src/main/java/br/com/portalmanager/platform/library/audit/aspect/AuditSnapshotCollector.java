@@ -1,9 +1,12 @@
 package br.com.portalmanager.platform.library.audit.aspect;
 
 import br.com.portalmanager.platform.library.audit.annotation.Auditable;
+import br.com.portalmanager.platform.library.audit.exception.AuditException;
+import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,13 +16,17 @@ import java.util.List;
 public final class AuditSnapshotCollector {
 
     private final AuditBeforeSnapshotProvider beforeSnapshotProvider;
+    private final ObjectMapper objectMapper;
 
-    public AuditSnapshotCollector(AuditBeforeSnapshotProvider beforeSnapshotProvider) {
+    public AuditSnapshotCollector(
+            AuditBeforeSnapshotProvider beforeSnapshotProvider,
+            ObjectMapper objectMapper
+    ) {
         this.beforeSnapshotProvider = beforeSnapshotProvider;
+        this.objectMapper = objectMapper;
     }
 
     public List<CapturedAuditSnapshot> captureBefore(
-            Method method,
             Object[] arguments,
             Auditable[] annotations
     ) {
@@ -27,7 +34,8 @@ public final class AuditSnapshotCollector {
         for (Auditable annotation : annotations) {
             if (annotation.action().capturesBefore()) {
                 requireBeforeSnapshotProvider();
-                Object snapshot = beforeSnapshotProvider.capture(method, arguments, annotation);
+                String resourceIdentifier = resourceIdentifier(arguments);
+                Object snapshot = beforeSnapshotProvider.capture(resourceIdentifier);
                 snapshots.add(new CapturedAuditSnapshot(annotation, snapshot));
             }
         }
@@ -47,6 +55,40 @@ public final class AuditSnapshotCollector {
             }
         }
         return snapshots;
+    }
+
+    private String resourceIdentifier(Object[] arguments) {
+        if (arguments != null) {
+            for (Object argument : arguments) {
+                if (argument == null) {
+                    continue;
+                }
+
+                JsonNode input;
+                try {
+                    input = objectMapper.valueToTree(argument);
+                } catch (Exception exception) {
+                    throw new AuditException(AuditMessageKeys.EVENT_SERIALIZATION_FAILED, exception);
+                }
+                if (input == null || !input.isObject()) {
+                    continue;
+                }
+
+                String identifier = identifier(input, "identifier");
+                if (identifier == null || identifier.isBlank()) {
+                    identifier = identifier(input, "id");
+                }
+                if (identifier != null && !identifier.isBlank()) {
+                    return identifier;
+                }
+            }
+        }
+        throw new AuditException(AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING);
+    }
+
+    private String identifier(JsonNode input, String property) {
+        JsonNode value = input.get(property);
+        return value == null || value.isNull() ? null : value.asText();
     }
 
     private void requireBeforeSnapshotProvider() {
