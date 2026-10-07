@@ -40,7 +40,7 @@ class AuditAspectTest {
     private final AuditEventFactory singleEventFactory =
             new AuditEventFactory(properties, contextResolver, new ObjectMapper());
     private final AuditAspect aspect = new AuditAspect(
-            new AuditSnapshotCollector(beforeSnapshotProvider),
+            new AuditSnapshotCollector(beforeSnapshotProvider, new ObjectMapper()),
             new AuditInvocationEventFactory(singleEventFactory),
             outboxAppender
     );
@@ -76,11 +76,13 @@ class AuditAspectTest {
     @Test
     void shouldCapturePurgeSnapshotBeforeExecutingTheUseCase() throws Throwable {
         List<String> order = new ArrayList<>();
-        when(beforeSnapshotProvider.capture(any(), any(), any())).thenAnswer(invocation -> {
+        when(beforeSnapshotProvider.capture("key-1")).thenAnswer(invocation -> {
             order.add("capture");
             return new ObjectMapper().valueToTree(Map.of("identifier", "key-1", "lifecycle", "INACTIVE"));
         });
-        ProceedingJoinPoint joinPoint = joinPoint("purge", null);
+        ProceedingJoinPoint joinPoint = joinPoint(
+                "purge", null, new Object[]{Map.of("identifier", "key-1")}
+        );
         doAnswer(invocation -> {
             order.add("proceed");
             return null;
@@ -89,6 +91,7 @@ class AuditAspectTest {
         aspect.audit(joinPoint);
 
         assertThat(order).containsExactly("capture", "proceed");
+        verify(beforeSnapshotProvider).capture("key-1");
         verify(outboxAppender).append(any(), any());
     }
 
@@ -153,6 +156,10 @@ class AuditAspectTest {
     }
 
     private ProceedingJoinPoint joinPoint(String methodName, Object result) throws Throwable {
+        return joinPoint(methodName, result, new Object[0]);
+    }
+
+    private ProceedingJoinPoint joinPoint(String methodName, Object result, Object[] arguments) throws Throwable {
         Method method = TestUseCase.class.getDeclaredMethod(methodName);
         MethodSignature signature = mock(MethodSignature.class);
         when(signature.getMethod()).thenReturn(method);
@@ -160,7 +167,7 @@ class AuditAspectTest {
         when(joinPoint.proceed()).thenReturn(result);
         when(joinPoint.getSignature()).thenReturn(signature);
         when(joinPoint.getTarget()).thenReturn(new TestUseCase());
-        when(joinPoint.getArgs()).thenReturn(new Object[0]);
+        when(joinPoint.getArgs()).thenReturn(arguments);
         return joinPoint;
     }
 
