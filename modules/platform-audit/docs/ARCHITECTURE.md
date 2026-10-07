@@ -99,7 +99,7 @@ sequenceDiagram
 
 | Classe | Objetivo |
 | --- | --- |
-| `AuditAction` | Estratégia técnica que define o momento de captura. `PURGE` captura antes; as demais ações implementadas capturam o retorno. O valor não é persistido como fato de negócio. `CUSTOM` ainda não tem estratégia e falha quando usado. |
+| `AuditAction` | Estratégia técnica que define o momento de captura. `PURGE` captura antes; as demais ações capturam o retorno. O valor não é persistido como fato de negócio. |
 | `AuditContext` | Dados de identidade e rastreamento lidos da sessão atual: account, application, environment, actor e correlation id. |
 | `AuditMetadata` | Modelo dos metadados do evento: serviço, tipo de recurso, fato, identificador, contexto e instante de ocorrência. |
 | `AuditOutboxStatus` | Estados técnicos da linha de outbox (`PENDING`, `PROCESSING`, `PROCESSED`, `RETRY`, `FAILED`). Nesta etapa o fluxo grava como `PENDING`; o worker que avançará os demais estados ainda não está neste módulo. |
