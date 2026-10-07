@@ -103,6 +103,42 @@ O método precisa ser chamado por um bean Spring. Chamadas internas entre métod
 
 Para `PURGE`, registre um bean que implemente `AuditBeforeSnapshotProvider`. Ele recebe o método chamado, os argumentos e a anotação; deve buscar e devolver o estado salvo antes da remoção, como `JsonNode`. Esse snapshot também precisa conter `identifier` ou `id`.
 
+No exemplo abaixo, o Use Case recebe um único `PurgeKeyInput`; o provider usa esse argumento para buscar o recurso antes da remoção e transforma um DTO de auditoria em `JsonNode`:
+
+```java
+import br.com.portalmanager.platform.library.audit.annotation.Auditable;
+import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
+import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
+import java.lang.reflect.Method;
+
+@Component
+public class KeyBeforeSnapshotProvider implements AuditBeforeSnapshotProvider {
+
+    private final KeyRepository keyRepository;
+    private final ObjectMapper objectMapper;
+
+    public KeyBeforeSnapshotProvider(KeyRepository keyRepository, ObjectMapper objectMapper) {
+        this.keyRepository = keyRepository;
+        this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public JsonNode capture(Method method, Object[] arguments, Auditable auditable) {
+        if (arguments.length == 0 || !(arguments[0] instanceof PurgeKeyInput input)) {
+            throw new IllegalArgumentException("PURGE requires a PurgeKeyInput argument");
+        }
+
+        Key key = keyRepository.findByIdentifier(input.identifier()).orElseThrow();
+        return objectMapper.valueToTree(KeyAuditSnapshot.from(key));
+    }
+}
+```
+
+`KeyRepository`, `PurgeKeyInput` e `KeyAuditSnapshot` são tipos do serviço consumidor. Ajuste a leitura dos argumentos e a consulta ao repositório ao contrato do seu Use Case. O provider é chamado antes da execução do método anotado.
+
 Se o retorno do Use Case for uma coleção, cada elemento gera um registro de auditoria.
 
 ## 7. Disponibilize o contexto de autorização
