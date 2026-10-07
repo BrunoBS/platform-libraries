@@ -11,11 +11,13 @@ import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotPro
 import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxAppender;
 import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxRepository;
 import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.repository.support.Repositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import tools.jackson.databind.ObjectMapper;
 
@@ -58,9 +60,10 @@ public class PlatformAuditAutoConfiguration {
     @ConditionalOnMissingBean(AuditOutboxAppender.class)
     AuditOutboxAppender auditOutboxAppender(
             AuditOutboxRepository<?> repository,
-            EntityManager entityManager
+            EntityManager entityManager,
+            ListableBeanFactory beanFactory
     ) {
-        return new AuditOutboxAppender(repository, entityManager);
+        return new AuditOutboxAppender(repository, entityManager, new Repositories(beanFactory));
     }
 
     @Bean
