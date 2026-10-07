@@ -111,7 +111,7 @@ sequenceDiagram
 | `AuditBeforeSnapshotProvider` | Extensão opcional da aplicação para fornecer o estado persistido antes de um `PURGE`. Recebe método, argumentos e anotação; devolve um `JsonNode`. |
 | `AuditOutboxEntity` | Mapeamento JPA abstrato comum (`@MappedSuperclass`) para a tabela do consumidor. Contém payload e metadados JSON, identificador, estado técnico e colunas de controle. Inicializa identificador/status e recebe payload/metadata antes da persistência. |
 | `AuditOutboxRepository` | Contrato genérico `@NoRepositoryBean` baseado em `JpaRepository`. Cada serviço cria uma interface tipada para sua entidade concreta. Seu método `append` encaminha a entidade ao `save` do Spring Data. |
-| `AuditOutboxAppender` | Ponte entre evento e persistência. Procura no metamodelo JPA exatamente uma entidade concreta que estenda `AuditOutboxEntity`, instancia-a, prepara payload e metadados e grava pelo repository. Mantém a resolução de JPA escondida do Aspect. |
+| `AuditOutboxAppender` | Ponte entre evento e persistência. Procura no metamodelo JPA exatamente uma entidade concreta que estenda `AuditOutboxEntity`, valida na inicialização se o repository injetado gerencia essa entidade, instancia-a, prepara payload e metadados e grava pelo repository. Mantém a resolução de JPA escondida do Aspect. |
 
 ## Arquivos de suporte
 
@@ -126,6 +126,6 @@ sequenceDiagram
 - A transação precisa estar ativa antes do Aspect. A configuração da library usa ordem 100 para o gerenciamento transacional e ordem 200 para `AuditAspect`.
 - A sessão `UserContext` precisa existir para compor os metadados.
 - O snapshot precisa ser um objeto JSON com `identifier` ou `id`. Uma coleção de retorno gera uma linha por elemento; a library não aplica limites de tamanho ou quantidade.
-- O consumidor possui a tabela física e declara a entidade concreta e o repository. Por unidade de persistência, a resolução atual exige exatamente uma entidade concreta de outbox.
+- O consumidor possui a tabela física e declara a entidade concreta e o repository correspondente. Por unidade de persistência, a resolução exige exatamente uma entidade concreta de outbox e verifica na inicialização se o repository injetado gerencia essa entidade.
 - A entidade mapeia JSON por `@JdbcTypeCode(SqlTypes.JSON)` e usa `tools.jackson.databind.JsonNode`. A autoconfiguração não substitui/configura globalmente o `ObjectMapper` da aplicação.
 - A persistência da outbox é transacional; esta etapa não publica o evento nem executa processamento assíncrono posterior.
