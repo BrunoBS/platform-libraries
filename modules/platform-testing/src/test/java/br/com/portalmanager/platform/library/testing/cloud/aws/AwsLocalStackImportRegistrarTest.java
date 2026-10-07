@@ -1,8 +1,5 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsS3;
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsSqs;
-import br.com.portalmanager.platform.library.testing.cloud.aws.WithAwsLocalStack;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;

@@ -1,8 +1,5 @@
 package br.com.portalmanager.platform.library.testing.database;
 
-import br.com.portalmanager.platform.library.testing.database.WithMySql;
-import br.com.portalmanager.platform.library.testing.database.CleanupMode;
-import br.com.portalmanager.platform.library.testing.database.DatabaseCleaner;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;

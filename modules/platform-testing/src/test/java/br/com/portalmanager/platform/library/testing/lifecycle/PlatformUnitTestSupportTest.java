@@ -1,6 +1,5 @@
 package br.com.portalmanager.platform.library.testing.lifecycle;
 
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformUnitTest;
 import br.com.portalmanager.platform.library.testing.context.TestContext;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;

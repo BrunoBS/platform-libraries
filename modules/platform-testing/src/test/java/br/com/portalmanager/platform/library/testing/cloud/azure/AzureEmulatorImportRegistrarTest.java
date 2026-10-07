@@ -1,8 +1,5 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
-import br.com.portalmanager.platform.library.testing.cloud.azure.AzureBlobStorage;
-import br.com.portalmanager.platform.library.testing.cloud.azure.AzureServiceBus;
-import br.com.portalmanager.platform.library.testing.cloud.azure.WithAzureEmulator;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import org.junit.jupiter.api.Test;

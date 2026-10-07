@@ -24,7 +24,9 @@ O módulo não contém regras de negócio dos serviços. Builders, factories, ce
 | `kafka` | Anotação e container Kafka conectado ao contexto Spring de teste. |
 | `lifecycle` | Anotações e extensões JUnit para inicialização, isolamento e métricas dos testes. |
 
-As anotações ficam no pacote do contexto que ativam; `annotation` não é um pacote público separado. `PlatformIntegrationTest`/`PlatformUnitTest` ficam em `lifecycle`, enquanto as anotações de infraestrutura ficam em seus contextos específicos.\n\n## Fluxo de um teste de integração
+As anotações ficam no pacote do contexto que ativam; `annotation` não é um pacote público separado. `PlatformIntegrationTest`/`PlatformUnitTest` ficam em `lifecycle`, enquanto as anotações de infraestrutura ficam em seus contextos específicos.
+
+## Fluxo de um teste de integração
 
 `@PlatformIntegrationTest` combina Spring Boot, servidor web em porta aleatória, profile `test`, configuração HTTP e extensões de ciclo de vida. As fixtures de infraestrutura são habilitadas separadamente pelas anotações do teste.
 

@@ -1,7 +1,5 @@
 package br.com.portalmanager.platform.library.testing.lifecycle;
 
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformIntegrationExtension;
-import br.com.portalmanager.platform.library.testing.lifecycle.TestPerformanceExtension;
 import br.com.portalmanager.platform.library.testing.http.PlatformHttpTestConfiguration;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;

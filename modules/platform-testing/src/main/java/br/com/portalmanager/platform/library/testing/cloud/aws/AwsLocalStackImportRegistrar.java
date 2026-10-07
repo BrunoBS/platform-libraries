@@ -1,6 +1,5 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
-import br.com.portalmanager.platform.library.testing.cloud.aws.WithAwsLocalStack;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
