@@ -130,6 +130,11 @@
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
         </dependency>
+        <!-- Exposes Datafaker to consumers that generate test data. -->
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
