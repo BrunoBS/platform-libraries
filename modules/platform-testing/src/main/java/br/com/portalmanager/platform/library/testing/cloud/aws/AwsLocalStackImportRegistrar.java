@@ -1,9 +1,11 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
+import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -56,7 +58,7 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             bucketNotifications = s3Notifications(s3SqsNotifications, buckets, queues);
         }
         if (services.isEmpty()) {
-            throw new IllegalArgumentException("At least one AWS service annotation must be configured");
+            throw configurationException("At least one AWS service annotation must be configured");
         }
 
         registerContainer(registry, services, queues, buckets, redrivePolicies, bucketNotifications);
@@ -86,11 +88,11 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             }
             requireName(deadLetterQueue, "SQS dead-letter queue");
             if (name.equals(deadLetterQueue)) {
-                throw new IllegalArgumentException("SQS source and dead-letter queues must be different");
+                throw configurationException("SQS source and dead-letter queues must be different");
             }
             int maxReceiveCount = queue.getNumber("maxReceiveCount").intValue();
             if (maxReceiveCount < 1) {
-                throw new IllegalArgumentException("SQS maxReceiveCount must be a positive integer");
+                throw configurationException("SQS maxReceiveCount must be a positive integer");
             }
             addUnique(queues, deadLetterQueue, "SQS queue");
             redrivePolicies.add(new String[]{name, deadLetterQueue, Integer.toString(maxReceiveCount)});
@@ -107,13 +109,15 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             requireName(bucket, "S3 notification bucket");
             requireName(queue, "S3 notification queue");
             if (!Arrays.asList(buckets).contains(bucket)) {
-                throw new IllegalArgumentException("S3 notification bucket must be declared in AwsS3.buckets: " + bucket);
+                throw configurationException(
+                        "S3 notification bucket must be declared in AwsS3.buckets: " + bucket);
             }
             if (!Arrays.asList(queues).contains(queue)) {
-                throw new IllegalArgumentException("S3 notification queue must be declared in AwsSqs.queues: " + queue);
+                throw configurationException(
+                        "S3 notification queue must be declared in AwsSqs.queues: " + queue);
             }
             if (queue.endsWith(".fifo")) {
-                throw new IllegalArgumentException("S3 notifications cannot target FIFO queues: " + queue);
+                throw configurationException("S3 notifications cannot target FIFO queues: " + queue);
             }
             notifications.add(new String[]{bucket, queue});
         }
@@ -122,15 +126,19 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
 
     private void requireName(String name, String type) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException(type + " name must not be blank");
+            throw configurationException(type + " name must not be blank");
         }
     }
 
     private void addUnique(List<String> values, String value, String type) {
         if (values.contains(value)) {
-            throw new IllegalArgumentException("Duplicate " + type + " name: " + value);
+            throw configurationException("Duplicate " + type + " name: " + value);
         }
         values.add(value);
+    }
+
+    private PlatformConfigurationException configurationException(String detail) {
+        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail));
     }
 
     private void registerContainer(
@@ -187,7 +195,7 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
 
     private void requireSingle(String annotationName, AnnotationAttributes[] annotations) {
         if (annotations.length > 1) {
-            throw new IllegalArgumentException(annotationName + " may be declared only once");
+            throw configurationException(annotationName + " may be declared only once");
         }
     }
 

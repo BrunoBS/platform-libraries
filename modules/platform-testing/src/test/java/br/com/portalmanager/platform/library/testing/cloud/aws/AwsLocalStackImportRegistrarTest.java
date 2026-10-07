@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsSqs;
@@ -43,14 +44,16 @@ class AwsLocalStackImportRegistrarTest {
     }
 
     @Test
-    void shouldRejectNotificationToUndeclaredQueue() {
+    void shouldRejectNotificationToUndeclaredQueueWithPlatformConfigurationError() {
         DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        PlatformConfigurationException exception = assertThrows(PlatformConfigurationException.class,
                 () -> registrar.registerBeanDefinitions(
                         AnnotationMetadata.introspect(InvalidAwsCloudTest.class), registry));
 
-        assertTrue(exception.getMessage().contains("must be declared in AwsSqs.queues"));
+        assertEquals("PLT-TST-001", exception.getErrorResponse().code());
+        assertTrue(exception.getErrorResponse().message().contains("must be declared in AwsSqs.queues"));
+        assertTrue(exception.getErrorResponse().solution().contains("@WithAwsLocalStack"));
     }
 
     @WithAwsLocalStack(
