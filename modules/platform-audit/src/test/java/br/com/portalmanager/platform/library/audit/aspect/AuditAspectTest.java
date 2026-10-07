@@ -40,7 +40,7 @@ class AuditAspectTest {
     private final AuditEventFactory singleEventFactory =
             new AuditEventFactory(properties, contextResolver, new ObjectMapper());
     private final AuditAspect aspect = new AuditAspect(
-            new AuditSnapshotCollector(beforeSnapshotProvider, new ObjectMapper()),
+            new AuditSnapshotCollector(beforeSnapshotProvider),
             new AuditInvocationEventFactory(singleEventFactory),
             outboxAppender
     );
@@ -76,7 +76,7 @@ class AuditAspectTest {
     @Test
     void shouldCapturePurgeSnapshotBeforeExecutingTheUseCase() throws Throwable {
         List<String> order = new ArrayList<>();
-        when(beforeSnapshotProvider.capture("key-1")).thenAnswer(invocation -> {
+        when(beforeSnapshotProvider.capture(any())).thenAnswer(invocation -> {
             order.add("capture");
             return new ObjectMapper().valueToTree(Map.of("identifier", "key-1", "lifecycle", "INACTIVE"));
         });
@@ -91,7 +91,7 @@ class AuditAspectTest {
         aspect.audit(joinPoint);
 
         assertThat(order).containsExactly("capture", "proceed");
-        verify(beforeSnapshotProvider).capture("key-1");
+        verify(beforeSnapshotProvider).capture(joinPoint.getArgs());
         verify(outboxAppender).append(any(), any());
     }
 
