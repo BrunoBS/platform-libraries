@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.library.testing.lifecycle.TestPerformanceEx
 import br.com.portalmanager.platform.library.testing.http.PlatformHttpTestConfiguration;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -23,4 +24,7 @@ import java.lang.annotation.Target;
 @Import(PlatformHttpTestConfiguration.class)
 @ExtendWith({PlatformIntegrationExtension.class, TestPerformanceExtension.class})
 public @interface PlatformIntegrationTest {
+
+    @AliasFor(annotation = SpringBootTest.class, attribute = "webEnvironment")
+    SpringBootTest.WebEnvironment webEnvironment() default SpringBootTest.WebEnvironment.RANDOM_PORT;
 }

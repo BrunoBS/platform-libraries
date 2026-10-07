@@ -1,5 +1,8 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure.blob;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import org.testcontainers.azure.AzuriteContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -52,7 +55,7 @@ public final class AzureBlobStorageContainer extends AzuriteContainer {
 
     private void requireName(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Azure blob container name must not be blank");
+            throw new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAzureConfiguration("Azure blob container name must not be blank"));
         }
     }
 }

@@ -1,5 +1,8 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure.servicebus;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusSenderAsyncClient;
 import org.testcontainers.azure.ServiceBusEmulatorContainer;
@@ -34,7 +37,7 @@ public final class AzureServiceBusContainer implements AutoCloseable {
             DockerImageName sqlServerImage,
             String configuration) {
         if (configuration == null || configuration.isBlank()) {
-            throw new IllegalArgumentException("Azure Service Bus emulator configuration is required");
+            throw new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAzureConfiguration("Azure Service Bus emulator configuration is required"));
         }
 
         this.network = Network.newNetwork();

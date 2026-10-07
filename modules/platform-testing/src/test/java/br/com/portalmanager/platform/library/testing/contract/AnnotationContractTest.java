@@ -4,12 +4,15 @@ import br.com.portalmanager.platform.library.testing.database.annotation.WithDat
 import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
 import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
 import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformUnitTest;
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
 import br.com.portalmanager.platform.library.testing.database.CleanupMode;
 import br.com.portalmanager.platform.library.testing.database.DatabaseCleanupPhase;
 import br.com.portalmanager.platform.library.testing.database.DatabaseSetupPhase;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockResult;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.AnnotationSupport;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -17,6 +20,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AnnotationContractTest {
+
+    @PlatformIntegrationTest
+    static class DefaultIntegrationTest {
+    }
+
+    @PlatformIntegrationTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+    static class NonWebIntegrationTest {
+    }
 
     @WithMySql
     static class DefaultMySqlTest {
@@ -47,6 +58,24 @@ class AnnotationContractTest {
         @WithDatabaseScripts(setup = "classpath:sql/second.sql")
         void scenario() {
         }
+    }
+
+    @Test
+    void shouldKeepRandomPortAsTheDefaultIntegrationEnvironment() {
+        SpringBootTest annotation = AnnotatedElementUtils
+                .findMergedAnnotation(DefaultIntegrationTest.class, SpringBootTest.class);
+
+        assertThat(annotation).isNotNull();
+        assertThat(annotation.webEnvironment()).isEqualTo(SpringBootTest.WebEnvironment.RANDOM_PORT);
+    }
+
+    @Test
+    void shouldAllowIntegrationTestsWithoutAnHttpServer() {
+        SpringBootTest annotation = AnnotatedElementUtils
+                .findMergedAnnotation(NonWebIntegrationTest.class, SpringBootTest.class);
+
+        assertThat(annotation).isNotNull();
+        assertThat(annotation.webEnvironment()).isEqualTo(SpringBootTest.WebEnvironment.NONE);
     }
 
     @Test

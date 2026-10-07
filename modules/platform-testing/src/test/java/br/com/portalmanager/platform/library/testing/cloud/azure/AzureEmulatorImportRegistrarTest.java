@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation.AzureBlobStorage;
 import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
 import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
@@ -23,26 +24,29 @@ class AzureEmulatorImportRegistrarTest {
     void shouldRejectNonPositiveMaxDeliveryCount() {
         DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
                 () -> registrar.registerBeanDefinitions(
                         AnnotationMetadata.introspect(InvalidAzureCloudTest.class), registry));
 
-        assertEquals("Azure Service Bus maxDeliveryCount must be a positive integer", exception.getMessage());
+        assertEquals("PLT-TST-002", exception.getErrorResponse().code());
+        assertEquals("Invalid platform-testing Azure configuration: Azure Service Bus maxDeliveryCount must be a positive integer",
+                exception.getErrorResponse().message());
     }
 
     @Test
     void shouldRejectBlobCreatedQueueThatIsNotDeclared() {
         DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
 
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
                 () -> registrar.registerBeanDefinitions(
                         AnnotationMetadata.introspect(InvalidBlobNotificationTest.class), registry));
 
+        assertEquals("PLT-TST-002", exception.getErrorResponse().code());
         assertEquals(
-                "Azure BlobCreated notification queue must be declared in AzureServiceBus: missing-events",
-                exception.getMessage());
+                "Invalid platform-testing Azure configuration: Azure BlobCreated notification queue must be declared in AzureServiceBus: missing-events",
+                exception.getErrorResponse().message());
     }
 
     @Test

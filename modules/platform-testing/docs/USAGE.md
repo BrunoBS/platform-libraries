@@ -25,9 +25,23 @@ Sem o BOM, declare a versão alinhada à release de `platform-libraries`.
 
 Kafka, AWS, Azure e as dependências do container MySQL são fornecidos transitivamente. O consumidor declara apenas `platform-testing` com escopo `test`; os recursos continuam opt-in pelas anotações. O starter JDBC permanece opcional para não ativar a auto-configuração de `DataSource` em serviços sem banco. Serviços que já usam JPA normalmente já recebem JDBC pela dependência de persistência.
 
+## Migração dos imports cloud
+
+As anotações de serviço agora ficam no pacote da feature. Atualize os imports dos consumidores ao usar a nova versão:
+
+| Anotação | Pacote anterior | Pacote atual |
+|---|---|---|
+| `AwsS3` | `testing.cloud.aws.annotation` | `testing.cloud.aws.s3.annotation` |
+| `AwsSqs` | `testing.cloud.aws.annotation` | `testing.cloud.aws.sqs.annotation` |
+| `AwsS3SqsNotification` | `testing.cloud.aws.annotation` | `testing.cloud.aws.s3notificationsqs.annotation` |
+| `AzureBlobStorage` | `testing.cloud.azure.annotation` | `testing.cloud.azure.blob.annotation` |
+| `AzureServiceBus` | `testing.cloud.azure.annotation` | `testing.cloud.azure.servicebus.annotation` |
+
+As anotações agregadoras `WithAwsLocalStack` e `WithAzureEmulator` mantêm seus pacotes de provider.
+
 ## Teste de integração básico
 
-`@PlatformIntegrationTest` inicializa Spring Boot com servidor HTTP em porta aleatória e profile `test`:
+`@PlatformIntegrationTest` inicializa Spring Boot com profile `test`; por padrão, usa servidor HTTP em porta aleatória:
 
 ```java
 import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
@@ -42,7 +56,16 @@ class HealthControllerIT {
 }
 ```
 
-Configure valores específicos do profile em `src/test/resources/application-test.yml`. Não configure manualmente porta HTTP ao usar o servidor aleatório.
+O padrão é `RANDOM_PORT`, indicado para testes que fazem chamadas HTTP. Para testes de integração de repositório ou mensageria que não precisam de servidor web, use `webEnvironment = SpringBootTest.WebEnvironment.NONE` e evite abrir uma porta HTTP:
+
+```java
+@PlatformIntegrationTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@WithMySql
+class ProductRepositoryIT {
+}
+```
+
+Importe `org.springframework.boot.test.context.SpringBootTest` para usar o enum. Configure valores específicos do profile em `src/test/resources/application-test.yml`.
 
 ## Testes unitários
 
@@ -68,7 +91,7 @@ A anotação habilita Mockito e a extensão de isolamento do módulo. Mantenha o
 `@WithMySql` é opt-in e inicializa o MySQL pelo Testcontainers. A limpeza padrão ocorre antes de cada método e preserva `flyway_schema_history`:
 
 ```java
-@PlatformIntegrationTest
+@PlatformIntegrationTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @WithMySql
 class ProductRepositoryIT {
 }
@@ -90,7 +113,7 @@ Os modos disponíveis são `BEFORE_EACH`, `AFTER_EACH` e `NONE`.
 Use `@WithDatabaseScripts` para criar views ou preparar dados específicos:
 
 ```java
-@PlatformIntegrationTest
+@PlatformIntegrationTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @WithMySql
 @WithDatabaseScripts(
     setup = {"classpath:sql/views/create-product-views.sql"},
@@ -118,7 +141,7 @@ Os atributos `setup` e `cleanup` aceitam arrays; reúna numa mesma anotação os
 A fixture Kafka inicia um container quando `@WithKafka` é declarada:
 
 ```java
-@PlatformIntegrationTest
+@PlatformIntegrationTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @WithKafka
 class ProductEventsIT {
 }

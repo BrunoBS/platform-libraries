@@ -13,6 +13,15 @@ public final class PlatformTestingTechnicalErrors {
         );
     }
 
+    public static PlatformErrorDefinition invalidAzureConfiguration(String detail) {
+        return new PlatformErrorDefinition(
+                "PLT-TST-002",
+                "Invalid platform-testing Azure configuration: " + detail,
+                "Review the @WithAzureEmulator Blob Storage and Service Bus declarations.",
+                500
+        );
+    }
+
     private PlatformTestingTechnicalErrors() {
     }
 }

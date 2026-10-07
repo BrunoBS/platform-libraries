@@ -1,5 +1,8 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+
 import br.com.portalmanager.platform.library.testing.cloud.azure.blob.AzureBlobStorageContainer;
 import br.com.portalmanager.platform.library.testing.cloud.azure.blob.AzureBlobStorageTestSupport;
 import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.AzureServiceBusContainer;
@@ -40,7 +43,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         String blobCreatedQueue = blobCreatedQueue(blobStorage, serviceBus);
 
         if (serviceBus.length == 0 && blobStorage.length == 0) {
-            throw new IllegalArgumentException("At least one Azure service annotation must be configured");
+            throw configurationException("At least one Azure service annotation must be configured");
         }
 
         if (serviceBus.length == 1) {
@@ -84,7 +87,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
             return "";
         }
         if (serviceBus.length == 0) {
-            throw new IllegalArgumentException(
+            throw configurationException(
                     "Azure BlobCreated notifications require Azure Service Bus to be configured");
         }
 
@@ -94,7 +97,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
                 return queueName;
             }
         }
-        throw new IllegalArgumentException(
+        throw configurationException(
                 "Azure BlobCreated notification queue must be declared in AzureServiceBus: " + queueName);
     }
 
@@ -104,12 +107,12 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
         for (int index = 0; index < queues.length; index++) {
             String name = json(queues[index].getString("name"));
             if (!queueNames.add(name)) {
-                throw new IllegalArgumentException("Duplicate Azure Service Bus queue name: " + name);
+                throw configurationException("Duplicate Azure Service Bus queue name: " + name);
             }
             int maxDeliveryCount = queues[index].getNumber("maxDeliveryCount").intValue();
             boolean sessionsEnabled = queues[index].getBoolean("sessionsEnabled");
             if (maxDeliveryCount < 1) {
-                throw new IllegalArgumentException(
+                throw configurationException(
                         "Azure Service Bus maxDeliveryCount must be a positive integer");
             }
             if (index > 0) {
@@ -153,7 +156,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
 
     private String json(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Azure resource name must not be blank");
+            throw configurationException("Azure resource name must not be blank");
         }
         return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
@@ -173,12 +176,16 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
             }
             return result;
         }
-        throw new IllegalArgumentException("Unsupported nested Azure service annotation metadata");
+        throw configurationException("Unsupported nested Azure service annotation metadata");
+    }
+
+    private PlatformConfigurationException configurationException(String detail) {
+        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAzureConfiguration(detail));
     }
 
     private void requireSingle(String annotationName, AnnotationAttributes[] annotations) {
         if (annotations.length > 1) {
-            throw new IllegalArgumentException(annotationName + " may be declared only once");
+            throw configurationException(annotationName + " may be declared only once");
         }
     }
 }
