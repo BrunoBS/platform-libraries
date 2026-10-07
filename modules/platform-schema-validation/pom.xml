@@ -9,7 +9,6 @@
     </parent>
 
     <artifactId>platform-schema-validation</artifactId>
-    <version>${revision}</version>
     <packaging>jar</packaging>
     <name>platform-schema-validation</name>
 
