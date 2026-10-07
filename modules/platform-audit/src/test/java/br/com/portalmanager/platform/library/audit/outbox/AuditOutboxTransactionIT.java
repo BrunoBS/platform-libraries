@@ -57,7 +57,7 @@ class AuditOutboxTransactionIT {
         }
         jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS DOMAIN_CHANGE (IDENTIFIER VARCHAR(36) PRIMARY KEY)");
         jdbcTemplate.update("DELETE FROM DOMAIN_CHANGE");
-        jdbcTemplate.update("DELETE FROM AUDIT_OUTBOX");
+        jdbcTemplate.update("DELETE FROM audit_outbox");
     }
 
     @Test
@@ -65,8 +65,8 @@ class AuditOutboxTransactionIT {
         useCase.execute(false);
 
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isEqualTo(1);
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM AUDIT_OUTBOX", Integer.class)).isEqualTo(1);
-        String payload = jdbcTemplate.queryForObject("SELECT payload FROM AUDIT_OUTBOX", String.class);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_outbox", Integer.class)).isEqualTo(1);
+        String payload = jdbcTemplate.queryForObject("SELECT payload FROM audit_outbox", String.class);
         assertThat(payload).contains("\"identifier\":\"resource-1\"");
     }
 
@@ -75,20 +75,20 @@ class AuditOutboxTransactionIT {
         assertThatThrownBy(() -> useCase.execute(true)).isInstanceOf(IllegalStateException.class);
 
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isZero();
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM AUDIT_OUTBOX", Integer.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_outbox", Integer.class)).isZero();
     }
 
     @Test
     void shouldRollbackDomainChangeWhenOutboxInsertFails() {
-        jdbcTemplate.execute("ALTER TABLE AUDIT_OUTBOX ADD CONSTRAINT CK_AUDIT_OUTBOX_TEST CHECK (status <> 'PENDING')");
+        jdbcTemplate.execute("ALTER TABLE audit_outbox ADD CONSTRAINT CK_audit_outbox_TEST CHECK (status <> 'PENDING')");
 
         try {
             assertThatThrownBy(() -> useCase.execute(false)).isInstanceOf(RuntimeException.class);
 
             assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isZero();
-            assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM AUDIT_OUTBOX", Integer.class)).isZero();
+            assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_outbox", Integer.class)).isZero();
         } finally {
-            jdbcTemplate.execute("ALTER TABLE AUDIT_OUTBOX DROP CHECK CK_AUDIT_OUTBOX_TEST");
+            jdbcTemplate.execute("ALTER TABLE audit_outbox DROP CHECK CK_audit_outbox_TEST");
         }
     }
 
@@ -104,7 +104,7 @@ class AuditOutboxTransactionIT {
 
     @Entity
     @Table(name = "audit_outbox", uniqueConstraints = @UniqueConstraint(
-            name = "UK_AUDIT_OUTBOX_IDENTIFIER", columnNames = "identifier"))
+            name = "UK_audit_outbox_IDENTIFIER", columnNames = "identifier"))
     public static class TestAuditOutboxEntity extends AuditOutboxEntity {
         protected TestAuditOutboxEntity() {
         }
