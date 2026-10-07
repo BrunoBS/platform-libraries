@@ -4,8 +4,10 @@ import org.testcontainers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AwsLocalStackContainer extends LocalStackContainer {
@@ -15,9 +17,10 @@ public class AwsLocalStackContainer extends LocalStackContainer {
     private final String[] queues;
     private final String[] buckets;
     private final String[][] redrivePolicies;
+    private final String[][] bucketNotifications;
 
     public AwsLocalStackContainer(AwsService[] services, String[] queues, String[] buckets) {
-        this(DEFAULT_IMAGE, services, queues, buckets, new String[0][]);
+        this(DEFAULT_IMAGE, services, queues, buckets, new String[0][], new String[0][]);
     }
 
     public AwsLocalStackContainer(
@@ -25,7 +28,16 @@ public class AwsLocalStackContainer extends LocalStackContainer {
             String[] queues,
             String[] buckets,
             String[][] redrivePolicies) {
-        this(DEFAULT_IMAGE, services, queues, buckets, redrivePolicies);
+        this(DEFAULT_IMAGE, services, queues, buckets, redrivePolicies, new String[0][]);
+    }
+
+    public AwsLocalStackContainer(
+            AwsService[] services,
+            String[] queues,
+            String[] buckets,
+            String[][] redrivePolicies,
+            String[][] bucketNotifications) {
+        this(DEFAULT_IMAGE, services, queues, buckets, redrivePolicies, bucketNotifications);
     }
 
     public AwsLocalStackContainer(
@@ -33,7 +45,7 @@ public class AwsLocalStackContainer extends LocalStackContainer {
             AwsService[] services,
             String[] queues,
             String[] buckets) {
-        this(image, services, queues, buckets, new String[0][]);
+        this(image, services, queues, buckets, new String[0][], new String[0][]);
     }
 
     public AwsLocalStackContainer(
@@ -42,11 +54,22 @@ public class AwsLocalStackContainer extends LocalStackContainer {
             String[] queues,
             String[] buckets,
             String[][] redrivePolicies) {
+        this(image, services, queues, buckets, redrivePolicies, new String[0][]);
+    }
+
+    public AwsLocalStackContainer(
+            DockerImageName image,
+            AwsService[] services,
+            String[] queues,
+            String[] buckets,
+            String[][] redrivePolicies,
+            String[][] bucketNotifications) {
         super(image);
         requireServices(services);
         this.queues = copyAndValidate(queues, "AWS queue");
         this.buckets = copyAndValidate(buckets, "AWS bucket");
         this.redrivePolicies = copyPolicies(redrivePolicies, this.queues);
+        this.bucketNotifications = copyNotifications(bucketNotifications, this.queues, this.buckets);
         withServices(Arrays.stream(services)
                 .map(AwsService::localStackName)
                 .toArray(String[]::new));
@@ -59,6 +82,7 @@ public class AwsLocalStackContainer extends LocalStackContainer {
             provisionQueues();
             provisionRedrivePolicies();
             provisionBuckets();
+            provisionBucketNotifications();
         } catch (RuntimeException exception) {
             super.stop();
             throw exception;
@@ -82,10 +106,74 @@ public class AwsLocalStackContainer extends LocalStackContainer {
             String deadLetterQueueArn = queueArn(policy[1]);
             String redrivePolicy = "{\"deadLetterTargetArn\":\"%s\",\"maxReceiveCount\":\"%s\"}"
                     .formatted(deadLetterQueueArn, policy[2]);
-            String escapedPolicy = redrivePolicy.replace("\\", "\\\\").replace("\"", "\\\"");
+            String escapedPolicy = escapeJson(redrivePolicy);
             String attributes = "{\"RedrivePolicy\":\"%s\"}".formatted(escapedPolicy);
             exec("sqs", "set-queue-attributes",
                     "--queue-url", sourceQueueUrl,
+                    "--attributes", attributes);
+        }
+    }
+
+    private void provisionBuckets() {
+        for (String bucket : buckets) {
+            exec("s3api", "create-bucket", "--bucket", bucket);
+        }
+    }
+
+    private void provisionBucketNotifications() {
+        if (bucketNotifications.length == 0) {
+            return;
+        }
+
+        provisionNotificationQueuePolicies();
+        for (String bucket : buckets) {
+            List<String> configurations = new ArrayList<>();
+            int notificationIndex = 0;
+            for (String[] notification : bucketNotifications) {
+                if (!bucket.equals(notification[0])) {
+                    continue;
+                }
+                String queueArn = queueArn(notification[1]);
+                configurations.add("{\"Id\":\"notification-%d\",\"QueueArn\":\"%s\","
+                        .formatted(notificationIndex++, queueArn)
+                        + "\"Events\":[\"s3:ObjectCreated:*\"]}");
+            }
+            if (!configurations.isEmpty()) {
+                String configuration = "{\"QueueConfigurations\":["
+                        + String.join(",", configurations) + "]}";
+                exec("s3api", "put-bucket-notification-configuration",
+                        "--bucket", bucket,
+                        "--notification-configuration", configuration);
+            }
+        }
+    }
+
+    private void provisionNotificationQueuePolicies() {
+        Set<String> configuredQueues = new HashSet<>();
+        for (String[] notification : bucketNotifications) {
+            String queue = notification[1];
+            if (!configuredQueues.add(queue)) {
+                continue;
+            }
+
+            String queueArn = queueArn(queue);
+            String accountId = queueArn.split(":")[4];
+            List<String> statements = new ArrayList<>();
+            for (String[] target : bucketNotifications) {
+                if (!queue.equals(target[1])) {
+                    continue;
+                }
+                statements.add("{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"s3.amazonaws.com\"},"
+                        + "\"Action\":\"sqs:SendMessage\",\"Resource\":\"" + queueArn + "\","
+                        + "\"Condition\":{\"ArnLike\":{\"aws:SourceArn\":\"arn:aws:s3:::" + target[0]
+                        + "\"},\"StringEquals\":{\"aws:SourceAccount\":\"" + accountId + "\"}}}");
+            }
+
+            String policy = "{\"Version\":\"2012-10-17\",\"Statement\":["
+                    + String.join(",", statements) + "]}";
+            String attributes = "{\"Policy\":\"" + escapeJson(policy) + "\"}";
+            exec("sqs", "set-queue-attributes",
+                    "--queue-url", queueUrl(queue),
                     "--attributes", attributes);
         }
     }
@@ -102,15 +190,9 @@ public class AwsLocalStackContainer extends LocalStackContainer {
                 "--query", "Attributes.QueueArn",
                 "--output", "text").trim();
         if (arn.isBlank() || "None".equals(arn)) {
-            throw new IllegalStateException("Failed to resolve ARN for dead-letter queue: " + queue);
+            throw new IllegalStateException("Failed to resolve ARN for SQS queue: " + queue);
         }
         return arn;
-    }
-
-    private void provisionBuckets() {
-        for (String bucket : buckets) {
-            exec("s3api", "create-bucket", "--bucket", bucket);
-        }
     }
 
     private String exec(String... command) {
@@ -142,9 +224,13 @@ public class AwsLocalStackContainer extends LocalStackContainer {
             return new String[0];
         }
         String[] copy = values.clone();
+        Set<String> unique = new HashSet<>();
         for (String value : copy) {
             if (value == null || value.isBlank()) {
                 throw new IllegalArgumentException(resource + " name must not be blank");
+            }
+            if (!unique.add(value)) {
+                throw new IllegalArgumentException("Duplicate " + resource + " name: " + value);
             }
         }
         return copy;
@@ -190,10 +276,45 @@ public class AwsLocalStackContainer extends LocalStackContainer {
         return copy;
     }
 
+    private String[][] copyNotifications(String[][] notifications, String[] configuredQueues, String[] configuredBuckets) {
+        if (notifications == null) {
+            return new String[0][];
+        }
+        Set<String> queueNames = new HashSet<>(Arrays.asList(configuredQueues));
+        Set<String> bucketNames = new HashSet<>(Arrays.asList(configuredBuckets));
+        String[][] copy = new String[notifications.length][];
+        for (int index = 0; index < notifications.length; index++) {
+            String[] notification = notifications[index];
+            if (notification == null || notification.length != 2) {
+                throw new IllegalArgumentException("Each S3 notification must define a bucket and an SQS queue");
+            }
+            String bucket = notification[0];
+            String queue = requireQueueName(notification[1], "SQS notification queue");
+            if (bucket == null || bucket.isBlank()) {
+                throw new IllegalArgumentException("S3 notification bucket name must not be blank");
+            }
+            if (!bucketNames.contains(bucket)) {
+                throw new IllegalArgumentException("S3 notification bucket must be provisioned: " + bucket);
+            }
+            if (!queueNames.contains(queue)) {
+                throw new IllegalArgumentException("S3 notification queue must be provisioned: " + queue);
+            }
+            if (queue.endsWith(".fifo")) {
+                throw new IllegalArgumentException("S3 notifications cannot target FIFO queues: " + queue);
+            }
+            copy[index] = new String[]{bucket, queue};
+        }
+        return copy;
+    }
+
     private String requireQueueName(String queue, String resource) {
         if (queue == null || queue.isBlank()) {
             throw new IllegalArgumentException(resource + " name must not be blank");
         }
         return queue;
+    }
+
+    private String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         String[] queues = new String[0];
         String[] buckets = new String[0];
         String[][] redrivePolicies = new String[0][];
+        String[][] bucketNotifications = new String[0][];
 
         if (sqs.length == 1) {
             services.add(AwsService.SQS);
@@ -47,12 +49,13 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         if (s3.length == 1) {
             services.add(AwsService.S3);
             buckets = s3[0].getStringArray("buckets");
+            bucketNotifications = s3Notifications(s3[0], buckets, queues);
         }
         if (services.isEmpty()) {
             throw new IllegalArgumentException("At least one AWS service annotation must be configured");
         }
 
-        registerContainer(registry, services, queues, buckets, redrivePolicies);
+        registerContainer(registry, services, queues, buckets, redrivePolicies, bucketNotifications);
         registerConnection(registry);
         registerServiceClients(registry, sqs.length == 1, s3.length == 1);
     }
@@ -92,6 +95,28 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         return new SqsConfiguration(queues.toArray(String[]::new), redrivePolicies.toArray(String[][]::new));
     }
 
+    private String[][] s3Notifications(AnnotationAttributes s3, String[] buckets, String[] queues) {
+        AnnotationAttributes[] definitions = annotations(s3.get("notifications"));
+        List<String[]> notifications = new ArrayList<>();
+        for (AnnotationAttributes notification : definitions) {
+            String bucket = notification.getString("bucket");
+            String queue = notification.getString("queue");
+            requireName(bucket, "S3 notification bucket");
+            requireName(queue, "S3 notification queue");
+            if (!Arrays.asList(buckets).contains(bucket)) {
+                throw new IllegalArgumentException("S3 notification bucket must be declared in AwsS3.buckets: " + bucket);
+            }
+            if (!Arrays.asList(queues).contains(queue)) {
+                throw new IllegalArgumentException("S3 notification queue must be declared in AwsSqs.queues: " + queue);
+            }
+            if (queue.endsWith(".fifo")) {
+                throw new IllegalArgumentException("S3 notifications cannot target FIFO queues: " + queue);
+            }
+            notifications.add(new String[]{bucket, queue});
+        }
+        return notifications.toArray(String[][]::new);
+    }
+
     private void requireName(String name, String type) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException(type + " name must not be blank");
@@ -110,13 +135,15 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             List<AwsService> services,
             String[] queues,
             String[] buckets,
-            String[][] redrivePolicies) {
+            String[][] redrivePolicies,
+            String[][] bucketNotifications) {
         AwsService[] enabledServices = services.toArray(AwsService[]::new);
         RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackContainer.class);
         definition.getConstructorArgumentValues().addIndexedArgumentValue(0, enabledServices);
         definition.getConstructorArgumentValues().addIndexedArgumentValue(1, queues.clone());
         definition.getConstructorArgumentValues().addIndexedArgumentValue(2, buckets.clone());
         definition.getConstructorArgumentValues().addIndexedArgumentValue(3, redrivePolicies.clone());
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(4, bucketNotifications.clone());
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(CONTAINER_BEAN, definition);

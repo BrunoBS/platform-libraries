@@ -10,4 +10,15 @@ import java.lang.annotation.Target;
 public @interface AwsS3 {
 
     String[] buckets() default {};
+
+    QueueNotification[] notifications() default {};
+
+    @Target({})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface QueueNotification {
+
+        String bucket();
+
+        String queue();
+    }
 }

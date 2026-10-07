@@ -1,0 +1,89 @@
+package br.com.portalmanager.platform.library.testing.cloud.aws;
+
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsS3;
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.AwsSqs;
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@SpringJUnitConfig(AwsS3CreatedEventIntegrationTest.AwsLocalStackConfiguration.class)
+class AwsS3CreatedEventIntegrationTest {
+
+    private static final String QUEUE = "s3-created-events";
+    private static final String BUCKET = "platform-testing-s3-events";
+    private static final String CONTENT = "audit-document-123";
+    private static final JsonMapper JSON = JsonMapper.builder().build();
+
+    @Autowired
+    private S3Client s3Client;
+
+    @Autowired
+    private SqsClient sqsClient;
+
+    @Autowired
+    private AwsLocalStackConnection connection;
+
+    @Test
+    void shouldPublishS3CreatedEventAndAllowReadingTheUploadedObject() throws Exception {
+        String queueUrl = sqsClient.getQueueUrl(request -> request.queueName(QUEUE)).queueUrl();
+        String objectKey = "audit-123.json";
+
+        s3Client.putObject(
+                PutObjectRequest.builder().bucket(BUCKET).key(objectKey).build(),
+                software.amazon.awssdk.core.sync.RequestBody.fromString(CONTENT));
+
+        var response = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .waitTimeSeconds(20)
+                .maxNumberOfMessages(1)
+                .build());
+        assertTrue(response.hasMessages(), "Expected an S3 ObjectCreated event in SQS");
+
+        JsonNode record = JSON.readTree(response.messages().getFirst().body())
+                .path("Records")
+                .get(0);
+        assertNotNull(record);
+        assertTrue(record.path("eventName").asText().startsWith("ObjectCreated:"));
+        assertEquals(BUCKET, record.path("s3").path("bucket").path("name").asText());
+
+        String eventKey = URLDecoder.decode(
+                record.path("s3").path("object").path("key").asText().replace("+", "%2B"),
+                StandardCharsets.UTF_8);
+        assertEquals(objectKey, eventKey);
+
+        String uploadedContent = s3Client.getObjectAsBytes(GetObjectRequest.builder()
+                        .bucket(record.path("s3").path("bucket").path("name").asText())
+                        .key(eventKey)
+                        .build())
+                .asUtf8String();
+        assertEquals(CONTENT, uploadedContent);
+        assertNotNull(connection.endpoint());
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @WithAwsLocalStack(
+            sqs = @AwsSqs(queues = @AwsSqs.Queue(name = QUEUE)),
+            s3 = @AwsS3(
+                    buckets = BUCKET,
+                    notifications = @AwsS3.QueueNotification(bucket = BUCKET, queue = QUEUE))
+    )
+    static class AwsLocalStackConfiguration {
+    }
+}

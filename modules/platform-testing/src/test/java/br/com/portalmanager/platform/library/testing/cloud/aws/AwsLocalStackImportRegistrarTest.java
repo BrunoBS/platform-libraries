@@ -11,6 +11,7 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AwsLocalStackImportRegistrarTest {
@@ -36,6 +37,19 @@ class AwsLocalStackImportRegistrarTest {
                 (String[]) arguments.getIndexedArgumentValue(1, String[].class).getValue());
         assertArrayEquals(new String[][]{{"order-events", "order-events-dlq", "3"}},
                 (String[][]) arguments.getIndexedArgumentValue(3, String[][].class).getValue());
+        assertArrayEquals(new String[][]{{"documents", "audit-events"}},
+                (String[][]) arguments.getIndexedArgumentValue(4, String[][].class).getValue());
+    }
+
+    @Test
+    void shouldRejectNotificationToUndeclaredQueue() {
+        DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> registrar.registerBeanDefinitions(
+                        AnnotationMetadata.introspect(InvalidAwsCloudTest.class), registry));
+
+        assertTrue(exception.getMessage().contains("must be declared in AwsSqs.queues"));
     }
 
     @WithAwsLocalStack(
@@ -43,8 +57,19 @@ class AwsLocalStackImportRegistrarTest {
                     @AwsSqs.Queue(name = "audit-events"),
                     @AwsSqs.Queue(name = "order-events", deadLetterEnabled = true, maxReceiveCount = 3)
             }),
-            s3 = @AwsS3(buckets = "documents")
+            s3 = @AwsS3(
+                    buckets = "documents",
+                    notifications = @AwsS3.QueueNotification(bucket = "documents", queue = "audit-events"))
     )
     private static final class AwsCloudTest {
+    }
+
+    @WithAwsLocalStack(
+            sqs = @AwsSqs(queues = @AwsSqs.Queue(name = "audit-events")),
+            s3 = @AwsS3(
+                    buckets = "documents",
+                    notifications = @AwsS3.QueueNotification(bucket = "documents", queue = "missing-queue"))
+    )
+    private static final class InvalidAwsCloudTest {
     }
 }

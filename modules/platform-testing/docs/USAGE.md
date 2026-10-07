@@ -68,9 +68,6 @@ A anotação habilita Mockito e a extensão de isolamento do módulo. Mantenha o
 `@WithMySql` é opt-in e inicializa o MySQL pelo Testcontainers. A limpeza padrão ocorre antes de cada método e preserva `flyway_schema_history`:
 
 ```java
-import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
-import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
-
 @PlatformIntegrationTest
 @WithMySql
 class ProductRepositoryIT {
@@ -193,19 +190,27 @@ A fixture permite habilitar SQS e/ou S3 por classe:
 ```java
 @PlatformIntegrationTest
 @WithAwsLocalStack(
-    sqs = @AwsSqs(queues = @AwsSqs.Queue(
-        name = "orders",
-        deadLetterEnabled = true
-    )),
-    s3 = @AwsS3(buckets = "order-files")
+    sqs = @AwsSqs(queues = {
+        @AwsSqs.Queue(name = "orders"),
+        @AwsSqs.Queue(name = "order-events")
+    }),
+    s3 = @AwsS3(
+        buckets = "order-files",
+        notifications = @AwsS3.QueueNotification(
+            bucket = "order-files",
+            queue = "order-events"
+        )
+    )
 )
 class OrderCloudIT {
 }
 ```
 
-As dependências do LocalStack e dos SDKs SQS/S3 chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor.
+O vínculo é opt-in: sem `notifications`, o bucket não publica eventos. A fixture configura a permissão da fila para o bucket e registra eventos `s3:ObjectCreated:*` no SQS declarado. Notificações S3 não podem ter como destino direto uma fila FIFO.
 
-Se o teste usar apenas SQS ou apenas S3, remova a outra configuração da anotação. A fixture registra clients configurados para o endpoint local.
+Para validar o fluxo, envie um objeto usando o `S3Client`, receba a mensagem pelo `SqsClient` e use `Records[0].s3.bucket.name` e `Records[0].s3.object.key` para ler o objeto. O teste de integração interno `AwsS3CreatedEventIntegrationTest` cobre esse percurso com LocalStack.
+
+As dependências do LocalStack e dos SDKs SQS/S3 chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor. A mensagem do LocalStack valida o comportamento integrado do emulador; confirme o formato de evento e as permissões também contra AWS real antes de assumir paridade de produção.
 
 ## Azure Emulator
 
