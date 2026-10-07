@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
-import com.azure.messaging.servicebus.ServiceBusSenderClient;
+import com.azure.messaging.servicebus.ServiceBusSenderAsyncClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import org.springframework.beans.factory.DisposableBean;
@@ -29,7 +29,7 @@ public final class AzureBlobServiceClientFactoryBean implements FactoryBean<Blob
 
             if (!container.blobCreatedQueue().isBlank()) {
                 AzureServiceBusContainer serviceBus = serviceBusContainers.getObject();
-                ServiceBusSenderClient sender = serviceBus.sender(container.blobCreatedQueue());
+                ServiceBusSenderAsyncClient sender = serviceBus.sender(container.blobCreatedQueue());
                 eventPolicy = new AzureBlobCreatedEventPolicy(sender);
                 builder.addPolicy(eventPolicy);
             }

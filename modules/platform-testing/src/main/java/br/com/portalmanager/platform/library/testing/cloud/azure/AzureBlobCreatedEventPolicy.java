@@ -7,7 +7,7 @@ import com.azure.core.http.HttpPipelinePosition;
 import com.azure.core.http.HttpResponse;
 import com.azure.core.http.policy.HttpPipelinePolicy;
 import com.azure.messaging.servicebus.ServiceBusMessage;
-import com.azure.messaging.servicebus.ServiceBusSenderClient;
+import com.azure.messaging.servicebus.ServiceBusSenderAsyncClient;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 import reactor.core.publisher.Mono;
@@ -34,11 +34,11 @@ final class AzureBlobCreatedEventPolicy implements HttpPipelinePolicy, AutoClose
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
-    private final ServiceBusSenderClient sender;
+    private final ServiceBusSenderAsyncClient sender;
     private final ConcurrentMap<String, Long> stagedBlockSizes = new ConcurrentHashMap<>();
     private final AtomicLong sequencer = new AtomicLong();
 
-    AzureBlobCreatedEventPolicy(ServiceBusSenderClient sender) {
+    AzureBlobCreatedEventPolicy(ServiceBusSenderAsyncClient sender) {
         this.sender = sender;
     }
 
@@ -51,19 +51,20 @@ final class AzureBlobCreatedEventPolicy implements HttpPipelinePolicy, AutoClose
     @Override
     public Mono<HttpResponse> process(HttpPipelineCallContext context, HttpPipelineNextPolicy next) {
         var request = context.getHttpRequest();
-        return next.process().doOnNext(response -> publishAfterSuccessfulUpload(request, response));
+        return next.process().flatMap(response ->
+                publishAfterSuccessfulUpload(request, response).thenReturn(response));
     }
 
-    private void publishAfterSuccessfulUpload(
+    private Mono<Void> publishAfterSuccessfulUpload(
             com.azure.core.http.HttpRequest request,
             HttpResponse response) {
         if (!HttpMethod.PUT.equals(request.getHttpMethod())) {
-            return;
+            return Mono.empty();
         }
 
         Upload upload = upload(request);
         if (upload == null) {
-            return;
+            return Mono.empty();
         }
 
         boolean successful = response.getStatusCode() >= 200 && response.getStatusCode() < 300;
@@ -71,7 +72,7 @@ final class AzureBlobCreatedEventPolicy implements HttpPipelinePolicy, AutoClose
             if ("blocklist".equals(upload.component())) {
                 stagedBlockSizes.remove(upload.resourceKey());
             }
-            return;
+            return Mono.empty();
         }
 
         if ("block".equals(upload.component())) {
@@ -79,15 +80,15 @@ final class AzureBlobCreatedEventPolicy implements HttpPipelinePolicy, AutoClose
             if (size != null) {
                 stagedBlockSizes.merge(upload.resourceKey(), size, Long::sum);
             }
-            return;
+            return Mono.empty();
         }
         if ("blocklist".equals(upload.component())) {
-            publish(upload, request, response, stagedBlockSizes.remove(upload.resourceKey()));
-            return;
+            return publish(upload, request, response, stagedBlockSizes.remove(upload.resourceKey()));
         }
         if (upload.component().isEmpty()) {
-            publish(upload, request, response, contentLength(request));
+            return publish(upload, request, response, contentLength(request));
         }
+        return Mono.empty();
     }
 
     private Upload upload(com.azure.core.http.HttpRequest request) {
@@ -112,7 +113,7 @@ final class AzureBlobCreatedEventPolicy implements HttpPipelinePolicy, AutoClose
         }
     }
 
-    private void publish(
+    private Mono<Void> publish(
             Upload upload,
             com.azure.core.http.HttpRequest request,
             HttpResponse response,
@@ -162,9 +163,9 @@ final class AzureBlobCreatedEventPolicy implements HttpPipelinePolicy, AutoClose
             message.getApplicationProperties().put("aeg-metadata-version", "1");
             message.getApplicationProperties().put("aeg-data-version", "");
             message.getApplicationProperties().put("aeg-output-event-id", eventId);
-            sender.sendMessage(message);
+            return sender.sendMessage(message);
         } catch (JacksonException exception) {
-            throw new IllegalStateException("Unable to serialize Azure BlobCreated event", exception);
+            return Mono.error(new IllegalStateException("Unable to serialize Azure BlobCreated event", exception));
         }
     }
 
