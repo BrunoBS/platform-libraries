@@ -12,7 +12,6 @@ import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxAppender;
 import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,16 +24,6 @@ import tools.jackson.databind.ObjectMapper;
 @EnableConfigurationProperties(PlatformAuditProperties.class)
 @ConditionalOnProperty(prefix = "platform.audit", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class PlatformAuditAutoConfiguration {
-
-    private static final String JSON_FORMAT_MAPPER = "hibernate.type.json_format_mapper";
-    private static final String JACKSON_3_JSON_FORMAT_MAPPER =
-            "org.hibernate.type.format.jackson.Jackson3JsonFormatMapper";
-
-    @Bean
-    HibernatePropertiesCustomizer auditJsonFormatMapperCustomizer() {
-        return properties -> properties.putIfAbsent(JSON_FORMAT_MAPPER, JACKSON_3_JSON_FORMAT_MAPPER);
-    }
-
 
     @Bean
     AuditPropertiesValidator auditPropertiesValidator(PlatformAuditProperties properties) {
