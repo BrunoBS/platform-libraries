@@ -101,9 +101,9 @@ O método precisa ser chamado por um bean Spring. Chamadas internas entre métod
 | `CREATE`, `UPDATE`, `ACTIVATE`, `DEACTIVATE`, `RESTORE`, `DELETE` | Retorno do Use Case, depois da execução |
 | `PURGE` | Estado anterior à remoção física; requer um `AuditBeforeSnapshotProvider` |
 
-Para `PURGE`, registre um bean que implemente `AuditBeforeSnapshotProvider`. A library procura `identifier` ou `id` nos argumentos do Use Case e passa somente esse valor ao provider. O provider busca e devolve o estado salvo antes da remoção, como `JsonNode`; esse snapshot também precisa conter `identifier` ou `id`.
+Para `PURGE`, registre um bean que implemente `AuditBeforeSnapshotProvider`. O provider recebe somente o array de argumentos originais do método interceptado, na mesma ordem da assinatura. Ele deve conhecer o contrato do Use Case e identificar nesses argumentos o objeto ou valor necessário para buscar o estado persistido. O provider devolve o snapshot anterior como `JsonNode`, que precisa conter `identifier` ou `id`.
 
-No exemplo abaixo, o input do Use Case contém um campo `identifier`; a library extrai esse valor e o provider recebe apenas o identificador para buscar o recurso antes da remoção:
+No exemplo abaixo, o primeiro argumento do Use Case é `PurgeKeyInput`; o provider conhece essa premissa e usa seu identificador para buscar o recurso antes da remoção:
 
 ```java
 import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
@@ -123,14 +123,15 @@ public class KeyBeforeSnapshotProvider implements AuditBeforeSnapshotProvider {
     }
 
     @Override
-    public JsonNode capture(String resourceIdentifier) {
-        Key key = keyRepository.findByIdentifier(resourceIdentifier).orElseThrow();
+    public JsonNode capture(Object[] sourceArguments) {
+        PurgeKeyInput input = (PurgeKeyInput) sourceArguments[0];
+        Key key = keyRepository.findByIdentifier(input.identifier()).orElseThrow();
         return objectMapper.valueToTree(KeyAuditSnapshot.from(key));
     }
 }
 ```
 
-`KeyRepository` e `KeyAuditSnapshot` são tipos do serviço consumidor. O argumento do Use Case precisa expor `identifier` ou `id`; o provider é chamado antes da execução do método anotado.
+`PurgeKeyInput`, `KeyRepository` e `KeyAuditSnapshot` são tipos do serviço consumidor. A premissa deste exemplo é que o primeiro argumento seja `PurgeKeyInput`; se a assinatura do Use Case mudar, ajuste o provider e este contrato. O provider recebe os argumentos originais antes da execução do método anotado e não deve alterá-los.
 
 Se o retorno do Use Case for uma coleção, cada elemento gera um registro de auditoria.
 
@@ -147,7 +148,7 @@ Confirme que:
 - A entidade e o repository são encontrados pelo JPA/Spring Data.
 - O Use Case é chamado por um bean Spring dentro de uma transação ativa.
 - O objeto retornado contém `identifier` ou `id`.
-- Para `PURGE`, pelo menos um argumento do Use Case contém `identifier` ou `id`.
+- Para `PURGE`, o provider recebe os argumentos originais do Use Case, na ordem da assinatura, e está alinhado à premissa documentada sobre qual argumento contém os dados para localizar o recurso.
 - A operação de negócio e o registro da auditoria são confirmados juntos.
 
 ## Erros comuns
