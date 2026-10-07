@@ -811,7 +811,7 @@ class ProductEventPublisherIT {
 
 O endereço do broker é registrado automaticamente. As propriedades de serializers, consumers e nomes de tópicos continuam sob responsabilidade do microsserviço.
 
-## 23. AWS LocalStack e Azure Emulator
+## 17. AWS LocalStack e Azure Emulator
 
 As fixtures cloud são opcionais. Adicione ao POM consumidor somente as dependências dos serviços usados, todas com escopo `test`.
 
@@ -914,7 +914,7 @@ Se usar só um serviço Azure, declare somente o respectivo bloco e SDK. Os nome
 
 > As versões são gerenciadas pelo BOM da plataforma. Não declare versões manualmente quando o BOM estiver importado.
 
-## 24. MySQL, Kafka e autorização juntos
+## 18. MySQL, Kafka e autorização juntos
 
 ```java
 @PlatformIntegrationTest
@@ -925,7 +925,7 @@ class ProductCompleteFlowIT {
 }
 ```
 
-## 23. Exemplo completo
+## 19. Exemplo completo
 
 ```java
 package com.empresa.product.integration;
@@ -989,7 +989,7 @@ class ProductControllerIT {
 }
 ```
 
-## 24. Qual recurso usar
+## 20. Qual recurso usar
 
 | Necessidade | Recurso recomendado |
 |---|---|
@@ -1007,7 +1007,7 @@ class ProductControllerIT {
 | Preparar vários recursos | `TestScenario<R>` |
 | Testar mensagens | `@WithKafka` |
 
-## 23. Problemas comuns
+## 21. Problemas comuns
 
 ### Docker não está disponível
 
@@ -1071,7 +1071,7 @@ Confirme que `CleanupMode.NONE` não está ativo e que a tabela não foi adicion
 
 Os requests HTTP não utilizam estado global e o correlation ID é isolado por thread. Porém, testes que compartilham o mesmo banco não devem executar em paralelo quando fazem limpeza das mesmas tabelas.
 
-## 24. Checklist de adoção
+## 22. Checklist de adoção
 
 - [ ] Adicionar `platform-testing` com escopo `test`.
 - [ ] Criar `application-test.yml`.
