@@ -5,6 +5,7 @@ O `platform-testing` reúne convenções e fixtures reutilizáveis para testes u
 ## Documentação do módulo
 
 - [Arquitetura](docs/ARCHITECTURE.md): pacotes, componentes e fluxo das extensões.
+- [Responsabilidades por pacote e classe](docs/PACKAGES_AND_CLASSES.md): inventário dos tipos Java e suas relações.
 - [Guia de uso](docs/USAGE.md): instalação, configuração e exemplos de consumo.
 
 ## Comece por aqui
