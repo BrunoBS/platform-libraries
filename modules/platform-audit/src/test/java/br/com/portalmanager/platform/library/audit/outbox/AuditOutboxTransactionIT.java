@@ -23,6 +23,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 import java.util.Objects;
@@ -46,6 +48,7 @@ import static org.mockito.Mockito.when;
 class AuditOutboxTransactionIT {
 
     @Autowired JdbcTemplate jdbcTemplate;
+    @Autowired ObjectMapper objectMapper;
     @Autowired AuditedUseCase useCase;
 
     @BeforeEach
@@ -67,7 +70,8 @@ class AuditOutboxTransactionIT {
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isEqualTo(1);
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_outbox", Integer.class)).isEqualTo(1);
         String payload = jdbcTemplate.queryForObject("SELECT payload FROM audit_outbox", String.class);
-        assertThat(payload).contains("\"identifier\":\"resource-1\"");
+        JsonNode payloadNode = objectMapper.readTree(payload);
+        assertThat(payloadNode.path("identifier").asText()).isEqualTo("resource-1");
     }
 
     @Test
