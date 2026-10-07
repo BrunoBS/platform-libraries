@@ -8,7 +8,7 @@ import org.testcontainers.utility.DockerImageName;
 public final class AzureBlobStorageContainer extends AzuriteContainer {
 
     public static final DockerImageName DEFAULT_IMAGE = DockerImageName.parse(
-            "mcr.microsoft.com/azure-storage/azurite:3.33.0"
+            "mcr.microsoft.com/azure-storage/azurite:3.37.0"
     );
 
     private final String[] containers;
@@ -20,8 +20,6 @@ public final class AzureBlobStorageContainer extends AzuriteContainer {
 
     public AzureBlobStorageContainer(String[] containers, String blobCreatedQueue) {
         super(DEFAULT_IMAGE);
-        // The Azure SDK may send newer API versions than the pinned Azurite image recognizes.
-        withCommandOptions("--skipApiVersionCheck");
         this.containers = containers == null ? new String[0] : containers.clone();
         this.blobCreatedQueue = blobCreatedQueue == null ? "" : blobCreatedQueue.trim();
     }
