@@ -1,4 +1,6 @@
-package br.com.portalmanager.platform.library.testing.fixture;
+package br.com.portalmanager.platform.library.testing.fixture.factory;
+
+import br.com.portalmanager.platform.library.testing.fixture.builder.AbstractTestDataBuilder;
 
 import org.junit.jupiter.api.Test;
 

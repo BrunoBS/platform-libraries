@@ -501,7 +501,7 @@ expectSize("items", 3);
 ```java
 package com.empresa.product.builder;
 
-import br.com.portalmanager.platform.library.testing.fixture.TestDataBuilder;
+import br.com.portalmanager.platform.library.testing.fixture.builder.TestDataBuilder;
 import com.empresa.product.web.dto.CreateProductRequest;
 
 import java.math.BigDecimal;
@@ -541,7 +541,7 @@ public final class ProductRequestBuilder
 
 ### Implementação pela classe abstrata
 
-Se o projeto quiser o método `self()`:
+Se o projeto quiser o método `self()`, importe `br.com.portalmanager.platform.library.testing.fixture.builder.AbstractTestDataBuilder`:
 
 ```java
 public final class ProductRequestBuilder
@@ -570,7 +570,7 @@ O contrato principal não exige herança:
 ```java
 package com.empresa.product.factory;
 
-import br.com.portalmanager.platform.library.testing.fixture.TestDataFactory;
+import br.com.portalmanager.platform.library.testing.fixture.factory.TestDataFactory;
 import com.empresa.product.builder.ProductRequestBuilder;
 import com.empresa.product.web.dto.CreateProductRequest;
 import org.springframework.stereotype.Component;
@@ -598,7 +598,7 @@ public final class ProductFactory
 }
 ```
 
-Também existe `AbstractTestDataFactory<T, B>` como implementação conveniente:
+Também existe `AbstractTestDataFactory<T, B>` como implementação conveniente. Importe `br.com.portalmanager.platform.library.testing.fixture.factory.AbstractTestDataFactory`:
 
 ```java
 public final class ProductFactory
@@ -632,7 +632,7 @@ Implementação:
 ```java
 package com.empresa.product.scenario;
 
-import br.com.portalmanager.platform.library.testing.fixture.TestScenario;
+import br.com.portalmanager.platform.library.testing.fixture.scenario.TestScenario;
 import com.empresa.product.client.ProductClient;
 import com.empresa.product.factory.ProductFactory;
 

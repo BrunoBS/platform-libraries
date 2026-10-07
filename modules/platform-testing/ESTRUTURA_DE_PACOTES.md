@@ -24,6 +24,10 @@ testing
 │   ├── annotation
 │   └── scripts, limpeza e fixture MySQL
 ├── fixture
+│   ├── builder
+│   ├── factory
+│   ├── scenario
+│   └── utilitários (TestClock e TestIds)
 ├── http
 │   └── response
 ├── kafka
@@ -40,7 +44,7 @@ A estrutura de testes acompanha os pacotes de produção para que cada teste fiq
 
 | Origem | Pacote atual | Motivo |
 |---|---|---|
-| `builder`, `factory`, `scenario`, `fixture` | `fixture` | Mantém junto o suporte à criação de dados e cenários de teste |
+| `builder`, `factory`, `scenario` | `fixture.builder`, `fixture.factory`, `fixture.scenario` | Separa os contratos de construção, variação de dados e preparação de cenários; utilitários genéricos permanecem em `fixture` |
 | `client` e `client.response` | `http` e `http.response` | Reúne clients, configuração e respostas sob a mesma responsabilidade |
 | `mysql` e `database` | `database` | Evita dividir o suporte de banco entre pacotes |
 | `extension` e `unit` | `lifecycle` | Reúne extensões que controlam o ciclo de vida dos testes |
@@ -54,9 +58,9 @@ Os contratos e classes-base para os microsserviços ficam nestes arquivos:
 
 | Uso no microsserviço | Tipo no `platform-testing` |
 |---|---|
-| Builder de dados | `fixture.TestDataBuilder` e `fixture.AbstractTestDataBuilder` |
-| Factory de massa válida e variações semânticas | `fixture.TestDataFactory` e `fixture.AbstractTestDataFactory` |
-| Preparação de pré-condições | `fixture.TestScenario` |
+| Builder de dados | `fixture.builder.TestDataBuilder` e `fixture.builder.AbstractTestDataBuilder` |
+| Factory de massa válida e variações semânticas | `fixture.factory.TestDataFactory` e `fixture.factory.AbstractTestDataFactory` |
+| Preparação de pré-condições | `fixture.scenario.TestScenario` |
 | Client HTTP | `http.BaseClient` |
 | Requisição HTTP | `http.PlatformRequestSpecificationFactory` |
 | Assertions e extração HTTP | `http.response.BaseResponse` |

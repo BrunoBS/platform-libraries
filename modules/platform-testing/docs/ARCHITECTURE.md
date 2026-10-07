@@ -18,7 +18,10 @@ O módulo não contém regras de negócio dos serviços. Builders, factories, ce
 | `cloud.azure` / `cloud.azure.annotation` | Suporte aos emuladores Azure para Service Bus e Blob Storage e seus clients; anotações ficam em `annotation`. |
 | `context` | Estado de teste associado à thread, como correlation ID. |
 | `database` / `database.annotation` | Container MySQL, limpeza de tabelas e execução de scripts SQL; anotações ficam em `annotation`. |
-| `fixture` | Contratos e utilitários para builders, factories, cenários, relógio e IDs. |
+| `fixture` | Utilitários compartilhados para testes, como relógio e IDs. |
+| `fixture.builder` | Contratos e classes-base para builders de massa de teste. |
+| `fixture.factory` | Contratos e classes-base para factories de massa válida e variações semânticas. |
+| `fixture.scenario` | Contrato para preparação de pré-condições e cenários compostos. |
 | `http` | Criação de requests RestAssured, clients base e customização de requests. |
 | `http.response` | Assertions fluentes para respostas HTTP. |
 | `kafka` / `kafka.annotation` | Container Kafka conectado ao contexto Spring de teste; anotações ficam em `annotation`. |
@@ -101,9 +104,9 @@ As dependências Maven de AWS e Azure são opcionais no artefato. O serviço con
 
 ## Fixtures de dados
 
-- `TestDataBuilder<T>` e `AbstractTestDataBuilder`: construção estrutural de dados.
-- `TestDataFactory<T>` e `AbstractTestDataFactory`: cenários semânticos reutilizáveis.
-- `TestScenario<R>`: contrato para preparar pré-condições.
+- `fixture.builder.TestDataBuilder<T>` e `fixture.builder.AbstractTestDataBuilder`: construção estrutural de dados.
+- `fixture.factory.TestDataFactory<T>` e `fixture.factory.AbstractTestDataFactory`: cenários semânticos reutilizáveis.
+- `fixture.scenario.TestScenario<R>`: contrato para preparar pré-condições.
 - `TestClock`: cria `Clock.fixed` com instante e fuso explícitos.
 - `TestIds`: gera UUID determinístico a partir de uma seed.
 

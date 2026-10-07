@@ -1,4 +1,7 @@
-package br.com.portalmanager.platform.library.testing.fixture;
+package br.com.portalmanager.platform.library.testing.fixture.factory;
+
+import br.com.portalmanager.platform.library.testing.fixture.builder.TestDataBuilder;
+import br.com.portalmanager.platform.library.testing.fixture.factory.TestDataFactory;
 
 import java.util.Objects;
 import java.util.function.Consumer;

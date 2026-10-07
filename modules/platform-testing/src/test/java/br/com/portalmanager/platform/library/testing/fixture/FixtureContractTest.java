@@ -1,13 +1,15 @@
 package br.com.portalmanager.platform.library.testing.fixture;
 
-import br.com.portalmanager.platform.library.testing.fixture.AbstractTestDataFactory;
-import br.com.portalmanager.platform.library.testing.fixture.TestDataFactory;
-import br.com.portalmanager.platform.library.testing.fixture.TestScenario;
+import br.com.portalmanager.platform.library.testing.fixture.factory.AbstractTestDataFactory;
+import br.com.portalmanager.platform.library.testing.fixture.factory.TestDataFactory;
+import br.com.portalmanager.platform.library.testing.fixture.builder.AbstractTestDataBuilder;
+import br.com.portalmanager.platform.library.testing.fixture.builder.TestDataBuilder;
+import br.com.portalmanager.platform.library.testing.fixture.scenario.TestScenario;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AbstractTestDataBuilderTest {
+class FixtureContractTest {
 
     record ExampleRequest(String name, boolean active) {
     }
