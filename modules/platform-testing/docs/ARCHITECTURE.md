@@ -12,20 +12,19 @@ O módulo não contém regras de negócio dos serviços. Builders, factories, ce
 
 | Pacote | Responsabilidade |
 |---|---|
-| `annotation` | Anotações públicas que ativam configurações ou extensões. |
-| `architecture` | Regra ArchUnit que exige cobertura para customizações de classes da plataforma. |
-| `authorization` | WireMock e builders para simular respostas do serviço de autorização. |
-| `cloud.aws` | LocalStack para SQS/S3, configuração de filas, DLQ e clients AWS de teste. |
-| `cloud.azure` | Emuladores Azure para Service Bus e Blob Storage e seus clients. |
+| `architecture` | Anotação e regra ArchUnit que exige cobertura para customizações de classes da plataforma. |
+| `authorization` | Anotação, WireMock e builders para simular respostas do serviço de autorização. |
+| `cloud.aws` | Anotações e suporte LocalStack para SQS/S3, configuração de filas, DLQ e clients AWS de teste. |
+| `cloud.azure` | Anotações e suporte aos emuladores Azure para Service Bus e Blob Storage e seus clients. |
 | `context` | Estado de teste associado à thread, como correlation ID. |
-| `database` | Container MySQL, limpeza de tabelas e execução de scripts SQL. |
+| `database` | Anotações, container MySQL, limpeza de tabelas e execução de scripts SQL. |
 | `fixture` | Contratos e utilitários para builders, factories, cenários, relógio e IDs. |
 | `http` | Criação de requests RestAssured, clients base e customização de requests. |
 | `http.response` | Assertions fluentes para respostas HTTP. |
-| `kafka` | Container Kafka conectado ao contexto Spring de teste. |
-| `lifecycle` | Extensões JUnit para inicialização, isolamento e métricas dos testes. |
+| `kafka` | Anotação e container Kafka conectado ao contexto Spring de teste. |
+| `lifecycle` | Anotações e extensões JUnit para inicialização, isolamento e métricas dos testes. |
 
-## Fluxo de um teste de integração
+As anotações ficam no pacote do contexto que ativam; `annotation` não é um pacote público separado. `PlatformIntegrationTest`/`PlatformUnitTest` ficam em `lifecycle`, enquanto as anotações de infraestrutura ficam em seus contextos específicos.\n\n## Fluxo de um teste de integração
 
 `@PlatformIntegrationTest` combina Spring Boot, servidor web em porta aleatória, profile `test`, configuração HTTP e extensões de ciclo de vida. As fixtures de infraestrutura são habilitadas separadamente pelas anotações do teste.
 

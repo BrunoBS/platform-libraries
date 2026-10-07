@@ -1,5 +1,9 @@
-package br.com.portalmanager.platform.library.testing.annotation;
+package br.com.portalmanager.platform.library.testing.contract;
 
+import br.com.portalmanager.platform.library.testing.database.WithDatabaseScripts;
+import br.com.portalmanager.platform.library.testing.database.WithMySql;
+import br.com.portalmanager.platform.library.testing.authorization.WithMockAuthorization;
+import br.com.portalmanager.platform.library.testing.lifecycle.PlatformUnitTest;
 import br.com.portalmanager.platform.library.testing.database.CleanupMode;
 import br.com.portalmanager.platform.library.testing.database.DatabaseCleanupPhase;
 import br.com.portalmanager.platform.library.testing.database.DatabaseSetupPhase;

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
-import br.com.portalmanager.platform.library.testing.annotation.WithAzureEmulator;
+import br.com.portalmanager.platform.library.testing.cloud.azure.WithAzureEmulator;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;

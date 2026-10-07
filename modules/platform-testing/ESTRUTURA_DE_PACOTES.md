@@ -6,18 +6,17 @@ Os pacotes agrupam recursos por responsabilidade, mantendo separadas as APIs pú
 
 ```text
 testing
-├── annotation       # anotações públicas de entrada
-├── architecture     # extensão e regras arquiteturais
-├── authorization    # mocks e sessões de autorização
+├── architecture     # anotação, extensão e regras arquiteturais
+├── authorization    # anotação, mocks e sessões de autorização
 ├── cloud
-│   ├── aws          # LocalStack, SQS e S3
-│   └── azure        # emuladores e clients Azure
+│   ├── aws          # anotação, LocalStack, SQS e S3
+│   └── azure        # anotação, emuladores e clients Azure
 ├── context          # contexto compartilhado dos testes
-├── database         # scripts, limpeza e fixtures MySQL
+├── database         # anotações, scripts, limpeza e fixtures MySQL
 ├── fixture          # builders, factories, cenários, clock e IDs
 ├── http             # clients, configuração e responses HTTP
-├── kafka            # configuração do broker de teste
-└── lifecycle        # extensões Spring/JUnit
+├── kafka            # anotação e configuração do broker de teste
+└── lifecycle        # anotações e extensões Spring/JUnit
 ```
 
 A estrutura de testes acompanha os pacotes de produção para que cada teste fique perto do recurso que valida. Os testes de integração permanecem agrupados em `integration`.
@@ -30,8 +29,9 @@ A estrutura de testes acompanha os pacotes de produção para que cada teste fiq
 | `client` e `client.response` | `http` e `http.response` | Reúne clients, configuração e respostas sob a mesma responsabilidade |
 | `mysql` e `database` | `database` | Evita dividir o suporte de banco entre pacotes |
 | `extension` e `unit` | `lifecycle` | Reúne extensões que controlam o ciclo de vida dos testes |
+| `annotation` | Pacotes de contexto | Mantém cada anotação de entrada próxima da configuração ou extensão que ativa |
 
-Os pacotes `annotation`, `architecture`, `authorization`, `cloud`, `context` e `kafka` permanecem separados porque representam áreas distintas da biblioteca.
+As anotações de entrada ficam junto ao contexto que ativam: cloud AWS/Azure, banco, Kafka, autorização, arquitetura ou ciclo de vida. Não há um pacote genérico `annotation`.
 
 ## Compatibilidade
 

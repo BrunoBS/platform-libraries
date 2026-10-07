@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.annotation;
+package br.com.portalmanager.platform.library.testing.database;
 
 import br.com.portalmanager.platform.library.testing.database.DatabaseCleanupPhase;
 import br.com.portalmanager.platform.library.testing.database.DatabaseScriptExtension;

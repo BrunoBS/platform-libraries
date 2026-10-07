@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.annotation;
+package br.com.portalmanager.platform.library.testing.authorization;
 
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockExtension;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockResult;

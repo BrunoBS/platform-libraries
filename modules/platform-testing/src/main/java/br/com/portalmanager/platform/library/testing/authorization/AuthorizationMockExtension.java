@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.authorization;
 
-import br.com.portalmanager.platform.library.testing.annotation.WithMockAuthorization;
+import br.com.portalmanager.platform.library.testing.authorization.WithMockAuthorization;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.support.AnnotationSupport;

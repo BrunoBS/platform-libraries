@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.testing.annotation;
+package br.com.portalmanager.platform.library.testing.kafka;
 
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackImportRegistrar;
+import br.com.portalmanager.platform.library.testing.kafka.KafkaTestConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -12,10 +12,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@Import(AwsLocalStackImportRegistrar.class)
-public @interface WithAwsLocalStack {
-
-    AwsSqs[] sqs() default {};
-
-    AwsS3[] s3() default {};
+@Import(KafkaTestConfiguration.class)
+public @interface WithKafka {
 }
