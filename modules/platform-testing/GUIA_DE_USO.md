@@ -286,7 +286,7 @@ Injete `PlatformRequestSpecificationFactory` no client do microsserviço:
 ```java
 package com.empresa.product.client;
 
-import br.com.portalmanager.platform.library.testing.client.PlatformRequestSpecificationFactory;
+import br.com.portalmanager.platform.library.testing.http.PlatformRequestSpecificationFactory;
 import com.empresa.product.client.response.ProductResponse;
 import com.empresa.product.web.dto.CreateProductRequest;
 import io.restassured.RestAssured;
@@ -342,7 +342,7 @@ Ele não contém autorização automaticamente.
 Para enviar os headers da plataforma, use `createAuthorized`:
 
 ```java
-import br.com.portalmanager.platform.library.testing.client.AuthorizationRequestData;
+import br.com.portalmanager.platform.library.testing.http.AuthorizationRequestData;
 
 public ProductResponse create(CreateProductRequest body) {
     AuthorizationRequestData authorization = AuthorizationRequestData.builder()
@@ -443,7 +443,7 @@ Crie uma response específica para o domínio:
 ```java
 package com.empresa.product.client.response;
 
-import br.com.portalmanager.platform.library.testing.client.response.BaseResponse;
+import br.com.portalmanager.platform.library.testing.http.response.BaseResponse;
 import com.empresa.product.web.dto.ProductResponseDTO;
 import io.restassured.response.ValidatableResponse;
 
@@ -501,7 +501,7 @@ expectSize("items", 3);
 ```java
 package com.empresa.product.builder;
 
-import br.com.portalmanager.platform.library.testing.builder.TestDataBuilder;
+import br.com.portalmanager.platform.library.testing.fixture.TestDataBuilder;
 import com.empresa.product.web.dto.CreateProductRequest;
 
 import java.math.BigDecimal;
@@ -570,7 +570,7 @@ O contrato principal não exige herança:
 ```java
 package com.empresa.product.factory;
 
-import br.com.portalmanager.platform.library.testing.factory.TestDataFactory;
+import br.com.portalmanager.platform.library.testing.fixture.TestDataFactory;
 import com.empresa.product.builder.ProductRequestBuilder;
 import com.empresa.product.web.dto.CreateProductRequest;
 import org.springframework.stereotype.Component;
@@ -632,7 +632,7 @@ Implementação:
 ```java
 package com.empresa.product.scenario;
 
-import br.com.portalmanager.platform.library.testing.scenario.TestScenario;
+import br.com.portalmanager.platform.library.testing.fixture.TestScenario;
 import com.empresa.product.client.ProductClient;
 import com.empresa.product.factory.ProductFactory;
 

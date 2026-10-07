@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.client.response;
+package br.com.portalmanager.platform.library.testing.http.response;
 
 import io.restassured.response.ValidatableResponse;
 import org.hamcrest.Matchers;

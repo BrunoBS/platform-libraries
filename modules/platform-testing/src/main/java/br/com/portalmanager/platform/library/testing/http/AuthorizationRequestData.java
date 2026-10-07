@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.client;
+package br.com.portalmanager.platform.library.testing.http;
 
 public record AuthorizationRequestData(
         String token,

@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.unit;
+package br.com.portalmanager.platform.library.testing.lifecycle;
 
 import br.com.portalmanager.platform.library.testing.annotation.PlatformUnitTest;
 import br.com.portalmanager.platform.library.testing.context.TestContext;

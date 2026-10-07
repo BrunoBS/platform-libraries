@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.mysql;
+package br.com.portalmanager.platform.library.testing.database;
 
 import br.com.portalmanager.platform.library.testing.annotation.WithMySql;
 import br.com.portalmanager.platform.library.testing.database.CleanupMode;

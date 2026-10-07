@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.mysql;
+package br.com.portalmanager.platform.library.testing.database;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

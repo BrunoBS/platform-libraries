@@ -1,25 +1,19 @@
-package br.com.portalmanager.platform.library.testing.unit;
+package br.com.portalmanager.platform.library.testing.lifecycle;
 
 import br.com.portalmanager.platform.library.testing.context.TestContext;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.MDC;
 
-public final class PlatformUnitTestExtension implements BeforeEachCallback, AfterEachCallback {
+public final class PlatformIntegrationExtension implements BeforeEachCallback, AfterEachCallback {
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        clearContexts();
+        TestContext.reset();
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
-        clearContexts();
-    }
-
-    private void clearContexts() {
         TestContext.reset();
-        MDC.clear();
     }
 }

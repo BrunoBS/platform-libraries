@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.builder;
+package br.com.portalmanager.platform.library.testing.fixture;
 
 @FunctionalInterface
 public interface TestDataBuilder<T> {

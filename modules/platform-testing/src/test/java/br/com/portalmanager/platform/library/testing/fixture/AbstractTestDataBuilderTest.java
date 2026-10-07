@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.testing.builder;
+package br.com.portalmanager.platform.library.testing.fixture;
 
-import br.com.portalmanager.platform.library.testing.factory.AbstractTestDataFactory;
-import br.com.portalmanager.platform.library.testing.factory.TestDataFactory;
-import br.com.portalmanager.platform.library.testing.scenario.TestScenario;
+import br.com.portalmanager.platform.library.testing.fixture.AbstractTestDataFactory;
+import br.com.portalmanager.platform.library.testing.fixture.TestDataFactory;
+import br.com.portalmanager.platform.library.testing.fixture.TestScenario;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

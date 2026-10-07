@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.client;
+package br.com.portalmanager.platform.library.testing.http;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.test.context.TestConfiguration;

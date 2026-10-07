@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.client;
+package br.com.portalmanager.platform.library.testing.http;
 
 import br.com.portalmanager.platform.library.testing.context.TestContext;
 import io.restassured.specification.QueryableRequestSpecification;

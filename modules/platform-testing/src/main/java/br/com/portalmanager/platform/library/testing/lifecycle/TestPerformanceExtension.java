@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.extension;
+package br.com.portalmanager.platform.library.testing.lifecycle;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;

@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.scenario;
+package br.com.portalmanager.platform.library.testing.fixture;
 
 @FunctionalInterface
 public interface TestScenario<R> {
