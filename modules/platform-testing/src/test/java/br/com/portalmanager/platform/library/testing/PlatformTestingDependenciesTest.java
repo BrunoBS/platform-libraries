@@ -12,12 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PlatformTestingDependenciesTest {
 
-    private static final Set<String> ADDITIONAL_MYSQL_DEPENDENCIES = Set.of(
-            "com.mysql:mysql-connector-j",
-            "org.springframework.boot:spring-boot-testcontainers",
-            "org.testcontainers:testcontainers-mysql"
-    );
-
     private static final Set<String> FIXTURE_DEPENDENCIES = Set.of(
             "br.com.portalmanager.platform.library:platform-authorization",
             "org.springframework.boot:spring-boot-starter-web",
