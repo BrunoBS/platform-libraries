@@ -45,7 +45,11 @@ Adicione apenas o que precisar:
 - `@WithMockAuthorization`: autorizador simulado;
 - `@WithDatabaseScripts`: views, procedures ou SQL de preparação.
 
-## 3. Organização recomendada
+## 3. Infraestrutura opcional
+
+Além de MySQL, Kafka e autorização simulada, o módulo oferece fixtures para AWS LocalStack e emuladores Azure. Cada fixture cloud exige dependências específicas no microsserviço; consulte [AWS LocalStack e Azure Emulator](GUIA_DE_USO.md#17-aws-localstack-e-azure-emulator) antes de usar essas anotações.
+
+## 4. Organização recomendada
 
 ```text
 src/test/java/com/empresa/product
@@ -59,7 +63,7 @@ src/test/java/com/empresa/product
 └── web/product/ProductIntegrationTest.java
 ```
 
-## 4. Builder
+## 5. Builder
 
 O Builder representa a estrutura do objeto.
 
@@ -118,7 +122,7 @@ private Set<ApproverDTO> approvers =
         new LinkedHashSet<>(Set.of(defaultApprover));
 ```
 
-## 5. Factory
+## 6. Factory
 
 A Factory representa cenários conhecidos.
 
@@ -154,7 +158,7 @@ Factory → cenário semântico
 
 Não transforme a Factory em um segundo Builder.
 
-## 6. Client
+## 7. Client
 
 O Client esconde os detalhes do HTTP:
 
