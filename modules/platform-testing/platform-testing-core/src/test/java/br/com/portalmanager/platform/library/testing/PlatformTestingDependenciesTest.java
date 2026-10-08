@@ -25,7 +25,8 @@ class PlatformTestingDependenciesTest {
             "com.azure:azure-messaging-servicebus",
             "com.azure:azure-storage-blob",
             "com.mysql:mysql-connector-j",
-            "br.com.portalmanager.platform.library:platform-authorization"
+            "br.com.portalmanager.platform.library:platform-authorization",
+            "br.com.portalmanager.platform.library:platform-messaging"
     );
 
     @Test
