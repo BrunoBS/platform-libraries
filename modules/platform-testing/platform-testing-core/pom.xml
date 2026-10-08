@@ -20,11 +20,6 @@
             <artifactId>archunit</artifactId>
         </dependency>
         <dependency>
-            <groupId>br.com.portalmanager.platform.library</groupId>
-            <artifactId>platform-messaging</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
         </dependency>
