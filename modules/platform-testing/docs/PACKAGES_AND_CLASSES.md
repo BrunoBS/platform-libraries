@@ -1,6 +1,6 @@
 # Mapa visual das APIs de teste da plataforma
 
-O mapa cobre as APIs dos sete artefatos de teste. Use a tabela da [arquitetura](ARCHITECTURE.md) para encontrar o módulo proprietário de cada pacote. O pacote `architecture`, `context`, `fixture`, `lifecycle` e `message` pertence ao Core; `http` a HTTP; `authorization` a Authorization; `kafka` a Kafka; `database` a Database; e `cloud.aws`/`cloud.azure` aos módulos correspondentes.
+O mapa cobre as APIs dos sete artefatos de teste. Use a tabela da [arquitetura](ARCHITECTURE.md) para encontrar o módulo proprietário de cada pacote. Os pacotes `architecture`, `context`, `fixture` e `lifecycle` pertencem ao Core; `http` a HTTP; `authorization` a Authorization; `kafka` a Kafka; `database` a Database; e `cloud.aws`/`cloud.azure` aos módulos correspondentes. Cada contexto mantém seus próprios erros de configuração, sem adicionar `platform-messaging` ao Core.
 
 Este guia mostra como as peças do módulo se conectam e, em seguida, descreve **todas as classes de produção, pacote por pacote**. Use os diagramas para entender o caminho de execução e as tabelas para consultar o papel e as relações de cada classe.
 
