@@ -6,7 +6,7 @@
 
 | Artefato | Pacotes e funcionalidades |
 |---|---|
-| `platform-testing-core` | `architecture`, `context`, `fixture`, `lifecycle`, `message` e validação de imagem compartilhada |
+| `platform-testing-core` | `architecture`, `context`, `fixture`, `lifecycle`, `context-specific error` e validação de imagem compartilhada |
 | `platform-testing-http` | `http` e a anotação `lifecycle.annotation.PlatformIntegrationTest`, que compõe HTTP + Spring Boot |
 | `platform-testing-authorization` | `authorization`, mock de autorização e `@WithMockAuthorization` |
 | `platform-testing-kafka` | `kafka` e `kafka.annotation` |
