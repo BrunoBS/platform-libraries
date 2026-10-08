@@ -4,7 +4,7 @@ import org.testcontainers.utility.DockerImageName;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
 import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
-import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.database.DatabaseTestingTechnicalErrors;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -37,7 +37,7 @@ public final class MySqlTestContextCustomizerFactory implements ContextCustomize
             return image.trim();
         } catch (IllegalArgumentException exception) {
             throw new PlatformConfigurationException(
-                    PlatformTestingTechnicalErrors.invalidMySqlConfiguration(
+                    DatabaseTestingTechnicalErrors.invalidMySqlConfiguration(
                             "MySQL image must be a versioned Docker image name"),
                     exception
             );
