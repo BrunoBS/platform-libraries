@@ -1,1 +1,1 @@
-org.springframework.test.context.ContextCustomizerFactory=br.com.portalmanager.platform.library.testing.kafka.KafkaTestContextCustomizerFactory,br.com.portalmanager.platform.library.testing.cloud.CloudTestContextCustomizerFactory
+org.springframework.test.context.ContextCustomizerFactory=br.com.portalmanager.platform.library.testing.kafka.KafkaTestContextCustomizerFactory,br.com.portalmanager.platform.library.testing.cloud.CloudTestContextCustomizerFactory,br.com.portalmanager.platform.library.testing.database.MySqlTestContextCustomizerFactory

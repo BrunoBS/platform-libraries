@@ -144,7 +144,7 @@ class HealthControllerIT {
 
 ## 6. MySQL
 
-A fixture usa a imagem fixa `mysql:8.4.11`, última versão LTS da linha 8.x; a anotação não permite trocar a imagem. Adicione `@WithMySql` somente quando o teste necessitar do banco:
+A fixture usa `mysql:8.4.11` como default. Informe outra tag ou digest fixo em `image` quando precisar validar uma versão específica, como `@WithMySql(image = "mysql:8.4.0")`. Também é possível usar 9.x, mas essa linha não é o default e não faz parte da validação contínua da biblioteca. Adicione `@WithMySql` somente quando o teste necessitar do banco:
 
 ```java
 @PlatformIntegrationTest

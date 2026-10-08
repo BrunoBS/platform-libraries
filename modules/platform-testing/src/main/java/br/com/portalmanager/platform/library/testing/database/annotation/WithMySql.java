@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.testing.database.annotation;
 
+import br.com.portalmanager.platform.library.testing.container.PlatformTestingContainerImages;
 import br.com.portalmanager.platform.library.testing.database.CleanupMode;
 import br.com.portalmanager.platform.library.testing.database.MySqlTestConfiguration;
 import br.com.portalmanager.platform.library.testing.database.MySqlTestExtension;
@@ -19,6 +20,8 @@ import java.lang.annotation.Target;
 @Import(MySqlTestConfiguration.class)
 @ExtendWith(MySqlTestExtension.class)
 public @interface WithMySql {
+
+    String image() default PlatformTestingContainerImages.MYSQL;
 
     CleanupMode cleanup() default CleanupMode.BEFORE_EACH;
 

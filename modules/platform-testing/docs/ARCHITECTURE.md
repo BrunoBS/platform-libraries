@@ -71,7 +71,7 @@ As anotações não sobem todos os serviços automaticamente. Por exemplo, `@Pla
 
 ### Banco de dados
 
-`MySqlTestConfiguration` disponibiliza o MySQL `8.4.11` pelo Testcontainers e Service Connections do Spring Boot; a versão vem do default fixo `PlatformTestingContainerImages.MYSQL` e não pode ser sobrescrita pela anotação. `MySqlTestExtension` interpreta `CleanupMode` antes/depois de cada método. O padrão é limpar antes de cada método, preservando `flyway_schema_history`.
+`MySqlTestConfiguration` disponibiliza MySQL pelo Testcontainers e Service Connections do Spring Boot. O default é `8.4.11`, configurado em `PlatformTestingContainerImages.MYSQL`; `@WithMySql(image = "mysql:8.4.0")` pode sobrescrever a imagem com uma tag ou digest fixo. A chave de cache do Spring considera a imagem, evitando compartilhar contexto entre versões. `MySqlTestExtension` interpreta `CleanupMode` antes/depois de cada método. O padrão é limpar antes de cada método, preservando `flyway_schema_history`.
 
 `DatabaseCleaner` consulta tabelas base do schema MySQL, ignora as tabelas configuradas e usa `TRUNCATE` com verificações de chave estrangeira temporariamente desativadas. A descoberta de tabelas fica em cache por URL JDBC e catálogo; scripts SQL invalidam esse cache.
 

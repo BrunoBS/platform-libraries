@@ -88,7 +88,13 @@ A anotação habilita Mockito e a extensão de isolamento do módulo. Mantenha o
 
 ## MySQL
 
-`@WithMySql` é opt-in e inicializa o MySQL pelo Testcontainers usando a imagem fixa `mysql:8.4.11`. A versão não é configurável pela anotação, para manter o mesmo ambiente reproduzível entre serviços. A limpeza padrão ocorre antes de cada método e preserva `flyway_schema_history`:
+`@WithMySql` é opt-in e inicializa o MySQL pelo Testcontainers. O default é `mysql:8.4.11`, e a anotação permite escolher outra tag ou digest explícito, inclusive para testar versões antigas ou MySQL 9.x:
+
+```java
+@WithMySql(image = "mysql:8.4.0")
+```
+
+A imagem deve ser versionada; a tag flutuante `latest` não é aceita. A biblioteca não limita o número da versão, mas o CI do módulo valida o default `8.4.11`; versões diferentes, inclusive 9.x, precisam ser verificadas contra os scripts e dependências do serviço. A limpeza padrão ocorre antes de cada método e preserva `flyway_schema_history`:
 
 ```java
 @PlatformIntegrationTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)

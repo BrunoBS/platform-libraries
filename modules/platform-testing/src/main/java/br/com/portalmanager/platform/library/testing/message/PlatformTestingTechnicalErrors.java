@@ -31,6 +31,15 @@ public final class PlatformTestingTechnicalErrors {
         );
     }
 
+    public static PlatformErrorDefinition invalidMySqlConfiguration(String detail) {
+        return new PlatformErrorDefinition(
+                "PLT-TST-004",
+                "Invalid platform-testing MySQL configuration: " + detail,
+                "Review the @WithMySql image declaration and use a versioned Docker image name.",
+                500
+        );
+    }
+
     private PlatformTestingTechnicalErrors() {
     }
 }
