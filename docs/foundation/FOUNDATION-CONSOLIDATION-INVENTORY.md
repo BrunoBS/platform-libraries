@@ -33,7 +33,7 @@ O reactor estabilizado contém somente:
 - platform-authorization;
 - platform-observability;
 - platform-starter;
-- platform-testing;
+- platform-testing-core;
 - platform-catalog;
 - platform-tagging.
 
@@ -50,7 +50,7 @@ Os settings de verify/publicação ainda precisam consultar o registry de `platf
 O consumidor atual:
 
 - usa `platform-parent:1.0.2`;
-- declara `platform-starter` e `platform-testing` sem versão;
+- declara `platform-starter` e `platform-testing-core` sem versão;
 - não possui BOM de capabilities próprio;
 - depende do dependency management de capabilities existente no parent;
 - configura os registries de `platform-build` e `platform-libraries`.

@@ -56,7 +56,7 @@ platform-authorization 1.0.0
 platform-audit         1.0.0
 platform-catalog       1.0.0
 platform-tagging       1.0.0
-platform-testing  1.0.0
+platform-testing-core  1.0.0
 ```
 
 Mesmo uma alteração localizada em uma capability pode gerar nova release train, sem alterar `platform-parent`.

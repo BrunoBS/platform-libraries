@@ -29,7 +29,7 @@ platform-logging
 → platform-observability
 
 platform-test-support
-→ platform-testing
+→ platform-testing-core
 ```
 
 Versão:
@@ -48,7 +48,7 @@ Para fechar a revalidação:
 - [ ] paths Java migrados;
 - [ ] POMs migrados;
 - [ ] starter usando platform-observability;
-- [ ] BOM gerenciando platform-observability e platform-testing;
+- [ ] BOM gerenciando platform-observability e platform-testing-core;
 - [ ] configuração de logging migrada para `platform.observability.logging`;
 - [ ] `mvn clean verify` verde;
 - [ ] artifacts `br.com.portalmanager.platform:*:1.0.0` publicados.
@@ -60,7 +60,7 @@ Depois da publicação:
 - [ ] parent migrado para `br.com.portalmanager.platform`;
 - [ ] BOM migrado para `br.com.portalmanager.platform`;
 - [ ] imports Java migrados;
-- [ ] `platform-testing` usado no escopo test;
+- [ ] `platform-testing-core` usado no escopo test;
 - [ ] G4 revalidada integralmente;
 - [ ] Maven repository local isolado;
 - [ ] zero dependência do namespace antigo;

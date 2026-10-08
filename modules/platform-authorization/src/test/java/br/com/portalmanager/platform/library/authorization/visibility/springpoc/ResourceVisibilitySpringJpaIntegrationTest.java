@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityFilterManager;
+import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
@@ -46,14 +47,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
                 "platform.authorization.enabled=false",
                 "platform.messaging.enabled=false",
                 "spring.main.web-application-type=none",
-                "spring.datasource.url=jdbc:h2:mem:resource_visibility_spring;MODE=MySQL;DB_CLOSE_DELAY=-1",
-                "spring.datasource.driver-class-name=org.h2.Driver",
-                "spring.datasource.username=sa",
-                "spring.datasource.password=",
                 "spring.jpa.hibernate.ddl-auto=create-drop",
                 "spring.jpa.show-sql=false"
         }
 )
+@WithMySql
 class ResourceVisibilitySpringJpaIntegrationTest {
 
     @Autowired

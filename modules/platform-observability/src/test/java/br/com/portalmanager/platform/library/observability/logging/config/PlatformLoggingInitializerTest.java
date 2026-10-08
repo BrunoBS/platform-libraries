@@ -16,7 +16,9 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PlatformLoggingInitializerTest {
 
@@ -69,16 +71,13 @@ class PlatformLoggingInitializerTest {
         Appender<ILoggingEvent> appender =
                 rootLogger.getAppender("JSON_CONSOLE");
 
-        assertNotNull(
-                appender,
-                "O appender JSON_CONSOLE deveria estar registrado."
-        );
+        assertThat(appender)
+                .as("O appender JSON_CONSOLE deveria estar registrado.")
+                .isNotNull();
 
-        assertInstanceOf(
-                ConsoleAppender.class,
-                appender,
-                "O appender deveria ser uma instância de ConsoleAppender."
-        );
+        assertThat(appender)
+                .as("O appender deveria ser uma instância de ConsoleAppender.")
+                .isInstanceOf(ConsoleAppender.class);
     }
 
     @Test
@@ -94,26 +93,22 @@ class PlatformLoggingInitializerTest {
                 "2.4.1-RELEASE"
         );
 
-        assertDoesNotThrow(
-                () -> initializer.initialize(context)
-        );
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
 
-        assertNotNull(
-                rootLogger().getAppender("JSON_CONSOLE")
-        );
+        assertThat(rootLogger().getAppender("JSON_CONSOLE"))
+                .isNotNull();
     }
 
     @Test
     void shouldInitializeSuccessfullyWithoutApplicationMetadata() {
 
-        assertDoesNotThrow(
-                () -> initializer.initialize(context)
-        );
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
 
-        assertNotNull(
-                rootLogger().getAppender("JSON_CONSOLE"),
-                "A inicialização deveria funcionar mesmo sem metadados da aplicação."
-        );
+        assertThat(rootLogger().getAppender("JSON_CONSOLE"))
+                .as("A inicialização deveria funcionar mesmo sem metadados da aplicação.")
+                .isNotNull();
     }
 
     @Test
@@ -129,25 +124,21 @@ class PlatformLoggingInitializerTest {
 
         PatternLayoutEncoder encoder = (PatternLayoutEncoder) appender.getEncoder();
 
-        assertTrue(
-                encoder.getPattern().contains("\"context\":%jsonMdc"),
-                "O contexto deveria usar o conversor JSON do MDC."
-        );
+        assertThat(encoder.getPattern())
+                .as("O contexto deveria usar o conversor JSON do MDC.")
+                .contains("\"context\":%jsonMdc");
 
-        assertTrue(
-                encoder.getPattern().contains("\"error\":%jsonError"),
-                "Erros resolvidos deveriam ser emitidos como objeto JSON estruturado."
-        );
+        assertThat(encoder.getPattern())
+                .as("Erros resolvidos deveriam ser emitidos como objeto JSON estruturado.")
+                .contains("\"error\":%jsonError");
 
-        assertTrue(
-                encoder.getPattern().contains("\"exception\":%jsonThrowable"),
-                "A exceção deveria ser renderizada como campo JSON anulável."
-        );
+        assertThat(encoder.getPattern())
+                .as("A exceção deveria ser renderizada como campo JSON anulável.")
+                .contains("\"exception\":%jsonThrowable");
 
-        assertFalse(
-                encoder.getPattern().contains("\"host\":\"null\""),
-                "HOSTNAME textual null não deveria ser emitido no log."
-        );
+        assertThat(encoder.getPattern())
+                .as("HOSTNAME textual null não deveria ser emitido no log.")
+                .doesNotContain("\"host\":\"null\"");
     }
 
     // ========================================================================
@@ -159,13 +150,12 @@ class PlatformLoggingInitializerTest {
 
         initializer.initialize(context);
 
-        assertFalse(
-                loggerContext
+        assertThat(loggerContext
                         .getStatusManager()
                         .getCopyOfStatusListenerList()
-                        .isEmpty(),
-                "O NopStatusListener deveria estar registrado."
-        );
+                        .isEmpty())
+                .as("O NopStatusListener deveria estar registrado.")
+                .isFalse();
     }
 
     // ========================================================================
@@ -192,26 +182,20 @@ class PlatformLoggingInitializerTest {
 
         initializer.initialize(context);
 
-        assertEquals(
-                Level.ERROR,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("org.springframework")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.ERROR);
 
-        assertEquals(
-                Level.ERROR,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("org.hibernate")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.ERROR);
 
-        assertEquals(
-                Level.ERROR,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.zaxxer.hikari")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.ERROR);
     }
 
     // ========================================================================
@@ -238,21 +222,17 @@ class PlatformLoggingInitializerTest {
 
         initializer.initialize(context);
 
-        assertEquals(
-                Level.DEBUG,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("org.springframework")
-                        .getLevel(),
-                "A configuração logging.level.* da aplicação deveria sobrescrever o default corporativo."
-        );
+                        .getLevel())
+                .as("A configuração logging.level.* da aplicação deveria sobrescrever o default corporativo.")
+                .isEqualTo(Level.DEBUG);
 
-        assertEquals(
-                Level.ERROR,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("org.hibernate")
-                        .getLevel(),
-                "O Hibernate deveria continuar utilizando o default corporativo."
-        );
+                        .getLevel())
+                .as("O Hibernate deveria continuar utilizando o default corporativo.")
+                .isEqualTo(Level.ERROR);
     }
 
     @Test
@@ -280,19 +260,15 @@ class PlatformLoggingInitializerTest {
 
         initializer.initialize(context);
 
-        assertEquals(
-                Level.DEBUG,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("org.springframework")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.DEBUG);
 
-        assertEquals(
-                Level.WARN,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("org.hibernate")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.WARN);
     }
 
     // ========================================================================
@@ -314,21 +290,17 @@ class PlatformLoggingInitializerTest {
 
         initializer.initialize(context);
 
-        assertEquals(
-                Level.DEBUG,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.novaequipe.vendas")
-                        .getLevel(),
-                "O pacote customizado deveria assumir DEBUG."
-        );
+                        .getLevel())
+                .as("O pacote customizado deveria assumir DEBUG.")
+                .isEqualTo(Level.DEBUG);
 
-        assertEquals(
-                Level.WARN,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.novaequipe.vendas.utils")
-                        .getLevel(),
-                "O subpacote customizado deveria assumir WARN."
-        );
+                        .getLevel())
+                .as("O subpacote customizado deveria assumir WARN.")
+                .isEqualTo(Level.WARN);
     }
 
     @Test
@@ -356,33 +328,25 @@ class PlatformLoggingInitializerTest {
 
         initializer.initialize(context);
 
-        assertEquals(
-                Level.DEBUG,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.empresa.api")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.DEBUG);
 
-        assertEquals(
-                Level.INFO,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.empresa.service")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.INFO);
 
-        assertEquals(
-                Level.WARN,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.empresa.repository")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.WARN);
 
-        assertEquals(
-                Level.ERROR,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.empresa.integration")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.ERROR);
     }
 
     // ========================================================================
@@ -392,9 +356,8 @@ class PlatformLoggingInitializerTest {
     @Test
     void shouldInitializeSuccessfullyWhenNoCustomLevelsAreConfigured() {
 
-        assertDoesNotThrow(
-                () -> initializer.initialize(context)
-        );
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
 
         Logger logger =
                 loggerContext.getLogger("com.brunobs");
@@ -405,15 +368,12 @@ class PlatformLoggingInitializerTest {
          *
          * Por isso verificamos getEffectiveLevel().
          */
-        assertNotNull(
-                logger.getEffectiveLevel(),
-                "O logger deveria possuir um nível efetivo."
-        );
+        assertThat(logger.getEffectiveLevel())
+                .as("O logger deveria possuir um nível efetivo.")
+                .isNotNull();
 
-        assertEquals(
-                Level.INFO,
-                logger.getEffectiveLevel()
-        );
+        assertThat(logger.getEffectiveLevel())
+                .isEqualTo(Level.INFO);
     }
 
     @Test
@@ -424,16 +384,13 @@ class PlatformLoggingInitializerTest {
                 "WARN"
         );
 
-        assertDoesNotThrow(
-                () -> initializer.initialize(context)
-        );
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
 
-        assertEquals(
-                Level.WARN,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.empresa")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.WARN);
     }
 
     @Test
@@ -444,16 +401,13 @@ class PlatformLoggingInitializerTest {
                 "DEBUG"
         );
 
-        assertDoesNotThrow(
-                () -> initializer.initialize(context)
-        );
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
 
-        assertEquals(
-                Level.DEBUG,
-                loggerContext
+        assertThat(loggerContext
                         .getLogger("com.empresa")
-                        .getLevel()
-        );
+                        .getLevel())
+                .isEqualTo(Level.DEBUG);
     }
 
     // ========================================================================
@@ -468,20 +422,20 @@ class PlatformLoggingInitializerTest {
         Appender<ILoggingEvent> firstAppender =
                 rootLogger().getAppender("JSON_CONSOLE");
 
-        assertNotNull(firstAppender);
+        assertThat(firstAppender)
+                .isNotNull();
 
         initializer.initialize(context);
 
         Appender<ILoggingEvent> secondAppender =
                 rootLogger().getAppender("JSON_CONSOLE");
 
-        assertNotNull(secondAppender);
+        assertThat(secondAppender)
+                .isNotNull();
 
-        assertNotSame(
-                firstAppender,
-                secondAppender,
-                "Uma nova inicialização deveria recriar o appender."
-        );
+        assertThat(secondAppender)
+                .as("Uma nova inicialização deveria recriar o appender.")
+                .isNotSameAs(firstAppender);
     }
 
     @Test
@@ -494,8 +448,10 @@ class PlatformLoggingInitializerTest {
 
         initializer.initialize(context);
 
-        assertNotNull(rootLogger().getAppender("APPLICATION_APPENDER"));
-        assertNotNull(rootLogger().getAppender("JSON_CONSOLE"));
+        assertThat(rootLogger().getAppender("APPLICATION_APPENDER"))
+                .isNotNull();
+        assertThat(rootLogger().getAppender("JSON_CONSOLE"))
+                .isNotNull();
     }
 
     @Test
@@ -505,12 +461,9 @@ class PlatformLoggingInitializerTest {
                 "com.example.DoesNotExistConverter"
         );
 
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                () -> initializer.initialize(context)
-        );
-
-        assertTrue(exception.getMessage().contains("DoesNotExistConverter"));
+        assertThatThrownBy(() -> initializer.initialize(context))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("DoesNotExistConverter");
     }
 
     // ========================================================================
@@ -520,11 +473,9 @@ class PlatformLoggingInitializerTest {
     @Test
     void shouldHaveHighestPrecedence() {
 
-        assertEquals(
-                Ordered.HIGHEST_PRECEDENCE,
-                initializer.getOrder(),
-                "O inicializador deveria possuir HIGHEST_PRECEDENCE."
-        );
+        assertThat(initializer.getOrder())
+                .as("O inicializador deveria possuir HIGHEST_PRECEDENCE.")
+                .isEqualTo(Ordered.HIGHEST_PRECEDENCE);
     }
 
     // ========================================================================

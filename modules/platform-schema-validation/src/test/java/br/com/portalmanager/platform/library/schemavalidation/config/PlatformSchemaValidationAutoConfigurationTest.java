@@ -7,122 +7,166 @@ import br.com.portalmanager.platform.library.schemavalidation.repository.Resourc
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Arrays;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class PlatformSchemaValidationAutoConfigurationTest {
 
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(
-                    PlatformSchemaValidationJdbcAutoConfiguration.class,
-                    PlatformSchemaValidationSourceAutoConfiguration.class,
-                    PlatformSchemaValidationAutoConfiguration.class
-            ));
-
     @Test
     void shouldUseCustomRepositoryAndNotCreateJdbcRepository() {
-        contextRunner
-                .withUserConfiguration(CustomRepositoryConfiguration.class)
-                .run(context -> {
-                    assertThat(context).hasSingleBean(ResourceSchemaRepository.class);
-                    assertThat(context.getBean(ResourceSchemaRepository.class))
-                            .isSameAs(CustomRepositoryConfiguration.REPOSITORY);
-                    assertThat(context).doesNotHaveBean(JdbcResourceSchemaRepository.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaResolver.class);
-                    assertThat(context).hasSingleBean(SchemaValidator.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaValidationAspect.class);
-                });
+        try (AnnotationConfigApplicationContext context = openContext(
+                PlatformSchemaValidationJdbcAutoConfiguration.class,
+                PlatformSchemaValidationSourceAutoConfiguration.class,
+                PlatformSchemaValidationAutoConfiguration.class,
+                CustomRepositoryConfiguration.class
+        )) {
+            assertThat(context.getBeansOfType(ResourceSchemaRepository.class)).hasSize(1);
+            assertThat(context.getBean(ResourceSchemaRepository.class))
+                    .isSameAs(CustomRepositoryConfiguration.REPOSITORY);
+            assertThat(context.getBeansOfType(JdbcResourceSchemaRepository.class)).isEmpty();
+            assertThat(context.getBeansOfType(ResourceSchemaResolver.class)).hasSize(1);
+            assertThat(context.getBeansOfType(SchemaValidator.class)).hasSize(1);
+            assertThat(context.getBeansOfType(ResourceSchemaValidationAspect.class)).hasSize(1);
+        }
     }
 
     @Test
     void shouldCreateJdbcRepositoryWhenJdbcTemplateIsAvailable() {
-        contextRunner
-                .withUserConfiguration(JdbcConfiguration.class)
-                .run(context -> {
-                    assertThat(context).hasSingleBean(ResourceSchemaRepository.class);
-                    assertThat(context.getBean(ResourceSchemaRepository.class))
-                            .isInstanceOf(JdbcResourceSchemaRepository.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaResolver.class);
-                    assertThat(context).hasSingleBean(SchemaValidator.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaValidationAspect.class);
-                });
+        try (AnnotationConfigApplicationContext context = openContext(
+                PlatformSchemaValidationJdbcAutoConfiguration.class,
+                PlatformSchemaValidationSourceAutoConfiguration.class,
+                PlatformSchemaValidationAutoConfiguration.class,
+                JdbcConfiguration.class
+        )) {
+            assertThat(context.getBeansOfType(ResourceSchemaRepository.class)).hasSize(1);
+            assertThat(context.getBean(ResourceSchemaRepository.class))
+                    .isInstanceOf(JdbcResourceSchemaRepository.class);
+            assertThat(context.getBeansOfType(ResourceSchemaResolver.class)).hasSize(1);
+            assertThat(context.getBeansOfType(SchemaValidator.class)).hasSize(1);
+            assertThat(context.getBeansOfType(ResourceSchemaValidationAspect.class)).hasSize(1);
+        }
     }
 
     @Test
     void shouldUseConfiguredViewNameInJdbcSourceValidation() {
-        contextRunner
-                .withPropertyValues("platform.schema-validation.view-name=vw_custom_resource_schemas")
-                .withUserConfiguration(JdbcConfiguration.class)
-                .run(context -> {
-                    assertThat(context).hasNotFailed();
-                    org.mockito.Mockito.verify(JdbcConfiguration.JDBC_TEMPLATE).query(
-                            org.mockito.ArgumentMatchers.<String>argThat(sql ->
-                                    sql.contains("FROM vw_custom_resource_schemas")
-                                            && sql.contains("WHERE 1 = 0")
-                            ),
-                            org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
-                    );
-                });
+        try (AnnotationConfigApplicationContext context = openContext(
+                Map.of("platform.schema-validation.view-name", "vw_custom_resource_schemas"),
+                PlatformSchemaValidationJdbcAutoConfiguration.class,
+                PlatformSchemaValidationSourceAutoConfiguration.class,
+                PlatformSchemaValidationAutoConfiguration.class,
+                JdbcConfiguration.class
+        )) {
+            org.mockito.Mockito.verify(JdbcConfiguration.JDBC_TEMPLATE).query(
+                    org.mockito.ArgumentMatchers.<String>argThat(sql ->
+                            sql.contains("FROM vw_custom_resource_schemas")
+                                    && sql.contains("WHERE 1 = 0")
+                    ),
+                    org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
+            );
+        }
     }
 
     @Test
     void shouldFailStartupWithoutRepositoryOrJdbcTemplate() {
-        contextRunner.run(context -> {
-            assertThat(context).hasFailed();
-            assertThat(context.getStartupFailure())
-                    .hasRootCauseInstanceOf(PlatformConfigurationException.class);
+        Throwable failure = catchThrowable(() -> openContext(
+                PlatformSchemaValidationJdbcAutoConfiguration.class,
+                PlatformSchemaValidationSourceAutoConfiguration.class,
+                PlatformSchemaValidationAutoConfiguration.class
+        ));
 
-            Throwable cause = context.getStartupFailure();
-            while (cause.getCause() != null) {
-                cause = cause.getCause();
-            }
+        assertThat(failure)
+                .hasRootCauseInstanceOf(PlatformConfigurationException.class);
 
-            assertThat(cause.getMessage())
-                    .contains("vw_platform_resource_schemas")
-                    .contains("resource_type, resource_code, schema_version, definition")
-                    .contains("platform.schema-validation.view-name")
-                    .contains("ResourceSchemaRepository");
-        });
+        Throwable cause = failure;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+
+        assertThat(cause.getMessage())
+                .contains("vw_platform_resource_schemas")
+                .contains("resource_type, resource_code, schema_version, definition")
+                .contains("platform.schema-validation.view-name")
+                .contains("ResourceSchemaRepository");
     }
 
     @Test
     void shouldExposePublicSchemaValidatorContractForDirectValidation() {
-        new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(PlatformSchemaValidationAutoConfiguration.class))
-                .withUserConfiguration(ValidatingRepositoryConfiguration.class)
-                .run(context -> {
-                    SchemaValidator validator = context.getBean(SchemaValidator.class);
+        try (AnnotationConfigApplicationContext context = openContext(
+                PlatformSchemaValidationAutoConfiguration.class,
+                ValidatingRepositoryConfiguration.class
+        )) {
+            SchemaValidator validator = context.getBean(SchemaValidator.class);
 
-                    validator.validate(
-                            "PUBLISHER",
-                            "websocket",
-                            context.getBean(ObjectMapper.class).createObjectNode().put("url", "wss://example.test")
-                    );
+            validator.validate(
+                    "PUBLISHER",
+                    "websocket",
+                    context.getBean(ObjectMapper.class).createObjectNode().put("url", "wss://example.test")
+            );
 
-                    assertThat(validator).isNotNull();
-                });
+            assertThat(validator).isNotNull();
+        }
     }
 
     @Test
     void shouldCreateValidatorAndAspectOnlyWhenRepositoryDependencyExists() {
-        new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(PlatformSchemaValidationAutoConfiguration.class))
-                .withUserConfiguration(CustomRepositoryWithoutJdbcConfiguration.class)
-                .run(context -> {
-                    assertThat(context).hasSingleBean(ResourceSchemaRepository.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaResolver.class);
-                    assertThat(context).hasSingleBean(SchemaValidator.class);
-                    assertThat(context).hasSingleBean(ResourceSchemaValidationAspect.class);
-                });
+        try (AnnotationConfigApplicationContext context = openContext(
+                PlatformSchemaValidationAutoConfiguration.class,
+                CustomRepositoryWithoutJdbcConfiguration.class
+        )) {
+            assertThat(context.getBeansOfType(ResourceSchemaRepository.class)).hasSize(1);
+            assertThat(context.getBeansOfType(ResourceSchemaResolver.class)).hasSize(1);
+            assertThat(context.getBeansOfType(SchemaValidator.class)).hasSize(1);
+            assertThat(context.getBeansOfType(ResourceSchemaValidationAspect.class)).hasSize(1);
+        }
+    }
+
+    private AnnotationConfigApplicationContext openContext(Class<?>... configurationClasses) {
+        return openContext(Map.of(), configurationClasses);
+    }
+
+    private AnnotationConfigApplicationContext openContext(
+            Map<String, Object> properties,
+            Class<?>... configurationClasses
+    ) {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        if (!properties.isEmpty()) {
+            context.getEnvironment().getPropertySources().addFirst(
+                    new MapPropertySource("test-properties", properties)
+            );
+        }
+        Class<?>[] testConfigurations = Arrays.stream(configurationClasses)
+                .filter(configuration -> !configuration.isAnnotationPresent(AutoConfiguration.class))
+                .toArray(Class<?>[]::new);
+        Class<?>[] autoConfigurations = Arrays.stream(configurationClasses)
+                .filter(configuration -> configuration.isAnnotationPresent(AutoConfiguration.class))
+                .toArray(Class<?>[]::new);
+        if (testConfigurations.length > 0) {
+            context.register(testConfigurations);
+        }
+        if (autoConfigurations.length > 0) {
+            context.register(autoConfigurations);
+        }
+        try {
+            context.refresh();
+            return context;
+        } catch (RuntimeException exception) {
+            context.close();
+            throw exception;
+        }
     }
 
     @Configuration(proxyBeanMethods = false)

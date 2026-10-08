@@ -7,8 +7,8 @@ import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabi
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
-import br.com.portalmanager.platform.library.testing.annotation.AzureServiceBus;
-import br.com.portalmanager.platform.library.testing.annotation.WithAzureEmulator;
+import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
+import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
 import org.junit.jupiter.api.BeforeEach;

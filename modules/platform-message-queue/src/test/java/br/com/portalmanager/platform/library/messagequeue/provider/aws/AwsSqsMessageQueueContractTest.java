@@ -5,8 +5,8 @@ import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractTe
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
-import br.com.portalmanager.platform.library.testing.annotation.AwsSqs;
-import br.com.portalmanager.platform.library.testing.annotation.WithAwsLocalStack;
+import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
+import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

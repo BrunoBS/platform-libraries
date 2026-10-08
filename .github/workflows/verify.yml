@@ -77,7 +77,11 @@ jobs:
           test -n "$REVISION"
           test -f platform-libraries-bom/.flattened-pom.xml
           grep -q "<version>$REVISION</version>" platform-libraries-bom/.flattened-pom.xml
-          if grep -R '\${revision}' platform-libraries-bom/.flattened-pom.xml modules/*/.flattened-pom.xml; then
-            echo "Unresolved revision found in flattened consumer POMs."
+          if grep -nH '\${revision}' platform-libraries-bom/.flattened-pom.xml; then
+            echo "Unresolved revision found in the flattened BOM."
+            exit 1
+          fi
+          if find modules -name .flattened-pom.xml -print0 | xargs -0 grep -nH '\${revision}'; then
+            echo "Unresolved revision found in flattened module POMs."
             exit 1
           fi

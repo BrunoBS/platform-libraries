@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.library.authorization.visibility.ResourceVi
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
+import br.com.portalmanager.platform.library.testing.database.MySqlContainerImages;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -21,6 +22,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
 import java.util.Set;
@@ -51,14 +54,21 @@ class ResourceVisibilityHibernatePocTest {
 
     private static StandardServiceRegistry registry;
     private static SessionFactory sessionFactory;
+    private static MySQLContainer<?> database;
 
     @BeforeAll
     static void setUpHibernate() {
+        database = new MySQLContainer<>(DockerImageName.parse(MySqlContainerImages.MYSQL))
+                .withDatabaseName("authorization_test")
+                .withUsername("test")
+                .withPassword("test");
+        database.start();
+
         registry = new StandardServiceRegistryBuilder()
-                .applySetting("jakarta.persistence.jdbc.driver", "org.h2.Driver")
-                .applySetting("jakarta.persistence.jdbc.url", "jdbc:h2:mem:resource_visibility;DB_CLOSE_DELAY=-1")
-                .applySetting("jakarta.persistence.jdbc.user", "sa")
-                .applySetting("jakarta.persistence.jdbc.password", "")
+                .applySetting("jakarta.persistence.jdbc.driver", database.getDriverClassName())
+                .applySetting("jakarta.persistence.jdbc.url", database.getJdbcUrl())
+                .applySetting("jakarta.persistence.jdbc.user", database.getUsername())
+                .applySetting("jakarta.persistence.jdbc.password", database.getPassword())
                 .applySetting("hibernate.hbm2ddl.auto", "create-drop")
                 .applySetting("hibernate.show_sql", "false")
                 .build();
@@ -89,6 +99,9 @@ class ResourceVisibilityHibernatePocTest {
         }
         if (registry != null) {
             StandardServiceRegistryBuilder.destroy(registry);
+        }
+        if (database != null) {
+            database.stop();
         }
     }
 

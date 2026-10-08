@@ -56,7 +56,37 @@
             </dependency>
             <dependency>
                 <groupId>br.com.portalmanager.platform.library</groupId>
-                <artifactId>platform-testing</artifactId>
+                <artifactId>platform-testing-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-testing-http</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-testing-kafka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-testing-database</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-testing-cloud-aws</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-testing-cloud-azure</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-testing-authorization</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

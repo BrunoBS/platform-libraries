@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.tagging.model.Tag;
 import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.library.tagging.model.TagOwner;
+import br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName;
 import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -48,6 +51,22 @@ class TagManagerTest {
 
         verify(repository).deleteAll(List.of(obsolete));
         verify(repository).saveAll(any());
+    }
+
+    @Test
+    void shouldReturnManualTagsByOwnerKeysUsingScalarProjection() {
+        TagRepository<TestTag, Owner> repository = repository();
+        when(repository.findOwnerTagNamesByIdentifiersAndOrigin(
+                anyCollection(),
+                eq(TagOriginType.MANUAL)
+        )).thenReturn(List.of(
+                new TagOwnerTagName("workspace-10", TagName.of("manual-a"))
+        ));
+
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+
+        assertThat(manager.findManualByOwnerKeys(List.of(" workspace-10 ")))
+                .containsEntry("workspace-10", List.of("manual-a"));
     }
 
     @Test

@@ -8,7 +8,9 @@ import br.com.portalmanager.platform.library.schemavalidation.message.SchemaVali
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -81,19 +83,16 @@ class ResourceSchemaValidatorTest {
                 "application",
                 objectMapper.valueToTree(new SampleInput("first"))
         );
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> validator.validate(
+        ValidationException exception = catchThrowableOfType(() -> validator.validate(
                         "APPLICATION",
                         "application",
                         objectMapper.createObjectNode()
-                )
-        );
+                ), ValidationException.class);
+        assertThat(exception).isNotNull();
 
-        org.junit.jupiter.api.Assertions.assertTrue(
-                exception.getDetails().stream()
-                        .anyMatch(detail -> "schemavalidation.required".equals(detail.messageKey()))
-        );
+        assertThat(exception.getDetails().stream()
+                        .anyMatch(detail -> "schemavalidation.required".equals(detail.messageKey())))
+                .isTrue();
         verify(resolver, times(2)).resolve("APPLICATION", "application");
     }
 
@@ -251,24 +250,21 @@ class ResourceSchemaValidatorTest {
 
         ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> validator.validate(
+        ValidationException exception = catchThrowableOfType(() -> validator.validate(
                         "APPLICATION",
                         "application",
                         objectMapper.valueToTree(true)
-                )
-        );
+                ), ValidationException.class);
+        assertThat(exception).isNotNull();
 
-        org.junit.jupiter.api.Assertions.assertFalse(exception.getDetails().isEmpty());
-        org.junit.jupiter.api.Assertions.assertTrue(
-                exception.getDetails().stream()
-                        .allMatch(detail -> detail.messageKey().startsWith("schemavalidation."))
-        );
-        org.junit.jupiter.api.Assertions.assertTrue(
-                exception.getDetails().stream()
-                        .allMatch(detail -> SchemaValidationMessageKeys.INVALID.equals(detail.fallbackMessageKey()))
-        );
+        assertThat(exception.getDetails().isEmpty())
+                .isFalse();
+        assertThat(exception.getDetails().stream()
+                        .allMatch(detail -> detail.messageKey().startsWith("schemavalidation.")))
+                .isTrue();
+        assertThat(exception.getDetails().stream()
+                        .allMatch(detail -> SchemaValidationMessageKeys.INVALID.equals(detail.fallbackMessageKey())))
+                .isTrue();
     }
 
     @Test
@@ -306,22 +302,19 @@ class ResourceSchemaValidatorTest {
 
         ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> validator.validate(
+        ValidationException exception = catchThrowableOfType(() -> validator.validate(
                         "APPLICATION",
                         "application",
                         objectMapper.readTree("\"not-an-email\"")
-                )
-        );
+                ), ValidationException.class);
+        assertThat(exception).isNotNull();
 
-        org.junit.jupiter.api.Assertions.assertTrue(
-                exception.getDetails().stream()
+        assertThat(exception.getDetails().stream()
                         .anyMatch(detail ->
                                 "schemavalidation.format".equals(detail.messageKey())
                                         && "email".equals(detail.parameters().get("1"))
-                        )
-        );
+                        ))
+                .isTrue();
     }
 
     private void assertCompositionProducesOnlyControlledKeys(String definition, String payload) {
@@ -331,24 +324,21 @@ class ResourceSchemaValidatorTest {
 
         ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> validator.validate(
+        ValidationException exception = catchThrowableOfType(() -> validator.validate(
                         "APPLICATION",
                         "application",
                         objectMapper.readTree(payload)
-                )
-        );
+                ), ValidationException.class);
+        assertThat(exception).isNotNull();
 
-        org.junit.jupiter.api.Assertions.assertFalse(exception.getDetails().isEmpty());
-        org.junit.jupiter.api.Assertions.assertTrue(
-                exception.getDetails().stream()
-                        .allMatch(detail -> detail.messageKey().startsWith("schemavalidation."))
-        );
-        org.junit.jupiter.api.Assertions.assertTrue(
-                exception.getDetails().stream()
-                        .allMatch(detail -> SchemaValidationMessageKeys.INVALID.equals(detail.fallbackMessageKey()))
-        );
+        assertThat(exception.getDetails().isEmpty())
+                .isFalse();
+        assertThat(exception.getDetails().stream()
+                        .allMatch(detail -> detail.messageKey().startsWith("schemavalidation.")))
+                .isTrue();
+        assertThat(exception.getDetails().stream()
+                        .allMatch(detail -> SchemaValidationMessageKeys.INVALID.equals(detail.fallbackMessageKey())))
+                .isTrue();
     }
 
     private void assertValidationMessage(String definition, String payload, String expectedMessageKey) {
@@ -358,21 +348,18 @@ class ResourceSchemaValidatorTest {
 
         ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> validator.validate(
+        ValidationException exception = catchThrowableOfType(() -> validator.validate(
                         "APPLICATION",
                         "application",
                         objectMapper.readTree(payload)
-                )
-        );
+                ), ValidationException.class);
+        assertThat(exception).isNotNull();
 
-        org.junit.jupiter.api.Assertions.assertTrue(
-                exception.getDetails().stream()
-                        .anyMatch(detail -> expectedMessageKey.equals(detail.messageKey())),
-                () -> "Expected message key " + expectedMessageKey + " but got " +
-                        exception.getDetails().stream().map(detail -> detail.messageKey()).toList()
-        );
+        assertThat(exception.getDetails().stream()
+                        .anyMatch(detail -> expectedMessageKey.equals(detail.messageKey())))
+                .as(() -> "Expected message key " + expectedMessageKey + " but got " +
+                        exception.getDetails().stream().map(detail -> detail.messageKey()).toList())
+                .isTrue();
     }
 
     private void assertInvalidDefinition(String definition) {
@@ -382,14 +369,11 @@ class ResourceSchemaValidatorTest {
 
         ResourceSchemaValidator validator = new ResourceSchemaValidator(resolver, objectMapper);
 
-        assertThrows(
-                PlatformConfigurationException.class,
-                () -> validator.validate(
+        assertThatThrownBy(() -> validator.validate(
                         "APPLICATION",
                         "application",
                         objectMapper.valueToTree(new SampleInput("test"))
-                )
-        );
+                )).isInstanceOf(PlatformConfigurationException.class);
     }
 
     record SampleInput(String name) {

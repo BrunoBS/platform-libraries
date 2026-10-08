@@ -1,0 +1,23 @@
+package br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation;
+
+import br.com.portalmanager.platform.library.testing.cloud.azure.AzureContainerImages;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AzureBlobStorage {
+
+    String image() default AzureContainerImages.AZURITE;
+
+    String[] containers() default {};
+
+    /**
+     * When configured, successful Blob uploads publish an Event Grid compatible
+     * BlobCreated message to this Service Bus queue in tests.
+     */
+    String blobCreatedQueue() default "";
+}

@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,8 +54,10 @@ class SchemaValidationMessagingIntegrationTest {
                 request()
         );
 
-        assertEquals(400, response.getStatusCode().value());
-        assertEquals("Mensagem dinâmica para name.", response.getBody().details().getFirst().message());
+        assertThat(response.getStatusCode().value())
+                .isEqualTo(400);
+        assertThat(response.getBody().details().getFirst().message())
+                .isEqualTo("Mensagem dinâmica para name.");
     }
 
     @Test
@@ -86,8 +88,10 @@ class SchemaValidationMessagingIntegrationTest {
                 request()
         );
 
-        assertEquals(400, response.getStatusCode().value());
-        assertEquals("Schema inválido para name.", response.getBody().details().getFirst().message());
+        assertThat(response.getStatusCode().value())
+                .isEqualTo(400);
+        assertThat(response.getBody().details().getFirst().message())
+                .isEqualTo("Schema inválido para name.");
     }
 
     private ApiExceptionHandler handler(ApiMessageRepository repository) {
