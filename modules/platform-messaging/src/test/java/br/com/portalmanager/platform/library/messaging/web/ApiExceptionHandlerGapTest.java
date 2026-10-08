@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import tools.jackson.databind.JsonMappingException;
 import tools.jackson.databind.exc.InvalidFormatException;
 
 import java.util.List;
@@ -53,6 +54,39 @@ class ApiExceptionHandlerGapTest {
     }
 
     @Test
+    void shouldReportArrayIndexWhenInvalidEnumPathHasNoPropertyName() {
+        ApiMessageResolver resolver = mock(ApiMessageResolver.class);
+        InvalidFormatException invalidFormat = mock(InvalidFormatException.class);
+        JsonMappingException.Reference reference = mock(JsonMappingException.Reference.class);
+        HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
+
+        when(reference.getPropertyName()).thenReturn(null);
+        when(reference.getIndex()).thenReturn(0);
+        when(invalidFormat.getPath()).thenReturn(List.of(reference));
+        when(invalidFormat.getTargetType()).thenReturn(Lifecycle.class);
+        when(exception.getCause()).thenReturn(invalidFormat);
+        when(resolver.resolve(PlatformMessageKeys.VALIDATION_FAILED, LOCALE))
+                .thenReturn(message(
+                        "GLOBAL-0001",
+                        PlatformMessageKeys.VALIDATION_FAILED,
+                        "Um ou mais campos informados são inválidos."
+                ));
+        when(resolver.resolve(PlatformMessageKeys.INVALID_ENUM, LOCALE))
+                .thenReturn(message(
+                        "GLOBAL-0008",
+                        PlatformMessageKeys.INVALID_ENUM,
+                        "Valor inválido."
+                ));
+
+        ResponseEntity<ApiErrorResponse> response = new ApiExceptionHandler(resolver)
+                .handleNotReadable(exception, LOCALE, request());
+
+        assertNotNull(response.getBody());
+        assertEquals("request[0]", response.getBody().details().getFirst().field());
+        assertEquals("GLOBAL-0008", response.getBody().details().getFirst().code());
+    }
+
+    @Test
     void shouldKeepUnreadableMessageForMalformedJsonWithoutInvalidValue() {
         ApiMessageResolver resolver = mock(ApiMessageResolver.class);
         HttpServletRequest request = request();
@@ -89,6 +123,10 @@ class ApiExceptionHandlerGapTest {
                         + "\"solution\":\"Informe uma versão válida.\"}]",
                 handler.toJsonDetails(List.of(detail))
         );
+    }
+
+    private enum Lifecycle {
+        ACTIVE
     }
 
     private HttpServletRequest request() {
