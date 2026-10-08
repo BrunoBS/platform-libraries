@@ -20,8 +20,6 @@ import org.springframework.core.env.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformMessagingProperties.class)
 @ConditionalOnProperty(prefix = "platform.messaging", name = "enabled", havingValue = "true", matchIfMissing = true)
@@ -50,12 +48,7 @@ public class PlatformMessagingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(ApiMessageProvider.class)
     ApiMessageProvider apiMessageProvider(Environment environment) {
-        try {
-            return new PlatformDefaultMessageProvider(requireApplicationName(environment));
-        } catch (RuntimeException exception) {
-            log.error("Platform messaging bundle unavailable during startup; continuing with immutable platform default", exception);
-            return (key, locale) -> Optional.empty();
-        }
+        return new PlatformDefaultMessageProvider(requireApplicationName(environment));
     }
 
     @Bean
