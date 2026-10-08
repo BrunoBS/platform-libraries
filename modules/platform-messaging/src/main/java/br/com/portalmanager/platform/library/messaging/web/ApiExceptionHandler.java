@@ -192,6 +192,12 @@ public class ApiExceptionHandler {
                         request
                 );
             }
+
+            return resolve(
+                    new ValidationException(PlatformMessageKeys.REQUEST_FORMAT_INVALID),
+                    locale,
+                    request
+            );
         }
 
         return resolve(
@@ -418,13 +424,7 @@ public class ApiExceptionHandler {
                         response.timestamp() == null
                                 ? null
                                 : response.timestamp().toString()
-                ) + "," +
-                "\"path\":" + jsonString(response.path()) + "," +
-                "\"correlationId\":" + jsonString(response.correlationId()) +
-                "}";
-    }
-
-    private String toJsonDetails(List<ApiValidationDetail> details) {
+             String toJsonDetails(List<ApiValidationDetail> details) {
         if (details == null || details.isEmpty()) {
             return "[]";
         }
@@ -432,6 +432,14 @@ public class ApiExceptionHandler {
         return details.stream()
                 .map(detail -> "{" +
                         "\"field\":" + jsonString(detail.field()) + "," +
+                        "\"code\":" + jsonString(detail.code()) + "," +
+                        "\"message\":" + jsonString(detail.message()) + "," +
+                        "\"solution\":" + jsonString(detail.solution()) +
+                        "}")
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+
+il.field()) + "," +
                         "\"message\":" + jsonString(detail.message()) +
                         "}")
                 .collect(Collectors.joining(",", "[", "]"));
