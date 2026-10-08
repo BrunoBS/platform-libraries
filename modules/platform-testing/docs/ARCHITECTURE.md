@@ -6,7 +6,7 @@
 
 | Artefato | Pacotes e funcionalidades |
 |---|---|
-| `platform-testing-core` | `architecture`, `context`, `fixture`, `lifecycle`, `context-specific error` e validação de imagem compartilhada |
+| `platform-testing-core` | `architecture`, `context`, `fixture`, `lifecycle` e validação de imagem compartilhada |
 | `platform-testing-http` | `http` e a anotação `lifecycle.annotation.PlatformIntegrationTest`, que compõe HTTP + Spring Boot |
 | `platform-testing-authorization` | `authorization`, mock de autorização e `@WithMockAuthorization` |
 | `platform-testing-kafka` | `kafka` e `kafka.annotation` |
@@ -26,14 +26,18 @@ platform-testing-database ──────┤
 platform-testing-cloud-aws ────┤
 platform-testing-cloud-azure ──┘
 
-platform-testing-authorization ──> platform-authorization
+platform-testing-kafka ─────────────> platform-messaging
+platform-testing-database ───────────> platform-messaging
+platform-testing-cloud-aws ──────────> platform-messaging
+platform-testing-cloud-azure ────────> platform-messaging
+platform-testing-authorization ──────> platform-authorization
 ```
 
 O core fornece interfaces e utilitários comuns; não importa classes de feature. AWS e Azure não dependem uma da outra. `platform-authorization` não depende de nenhum artefato de teste, então a relação não forma ciclo. O agregador não entra no BOM e não é dependência do consumidor.
 
 ## Escopo das dependências
 
-As dependências de JUnit, Spring Test, ArchUnit, SLF4J, Mockito Extension, Datafaker e mensagens ficam no core porque são usadas pela API compartilhada. RestAssured/Jackson ficam em HTTP; WireMock e a capability de autorização em authorization; Kafka/Testcontainers em kafka; JDBC, driver MySQL e Testcontainers MySQL em database; SDKs e containers de cada fornecedor no respectivo módulo cloud. `spring-boot-starter-test` e `testcontainers-junit-jupiter` são escopo `test` nos módulos que os utilizam para executar a própria suíte.
+O core fornece JUnit, AssertJ, Spring Test, ArchUnit, SLF4J e Mockito Extension para APIs compartilhadas. Datafaker e `platform-messaging` não entram pelo core. Kafka, database, AWS e Azure declaram `platform-messaging` diretamente porque lançam erros de configuração específicos do contexto. RestAssured/Jackson ficam em HTTP; WireMock e a capability de autorização em authorization; Kafka/Testcontainers em kafka; JDBC, driver MySQL e Testcontainers MySQL em database; SDKs e containers de cada fornecedor no respectivo módulo cloud. As dependências de teste ficam somente nos módulos que usam suas APIs. As suites compartilham JUnit, AssertJ, Mockito e Spring Test através de `platform-testing-core`.
 
 `platform-testing-database` fornece MySQL pelo Testcontainers e não declara H2. Os consumidores escolhem o artefato correspondente ao que usam em seus testes.
 
