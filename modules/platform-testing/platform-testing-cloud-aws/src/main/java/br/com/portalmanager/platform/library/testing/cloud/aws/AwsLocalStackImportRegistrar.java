@@ -7,7 +7,7 @@ import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.Aws
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
-import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.cloud.aws.AwsTestingTechnicalErrors;
 import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
 
 import org.testcontainers.utility.DockerImageName;
@@ -144,11 +144,11 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
     }
 
     private PlatformConfigurationException configurationException(String detail) {
-        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail));
+        return new PlatformConfigurationException(AwsTestingTechnicalErrors.invalidAwsConfiguration(detail));
     }
 
     private PlatformConfigurationException configurationException(String detail, Throwable cause) {
-        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail), cause);
+        return new PlatformConfigurationException(AwsTestingTechnicalErrors.invalidAwsConfiguration(detail), cause);
     }
 
     private DockerImageName dockerImageName(Object value) {
