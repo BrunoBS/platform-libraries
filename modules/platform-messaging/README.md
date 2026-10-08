@@ -217,3 +217,7 @@ Um miss é fluxo normal e não é tratado como falha. Quando nenhuma fonte conhe
 Quando o datasource está habilitado, a library executa no startup uma consulta sem linhas (`WHERE 1 = 0`) com as colunas do contrato para diagnosticar existência/acesso da view. Falhas são registradas, mas não impedem o startup; em runtime a resolução continua pelos fallbacks disponíveis.
 
 Falhas repetidas durante a resolução são limitadas por fonte/tipo de erro em uma janela curta para evitar tempestade de logs.
+
+## Validation response details
+
+The response envelope uses the code, message, solution, and HTTP status resolved for the exception's message key. Each validation detail also includes the resolved message `code`, `message`, and `solution` alongside its `field`. This keeps field-level message codes visible when multiple fields fail validation; the envelope's HTTP status remains the single HTTP status for the response.
