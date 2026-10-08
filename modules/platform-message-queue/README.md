@@ -237,7 +237,7 @@ A biblioteca registra logs SLF4J para falhas técnicas de polling, processamento
 
 ## Testes
 
-Use `platform-testing` no escopo de testes. O suporte de emuladores e fixtures pertence ao ambiente de teste; não é dependência de runtime da aplicação.
+Use `platform-testing-core` no escopo de testes. O suporte de emuladores e fixtures pertence ao ambiente de teste; não é dependência de runtime da aplicação.
 
 Para SQS, a fixture pode criar uma fila principal e sua DLQ no LocalStack, com redrive policy:
 

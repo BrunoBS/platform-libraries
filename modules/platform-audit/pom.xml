@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
-            <artifactId>platform-testing</artifactId>
+            <artifactId>platform-testing-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

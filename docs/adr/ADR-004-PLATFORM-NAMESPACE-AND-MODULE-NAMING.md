@@ -65,7 +65,7 @@ O rename não cria métricas ou tracing. Essas capacidades só serão adicionada
 O artifact `platform-test-support` passa a ser:
 
 ```text
-platform-testing
+platform-testing-core
 ```
 
 Seu package público é:
@@ -91,7 +91,7 @@ platform-libraries/
     ├── platform-audit/
     ├── platform-catalog/
     ├── platform-tagging/
-    └── platform-testing/
+    └── platform-testing-core/
 ```
 
 ## Versionamento
@@ -108,7 +108,7 @@ O novo `groupId` cria coordenadas Maven distintas das coordenadas anteriores. Os
 
 - consumidores devem migrar parent, BOM, dependencies e imports para `br.com.portalmanager.platform`;
 - `platform-starter` agrega `platform-observability`;
-- dependências de teste usam `platform-testing`;
+- dependências de teste usam `platform-testing-core`;
 - `platform.logging.*` deixa de ser contrato vigente; o prefixo passa a `platform.observability.logging.*`;
 - a Golden Reference deve ser revalidada consumindo exclusivamente os artifacts remotos do novo namespace antes de iniciar G5.
 

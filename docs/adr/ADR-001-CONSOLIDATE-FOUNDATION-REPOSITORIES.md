@@ -57,7 +57,7 @@ O root POM será apenas aggregator e ponto de publicação do reactor. Não conc
 - platform-audit;
 - platform-catalog;
 - platform-tagging;
-- platform-testing.
+- platform-testing-core.
 
 ## Versioning strategy for this migration
 

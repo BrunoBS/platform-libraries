@@ -37,7 +37,7 @@ br.com.portalmanager.platform:platform-authorization:1.0.0
 br.com.portalmanager.platform:platform-audit:1.0.0
 br.com.portalmanager.platform:platform-catalog:1.0.0
 br.com.portalmanager.platform:platform-tagging:1.0.0
-br.com.portalmanager.platform:platform-testing:1.0.0
+br.com.portalmanager.platform:platform-testing-core:1.0.0
 ```
 
 O root reactor `platform-libraries` é operacional e não é eixo de consumo.
@@ -60,7 +60,7 @@ Além disso:
 
 ```text
 platform-logging      → platform-observability
-platform-test-support → platform-testing
+platform-test-support → platform-testing-core
 ```
 
 Portanto esta migração não depende de sobrescrever artifacts do namespace anterior.
@@ -104,7 +104,7 @@ Após o deploy, o `account-service` deve:
 
 - usar `br.com.portalmanager.platform:platform-parent:1.0.0`;
 - importar `br.com.portalmanager.platform:platform-libraries-bom:1.0.0`;
-- consumir `platform-starter`, `platform-tagging`, `platform-audit` e `platform-testing` sem versão;
+- consumir `platform-starter`, `platform-tagging`, `platform-audit` e `platform-testing-core` sem versão;
 - migrar imports Java para `br.com.portalmanager.platform.*`;
 - executar `clean verify` com Maven repository local isolado;
 - não depender do namespace `br.com.portalmanager.core`.

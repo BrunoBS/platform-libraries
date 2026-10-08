@@ -32,7 +32,7 @@ platform-libraries/
     ├── platform-audit/
     ├── platform-catalog/
     ├── platform-tagging/
-    └── platform-testing/
+    └── platform-testing-core/
 ```
 
 O root POM é somente reactor/aggregator.
@@ -78,7 +78,7 @@ Gerencia a release train compatível das capabilities:
 - platform-audit;
 - platform-catalog;
 - platform-tagging;
-- platform-testing.
+- platform-testing-core.
 
 ## Starter
 
@@ -94,7 +94,7 @@ Schema validation, audit, catalog e tagging são capabilities explícitas e não
 
 Ao declarar `platform-schema-validation`, o consumidor deve possuir `JdbcTemplate` para a fonte JDBC default ou fornecer um `ResourceSchemaRepository` customizado. A ausência de ambas as fontes é erro de configuração e impede o startup.
 
-`platform-testing` é exclusivo de testes e não faz parte do runtime starter.
+`platform-testing-core` é exclusivo de testes e não faz parte do runtime starter.
 
 ## Dependências internas
 
@@ -135,7 +135,7 @@ Metrics e tracing não são adicionados sem caso real aprovado.
 
 ## Testing
 
-`platform-testing` fornece infraestrutura reutilizável para:
+`platform-testing-core` fornece infraestrutura reutilizável para:
 
 - unit tests;
 - Spring integration tests;

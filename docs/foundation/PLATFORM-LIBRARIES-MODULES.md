@@ -14,7 +14,7 @@ platform-authorization
 platform-audit
 platform-catalog
 platform-tagging
-platform-testing
+platform-testing-core
 ```
 
 Namespace:
@@ -83,7 +83,7 @@ Catálogos persistidos/gerenciados. Independente de CRUD genérico. Não entra p
 
 Tagging persistido, owner isolation e reconciliação de origem. Não entra pelo starter.
 
-### platform-testing
+### platform-testing-core
 
 Capability de testing reutilizável:
 
@@ -104,7 +104,7 @@ Dependências pesadas permanecem opcionais e só entram quando o consumidor decl
 ```text
 platform-crud         → removido
 platform-logging      → platform-observability
-platform-test-support → platform-testing
+platform-test-support → platform-testing-core
 ```
 
 Os nomes antigos não são aliases e não fazem parte do baseline vigente.

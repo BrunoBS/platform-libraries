@@ -1,0 +1,1218 @@
+# Guia completo de uso — Platform Test Support
+
+Este guia mostra como adicionar o `platform-testing-core` a um microsserviço e criar testes de integração completos usando o padrão da plataforma.
+
+Os exemplos utilizam uma API fictícia de produtos, mas a mesma organização pode ser aplicada a contas, aplicações, ambientes, rotas, menus ou qualquer outra feature.
+
+## 1. O que a biblioteca fornece
+
+| Recurso | Responsabilidade |
+|---|---|
+| `@PlatformIntegrationTest` | Inicializar o Spring Boot com servidor HTTP em porta aleatória |
+| `@WithMySql` | Inicializar o MySQL e limpar as tabelas entre os testes |
+| `@WithDatabaseScripts` | Executar scripts opcionais de setup e cleanup |
+| `@WithKafka` | Inicializar um Kafka para o teste |
+| `@WithAwsLocalStack` | Inicializar SQS e/ou S3 no LocalStack |
+| `@WithAzureEmulator` | Inicializar Service Bus e/ou Blob Storage no emulador Azure |
+| `@WithMockAuthorization` | Simular o autorizador comum da plataforma |
+| `PlatformRequestSpecificationFactory` | Criar requests RestAssured sem estado global |
+| `BaseClient` | Implementação opcional para clients baseados em herança |
+| `BaseResponse` | Fornecer validações HTTP fluentes |
+| `TestDataBuilder<T>` | Contrato para builders de massa de teste |
+| `TestDataFactory<T>` | Contrato para factories de cenários válidos |
+| `TestScenario<R>` | Contrato para preparação de cenários compostos |
+
+Nenhum recurso de infraestrutura é ativado automaticamente. O teste seleciona apenas as anotações de que precisa.
+
+## 2. Dependência Maven
+
+Adicione a biblioteca no `pom.xml` do microsserviço:
+
+```xml
+<properties>
+    <platform-libraries.version>1.0.0-SNAPSHOT</platform-libraries.version>
+</properties>
+
+<dependencies>
+    <dependency>
+        <groupId>br.com.portalmanager.platform.library</groupId>
+        <artifactId>platform-testing-core</artifactId>
+        <version>${platform-libraries.version}</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
+O escopo deve ser `test`. Assim, Testcontainers, RestAssured e as demais ferramentas de teste não são incluídas no artefato de produção.
+
+Se o microsserviço utiliza o autorizador, ele também deve possuir a dependência normal da `platform-authorization`. Para usar `@WithMockAuthorization` nos testes, declare também `platform-testing-authorization` (ele inclui o core):
+
+```xml
+<dependency>
+    <groupId>br.com.portalmanager.platform.library</groupId>
+    <artifactId>platform-authorization</artifactId>
+    <version>${platform-libraries.version}</version>
+</dependency>
+
+<dependency>
+    <groupId>br.com.portalmanager.platform.library</groupId>
+    <artifactId>platform-testing-authorization</artifactId>
+    <version>${platform-libraries.version}</version>
+    <scope>test</scope>
+</dependency>
+```
+
+## 3. Profile de teste
+
+Crie o arquivo:
+
+```text
+src/test/resources/application-test.yml
+```
+
+Exemplo:
+
+```yaml
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+platform:
+  authorization:
+    enabled: false
+```
+
+Quando `@WithMySql` for utilizado, não informe URL, usuário ou senha do datasource. A conexão será registrada automaticamente pelo Testcontainers.
+
+Quando `@WithMockAuthorization` for utilizado, a própria anotação habilitará o autorizador e substituirá a URL pelo endereço do WireMock.
+
+## 4. Organização recomendada
+
+```text
+src/test
+├── java/com/empresa/product
+│   ├── builder
+│   │   └── ProductRequestBuilder.java
+│   ├── client
+│   │   ├── ProductClient.java
+│   │   └── response
+│   │       └── ProductResponse.java
+│   ├── config
+│   │   └── ProductAuthorizationTestConfiguration.java
+│   ├── factory
+│   │   └── ProductFactory.java
+│   ├── scenario
+│   │   ├── ProductScenario.java
+│   │   └── ProductScenarioResult.java
+│   └── integration
+│       └── ProductControllerIT.java
+└── resources
+    ├── application-test.yml
+    └── sql
+        ├── views
+        │   ├── create-product-views.sql
+        │   └── drop-product-views.sql
+        └── scenarios
+            ├── create-product.sql
+            └── delete-products.sql
+```
+
+As classes relacionadas ao domínio continuam no microsserviço. A biblioteca fornece apenas os contratos e a infraestrutura comum.
+
+## 5. Primeiro teste de integração
+
+O teste mínimo para uma API HTTP é:
+
+```java
+package com.empresa.product.integration;
+
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
+import org.junit.jupiter.api.Test;
+
+@PlatformIntegrationTest
+class HealthControllerIT {
+
+    @Test
+    void deveCarregarContexto() {
+    }
+}
+```
+
+`@PlatformIntegrationTest` configura:
+
+- `@SpringBootTest`;
+- servidor HTTP em porta aleatória;
+- profile `test`;
+- fábrica de requests RestAssured;
+- um novo correlation ID para cada teste.
+
+## 6. MySQL
+
+A fixture usa `mysql:8.4.11` como default. Informe outra tag ou digest fixo em `image` quando precisar validar uma versão específica, como `@WithMySql(image = "mysql:8.4.0")`. Também é possível usar 9.x, mas essa linha não é o default e não faz parte da validação contínua da biblioteca. Adicione `@WithMySql` somente quando o teste necessitar do banco:
+
+```java
+@PlatformIntegrationTest
+@WithMySql
+class ProductRepositoryIT {
+}
+```
+
+Por padrão, todas as tabelas são truncadas antes de cada teste, exceto `flyway_schema_history`:
+
+```java
+@WithMySql(
+    cleanup = CleanupMode.BEFORE_EACH,
+    excludeTables = "flyway_schema_history"
+)
+```
+
+### Modos de limpeza
+
+```java
+@WithMySql(cleanup = CleanupMode.BEFORE_EACH)
+```
+
+Limpa antes de cada teste. É o comportamento recomendado.
+
+```java
+@WithMySql(cleanup = CleanupMode.AFTER_EACH)
+```
+
+Limpa depois de cada teste.
+
+```java
+@WithMySql(cleanup = CleanupMode.NONE)
+```
+
+Desativa a limpeza automática.
+
+### Preservar tabelas de catálogo
+
+```java
+@WithMySql(
+    excludeTables = {
+        "flyway_schema_history",
+        "product_types",
+        "status_types"
+    }
+)
+```
+
+As views não são truncadas pelo `DatabaseCleaner`. Elas continuam existindo e passam a refletir o estado atualizado das tabelas.
+
+## 7. Scripts SQL e views
+
+Use `@WithDatabaseScripts` quando o teste precisar de views, procedures, triggers ou dados SQL específicos.
+
+### Script para toda a classe
+
+```java
+@PlatformIntegrationTest
+@WithMySql
+@WithDatabaseScripts(
+    setup = {"classpath:sql/views/create-product-views.sql"},
+    cleanup = {"classpath:sql/views/drop-product-views.sql"}
+)
+class ProductViewRepositoryIT {
+}
+```
+
+Criação da view:
+
+```sql
+CREATE OR REPLACE VIEW vw_active_products AS
+SELECT id, name, price
+FROM products
+WHERE active = TRUE;
+```
+
+Limpeza:
+
+```sql
+DROP VIEW IF EXISTS vw_active_products;
+```
+
+Por padrão:
+
+- `setup`: antes de todos os testes da classe;
+- `cleanup`: depois de todos os testes da classe.
+
+### Script antes e depois de cada teste
+
+```java
+@WithDatabaseScripts(
+    setup = {"classpath:sql/scenarios/create-product.sql"},
+    cleanup = {"classpath:sql/scenarios/delete-products.sql"},
+    setupPhase = DatabaseSetupPhase.BEFORE_EACH,
+    cleanupPhase = DatabaseCleanupPhase.AFTER_EACH
+)
+```
+
+### Script específico de um método
+
+```java
+@Test
+@WithDatabaseScripts(
+    setup = {"classpath:sql/scenarios/create-inactive-product.sql"},
+    cleanup = {"classpath:sql/scenarios/delete-products.sql"}
+)
+void deveBuscarProdutoInativo() {
+}
+```
+
+Em métodos, setup e cleanup envolvem somente aquele teste.
+
+### Mais de um conjunto de scripts
+
+Os atributos `setup` e `cleanup` são arrays. Quando todos os scripts compartilham as mesmas fases e o mesmo `continueOnError`, declare-os juntos em uma única anotação:
+
+```java
+@WithDatabaseScripts(
+    setup = {
+        "classpath:sql/views/create-product-views.sql",
+        "classpath:sql/scenarios/create-catalogs.sql"
+    },
+    cleanup = {
+        "classpath:sql/scenarios/delete-catalogs.sql",
+        "classpath:sql/views/drop-product-views.sql"
+    }
+)
+class ProductRepositoryIT {
+}
+```
+
+Os arquivos de cada array executam na ordem declarada. Liste o cleanup na ordem necessária para desfazer as dependências, como no exemplo acima.
+
+A anotação é repetível quando grupos de scripts precisam de configurações diferentes, como fases de setup/cleanup ou valores diferentes de `continueOnError`. Nesse caso, os grupos de setup seguem a ordem das anotações e os grupos de cleanup executam na ordem inversa; os arquivos de cada array ainda seguem sua própria ordem declarada.
+
+Utilize caminhos com o prefixo `classpath:` e scripts de cleanup idempotentes, como `DROP VIEW IF EXISTS` e `DELETE` com condições seguras. Um arquivo inexistente ou ilegível interrompe o teste imediatamente.
+
+## 8. Criação dos requests HTTP
+
+Injete `PlatformRequestSpecificationFactory` no client do microsserviço:
+
+```java
+package com.empresa.product.client;
+
+import br.com.portalmanager.platform.library.testing.http.PlatformRequestSpecificationFactory;
+import com.empresa.product.client.response.ProductResponse;
+import com.empresa.product.web.dto.CreateProductRequest;
+import io.restassured.RestAssured;
+import org.springframework.stereotype.Component;
+
+@Component
+public final class ProductClient {
+
+    private static final String BASE_PATH = "/api/v1/products";
+
+    private final PlatformRequestSpecificationFactory requests;
+
+    public ProductClient(PlatformRequestSpecificationFactory requests) {
+        this.requests = requests;
+    }
+
+    public ProductResponse create(CreateProductRequest body) {
+        return new ProductResponse(
+            RestAssured.given()
+                .spec(requests.create())
+                .body(body)
+                .when()
+                .post(BASE_PATH)
+                .then()
+        );
+    }
+
+    public ProductResponse findById(Long id) {
+        return new ProductResponse(
+            RestAssured.given()
+                .spec(requests.create())
+                .pathParam("id", id)
+                .when()
+                .get(BASE_PATH + "/{id}")
+                .then()
+        );
+    }
+}
+```
+
+Uma nova especificação deve ser criada em cada operação. Não armazene o `RequestSpecification` em um campo singleton, pois o correlation ID pertence ao teste atual.
+
+O request padrão contém:
+
+- porta aleatória do servidor;
+- `Content-Type: application/json`;
+- `X-Correlation-Id`.
+
+Ele não contém autorização automaticamente.
+
+## 9. Requests autorizados
+
+Para enviar os headers da plataforma, use `createAuthorized`:
+
+```java
+import br.com.portalmanager.platform.library.testing.http.AuthorizationRequestData;
+
+public ProductResponse create(CreateProductRequest body) {
+    AuthorizationRequestData authorization = AuthorizationRequestData.builder()
+        .token("token-product-test")
+        .accountId("account-123")
+        .environment("DEV")
+        .applicationId("product-api")
+        .build();
+
+    return new ProductResponse(
+        RestAssured.given()
+            .spec(requests.createAuthorized(authorization))
+            .body(body)
+            .when()
+            .post(BASE_PATH)
+            .then()
+    );
+}
+```
+
+Isso adiciona:
+
+```text
+Authorization: Bearer token-product-test
+X-Account-Id: account-123
+X-Environment: DEV
+X-Application-Id: product-api
+```
+
+Para utilizar os valores genéricos da biblioteca:
+
+```java
+requests.createAuthorized();
+```
+
+### Customização comum de requests
+
+O microsserviço pode fornecer customizações por composição:
+
+```java
+@TestConfiguration(proxyBeanMethods = false)
+class ProductHttpTestConfiguration {
+
+    @Bean
+    PlatformRequestSpecificationCustomizer productHeaders() {
+        return builder -> builder.addHeader("X-Feature", "PRODUCT");
+    }
+}
+```
+
+Importe a configuração no teste:
+
+```java
+@Import(ProductHttpTestConfiguration.class)
+```
+
+## 10. Usando `BaseClient`
+
+O uso de herança é opcional. Caso o projeto prefira `BaseClient`, injete o `JsonMapper` configurado pelo Spring Boot; o helper `json(...)` usa as mesmas regras da aplicação:
+
+```java
+import tools.jackson.databind.json.JsonMapper;
+
+@Component
+public final class ProductClient extends BaseClient {
+
+    private static final String BASE_PATH = "/api/v1/products";
+
+    public ProductClient(
+            PlatformRequestSpecificationFactory requests,
+            JsonMapper jsonMapper
+    ) {
+        super(requests, jsonMapper);
+    }
+
+    public ProductResponse create(CreateProductRequest body) {
+        return new ProductResponse(
+            RestAssured.given()
+                .spec(authorizedRequest())
+                .body(json(body))
+                .when()
+                .post(BASE_PATH)
+                .then()
+        );
+    }
+}
+```
+
+Métodos protegidos disponíveis:
+
+```java
+request();
+authorizedRequest();
+authorizedRequest(authorizationRequestData);
+```
+
+Para novos clients, a composição com `PlatformRequestSpecificationFactory` é a opção preferencial.
+
+## 11. Responses fluentes
+
+Crie uma response específica para o domínio:
+
+```java
+package com.empresa.product.client.response;
+
+import br.com.portalmanager.platform.library.testing.http.response.BaseResponse;
+import com.empresa.product.web.dto.ProductResponseDTO;
+import io.restassured.response.ValidatableResponse;
+
+public final class ProductResponse extends BaseResponse<ProductResponse> {
+
+    public ProductResponse(ValidatableResponse response) {
+        super(response);
+    }
+
+    public ProductResponseDTO extractBody() {
+        return extract(ProductResponseDTO.class);
+    }
+}
+```
+
+Uso:
+
+```java
+productClient.create(request)
+    .expectCreated()
+    .expectNotNull("id")
+    .expect("name", "Notebook")
+    .expect("active", true);
+```
+
+Status disponíveis:
+
+```java
+expectOk();
+expectCreated();
+expectNoContent();
+expectBadRequest();
+expectUnauthorized();
+expectForbidden();
+expectNotFound();
+expectConflict();
+expect2xx();
+expect4xx();
+expect5xx();
+```
+
+Validações de body:
+
+```java
+expect("name", "Notebook");
+expectNotNull("id");
+expectContains("description", "Produto");
+expectSize("items", 3);
+```
+
+## 12. Builder da massa de teste
+
+### Implementação por interface
+
+```java
+package com.empresa.product.builder;
+
+import br.com.portalmanager.platform.library.testing.fixture.builder.TestDataBuilder;
+import com.empresa.product.web.dto.CreateProductRequest;
+
+import java.math.BigDecimal;
+
+public final class ProductRequestBuilder
+        implements TestDataBuilder<CreateProductRequest> {
+
+    private String name = "Produto de integração";
+    private BigDecimal price = new BigDecimal("100.00");
+    private boolean active = true;
+
+    public static ProductRequestBuilder builder() {
+        return new ProductRequestBuilder();
+    }
+
+    public ProductRequestBuilder withName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public ProductRequestBuilder withPrice(BigDecimal price) {
+        this.price = price;
+        return this;
+    }
+
+    public ProductRequestBuilder inactive() {
+        this.active = false;
+        return this;
+    }
+
+    @Override
+    public CreateProductRequest build() {
+        return new CreateProductRequest(name, price, active);
+    }
+}
+```
+
+### Implementação pela classe abstrata
+
+Se o projeto quiser o método `self()`, importe `br.com.portalmanager.platform.library.testing.fixture.builder.AbstractTestDataBuilder`:
+
+```java
+public final class ProductRequestBuilder
+        extends AbstractTestDataBuilder<CreateProductRequest, ProductRequestBuilder> {
+
+    private String name = "Produto de integração";
+
+    public ProductRequestBuilder withName(String name) {
+        this.name = name;
+        return self();
+    }
+
+    @Override
+    public CreateProductRequest build() {
+        return new CreateProductRequest(name);
+    }
+}
+```
+
+Os campos e regras do domínio devem permanecer no microsserviço.
+
+## 13. Factory de dados
+
+O contrato principal não exige herança:
+
+```java
+package com.empresa.product.factory;
+
+import br.com.portalmanager.platform.library.testing.fixture.factory.TestDataFactory;
+import com.empresa.product.builder.ProductRequestBuilder;
+import com.empresa.product.web.dto.CreateProductRequest;
+import org.springframework.stereotype.Component;
+
+@Component
+public final class ProductFactory
+        implements TestDataFactory<CreateProductRequest> {
+
+    @Override
+    public CreateProductRequest valid() {
+        return ProductRequestBuilder.builder().build();
+    }
+
+    public CreateProductRequest withoutName() {
+        return ProductRequestBuilder.builder()
+            .withName(null)
+            .build();
+    }
+
+    public CreateProductRequest inactive() {
+        return ProductRequestBuilder.builder()
+            .inactive()
+            .build();
+    }
+}
+```
+
+Também existe `AbstractTestDataFactory<T, B>` como implementação conveniente. Importe `br.com.portalmanager.platform.library.testing.fixture.factory.AbstractTestDataFactory`:
+
+```java
+public final class ProductFactory
+        extends AbstractTestDataFactory<CreateProductRequest, ProductRequestBuilder> {
+
+    @Override
+    protected ProductRequestBuilder builder() {
+        return ProductRequestBuilder.builder();
+    }
+}
+```
+
+## 14. Cenários compostos
+
+Use `TestScenario<R>` quando um teste precisar criar vários recursos antes da ação principal.
+
+Resultado do cenário:
+
+```java
+package com.empresa.product.scenario;
+
+public record ProductScenarioResult(
+    Long categoryId,
+    Long productId
+) {
+}
+```
+
+Implementação:
+
+```java
+package com.empresa.product.scenario;
+
+import br.com.portalmanager.platform.library.testing.fixture.scenario.TestScenario;
+import com.empresa.product.client.ProductClient;
+import com.empresa.product.factory.ProductFactory;
+
+public final class ProductScenario
+        implements TestScenario<ProductScenarioResult> {
+
+    private final ProductClient productClient;
+    private final ProductFactory productFactory;
+
+    public ProductScenario(
+            ProductClient productClient,
+            ProductFactory productFactory
+    ) {
+        this.productClient = productClient;
+        this.productFactory = productFactory;
+    }
+
+    @Override
+    public ProductScenarioResult setup() {
+        Long categoryId = createCategory();
+        Long productId = productClient
+            .create(productFactory.valid())
+            .expectCreated()
+            .extractBody()
+            .id();
+
+        return new ProductScenarioResult(categoryId, productId);
+    }
+
+    private Long createCategory() {
+        // Preparação específica da API de produtos.
+        return 1L;
+    }
+}
+```
+
+Uso:
+
+```java
+ProductScenarioResult scenario = productScenario.setup();
+
+productClient.findById(scenario.productId())
+    .expectOk();
+```
+
+O cenário deve preparar estado. As validações principais continuam no método de teste.
+
+## 15. Mock de autorização
+
+Adicione a anotação somente nos testes que precisam do autorizador:
+
+```java
+@PlatformIntegrationTest
+@WithMockAuthorization
+class ProductControllerIT {
+}
+```
+
+A biblioteca fornece:
+
+- WireMock em porta dinâmica;
+- endpoint `POST /authorize`;
+- configuração automática da URL;
+- resposta no formato `UserSession`;
+- reset antes de cada teste.
+
+### Sessão permitida padrão
+
+```java
+authorizationMock.allow();
+```
+
+### Sessão permitida customizada
+
+```java
+authorizationMock.allow(session -> session
+    .userName("product.integration")
+    .email("product.integration@empresa.com")
+    .accountId("account-123")
+    .applicationId("product-api")
+    .environmentId("DEV")
+    .groups("PM5_OWNER", "PRODUCT_ADMIN")
+    .addAuthorizerGroup(
+        "GRP_PRODUCT_DEV_ADMIN",
+        "ADMIN",
+        "DEV",
+        "PRODUCT"
+    ));
+```
+
+### Outros resultados
+
+```java
+authorizationMock.deny();
+authorizationMock.forbidden();
+authorizationMock.internalError();
+authorizationMock.expiredSession();
+authorizationMock.custom(429, "{\"message\":\"Limite excedido\"}");
+```
+
+Também é possível definir o resultado inicial da classe:
+
+```java
+@WithMockAuthorization(defaultResult = AuthorizationMockResult.FORBIDDEN)
+```
+
+### Sessão padrão do microsserviço
+
+Crie uma configuração de teste:
+
+```java
+package com.empresa.product.config;
+
+import br.com.portalmanager.platform.library.testing.authorization.AuthorizationSessionCustomizer;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+
+@TestConfiguration(proxyBeanMethods = false)
+public class ProductAuthorizationTestConfiguration {
+
+    @Bean
+    AuthorizationSessionCustomizer productSession() {
+        return session -> session
+            .userName("product.integration")
+            .accountId("account-123")
+            .applicationId("product-api")
+            .environmentId("DEV")
+            .groups("PM5_OWNER");
+    }
+}
+```
+
+Importe no teste:
+
+```java
+@Import(ProductAuthorizationTestConfiguration.class)
+```
+
+Não é necessário criar ou herdar um helper de autorização. O microsserviço customiza somente os dados da sessão.
+
+### Verificar a chamada ao autorizador
+
+```java
+authorizationMock.verifyCalled();
+authorizationMock.verifyCalled(1);
+authorizationMock.verifyNotCalled();
+authorizationMock.verifyCalledWithWorkspace("workspace-123");
+authorizationMock.verifyCalledWithEnvironment("DEV");
+authorizationMock.verifyCalledWithApplication("product-api");
+authorizationMock.verifyCalledWithPolicy("ADMIN");
+```
+
+## 16. Kafka
+
+Adicione `@WithKafka` quando o teste precisar publicar ou consumir mensagens:
+
+```java
+@PlatformIntegrationTest
+@WithKafka
+class ProductEventPublisherIT {
+
+    @Autowired
+    private KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate;
+
+    @Test
+    void devePublicarEvento() {
+        kafkaTemplate.send(
+            "product-created",
+            new ProductCreatedEvent(1L, "Notebook")
+        );
+
+        // Aguarde e valide a mensagem usando a infraestrutura do projeto.
+    }
+}
+```
+
+O endereço do broker é registrado automaticamente. As propriedades de serializers, consumers e nomes de tópicos continuam sob responsabilidade do microsserviço.
+
+## 17. AWS LocalStack e Azure Emulator
+
+As dependências de Kafka e dos providers cloud são incluídas transitivamente por `platform-testing-core`, que o consumidor declara uma única vez com escopo `test`. As anotações continuam opt-in: somente os containers descritos no teste são iniciados.
+
+### AWS LocalStack
+
+As dependências do LocalStack e dos SDKs SQS/S3 já chegam transitivamente por `platform-testing-core`; não é necessário declará-las no POM consumidor.
+
+Declare apenas os serviços e recursos necessários. O exemplo provisiona uma fila SQS com dead-letter queue e um bucket S3:
+
+```java
+@PlatformIntegrationTest
+@WithAwsLocalStack(
+        sqs = @AwsSqs(queues = @AwsSqs.Queue(
+                name = "orders",
+                deadLetterEnabled = true
+        )),
+        s3 = @AwsS3(buckets = "order-files")
+)
+class OrderCloudIT {
+
+    @Autowired
+    private SqsClient sqsClient;
+
+    @Autowired
+    private S3Client s3Client;
+}
+```
+
+Se o teste usar apenas SQS ou apenas S3, declare somente o serviço correspondente na anotação. A fixture configura os clientes e endpoints locais para os serviços declarados.
+
+### Azure Emulator
+
+As dependências do emulador Azure, SQL Server, Service Bus e Blob Storage também chegam transitivamente por `platform-testing-core`; não é necessário declará-las no POM consumidor.
+
+Exemplo com fila do Service Bus e container de Blob Storage:
+
+```java
+@PlatformIntegrationTest
+@WithAzureEmulator(
+        serviceBus = @AzureServiceBus(queues = @AzureServiceBus.Queue(name = "orders")),
+        blobStorage = @AzureBlobStorage(containers = "order-files")
+)
+class OrderAzureIT {
+
+    @Autowired
+    private ServiceBusClientBuilder serviceBusClientBuilder;
+
+    @Autowired
+    private BlobServiceClient blobServiceClient;
+}
+```
+
+Declare somente os serviços usados na anotação. A fixture cria os recursos declarados e disponibiliza os clients com os endpoints do emulador.
+
+> As versões são gerenciadas pelo BOM da plataforma. Não declare versões manualmente quando o BOM estiver importado.
+
+## 18. MySQL, Kafka e autorização juntos
+
+```java
+@PlatformIntegrationTest
+@WithMySql
+@WithKafka
+@WithMockAuthorization
+class ProductCompleteFlowIT {
+}
+```
+
+## 19. Exemplo completo
+
+```java
+package com.empresa.product.integration;
+
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.database.annotation.WithDatabaseScripts;
+import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
+import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
+import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMock;
+import com.empresa.product.client.ProductClient;
+import com.empresa.product.config.ProductAuthorizationTestConfiguration;
+import com.empresa.product.factory.ProductFactory;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+
+@PlatformIntegrationTest
+@WithMySql
+@WithMockAuthorization
+@Import(ProductAuthorizationTestConfiguration.class)
+@WithDatabaseScripts(
+    setup = {"classpath:sql/views/create-product-views.sql"},
+    cleanup = {"classpath:sql/views/drop-product-views.sql"}
+)
+class ProductControllerIT {
+
+    @Autowired
+    private ProductClient productClient;
+
+    @Autowired
+    private ProductFactory productFactory;
+
+    @Autowired
+    private AuthorizationMock authorizationMock;
+
+    @Test
+    void deveCriarProduto() {
+        productClient.create(productFactory.valid())
+            .expectCreated()
+            .expectNotNull("id")
+            .expect("active", true);
+
+        authorizationMock.verifyCalled();
+        authorizationMock.verifyCalledWithWorkspace("workspace-123");
+        authorizationMock.verifyCalledWithApplication("product-api");
+    }
+
+    @Test
+    void deveRejeitarProdutoSemNome() {
+        productClient.create(productFactory.withoutName())
+            .expectBadRequest();
+    }
+
+    @Test
+    void deveNegarAcessoSemPermissao() {
+        authorizationMock.forbidden();
+
+        productClient.create(productFactory.valid())
+            .expectForbidden();
+    }
+}
+```
+
+## 20. Qual recurso usar
+
+| Necessidade | Recurso recomendado |
+|---|---|
+| Testar controller HTTP | `@PlatformIntegrationTest` |
+| Testar com banco real | `@WithMySql` |
+| Preservar tabela de catálogo | `excludeTables` |
+| Criar uma view para a classe | `@WithDatabaseScripts` na classe |
+| Preparar SQL para um único teste | `@WithDatabaseScripts` no método |
+| Simular autorização | `@WithMockAuthorization` |
+| Customizar a sessão | `AuthorizationSessionCustomizer` |
+| Enviar request sem autenticação | `requests.create()` |
+| Enviar request autenticado | `requests.createAuthorized(...)` |
+| Criar massa válida | `TestDataFactory<T>` |
+| Variar campos da massa | `TestDataBuilder<T>` |
+| Preparar vários recursos | `TestScenario<R>` |
+| Testar mensagens | `@WithKafka` |
+
+## 21. Problemas comuns
+
+### Docker não está disponível
+
+Sintoma:
+
+```text
+Could not find a valid Docker environment
+```
+
+Solução: inicialize o Docker Desktop ou o runtime de containers utilizado pela equipe.
+
+### Script não encontrado
+
+Sintoma:
+
+```text
+Database script does not exist or is not readable
+```
+
+Verifique se o arquivo está em `src/test/resources` e utilize:
+
+```text
+classpath:sql/caminho/script.sql
+```
+
+### Não existe `DataSource`
+
+Sintoma:
+
+```text
+@WithDatabaseScripts requires a DataSource in the Spring test context
+```
+
+Adicione `@WithMySql` ou configure outro `DataSource` no contexto de teste.
+
+### Porta HTTP não encontrada
+
+Sintoma:
+
+```text
+Required key 'local.server.port' not found
+```
+
+Utilize `@PlatformIntegrationTest` nos testes que criam requests pela `PlatformRequestSpecificationFactory`.
+
+### Autorizador real está sendo chamado
+
+Confirme que o teste possui:
+
+```java
+@WithMockAuthorization
+```
+
+Essa anotação substitui `platform.authorization.service-url` pela URL dinâmica do WireMock.
+
+### Dados de outro teste permaneceram no banco
+
+Confirme que `CleanupMode.NONE` não está ativo e que a tabela não foi adicionada acidentalmente a `excludeTables`.
+
+### Execução paralela
+
+Os requests HTTP não utilizam estado global e o correlation ID é isolado por thread. Porém, testes que compartilham o mesmo banco não devem executar em paralelo quando fazem limpeza das mesmas tabelas.
+
+## 22. Checklist de adoção
+
+- [ ] Adicionar `platform-testing-core` com escopo `test`.
+- [ ] Criar `application-test.yml`.
+- [ ] Organizar `client`, `response`, `builder`, `factory`, `scenario` e `integration`.
+- [ ] Adicionar `@PlatformIntegrationTest` aos testes HTTP.
+- [ ] Adicionar `@WithMySql` somente onde houver banco.
+- [ ] Manter scripts em `src/test/resources/sql`.
+- [ ] Criar scripts de cleanup idempotentes.
+- [ ] Adicionar `@WithMockAuthorization` somente quando necessário.
+- [ ] Criar requests autorizados explicitamente.
+- [ ] Criar um request novo em cada operação do client.
+- [ ] Manter dados e regras específicas dentro do microsserviço.
+- [ ] Executar `mvn test` com Java 25 e Docker disponíveis.
+
+## 23. Comandos de execução
+
+Executar os testes do módulo ou microsserviço:
+
+```bash
+mvn test
+```
+
+Executar o ciclo completo quando o Maven Failsafe estiver configurado:
+
+```bash
+mvn verify
+```
+
+Executar somente um teste:
+
+```bash
+mvn -Dtest=ProductControllerIT test
+```
+
+## 24. Testes unitários
+
+Testes unitários não devem inicializar Spring, MySQL, Kafka, WireMock ou servidor HTTP. Utilize `@PlatformUnitTest` para configurar Mockito e o isolamento dos contextos comuns:
+
+```java
+package com.empresa.product.core;
+
+import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformUnitTest;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@PlatformUnitTest
+class ProductServiceTest {
+
+    @Mock
+    private ProductRepository repository;
+
+    @Mock
+    private ProductEventPublisher eventPublisher;
+
+    @InjectMocks
+    private ProductService productService;
+
+    @Test
+    void deveBuscarProduto() {
+        Product product = new Product(1L, "Notebook");
+        when(repository.findById(1L)).thenReturn(Optional.of(product));
+
+        Product result = productService.findById(1L);
+
+        assertThat(result).isEqualTo(product);
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void devePublicarEventoAoCriarProduto() {
+        Product product = new Product(1L, "Notebook");
+        when(repository.save(product)).thenReturn(product);
+
+        productService.create(product);
+
+        verify(repository).save(product);
+        verify(eventPublisher).publish(product);
+    }
+}
+```
+
+`@PlatformUnitTest` fornece:
+
+- `MockitoExtension`;
+- suporte a `@Mock`, `@Spy`, `@Captor` e `@InjectMocks`;
+- limpeza do `TestContext` antes e depois de cada teste;
+- limpeza do MDC antes e depois de cada teste;
+- nenhuma inicialização do contexto Spring.
+
+### Testar regras dependentes de data
+
+Quando a classe recebe um `Clock`, utilize `TestClock`:
+
+```java
+import br.com.portalmanager.platform.library.testing.fixture.TestClock;
+
+Clock clock = TestClock.fixed("2026-09-12T12:00:00Z");
+ExpirationService service = new ExpirationService(clock);
+
+assertThat(service.now())
+    .isEqualTo(Instant.parse("2026-09-12T12:00:00Z"));
+```
+
+Com fuso específico:
+
+```java
+Clock clock = TestClock.fixed(
+    "2026-09-12T12:00:00Z",
+    ZoneId.of("America/Sao_Paulo")
+);
+```
+
+Evite chamar `Instant.now()` ou `LocalDateTime.now()` diretamente nas regras que precisam ser testadas. Injete um `Clock` na classe de produção.
+
+### UUIDs previsíveis
+
+Use `TestIds` quando o cenário precisar de identificadores estáveis:
+
+```java
+import br.com.portalmanager.platform.library.testing.fixture.TestIds;
+
+UUID accountId = TestIds.uuid("account-1");
+UUID productId = TestIds.uuid("product-1");
+```
+
+A mesma seed sempre produz o mesmo UUID:
+
+```java
+assertThat(TestIds.uuid("product-1"))
+    .isEqualTo(TestIds.uuid("product-1"));
+```
+
+### Builders e factories nos testes unitários
+
+Os mesmos contratos de massa podem ser utilizados sem Spring:
+
+```java
+ProductRequest request = ProductRequestBuilder.builder()
+    .withName("Notebook")
+    .withPrice(new BigDecimal("4500.00"))
+    .build();
+
+ProductRequest validRequest = new ProductFactory().valid();
+```
+
+### Quando o teste deixa de ser unitário
+
+Se o teste precisar de qualquer item abaixo, utilize a estrutura de integração:
+
+- `@SpringBootTest`;
+- repository real;
+- banco de dados;
+- chamada HTTP;
+- RestAssured;
+- Kafka real;
+- WireMock;
+- Testcontainers.
+
+Resumo:
+
+| Objetivo | Anotação |
+|---|---|
+| Testar uma classe isoladamente | `@PlatformUnitTest` |
+| Testar a aplicação Spring e HTTP | `@PlatformIntegrationTest` |
+| Adicionar banco real | `@WithMySql` |
+| Adicionar mensageria real | `@WithKafka` |
+| Simular o autorizador | `@WithMockAuthorization` |

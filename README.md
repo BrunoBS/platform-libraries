@@ -31,7 +31,8 @@ platform-libraries/
     ├── platform-audit/
     ├── platform-catalog/
     ├── platform-tagging/
-    └── platform-testing/
+    ├── platform-testing-core/
+    └── platform-testing-authorization/
 ```
 
 O POM raiz é somente reactor/aggregator e não concentra regras de build.
@@ -79,6 +80,7 @@ As dependências internas entre capabilities usam `${project.version}`. Os POMs 
 platform-authorization -> platform-messaging
 platform-audit         -> platform-authorization
 platform-audit         -> platform-messaging
+platform-testing-authorization -> platform-testing-core + platform-authorization
 platform-catalog       -> platform-messaging
 
 platform-starter
@@ -89,7 +91,7 @@ platform-starter
 platform-schema-validation -> platform-messaging
 ```
 
-`platform-testing` mantém fixtures opt-in para MySQL, Kafka e cloud, com as dependências dos containers fornecidas transitivamente. O starter JDBC é opcional para não ativar auto-configuração de `DataSource` em consumidores sem banco.
+`platform-testing-core` mantém fixtures genéricas opt-in para MySQL, Kafka e cloud. `platform-testing-authorization` depende do core e de `platform-authorization`, mantendo mocks de autorização fora do módulo genérico. O starter JDBC do core é opcional para não ativar auto-configuração de `DataSource` em consumidores sem banco.
 
 ## Consumo alvo
 
