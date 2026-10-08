@@ -4,7 +4,7 @@ import org.testcontainers.utility.DockerImageName;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
 import br.com.portalmanager.platform.library.testing.kafka.annotation.WithKafka;
-import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.kafka.KafkaTestingTechnicalErrors;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -70,7 +70,7 @@ public final class KafkaTestContextCustomizerFactory implements ContextCustomize
     }
 
     private PlatformConfigurationException configurationException(String detail) {
-        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidKafkaConfiguration(detail));
+        return new PlatformConfigurationException(KafkaTestingTechnicalErrors.invalidKafkaConfiguration(detail));
     }
 
     private record KafkaTestContextCustomizer(String image, List<String> topics) implements ContextCustomizer {
