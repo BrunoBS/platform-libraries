@@ -48,8 +48,9 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-testing-core</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- Only the cloud fixtures exercised by these tests are included below. -->
