@@ -268,6 +268,7 @@ flowchart TD
 | Class | Responsibility | Relationship |
 |---|---|---|
 | `AwsLocalStackImportRegistrar` | Reads the provider-level annotation, validates its image and wires LocalStack plus enabled feature support. | Imported by `WithAwsLocalStack`; delegates client registration to the S3 and SQS feature packages. |
+| `AwsTestingTechnicalErrors` | Cria os erros de configuração do módulo AWS. | Usado pelo registrar ao validar as declarações de S3, SQS e notificações. |
 | `AwsLocalStackContainer` | Starts LocalStack and provisions the declared queues, DLQs, buckets and notifications. | Receives normalized configuration from the registrar; feature annotations select those resources. |
 | `AwsLocalStackConnection` | Exposes endpoint, region and credentials from the running container. | Injected into S3 and SQS client factories. |
 | `AwsService` | Maps supported LocalStack services to their LocalStack names. | Used by the container to start only the requested services. |
@@ -305,6 +306,7 @@ Annotation package `testing.cloud.aws.s3notificationsqs.annotation`: `AwsS3SqsNo
 | Class | Responsibility | Relationship |
 |---|---|---|
 | `AzureEmulatorImportRegistrar` | Reads and validates image settings, then registers only selected emulator services and clients. | Imported by `WithAzureEmulator`; delegates to the Blob and Service Bus feature packages. |
+| `AzureTestingTechnicalErrors` | Cria os erros de configuração do módulo Azure. | Usado pelo registrar e pelo container Service Bus ao validar a configuração. |
 | `AzureServiceTestSupport` | Shared contract for registering a service-specific Spring test client. | Implemented by the Azure Service Bus support and consumed by the registrar. |
 
 Provider annotation package `testing.cloud.azure.annotation`: `WithAzureEmulator` enables the Azure emulators and composes optional feature annotations.
@@ -358,6 +360,7 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 | **DatabaseScriptExtension** | Executa setup e cleanup na classe ou no método e em ordem inversa para limpeza. | É ativada por **WithDatabaseScripts** e delega SQL a **DatabaseScriptExecutor**. |
 | **DatabaseSetupPhase** | Define execução do setup SQL antes da classe ou antes de cada teste. | Usado por **WithDatabaseScripts** e interpretado por **DatabaseScriptExtension**. |
 | **MySqlTestConfiguration** | Declara um MySQL Testcontainers como service connection do Spring Boot. | Importada por **WithMySql**; fornece o banco que a extensão de limpeza acessa. |
+| **DatabaseTestingTechnicalErrors** | Cria os erros de configuração do MySQL usados pela fixture. | Usado por **MySqlTestContextCustomizerFactory** ao validar a imagem. |
 | **MySqlTestExtension** | Aplica o modo e as exclusões definidos na anotação MySQL. | É ativada por **WithMySql** e delega a limpeza a **DatabaseCleaner**. |
 
 ### br.com.portalmanager.platform.library.testing.database.annotation
@@ -416,6 +419,7 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
 | **KafkaTestConfiguration** | Cria o container Kafka como service connection do Spring Boot. | Lê as opções fornecidas por **KafkaTestContextCustomizerFactory** e fornece **KafkaTestContainer**. |
+| **KafkaTestingTechnicalErrors** | Cria os erros de configuração do Kafka usados pela fixture. | Usado por **KafkaTestContextCustomizerFactory** ao validar imagem e tópicos. |
 | **KafkaTestContainer** | Inicia Kafka e cria os tópicos opcionais declarados na anotação. | Estende o container Confluent e provisiona tópicos com AdminClient; serializers e producers continuam no serviço consumidor. |
 | **KafkaTestContextCustomizerFactory** | Lê e valida imagem/tópicos da anotação e os encaminha ao contexto Spring. | É carregado via Spring Test SPI; seu customizer participa da chave do cache e separa contextos com imagem ou tópicos diferentes. |
 
