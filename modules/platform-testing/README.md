@@ -40,7 +40,7 @@ Importe o BOM da plataforma no `dependencyManagement` do serviço e declare some
 
 ## Escopos e imagens
 
-As dependências de cada integração são transitivas a partir do artefato correspondente. Datafaker não é uma API do Platform Testing; serviços que o usam devem declará-lo diretamente. `spring-boot-starter-test` e `testcontainers-junit-jupiter` são dependências de teste privadas de cada módulo e não são exportadas para os consumidores. As imagens padrão ficam junto do módulo que as utiliza; a validação comum de referências versionadas fica no Core.
+As dependências de cada integração são transitivas a partir do artefato correspondente. Datafaker não é uma API do Platform Testing; serviços que o usam devem declará-lo diretamente. JUnit, AssertJ, Mockito e Spring Test para as suites vêm de `platform-testing-core`. Cada módulo declara apenas as dependências específicas de teste que seus próprios testes usam; elas não são exportadas para os consumidores. As imagens padrão ficam junto do módulo que as utiliza; a validação comum de referências versionadas fica no Core.
 
 `platform-testing-database` usa MySQL via Testcontainers e não inclui H2. H2 não faz parte de nenhum artefato `platform-testing`; se um serviço precisar de H2 em testes, deve declará-lo diretamente no próprio projeto de testes.
 
