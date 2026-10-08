@@ -4,7 +4,7 @@ Os módulos de teste são organizados por contexto para que cada serviço traga 
 
 | Artefato | Responsabilidade | Dependências próprias |
 |---|---|---|
-| `platform-testing-core` | Arquitetura, ciclo de vida, `TestContext`, builders, factories, cenários, relógio e IDs | ArchUnit, JUnit, Spring Test, Mockito Extension e SLF4J |
+| `platform-testing-core` | Arquitetura, ciclo de vida, `TestContext`, builders, factories, cenários, relógio e IDs | ArchUnit, JUnit, AssertJ, Spring Test, Mockito Extension e SLF4J |
 | `platform-testing-http` | `@PlatformIntegrationTest`, clients e requests RestAssured | Spring Boot Web, RestAssured e Jackson |
 | `platform-testing-authorization` | `@WithMockAuthorization` e mock do serviço de autorização | `platform-authorization` e WireMock |
 | `platform-testing-kafka` | `@WithKafka`, container e provisionamento de tópicos | Spring Kafka e Testcontainers Kafka |
