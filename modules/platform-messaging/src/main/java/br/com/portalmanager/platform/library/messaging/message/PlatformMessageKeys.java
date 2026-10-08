@@ -10,9 +10,10 @@ public final class PlatformMessageKeys {
     public static final String DATA_INTEGRITY = PREFIX + "global.data.integrity";
     public static final String RESOURCE_NOT_FOUND = PREFIX + "global.resource.not.found";
     public static final String INTERNAL_SERVER_ERROR = PREFIX + "global.internal.server.error";
+    @Deprecated(forRemoval = true)
+    public static final String UNEXPECTED_ERROR = INTERNAL_SERVER_ERROR;
     public static final String TYPE_MISMATCH = PREFIX + "global.validation.type.mismatch";
     public static final String INVALID_ENUM = PREFIX + "validation.invalid.enum";
-    public static final String UNEXPECTED_ERROR = PREFIX + "global.unexpected.error";
     public static final String RESOURCE_VERSION_CONFLICT = PREFIX + "global.resource.version.conflict";
 
     private PlatformMessageKeys() {

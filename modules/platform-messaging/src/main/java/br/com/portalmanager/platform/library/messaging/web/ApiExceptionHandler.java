@@ -166,6 +166,12 @@ public class ApiExceptionHandler {
             String field = invalidFormat.getPath().isEmpty()
                     ? "request"
                     : invalidFormat.getPath().getLast().getPropertyName();
+            if (field == null || field.isBlank()) {
+                int index = invalidFormat.getPath().isEmpty()
+                        ? -1
+                        : invalidFormat.getPath().getLast().getIndex();
+                field = index >= 0 ? "request[" + index + "]" : "request";
+            }
 
             Class<?> targetType = invalidFormat.getTargetType();
 
@@ -192,6 +198,12 @@ public class ApiExceptionHandler {
                         request
                 );
             }
+
+            return resolve(
+                    new ValidationException(PlatformMessageKeys.REQUEST_FORMAT_INVALID),
+                    locale,
+                    request
+            );
         }
 
         return resolve(
@@ -424,7 +436,7 @@ public class ApiExceptionHandler {
                 "}";
     }
 
-    private String toJsonDetails(List<ApiValidationDetail> details) {
+    String toJsonDetails(List<ApiValidationDetail> details) {
         if (details == null || details.isEmpty()) {
             return "[]";
         }
@@ -432,7 +444,9 @@ public class ApiExceptionHandler {
         return details.stream()
                 .map(detail -> "{" +
                         "\"field\":" + jsonString(detail.field()) + "," +
-                        "\"message\":" + jsonString(detail.message()) +
+                        "\"code\":" + jsonString(detail.code()) + "," +
+                        "\"message\":" + jsonString(detail.message()) + "," +
+                        "\"solution\":" + jsonString(detail.solution()) +
                         "}")
                 .collect(Collectors.joining(",", "[", "]"));
     }
