@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.cloud.aws.AwsTestingTechnicalErrors;
 
 import org.testcontainers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -320,11 +320,11 @@ public class AwsLocalStackContainer extends LocalStackContainer {
     }
 
     private PlatformConfigurationException configurationException(String detail) {
-        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail));
+        return new PlatformConfigurationException(AwsTestingTechnicalErrors.invalidAwsConfiguration(detail));
     }
 
     private PlatformConfigurationException configurationException(String detail, Throwable cause) {
-        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail), cause);
+        return new PlatformConfigurationException(AwsTestingTechnicalErrors.invalidAwsConfiguration(detail), cause);
     }
 
     private String escapeJson(String value) {
