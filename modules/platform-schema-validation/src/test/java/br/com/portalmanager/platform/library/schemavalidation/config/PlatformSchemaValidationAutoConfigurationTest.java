@@ -154,8 +154,12 @@ class PlatformSchemaValidationAutoConfigurationTest {
         Class<?>[] autoConfigurations = Arrays.stream(configurationClasses)
                 .filter(configuration -> configuration.isAnnotationPresent(AutoConfiguration.class))
                 .toArray(Class<?>[]::new);
-        context.register(testConfigurations);
-        context.register(autoConfigurations);
+        if (testConfigurations.length > 0) {
+            context.register(testConfigurations);
+        }
+        if (autoConfigurations.length > 0) {
+            context.register(autoConfigurations);
+        }
         try {
             context.refresh();
             return context;
