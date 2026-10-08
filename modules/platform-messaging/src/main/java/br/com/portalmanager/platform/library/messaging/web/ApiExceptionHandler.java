@@ -312,7 +312,9 @@ public class ApiExceptionHandler {
         if (detail.messageKey() == null || detail.messageKey().isBlank()) {
             return new ApiValidationDetail(
                     detail.field(),
-                    detail.defaultMessage()
+                    null,
+                    detail.defaultMessage(),
+                    null
             );
         }
 
@@ -333,8 +335,13 @@ public class ApiExceptionHandler {
 
         return new ApiValidationDetail(
                 detail.field(),
+                message.code(),
                 MessageParameterResolver.resolve(
                         message.message(),
+                        detail.parameters()
+                ),
+                MessageParameterResolver.resolve(
+                        message.solution(),
                         detail.parameters()
                 )
         );
