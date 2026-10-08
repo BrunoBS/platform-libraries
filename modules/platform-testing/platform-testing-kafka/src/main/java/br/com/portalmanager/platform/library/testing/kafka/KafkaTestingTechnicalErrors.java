@@ -8,7 +8,7 @@ public final class KafkaTestingTechnicalErrors {
         return new PlatformErrorDefinition(
                 "PLT-TST-003",
                 "Invalid platform-testing Kafka configuration: " + detail,
-                "undefined",
+                "Review the @WithKafka image and topic declarations.",
                 500
         );
     }
