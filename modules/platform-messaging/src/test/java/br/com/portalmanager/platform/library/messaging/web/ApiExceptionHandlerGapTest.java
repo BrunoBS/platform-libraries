@@ -30,6 +30,7 @@ class ApiExceptionHandlerGapTest {
         InvalidFormatException invalidFormat = mock(InvalidFormatException.class);
         HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
 
+        when(invalidFormat.getPath()).thenReturn(List.of());
         when(invalidFormat.getTargetType()).thenReturn(Long.class);
         when(exception.getCause()).thenReturn(invalidFormat);
         when(resolver.resolve(PlatformMessageKeys.REQUEST_FORMAT_INVALID, LOCALE))
