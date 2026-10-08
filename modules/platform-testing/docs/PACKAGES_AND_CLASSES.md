@@ -337,7 +337,7 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
-| **PlatformTestingContainerImages** | Centraliza os nomes de imagem padrão, fixos e testados pelo módulo. | Fornece defaults às anotações; o consumidor pode sobrescrever a imagem com uma tag ou digest. |
+| **PlatformTestingContainerImages** | Centraliza os nomes de imagem padrão, fixos e testados pelo módulo, incluindo MySQL `8.4.11`. | Fornece defaults às fixtures; MySQL permanece fixo, enquanto outras anotações permitem override por tag ou digest. |
 
 ### br.com.portalmanager.platform.library.testing.context
 

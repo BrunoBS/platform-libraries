@@ -88,7 +88,7 @@ A anotação habilita Mockito e a extensão de isolamento do módulo. Mantenha o
 
 ## MySQL
 
-`@WithMySql` é opt-in e inicializa o MySQL pelo Testcontainers. A limpeza padrão ocorre antes de cada método e preserva `flyway_schema_history`:
+`@WithMySql` é opt-in e inicializa o MySQL pelo Testcontainers usando a imagem fixa `mysql:8.4.11`. A versão não é configurável pela anotação, para manter o mesmo ambiente reproduzível entre serviços. A limpeza padrão ocorre antes de cada método e preserva `flyway_schema_history`:
 
 ```java
 @PlatformIntegrationTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)

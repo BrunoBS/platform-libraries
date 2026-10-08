@@ -4,11 +4,13 @@ import org.testcontainers.utility.DockerImageName;
 
 /**
  * Default Docker images exercised by the platform-testing fixtures.
- * Consumers can override these defaults in the corresponding annotations.
+ * Annotations expose overrides only for fixtures that support them; MySQL stays fixed
+ * to the default below so all consumers use the same reproducible database version.
  */
 
 public final class PlatformTestingContainerImages {
 
+    public static final String MYSQL = "mysql:8.4.11";
     public static final String KAFKA = "confluentinc/cp-kafka:7.8.0";
     public static final String AWS_LOCALSTACK = "localstack/localstack:4.14.0";
     public static final String AZURITE = "mcr.microsoft.com/azure-storage/azurite:3.37.0";

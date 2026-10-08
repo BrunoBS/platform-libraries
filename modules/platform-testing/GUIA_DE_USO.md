@@ -144,7 +144,7 @@ class HealthControllerIT {
 
 ## 6. MySQL
 
-Adicione `@WithMySql` somente quando o teste necessitar do banco:
+A fixture usa a imagem fixa `mysql:8.4.11`, última versão LTS da linha 8.x; a anotação não permite trocar a imagem. Adicione `@WithMySql` somente quando o teste necessitar do banco:
 
 ```java
 @PlatformIntegrationTest

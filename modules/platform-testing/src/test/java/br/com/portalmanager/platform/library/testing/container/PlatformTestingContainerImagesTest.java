@@ -8,6 +8,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class PlatformTestingContainerImagesTest {
 
     @Test
+    void shouldPinMySqlToLatestEightSeriesLts() {
+        assertThat(PlatformTestingContainerImages.MYSQL).isEqualTo("mysql:8.4.11");
+    }
+
+    @Test
     void shouldParseVersionedImageAndDigestReferences() {
         assertThat(PlatformTestingContainerImages.parse("registry.example:5000/kafka:3.8.1").toString())
                 .isEqualTo("registry.example:5000/kafka:3.8.1");
