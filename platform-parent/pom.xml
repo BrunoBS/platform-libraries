@@ -22,14 +22,13 @@
         <spring-boot-maven-plugin.version>4.1.1</spring-boot-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <flatten-maven-plugin.version>1.8.0</flatten-maven-plugin.version>
-        <platform-dependencies.version>${revision}</platform-dependencies.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>br.com.portalmanager.platform.library</groupId>
                 <artifactId>platform-dependencies</artifactId>
-                <version>${platform-dependencies.version}</version>
+                <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -204,6 +203,10 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
