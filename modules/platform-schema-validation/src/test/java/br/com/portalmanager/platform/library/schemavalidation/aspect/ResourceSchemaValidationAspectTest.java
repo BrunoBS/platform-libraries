@@ -11,7 +11,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class ResourceSchemaValidationAspectTest {
@@ -69,7 +69,7 @@ class ResourceSchemaValidationAspectTest {
         ProceedingJoinPoint joinPoint = joinPoint(method, new Object[]{new SampleInput("app")});
         ValidateResourceSchema binding = method.getAnnotation(ValidateResourceSchema.class);
 
-        assertThrows(PlatformConfigurationException.class, () -> aspect.validate(joinPoint, binding));
+        assertThatThrownBy(() -> aspect.validate(joinPoint, binding)).isInstanceOf(PlatformConfigurationException.class);
         verify(joinPoint, never()).proceed();
     }
 

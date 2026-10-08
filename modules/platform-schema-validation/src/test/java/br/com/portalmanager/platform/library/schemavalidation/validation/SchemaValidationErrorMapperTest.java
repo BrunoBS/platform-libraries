@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,11 +28,10 @@ class SchemaValidationErrorMapperTest {
         SchemaValidationErrorMapper.MappedValidationError mapped =
                 map("futureKeyword", "name", "first", "second");
 
-        assertEquals("schemavalidation.future-keyword", mapped.messageKey());
-        assertEquals(
-                Map.of("0", "name", "1", "first", "2", "second"),
-                mapped.parameters()
-        );
+        assertThat(mapped.messageKey())
+                .isEqualTo("schemavalidation.future-keyword");
+        assertThat(mapped.parameters())
+                .isEqualTo(Map.of("0", "name", "1", "first", "2", "second"));
     }
 
     @Test
@@ -47,7 +46,8 @@ class SchemaValidationErrorMapperTest {
         SchemaValidationErrorMapper.MappedValidationError mapped =
                 map("type", "name", "integer", "string");
 
-        assertEquals(Map.of("0", "name", "1", "string"), mapped.parameters());
+        assertThat(mapped.parameters())
+                .isEqualTo(Map.of("0", "name", "1", "string"));
     }
 
     @Test
@@ -55,7 +55,8 @@ class SchemaValidationErrorMapperTest {
         SchemaValidationErrorMapper.MappedValidationError mapped =
                 map("minLength", "name", 3);
 
-        assertEquals(Map.of("0", "name", "1", "3"), mapped.parameters());
+        assertThat(mapped.parameters())
+                .isEqualTo(Map.of("0", "name", "1", "3"));
     }
 
     @Test
@@ -63,7 +64,8 @@ class SchemaValidationErrorMapperTest {
         SchemaValidationErrorMapper.MappedValidationError mapped =
                 map("format", "email", "email", "not-an-email");
 
-        assertEquals(Map.of("0", "email", "1", "email"), mapped.parameters());
+        assertThat(mapped.parameters())
+                .isEqualTo(Map.of("0", "email", "1", "email"));
     }
 
     @Test
@@ -71,7 +73,8 @@ class SchemaValidationErrorMapperTest {
         SchemaValidationErrorMapper.MappedValidationError mapped =
                 map("const", "status", "ACTIVE", "INACTIVE");
 
-        assertEquals(Map.of("0", "status", "1", "ACTIVE"), mapped.parameters());
+        assertThat(mapped.parameters())
+                .isEqualTo(Map.of("0", "status", "1", "ACTIVE"));
     }
 
     @Test
@@ -79,8 +82,10 @@ class SchemaValidationErrorMapperTest {
         SchemaValidationErrorMapper.MappedValidationError mapped =
                 map("dependentRequired", "address", "zipCode", "address");
 
-        assertEquals("zipCode", mapped.field());
-        assertEquals(Map.of("0", "zipCode", "1", "address"), mapped.parameters());
+        assertThat(mapped.field())
+                .isEqualTo("zipCode");
+        assertThat(mapped.parameters())
+                .isEqualTo(Map.of("0", "zipCode", "1", "address"));
     }
 
     @Test
@@ -88,15 +93,19 @@ class SchemaValidationErrorMapperTest {
         SchemaValidationErrorMapper.MappedValidationError mapped =
                 map("pattern", "name", "^[A-Z]+$");
 
-        assertEquals(Map.of("0", "name"), mapped.parameters());
+        assertThat(mapped.parameters())
+                .isEqualTo(Map.of("0", "name"));
     }
 
     private void assertKey(String keyword, String expectedKey) {
         SchemaValidationErrorMapper.MappedValidationError mapped = map(keyword, "name");
 
-        assertEquals("name", mapped.field());
-        assertEquals(expectedKey, mapped.messageKey());
-        assertEquals(Map.of("0", "name"), mapped.parameters());
+        assertThat(mapped.field())
+                .isEqualTo("name");
+        assertThat(mapped.messageKey())
+                .isEqualTo(expectedKey);
+        assertThat(mapped.parameters())
+                .isEqualTo(Map.of("0", "name"));
     }
 
     private SchemaValidationErrorMapper.MappedValidationError map(

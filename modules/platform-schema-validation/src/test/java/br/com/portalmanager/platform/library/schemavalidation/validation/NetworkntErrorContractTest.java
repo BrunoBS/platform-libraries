@@ -11,9 +11,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NetworkntErrorContractTest {
 
@@ -55,14 +53,15 @@ class NetworkntErrorContractTest {
 
         for (Case testCase : cases) {
             List<Error> errors = validate(testCase.schema(), testCase.payload());
-            assertFalse(errors.isEmpty(), testCase.name());
+            assertThat(errors.isEmpty())
+                    .as(testCase.name())
+                    .isFalse();
             Error error = find(errors, testCase.expectedKeyword());
             printContract(testCase.name(), error);
-            assertTrue(
-                    errors.stream().anyMatch(candidate -> testCase.expectedKeyword().equals(candidate.getKeyword())),
-                    () -> testCase.name() + " expected keyword " + testCase.expectedKeyword()
-                            + " but got " + errors.stream().map(Error::getKeyword).toList()
-            );
+            assertThat(errors.stream().anyMatch(candidate -> testCase.expectedKeyword().equals(candidate.getKeyword())))
+                    .as(() -> testCase.name() + " expected keyword " + testCase.expectedKeyword()
+                            + " but got " + errors.stream().map(Error::getKeyword).toList())
+                    .isTrue();
         }
     }
 
@@ -84,7 +83,8 @@ class NetworkntErrorContractTest {
                 "[1,1]"
         ), "uniqueItems");
 
-        org.junit.jupiter.api.Assertions.assertNull(uniqueItems.getArguments());
+        assertThat(uniqueItems.getArguments())
+                .isNull();
     }
 
     @Test
@@ -94,7 +94,8 @@ class NetworkntErrorContractTest {
                 "\"not-an-email\""
         );
 
-        assertTrue(errors.isEmpty());
+        assertThat(errors.isEmpty())
+                .isTrue();
     }
 
     @Test
@@ -104,7 +105,8 @@ class NetworkntErrorContractTest {
                 "[2,3]"
         );
 
-        assertFalse(errors.isEmpty());
+        assertThat(errors.isEmpty())
+                .isFalse();
         errors.forEach(error -> printContract("containsCharacterization", error));
     }
 
@@ -123,9 +125,11 @@ class NetworkntErrorContractTest {
                 )
         );
 
-        assertFalse(errors.isEmpty());
+        assertThat(errors.isEmpty())
+                .isFalse();
         errors.forEach(error -> printContract("formatAssertionEnabled", error));
-        assertTrue(errors.stream().anyMatch(error -> "format".equals(error.getKeyword())));
+        assertThat(errors.stream().anyMatch(error -> "format".equals(error.getKeyword())))
+                .isTrue();
     }
 
     @Test
@@ -135,7 +139,8 @@ class NetworkntErrorContractTest {
                 "1"
         );
 
-        assertFalse(errors.isEmpty());
+        assertThat(errors.isEmpty())
+                .isFalse();
         errors.forEach(error -> printContract("allOfAggregate", error));
     }
 
@@ -146,7 +151,8 @@ class NetworkntErrorContractTest {
                 "true"
         );
 
-        assertFalse(errors.isEmpty());
+        assertThat(errors.isEmpty())
+                .isFalse();
         errors.forEach(error -> printContract("anyOfAggregate", error));
     }
 
@@ -158,8 +164,10 @@ class NetworkntErrorContractTest {
 
     private void assertControlledComposition(String definition, String payload) throws Exception {
         List<Error> errors = validate(definition, payload);
-        assertFalse(errors.isEmpty());
-        assertTrue(errors.stream().allMatch(error -> error.getKeyword() != null && !error.getKeyword().isBlank()));
+        assertThat(errors.isEmpty())
+                .isFalse();
+        assertThat(errors.stream().allMatch(error -> error.getKeyword() != null && !error.getKeyword().isBlank()))
+                .isTrue();
     }
 
     private void printContract(String scenario, Error error) {
@@ -186,7 +194,9 @@ class NetworkntErrorContractTest {
         List<String> actual = Arrays.stream(error.getArguments())
                 .map(String::valueOf)
                 .toList();
-        assertEquals(List.of(expected), actual, keyword);
+        assertThat(actual)
+                .as(keyword)
+                .isEqualTo(List.of(expected));
     }
 
     private Error find(List<Error> errors, String keyword) {

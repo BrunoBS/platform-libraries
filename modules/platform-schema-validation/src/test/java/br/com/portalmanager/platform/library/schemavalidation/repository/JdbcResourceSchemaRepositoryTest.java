@@ -13,9 +13,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -61,17 +60,24 @@ class JdbcResourceSchemaRepositoryTest {
                 org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.ResultSetExtractor<Object>>any()
         )).thenThrow(new DataAccessResourceFailureException("view unavailable"));
 
-        PlatformConfigurationException exception = assertThrows(
-                PlatformConfigurationException.class,
-                repository::validateSource
+        PlatformConfigurationException exception = catchThrowableOfType(
+                repository::validateSource,
+                PlatformConfigurationException.class
         );
+        assertThat(exception).isNotNull();
 
-        assertTrue(exception.getCause() instanceof DataAccessResourceFailureException);
-        assertEquals("PLT-SCHEMA-005", exception.getErrorResponse().code());
-        assertTrue(exception.getErrorResponse().message().contains("vw_platform_resource_schemas"));
-        assertTrue(exception.getErrorResponse().solution().contains("platform.schema-validation.view-name"));
-        assertTrue(exception.getErrorResponse().solution().contains("ResourceSchemaRepository"));
-        assertTrue(exception.getMessage().contains("resource_type, resource_code, schema_version, definition"));
+        assertThat(exception.getCause() instanceof DataAccessResourceFailureException)
+                .isTrue();
+        assertThat(exception.getErrorResponse().code())
+                .isEqualTo("PLT-SCHEMA-005");
+        assertThat(exception.getErrorResponse().message().contains("vw_platform_resource_schemas"))
+                .isTrue();
+        assertThat(exception.getErrorResponse().solution().contains("platform.schema-validation.view-name"))
+                .isTrue();
+        assertThat(exception.getErrorResponse().solution().contains("ResourceSchemaRepository"))
+                .isTrue();
+        assertThat(exception.getMessage().contains("resource_type, resource_code, schema_version, definition"))
+                .isTrue();
     }
 
     @Test
@@ -92,8 +98,10 @@ class JdbcResourceSchemaRepositoryTest {
 
         Optional<ResourceSchema> result = repository.find("APPLICATION", "application");
 
-        assertTrue(result.isPresent());
-        assertEquals(expected, result.orElseThrow());
+        assertThat(result.isPresent())
+                .isTrue();
+        assertThat(result.orElseThrow())
+                .isEqualTo(expected);
     }
 
     @Test
@@ -105,7 +113,8 @@ class JdbcResourceSchemaRepositoryTest {
                 eq("menu")
         )).thenThrow(new EmptyResultDataAccessException(1));
 
-        assertTrue(repository.find("MENU", "menu").isEmpty());
+        assertThat(repository.find("MENU", "menu").isEmpty())
+                .isTrue();
     }
 
     @Test
@@ -117,12 +126,14 @@ class JdbcResourceSchemaRepositoryTest {
                 eq("application")
         )).thenThrow(new IncorrectResultSizeDataAccessException(1, 2));
 
-        PlatformConfigurationException exception = assertThrows(
-                PlatformConfigurationException.class,
-                () -> repository.find("APPLICATION", "application")
+        PlatformConfigurationException exception = catchThrowableOfType(
+                () -> repository.find("APPLICATION", "application"),
+                PlatformConfigurationException.class
         );
+        assertThat(exception).isNotNull();
 
-        assertTrue(exception.getCause() instanceof IncorrectResultSizeDataAccessException);
+        assertThat(exception.getCause() instanceof IncorrectResultSizeDataAccessException)
+                .isTrue();
     }
 
     @Test
@@ -134,11 +145,13 @@ class JdbcResourceSchemaRepositoryTest {
                 eq("application")
         )).thenThrow(new DataAccessResourceFailureException("database unavailable"));
 
-        PlatformConfigurationException exception = assertThrows(
-                PlatformConfigurationException.class,
-                () -> repository.find("APPLICATION", "application")
+        PlatformConfigurationException exception = catchThrowableOfType(
+                () -> repository.find("APPLICATION", "application"),
+                PlatformConfigurationException.class
         );
+        assertThat(exception).isNotNull();
 
-        assertTrue(exception.getCause() instanceof DataAccessResourceFailureException);
+        assertThat(exception.getCause() instanceof DataAccessResourceFailureException)
+                .isTrue();
     }
 }
