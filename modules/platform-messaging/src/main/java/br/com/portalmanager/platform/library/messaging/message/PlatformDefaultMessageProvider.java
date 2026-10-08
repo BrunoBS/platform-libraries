@@ -189,7 +189,7 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
                     }
 
                     String definition = properties.getProperty(localKey);
-                    parser.parse(globalKey, Locale.forLanguageTag(bundle.locale()), definition);
+                    parser.parse(globalKey, Locale.forLanguageTag(bundle.locale().replace('_', '-')), definition);
                     localeDefinitions.put(globalKey, definition);
                 }
             }
