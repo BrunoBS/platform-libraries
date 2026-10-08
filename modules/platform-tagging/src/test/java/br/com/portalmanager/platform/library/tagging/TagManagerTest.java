@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.tagging.model.Tag;
 import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.library.tagging.model.TagOwner;
+import br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName;
 import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
 import org.junit.jupiter.api.Test;
 

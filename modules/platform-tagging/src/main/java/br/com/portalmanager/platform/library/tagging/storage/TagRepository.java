@@ -31,13 +31,15 @@ public interface TagRepository<TAG extends Tag<OWNER>, OWNER extends TagOwner>
     List<TAG> findByOwnerId(@Param("ownerId") Long ownerId);
 
     @Query("""
-            select t
+            select new br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName(
+                t.owner.identifier, t.name
+            )
               from #{#entityName} t
              where t.owner.identifier in :identifiers
                and t.originType = :originType
              order by t.owner.identifier, t.name
             """)
-    List<TAG> findByOwnerIdentifiersAndOrigin(
+    List<TagOwnerTagName> findOwnerTagNamesByIdentifiersAndOrigin(
             @Param("identifiers") Collection<String> identifiers,
             @Param("originType") TagOriginType originType
     );

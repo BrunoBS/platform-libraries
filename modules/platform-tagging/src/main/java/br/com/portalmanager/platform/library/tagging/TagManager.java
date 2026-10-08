@@ -91,13 +91,13 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         Map<String, List<String>> result = new LinkedHashMap<>();
         requested.forEach(key -> result.put(key, new ArrayList<>()));
 
-        repository.findByOwnerIdentifiersAndOrigin(requested, TagOriginType.MANUAL).forEach(tag -> {
-            String key = requireOwner(tag.getOwner()).getIdentifier();
-            List<String> tags = result.get(key);
-            if (tags != null) {
-                tags.add(requireTagName(tag).value());
-            }
-        });
+        repository.findOwnerTagNamesByIdentifiersAndOrigin(requested, TagOriginType.MANUAL)
+                .forEach(tag -> {
+                    List<String> tags = result.get(tag.ownerIdentifier());
+                    if (tags != null) {
+                        tags.add(tag.tagName().value());
+                    }
+                });
 
         return result.entrySet().stream()
                 .collect(Collectors.toMap(
