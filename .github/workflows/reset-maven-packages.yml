@@ -56,13 +56,21 @@ jobs:
             platform-libraries-bom
             platform-observability
             platform-messaging
+            platform-message-queue
             platform-schema-validation
             platform-authorization
             platform-audit
             platform-catalog
             platform-tagging
             platform-starter
-            platform-testing
+            platform-testing-aggregator
+            platform-testing-core
+            platform-testing-http
+            platform-testing-authorization
+            platform-testing-kafka
+            platform-testing-database
+            platform-testing-cloud-aws
+            platform-testing-cloud-azure
           )
 
           is_platform_artifact() {
@@ -96,7 +104,7 @@ jobs:
 
             encoded_package="$(jq -rn --arg value "$package" '$value|@uri')"
             echo "Deleting $package"
-            gh api               --method DELETE               "/user/packages/maven/$encoded_package"
+            gh api --method DELETE "/user/packages/maven/$encoded_package"
           done
 
           if [ "$matched" -eq 0 ]; then
