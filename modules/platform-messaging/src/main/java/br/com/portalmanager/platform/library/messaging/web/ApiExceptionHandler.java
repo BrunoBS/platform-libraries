@@ -166,6 +166,12 @@ public class ApiExceptionHandler {
             String field = invalidFormat.getPath().isEmpty()
                     ? "request"
                     : invalidFormat.getPath().getLast().getPropertyName();
+            if (field == null || field.isBlank()) {
+                int index = invalidFormat.getPath().isEmpty()
+                        ? -1
+                        : invalidFormat.getPath().getLast().getIndex();
+                field = index >= 0 ? "request[" + index + "]" : "request";
+            }
 
             Class<?> targetType = invalidFormat.getTargetType();
 
