@@ -62,7 +62,7 @@ public class RedisApiMessageCache implements ApiMessageCache {
                     fields[INDEX_SOLUTION],
                     Integer.parseInt(fields[INDEX_HTTP_STATUS])
             ));
-        } catch (NumberFormatException exception) {
+        } catch (IllegalArgumentException exception) {
             return Optional.empty();
         }
     }

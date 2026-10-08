@@ -98,6 +98,20 @@ class RedisApiMessageCacheTest {
     }
 
     @Test
+    void shouldTreatCachedMessageWithoutErrorCodeAsCorrupted() {
+        String key = "invalid.code";
+        Locale locale = Locale.US;
+        String cacheKey = "platform:message:invalid.code:en-US";
+        String corruptedValue = String.join(
+                delimiter, "", key, "en-US", "Missing code", "Retry", "400"
+        );
+
+        when(valueOperations.get(cacheKey)).thenReturn(corruptedValue);
+
+        assertTrue(cache.get(key, locale).isEmpty());
+    }
+
+    @Test
     void shouldReturnEmptyOptionalWhenRedisThrowsException() {
         // Arrange
         String key = "timeout.key";

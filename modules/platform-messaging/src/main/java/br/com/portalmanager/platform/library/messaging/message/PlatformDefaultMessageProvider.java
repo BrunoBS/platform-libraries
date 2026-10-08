@@ -188,7 +188,9 @@ public final class PlatformDefaultMessageProvider implements ApiMessageProvider 
                         );
                     }
 
-                    localeDefinitions.put(globalKey, properties.getProperty(localKey));
+                    String definition = properties.getProperty(localKey);
+                    parser.parse(globalKey, Locale.forLanguageTag(bundle.locale().replace('_', '-')), definition);
+                    localeDefinitions.put(globalKey, definition);
                 }
             }
 

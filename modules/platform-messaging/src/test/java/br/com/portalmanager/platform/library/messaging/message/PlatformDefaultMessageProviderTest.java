@@ -148,6 +148,29 @@ class PlatformDefaultMessageProviderTest {
     }
 
     @Test
+    void shouldFailStartupWhenMessageDefinitionHasNoErrorCode() throws Exception {
+        PathMatchingResourcePatternResolver resolver =
+                mock(PathMatchingResourcePatternResolver.class);
+
+        Resource catalog = new NamedByteArrayResource(
+                "catalog_pt_BR.properties",
+                "not.found=|404|Catálogo não encontrado.|Verifique o identificador."
+        );
+
+        when(resolver.getResources(anyString()))
+                .thenReturn(new Resource[]{catalog});
+
+        assertThatThrownBy(() ->
+                new PlatformDefaultMessageProvider(
+                        resolver,
+                        new ApiMessageDefinitionParser()
+                )
+        )
+                .isInstanceOf(PlatformConfigurationException.class)
+                .hasMessageContaining("code is required");
+    }
+
+    @Test
     void shouldRejectAlreadyPrefixedLocalKey() throws Exception {
         PathMatchingResourcePatternResolver resolver =
                 mock(PathMatchingResourcePatternResolver.class);
