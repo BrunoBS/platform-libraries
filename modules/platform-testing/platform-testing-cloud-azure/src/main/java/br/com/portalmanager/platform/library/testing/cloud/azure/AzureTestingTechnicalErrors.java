@@ -8,7 +8,7 @@ public final class AzureTestingTechnicalErrors {
         return new PlatformErrorDefinition(
                 "PLT-TST-002",
                 "Invalid platform-testing Azure configuration: " + detail,
-                "undefined",
+                "Review the @WithAzureEmulator Blob Storage and Service Bus declarations.",
                 500
         );
     }
