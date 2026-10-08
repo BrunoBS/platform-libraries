@@ -99,6 +99,7 @@ Todos esses valores já possuem defaults seguros em `PlatformMessagingProperties
 
 Ao criar o `PlatformDefaultMessageProvider`, todos os bundles em
 `META-INF/platform-messages/*.properties` são carregados e indexados.
+Bundles inválidos, chaves duplicadas ou definições malformadas falham no startup. Durante a resolução em runtime, falhas transitórias da fonte continuam seguindo a cadeia de fallback.
 
 A combinação abaixo deve ser única:
 
