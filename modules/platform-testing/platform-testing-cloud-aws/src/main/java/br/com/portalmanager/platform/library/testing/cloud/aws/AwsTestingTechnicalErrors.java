@@ -8,7 +8,7 @@ public final class AwsTestingTechnicalErrors {
         return new PlatformErrorDefinition(
                 "PLT-TST-001",
                 "Invalid platform-testing AWS configuration: " + detail,
-                "undefined",
+                "Review the @WithAwsLocalStack S3 bucket, SQS queue, and notification declarations.",
                 500
         );
     }
