@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>br.com.portalmanager.platform.library</groupId>
+        <artifactId>platform-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../platform-parent/pom.xml</relativePath>
+    </parent>
+    <artifactId>platform-testing-aggregator</artifactId>
+    <packaging>pom</packaging>
+    <name>platform-testing</name>
+    <modules>
+        <module>platform-testing-core</module>
+        <module>platform-testing-http</module>
+        <module>platform-testing-authorization</module>
+        <module>platform-testing-kafka</module>
+        <module>platform-testing-database</module>
+        <module>platform-testing-cloud-aws</module>
+        <module>platform-testing-cloud-azure</module>
+    </modules>
+</project>

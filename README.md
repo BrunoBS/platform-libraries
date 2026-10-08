@@ -31,8 +31,14 @@ platform-libraries/
     ├── platform-audit/
     ├── platform-catalog/
     ├── platform-tagging/
-    ├── platform-testing-core/
-    └── platform-testing-authorization/
+    └── platform-testing/
+        ├── platform-testing-core/
+        ├── platform-testing-http/
+        ├── platform-testing-authorization/
+        ├── platform-testing-kafka/
+        ├── platform-testing-database/
+        ├── platform-testing-cloud-aws/
+        └── platform-testing-cloud-azure/
 ```
 
 O POM raiz é somente reactor/aggregator e não concentra regras de build.
@@ -70,7 +76,7 @@ Usam essa `revision`:
 
 - root reactor `platform-libraries`;
 - `platform-libraries-bom`;
-- as nove capabilities em `modules/`.
+- as capabilities em `modules/`.
 
 As dependências internas entre capabilities usam `${project.version}`. Os POMs de consumo gerados pelo Flatten Maven Plugin não são versionados no Git.
 
@@ -80,7 +86,12 @@ As dependências internas entre capabilities usam `${project.version}`. Os POMs 
 platform-authorization -> platform-messaging
 platform-audit         -> platform-authorization
 platform-audit         -> platform-messaging
+platform-testing-http -> platform-testing-core
 platform-testing-authorization -> platform-testing-core + platform-authorization
+platform-testing-kafka -> platform-testing-core
+platform-testing-database -> platform-testing-core
+platform-testing-cloud-aws -> platform-testing-core
+platform-testing-cloud-azure -> platform-testing-core
 platform-catalog       -> platform-messaging
 
 platform-starter
@@ -91,7 +102,7 @@ platform-starter
 platform-schema-validation -> platform-messaging
 ```
 
-`platform-testing-core` mantém fixtures genéricas opt-in para MySQL, Kafka e cloud. `platform-testing-authorization` depende do core e de `platform-authorization`, mantendo mocks de autorização fora do módulo genérico. O starter JDBC do core é opcional para não ativar auto-configuração de `DataSource` em consumidores sem banco.
+`platform-testing` é um agregador Maven; os sete JARs ficam separados por contexto. `platform-testing-core` mantém arquitetura, ciclo de vida, contexto e fixtures genéricas. HTTP, autorização, Kafka, banco de dados, AWS e Azure entram apenas quando o consumidor declara o artefato correspondente. Veja [o guia de módulos de teste](modules/platform-testing/README.md).
 
 ## Consumo alvo
 

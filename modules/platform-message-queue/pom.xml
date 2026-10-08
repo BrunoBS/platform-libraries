@@ -52,10 +52,16 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Cloud container fixtures and their drivers are supplied by platform-testing-core below. -->
+        <!-- Only the cloud fixtures exercised by these tests are included below. -->
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
-            <artifactId>platform-testing-core</artifactId>
+            <artifactId>platform-testing-cloud-aws</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-testing-cloud-azure</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
