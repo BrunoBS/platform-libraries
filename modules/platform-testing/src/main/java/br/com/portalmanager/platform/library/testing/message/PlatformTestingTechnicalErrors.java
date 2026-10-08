@@ -22,6 +22,15 @@ public final class PlatformTestingTechnicalErrors {
         );
     }
 
+    public static PlatformErrorDefinition invalidKafkaConfiguration(String detail) {
+        return new PlatformErrorDefinition(
+                "PLT-TST-003",
+                "Invalid platform-testing Kafka configuration: " + detail,
+                "Review the @WithKafka image and topic declarations.",
+                500
+        );
+    }
+
     private PlatformTestingTechnicalErrors() {
     }
 }

@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.testing.cloud.azure.servicebus;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.container.PlatformTestingContainerImages;
 
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusSenderAsyncClient;
@@ -15,11 +16,11 @@ import org.testcontainers.utility.DockerImageName;
 public final class AzureServiceBusContainer implements AutoCloseable {
 
     public static final DockerImageName DEFAULT_SQL_SERVER_IMAGE = DockerImageName.parse(
-            "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04"
+            PlatformTestingContainerImages.AZURE_SQL_SERVER
     );
 
     public static final DockerImageName DEFAULT_SERVICE_BUS_IMAGE = DockerImageName.parse(
-            "mcr.microsoft.com/azure-messaging/servicebus-emulator:1.1.2"
+            PlatformTestingContainerImages.AZURE_SERVICE_BUS
     );
 
     private static final String DEFAULT_SQL_PASSWORD = "Platform_Testing_123!";

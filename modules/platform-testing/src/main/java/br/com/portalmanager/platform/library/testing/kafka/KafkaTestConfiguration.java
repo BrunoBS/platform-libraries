@@ -1,19 +1,28 @@
 package br.com.portalmanager.platform.library.testing.kafka;
 
+import br.com.portalmanager.platform.library.testing.container.PlatformTestingContainerImages;
+
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.testcontainers.kafka.ConfluentKafkaContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.core.env.Environment;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class KafkaTestConfiguration {
 
+    static final String IMAGE_PROPERTY = "platform.testing.kafka.image";
+    static final String TOPICS_PROPERTY = "platform.testing.kafka.topics";
+
     @Bean(destroyMethod = "stop")
     @ServiceConnection
-    ConfluentKafkaContainer kafkaContainer() {
-        return new ConfluentKafkaContainer(
-                DockerImageName.parse("confluentinc/cp-kafka:7.8.0")
-        );
+    KafkaTestContainer kafkaContainer(Environment environment) {
+        String image = environment.getProperty(
+                IMAGE_PROPERTY,
+                PlatformTestingContainerImages.KAFKA);
+        String[] topics = environment.getProperty(
+                TOPICS_PROPERTY,
+                String[].class,
+                new String[0]);
+        return new KafkaTestContainer(PlatformTestingContainerImages.parse(image), topics);
     }
 }

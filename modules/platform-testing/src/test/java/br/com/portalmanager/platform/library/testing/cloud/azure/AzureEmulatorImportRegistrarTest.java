@@ -7,6 +7,8 @@ import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.With
 
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.testcontainers.utility.DockerImageName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -19,6 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AzureEmulatorImportRegistrarTest {
 
     private final AzureEmulatorImportRegistrar registrar = new AzureEmulatorImportRegistrar();
+
+    @Test
+    void shouldRejectUnversionedImageWithPlatformConfigurationError() {
+        DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
+
+        PlatformConfigurationException exception = assertThrows(
+                PlatformConfigurationException.class,
+                () -> registrar.registerBeanDefinitions(
+                        AnnotationMetadata.introspect(UnversionedAzuriteTest.class), registry));
+
+        assertEquals("PLT-TST-002", exception.getErrorResponse().code());
+    }
 
     @Test
     void shouldRejectNonPositiveMaxDeliveryCount() {
@@ -57,6 +71,16 @@ class AzureEmulatorImportRegistrarTest {
 
         assertTrue(registry.containsBeanDefinition("azureServiceBusContainer"));
         assertTrue(registry.containsBeanDefinition("azureBlobStorageContainer"));
+        ConstructorArgumentValues serviceBusArguments = registry.getBeanDefinition("azureServiceBusContainer")
+                .getConstructorArgumentValues();
+        assertEquals(DockerImageName.parse("mcr.microsoft.com/azure-messaging/servicebus-emulator:1.1.3").toString(),
+                serviceBusArguments.getIndexedArgumentValue(0, DockerImageName.class).getValue().toString());
+        assertEquals(DockerImageName.parse("mcr.microsoft.com/mssql/server:2022-CU15-ubuntu-22.04").toString(),
+                serviceBusArguments.getIndexedArgumentValue(1, DockerImageName.class).getValue().toString());
+        ConstructorArgumentValues blobArguments = registry.getBeanDefinition("azureBlobStorageContainer")
+                .getConstructorArgumentValues();
+        assertEquals(DockerImageName.parse("mcr.microsoft.com/azure-storage/azurite:3.38.0").toString(),
+                blobArguments.getIndexedArgumentValue(0, DockerImageName.class).getValue().toString());
         assertTrue(registry.containsBeanDefinition("azureServiceBusClientBuilder"));
         assertTrue(registry.containsBeanDefinition("azureBlobServiceClient"));
         assertEquals(ServiceBusClientBuilder.class,
@@ -78,13 +102,26 @@ class AzureEmulatorImportRegistrarTest {
     }
 
     @WithAzureEmulator(
-            serviceBus = @AzureServiceBus(queues = {
+            serviceBus = @AzureServiceBus(
+                    image = "mcr.microsoft.com/azure-messaging/servicebus-emulator:1.1.3",
+                    sqlServerImage = "mcr.microsoft.com/mssql/server:2022-CU15-ubuntu-22.04",
+                    queues = {
                     @AzureServiceBus.Queue(name = "orders"),
                     @AzureServiceBus.Queue(name = "ordered-orders", sessionsEnabled = true)
             }),
-            blobStorage = @AzureBlobStorage(containers = "documents")
+            blobStorage = @AzureBlobStorage(
+                    image = "mcr.microsoft.com/azure-storage/azurite:3.38.0",
+                    containers = "documents")
     )
     private static final class AzureCloudTest {
+    }
+
+    @WithAzureEmulator(
+            blobStorage = @AzureBlobStorage(
+                    image = "mcr.microsoft.com/azure-storage/azurite",
+                    containers = "documents")
+    )
+    private static final class UnversionedAzuriteTest {
     }
 
     @WithAzureEmulator(

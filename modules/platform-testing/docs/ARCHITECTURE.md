@@ -79,12 +79,12 @@ As anotações não sobem todos os serviços automaticamente. Por exemplo, `@Pla
 
 ### Kafka e cloud
 
-`KafkaTestConfiguration` registra um `ConfluentKafkaContainer` como service connection. O broker só é iniciado quando o teste importa `@WithKafka`.
+`KafkaTestContextCustomizerFactory` valida os valores da anotação e adiciona imagem/tópicos ao contexto; seus valores fazem parte da chave de cache do Spring. `KafkaTestConfiguration` cria `KafkaTestContainer` como service connection: ele inicia o broker e provisiona os tópicos declarados. Os defaults de imagens ficam em `PlatformTestingContainerImages`; as anotações permitem override por tag ou digest. Serializers e producers continuam no serviço consumidor.
 
-Os registrars cloud interpretam as anotações e registram beans de container e clients correspondentes:
+Os registrars cloud interpretam as anotações e registram beans de container e clients correspondentes. `CloudTestContextCustomizerFactory` inclui os valores AWS/Azure na chave do cache do Spring para que recursos diferentes não compartilhem contexto:
 
-- AWS: LocalStack com SQS e/ou S3. A anotação de fila aceita configuração de DLQ, fila FIFO pelo nome e quantidade máxima de recebimentos.
-- Azure: emulador para filas do Service Bus e containers do Blob Storage. Filas podem habilitar sessions e configurar `maxDeliveryCount`.
+- AWS: LocalStack com SQS e/ou S3. A anotação de provider permite trocar a imagem; a anotação de fila aceita configuração de DLQ, fila FIFO pelo nome e quantidade máxima de recebimentos.
+- Azure: emulador para filas do Service Bus e containers do Blob Storage. Cada feature pode trocar sua imagem; Service Bus também permite trocar a imagem SQL que ele requer. Filas podem habilitar sessions e configurar `maxDeliveryCount`.
 
 As dependências de Kafka, AWS e Azure são incluídas no artefato sem marcação opcional. O consumidor declara somente `platform-testing` com escopo `test`; as anotações ativam apenas os containers e serviços usados em cada teste.
 

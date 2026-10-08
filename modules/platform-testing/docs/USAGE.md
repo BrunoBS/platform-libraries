@@ -149,7 +149,16 @@ class ProductEventsIT {
 
 As dependências Kafka necessárias já chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor.
 
-O Spring Boot recebe a conexão do container por meio de Service Connection. Tópicos, serializers, producers e consumers continuam sendo responsabilidade do serviço.
+O Spring Boot recebe a conexão do container por meio de Service Connection. Para tópicos simples de teste, declare nome e partições em `@WithKafka`; serializers, producers e consumers continuam sendo responsabilidade do serviço. Exemplo:
+
+```java
+@WithKafka(
+    image = "confluentinc/cp-kafka:7.8.0",
+    topics = @WithKafka.Topic(name = "product-events", partitions = 3)
+)
+```
+
+A imagem pode ser sobrescrita para validar outra versão da imagem Confluent usada pelo fixture. O default é fixo e testado pela biblioteca; informe uma tag ou digest explícito em vez de `latest`.
 
 ## Autorização simulada
 
@@ -208,11 +217,12 @@ Use `create()` para chamadas sem headers de autorização da plataforma. Use `cr
 
 ## AWS LocalStack
 
-Declare as filas e os buckets em suas anotações próprias. Quando precisar publicar eventos de criação do S3 no SQS, declare a relação com a terceira anotação:
+Declare as filas e os buckets em suas anotações próprias. O default do LocalStack é fixo e testado pela biblioteca; use outra tag ou digest da imagem LocalStack em `image` quando quiser validar uma versão diferente. Quando precisar publicar eventos de criação do S3 no SQS, declare a relação com a terceira anotação:
 
 ```java
 @PlatformIntegrationTest
 @WithAwsLocalStack(
+    image = "localstack/localstack:4.14.0",
     sqs = @AwsSqs(queues = {
         @AwsSqs.Queue(name = "orders"),
         @AwsSqs.Queue(name = "order-events")
@@ -235,15 +245,19 @@ As dependências do LocalStack e dos SDKs SQS/S3 chegam transitivamente por `pla
 
 ## Azure Emulator
 
-A fixture habilita Service Bus e/ou Blob Storage:
+A fixture habilita Service Bus e/ou Blob Storage. Os defaults de Azurite, Service Bus Emulator e SQL Server são fixos e testados; cada anotação da feature permite sobrescrevê-los:
 
 ```java
 @PlatformIntegrationTest
 @WithAzureEmulator(
     serviceBus = @AzureServiceBus(
+        image = "mcr.microsoft.com/azure-messaging/servicebus-emulator:1.1.2",
+        sqlServerImage = "mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04",
         queues = @AzureServiceBus.Queue(name = "orders")
     ),
-    blobStorage = @AzureBlobStorage(containers = "order-files")
+    blobStorage = @AzureBlobStorage(
+        image = "mcr.microsoft.com/azure-storage/azurite:3.37.0",
+        containers = "order-files")
 )
 class OrderAzureIT {
 }
@@ -251,7 +265,7 @@ class OrderAzureIT {
 
 As dependências do emulador Azure, SQL Server, Service Bus e Blob Storage chegam transitivamente por `platform-testing`; não é necessário declará-las no POM consumidor.
 
-Declare somente o serviço utilizado na anotação. A fixture cria os recursos declarados e disponibiliza os clients com endpoints do emulador.
+Declare somente o serviço utilizado na anotação. A fixture cria os recursos declarados e disponibiliza os clients com endpoints do emulador. Os valores acima são os defaults; informe outras tags ou digests das imagens compatíveis com cada fixture para testar versões específicas. A biblioteca valida o formato da referência, mas não garante a compatibilidade de versões fora da matriz testada.
 
 Para a POC local de Blob para Service Bus, configure `blobCreatedQueue` com uma fila também declarada em `serviceBus`:
 

@@ -9,6 +9,10 @@ import org.springframework.boot.kafka.autoconfigure.KafkaConnectionDetails;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration"
         }
 )
-@WithKafka
+@WithKafka(
+        image = "confluentinc/cp-kafka:7.8.0",
+        topics = @WithKafka.Topic(name = "platform-testing-events", partitions = 2)
+)
 class KafkaTestConfigurationIntegrationTest {
 
     @Autowired
@@ -36,6 +43,14 @@ class KafkaTestConfigurationIntegrationTest {
         assertThat(kafka.isRunning()).isTrue();
         assertThat(connectionDetails.getBootstrapServers())
                 .containsExactly(kafka.getBootstrapServers());
+        try (Admin admin = Admin.create(Map.of(
+                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+                kafka.getBootstrapServers()))) {
+            assertThat(admin.listTopics().names().get())
+                    .contains("platform-testing-events");
+        } catch (Exception exception) {
+            throw new AssertionError("Configured Kafka topic should be available", exception);
+        }
     }
 
     @SpringBootConfiguration

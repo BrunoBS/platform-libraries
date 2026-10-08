@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.container.PlatformTestingContainerImages;
 
 import org.testcontainers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -15,7 +16,9 @@ import java.util.Set;
 
 public class AwsLocalStackContainer extends LocalStackContainer {
 
-    public static final DockerImageName DEFAULT_IMAGE = DockerImageName.parse("localstack/localstack:4.14.0");
+    public static final DockerImageName DEFAULT_IMAGE = DockerImageName.parse(
+            PlatformTestingContainerImages.AWS_LOCALSTACK
+    );
 
     private final String[] queues;
     private final String[] buckets;

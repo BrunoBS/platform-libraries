@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.Aws
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
+import org.testcontainers.utility.DockerImageName;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -35,12 +36,25 @@ class AwsLocalStackImportRegistrarTest {
 
         ConstructorArgumentValues arguments = registry.getBeanDefinition("awsLocalStackContainer")
                 .getConstructorArgumentValues();
+        assertEquals(DockerImageName.parse("localstack/localstack:4.14.1").toString(),
+                arguments.getIndexedArgumentValue(0, DockerImageName.class).getValue().toString());
         assertArrayEquals(new String[]{"audit-events", "order-events", "order-events-dlq"},
-                (String[]) arguments.getIndexedArgumentValue(1, String[].class).getValue());
+                (String[]) arguments.getIndexedArgumentValue(2, String[].class).getValue());
         assertArrayEquals(new String[][]{{"order-events", "order-events-dlq", "3"}},
-                (String[][]) arguments.getIndexedArgumentValue(3, String[][].class).getValue());
-        assertArrayEquals(new String[][]{{"documents", "audit-events"}},
                 (String[][]) arguments.getIndexedArgumentValue(4, String[][].class).getValue());
+        assertArrayEquals(new String[][]{{"documents", "audit-events"}},
+                (String[][]) arguments.getIndexedArgumentValue(5, String[][].class).getValue());
+    }
+
+    @Test
+    void shouldRejectFloatingImageTagWithPlatformConfigurationError() {
+        DefaultListableBeanFactory registry = new DefaultListableBeanFactory();
+
+        PlatformConfigurationException exception = assertThrows(PlatformConfigurationException.class,
+                () -> registrar.registerBeanDefinitions(
+                        AnnotationMetadata.introspect(FloatingAwsImageTest.class), registry));
+
+        assertEquals("PLT-TST-001", exception.getErrorResponse().code());
     }
 
     @Test
@@ -57,6 +71,7 @@ class AwsLocalStackImportRegistrarTest {
     }
 
     @WithAwsLocalStack(
+            image = "localstack/localstack:4.14.1",
             sqs = @AwsSqs(queues = {
                     @AwsSqs.Queue(name = "audit-events"),
                     @AwsSqs.Queue(name = "order-events", deadLetterEnabled = true, maxReceiveCount = 3)
@@ -65,6 +80,13 @@ class AwsLocalStackImportRegistrarTest {
             s3SqsNotifications = @AwsS3SqsNotification(bucket = "documents", queue = "audit-events")
     )
     private static final class AwsCloudTest {
+    }
+
+    @WithAwsLocalStack(
+            image = "localstack/localstack:latest",
+            sqs = @AwsSqs(queues = @AwsSqs.Queue(name = "audit-events"))
+    )
+    private static final class FloatingAwsImageTest {
     }
 
     @WithAwsLocalStack(

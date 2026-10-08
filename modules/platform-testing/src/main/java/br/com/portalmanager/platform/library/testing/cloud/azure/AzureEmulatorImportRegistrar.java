@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.testing.cloud.azure;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.container.PlatformTestingContainerImages;
 
 import br.com.portalmanager.platform.library.testing.cloud.azure.blob.AzureBlobStorageContainer;
 import br.com.portalmanager.platform.library.testing.cloud.azure.blob.AzureBlobStorageTestSupport;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.Map;
 import java.util.HashSet;
@@ -51,7 +53,11 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
             SERVICE_BUS_SUPPORT.register(registry);
         }
         if (blobStorage.length == 1) {
-            registerBlobStorage(registry, blobStorage[0].getStringArray("containers"), blobCreatedQueue);
+            registerBlobStorage(
+                    registry,
+                    dockerImageName(blobStorage[0].getString("image"), "Azure Blob Storage"),
+                    blobStorage[0].getStringArray("containers"),
+                    blobCreatedQueue);
             BLOB_STORAGE_SUPPORT.register(registry);
         }
     }
@@ -59,17 +65,29 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
     private void registerServiceBus(BeanDefinitionRegistry registry, AnnotationAttributes serviceBus) {
         AnnotationAttributes[] queues = annotations(serviceBus.get("queues"));
         String configuration = serviceBusConfiguration(queues);
+        DockerImageName serviceBusImage = dockerImageName(
+                serviceBus.getString("image"), "Azure Service Bus");
+        DockerImageName sqlServerImage = dockerImageName(
+                serviceBus.getString("sqlServerImage"), "Azure SQL Server");
         RootBeanDefinition definition = new RootBeanDefinition(AzureServiceBusContainer.class);
-        definition.setInstanceSupplier(() -> new AzureServiceBusContainer(configuration));
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(0, serviceBusImage);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(1, sqlServerImage);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(2, configuration);
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(SERVICE_BUS_CONTAINER_BEAN, definition);
     }
 
-    private void registerBlobStorage(BeanDefinitionRegistry registry, String[] containers, String blobCreatedQueue) {
+    private void registerBlobStorage(
+            BeanDefinitionRegistry registry,
+            DockerImageName image,
+            String[] containers,
+            String blobCreatedQueue) {
         String[] configuredContainers = containers.clone();
         RootBeanDefinition definition = new RootBeanDefinition(AzureBlobStorageContainer.class);
-        definition.setInstanceSupplier(() -> new AzureBlobStorageContainer(configuredContainers, blobCreatedQueue));
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(0, image);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(1, configuredContainers);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(2, blobCreatedQueue);
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(BLOB_STORAGE_BEAN, definition);
@@ -177,6 +195,17 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
             return result;
         }
         throw configurationException("Unsupported nested Azure service annotation metadata");
+    }
+
+    private DockerImageName dockerImageName(String image, String component) {
+        if (image == null || image.isBlank()) {
+            throw configurationException(component + " image must not be blank");
+        }
+        try {
+            return PlatformTestingContainerImages.parse(image);
+        } catch (IllegalArgumentException exception) {
+            throw configurationException(component + " image must be a valid Docker image name");
+        }
     }
 
     private PlatformConfigurationException configurationException(String detail) {

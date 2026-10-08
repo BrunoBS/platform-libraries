@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.testing.cloud.azure.blob;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.container.PlatformTestingContainerImages;
 
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import org.testcontainers.azure.AzuriteContainer;
@@ -11,7 +12,7 @@ import org.testcontainers.utility.DockerImageName;
 public final class AzureBlobStorageContainer extends AzuriteContainer {
 
     public static final DockerImageName DEFAULT_IMAGE = DockerImageName.parse(
-            "mcr.microsoft.com/azure-storage/azurite:3.37.0"
+            PlatformTestingContainerImages.AZURITE
     );
 
     private final String[] containers;
@@ -22,7 +23,14 @@ public final class AzureBlobStorageContainer extends AzuriteContainer {
     }
 
     public AzureBlobStorageContainer(String[] containers, String blobCreatedQueue) {
-        super(DEFAULT_IMAGE);
+        this(DEFAULT_IMAGE, containers, blobCreatedQueue);
+    }
+
+    public AzureBlobStorageContainer(
+            DockerImageName image,
+            String[] containers,
+            String blobCreatedQueue) {
+        super(image);
         this.containers = containers == null ? new String[0] : containers.clone();
         this.blobCreatedQueue = blobCreatedQueue == null ? "" : blobCreatedQueue.trim();
     }

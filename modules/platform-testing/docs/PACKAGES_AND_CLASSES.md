@@ -255,11 +255,17 @@ flowchart TD
     SQS --> LINK
 ```
 
+### br.com.portalmanager.platform.library.testing.cloud
+
+| Class | Responsibility | Relationship |
+|---|---|---|
+| `CloudTestContextCustomizerFactory` | Captures AWS/Azure annotation values in Spring's context cache key. | Loaded through Spring Test SPI; prevents reusing a context that was provisioned with different resources or images. |
+
 ### AWS shared package: `testing.cloud.aws`
 
 | Class | Responsibility | Relationship |
 |---|---|---|
-| `AwsLocalStackImportRegistrar` | Reads the provider-level annotation and wires LocalStack plus enabled feature support. | Imported by `WithAwsLocalStack`; delegates client registration to the S3 and SQS feature packages. |
+| `AwsLocalStackImportRegistrar` | Reads the provider-level annotation, validates its image and wires LocalStack plus enabled feature support. | Imported by `WithAwsLocalStack`; delegates client registration to the S3 and SQS feature packages. |
 | `AwsLocalStackContainer` | Starts LocalStack and provisions the declared queues, DLQs, buckets and notifications. | Receives normalized configuration from the registrar; feature annotations select those resources. |
 | `AwsLocalStackConnection` | Exposes endpoint, region and credentials from the running container. | Injected into S3 and SQS client factories. |
 | `AwsService` | Maps supported LocalStack services to their LocalStack names. | Used by the container to start only the requested services. |
@@ -296,7 +302,7 @@ Annotation package `testing.cloud.aws.s3notificationsqs.annotation`: `AwsS3SqsNo
 
 | Class | Responsibility | Relationship |
 |---|---|---|
-| `AzureEmulatorImportRegistrar` | Reads the provider annotation and registers only selected emulator services and clients. | Imported by `WithAzureEmulator`; delegates to the Blob and Service Bus feature packages. |
+| `AzureEmulatorImportRegistrar` | Reads and validates image settings, then registers only selected emulator services and clients. | Imported by `WithAzureEmulator`; delegates to the Blob and Service Bus feature packages. |
 | `AzureServiceTestSupport` | Shared contract for registering a service-specific Spring test client. | Implemented by the Azure Service Bus support and consumed by the registrar. |
 
 Provider annotation package `testing.cloud.azure.annotation`: `WithAzureEmulator` enables the Azure emulators and composes optional feature annotations.
@@ -326,6 +332,12 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 |---|---|---|
 | `AzureBlobServiceClientFactoryBean` | Configures the Blob SDK client to emulate the upload-created event flow used by tests. | Adds `AzureBlobCreatedEventPolicy` to the Blob client pipeline. |
 | `AzureBlobCreatedEventPolicy` | Converts a completed Blob upload into the event payload and sends it to Service Bus. | Uses the Service Bus emulator client; invoked by Blob SDK uploads in integration tests. |
+
+### br.com.portalmanager.platform.library.testing.container
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **PlatformTestingContainerImages** | Centraliza os nomes de imagem padrão, fixos e testados pelo módulo. | Fornece defaults às anotações; o consumidor pode sobrescrever a imagem com uma tag ou digest. |
 
 ### br.com.portalmanager.platform.library.testing.context
 
@@ -401,13 +413,15 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
-| **KafkaTestConfiguration** | Declara o container Kafka como service connection do Spring Boot. | Importada por **WithKafka**; disponibiliza o broker para o contexto de teste. |
+| **KafkaTestConfiguration** | Cria o container Kafka como service connection do Spring Boot. | Lê as opções fornecidas por **KafkaTestContextCustomizerFactory** e fornece **KafkaTestContainer**. |
+| **KafkaTestContainer** | Inicia Kafka e cria os tópicos opcionais declarados na anotação. | Estende o container Confluent e provisiona tópicos com AdminClient; serializers e producers continuam no serviço consumidor. |
+| **KafkaTestContextCustomizerFactory** | Lê e valida imagem/tópicos da anotação e os encaminha ao contexto Spring. | É carregado via Spring Test SPI; seu customizer participa da chave do cache e separa contextos com imagem ou tópicos diferentes. |
 
 ### br.com.portalmanager.platform.library.testing.kafka.annotation
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
-| **WithKafka** | Habilita Kafka no contexto de teste. | Importa **KafkaTestConfiguration**; o teste que não usa a anotação não inicia esse container. |
+| **WithKafka** | Habilita Kafka, permite escolher imagem e declara tópicos opcionais. | Importa **KafkaTestConfiguration** e é reconhecida por **KafkaTestContextCustomizerFactory**; o container só inicia quando a anotação é usada. |
 
 ### br.com.portalmanager.platform.library.testing.lifecycle
 

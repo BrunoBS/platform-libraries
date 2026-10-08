@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.Aws
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackImportRegistrar;
+import br.com.portalmanager.platform.library.testing.container.PlatformTestingContainerImages;
 
 import org.springframework.context.annotation.Import;
 
@@ -18,6 +19,8 @@ import java.lang.annotation.Target;
 @Inherited
 @Import(AwsLocalStackImportRegistrar.class)
 public @interface WithAwsLocalStack {
+
+    String image() default PlatformTestingContainerImages.AWS_LOCALSTACK;
 
     AwsSqs[] sqs() default {};
 

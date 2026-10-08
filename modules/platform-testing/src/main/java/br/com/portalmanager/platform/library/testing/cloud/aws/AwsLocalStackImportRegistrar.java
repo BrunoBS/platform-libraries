@@ -8,6 +8,9 @@ import br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.container.PlatformTestingContainerImages;
+
+import org.testcontainers.utility.DockerImageName;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -63,7 +66,8 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             throw configurationException("At least one AWS service annotation must be configured");
         }
 
-        registerContainer(registry, services, queues, buckets, redrivePolicies, bucketNotifications);
+        DockerImageName image = dockerImageName(attributes.get("image"));
+        registerContainer(registry, image, services, queues, buckets, redrivePolicies, bucketNotifications);
         registerConnection(registry);
         registerServiceClients(registry, sqs.length == 1, s3.length == 1);
     }
@@ -143,8 +147,24 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
         return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail));
     }
 
+    private PlatformConfigurationException configurationException(String detail, Throwable cause) {
+        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAwsConfiguration(detail), cause);
+    }
+
+    private DockerImageName dockerImageName(Object value) {
+        if (!(value instanceof String image) || image.isBlank()) {
+            throw configurationException("AWS LocalStack image must not be blank");
+        }
+        try {
+            return PlatformTestingContainerImages.parse(image);
+        } catch (IllegalArgumentException exception) {
+            throw configurationException("AWS LocalStack image must be a valid Docker image name", exception);
+        }
+    }
+
     private void registerContainer(
             BeanDefinitionRegistry registry,
+            DockerImageName image,
             List<AwsService> services,
             String[] queues,
             String[] buckets,
@@ -152,11 +172,12 @@ public final class AwsLocalStackImportRegistrar implements ImportBeanDefinitionR
             String[][] bucketNotifications) {
         AwsService[] enabledServices = services.toArray(AwsService[]::new);
         RootBeanDefinition definition = new RootBeanDefinition(AwsLocalStackContainer.class);
-        definition.getConstructorArgumentValues().addIndexedArgumentValue(0, enabledServices);
-        definition.getConstructorArgumentValues().addIndexedArgumentValue(1, queues.clone());
-        definition.getConstructorArgumentValues().addIndexedArgumentValue(2, buckets.clone());
-        definition.getConstructorArgumentValues().addIndexedArgumentValue(3, redrivePolicies.clone());
-        definition.getConstructorArgumentValues().addIndexedArgumentValue(4, bucketNotifications.clone());
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(0, image);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(1, enabledServices);
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(2, queues.clone());
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(3, buckets.clone());
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(4, redrivePolicies.clone());
+        definition.getConstructorArgumentValues().addIndexedArgumentValue(5, bucketNotifications.clone());
         definition.setInitMethodName("start");
         definition.setDestroyMethodName("stop");
         registry.registerBeanDefinition(CONTAINER_BEAN, definition);
