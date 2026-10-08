@@ -118,6 +118,28 @@ class DefaultApiMessageResolverTest {
     }
 
     @Test
+    void shouldUseProviderFallbackWhenRepositoryMessageHasNoErrorCode() {
+        ApiMessageRepository repository = (k, l) -> Optional.of(
+                new ApiMessage("", k, l.toLanguageTag(), "Invalid message", "Retry", 500)
+        );
+        ApiMessageProvider provider = (k, l) -> Optional.of(
+                new ApiMessage("BUNDLE-500", k, l.toLanguageTag(), "Fallback", "Retry", 500)
+        );
+
+        var resolver = new DefaultApiMessageResolver(
+                repository,
+                new NoOpApiMessageCache(),
+                Locale.forLanguageTag("pt-BR"),
+                provider
+        );
+
+        var result = resolver.resolve("test.message", Locale.forLanguageTag("pt-BR"));
+
+        assertEquals("BUNDLE-500", result.code());
+        assertEquals("Fallback", result.message());
+    }
+
+    @Test
     void shouldUseImmutablePlatformDefaultWhenMessageIsNotFoundAnywhere() {
         ApiMessageRepository repository = (k, l) -> Optional.empty();
         var resolver = new DefaultApiMessageResolver(
