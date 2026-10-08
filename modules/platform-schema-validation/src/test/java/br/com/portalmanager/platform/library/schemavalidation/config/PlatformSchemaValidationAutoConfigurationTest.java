@@ -7,6 +7,7 @@ import br.com.portalmanager.platform.library.schemavalidation.repository.Resourc
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -146,7 +148,14 @@ class PlatformSchemaValidationAutoConfigurationTest {
                     new MapPropertySource("test-properties", properties)
             );
         }
-        context.register(configurationClasses);
+        Class<?>[] testConfigurations = Arrays.stream(configurationClasses)
+                .filter(configuration -> !configuration.isAnnotationPresent(AutoConfiguration.class))
+                .toArray(Class<?>[]::new);
+        Class<?>[] autoConfigurations = Arrays.stream(configurationClasses)
+                .filter(configuration -> configuration.isAnnotationPresent(AutoConfiguration.class))
+                .toArray(Class<?>[]::new);
+        context.register(testConfigurations);
+        context.register(autoConfigurations);
         try {
             context.refresh();
             return context;
