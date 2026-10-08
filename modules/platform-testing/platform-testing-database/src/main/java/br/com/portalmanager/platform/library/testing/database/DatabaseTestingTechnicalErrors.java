@@ -8,7 +8,7 @@ public final class DatabaseTestingTechnicalErrors {
         return new PlatformErrorDefinition(
                 "PLT-TST-004",
                 "Invalid platform-testing MySQL configuration: " + detail,
-                "undefined",
+                "Review the @WithMySql image declaration and use a versioned Docker image name.",
                 500
         );
     }
