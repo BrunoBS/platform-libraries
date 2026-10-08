@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.message.PlatformTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.cloud.azure.AzureTestingTechnicalErrors;
 import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
 
 import br.com.portalmanager.platform.library.testing.cloud.azure.blob.AzureBlobStorageContainer;
@@ -209,7 +209,7 @@ public final class AzureEmulatorImportRegistrar implements ImportBeanDefinitionR
     }
 
     private PlatformConfigurationException configurationException(String detail) {
-        return new PlatformConfigurationException(PlatformTestingTechnicalErrors.invalidAzureConfiguration(detail));
+        return new PlatformConfigurationException(AzureTestingTechnicalErrors.invalidAzureConfiguration(detail));
     }
 
     private void requireSingle(String annotationName, AnnotationAttributes[] annotations) {
