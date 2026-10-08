@@ -430,7 +430,7 @@ public class ApiExceptionHandler {
                 "}";
     }
 
-    private String toJsonDetails(List<ApiValidationDetail> details) {
+    String toJsonDetails(List<ApiValidationDetail> details) {
         if (details == null || details.isEmpty()) {
             return "[]";
         }
