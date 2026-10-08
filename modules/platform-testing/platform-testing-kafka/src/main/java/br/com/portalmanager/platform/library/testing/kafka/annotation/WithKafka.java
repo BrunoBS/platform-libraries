@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.testing.kafka.annotation;
 
 import br.com.portalmanager.platform.library.testing.kafka.KafkaTestConfiguration;
+import br.com.portalmanager.platform.library.testing.kafka.KafkaContainerImages;
 
 import org.springframework.context.annotation.Import;
 

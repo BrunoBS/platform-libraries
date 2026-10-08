@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.testing.database.annotation;
 
 import br.com.portalmanager.platform.library.testing.database.CleanupMode;
+import br.com.portalmanager.platform.library.testing.database.MySqlContainerImages;
 import br.com.portalmanager.platform.library.testing.database.MySqlTestConfiguration;
 import br.com.portalmanager.platform.library.testing.database.MySqlTestExtension;
 
