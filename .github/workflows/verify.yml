@@ -76,6 +76,11 @@ jobs:
           REVISION="$(sed -n 's/^-Drevision=//p' .mvn/maven.config)"
           test -n "$REVISION"
           test -f platform-libraries-bom/.flattened-pom.xml
+          test -f platform-parent/.flattened-pom.xml
+          if grep -nH '\${revision}' platform-parent/.flattened-pom.xml; then
+            echo "Unresolved revision found in the flattened parent POM."
+            exit 1
+          fi
           grep -q "<version>$REVISION</version>" platform-libraries-bom/.flattened-pom.xml
           if grep -nH '\${revision}' platform-libraries-bom/.flattened-pom.xml; then
             echo "Unresolved revision found in the flattened BOM."
