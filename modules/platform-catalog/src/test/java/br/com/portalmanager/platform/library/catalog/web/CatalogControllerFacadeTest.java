@@ -18,20 +18,15 @@ class CatalogControllerFacadeTest {
         @SuppressWarnings("unchecked")
         AbstractCatalogFacade<CatalogEntity> facade = mock(AbstractCatalogFacade.class);
         CatalogController<CatalogEntity> controller = new CatalogController<>(facade) {};
-        var headers = Map.of(
-                "Authorization", "Bearer token",
-                "Correlation-Id", "request-id",
-                "workspace-identifier", "workspace-id",
-                "environment-identifier", "environment-id",
-                "application-identifier", "application-id");
-
-        controller.findAll(headers, Map.of("active", "true"));
-        controller.findByCode(headers, "CODE");
-        controller.delete(headers, "CODE");
-        controller.restore(headers, "CODE");
-
         var context = new AuthorizationContext("request-id", "Bearer token",
-                "workspace-id", "environment-id", "application-id");
+                "workspace-id", "environment-id", "application-id",
+                "127.0.0.1", "test-agent", "/catalog");
+
+        controller.findAll(context, Map.of("active", "true"));
+        controller.findByCode(context, "CODE");
+        controller.delete(context, "CODE");
+        controller.restore(context, "CODE");
+
         verify(facade).findAll(eq(context), eq(Map.of("active", "true")));
         verify(facade).findByCode(eq(context), eq("CODE"));
         verify(facade).delete(eq(context), eq("CODE"));
