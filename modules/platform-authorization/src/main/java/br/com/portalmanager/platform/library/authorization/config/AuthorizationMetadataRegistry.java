@@ -33,8 +33,8 @@ public class AuthorizationMetadataRegistry {
     private AuthorizationPolicy policy(AuthorizationRequired annotation, AuthorizationPolicy.Source source) {
         return new AuthorizationPolicy(
                 annotation.level(), source,
-                annotation.workspacePathVariable(),
-                annotation.applicationPathVariable(),
-                annotation.environmentPathVariable());
+                "workspaceIdentifier",
+                "applicationIdentifier",
+                "environmentIdentifier");
     }
 }
