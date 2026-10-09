@@ -21,6 +21,7 @@ class PlatformStarterMinimalConsumerTest {
         ));
 
         try (ConfigurableApplicationContext context = application.run(
+                "--spring.profiles.active=test",
                 "--platform.messaging.enabled=false"
         )) {
             assertThat(context.isActive()).isTrue();
