@@ -16,6 +16,7 @@ public class PlatformAuthorizationProperties {
     private Duration readTimeout = Duration.ofSeconds(2);
     private Retry retry = new Retry();
     private Mock mock = new Mock();
+    private ContextPropagation contextPropagation = new ContextPropagation();
 
     public AuthorizationMode getMode() {
         return mode;
@@ -63,6 +64,36 @@ public class PlatformAuthorizationProperties {
 
     public void setMock(Mock mock) {
         this.mock = mock == null ? new Mock() : mock;
+    }
+
+    public ContextPropagation getContextPropagation() { return contextPropagation; }
+    public void setContextPropagation(ContextPropagation value) {
+        this.contextPropagation = value == null ? new ContextPropagation() : value;
+    }
+
+    public static class ContextPropagation {
+        private boolean enabled;
+        private boolean defaultExecutor;
+        private int coreSize = 4;
+        private int maxSize = 16;
+        private int queueCapacity = 100;
+        private Duration keepAlive = Duration.ofSeconds(60);
+        private String threadNamePrefix = "authorization-async-";
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean value) { enabled = value; }
+        public boolean isDefaultExecutor() { return defaultExecutor; }
+        public void setDefaultExecutor(boolean value) { defaultExecutor = value; }
+        public int getCoreSize() { return coreSize; }
+        public void setCoreSize(int value) { coreSize = value; }
+        public int getMaxSize() { return maxSize; }
+        public void setMaxSize(int value) { maxSize = value; }
+        public int getQueueCapacity() { return queueCapacity; }
+        public void setQueueCapacity(int value) { queueCapacity = value; }
+        public Duration getKeepAlive() { return keepAlive; }
+        public void setKeepAlive(Duration value) { keepAlive = value; }
+        public String getThreadNamePrefix() { return threadNamePrefix; }
+        public void setThreadNamePrefix(String value) { threadNamePrefix = value; }
     }
 
     public static class Retry {
