@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.authorization.client.AuthorizationClient;
@@ -21,6 +22,18 @@ import java.net.http.HttpClient;
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformAuthorizationProperties.class)
 public class PlatformAuthorizationAutoConfiguration {
+
+    @Bean
+    public SmartInitializingSingleton authorizationContextPropagationConfigurationValidator(
+            PlatformAuthorizationProperties properties) {
+        return () -> {
+            var settings = properties.getContextPropagation();
+            if (settings.isDefaultExecutor() && !settings.isEnabled()) {
+                throw new PlatformConfigurationException(
+                        AuthorizationTechnicalErrors.CONTEXT_PROPAGATION_REQUIRED);
+            }
+        };
+    }
 
     @Bean
     @ConditionalOnMissingBean
