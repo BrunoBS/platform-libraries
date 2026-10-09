@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 class AuthorizationWebMvcAutoConfigurationIntegrationTest {
     @Test
@@ -30,8 +30,10 @@ class AuthorizationWebMvcAutoConfigurationIntegrationTest {
                     MockMvc mvc = MockMvcBuilders.webAppContextSetup((WebApplicationContext) context).build();
                     mvc.perform(get("/context").header("workspaceidentifier", "workspace-42")
                                     .header("correlation-id", "trace"))
-                            .andExpect(status().isOk())
-                            .andExpect(content().string("workspace-42:trace:/context"));
+                            .andDo(result -> {
+                                assertThat(result.getResponse().getStatus()).isEqualTo(200);
+                                assertThat(result.getResponse().getContentAsString()).isEqualTo("workspace-42:trace:/context");
+                            });
                 });
     }
 
