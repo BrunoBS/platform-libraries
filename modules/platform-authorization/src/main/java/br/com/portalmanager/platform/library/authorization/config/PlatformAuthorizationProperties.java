@@ -63,37 +63,22 @@ public class PlatformAuthorizationProperties {
     public void setHeaders(Headers headers) { this.headers = headers == null ? new Headers() : headers; }
 
     public static class Headers {
-        private String correlationId = "correlation-id";
-        private String correlationIdAlternative = "correlationid";
-        private String authorization = "authorization";
-        private String authorizationAlternative;
-        private String workspaceIdentifier = "workspace-identifier";
-        private String workspaceIdentifierAlternative = "workspaceidentifier";
-        private String environmentIdentifier = "environment-identifier";
-        private String environmentIdentifierAlternative = "environmentidentifier";
-        private String applicationIdentifier = "application-identifier";
-        private String applicationIdentifierAlternative = "applicationidentifier";
+        private List<String> correlationId = List.of("correlation-id", "correlationid");
+        private List<String> authorization = List.of("authorization");
+        private List<String> workspaceIdentifier = List.of("workspace-identifier", "workspaceidentifier");
+        private List<String> environmentIdentifier = List.of("environment-identifier", "environmentidentifier");
+        private List<String> applicationIdentifier = List.of("application-identifier", "applicationidentifier");
 
-        public String getCorrelationId() { return correlationId; }
-        public void setCorrelationId(String value) { correlationId = value; }
-        public String getCorrelationIdAlternative() { return correlationIdAlternative; }
-        public void setCorrelationIdAlternative(String value) { correlationIdAlternative = value; }
-        public String getAuthorization() { return authorization; }
-        public void setAuthorization(String value) { authorization = value; }
-        public String getAuthorizationAlternative() { return authorizationAlternative; }
-        public void setAuthorizationAlternative(String value) { authorizationAlternative = value; }
-        public String getWorkspaceIdentifier() { return workspaceIdentifier; }
-        public void setWorkspaceIdentifier(String value) { workspaceIdentifier = value; }
-        public String getWorkspaceIdentifierAlternative() { return workspaceIdentifierAlternative; }
-        public void setWorkspaceIdentifierAlternative(String value) { workspaceIdentifierAlternative = value; }
-        public String getEnvironmentIdentifier() { return environmentIdentifier; }
-        public void setEnvironmentIdentifier(String value) { environmentIdentifier = value; }
-        public String getEnvironmentIdentifierAlternative() { return environmentIdentifierAlternative; }
-        public void setEnvironmentIdentifierAlternative(String value) { environmentIdentifierAlternative = value; }
-        public String getApplicationIdentifier() { return applicationIdentifier; }
-        public void setApplicationIdentifier(String value) { applicationIdentifier = value; }
-        public String getApplicationIdentifierAlternative() { return applicationIdentifierAlternative; }
-        public void setApplicationIdentifierAlternative(String value) { applicationIdentifierAlternative = value; }
+        public List<String> getCorrelationId() { return correlationId; }
+        public void setCorrelationId(List<String> value) { correlationId = value == null ? List.of() : List.copyOf(value); }
+        public List<String> getAuthorization() { return authorization; }
+        public void setAuthorization(List<String> value) { authorization = value == null ? List.of() : List.copyOf(value); }
+        public List<String> getWorkspaceIdentifier() { return workspaceIdentifier; }
+        public void setWorkspaceIdentifier(List<String> value) { workspaceIdentifier = value == null ? List.of() : List.copyOf(value); }
+        public List<String> getEnvironmentIdentifier() { return environmentIdentifier; }
+        public void setEnvironmentIdentifier(List<String> value) { environmentIdentifier = value == null ? List.of() : List.copyOf(value); }
+        public List<String> getApplicationIdentifier() { return applicationIdentifier; }
+        public void setApplicationIdentifier(List<String> value) { applicationIdentifier = value == null ? List.of() : List.copyOf(value); }
     }
 
     public Mock getMock() {
