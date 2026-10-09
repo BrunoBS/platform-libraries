@@ -44,7 +44,7 @@ class AuthorizationContextPropagationTest {
                 assertThat(UserContext.get()).containsSame(request);
                 assertThat(MDC.get("correlationId")).isEqualTo("request-id");
             });
-            Runnable failure = AuthorizationContextPropagation.wrap(() -> {
+            Runnable failure = AuthorizationContextPropagation.wrap((Runnable) () -> {
                 throw new IllegalStateException("boom");
             });
             UserContext.clear();
