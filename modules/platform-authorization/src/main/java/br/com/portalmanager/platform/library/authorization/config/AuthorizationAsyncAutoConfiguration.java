@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationContextPropagation;
+import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,7 +33,7 @@ public class AuthorizationAsyncAutoConfiguration {
                 || settings.getQueueCapacity() < 0 || settings.getKeepAlive() == null
                 || settings.getKeepAlive().isNegative() || settings.getThreadNamePrefix() == null
                 || settings.getThreadNamePrefix().isBlank()) {
-            throw new IllegalArgumentException("Invalid platform.authorization.context-propagation executor settings");
+            throw new PlatformConfigurationException(AuthorizationTechnicalErrors.CONTEXT_PROPAGATION_INVALID_SETTINGS);
         }
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setThreadNamePrefix(settings.getThreadNamePrefix());
