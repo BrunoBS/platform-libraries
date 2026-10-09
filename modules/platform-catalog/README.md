@@ -57,6 +57,7 @@ A persistência é igual nos dois modelos; muda somente quem governa quais `code
 CatalogDTO
 IncludedCatalogService
 EnumCatalogService
+AbstractCatalogFacade
 CatalogController
 ```
 
@@ -79,6 +80,7 @@ CatalogEntity
 CatalogRepository
 CatalogDTO
 CatalogController
+AbstractCatalogFacade
 EnumCatalogService | IncludedCatalogService
 CatalogEnum         (somente Enum Catalog)
 AbstractCatalogCode (quando o domínio precisar de um VO de referência)
@@ -93,6 +95,31 @@ de extensão do microserviço consumidor.
 A regra Golden é preferir composição pelos contratos acima e não criar camadas
 intermediárias no microserviço para substituir comportamento já fornecido pela
 library.
+
+## Autorização e Facade
+
+O fluxo obrigatório da API HTTP é `CatalogController → AbstractCatalogFacade → AbstractCatalogService`.
+O controller recebe uma Facade concreta gerenciada pelo Spring e não deve injetar nem chamar
+diretamente serviços de catálogo ou use cases.
+
+Cada catálogo consumidor estende `AbstractCatalogFacade<E>`, injeta seu serviço
+no construtor e registra a Facade como bean Spring. Todos os métodos públicos da
+Facade abstrata exigem `@AuthorizationRequired(level = OWNER, action = ...)`.
+O consumidor pode sobrescrever um método para personalizar a regra, desde que
+declare novamente `@AuthorizationRequired` com `level` e `action` explícitos.
+Métodos sobrescritos sem a anotação não são permitidos pelo contrato.
+
+O Aspect Spring AOP depende de chamadas externas pelo proxy Spring. Não faça
+self-invocation de métodos protegidos para tentar obter uma segunda autorização.
+`super.findAll(...)` dentro de uma sobrescrita executa a lógica delegada,
+mas não representa uma nova autorização; a autorização ocorre na entrada do método.
+
+Os headers esperados são `Authorization`, `correlation-id`,
+`workspace-identifier`, `environment-identifier` e
+`application-identifier`. A ausência de token Bearer ou correlation-id
+é rejeitada pelo Aspect antes de executar o serviço. A migração de consumidores
+é intencionalmente incompatível: o construtor de `CatalogController` recebe
+`AbstractCatalogFacade` em vez de `AbstractCatalogService`.
 
 ## API HTTP padrão
 
