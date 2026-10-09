@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
 import br.com.portalmanager.platform.library.authorization.aop.AuthorizationFacadeAspect;
-import br.com.portalmanager.platform.library.authorization.web.MockAuthorizationInterceptor;
+import br.com.portalmanager.platform.library.authorization.aop.MockAuthorizationFacadeAspect;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationContextCleanupFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -76,19 +76,8 @@ public class PlatformAuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "MOCK")
-    public MockAuthorizationInterceptor mockAuthorizationInterceptor(PlatformAuthorizationProperties properties) {
-        return new MockAuthorizationInterceptor(properties);
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "MOCK")
-    public WebMvcConfigurer mockInterceptorConfigurer(MockAuthorizationInterceptor mockInterceptor) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(mockInterceptor).addPathPatterns("/**");
-            }
-        };
+    public MockAuthorizationFacadeAspect mockAuthorizationFacadeAspect(PlatformAuthorizationProperties properties) {
+        return new MockAuthorizationFacadeAspect(properties);
     }
 
 }
