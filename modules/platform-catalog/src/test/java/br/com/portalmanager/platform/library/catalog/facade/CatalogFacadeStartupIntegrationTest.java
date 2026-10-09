@@ -6,8 +6,7 @@ import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import br.com.portalmanager.platform.library.catalog.service.AbstractCatalogService;
 import br.com.portalmanager.platform.library.catalog.service.IncludedCatalogService;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import java.util.List;
@@ -16,21 +15,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 class CatalogFacadeStartupIntegrationTest {
-    private final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(CatalogFacadePolicyAutoConfiguration.class));
-
     @Test
     void rejectsUnprotectedOverrideDuringSpringStartup() {
-        runner.withUserConfiguration(UnprotectedConfig.class).run(context -> {
-            assertThat(context).hasFailed();
-            assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(IllegalStateException.class);
-            assertThat(context.getStartupFailure()).hasStackTraceContaining("without @AuthorizationRequired");
-        });
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> {
+            try (var context = new AnnotationConfigApplicationContext()) {
+                context.register(CatalogFacadePolicyAutoConfiguration.class, UnprotectedConfig.class);
+                context.refresh();
+            }
+        }).hasRootCauseInstanceOf(IllegalStateException.class)
+          .hasStackTraceContaining("without @AuthorizationRequired");
     }
 
     @Test
     void allowsInheritedProtectedOperationsDuringSpringStartup() {
-        runner.withUserConfiguration(ProtectedConfig.class).run(context -> assertThat(context).hasNotFailed());
+        try (var context = new AnnotationConfigApplicationContext()) {
+            context.register(CatalogFacadePolicyAutoConfiguration.class, ProtectedConfig.class);
+            context.refresh();
+            assertThat(context.isActive()).isTrue();
+        }
     }
 
     static class UnprotectedFacade extends AbstractCatalogFacade<CatalogEntity> {
