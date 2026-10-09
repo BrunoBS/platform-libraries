@@ -5,12 +5,11 @@ import br.com.portalmanager.platform.library.authorization.config.PlatformAuthor
 import br.com.portalmanager.platform.library.authorization.model.AuthorizerGroupParser;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationContext;
 import br.com.portalmanager.platform.library.authorization.model.ParsedGroup;
-import br.com.portalmanager.platform.library.authorization.model.UserContext;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequestContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.slf4j.MDC;
 
 import java.time.Instant;
 import java.util.Set;
@@ -32,21 +31,9 @@ public class MockAuthorizationFacadeAspect {
                 break;
             }
         }
-        UserSession previous = UserContext.get().orElse(null);
-        String correlationId = MDC.get("correlationId");
-        String username = MDC.get("username");
-        try {
-            UserSession session = createSession(properties.getMock());
-            UserContext.set(session);
-            if (context != null && context.correlationId() != null) {
-                MDC.put("correlationId", context.correlationId());
-            }
-            if (session.getUserName() != null) MDC.put("username", session.getUserName());
+        UserSession session = createSession(properties.getMock());
+        try (AuthorizationRequestContext.Scope scope = AuthorizationRequestContext.open(session, context)) {
             return joinPoint.proceed();
-        } finally {
-            UserContext.set(previous);
-            restore("correlationId", correlationId);
-            restore("username", username);
         }
     }
 
@@ -73,8 +60,4 @@ public class MockAuthorizationFacadeAspect {
         return session;
     }
 
-    private static void restore(String key, String value) {
-        if (value == null) MDC.remove(key);
-        else MDC.put(key, value);
-    }
 }
