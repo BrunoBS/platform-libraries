@@ -17,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AuthorizationAsyncAutoConfigurationTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withUserConfiguration(AuthorizationAsyncAutoConfiguration.class);
+            .withUserConfiguration(AuthorizationAsyncAutoConfiguration.class)
+            .withPropertyValues("platform.authorization.mode=MOCK");
 
     @AfterEach
     void cleanup() {
@@ -64,10 +65,10 @@ class AuthorizationAsyncAutoConfigurationTest {
     void usesSpringTaskExecutionPoolSettings() {
         runner.withPropertyValues(
                         "platform.authorization.context-propagation.enabled=true",
-                        "spring.task.execution.pool.core-size=3",
-                        "spring.task.execution.pool.max-size=8",
-                        "spring.task.execution.pool.queue-capacity=25",
-                        "spring.task.execution.thread-name-prefix=custom-async-")
+                        "platform.authorization.context-propagation.core-size=3",
+                        "platform.authorization.context-propagation.max-size=8",
+                        "platform.authorization.context-propagation.queue-capacity=25",
+                        "platform.authorization.context-propagation.thread-name-prefix=custom-async-")
                 .run(context -> {
                     ThreadPoolTaskExecutor executor =
                             context.getBean("authorizationExecutor", ThreadPoolTaskExecutor.class);
@@ -76,6 +77,38 @@ class AuthorizationAsyncAutoConfigurationTest {
                     assertThat(executor.getThreadPoolExecutor().getQueue().remainingCapacity()).isEqualTo(25);
                     assertThat(executor.getThreadNamePrefix()).isEqualTo("custom-async-");
                 });
+    }
+
+    @Test
+    void defaultsAreAvailableWithoutPoolProperties() {
+        runner.withPropertyValues("platform.authorization.context-propagation.enabled=true")
+                .run(context -> {
+                    ThreadPoolTaskExecutor executor =
+                            context.getBean("authorizationExecutor", ThreadPoolTaskExecutor.class);
+                    assertThat(executor.getCorePoolSize()).isEqualTo(4);
+                    assertThat(executor.getMaxPoolSize()).isEqualTo(16);
+                    assertThat(executor.getThreadPoolExecutor().getQueue().remainingCapacity()).isEqualTo(100);
+                    assertThat(context).doesNotHaveBean(org.springframework.scheduling.annotation.AsyncConfigurer.class);
+                });
+    }
+
+    @Test
+    void canSelectDefaultAsyncExecutor() {
+        runner.withPropertyValues(
+                        "platform.authorization.context-propagation.enabled=true",
+                        "platform.authorization.context-propagation.default-executor=true")
+                .run(context -> assertThat(context.getBean(
+                        org.springframework.scheduling.annotation.AsyncConfigurer.class).getAsyncExecutor())
+                        .isSameAs(context.getBean("authorizationExecutor")));
+    }
+
+    @Test
+    void rejectsInvalidPoolSettings() {
+        runner.withPropertyValues(
+                        "platform.authorization.context-propagation.enabled=true",
+                        "platform.authorization.context-propagation.core-size=20",
+                        "platform.authorization.context-propagation.max-size=5")
+                .run(context -> assertThat(context).hasFailed());
     }
 
     @Test
