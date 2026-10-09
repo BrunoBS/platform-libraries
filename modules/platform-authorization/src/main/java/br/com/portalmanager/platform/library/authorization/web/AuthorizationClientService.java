@@ -61,7 +61,7 @@ public class AuthorizationClientService {
                     setIfNotNull(headers, "workspaceIdentifier", request.workspaceIdentifier());
                     setIfNotNull(headers, "environmentIdentifier", request.environmentIdentifier());
                     setIfNotNull(headers, "applicationIdentifier", request.applicationIdentifier());
-                    setIfNotNull(headers, "method", request.method());
+                    setIfNotNull(headers, "action", request.action() == null ? null : request.action().name());
                     if (request.policy() != null) {
                         headers.set("policy", request.policy().name());
                     }
