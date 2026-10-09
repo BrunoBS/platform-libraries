@@ -5,13 +5,12 @@ import br.com.portalmanager.platform.library.authorization.exception.Unauthorize
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationContext;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
-import br.com.portalmanager.platform.library.authorization.model.UserContext;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequestContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.slf4j.MDC;
 
 @Aspect
 public class AuthorizationFacadeAspect {
@@ -37,30 +36,15 @@ public class AuthorizationFacadeAspect {
             throw new UnauthorizedAccessException(AuthorizationMessageKeys.TOKEN_MISSING);
         }
 
-        UserSession previous = UserContext.get().orElse(null);
-        String previousCorrelationId = MDC.get("correlationId");
-        String previousUsername = MDC.get("username");
-        try {
-            UserSession session = client.authorize(new AuthorizationRequest(
-                    context.correlationId(), context.authorization(), context.workspaceIdentifier(),
-                    context.environmentIdentifier(), context.applicationIdentifier(),
-                    required.action(), required.level()));
-            if (session == null) {
-                throw new UnauthorizedAccessException(AuthorizationMessageKeys.SESSION_NOT_FOUND);
-            }
-            UserContext.set(session);
-            MDC.put("correlationId", context.correlationId());
-            if (session.getUserName() != null) MDC.put("username", session.getUserName());
-            return joinPoint.proceed();
-        } finally {
-            UserContext.set(previous);
-            restoreMdc("correlationId", previousCorrelationId);
-            restoreMdc("username", previousUsername);
+        UserSession session = client.authorize(new AuthorizationRequest(
+                context.correlationId(), context.authorization(), context.workspaceIdentifier(),
+                context.environmentIdentifier(), context.applicationIdentifier(),
+                required.action(), required.level()));
+        if (session == null) {
+            throw new UnauthorizedAccessException(AuthorizationMessageKeys.SESSION_NOT_FOUND);
         }
-    }
-
-    private static void restoreMdc(String key, String previous) {
-        if (previous == null) MDC.remove(key);
-        else MDC.put(key, previous);
+        try (AuthorizationRequestContext.Scope scope = AuthorizationRequestContext.open(session, context)) {
+            return joinPoint.proceed();
+        }
     }
 }
