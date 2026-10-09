@@ -87,7 +87,7 @@ class PlatformAuthorizationAutoConfigurationTest {
         contextRunner.withPropertyValues("platform.authorization.mode=MOCK")
                 .run(context -> {
                     assertThat(context).hasFailed();
-                    assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
+                    assertThat(context.getStartupFailure()).isInstanceOf(PlatformConfigurationException.class);
                 });
     }
 
@@ -97,7 +97,7 @@ class PlatformAuthorizationAutoConfigurationTest {
                 .withInitializer(ctx -> ctx.getEnvironment().setActiveProfiles("prod"))
                 .run(context -> {
                     assertThat(context).hasFailed();
-                    assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
+                    assertThat(context.getStartupFailure()).isInstanceOf(PlatformConfigurationException.class);
                 });
     }
 
@@ -107,7 +107,7 @@ class PlatformAuthorizationAutoConfigurationTest {
                 .withInitializer(ctx -> ctx.getEnvironment().setActiveProfiles("local", "prod"))
                 .run(context -> {
                     assertThat(context).hasFailed();
-                    assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
+                    assertThat(context.getStartupFailure()).isInstanceOf(PlatformConfigurationException.class);
                 });
     }
 
