@@ -79,7 +79,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
                 pathVariable(pathVariables, policy.workspacePathVariable()),
                 pathVariable(pathVariables, policy.environmentPathVariable()),
                 pathVariable(pathVariables, policy.applicationPathVariable()),
-                request.getMethod(),
+                br.com.portalmanager.platform.library.authorization.model.AuthorizationAction.READ,
                 policy.level()
         );
     }
