@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.authorization.web;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -14,8 +15,14 @@ import java.util.List;
 @ConditionalOnClass(WebMvcConfigurer.class)
 public class AuthorizationWebMvcAutoConfiguration implements WebMvcConfigurer {
 
+    private final PlatformAuthorizationProperties properties;
+
+    public AuthorizationWebMvcAutoConfiguration(PlatformAuthorizationProperties properties) {
+        this.properties = properties;
+    }
+
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new AuthorizationContextResolver());
+        resolvers.add(new AuthorizationContextResolver(properties));
     }
 }
