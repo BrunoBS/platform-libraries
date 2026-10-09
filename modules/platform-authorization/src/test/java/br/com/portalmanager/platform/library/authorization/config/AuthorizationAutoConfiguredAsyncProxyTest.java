@@ -23,6 +23,7 @@ class AuthorizationAutoConfiguredAsyncProxyTest {
             .withConfiguration(AutoConfigurations.of(PlatformAuthorizationAutoConfiguration.class,
                     AuthorizationAsyncAutoConfiguration.class))
             .withUserConfiguration(AsyncBeans.class)
+            .withInitializer(context -> context.getEnvironment().setActiveProfiles("test"))
             .withPropertyValues("platform.authorization.mode=MOCK");
 
     @AfterEach void cleanup() { UserContext.clear(); MDC.clear(); }
