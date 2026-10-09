@@ -27,6 +27,23 @@ class AuthorizationAsyncAutoConfigurationTest {
     }
 
     @Test
+    void rejectsDefaultExecutorWhenPropagationDisabled() {
+        new ApplicationContextRunner()
+                .withUserConfiguration(PlatformAuthorizationAutoConfiguration.class,
+                        AuthorizationAsyncAutoConfiguration.class)
+                .withPropertyValues(
+                        "platform.authorization.mode=MOCK",
+                        "platform.authorization.context-propagation.enabled=false",
+                        "platform.authorization.context-propagation.default-executor=true")
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .hasRootCauseInstanceOf(
+                                    br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException.class);
+                });
+    }
+
+    @Test
     void disabledByDefault() {
         runner.run(context -> assertThat(context).doesNotHaveBean("authorizationExecutor"));
     }
