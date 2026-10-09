@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.authorization.config.PlatformAuthor
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
-import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
+import br.com.portalmanager.platform.library.authorization.client.AuthorizationClient;
 import br.com.portalmanager.platform.library.authorization.aop.AuthorizationFacadeAspect;
 import br.com.portalmanager.platform.library.authorization.aop.MockAuthorizationFacadeAspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -31,7 +31,7 @@ public class PlatformAuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
-    public AuthorizationClientService authorizationClientService(
+    public AuthorizationClient authorizationClient(
             RestClient.Builder builder,
             PlatformAuthorizationProperties properties) {
 
@@ -50,7 +50,7 @@ public class PlatformAuthorizationAutoConfiguration {
         RestClient.Builder authorizationBuilder = builder.clone()
                 .requestFactory(requestFactory);
 
-        return new AuthorizationClientService(
+        return new AuthorizationClient(
                 authorizationBuilder,
                 authUrl,
                 properties.getRetry()
@@ -60,7 +60,7 @@ public class PlatformAuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
-    public AuthorizationFacadeAspect authorizationFacadeAspect(AuthorizationClientService clientService) {
+    public AuthorizationFacadeAspect authorizationFacadeAspect(AuthorizationClient clientService) {
         return new AuthorizationFacadeAspect(clientService);
     }
 
