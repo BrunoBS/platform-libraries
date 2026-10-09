@@ -119,6 +119,13 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
+    void shouldAllowMockWithDevProfile() {
+        contextRunner.withPropertyValues("platform.authorization.mode=MOCK")
+                .withInitializer(ctx -> ctx.getEnvironment().setActiveProfiles("dev"))
+                .run(context -> assertThat(context).hasSingleBean(MockAuthorizationFacadeAspect.class));
+    }
+
+    @Test
     void shouldKeepUserAuthorizationMetadataRegistry() {
         contextRunner.withUserConfiguration(InfrastructureConfiguration.class, CustomRegistryConfiguration.class)
                 .withPropertyValues("platform.authorization.mode=REAL", "platform.authorization.service-url=http://localhost")
