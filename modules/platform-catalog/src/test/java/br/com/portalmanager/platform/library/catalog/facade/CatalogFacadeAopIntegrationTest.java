@@ -7,6 +7,7 @@ import br.com.portalmanager.platform.library.authorization.model.*;
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import br.com.portalmanager.platform.library.catalog.service.AbstractCatalogService;
+import br.com.portalmanager.platform.library.catalog.service.IncludedCatalogService;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -95,7 +96,7 @@ class CatalogFacadeAopIntegrationTest {
         @Bean
         @SuppressWarnings("unchecked")
         AbstractCatalogService<CatalogEntity> catalogService() {
-            return mock(AbstractCatalogService.class);
+            return mock(IncludedCatalogService.class);
         }
 
         @Bean StandardFacade standardFacade(AbstractCatalogService<CatalogEntity> service) {
