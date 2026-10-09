@@ -1,0 +1,84 @@
+package br.com.portalmanager.platform.library.authorization.config;
+
+import br.com.portalmanager.platform.library.authorization.model.UserContext;
+import br.com.portalmanager.platform.library.authorization.model.UserSession;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class AuthorizationAsyncAutoConfigurationTest {
+
+    private final ApplicationContextRunner runner = new ApplicationContextRunner()
+            .withUserConfiguration(AuthorizationAsyncAutoConfiguration.class);
+
+    @AfterEach
+    void cleanup() {
+        UserContext.clear();
+        MDC.clear();
+    }
+
+    @Test
+    void disabledByDefault() {
+        runner.run(context -> assertThat(context).doesNotHaveBean("authorizationExecutor"));
+    }
+
+    @Test
+    void disabledExplicitly() {
+        runner.withPropertyValues("platform.authorization.context-propagation.enabled=false")
+                .run(context -> assertThat(context).doesNotHaveBean("authorizationExecutor"));
+    }
+
+    @Test
+    void enabledExecutorPropagatesAndRestoresContext() {
+        runner.withPropertyValues("platform.authorization.context-propagation.enabled=true")
+                .run(context -> {
+                    assertThat(context).hasBean("authorizationContextTaskDecorator");
+                    ThreadPoolTaskExecutor executor = context.getBean("authorizationExecutor", ThreadPoolTaskExecutor.class);
+                    UserSession session = new UserSession();
+                    session.setUserName("alice");
+                    UserContext.set(session);
+                    MDC.put("correlationId", "request-1");
+                    var future = executor.submit(() -> {
+                        assertThat(UserContext.get()).containsSame(session);
+                        assertThat(MDC.get("correlationId")).isEqualTo("request-1");
+                    });
+                    future.get(5, TimeUnit.SECONDS);
+                    UserContext.clear();
+                    MDC.clear();
+                    executor.submit(() -> {
+                        assertThat(UserContext.get()).isEmpty();
+                        assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
+                    }).get(5, TimeUnit.SECONDS);
+                });
+    }
+
+    @Test
+    void preservesApplicationProvidedExecutor() {
+        runner.withPropertyValues("platform.authorization.context-propagation.enabled=true")
+                .withUserConfiguration(CustomExecutor.class)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(ThreadPoolTaskExecutor.class);
+                    assertThat(context.getBean("authorizationExecutor"))
+                            .isSameAs(context.getBean(CustomExecutor.class).executor);
+                });
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class CustomExecutor {
+        private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        @Bean("authorizationExecutor")
+        ThreadPoolTaskExecutor authorizationExecutor() {
+            executor.initialize();
+            return executor;
+        }
+    }
+}
