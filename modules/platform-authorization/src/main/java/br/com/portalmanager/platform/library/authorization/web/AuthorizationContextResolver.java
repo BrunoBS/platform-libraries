@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.authorization.web;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationContext;
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import java.util.Objects;
+import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -32,19 +33,26 @@ public final class AuthorizationContextResolver implements HandlerMethodArgument
             throw new IllegalStateException("AuthorizationContext requires an HTTP servlet request");
         }
         return new AuthorizationContext(
-                header(request, headers.getCorrelationId(), headers.getCorrelationIdAlternative()),
-                header(request, headers.getAuthorization(), headers.getAuthorizationAlternative()),
-                header(request, headers.getWorkspaceIdentifier(), headers.getWorkspaceIdentifierAlternative()),
-                header(request, headers.getEnvironmentIdentifier(), headers.getEnvironmentIdentifierAlternative()),
-                header(request, headers.getApplicationIdentifier(), headers.getApplicationIdentifierAlternative()),
+                header(request, headers.getCorrelationId()),
+                header(request, headers.getAuthorization()),
+                header(request, headers.getWorkspaceIdentifier()),
+                header(request, headers.getEnvironmentIdentifier()),
+                header(request, headers.getApplicationIdentifier()),
                 request.getRemoteAddr(),
                 request.getHeader("user-agent"),
                 request.getRequestURI());
     }
 
-    private static String header(HttpServletRequest request, String primary, String alternative) {
-        String value = request.getHeader(primary);
-        return value != null || alternative == null || alternative.isBlank()
-                ? value : request.getHeader(alternative);
+    private static String header(HttpServletRequest request, List<String> names) {
+        for (String name : names) {
+            if (name == null || name.isBlank()) {
+                continue;
+            }
+            String value = request.getHeader(name);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 }
