@@ -14,7 +14,7 @@ import java.util.Map;
 import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 class CatalogControllerMvcIntegrationTest {
     @RestController
@@ -37,7 +37,7 @@ class CatalogControllerMvcIntegrationTest {
         mvc.perform(get("/catalog").header("correlation-id", "trace")
                         .header("authorization", "Bearer token")
                         .header("X-Workspace-Id", "workspace-42"))
-                .andExpect(status().isOk());
+                .andDo(result -> org.assertj.core.api.Assertions.assertThat(result.getResponse().getStatus()).isEqualTo(200));
 
         verify(facade).findAll(argThat((AuthorizationContext context) ->
                 "workspace-42".equals(context.workspaceIdentifier())
