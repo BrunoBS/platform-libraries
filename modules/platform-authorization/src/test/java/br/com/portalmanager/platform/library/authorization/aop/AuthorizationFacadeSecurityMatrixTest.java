@@ -32,7 +32,7 @@ class AuthorizationFacadeSecurityMatrixTest {
             verify(client).authorize(argThat(r -> r.policy() == AuthorizationLevel.TST && r.action() == AuthorizationAction.UPDATE));
             verify(client).authorize(argThat(r -> r.policy() == AuthorizationLevel.ADM && r.action() == AuthorizationAction.DELETE));
             verify(client).authorize(argThat(r -> r.policy() == AuthorizationLevel.OWNER && r.action() == AuthorizationAction.RESTORE));
-            assertThat(facade.executions).isEqualTo(5);
+            assertThat(facade.executionCount()).isEqualTo(5);
         }
     }
 
@@ -42,7 +42,7 @@ class AuthorizationFacadeSecurityMatrixTest {
             var client = context.getBean(AuthorizationClient.class);
             when(client.authorize(any())).thenReturn(null);
             assertThatThrownBy(() -> facade.open(valid())).isInstanceOf(RuntimeException.class);
-            assertThat(facade.executions).isZero();
+            assertThat(facade.executionCount()).isZero();
             assertThat(UserContext.get()).isEmpty();
         }
     }
@@ -55,7 +55,7 @@ class AuthorizationFacadeSecurityMatrixTest {
             assertThatThrownBy(() -> facade.open(valid())).isInstanceOf(IllegalStateException.class);
             assertThatThrownBy(() -> facade.dev(valid())).isInstanceOf(IllegalStateException.class);
             assertThatThrownBy(() -> facade.owner(valid())).isInstanceOf(IllegalStateException.class);
-            assertThat(facade.executions).isZero();
+            assertThat(facade.executionCount()).isZero();
         }
     }
 
@@ -66,7 +66,7 @@ class AuthorizationFacadeSecurityMatrixTest {
             assertThatThrownBy(() -> facade.open(new AuthorizationContext("id", "", null, null, null)))
                     .isInstanceOf(RuntimeException.class);
             verifyNoInteractions(client);
-            assertThat(facade.executions).isZero();
+            assertThat(facade.executionCount()).isZero();
         }
     }
 
@@ -76,6 +76,7 @@ class AuthorizationFacadeSecurityMatrixTest {
 
     public static class Facade {
         int executions;
+        public int executionCount() { return executions; }
         private void executed() { executions++; }
         @AuthorizationRequired(level = AuthorizationLevel.OPEN, action = AuthorizationAction.READ)
         public void open(AuthorizationContext context) { executed(); }
