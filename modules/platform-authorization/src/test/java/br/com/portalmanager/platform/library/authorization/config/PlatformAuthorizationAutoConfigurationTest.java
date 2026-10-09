@@ -73,13 +73,49 @@ class PlatformAuthorizationAutoConfigurationTest {
     @Test
     void shouldLoadMockAspectWithoutRealClient() {
         contextRunner.withUserConfiguration(InfrastructureConfiguration.class)
-                .withPropertyValues("platform.authorization.mode=MOCK")
+                .withPropertyValues("platform.authorization.mode=MOCK").withInitializer(ctx -> ctx.getEnvironment().setActiveProfiles("test"))
                 .run(context -> {
                     assertThat(context).hasSingleBean(AuthorizationMetadataRegistry.class);
                     assertThat(context).hasSingleBean(MockAuthorizationFacadeAspect.class);
                     assertThat(context).doesNotHaveBean(AuthorizationClient.class);
                     assertThat(context).doesNotHaveBean(AuthorizationFacadeAspect.class);
                 });
+    }
+
+    @Test
+    void shouldRejectMockWithoutActiveProfile() {
+        contextRunner.withPropertyValues("platform.authorization.mode=MOCK")
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
+                });
+    }
+
+    @Test
+    void shouldRejectMockInProduction() {
+        contextRunner.withPropertyValues("platform.authorization.mode=MOCK")
+                .withInitializer(ctx -> ctx.getEnvironment().setActiveProfiles("prod"))
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
+                });
+    }
+
+    @Test
+    void shouldRejectMockWithMixedProfiles() {
+        contextRunner.withPropertyValues("platform.authorization.mode=MOCK")
+                .withInitializer(ctx -> ctx.getEnvironment().setActiveProfiles("local", "prod"))
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(PlatformConfigurationException.class);
+                });
+    }
+
+    @Test
+    void shouldAllowMockWithLocalProfile() {
+        contextRunner.withPropertyValues("platform.authorization.mode=MOCK")
+                .withInitializer(ctx -> ctx.getEnvironment().setActiveProfiles("local"))
+                .run(context -> assertThat(context).hasSingleBean(MockAuthorizationFacadeAspect.class));
     }
 
     @Test
