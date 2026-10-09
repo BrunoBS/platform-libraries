@@ -28,6 +28,14 @@ public final class AuthorizationTechnicalErrors {
                     500
             );
 
+    public static final PlatformErrorDefinition MOCK_MODE_FORBIDDEN =
+            new PlatformErrorDefinition(
+                    "PLT-AUTH-004",
+                    "Authorization MOCK mode is only permitted with exclusively local or test Spring profiles",
+                    "Use REAL mode outside local/test. Do not activate MOCK in deployed environments.",
+                    500
+            );
+
     private AuthorizationTechnicalErrors() {
     }
 }
