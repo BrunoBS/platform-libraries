@@ -32,14 +32,19 @@ public final class AuthorizationContextResolver implements HandlerMethodArgument
             throw new IllegalStateException("AuthorizationContext requires an HTTP servlet request");
         }
         return new AuthorizationContext(
-                request.getHeader(headers.getCorrelationId()),
-                request.getHeader(headers.getAuthorization()),
-                request.getHeader(headers.getWorkspaceIdentifier()),
-                request.getHeader(headers.getEnvironmentIdentifier()),
-                request.getHeader(headers.getApplicationIdentifier()),
+                header(request, headers.getCorrelationId(), headers.getCorrelationIdAlternative()),
+                header(request, headers.getAuthorization(), headers.getAuthorizationAlternative()),
+                header(request, headers.getWorkspaceIdentifier(), headers.getWorkspaceIdentifierAlternative()),
+                header(request, headers.getEnvironmentIdentifier(), headers.getEnvironmentIdentifierAlternative()),
+                header(request, headers.getApplicationIdentifier(), headers.getApplicationIdentifierAlternative()),
                 request.getRemoteAddr(),
                 request.getHeader("user-agent"),
                 request.getRequestURI());
     }
 
+    private static String header(HttpServletRequest request, String primary, String alternative) {
+        String value = request.getHeader(primary);
+        return value != null || alternative == null || alternative.isBlank()
+                ? value : request.getHeader(alternative);
+    }
 }
