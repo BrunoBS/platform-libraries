@@ -67,7 +67,7 @@ class AuthorizationContextResolverTest {
     @Test
     void usesAlternateHeaderOnlyWhenPrimaryIsMissing() throws Exception {
         var properties = new PlatformAuthorizationProperties();
-        properties.getHeaders().setWorkspaceIdentifier("X-Workspace-Id");
+        properties.getHeaders().setWorkspaceIdentifier(List.of("X-Workspace-Id", "workspace-identifier"));
         var request = new MockHttpServletRequest("GET", "/catalog");
         request.addHeader("workspace-identifier", "fallback");
         var resolver = new AuthorizationContextResolver(properties);
