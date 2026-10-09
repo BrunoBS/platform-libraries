@@ -63,4 +63,25 @@ class AuthorizationContextResolverTest {
         assertThat(context.workspaceIdentifier()).isEqualTo("custom-workspace");
     }
 
+    @Test
+    void usesAlternateHeaderOnlyWhenPrimaryIsMissing() throws Exception {
+        var properties = new PlatformAuthorizationProperties();
+        properties.getHeaders().setWorkspaceIdentifier("X-Workspace-Id");
+        properties.getHeaders().setWorkspaceIdentifierAlternative("workspace-identifier");
+        var request = new MockHttpServletRequest("GET", "/catalog");
+        request.addHeader("workspace-identifier", "fallback");
+        var resolver = new AuthorizationContextResolver(properties);
+        var parameter = new MethodParameter(getClass().getDeclaredMethod("endpoint", AuthorizationContext.class), 0);
+
+        var context = (AuthorizationContext) resolver.resolveArgument(
+                parameter, null, new ServletWebRequest(request), null);
+
+        assertThat(context.workspaceIdentifier()).isEqualTo("fallback");
+
+        request.addHeader("X-Workspace-Id", "primary");
+        context = (AuthorizationContext) resolver.resolveArgument(
+                parameter, null, new ServletWebRequest(request), null);
+        assertThat(context.workspaceIdentifier()).isEqualTo("primary");
+    }
+
 }
