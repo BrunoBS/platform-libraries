@@ -27,8 +27,9 @@ class AuthorizationContextPropagationTest {
         });
         UserContext.clear();
         MDC.clear();
-        Thread thread = Thread.ofVirtual().start(task);
-        thread.join();
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            executor.submit(task).get();
+        }
         assertThat(UserContext.get()).isEmpty();
         assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
     }
