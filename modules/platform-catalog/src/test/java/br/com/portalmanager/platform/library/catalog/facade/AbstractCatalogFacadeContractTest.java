@@ -68,6 +68,26 @@ class AbstractCatalogFacadeContractTest {
         assertThat(required.level()).isEqualTo(AuthorizationLevel.DEV);
     }
 
+    @Test
+    void rejectsOverrideWithoutAuthorizationPolicy() {
+        @SuppressWarnings("unchecked")
+        AbstractCatalogService<CatalogEntity> service = mock(IncludedCatalogService.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                () -> CatalogFacadePolicyValidator.validate(new UnprotectedFacade(service)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("without @AuthorizationRequired");
+        CatalogFacadePolicyValidator.validate(new SampleFacade(service));
+        CatalogFacadePolicyValidator.validate(new CustomizedFacade(service));
+    }
+
+    static class UnprotectedFacade extends SampleFacade {
+        UnprotectedFacade(AbstractCatalogService<CatalogEntity> service) { super(service); }
+        @Override
+        public List<CatalogDTO> findAll(AuthorizationContext context, Map<String, String> filters) {
+            return super.findAll(context, filters);
+        }
+    }
+
     static class SampleFacade extends AbstractCatalogFacade<CatalogEntity> {
         SampleFacade(AbstractCatalogService<CatalogEntity> service) {
             super(service);
