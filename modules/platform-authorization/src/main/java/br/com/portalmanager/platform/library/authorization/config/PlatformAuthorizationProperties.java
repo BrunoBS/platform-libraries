@@ -64,21 +64,33 @@ public class PlatformAuthorizationProperties {
 
     public static class Headers {
         private String correlationId = "correlation-id";
+        private String correlationIdAlternative = "correlationid";
         private String authorization = "authorization";
         private String workspaceIdentifier = "workspace-identifier";
+        private String workspaceIdentifierAlternative = "workspaceidentifier";
         private String environmentIdentifier = "environment-identifier";
+        private String environmentIdentifierAlternative = "environmentidentifier";
         private String applicationIdentifier = "application-identifier";
+        private String applicationIdentifierAlternative = "applicationidentifier";
 
         public String getCorrelationId() { return correlationId; }
         public void setCorrelationId(String value) { correlationId = value; }
+        public String getCorrelationIdAlternative() { return correlationIdAlternative; }
+        public void setCorrelationIdAlternative(String value) { correlationIdAlternative = value; }
         public String getAuthorization() { return authorization; }
         public void setAuthorization(String value) { authorization = value; }
         public String getWorkspaceIdentifier() { return workspaceIdentifier; }
         public void setWorkspaceIdentifier(String value) { workspaceIdentifier = value; }
+        public String getWorkspaceIdentifierAlternative() { return workspaceIdentifierAlternative; }
+        public void setWorkspaceIdentifierAlternative(String value) { workspaceIdentifierAlternative = value; }
         public String getEnvironmentIdentifier() { return environmentIdentifier; }
         public void setEnvironmentIdentifier(String value) { environmentIdentifier = value; }
+        public String getEnvironmentIdentifierAlternative() { return environmentIdentifierAlternative; }
+        public void setEnvironmentIdentifierAlternative(String value) { environmentIdentifierAlternative = value; }
         public String getApplicationIdentifier() { return applicationIdentifier; }
         public void setApplicationIdentifier(String value) { applicationIdentifier = value; }
+        public String getApplicationIdentifierAlternative() { return applicationIdentifierAlternative; }
+        public void setApplicationIdentifierAlternative(String value) { applicationIdentifierAlternative = value; }
     }
 
     public Mock getMock() {
