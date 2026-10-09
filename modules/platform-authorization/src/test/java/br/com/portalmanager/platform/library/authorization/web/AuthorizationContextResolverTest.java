@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.authorization.web;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationContext;
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import org.junit.jupiter.api.Test;
+import java.util.List;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -50,7 +51,7 @@ class AuthorizationContextResolverTest {
     @Test
     void honorsApplicationWideCustomHeaderNames() throws Exception {
         var properties = new PlatformAuthorizationProperties();
-        properties.getHeaders().setWorkspaceIdentifier("X-Workspace-Id");
+        properties.getHeaders().setWorkspaceIdentifier(List.of("X-Workspace-Id", "workspace-identifier"));
         var request = new MockHttpServletRequest("GET", "/catalog");
         request.addHeader("X-Workspace-Id", "custom-workspace");
         request.addHeader("workspace-identifier", "ignored-workspace");
@@ -67,7 +68,6 @@ class AuthorizationContextResolverTest {
     void usesAlternateHeaderOnlyWhenPrimaryIsMissing() throws Exception {
         var properties = new PlatformAuthorizationProperties();
         properties.getHeaders().setWorkspaceIdentifier("X-Workspace-Id");
-        properties.getHeaders().setWorkspaceIdentifierAlternative("workspace-identifier");
         var request = new MockHttpServletRequest("GET", "/catalog");
         request.addHeader("workspace-identifier", "fallback");
         var resolver = new AuthorizationContextResolver(properties);
