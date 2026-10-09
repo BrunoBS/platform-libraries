@@ -22,7 +22,7 @@ class CatalogFacadeStartupIntegrationTest {
                 context.register(CatalogFacadePolicyAutoConfiguration.class, UnprotectedConfig.class);
                 context.refresh();
             }
-        }).hasRootCauseInstanceOf(IllegalStateException.class)
+        }).isInstanceOf(IllegalStateException.class)
           .hasStackTraceContaining("without @AuthorizationRequired");
     }
 
