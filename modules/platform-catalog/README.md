@@ -107,7 +107,7 @@ no construtor e registra a Facade como bean Spring. Todos os métodos públicos 
 Facade abstrata exigem `@AuthorizationRequired(level = OWNER, action = ...)`.
 O consumidor pode sobrescrever um método para personalizar a regra, desde que
 declare novamente `@AuthorizationRequired` com `level` e `action` explícitos.
-Métodos sobrescritos sem a anotação não são permitidos pelo contrato.
+Métodos sobrescritos sem a anotação não são permitidos pelo contrato. A library valida\nessas sobrescritas na inicialização do Spring e impede o startup quando falta\n`@AuthorizationRequired`.
 
 O Aspect Spring AOP depende de chamadas externas pelo proxy Spring. Não faça
 self-invocation de métodos protegidos para tentar obter uma segunda autorização.
@@ -117,7 +117,29 @@ mas não representa uma nova autorização; a autorização ocorre na entrada do
 Os headers esperados são `Authorization`, `correlation-id`,
 `workspace-identifier`, `environment-identifier` e
 `application-identifier`. A ausência de token Bearer ou correlation-id
-é rejeitada pelo Aspect antes de executar o serviço. A migração de consumidores
+é rejeitada pelo Aspect antes de executar o serviço.
+
+### Aliases de headers
+
+Os nomes dos headers são configurados globalmente em `platform.authorization.headers`.
+Cada propriedade aceita uma lista ordenada; o primeiro header presente prevalece.
+Quando mais de um alias é enviado, **a ordem configurada define a prioridade**,
+inclusive se os valores forem diferentes.
+
+```yaml
+platform:
+  authorization:
+    headers:
+      correlation-id: correlation-id,X-Correlation-Id,correlationid
+      authorization: authorization
+      workspace-identifier: workspace-identifier,X-Workspace-Id,workspaceId
+      environment-identifier: environment-identifier,environmentId
+      application-identifier: application-identifier,applicationId
+```
+
+Também é possível usar uma sequência YAML (`- nome-do-header`). Quando uma
+propriedade é informada, sua lista substitui os aliases padrão daquela propriedade.
+A configuração vale para todos os controllers que utilizam o resolver da library. A migração de consumidores
 é intencionalmente incompatível: o construtor de `CatalogController` recebe
 `AbstractCatalogFacade` em vez de `AbstractCatalogService`.
 
