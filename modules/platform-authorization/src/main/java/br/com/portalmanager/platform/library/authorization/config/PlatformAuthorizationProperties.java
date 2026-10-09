@@ -66,6 +66,7 @@ public class PlatformAuthorizationProperties {
         private String correlationId = "correlation-id";
         private String correlationIdAlternative = "correlationid";
         private String authorization = "authorization";
+        private String authorizationAlternative;
         private String workspaceIdentifier = "workspace-identifier";
         private String workspaceIdentifierAlternative = "workspaceidentifier";
         private String environmentIdentifier = "environment-identifier";
@@ -79,6 +80,8 @@ public class PlatformAuthorizationProperties {
         public void setCorrelationIdAlternative(String value) { correlationIdAlternative = value; }
         public String getAuthorization() { return authorization; }
         public void setAuthorization(String value) { authorization = value; }
+        public String getAuthorizationAlternative() { return authorizationAlternative; }
+        public void setAuthorizationAlternative(String value) { authorizationAlternative = value; }
         public String getWorkspaceIdentifier() { return workspaceIdentifier; }
         public void setWorkspaceIdentifier(String value) { workspaceIdentifier = value; }
         public String getWorkspaceIdentifierAlternative() { return workspaceIdentifierAlternative; }
