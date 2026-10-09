@@ -7,16 +7,16 @@ import br.com.portalmanager.platform.library.authorization.model.AuthorizationCo
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequestContext;
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
-import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
+import br.com.portalmanager.platform.library.authorization.client.AuthorizationClient;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 
 @Aspect
 public class AuthorizationFacadeAspect {
-    private final AuthorizationClientService client;
+    private final AuthorizationClient client;
 
-    public AuthorizationFacadeAspect(AuthorizationClientService client) {
+    public AuthorizationFacadeAspect(AuthorizationClient client) {
         this.client = client;
     }
 
