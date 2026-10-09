@@ -16,6 +16,7 @@ public class PlatformAuthorizationProperties {
     private Duration readTimeout = Duration.ofSeconds(2);
     private Retry retry = new Retry();
     private Mock mock = new Mock();
+    private Headers headers = new Headers();
     private ContextPropagation contextPropagation = new ContextPropagation();
 
     public AuthorizationMode getMode() {
@@ -56,6 +57,28 @@ public class PlatformAuthorizationProperties {
 
     public void setRetry(Retry retry) {
         this.retry = retry == null ? new Retry() : retry;
+    }
+
+    public Headers getHeaders() { return headers; }
+    public void setHeaders(Headers headers) { this.headers = headers == null ? new Headers() : headers; }
+
+    public static class Headers {
+        private String correlationId = "correlation-id";
+        private String authorization = "authorization";
+        private String workspaceIdentifier = "workspace-identifier";
+        private String environmentIdentifier = "environment-identifier";
+        private String applicationIdentifier = "application-identifier";
+
+        public String getCorrelationId() { return correlationId; }
+        public void setCorrelationId(String value) { correlationId = value; }
+        public String getAuthorization() { return authorization; }
+        public void setAuthorization(String value) { authorization = value; }
+        public String getWorkspaceIdentifier() { return workspaceIdentifier; }
+        public void setWorkspaceIdentifier(String value) { workspaceIdentifier = value; }
+        public String getEnvironmentIdentifier() { return environmentIdentifier; }
+        public void setEnvironmentIdentifier(String value) { environmentIdentifier = value; }
+        public String getApplicationIdentifier() { return applicationIdentifier; }
+        public void setApplicationIdentifier(String value) { applicationIdentifier = value; }
     }
 
     public Mock getMock() {
