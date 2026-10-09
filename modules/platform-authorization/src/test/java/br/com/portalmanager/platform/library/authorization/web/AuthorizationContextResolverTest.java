@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.authorization.web;
 
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationContext;
+import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -24,7 +25,7 @@ class AuthorizationContextResolverTest {
         request.addHeader("User-Agent", "agent");
         request.setRemoteAddr("127.0.0.1");
 
-        var resolver = new AuthorizationContextResolver();
+        var resolver = new AuthorizationContextResolver(new PlatformAuthorizationProperties());
         var parameter = new MethodParameter(getClass().getDeclaredMethod("endpoint", AuthorizationContext.class), 0);
         assertThat(resolver.supportsParameter(parameter)).isTrue();
 
@@ -39,11 +40,27 @@ class AuthorizationContextResolverTest {
     @Test
     void missingHeadersRemainNull() throws Exception {
         var request = new MockHttpServletRequest("GET", "/catalog");
-        var resolver = new AuthorizationContextResolver();
+        var resolver = new AuthorizationContextResolver(new PlatformAuthorizationProperties());
         var parameter = new MethodParameter(getClass().getDeclaredMethod("endpoint", AuthorizationContext.class), 0);
         var context = (AuthorizationContext) resolver.resolveArgument(
                 parameter, null, new ServletWebRequest(request), null);
         assertThat(context.authorization()).isNull();
         assertThat(context.uri()).isEqualTo("/catalog");
     }
+    @Test
+    void honorsApplicationWideCustomHeaderNames() throws Exception {
+        var properties = new PlatformAuthorizationProperties();
+        properties.getHeaders().setWorkspaceIdentifier("X-Workspace-Id");
+        var request = new MockHttpServletRequest("GET", "/catalog");
+        request.addHeader("X-Workspace-Id", "custom-workspace");
+        request.addHeader("workspace-identifier", "ignored-workspace");
+        var resolver = new AuthorizationContextResolver(properties);
+        var parameter = new MethodParameter(getClass().getDeclaredMethod("endpoint", AuthorizationContext.class), 0);
+
+        var context = (AuthorizationContext) resolver.resolveArgument(
+                parameter, null, new ServletWebRequest(request), null);
+
+        assertThat(context.workspaceIdentifier()).isEqualTo("custom-workspace");
+    }
+
 }
