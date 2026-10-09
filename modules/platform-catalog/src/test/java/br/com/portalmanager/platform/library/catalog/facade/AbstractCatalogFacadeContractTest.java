@@ -7,6 +7,7 @@ import br.com.portalmanager.platform.library.authorization.model.AuthorizationLe
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import br.com.portalmanager.platform.library.catalog.service.AbstractCatalogService;
+import br.com.portalmanager.platform.library.catalog.service.IncludedCatalogService;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Modifier;
@@ -45,7 +46,7 @@ class AbstractCatalogFacadeContractTest {
     @Test
     void facadeDelegatesToExistingService() {
         @SuppressWarnings("unchecked")
-        AbstractCatalogService<CatalogEntity> service = mock(AbstractCatalogService.class);
+        AbstractCatalogService<CatalogEntity> service = mock(IncludedCatalogService.class);
         var facade = new SampleFacade(service);
         var context = new AuthorizationContext("correlation", "Bearer token", null, null, null);
         facade.findAll(context, Map.of("active", "true"));
