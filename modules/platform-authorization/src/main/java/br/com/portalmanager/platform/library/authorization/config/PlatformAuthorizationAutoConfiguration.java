@@ -7,7 +7,6 @@ import br.com.portalmanager.platform.library.authorization.config.AuthorizationM
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
 import br.com.portalmanager.platform.library.authorization.aop.AuthorizationFacadeAspect;
 import br.com.portalmanager.platform.library.authorization.aop.MockAuthorizationFacadeAspect;
-import br.com.portalmanager.platform.library.authorization.web.AuthorizationContextCleanupFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,8 +16,6 @@ import org.springframework.web.client.RestClient;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
 import java.net.http.HttpClient;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @AutoConfiguration
@@ -29,12 +26,6 @@ public class PlatformAuthorizationAutoConfiguration {
     @ConditionalOnMissingBean
     public AuthorizationMetadataRegistry authorizationMetadataRegistry() {
         return new AuthorizationMetadataRegistry();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public AuthorizationContextCleanupFilter authorizationContextCleanupFilter() {
-        return new AuthorizationContextCleanupFilter();
     }
 
     @Bean
