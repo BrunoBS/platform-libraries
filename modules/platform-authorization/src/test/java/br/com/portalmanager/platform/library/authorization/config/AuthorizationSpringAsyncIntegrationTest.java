@@ -78,7 +78,7 @@ class AuthorizationSpringAsyncIntegrationTest {
 
     @Configuration(proxyBeanMethods = false)
     @EnableAsync
-    static class AsyncConfig implements org.springframework.scheduling.annotation.AsyncConfigurer {
+    static class AsyncConfig {
         @Bean("authorizationExecutor")
         ThreadPoolTaskExecutor executor() {
             var executor = new ThreadPoolTaskExecutor();
@@ -90,9 +90,15 @@ class AuthorizationSpringAsyncIntegrationTest {
         }
         @Bean AsyncService asyncService() { return new AsyncService(); }
 
-        @Override
-        public java.util.concurrent.Executor getAsyncExecutor() {
-            return executor();
+        @Bean
+        org.springframework.scheduling.annotation.AsyncConfigurer asyncConfigurer(
+                @org.springframework.beans.factory.annotation.Qualifier("authorizationExecutor")
+                ThreadPoolTaskExecutor executor) {
+            return new org.springframework.scheduling.annotation.AsyncConfigurer() {
+                @Override public java.util.concurrent.Executor getAsyncExecutor() {
+                    return executor;
+                }
+            };
         }
     }
 }
