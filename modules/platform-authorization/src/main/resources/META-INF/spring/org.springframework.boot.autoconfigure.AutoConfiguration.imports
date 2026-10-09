@@ -1,2 +1,4 @@
 br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationAutoConfiguration
 br.com.portalmanager.platform.library.authorization.visibility.ResourceVisibilityJpaAutoConfiguration
+br.com.portalmanager.platform.library.authorization.config.AuthorizationAsyncAutoConfiguration
+br.com.portalmanager.platform.library.authorization.web.AuthorizationWebMvcAutoConfiguration

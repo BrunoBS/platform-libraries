@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.authorization.web;
+package br.com.portalmanager.platform.library.authorization.client;
 
 import br.com.portalmanager.platform.library.authorization.exception.ForbiddenAccessException;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
@@ -20,14 +20,14 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 
-public class AuthorizationClientService {
+public class AuthorizationClient {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthorizationClientService.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthorizationClient.class);
 
     private final RestClient restClient;
     private final RetryTemplate retryTemplate;
 
-    public AuthorizationClientService(
+    public AuthorizationClient(
             RestClient.Builder builder,
             String authUrl,
             PlatformAuthorizationProperties.Retry retry
@@ -41,7 +41,7 @@ public class AuthorizationClientService {
                         .multiplier(retry.getMultiplier())
                         .build()
         );
-        log.info("AuthorizationClientService inicializado com sucesso na URL: {}", authUrl);
+        log.info("AuthorizationClient inicializado com sucesso na URL: {}", authUrl);
     }
 
     public UserSession authorize(AuthorizationRequest request) {
@@ -61,7 +61,7 @@ public class AuthorizationClientService {
                     setIfNotNull(headers, "workspaceIdentifier", request.workspaceIdentifier());
                     setIfNotNull(headers, "environmentIdentifier", request.environmentIdentifier());
                     setIfNotNull(headers, "applicationIdentifier", request.applicationIdentifier());
-                    setIfNotNull(headers, "method", request.method());
+                    setIfNotNull(headers, "action", request.action() == null ? null : request.action().name());
                     if (request.policy() != null) {
                         headers.set("policy", request.policy().name());
                     }

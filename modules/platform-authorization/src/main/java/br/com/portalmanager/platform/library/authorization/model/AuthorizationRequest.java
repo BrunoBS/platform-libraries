@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.authorization.model;
 
 /**
- * Request context forwarded by the library to the central Authorization API.
+ * Request sent by the authorization library to the central Authorization API.
  */
 public record AuthorizationRequest(
         String correlationId,
@@ -9,7 +9,7 @@ public record AuthorizationRequest(
         String workspaceIdentifier,
         String environmentIdentifier,
         String applicationIdentifier,
-        String method,
+        AuthorizationAction action,
         AuthorizationLevel policy
 ) {
 }

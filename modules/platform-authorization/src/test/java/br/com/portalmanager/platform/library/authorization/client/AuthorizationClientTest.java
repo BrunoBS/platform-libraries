@@ -1,8 +1,9 @@
-package br.com.portalmanager.platform.library.authorization.web;
+package br.com.portalmanager.platform.library.authorization.client;
 
 import br.com.portalmanager.platform.library.authorization.exception.AuthorizationServiceUnavailableException;
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationLevel;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationAction;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
@@ -13,7 +14,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class AuthorizationClientServiceTest {
+class AuthorizationClientTest {
 
     @Test
     void shouldReportTechnicalFailureWhenAuthorizationApiIsUnavailable() {
@@ -22,7 +23,7 @@ class AuthorizationClientServiceTest {
         when(builder.baseUrl(anyString())).thenReturn(builder);
         when(builder.build()).thenReturn(restClient);
 
-        AuthorizationClientService service = new AuthorizationClientService(builder, "http://localhost:8080", new PlatformAuthorizationProperties.Retry());
+        AuthorizationClient service = new AuthorizationClient(builder, "http://localhost:8080", new PlatformAuthorizationProperties.Retry());
         RuntimeException exception = new RuntimeException("Network timeout");
         AuthorizationRequest request = new AuthorizationRequest(
                 "trace-1",
@@ -30,7 +31,7 @@ class AuthorizationClientServiceTest {
                 "workspace",
                 "env",
                 "app",
-                "GET",
+                AuthorizationAction.READ,
                 AuthorizationLevel.ADM
         );
 

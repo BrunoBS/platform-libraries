@@ -16,6 +16,8 @@ public class PlatformAuthorizationProperties {
     private Duration readTimeout = Duration.ofSeconds(2);
     private Retry retry = new Retry();
     private Mock mock = new Mock();
+    private Headers headers = new Headers();
+    private ContextPropagation contextPropagation = new ContextPropagation();
 
     public AuthorizationMode getMode() {
         return mode;
@@ -57,12 +59,64 @@ public class PlatformAuthorizationProperties {
         this.retry = retry == null ? new Retry() : retry;
     }
 
+    public Headers getHeaders() { return headers; }
+    public void setHeaders(Headers headers) { this.headers = headers == null ? new Headers() : headers; }
+
+    public static class Headers {
+        private List<String> correlationId = List.of("correlation-id", "correlationid");
+        private List<String> authorization = List.of("authorization");
+        private List<String> workspaceIdentifier = List.of("workspace-identifier", "workspaceidentifier");
+        private List<String> environmentIdentifier = List.of("environment-identifier", "environmentidentifier");
+        private List<String> applicationIdentifier = List.of("application-identifier", "applicationidentifier");
+
+        public List<String> getCorrelationId() { return correlationId; }
+        public void setCorrelationId(List<String> value) { correlationId = value == null ? List.of() : List.copyOf(value); }
+        public List<String> getAuthorization() { return authorization; }
+        public void setAuthorization(List<String> value) { authorization = value == null ? List.of() : List.copyOf(value); }
+        public List<String> getWorkspaceIdentifier() { return workspaceIdentifier; }
+        public void setWorkspaceIdentifier(List<String> value) { workspaceIdentifier = value == null ? List.of() : List.copyOf(value); }
+        public List<String> getEnvironmentIdentifier() { return environmentIdentifier; }
+        public void setEnvironmentIdentifier(List<String> value) { environmentIdentifier = value == null ? List.of() : List.copyOf(value); }
+        public List<String> getApplicationIdentifier() { return applicationIdentifier; }
+        public void setApplicationIdentifier(List<String> value) { applicationIdentifier = value == null ? List.of() : List.copyOf(value); }
+    }
+
     public Mock getMock() {
         return mock;
     }
 
     public void setMock(Mock mock) {
         this.mock = mock == null ? new Mock() : mock;
+    }
+
+    public ContextPropagation getContextPropagation() { return contextPropagation; }
+    public void setContextPropagation(ContextPropagation value) {
+        this.contextPropagation = value == null ? new ContextPropagation() : value;
+    }
+
+    public static class ContextPropagation {
+        private boolean enabled;
+        private boolean defaultExecutor;
+        private int coreSize = 4;
+        private int maxSize = 16;
+        private int queueCapacity = 100;
+        private Duration keepAlive = Duration.ofSeconds(60);
+        private String threadNamePrefix = "authorization-async-";
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean value) { enabled = value; }
+        public boolean isDefaultExecutor() { return defaultExecutor; }
+        public void setDefaultExecutor(boolean value) { defaultExecutor = value; }
+        public int getCoreSize() { return coreSize; }
+        public void setCoreSize(int value) { coreSize = value; }
+        public int getMaxSize() { return maxSize; }
+        public void setMaxSize(int value) { maxSize = value; }
+        public int getQueueCapacity() { return queueCapacity; }
+        public void setQueueCapacity(int value) { queueCapacity = value; }
+        public Duration getKeepAlive() { return keepAlive; }
+        public void setKeepAlive(Duration value) { keepAlive = value; }
+        public String getThreadNamePrefix() { return threadNamePrefix; }
+        public void setThreadNamePrefix(String value) { threadNamePrefix = value; }
     }
 
     public static class Retry {

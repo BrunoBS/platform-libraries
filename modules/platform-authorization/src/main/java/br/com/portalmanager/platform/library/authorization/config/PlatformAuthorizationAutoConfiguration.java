@@ -2,12 +2,12 @@ package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
-import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
-import br.com.portalmanager.platform.library.authorization.web.AuthorizationInterceptor;
-import br.com.portalmanager.platform.library.authorization.web.MockAuthorizationInterceptor;
-import br.com.portalmanager.platform.library.authorization.web.AuthorizationContextCleanupFilter;
+import br.com.portalmanager.platform.library.authorization.client.AuthorizationClient;
+import br.com.portalmanager.platform.library.authorization.aop.AuthorizationFacadeAspect;
+import br.com.portalmanager.platform.library.authorization.aop.MockAuthorizationFacadeAspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,13 +17,33 @@ import org.springframework.web.client.RestClient;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 
 import java.net.http.HttpClient;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import java.util.Arrays;
+import java.util.Set;
+import org.springframework.core.env.Environment;
 
 
 @AutoConfiguration
 @EnableConfigurationProperties(PlatformAuthorizationProperties.class)
 public class PlatformAuthorizationAutoConfiguration {
+
+    @Bean
+    public SmartInitializingSingleton authorizationContextPropagationConfigurationValidator(
+            PlatformAuthorizationProperties properties, Environment environment) {
+        return () -> {
+            if (properties.getMode() == AuthorizationMode.MOCK) {
+                Set<String> permitted = Set.of("local", "test", "dev");
+                String[] active = environment.getActiveProfiles();
+                if (active.length == 0 || Arrays.stream(active).anyMatch(profile -> !permitted.contains(profile))) {
+                    throw new PlatformConfigurationException(AuthorizationTechnicalErrors.MOCK_MODE_FORBIDDEN);
+                }
+            }
+            var settings = properties.getContextPropagation();
+            if (settings.isDefaultExecutor() && !settings.isEnabled()) {
+                throw new PlatformConfigurationException(
+                        AuthorizationTechnicalErrors.CONTEXT_PROPAGATION_REQUIRED);
+            }
+        };
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -33,14 +53,8 @@ public class PlatformAuthorizationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuthorizationContextCleanupFilter authorizationContextCleanupFilter() {
-        return new AuthorizationContextCleanupFilter();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
-    public AuthorizationClientService authorizationClientService(
+    public AuthorizationClient authorizationClient(
             RestClient.Builder builder,
             PlatformAuthorizationProperties properties) {
 
@@ -59,7 +73,7 @@ public class PlatformAuthorizationAutoConfiguration {
         RestClient.Builder authorizationBuilder = builder.clone()
                 .requestFactory(requestFactory);
 
-        return new AuthorizationClientService(
+        return new AuthorizationClient(
                 authorizationBuilder,
                 authUrl,
                 properties.getRetry()
@@ -69,39 +83,15 @@ public class PlatformAuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
-    public AuthorizationInterceptor authorizationInterceptor(
-            AuthorizationClientService clientService,
-            AuthorizationMetadataRegistry metadataRegistry) {
-        return new AuthorizationInterceptor(clientService, metadataRegistry);
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
-    public WebMvcConfigurer realInterceptorConfigurer(AuthorizationInterceptor realInterceptor) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(realInterceptor).addPathPatterns("/**");
-            }
-        };
+    public AuthorizationFacadeAspect authorizationFacadeAspect(AuthorizationClient clientService) {
+        return new AuthorizationFacadeAspect(clientService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "MOCK")
-    public MockAuthorizationInterceptor mockAuthorizationInterceptor(PlatformAuthorizationProperties properties) {
-        return new MockAuthorizationInterceptor(properties);
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "MOCK")
-    public WebMvcConfigurer mockInterceptorConfigurer(MockAuthorizationInterceptor mockInterceptor) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(mockInterceptor).addPathPatterns("/**");
-            }
-        };
+    public MockAuthorizationFacadeAspect mockAuthorizationFacadeAspect(PlatformAuthorizationProperties properties) {
+        return new MockAuthorizationFacadeAspect(properties);
     }
 
 }

@@ -1,31 +1,30 @@
 package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizationRequired;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationAction;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationLevel;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationPolicy;
 import org.junit.jupiter.api.Test;
-import java.lang.reflect.Method;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AuthorizationMetadataRegistryTest {
-    static class BaseController { public void findAll() {} }
+    static class BaseController {
+        public void findAll() {}
+    }
 
-    @AuthorizationRequired(level = AuthorizationLevel.DEV)
     static class SampleController extends BaseController {
-        @AuthorizationRequired(level = AuthorizationLevel.ADM)
+        @AuthorizationRequired(level = AuthorizationLevel.ADM, action = AuthorizationAction.READ)
         public void securedMethod() {}
 
-        @AuthorizationRequired(level = AuthorizationLevel.DEV,
-                workspacePathVariable = "tenantId",
-                applicationPathVariable = "appId",
-                environmentPathVariable = "envId")
-        public void securedWithCustomPathVariables() {}
+        @AuthorizationRequired(level = AuthorizationLevel.DEV, action = AuthorizationAction.READ)
+        public void securedWithContextIdentifiers() {}
     }
 
     private final AuthorizationMetadataRegistry registry = new AuthorizationMetadataRegistry();
 
     @Test
-    void shouldPreferMethodAnnotation() throws NoSuchMethodException {
+    void shouldResolveMethodAnnotation() throws NoSuchMethodException {
         AuthorizationPolicy policy = registry.resolve(SampleController.class,
                 SampleController.class.getMethod("securedMethod"));
         assertEquals(AuthorizationLevel.ADM, policy.level());
@@ -33,19 +32,19 @@ class AuthorizationMetadataRegistryTest {
     }
 
     @Test
-    void shouldUseClassAnnotationWhenMethodHasNoOverride() throws NoSuchMethodException {
+    void shouldUseOpenPolicyForUnannotatedMethod() throws NoSuchMethodException {
         AuthorizationPolicy policy = registry.resolve(SampleController.class,
                 BaseController.class.getMethod("findAll"));
-        assertEquals(AuthorizationLevel.DEV, policy.level());
-        assertEquals(AuthorizationPolicy.Source.CLASS, policy.source());
+        assertEquals(AuthorizationLevel.OPEN, policy.level());
+        assertEquals(AuthorizationPolicy.Source.DEFAULT, policy.source());
     }
 
     @Test
-    void shouldResolveCustomPathVariableNames() throws NoSuchMethodException {
+    void shouldUseContextIdentifierNames() throws NoSuchMethodException {
         AuthorizationPolicy policy = registry.resolve(SampleController.class,
-                SampleController.class.getMethod("securedWithCustomPathVariables"));
-        assertEquals("tenantId", policy.workspacePathVariable());
-        assertEquals("appId", policy.applicationPathVariable());
-        assertEquals("envId", policy.environmentPathVariable());
+                SampleController.class.getMethod("securedWithContextIdentifiers"));
+        assertEquals("workspaceIdentifier", policy.workspacePathVariable());
+        assertEquals("applicationIdentifier", policy.applicationPathVariable());
+        assertEquals("environmentIdentifier", policy.environmentPathVariable());
     }
 }

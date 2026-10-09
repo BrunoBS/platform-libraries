@@ -1,52 +1,56 @@
 package br.com.portalmanager.platform.library.catalog.web;
 
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationContext;
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
+import br.com.portalmanager.platform.library.catalog.facade.AbstractCatalogFacade;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
-import br.com.portalmanager.platform.library.catalog.service.AbstractCatalogService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
-/** Reusable REST contract for the standard catalog shape. */
+/** Reusable REST contract: the controller delegates exclusively to an authorized facade. */
 public abstract class CatalogController<E extends CatalogEntity> {
 
-    private final AbstractCatalogService<E> service;
+    private final AbstractCatalogFacade<E> facade;
 
-    protected CatalogController(AbstractCatalogService<E> service) {
-        this.service = service;
+    protected CatalogController(AbstractCatalogFacade<E> facade) {
+        this.facade = facade;
     }
 
     @GetMapping
-    public List<CatalogDTO> findAll(@RequestParam Map<String, String> filters) {
-        return service.findAll(filters);
+    public List<CatalogDTO> findAll(AuthorizationContext context,
+                                    @RequestParam Map<String, String> filters) {
+        return facade.findAll(context, filters);
     }
 
     @GetMapping("/{code}")
-    public CatalogDTO findByCode(@PathVariable String code) {
-        return service.findByCode(code);
+    public CatalogDTO findByCode(AuthorizationContext context, @PathVariable String code) {
+        return facade.findByCode(context, code);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CatalogDTO create(@RequestBody CatalogDTO dto) {
-        return service.create(dto);
+    public CatalogDTO create(AuthorizationContext context, @RequestBody CatalogDTO dto) {
+        return facade.create(context, dto);
     }
 
     @PutMapping("/{code}")
-    public CatalogDTO update(@PathVariable String code, @RequestBody CatalogDTO dto) {
-        return service.update(code, dto);
+    public CatalogDTO update(AuthorizationContext context, @PathVariable String code,
+                             @RequestBody CatalogDTO dto) {
+        return facade.update(context, code, dto);
     }
 
     @DeleteMapping("/{code}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable String code) {
-        service.delete(code);
+    public void delete(AuthorizationContext context, @PathVariable String code) {
+        facade.delete(context, code);
     }
 
     @PostMapping("/{code}/restore")
-    public CatalogDTO restore(@PathVariable String code) {
-        return service.restore(code);
+    public CatalogDTO restore(AuthorizationContext context, @PathVariable String code) {
+        return facade.restore(context, code);
     }
+
 }

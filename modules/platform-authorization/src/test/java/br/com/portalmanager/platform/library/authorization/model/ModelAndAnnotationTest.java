@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.authorization.model;
 
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizationRequired;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationAction;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -45,12 +46,13 @@ class ModelAndAnnotationTest {
     }
 
     @Test
-    @AuthorizationRequired(level = AuthorizationLevel.ADM)
+    @AuthorizationRequired(level = AuthorizationLevel.ADM, action = AuthorizationAction.READ)
     void testAnnotationPresence() throws NoSuchMethodException {
         var method = this.getClass().getDeclaredMethod("testAnnotationPresence");
         var ann = method.getAnnotation(AuthorizationRequired.class);
         assertNotNull(ann);
         assertEquals(AuthorizationLevel.ADM, ann.level());
+        assertEquals(AuthorizationAction.READ, ann.action());
     }
 
 }
