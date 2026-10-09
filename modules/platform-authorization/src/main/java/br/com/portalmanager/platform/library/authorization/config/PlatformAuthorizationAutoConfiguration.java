@@ -5,7 +5,7 @@ import br.com.portalmanager.platform.library.authorization.message.Authorization
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationClientService;
-import br.com.portalmanager.platform.library.authorization.web.AuthorizationInterceptor;
+import br.com.portalmanager.platform.library.authorization.aop.AuthorizationFacadeAspect;
 import br.com.portalmanager.platform.library.authorization.web.MockAuthorizationInterceptor;
 import br.com.portalmanager.platform.library.authorization.web.AuthorizationContextCleanupFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -69,21 +69,8 @@ public class PlatformAuthorizationAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
-    public AuthorizationInterceptor authorizationInterceptor(
-            AuthorizationClientService clientService,
-            AuthorizationMetadataRegistry metadataRegistry) {
-        return new AuthorizationInterceptor(clientService, metadataRegistry);
-    }
-
-    @Bean
-    @ConditionalOnProperty(prefix = "platform.authorization", name = "mode", havingValue = "REAL", matchIfMissing = true)
-    public WebMvcConfigurer realInterceptorConfigurer(AuthorizationInterceptor realInterceptor) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(realInterceptor).addPathPatterns("/**");
-            }
-        };
+    public AuthorizationFacadeAspect authorizationFacadeAspect(AuthorizationClientService clientService) {
+        return new AuthorizationFacadeAspect(clientService);
     }
 
     @Bean
