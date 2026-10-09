@@ -20,57 +20,37 @@ public abstract class CatalogController<E extends CatalogEntity> {
     }
 
     @GetMapping
-    public List<CatalogDTO> findAll(@RequestHeader Map<String, String> headers,
+    public List<CatalogDTO> findAll(AuthorizationContext context,
                                     @RequestParam Map<String, String> filters) {
-        return facade.findAll(authorizationContext(headers), filters);
+        return facade.findAll(context, filters);
     }
 
     @GetMapping("/{code}")
-    public CatalogDTO findByCode(@RequestHeader Map<String, String> headers, @PathVariable String code) {
-        return facade.findByCode(authorizationContext(headers), code);
+    public CatalogDTO findByCode(AuthorizationContext context, @PathVariable String code) {
+        return facade.findByCode(context, code);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CatalogDTO create(@RequestHeader Map<String, String> headers, @RequestBody CatalogDTO dto) {
-        return facade.create(authorizationContext(headers), dto);
+    public CatalogDTO create(AuthorizationContext context, @RequestBody CatalogDTO dto) {
+        return facade.create(context, dto);
     }
 
     @PutMapping("/{code}")
-    public CatalogDTO update(@RequestHeader Map<String, String> headers, @PathVariable String code,
+    public CatalogDTO update(AuthorizationContext context, @PathVariable String code,
                              @RequestBody CatalogDTO dto) {
-        return facade.update(authorizationContext(headers), code, dto);
+        return facade.update(context, code, dto);
     }
 
     @DeleteMapping("/{code}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@RequestHeader Map<String, String> headers, @PathVariable String code) {
-        facade.delete(authorizationContext(headers), code);
+    public void delete(AuthorizationContext context, @PathVariable String code) {
+        facade.delete(context, code);
     }
 
     @PostMapping("/{code}/restore")
-    public CatalogDTO restore(@RequestHeader Map<String, String> headers, @PathVariable String code) {
-        return facade.restore(authorizationContext(headers), code);
+    public CatalogDTO restore(AuthorizationContext context, @PathVariable String code) {
+        return facade.restore(context, code);
     }
 
-    private static AuthorizationContext authorizationContext(Map<String, String> headers) {
-        return new AuthorizationContext(
-                header(headers, "correlation-id", "correlationid"),
-                header(headers, "authorization"),
-                header(headers, "workspace-identifier", "workspaceidentifier"),
-                header(headers, "environment-identifier", "environmentidentifier"),
-                header(headers, "application-identifier", "applicationidentifier"),
-                header(headers, "x-forwarded-for"),
-                header(headers, "user-agent"),
-                null);
-    }
-
-    private static String header(Map<String, String> headers, String... names) {
-        for (var entry : headers.entrySet()) {
-            for (String name : names) {
-                if (entry.getKey().equalsIgnoreCase(name)) return entry.getValue();
-            }
-        }
-        return null;
-    }
 }
