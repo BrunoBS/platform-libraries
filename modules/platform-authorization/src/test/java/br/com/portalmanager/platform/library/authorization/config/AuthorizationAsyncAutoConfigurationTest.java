@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -17,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AuthorizationAsyncAutoConfigurationTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withUserConfiguration(AuthorizationAsyncAutoConfiguration.class)
+            .withConfiguration(AutoConfigurations.of(AuthorizationAsyncAutoConfiguration.class))
             .withPropertyValues("platform.authorization.mode=MOCK");
 
     @AfterEach
@@ -29,8 +30,8 @@ class AuthorizationAsyncAutoConfigurationTest {
     @Test
     void rejectsDefaultExecutorWhenPropagationDisabled() {
         new ApplicationContextRunner()
-                .withUserConfiguration(PlatformAuthorizationAutoConfiguration.class,
-                        AuthorizationAsyncAutoConfiguration.class)
+                .withConfiguration(AutoConfigurations.of(PlatformAuthorizationAutoConfiguration.class,
+                        AuthorizationAsyncAutoConfiguration.class))
                 .withPropertyValues(
                         "platform.authorization.mode=MOCK",
                         "platform.authorization.context-propagation.enabled=false",
@@ -38,7 +39,7 @@ class AuthorizationAsyncAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
-                            .hasRootCauseInstanceOf(
+                            .isInstanceOf(
                                     br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException.class);
                 });
     }
