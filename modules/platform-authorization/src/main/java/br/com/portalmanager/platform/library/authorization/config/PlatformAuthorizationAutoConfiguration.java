@@ -31,7 +31,7 @@ public class PlatformAuthorizationAutoConfiguration {
             PlatformAuthorizationProperties properties, Environment environment) {
         return () -> {
             if (properties.getMode() == AuthorizationMode.MOCK) {
-                Set<String> permitted = Set.of("local", "test");
+                Set<String> permitted = Set.of("local", "test", "dev");
                 String[] active = environment.getActiveProfiles();
                 if (active.length == 0 || Arrays.stream(active).anyMatch(profile -> !permitted.contains(profile))) {
                     throw new PlatformConfigurationException(AuthorizationTechnicalErrors.MOCK_MODE_FORBIDDEN);
