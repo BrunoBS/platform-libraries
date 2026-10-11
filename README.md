@@ -177,3 +177,21 @@ Consulte:
 - `docs/foundation/FOUNDATION-CHECKPOINT.md`;
 - `docs/adr/ADR-001-CONSOLIDATE-FOUNDATION-REPOSITORIES.md`;
 - `docs/adr/ADR-002-PORTALMANAGER-NAMESPACE.md`.
+
+
+## Persistência de tags sem releitura
+
+`TagManager.createInitialTags(owner, manualTags, systemTags)` insere as tags de um
+owner recém-persistido, sem consultar tags existentes. Use apenas quando o owner
+ainda não possui tags e dentro da mesma transação de criação; o método não é
+idempotente nem substitui a reconciliação de um owner existente.
+
+`TagManager.reconcileAndReturnManualTags(owner, manualTags, systemTags)` consulta as
+tags existentes uma vez, preserva as que continuam válidas, remove as obsoletas,
+atualiza origens e adiciona as novas. O retorno dispensa uma chamada a `findManual`.
+
+Ambas as operações retornam uma lista imutável de tags manuais normalizadas,
+deduplicadas e ordenadas. Tags manuais têm prioridade sobre tags de sistema com o
+mesmo nome. A lista descreve o resultado da operação na transação atual; a
+confirmação da persistência ocorre no commit. O método `reconcile` existente
+continua disponível e delega à mesma implementação.

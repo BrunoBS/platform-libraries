@@ -27,9 +27,29 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         this.factory = Objects.requireNonNull(factory, "tag factory must not be null");
     }
 
-    public void reconcile(OWNER owner, Collection<String> manualTags, Collection<String> systemTags) {
+    /**
+     * Inserts tags for a newly persisted owner that has no existing tags.
+     * The caller must use the same transaction as owner creation.
+     */
+    public List<String> createInitialTags(OWNER owner, Collection<String> manualTags, Collection<String> systemTags) {
         requireOwner(owner);
         Map<TagName, TagOriginType> desired = desiredTags(manualTags, systemTags);
+        List<TAG> created = createTags(owner, desired);
+        if (!created.isEmpty()) {
+            repository.saveAll(created);
+        }
+        return manualTagNames(desired);
+    }
+
+    public void reconcile(OWNER owner, Collection<String> manualTags, Collection<String> systemTags) {
+        reconcileAndReturnManualTags(owner, manualTags, systemTags);
+    }
+
+    /** Returns normalized, sorted manual tags without querying them again. */
+    public List<String> reconcileAndReturnManualTags(OWNER owner, Collection<String> manualTags, Collection<String> systemTags) {
+        requireOwner(owner);
+        Map<TagName, TagOriginType> desired = desiredTags(manualTags, systemTags);
+        List<String> normalizedManualTags = manualTagNames(desired);
         List<TAG> current = repository.findByOwnerId(owner.getId());
         validateCurrent(current);
 
@@ -51,9 +71,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
             repository.deleteAll(obsolete);
         }
 
-        List<TAG> created = desired.entrySet().stream()
-                .map(entry -> Objects.requireNonNull(factory.create(owner, entry.getKey(), entry.getValue()), "tag factory must not return null"))
-                .toList();
+        List<TAG> created = createTags(owner, desired);
 
         if (!changed.isEmpty() || !created.isEmpty()) {
             List<TAG> toSave = new ArrayList<>(changed.size() + created.size());
@@ -61,6 +79,21 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
             toSave.addAll(created);
             repository.saveAll(toSave);
         }
+        return normalizedManualTags;
+    }
+
+    private List<TAG> createTags(OWNER owner, Map<TagName, TagOriginType> desired) {
+        return desired.entrySet().stream()
+                .map(entry -> Objects.requireNonNull(factory.create(owner, entry.getKey(), entry.getValue()), "tag factory must not return null"))
+                .toList();
+    }
+
+    private static List<String> manualTagNames(Map<TagName, TagOriginType> desired) {
+        return desired.entrySet().stream()
+                .filter(entry -> entry.getValue() == TagOriginType.MANUAL)
+                .map(entry -> entry.getKey().value())
+                .sorted()
+                .toList();
     }
 
     public List<String> findManual(OWNER owner) {

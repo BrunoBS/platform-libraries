@@ -167,6 +167,46 @@ class TagManagerTest {
         verify(repository).deleteByOwnerId(10L);
     }
 
+    @Test
+    void shouldCreateInitialTagsWithoutReadingPersistedTags() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+        assertThat(manager.createInitialTags(owner,
+                java.util.Arrays.asList(" Z Tag ", "a tag", "A Tag", " ", null),
+                List.of("system", "a-tag")))
+                .containsExactly("a-tag", "z-tag");
+        verify(repository, never()).findByOwnerId(any());
+        verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
+            List<TestTag> saved = new java.util.ArrayList<>();
+            tags.forEach(saved::add);
+            return saved.size() == 3 && saved.stream().filter(tag -> tag.getOriginType() == TagOriginType.MANUAL).count() == 2;
+        }));
+    }
+
+    @Test
+    void shouldAvoidRepositoryCallsForEmptyInitialTags() {
+        TagRepository<TestTag, Owner> repository = repository();
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+        assertThat(manager.createInitialTags(new Owner(10L, "workspace-10"), null, List.of())).isEmpty();
+        org.mockito.Mockito.verifyNoInteractions(repository);
+        assertThatThrownBy(() -> manager.createInitialTags(new Owner(null, "workspace-10"), List.of("tag"), null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void shouldReturnManualTagsAfterReconciliationWithOneRead() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        TestTag existing = new TestTag(owner, TagName.of("a-tag"), TagOriginType.SYSTEM);
+        when(repository.findByOwnerId(10L)).thenReturn(List.of(existing));
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+        assertThat(manager.reconcileAndReturnManualTags(owner, List.of("Z Tag", " A Tag ", "a-tag"), List.of("system")))
+                .containsExactly("a-tag", "z-tag");
+        assertThat(existing.getOriginType()).isEqualTo(TagOriginType.MANUAL);
+        verify(repository, org.mockito.Mockito.times(1)).findByOwnerId(10L);
+    }
+
     @SuppressWarnings("unchecked")
     private static TagRepository<TestTag, Owner> repository() {
         return mock(TagRepository.class);
