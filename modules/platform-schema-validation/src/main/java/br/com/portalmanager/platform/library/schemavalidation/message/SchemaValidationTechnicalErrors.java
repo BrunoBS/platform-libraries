@@ -81,6 +81,14 @@ public final class SchemaValidationTechnicalErrors {
         );
     }
 
+    public static final PlatformErrorDefinition REQUEST_NORMALIZER_INVALID =
+            new PlatformErrorDefinition(
+                    "PLT-SCHEMA-008",
+                    "The request schema normalizer bean is missing or ambiguous",
+                    "Register exactly one Spring bean of the normalizer type declared in @ValidateResourceSchemaRequest.",
+                    500
+            );
+
     private SchemaValidationTechnicalErrors() {
     }
 }

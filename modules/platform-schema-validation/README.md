@@ -229,3 +229,18 @@ schemaValidator.validate(resourceType, resourceCode, payload);
 ```
 
 O consumidor depende somente de `SchemaValidator`. `ResourceSchemaValidator`, NetworkNT, resolução e mapeamento de erros permanecem detalhes internos da implementação. O Aspect também consome o mesmo contrato, garantindo um único fluxo de validação para chamadas automáticas e explícitas.
+
+## Requests tipados em Spring MVC
+
+Use `@ValidateResourceSchemaRequest` no record/classe do request para validar o JSON recebido antes da desserialização:
+
+```java
+@ValidateResourceSchemaRequest(type = "WORKSPACE", code = "workspace", normalizer = WorkspaceNormalizer.class)
+public record CreateWorkspaceRequest(String name, String description) {}
+```
+
+A biblioteca registra `ResourceSchemaRequestBodyAdvice` automaticamente em aplicações Servlet/MVC com `SchemaValidator` e `ObjectMapper`. Não é necessário implementar advice no serviço. Sem `normalizer`, valida o JSON recebido diretamente. Para normalizar textos conhecidos antes do schema, registre um bean implementando `SchemaPayloadNormalizer`. O normalizador deve preservar propriedades desconhecidas, tipos originais e campos ausentes, para que o schema possa rejeitá-los.
+
+Fluxo: árvore JSON original → normalização opcional → `SchemaValidator` → request tipado → input do use case. JSON inválido gera erro de leitura HTTP; falha de schema interrompe o fluxo antes do controller. O schema continua vindo do resolver/cache configurado. Não repetir `@ValidateResourceSchema` no use case desse fluxo: a validação estrutural já ocorreu na entrada HTTP. A anotação de método e `@SchemaPayload` continuam disponíveis para os consumidores existentes.
+
+As dependências MVC/Servlet são opcionais; consumidores não web continuam usando a validação por método sem ativar o advice.

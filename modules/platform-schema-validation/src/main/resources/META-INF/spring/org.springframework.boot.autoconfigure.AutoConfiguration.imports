@@ -2,3 +2,4 @@ br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaVali
 br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationSourceAutoConfiguration
 br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationRedisAutoConfiguration
 br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationAutoConfiguration
+br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationWebAutoConfiguration
