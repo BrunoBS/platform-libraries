@@ -7,7 +7,6 @@ import br.com.portalmanager.platform.library.audit.config.AuditPropertiesValidat
 import br.com.portalmanager.platform.library.audit.config.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
-import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
 import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxAppender;
 import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxRepository;
 import jakarta.persistence.EntityManager;
@@ -50,10 +49,8 @@ public class PlatformAuditAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AuditSnapshotCollector.class)
-    AuditSnapshotCollector auditSnapshotCollector(
-            org.springframework.beans.factory.ObjectProvider<AuditBeforeSnapshotProvider> beforeSnapshotProviders
-    ) {
-        return new AuditSnapshotCollector(beforeSnapshotProviders.getIfAvailable());
+    AuditSnapshotCollector auditSnapshotCollector() {
+        return new AuditSnapshotCollector();
     }
 
     @Bean

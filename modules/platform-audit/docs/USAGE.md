@@ -99,39 +99,24 @@ O método precisa ser chamado por um bean Spring. Chamadas internas entre métod
 | Ação | Estado registrado |
 | --- | --- |
 | `CREATE`, `UPDATE`, `ACTIVATE`, `DEACTIVATE`, `RESTORE`, `DELETE` | Retorno do Use Case, depois da execução |
-| `PURGE` | Estado anterior à remoção física; requer um `AuditBeforeSnapshotProvider` |
+| `PURGE` | Objeto removido retornado pelo Use Case, com o estado preservado antes da exclusão |
 
-Para `PURGE`, registre um bean que implemente `AuditBeforeSnapshotProvider`. O provider recebe somente o array de argumentos originais do método interceptado, na mesma ordem da assinatura. Ele deve conhecer o contrato do Use Case e identificar nesses argumentos o objeto ou valor necessário para buscar o estado persistido. O provider devolve o snapshot anterior como `JsonNode`, que precisa conter `identifier` ou `id`.
-
-No exemplo abaixo, o primeiro argumento do Use Case é `PurgeKeyInput`; o provider conhece essa premissa e usa seu identificador para buscar o recurso antes da remoção:
+Para `PURGE`, o Use Case busca pelo identificador, valida as regras, monta o snapshot, remove o registro e retorna o snapshot depois do flush. O Aspect captura esse retorno dentro da mesma transação; não consulta novamente a base.
 
 ```java
-import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
-import org.springframework.stereotype.Component;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-
-@Component
-public class KeyBeforeSnapshotProvider implements AuditBeforeSnapshotProvider {
-
-    private final KeyRepository keyRepository;
-    private final ObjectMapper objectMapper;
-
-    public KeyBeforeSnapshotProvider(KeyRepository keyRepository, ObjectMapper objectMapper) {
-        this.keyRepository = keyRepository;
-        this.objectMapper = objectMapper;
-    }
-
-    @Override
-    public JsonNode capture(Object[] sourceArguments) {
-        PurgeKeyInput input = (PurgeKeyInput) sourceArguments[0];
-        Key key = keyRepository.findByIdentifier(input.identifier()).orElseThrow();
-        return objectMapper.valueToTree(KeyAuditSnapshot.from(key));
-    }
+@Transactional
+@Auditable(action = AuditAction.PURGE, event = "KEY_PURGED", resourceType = "KEY")
+public KeyOutput delete(String identifier) {
+    Key key = finder.findForUpdate(identifier);
+    validator.validateForDelete(key);
+    KeyOutput removed = KeyOutput.from(key);
+    repository.delete(key);
+    repository.flush();
+    return removed;
 }
 ```
 
-`PurgeKeyInput`, `KeyRepository` e `KeyAuditSnapshot` são tipos do serviço consumidor. A premissa deste exemplo é que o primeiro argumento seja `PurgeKeyInput`; se a assinatura do Use Case mudar, ajuste o provider e este contrato. O provider recebe os argumentos originais antes da execução do método anotado e não deve alterá-los.
+Métodos PURGE com retorno `void` ou `Void` são rejeitados antes da execução. Retorno nulo ou coleção vazia também é rejeitado, provocando rollback. O controller pode descartar o retorno e responder HTTP 204. Consumers que implementavam `AuditBeforeSnapshotProvider` devem migrar para o retorno do command; essa extensão foi removida.
 
 Se o retorno do Use Case for uma coleção, cada elemento gera um registro de auditoria.
 
@@ -148,7 +133,7 @@ Confirme que:
 - A entidade e o repository são encontrados pelo JPA/Spring Data.
 - O Use Case é chamado por um bean Spring dentro de uma transação ativa.
 - O objeto retornado contém `identifier` ou `id`.
-- Para `PURGE`, o provider recebe os argumentos originais do Use Case, na ordem da assinatura, e está alinhado à premissa documentada sobre qual argumento contém os dados para localizar o recurso.
+- Para `PURGE`, o retorno preserva o objeto removido e não é nulo nem vazio.
 - A operação de negócio e o registro da auditoria são confirmados juntos.
 
 ## Erros comuns
@@ -162,4 +147,6 @@ Confirme que:
 | `transaction.required` | A chamada não está dentro de uma transação ativa ou não passou pelo proxy Spring |
 | `context.user.missing` | `UserContext` não está disponível durante a execução |
 | `resource.identifier.missing` | O snapshot não tem `identifier` nem `id` preenchido |
-| `before-snapshot.provider-required` | A ação é `PURGE` e não há um `AuditBeforeSnapshotProvider` registrado |
+| `snapshot.required` | O snapshot não é um objeto JSON válido |
+| `purge.return.required` | O método PURGE declara retorno void ou Void |
+| `purge.snapshot.required` | O método PURGE retornou nulo ou uma coleção vazia |

@@ -6,8 +6,8 @@ import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationCon
 import br.com.portalmanager.platform.library.audit.event.AuditEventFactory;
 import br.com.portalmanager.platform.library.audit.exception.AuditException;
 import br.com.portalmanager.platform.library.audit.model.AuditAction;
+import br.com.portalmanager.platform.library.audit.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
-import br.com.portalmanager.platform.library.audit.outbox.AuditBeforeSnapshotProvider;
 import br.com.portalmanager.platform.library.audit.outbox.AuditOutboxAppender;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -25,7 +25,6 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -36,11 +35,10 @@ class AuditAspectTest {
     private final PlatformAuditProperties properties = new PlatformAuditProperties();
     private final AuditAuthorizationContextResolver contextResolver = mock(AuditAuthorizationContextResolver.class);
     private final AuditOutboxAppender outboxAppender = mock(AuditOutboxAppender.class);
-    private final AuditBeforeSnapshotProvider beforeSnapshotProvider = mock(AuditBeforeSnapshotProvider.class);
     private final AuditEventFactory singleEventFactory =
             new AuditEventFactory(properties, contextResolver, new ObjectMapper());
     private final AuditAspect aspect = new AuditAspect(
-            new AuditSnapshotCollector(beforeSnapshotProvider),
+            new AuditSnapshotCollector(),
             new AuditInvocationEventFactory(singleEventFactory),
             outboxAppender
     );
@@ -74,25 +72,40 @@ class AuditAspectTest {
     }
 
     @Test
-    void shouldCapturePurgeSnapshotBeforeExecutingTheUseCase() throws Throwable {
-        List<String> order = new ArrayList<>();
-        when(beforeSnapshotProvider.capture(any())).thenAnswer(invocation -> {
-            order.add("capture");
-            return new ObjectMapper().valueToTree(Map.of("identifier", "key-1", "lifecycle", "INACTIVE"));
-        });
-        ProceedingJoinPoint joinPoint = joinPoint(
-                "purge", null, new Object[]{Map.of("identifier", "key-1")}
-        );
-        doAnswer(invocation -> {
-            order.add("proceed");
-            return null;
-        }).when(joinPoint).proceed();
+    void shouldAuditTheRemovedObjectReturnedByPurge() throws Throwable {
+        Map<String, String> removed = Map.of("identifier", "key-1", "lifecycle", "INACTIVE");
+        aspect.audit(joinPoint("purge", removed));
 
-        aspect.audit(joinPoint);
+        var payload = org.mockito.ArgumentCaptor.forClass(tools.jackson.databind.JsonNode.class);
+        verify(outboxAppender).append(payload.capture(), any());
+        assertThat(payload.getValue().get("identifier").asText()).isEqualTo("key-1");
+        assertThat(payload.getValue().get("lifecycle").asText()).isEqualTo("INACTIVE");
+    }
 
-        assertThat(order).containsExactly("capture", "proceed");
-        verify(beforeSnapshotProvider).capture(joinPoint.getArgs());
-        verify(outboxAppender).append(any(), any());
+    @Test
+    void shouldRejectVoidPurgeBeforeRunningBusinessCode() throws Throwable {
+        ProceedingJoinPoint joinPoint = joinPoint("purgeVoid", null);
+        assertThatThrownBy(() -> aspect.audit(joinPoint)).isInstanceOf(AuditException.class)
+                .hasMessage(AuditMessageKeys.PURGE_RETURN_REQUIRED);
+        verify(joinPoint, never()).proceed();
+        verify(outboxAppender, never()).append(any(), any());
+    }
+
+    @Test
+    void shouldRejectMissingPurgeSnapshotAfterExecution() throws Throwable {
+        ProceedingJoinPoint joinPoint = joinPoint("purge", null);
+        assertThatThrownBy(() -> aspect.audit(joinPoint)).isInstanceOf(AuditException.class)
+                .hasMessage(AuditMessageKeys.PURGE_SNAPSHOT_REQUIRED);
+        verify(joinPoint).proceed();
+        verify(outboxAppender, never()).append(any(), any());
+    }
+
+    @Test
+    void shouldRejectEmptyPurgeSnapshots() throws Throwable {
+        assertThatThrownBy(() -> aspect.audit(joinPoint("purge", List.of())))
+                .isInstanceOf(AuditException.class)
+                .hasMessage(AuditMessageKeys.PURGE_SNAPSHOT_REQUIRED);
+        verify(outboxAppender, never()).append(any(), any());
     }
 
     @Test
@@ -131,7 +144,8 @@ class AuditAspectTest {
         TransactionSynchronizationManager.setActualTransactionActive(false);
         ProceedingJoinPoint joinPoint = joinPoint("update", Map.of("identifier", "key-1"));
 
-        assertThatThrownBy(() -> aspect.audit(joinPoint)).isInstanceOf(AuditException.class);
+        assertThatThrownBy(() -> aspect.audit(joinPoint)).isInstanceOf(AuditException.class)
+                .hasMessage(AuditMessageKeys.TRANSACTION_REQUIRED);
         verify(joinPoint, never()).proceed();
     }
 
@@ -176,7 +190,10 @@ class AuditAspectTest {
         void update() { }
 
         @Auditable(action = AuditAction.PURGE, event = "PURGED", resourceType = "KEY")
-        void purge() { }
+        Object purge() { return null; }
+
+        @Auditable(action = AuditAction.PURGE, event = "PURGED", resourceType = "KEY")
+        void purgeVoid() { }
 
         @Auditable(action = AuditAction.UPDATE, event = "UPDATED", resourceType = "KEY")
         void updateMany() { }

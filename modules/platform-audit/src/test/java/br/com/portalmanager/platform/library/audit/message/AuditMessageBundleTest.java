@@ -31,7 +31,8 @@ class AuditMessageBundleTest {
                 AuditMessageKeys.EVENT_DEFINITION_REQUIRED,
                 AuditMessageKeys.SNAPSHOT_REQUIRED,
                 AuditMessageKeys.TRANSACTION_REQUIRED,
-                AuditMessageKeys.BEFORE_SNAPSHOT_PROVIDER_REQUIRED,
+                AuditMessageKeys.PURGE_RETURN_REQUIRED,
+                AuditMessageKeys.PURGE_SNAPSHOT_REQUIRED,
                 AuditMessageKeys.EVENT_SERIALIZATION_FAILED
         };
 

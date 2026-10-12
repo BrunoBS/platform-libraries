@@ -9,8 +9,9 @@ public final class AuditMessageKeys {
     public static final String EVENT_DEFINITION_REQUIRED = PREFIX + "event-definition.required";
     public static final String SNAPSHOT_REQUIRED = PREFIX + "snapshot.required";
     public static final String EVENT_SERIALIZATION_FAILED = PREFIX + "event.serialization-failed";
+    public static final String PURGE_RETURN_REQUIRED = PREFIX + "purge.return.required";
+    public static final String PURGE_SNAPSHOT_REQUIRED = PREFIX + "purge.snapshot.required";
     public static final String TRANSACTION_REQUIRED = PREFIX + "transaction.required";
-    public static final String BEFORE_SNAPSHOT_PROVIDER_REQUIRED = PREFIX + "before-snapshot.provider-required";
 
     private AuditMessageKeys() {
     }

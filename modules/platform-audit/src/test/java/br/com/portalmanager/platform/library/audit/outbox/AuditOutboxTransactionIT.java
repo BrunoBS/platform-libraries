@@ -97,6 +97,17 @@ class AuditOutboxTransactionIT {
         }
     }
 
+    @Test
+    void shouldRollbackPurgeWhenTheRemovedObjectIsNotReturned() {
+        jdbcTemplate.update("INSERT INTO DOMAIN_CHANGE (IDENTIFIER) VALUES (?)", "resource-1");
+
+        assertThatThrownBy(() -> useCase.purgeWithoutSnapshot("resource-1"))
+                .isInstanceOf(br.com.portalmanager.platform.library.audit.exception.AuditException.class);
+
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_outbox", Integer.class)).isZero();
+    }
+
     private boolean outboxTableExists() {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
@@ -158,5 +169,13 @@ class AuditOutboxTransactionIT {
             }
             return Map.of("identifier", "resource-1", "name", "timeout");
         }
+
+        @Transactional
+        @Auditable(action = AuditAction.PURGE, event = "PURGED", resourceType = "KEY")
+        public Map<String, String> purgeWithoutSnapshot(String identifier) {
+            jdbcTemplate.update("DELETE FROM DOMAIN_CHANGE WHERE IDENTIFIER = ?", identifier);
+            return null;
+        }
+
     }
 }
