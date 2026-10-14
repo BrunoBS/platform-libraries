@@ -14,6 +14,7 @@ public final class PlatformMessageKeys {
     public static final String UNEXPECTED_ERROR = INTERNAL_SERVER_ERROR;
     public static final String TYPE_MISMATCH = PREFIX + "global.validation.type.mismatch";
     public static final String INVALID_ENUM = PREFIX + "validation.invalid.enum";
+    public static final String METHOD_NOT_ALLOWED = PREFIX + "global.method.not.allowed";
     public static final String RESOURCE_VERSION_CONFLICT = PREFIX + "global.resource.version.conflict";
 
     private PlatformMessageKeys() {
