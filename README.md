@@ -31,10 +31,12 @@ platform-libraries/
     ├── platform-audit/
     ├── platform-catalog/
     ├── platform-tagging/
+    ├── platform-redis/
     └── platform-testing/
         ├── platform-testing-core/
         ├── platform-testing-http/
         ├── platform-testing-authorization/
+        ├── platform-testing-redis/
         ├── platform-testing-kafka/
         ├── platform-testing-database/
         ├── platform-testing-cloud-aws/
@@ -88,11 +90,13 @@ platform-audit         -> platform-authorization
 platform-audit         -> platform-messaging
 platform-testing-http -> platform-testing-core
 platform-testing-authorization -> platform-testing-core + platform-authorization
+platform-testing-redis -> platform-testing-core
 platform-testing-kafka -> platform-testing-core
 platform-testing-database -> platform-testing-core
 platform-testing-cloud-aws -> platform-testing-core
 platform-testing-cloud-azure -> platform-testing-core
 platform-catalog       -> platform-messaging
+platform-redis         -> platform-messaging
 
 platform-starter
 ├── platform-observability
@@ -102,7 +106,7 @@ platform-starter
 platform-schema-validation -> platform-messaging
 ```
 
-`platform-testing` é um agregador Maven; os sete JARs ficam separados por contexto. `platform-testing-core` mantém arquitetura, ciclo de vida, contexto e fixtures genéricas. HTTP, autorização, Kafka, banco de dados, AWS e Azure entram apenas quando o consumidor declara o artefato correspondente. Veja [o guia de módulos de teste](modules/platform-testing/README.md).
+`platform-testing` é um agregador Maven; os oito JARs ficam separados por contexto. `platform-testing-core` mantém arquitetura, ciclo de vida, contexto e fixtures genéricas. HTTP, autorização, Redis, Kafka, banco de dados, AWS e Azure entram apenas quando o consumidor declara o artefato correspondente. Veja [o guia de módulos de teste](modules/platform-testing/README.md).
 
 ## Consumo alvo
 
@@ -195,3 +199,7 @@ deduplicadas e ordenadas. Tags manuais têm prioridade sobre tags de sistema com
 mesmo nome. A lista descreve o resultado da operação na transação atual; a
 confirmação da persistência ocorre no commit. O método `reconcile` existente
 continua disponível e delega à mesma implementação.
+
+## Redis
+
+`platform-redis` oferece Store síncrono/assíncrono com `setAll`/`getAll` (MSET/MGET), estruturas nativas, Pub/Sub, Streams e Spring Cache opcional com autoconfiguração independente do starter. Consulte o [README do módulo](modules/platform-redis/README.md) e a [matriz V3](docs/platform-redis/ONDA-0.md).

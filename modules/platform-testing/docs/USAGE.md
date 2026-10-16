@@ -7,6 +7,7 @@ Importe o BOM da plataforma no `dependencyManagement` e adicione cada artefato c
 | Builders, lifecycle, contexto e testes arquiteturais | `platform-testing-core` |
 | Anotação de integração HTTP, requests e clients RestAssured | `platform-testing-http` |
 | Mock de chamadas ao Authorization | `platform-testing-authorization` |
+| Redis em Testcontainers, conexão dinâmica e limpeza por namespace | [`platform-testing-redis`](GUIA_DE_USO.md#16-redis) |
 | Kafka em Testcontainers | `platform-testing-kafka` |
 | MySQL e scripts de banco | `platform-testing-database` |
 | AWS LocalStack, SQS e S3 | `platform-testing-cloud-aws` |
@@ -33,6 +34,8 @@ Exemplo de seleção para uma API que usa HTTP, MySQL e mock de autorização:
     </dependency>
 </dependencies>
 ```
+
+## Consultar os guias
 
 Cada módulo funcional já traz o core. `platform-testing-authorization` também depende de `platform-authorization`; o core permanece independente dessa capability. Os guias detalhados mantêm exemplos de código, anotações e configurações:
 

@@ -89,6 +89,16 @@
                 <artifactId>platform-testing-authorization</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-redis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-testing-redis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>

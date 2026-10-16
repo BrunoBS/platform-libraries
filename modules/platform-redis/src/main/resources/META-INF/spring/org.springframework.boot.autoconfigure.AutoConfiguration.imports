@@ -1,0 +1,2 @@
+br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration
+br.com.portalmanager.platform.library.redis.cache.PlatformRedisCacheAutoConfiguration

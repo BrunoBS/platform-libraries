@@ -1,12 +1,13 @@
 # Estrutura de pacotes e módulos
 
-O agregador `modules/platform-testing` contém sete artefatos, cada um com os pacotes Java do seu contexto. O namespace público continua sendo `br.com.portalmanager.platform.library.testing`.
+O agregador `modules/platform-testing` contém oito artefatos, cada um com os pacotes Java do seu contexto. O namespace público continua sendo `br.com.portalmanager.platform.library.testing`.
 
 | Artefato | Pacotes |
 |---|---|
-| `platform-testing-core` | `architecture`, `context`, `fixture`, `lifecycle`, `message`, `container` (validação genérica de imagem) |
+| `platform-testing-core` | `architecture`, `context`, `fixture`, `lifecycle`, `container` (validação genérica de imagem) |
 | `platform-testing-http` | `http`, `http.response`, `lifecycle.annotation.PlatformIntegrationTest` |
 | `platform-testing-authorization` | `authorization` e `authorization.annotation` |
+| `platform-testing-redis` | `redis` e `redis.annotation` |
 | `platform-testing-kafka` | `kafka` e `kafka.annotation` |
 | `platform-testing-database` | `database` e `database.annotation` |
 | `platform-testing-cloud-aws` | `cloud.aws` e subpacotes `s3`, `sqs`, `s3notificationsqs` |
@@ -16,9 +17,11 @@ As anotações ficam em `annotation` dentro do contexto ao qual pertencem. Os pa
 
 ## Dependências entre módulos
 
-Cada módulo de funcionalidade depende de `platform-testing-core`. HTTP, Authorization, Kafka, Database, AWS e Azure não dependem uns dos outros. A exceção é `platform-testing-authorization`, que também compõe `platform-authorization`; o Core não importa Authorization.
+Cada módulo de funcionalidade depende de `platform-testing-core`. HTTP, Authorization, Redis, Kafka, Database, AWS e Azure não dependem uns dos outros. `platform-testing-authorization` também depende da capability de produção `platform-authorization`; essa relação não é uma dependência entre fixtures. O Core não importa Authorization.
 
 `PlatformIntegrationTest` e os clients RestAssured ficam em HTTP, pois a anotação inicia o servidor aleatório e importa a configuração de request. O contexto de correlation ID permanece no Core, onde é compartilhado pelo ciclo de vida e pelas requests HTTP.
+
+O Redis mantém configuração, imagem, customizer e extensão em `redis`, e sua anotação em `redis.annotation`. A conexão e a limpeza estão descritas no [guia de uso](GUIA_DE_USO.md#16-redis); as responsabilidades de cada tipo ficam no [inventário](PACKAGES_AND_CLASSES.md#brcomportalmanagerplatformlibrarytestingredis).
 
 ## Tipos reutilizáveis do core
 
@@ -31,4 +34,4 @@ Cada módulo de funcionalidade depende de `platform-testing-core`. HTTP, Authori
 | Relógio e IDs determinísticos | `fixture.TestClock` e `fixture.TestIds` |
 | Isolamento e métricas de teste | `lifecycle` e `lifecycle.annotation.PlatformUnitTest` |
 
-Clients HTTP, fixtures de autorização, Kafka, banco e cloud são fornecidos somente pelo artefato correspondente. Consulte [o inventário de classes](PACKAGES_AND_CLASSES.md) e o [guia completo](GUIA_DE_USO.md) para exemplos.
+Clients HTTP, fixtures de autorização, Redis, Kafka, banco e cloud são fornecidos somente pelo artefato correspondente. Consulte [o inventário de classes](PACKAGES_AND_CLASSES.md) e o [guia completo](GUIA_DE_USO.md) para exemplos.

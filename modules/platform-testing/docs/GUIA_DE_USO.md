@@ -1,4 +1,4 @@
-# Guia completo de uso — Platform Test Support
+# Guia completo de uso — Platform Testing
 
 Este guia mostra como escolher os artefatos de teste e criar testes de integração com os padrões da plataforma. Cada artefato é adicionado separadamente; veja a [tabela de seleção](../README.md#dependências-maven).
 
@@ -11,6 +11,7 @@ Os exemplos utilizam uma API fictícia de produtos, mas a mesma organização po
 | `@PlatformIntegrationTest` | Inicializar o Spring Boot com servidor HTTP em porta aleatória |
 | `@WithMySql` | Inicializar o MySQL e limpar as tabelas entre os testes |
 | `@WithDatabaseScripts` | Executar scripts opcionais de setup e cleanup |
+| `@WithRedis` | Inicializar Redis com conexão dinâmica e limpeza por namespace |
 | `@WithKafka` | Inicializar um Kafka para o teste |
 | `@WithAwsLocalStack` | Inicializar SQS e/ou S3 no LocalStack |
 | `@WithAzureEmulator` | Inicializar Service Bus e/ou Blob Storage no emulador Azure |
@@ -48,11 +49,13 @@ Importe `platform-libraries-bom` no `dependencyManagement` para não repetir ver
 </dependencies>
 ```
 
-Se os testes não fizerem requests HTTP, omita `platform-testing-http`. Kafka, banco, AWS e Azure também são dependências independentes; adicione somente o artefato usado. Todos fornecem o `platform-testing-core` transitivamente.
+Se os testes não fizerem requests HTTP, omita `platform-testing-http`. Redis, Kafka, banco, AWS e Azure também são dependências independentes; adicione somente o artefato usado. Todos fornecem o `platform-testing-core` transitivamente.
 
 Para simular o serviço de autorização, `platform-testing-authorization` já inclui `platform-authorization` e o core. A aplicação ainda declara `platform-authorization` normalmente em seu escopo de produção, conforme necessário.
 
 ## 3. Profile de teste
+
+`@PlatformIntegrationTest` ativa o profile `test`. Com `@SpringBootTest` diretamente, adicione `@ActiveProfiles("test")` quando precisar carregar este arquivo.
 
 Crie o arquivo:
 
@@ -330,6 +333,8 @@ public final class ProductClient {
 
 Uma nova especificação deve ser criada em cada operação. Não armazene o `RequestSpecification` em um campo singleton, pois o correlation ID pertence ao teste atual.
 
+Neste primeiro exemplo, `requests.create()` monta uma chamada sem autorização. Para endpoints protegidos e para o exemplo completo da seção 20, use a variante `createAuthorized(...)` da próxima seção em todas as operações protegidas.
+
 O request padrão contém:
 
 - porta aleatória do servidor;
@@ -356,6 +361,9 @@ public ProductResponse create(CreateProductRequest body) {
     return new ProductResponse(
         RestAssured.given()
             .spec(requests.createAuthorized(authorization))
+            .header("workspace-identifier", "workspace-123")
+            .header("environment-identifier", "DEV")
+            .header("application-identifier", "product-api")
             .body(body)
             .when()
             .post(BASE_PATH)
@@ -371,7 +379,12 @@ Authorization: Bearer token-product-test
 X-Account-Id: account-123
 X-Environment: DEV
 X-Application-Id: product-api
+workspace-identifier: workspace-123
+environment-identifier: DEV
+application-identifier: product-api
 ```
+
+`AuthorizationRequestData` adiciona os headers `X-*` do helper HTTP. Os três headers de identificadores adicionados explicitamente no exemplo são os nomes padrão lidos pelo `platform-authorization`; `X-Account-Id` não substitui workspace. Ajuste-os à configuração e à política do endpoint da aplicação.
 
 Para utilizar os valores genéricos da biblioteca:
 
@@ -562,7 +575,7 @@ public final class ProductRequestBuilder
 
     @Override
     public CreateProductRequest build() {
-        return new CreateProductRequest(name);
+        return new CreateProductRequest(name, new java.math.BigDecimal("100.00"), true);
     }
 }
 ```
@@ -791,7 +804,81 @@ authorizationMock.verifyCalledWithApplication("product-api");
 authorizationMock.verifyCalledWithPolicy("ADMIN");
 ```
 
-## 16. Kafka
+## 16. Redis
+
+Declare `platform-testing-redis` com escopo `test` e versão gerenciada pelo BOM:
+
+```xml
+<dependency>
+    <groupId>br.com.portalmanager.platform.library</groupId>
+    <artifactId>platform-testing-redis</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+Use `@SpringBootTest` com `@WithRedis` para testar Redis sem servidor HTTP. Se o teste também chamar uma API HTTP, use `@PlatformIntegrationTest` do artefato HTTP com `@WithRedis`.
+
+```java
+import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(properties = "spring.application.name=product-api")
+@WithRedis
+class ProductRedisIT {
+
+    @Autowired
+    private StringRedisTemplate redis;
+
+    @Autowired
+    private Environment environment;
+
+    @Test
+    void deveGravarEBuscarValor() {
+        String key = environment.getRequiredProperty("platform.redis.namespace")
+                + ".product-api:product:42";
+
+        redis.opsForValue().set(key, "Notebook");
+
+        assertThat(redis.opsForValue().get(key)).isEqualTo("Notebook");
+    }
+}
+```
+
+O exemplo usa `StringRedisTemplate`, fornecido quando a aplicação declara o starter Redis do Boot. A fixture não depende da capability `platform-redis`. Se a aplicação já usa essa capability, injete `RedisStore` normalmente: `store.set("product:42", "Notebook")` e `store.get("product:42", String.class)` recebem o prefixo automaticamente.
+
+### Conexão e imagem
+
+A anotação inicia somente o Redis declarado, configura host/porta/URL dinâmicos antes das conexões e registra `@ServiceConnection(name = "redis")`. Assim, propriedades de Cluster/Sentinel da aplicação não desviam a conexão do container. Não configure endpoints fixos nem `@DynamicPropertySource` para essa fixture.
+
+A imagem padrão é fixada por digest em `RedisContainerImages.REDIS`. Para validar outra versão, use uma tag explícita ou digest:
+
+```java
+@WithRedis(image = "redis:7.4.8-alpine")
+```
+
+A validação compartilhada `PinnedDockerImage` recusa referências sem versão e tags flutuantes, como `latest`.
+
+### Namespace e limpeza
+
+Cada contexto de classe recebe um namespace exclusivo e `platform.redis.namespace-mode=ISOLATED`. Com `StringRedisTemplate` único no contexto, a extensão limpa antes de cada método somente as chaves `<namespace>.<spring.application.name>:` usando SCAN/DEL. Chaves fora desse prefixo permanecem; não há FLUSH global. O nome do serviço deve usar letras, números, ponto, traço ou underscore.
+
+Para preservar estado deliberadamente entre métodos:
+
+```java
+@WithRedis(cleanupBeforeEach = false)
+```
+
+Sem template resolvido sem ambiguidade, a extensão não faz limpeza automática. Conexões próprias e testes apenas reativos devem cuidar dos dados entre métodos. O contexto/container pode ser reutilizado na mesma classe e é encerrado ao fechar o contexto; a limpeza compartilhada exige execução sequencial dos métodos.
+
+A fixture apenas fornece Redis. Spring Cache continua opt-in por `platform.redis.cache.enabled=true` quando a aplicação usa `platform-redis`. Veja [o README da fixture](../platform-testing-redis/README.md) para configuração, erros e comandos.
+
+## 17. Kafka
 
 Adicione `@WithKafka` quando o teste precisar publicar ou consumir mensagens:
 
@@ -817,7 +904,7 @@ class ProductEventPublisherIT {
 
 O endereço do broker é registrado automaticamente. As propriedades de serializers, consumers e nomes de tópicos continuam sob responsabilidade do microsserviço.
 
-## 17. AWS LocalStack e Azure Emulator
+## 18. AWS LocalStack e Azure Emulator
 
 Kafka, AWS e Azure são incluídos pelos módulos próprios (`platform-testing-kafka`, `platform-testing-cloud-aws` e `platform-testing-cloud-azure`). As anotações continuam opt-in: somente os containers descritos no teste são iniciados.
 
@@ -874,7 +961,7 @@ Declare somente os serviços usados na anotação. A fixture cria os recursos de
 
 > As versões são gerenciadas pelo BOM da plataforma. Não declare versões manualmente quando o BOM estiver importado.
 
-## 18. MySQL, Kafka e autorização juntos
+## 19. MySQL, Kafka e autorização juntos
 
 ```java
 @PlatformIntegrationTest
@@ -885,7 +972,9 @@ class ProductCompleteFlowIT {
 }
 ```
 
-## 19. Exemplo completo
+## 20. Exemplo completo
+
+Este exemplo usa o ProductClient com `createAuthorized(...)` e os headers de workspace, ambiente e aplicação da seção 9. O controller da aplicação deve declarar sua política de autorização para que as chamadas ao mock ocorram.
 
 ```java
 package com.empresa.product.integration;
@@ -949,7 +1038,7 @@ class ProductControllerIT {
 }
 ```
 
-## 20. Qual recurso usar
+## 21. Qual recurso usar
 
 | Necessidade | Recurso recomendado |
 |---|---|
@@ -965,9 +1054,10 @@ class ProductControllerIT {
 | Criar massa válida | `TestDataFactory<T>` |
 | Variar campos da massa | `TestDataBuilder<T>` |
 | Preparar vários recursos | `TestScenario<R>` |
+| Testar Redis real | `@WithRedis` |
 | Testar mensagens | `@WithKafka` |
 
-## 21. Problemas comuns
+## 22. Problemas comuns
 
 ### Docker não está disponível
 
@@ -1027,28 +1117,34 @@ Essa anotação substitui `platform.authorization.service-url` pela URL dinâmic
 
 Confirme que `CleanupMode.NONE` não está ativo e que a tabela não foi adicionada acidentalmente a `excludeTables`.
 
+### Dados Redis permaneceram entre métodos
+
+Verifique `cleanupBeforeEach`, a presença de um `StringRedisTemplate` resolvido sem ambiguidade e o prefixo `<namespace>.<spring.application.name>:`. Chaves criadas diretamente com outro prefixo não são removidas. Não sobrescreva o namespace isolado nem o modo ISOLATED da fixture. Consulte [Redis](#16-redis).
+
 ### Execução paralela
 
-Os requests HTTP não utilizam estado global e o correlation ID é isolado por thread. Porém, testes que compartilham o mesmo banco não devem executar em paralelo quando fazem limpeza das mesmas tabelas.
+Os requests HTTP não utilizam estado global e o correlation ID é isolado por thread. Porém, testes que compartilham o mesmo banco não devem executar em paralelo quando fazem limpeza das mesmas tabelas. O mesmo vale para métodos que compartilham o namespace Redis com limpeza antes de cada teste.
 
-## 22. Checklist de adoção
+## 23. Checklist de adoção
 
 - [ ] Adicionar os artefatos de teste necessários com escopo `test`.
 - [ ] Criar `application-test.yml`.
 - [ ] Organizar `client`, `response`, `builder`, `factory`, `scenario` e `integration`.
 - [ ] Adicionar `@PlatformIntegrationTest` aos testes HTTP.
 - [ ] Adicionar `@WithMySql` somente onde houver banco.
+- [ ] Adicionar `platform-testing-redis` e `@WithRedis` somente onde houver Redis.
+- [ ] Usar o namespace da fixture nas chaves Redis e revisar a limpeza entre métodos.
 - [ ] Manter scripts em `src/test/resources/sql`.
 - [ ] Criar scripts de cleanup idempotentes.
 - [ ] Adicionar `@WithMockAuthorization` somente quando necessário.
 - [ ] Criar requests autorizados explicitamente.
 - [ ] Criar um request novo em cada operação do client.
 - [ ] Manter dados e regras específicas dentro do microsserviço.
-- [ ] Executar `mvn test` com Java 25 e Docker disponíveis.
+- [ ] Executar `mvn test` para unitários e `mvn verify` para integrações Failsafe, com Java 25 e Docker disponíveis.
 
-## 23. Comandos de execução
+## 24. Comandos de execução
 
-Executar os testes do módulo ou microsserviço:
+Executar testes unitários pelo Surefire:
 
 ```bash
 mvn test
@@ -1060,15 +1156,21 @@ Executar o ciclo completo quando o Maven Failsafe estiver configurado:
 mvn verify
 ```
 
-Executar somente um teste:
+Executar somente uma integração pelo Failsafe:
 
 ```bash
-mvn -Dtest=ProductControllerIT test
+mvn -Dit.test=ProductControllerIT verify
 ```
 
-## 24. Testes unitários
+Para uma classe unitária pelo Surefire:
 
-Testes unitários não devem inicializar Spring, MySQL, Kafka, WireMock ou servidor HTTP. Utilize `@PlatformUnitTest` para configurar Mockito e o isolamento dos contextos comuns:
+```bash
+mvn -Dtest=ProductServiceTest test
+```
+
+## 25. Testes unitários
+
+Testes unitários não devem inicializar Spring, MySQL, Redis, Kafka, WireMock ou servidor HTTP. Utilize `@PlatformUnitTest` para configurar Mockito e o isolamento dos contextos comuns:
 
 ```java
 package com.empresa.product.core;
@@ -1194,6 +1296,7 @@ Se o teste precisar de qualquer item abaixo, utilize a estrutura de integração
 - chamada HTTP;
 - RestAssured;
 - Kafka real;
+- Redis real;
 - WireMock;
 - Testcontainers.
 
@@ -1204,5 +1307,6 @@ Resumo:
 | Testar uma classe isoladamente | `@PlatformUnitTest` |
 | Testar a aplicação Spring e HTTP | `@PlatformIntegrationTest` |
 | Adicionar banco real | `@WithMySql` |
+| Adicionar Redis real | `@WithRedis` |
 | Adicionar mensageria real | `@WithKafka` |
 | Simular o autorizador | `@WithMockAuthorization` |

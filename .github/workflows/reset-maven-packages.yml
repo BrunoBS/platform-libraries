@@ -57,6 +57,7 @@ jobs:
             platform-observability
             platform-messaging
             platform-message-queue
+            platform-redis
             platform-schema-validation
             platform-authorization
             platform-audit
@@ -68,6 +69,7 @@ jobs:
             platform-testing-http
             platform-testing-authorization
             platform-testing-kafka
+            platform-testing-redis
             platform-testing-database
             platform-testing-cloud-aws
             platform-testing-cloud-azure

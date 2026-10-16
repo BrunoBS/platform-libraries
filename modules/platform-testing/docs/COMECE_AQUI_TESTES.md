@@ -1,4 +1,4 @@
-# Comece aqui — Testes com platform-testing-core
+# Comece aqui — Platform Testing
 
 Este guia apresenta as APIs de Platform Testing e a organização recomendada para testes de integração. Consulte o [mapa de artefatos](../README.md) e adicione apenas os módulos usados.
 
@@ -42,12 +42,24 @@ Adicione apenas o que precisar:
 
 - `@WithMySql`: banco real via Testcontainers;
 - `@WithKafka`: Kafka real;
+- `@WithRedis`: Redis real, conexão dinâmica e namespace exclusivo;
 - `@WithMockAuthorization`: autorizador simulado, disponível em `platform-testing-authorization`;
 - `@WithDatabaseScripts`: views, procedures ou SQL de preparação.
 
 ## 3. Infraestrutura opcional
 
-As fixtures de Kafka, AWS e Azure ficam em artefatos próprios. Adicione `platform-testing-kafka`, `platform-testing-cloud-aws` ou `platform-testing-cloud-azure` apenas quando os testes precisarem delas. Veja [AWS LocalStack e Azure Emulator](GUIA_DE_USO.md#17-aws-localstack-e-azure-emulator).
+As fixtures de Redis, Kafka, AWS e Azure ficam em artefatos próprios. Adicione `platform-testing-redis`, `platform-testing-kafka`, `platform-testing-cloud-aws` ou `platform-testing-cloud-azure` apenas quando os testes precisarem delas. Veja [Redis](GUIA_DE_USO.md#16-redis) e [AWS LocalStack e Azure Emulator](GUIA_DE_USO.md#18-aws-localstack-e-azure-emulator).
+
+Para Redis sem HTTP, use `@SpringBootTest` + `@WithRedis`. Para uma API que também usa Redis:
+
+```java
+@PlatformIntegrationTest
+@WithRedis
+class ProductCacheIT {
+}
+```
+
+Declare `platform-testing-redis` em `test`, além do artefato HTTP neste segundo caso. A aplicação fornece o starter/capability Redis. Não configure host/porta fixos: a fixture aponta a conexão para o container e define o namespace. Com `RedisStore`, o prefixo é automático; com `StringRedisTemplate`, componha a chave com `<namespace>.<spring.application.name>:` para participar da limpeza. [Exemplo completo](../platform-testing-redis/README.md).
 
 ## 4. Organização recomendada
 
@@ -295,7 +307,7 @@ Quando uma feature ainda não possui testes:
 11. Implemente autorização
 12. Revise edge cases
 13. Rode a classe isolada
-14. Rode mvn verify
+14. Rode mvn verify (inclui integrações configuradas no Failsafe)
 ```
 
 ## 11. Checklist para CRUD
@@ -508,13 +520,11 @@ Se essas mudanças quebram testes, a suíte está protegendo comportamento, não
 | Como validar/extrair resposta? | Response |
 | O que precisa existir antes? | Scenario |
 | Onde fica a regra testada? | IntegrationTest |
-| Quem sobe cada serviço? | O artefato Database, Kafka, AWS, Azure ou Authorization correspondente |
+| Quem sobe cada serviço? | O artefato Database, Redis, Kafka, AWS, Azure ou Authorization correspondente |
 
-## 20. Projeto de referência
+## 20. Cobertura de referência
 
-O `account-api` é o projeto piloto de referência.
-
-A suíte de Account demonstra:
+Use os exemplos de produtos deste guia como estrutura e adapte os cenários ao domínio do microsserviço. Uma suíte completa deve cobrir:
 
 - CRUD;
 - filtros;
@@ -530,5 +540,5 @@ A suíte de Account demonstra:
 
 Para recursos avançados da biblioteca, consulte também:
 
-- `README.md`;
-- `GUIA_DE_USO.md`.
+- [Mapa dos artefatos](../README.md);
+- [Guia completo](GUIA_DE_USO.md).

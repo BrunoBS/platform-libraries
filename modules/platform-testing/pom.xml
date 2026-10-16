@@ -15,6 +15,7 @@
         <module>platform-testing-http</module>
         <module>platform-testing-authorization</module>
         <module>platform-testing-kafka</module>
+        <module>platform-testing-redis</module>
         <module>platform-testing-database</module>
         <module>platform-testing-cloud-aws</module>
         <module>platform-testing-cloud-azure</module>
