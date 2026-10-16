@@ -17,3 +17,9 @@ Declare o módulo com escopo `test` e versão gerenciada pelo `platform-librarie
 ## Fixture
 
 Use `@WithMockAuthorization` para registrar o WireMock e configurar a resposta padrão. O módulo fornece `AuthorizationMock`, `AuthorizationSessionBuilder`, `AuthorizationSessionCustomizer`, `AuthorizationResourceMatcher` e a anotação `@WithMockAuthorization`. As regras e o cliente reais continuam em `platform-authorization`; este módulo contém apenas suporte de teste.
+
+## Documentação relacionada
+
+- [Seleção dos artefatos](../README.md)
+- [Mock de autorização no guia completo](../docs/GUIA_DE_USO.md#15-mock-de-autorização)
+- [Pacotes e relações das classes](../docs/PACKAGES_AND_CLASSES.md#brcomportalmanagerplatformlibrarytestingauthorization)

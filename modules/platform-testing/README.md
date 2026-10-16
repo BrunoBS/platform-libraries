@@ -1,12 +1,13 @@
 # Platform Testing
 
-Os módulos de teste são organizados por contexto para que cada serviço traga apenas as fixtures que usa. `platform-testing` é somente um agregador Maven: os artefatos consumíveis são os sete JARs abaixo. Todos são usados com escopo `test`.
+Os módulos de teste são organizados por contexto para que cada serviço traga apenas as fixtures que usa. `platform-testing` é somente um agregador Maven: os artefatos consumíveis são os oito JARs abaixo. Todos são usados com escopo `test`.
 
 | Artefato | Responsabilidade | Dependências próprias |
 |---|---|---|
 | `platform-testing-core` | Arquitetura, ciclo de vida, `TestContext`, builders, factories, cenários, relógio e IDs | ArchUnit, JUnit, AssertJ, Spring Test, Mockito Extension e SLF4J |
 | `platform-testing-http` | `@PlatformIntegrationTest`, clients e requests RestAssured | Spring Boot Web, RestAssured e Jackson |
 | `platform-testing-authorization` | `@WithMockAuthorization` e mock do serviço de autorização | `platform-authorization` e WireMock |
+| `platform-testing-redis` | `@WithRedis`, imagem versionada, conexão dinâmica e limpeza por namespace | Testcontainers, Spring Data Redis e `platform-messaging` |
 | `platform-testing-kafka` | `@WithKafka`, container e provisionamento de tópicos | Spring Kafka, Testcontainers Kafka e `platform-messaging` |
 | `platform-testing-database` | `@WithMySql`, scripts, limpeza e ciclo de vida do banco | JDBC, driver MySQL, Testcontainers MySQL e `platform-messaging` |
 | `platform-testing-cloud-aws` | LocalStack, SQS, S3 e notificações S3→SQS | Testcontainers LocalStack, AWS SDK SQS/S3 e `platform-messaging` |
@@ -36,7 +37,7 @@ Importe o BOM da plataforma no `dependencyManagement` do serviço e declare some
 </dependencies>
 ```
 
-`platform-testing-authorization` já depende de `platform-testing-core` e `platform-authorization`. Os módulos HTTP, Kafka, database, AWS e Azure também dependem do core, sem dependência entre si. O módulo Authorization permanece isolado e não é dependência do Core; assim não há ciclo entre `platform-authorization` e fixtures de teste.
+`platform-testing-authorization` já depende de `platform-testing-core` e `platform-authorization`. Os módulos HTTP, Redis, Kafka, database, AWS e Azure também dependem do core, sem dependência entre si. O módulo Authorization permanece isolado e não é dependência do Core; assim não há ciclo entre `platform-authorization` e fixtures de teste.
 
 ## Escopos e imagens
 
@@ -47,3 +48,13 @@ As dependências de cada integração são transitivas a partir do artefato corr
 ## Mapa do código
 
 Cada artefato mantém seus pacotes sob `br.com.portalmanager.platform.library.testing`, por contexto. O agregador não contém classes Java nem dependências de runtime. A árvore e os detalhes das APIs estão em [Responsabilidades por pacote e classe](docs/PACKAGES_AND_CLASSES.md); exemplos completos estão no [Guia de uso](docs/GUIA_DE_USO.md).
+
+## Guias
+
+- [Escolha dos artefatos](docs/USAGE.md)
+- [Primeiros testes](docs/COMECE_AQUI_TESTES.md)
+- [Guia completo de uso](docs/GUIA_DE_USO.md)
+- [Arquitetura](docs/ARCHITECTURE.md)
+- [Estrutura de pacotes](docs/ESTRUTURA_DE_PACOTES.md)
+- [Diagramas e inventário de classes](docs/PACKAGES_AND_CLASSES.md)
+- [Fixture Redis: configuração, exemplos e limpeza](platform-testing-redis/README.md)

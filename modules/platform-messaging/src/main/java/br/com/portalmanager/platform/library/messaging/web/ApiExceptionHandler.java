@@ -26,6 +26,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -211,6 +213,25 @@ public class ApiExceptionHandler {
                 locale,
                 request
         );
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        ResponseEntity<ApiErrorResponse> response = resolve(
+                new ApiException(
+                        PlatformMessageKeys.METHOD_NOT_ALLOWED,
+                        Map.of("0", exception.getMethod())
+                ),
+                locale,
+                request
+        );
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .headers(exception.getHeaders())
+                .body(response.getBody());
     }
 
     @ExceptionHandler(Exception.class)

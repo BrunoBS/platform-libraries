@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "platform.redis.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Enable passive Platform Redis APIs and declared listener infrastructure."
+    }
+  ]
+}

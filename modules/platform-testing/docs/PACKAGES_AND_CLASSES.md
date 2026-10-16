@@ -1,10 +1,10 @@
 # Mapa visual das APIs de teste da plataforma
 
-O mapa cobre as APIs dos sete artefatos de teste. Use a tabela da [arquitetura](ARCHITECTURE.md) para encontrar o módulo proprietário de cada pacote. Os pacotes `architecture`, `context`, `fixture` e `lifecycle` pertencem ao Core; `http` a HTTP; `authorization` a Authorization; `kafka` a Kafka; `database` a Database; e `cloud.aws`/`cloud.azure` aos módulos correspondentes. Cada contexto mantém seus próprios erros de configuração, sem adicionar `platform-messaging` ao Core.
+O mapa cobre as APIs dos oito artefatos de teste. Use a tabela da [arquitetura](ARCHITECTURE.md) para encontrar o módulo proprietário de cada pacote. Os pacotes `architecture`, `container`, `context`, `fixture` e `lifecycle` pertencem ao Core; `http` a HTTP; `authorization` a Authorization; `redis` a Redis; `kafka` a Kafka; `database` a Database; e `cloud.aws`/`cloud.azure` aos módulos correspondentes. Cada contexto mantém seus próprios erros de configuração, sem adicionar `platform-messaging` ao Core.
 
-Este guia mostra como as peças do módulo se conectam e, em seguida, descreve **todas as classes de produção, pacote por pacote**. Use os diagramas para entender o caminho de execução e as tabelas para consultar o papel e as relações de cada classe.
+Este guia mostra como as peças do módulo se conectam e, em seguida, descreve **todos os tipos de produção de nível superior, pacote por pacote**. Use os diagramas para entender o caminho de execução e as tabelas para consultar o papel e as relações de cada classe.
 
-As setas indicam configuração, criação, chamada ou uso. Quando uma classe fica no microsserviço consumidor, isso está indicado explicitamente. Classes internas com visibilidade de pacote são identificadas como apoio interno.
+As setas indicam configuração, criação, chamada ou uso. Quando uma classe fica no microsserviço consumidor, isso está indicado explicitamente. Tipos aninhados, como builders e enums de opções, são descritos junto ao tipo que os declara.
 
 ## Visão geral: onde o teste encontra a biblioteca
 
@@ -61,9 +61,9 @@ flowchart TB
     Builder -->|extends| BuilderBase
     BuilderBase -->|implements| BuilderContract
     Factory -->|extends| FactoryBase
-    FactoryBase -->|obtains builder| Builder
+    FactoryBase -->|obtém builder| Builder
     Scenario -->|implements| ScenarioContract
-    Scenario -->|composes| Factory
+    Scenario -->|compõe| Factory
 ```
 
 **Como ler:** o builder constrói um objeto; a factory usa o builder para expor variações semânticas; um scenario combina a massa e a preparação de pré-condições. A biblioteca não fornece scenarios de domínio prontos.
@@ -135,6 +135,47 @@ flowchart TB
 ```
 
 A limpeza do banco e a execução de scripts são mecanismos separados: **MySqlTestExtension** limpa tabelas; **DatabaseScriptExtension** executa setup e cleanup configurados.
+
+## Kafka
+
+```mermaid
+flowchart TB
+    Annotation["@WithKafka"]
+    Customizer["KafkaTestContextCustomizerFactory"]
+    Configuration["KafkaTestConfiguration"]
+    Container["KafkaTestContainer"]
+    Connection["Conexão Kafka do Spring Boot"]
+    Annotation --> Configuration
+    Annotation -. "descoberta via Spring Test SPI" .-> Customizer
+    Customizer -->|"imagem e tópicos"| Configuration
+    Configuration --> Container
+    Container -->|"ServiceConnection"| Connection
+```
+
+O container cria os tópicos declarados. Serializers, producers e consumers continuam na aplicação; não há limpeza automática dos tópicos entre métodos.
+
+## Redis
+
+```mermaid
+flowchart TB
+    WithRedis["@WithRedis"]
+    Customizer["RedisTestContextCustomizerFactory"]
+    Config["RedisTestConfiguration"]
+    Container["GenericContainer Redis"]
+    Connection["Conexão Redis do Spring Boot"]
+    Extension["RedisTestExtension"]
+    Template["StringRedisTemplate do contexto"]
+
+    WithRedis --> Config
+    WithRedis --> Extension
+    Customizer -->|"imagem e namespace por classe"| Config
+    Config --> Container
+    Container -->|"propriedades dinâmicas e ServiceConnection"| Connection
+    Connection --> Template
+    Extension -->|"SCAN/DEL somente no namespace"| Template
+```
+
+O customizer é descoberto via `spring.factories` e só atua nas classes com `@WithRedis`. A conexão reutiliza o container do contexto. A limpeza ocorre antes de cada método quando habilitada e existe um template resolvido sem ambiguidade; não usa FLUSH global. A fixture não depende da capability `platform-redis`.
 
 ## AWS LocalStack
 
@@ -212,6 +253,8 @@ flowchart TB
 
 ## Inventário por pacote
 
+Os pacotes seguem ordem alfabética. Cada tipo aparece uma única vez, no pacote declarado no código.
+
 ### br.com.portalmanager.platform.library.testing.architecture
 
 | Classe | O que faz | Relação com as demais |
@@ -222,8 +265,8 @@ flowchart TB
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
-| **PlatformArchitectureTest** | Anotação opt-in que define pacotes do serviço e pacotes base observados. | Ativa **PlatformArchitectureExtension**. |
 | **CoversClasses** | Declara as classes de produção cobertas por uma classe de teste. | Lida por **PlatformArchitectureExtension** para aceitar cobertura explícita, inclusive quando um teste cobre vários tipos. |
+| **PlatformArchitectureTest** | Anotação opt-in que define pacotes do serviço e pacotes base observados. | Ativa **PlatformArchitectureExtension**. |
 
 ### br.com.portalmanager.platform.library.testing.authorization
 
@@ -243,110 +286,117 @@ flowchart TB
 |---|---|---|
 | **WithMockAuthorization** | Ativa a simulação de autorização numa classe de teste e escolhe o resultado padrão. | Importa **AuthorizationMockTestConfiguration** e registra **AuthorizationMockExtension**; usa **AuthorizationMockResult**. |
 
-## Cloud testing packages
+### br.com.portalmanager.platform.library.testing.cloud.aws
 
-The provider package keeps only the shared emulator lifecycle and its registrar. Each capability lives under its own feature package; annotations follow the feature they configure.
-
-```mermaid
-flowchart TD
-    A["@WithAwsLocalStack"] --> R["AWS registrar"]
-    R --> L["LocalStack"]
-    L --> S3["aws.s3"]
-    L --> SQS["aws.sqs"]
-    S3 --> LINK["aws.s3sqs"]
-    SQS --> LINK
-```
-
-### br.com.portalmanager.platform.library.testing.cloud
-
-| Class | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `AnnotationContextCustomizerFactory` | Captures one feature annotation in Spring's context cache key. | The AWS and Azure modules extend it with provider-specific annotation types; each provider registers its factory from its own JAR. |
+| **AwsCloudTestContextCustomizerFactory** | Inclui a declaração WithAwsLocalStack na chave do contexto Spring. | Estende **AnnotationContextCustomizerFactory**; registrada em spring.factories do módulo AWS. |
+| **AwsContainerImages** | Define a imagem LocalStack padrão versionada. | Usada pela anotação **WithAwsLocalStack**. |
+| **AwsLocalStackConnection** | Fornece endpoint, região e credenciais do container de teste. | Usada pelas factories de clients S3 e SQS. |
+| **AwsLocalStackContainer** | Inicia LocalStack e provisiona filas, DLQs, buckets e notificações declaradas. | Recebe a configuração normalizada pelo registrar e fornece AwsLocalStackConnection. |
+| **AwsLocalStackImportRegistrar** | Lê a anotação, valida a configuração e registra LocalStack e os recursos selecionados. | Importado por WithAwsLocalStack; delega registro dos clients aos apoios S3/SQS. |
+| **AwsService** | Associa os serviços suportados aos nomes reconhecidos pelo LocalStack. | Usado para iniciar somente os serviços solicitados. |
+| **AwsTestingTechnicalErrors** | Cria os erros de configuração do módulo AWS. | Usado pelo registrar ao validar as declarações de S3, SQS e notificações. |
 
-### AWS shared package: `testing.cloud.aws`
+### br.com.portalmanager.platform.library.testing.cloud.aws.annotation
 
-| Class | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `AwsLocalStackImportRegistrar` | Reads the provider-level annotation, validates its image and wires LocalStack plus enabled feature support. | Imported by `WithAwsLocalStack`; delegates client registration to the S3 and SQS feature packages. |
-| `AwsTestingTechnicalErrors` | Cria os erros de configuração do módulo AWS. | Usado pelo registrar ao validar as declarações de S3, SQS e notificações. |
-| `AwsLocalStackContainer` | Starts LocalStack and provisions the declared queues, DLQs, buckets and notifications. | Receives normalized configuration from the registrar; feature annotations select those resources. |
-| `AwsLocalStackConnection` | Exposes endpoint, region and credentials from the running container. | Injected into S3 and SQS client factories. |
-| `AwsService` | Maps supported LocalStack services to their LocalStack names. | Used by the container to start only the requested services. |
+| **WithAwsLocalStack** | Ativa LocalStack e compõe as declarações opcionais S3, SQS e notificações. | Importa AwsLocalStackImportRegistrar; reconhecida por AwsCloudTestContextCustomizerFactory. |
 
-### AWS provider annotation: `testing.cloud.aws.annotation`
+### br.com.portalmanager.platform.library.testing.cloud.aws.s3
 
-| Annotation | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `WithAwsLocalStack` | Enables the LocalStack provider and composes optional feature declarations. | Imports the registrar; embeds feature annotations from `aws.s3.annotation`, `aws.sqs.annotation` and `aws.s3sqs.annotation`. |
+| **AwsS3ClientFactoryBean** | Cria e encerra o S3Client do AWS SDK apontando para LocalStack. | Registrada por AwsS3TestSupport; usa AwsLocalStackConnection. |
+| **AwsS3TestSupport** | Registra a factory do client quando S3 está habilitado. | Chamado pelo registrar quando AwsS3 está presente. |
 
-### AWS S3: `testing.cloud.aws.s3`
+### br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation
 
-| Class | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `AwsS3ClientFactoryBean` | Creates and closes the AWS SDK `S3Client` against LocalStack. | Uses `AwsLocalStackConnection`; registered by `AwsS3TestSupport`. |
-| `AwsS3TestSupport` | Registers the S3 client factory when the S3 feature is enabled. | Called by the provider registrar when `@AwsS3` is present. |
+| **AwsS3** | Declara buckets S3 a provisionar no teste. | Compõe WithAwsLocalStack; interpretada pelo registrar e pelo container. |
 
-Annotation package `testing.cloud.aws.s3.annotation`: `AwsS3` declares the buckets to provision; the registrar passes them to LocalStack.
+### br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation
 
-### AWS SQS: `testing.cloud.aws.sqs`
-
-| Class | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `AwsSqsClientFactoryBean` | Creates and closes the AWS SDK `SqsClient` against LocalStack. | Uses `AwsLocalStackConnection`; registered by `AwsSqsTestSupport`. |
-| `AwsSqsTestSupport` | Registers the SQS client factory when the SQS feature is enabled. | Called by the provider registrar when `@AwsSqs` is present. |
+| **AwsS3SqsNotification** | Liga um bucket declarado a uma fila SQS padrão declarada. | Compõe WithAwsLocalStack; registrar valida os vínculos e container cria notificação e política. |
 
-Annotation package `testing.cloud.aws.sqs.annotation`: `AwsSqs` declares queues and optional DLQ policies; its nested `Queue` describes each queue.
+### br.com.portalmanager.platform.library.testing.cloud.aws.sqs
 
-### AWS S3-to-SQS integration: `testing.cloud.aws.s3notificationsqs`
-
-Annotation package `testing.cloud.aws.s3notificationsqs.annotation`: `AwsS3SqsNotification` links a declared bucket to a declared standard queue. The provider registrar validates both feature declarations and the LocalStack container provisions the notification and queue policy.
-
-### Azure shared package: `testing.cloud.azure`
-
-| Class | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `AzureEmulatorImportRegistrar` | Reads and validates image settings, then registers only selected emulator services and clients. | Imported by `WithAzureEmulator`; delegates to the Blob and Service Bus feature packages. |
-| `AzureTestingTechnicalErrors` | Cria os erros de configuração do módulo Azure. | Usado pelo registrar e pelo container Service Bus ao validar a configuração. |
-| `AzureServiceTestSupport` | Shared contract for registering a service-specific Spring test client. | Implemented by the Azure Service Bus support and consumed by the registrar. |
+| **AwsSqsClientFactoryBean** | Cria e encerra o SqsClient do AWS SDK apontando para LocalStack. | Registrada por AwsSqsTestSupport; usa AwsLocalStackConnection. |
+| **AwsSqsTestSupport** | Registra a factory do client quando SQS está habilitado. | Chamado pelo registrar quando AwsSqs está presente. |
 
-Provider annotation package `testing.cloud.azure.annotation`: `WithAzureEmulator` enables the Azure emulators and composes optional feature annotations.
+### br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation
 
-### Azure Blob Storage: `testing.cloud.azure.blob`
-
-| Class | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `AzureBlobStorageContainer` | Starts Azurite and creates the configured containers. | Created by the provider registrar from `@AzureBlobStorage`. |
-| `AzureBlobStorageTestSupport` | Registers the Blob client factory. | Called by the registrar when Blob Storage is enabled. |
+| **AwsSqs** | Declara filas e opções de DLQ; o tipo aninhado Queue descreve cada fila. | Compõe WithAwsLocalStack; suas opções são aplicadas pelo container. |
 
-Feature annotation package `testing.cloud.azure.blob.annotation`: `AzureBlobStorage` lists Blob containers to provision.
+### br.com.portalmanager.platform.library.testing.cloud.azure
 
-### Azure Service Bus: `testing.cloud.azure.servicebus`
-
-| Class | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `AzureServiceBusContainer` | Coordinates SQL Server and Service Bus Emulator startup. | Created from `@AzureServiceBus`; supplies connection data to the client factory. |
-| `AzureServiceBusClientBuilderFactoryBean` | Creates the SDK `ServiceBusClientBuilder` pointed to the emulator. | Uses `AzureServiceBusContainer`; registered by `AzureServiceBusTestSupport`. |
-| `AzureServiceBusTestSupport` | Registers the Service Bus client builder. | Called when the Service Bus feature is enabled. |
+| **AzureCloudTestContextCustomizerFactory** | Inclui a declaração WithAzureEmulator na chave do contexto Spring. | Estende **AnnotationContextCustomizerFactory**; registrada em spring.factories do módulo Azure. |
+| **AzureContainerImages** | Define as imagens versionadas de Azurite, Service Bus e SQL Server. | Usada pelas anotações e containers das fixtures Azure. |
+| **AzureEmulatorImportRegistrar** | Valida as opções e registra somente os emuladores e clients selecionados. | Importado por WithAzureEmulator; delega aos apoios Blob e Service Bus. |
+| **AzureServiceTestSupport** | Contrato de registro de suporte de serviço no contexto Spring. | Implementado por AzureServiceBusTestSupport e usado pelo registrar. |
+| **AzureTestingTechnicalErrors** | Cria os erros de configuração do módulo Azure. | Usado pelo registrar e pelo container Service Bus ao validar a configuração. |
 
-Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureServiceBus` declares queues, sessions and delivery settings.
+### br.com.portalmanager.platform.library.testing.cloud.azure.annotation
 
-### Azure Blob-to-Service Bus integration: `testing.cloud.azure.blobservicebus`
-
-| Class | Responsibility | Relationship |
+| Classe | O que faz | Relação com as demais |
 |---|---|---|
-| `AzureBlobServiceClientFactoryBean` | Configures the Blob SDK client to emulate the upload-created event flow used by tests. | Adds `AzureBlobCreatedEventPolicy` to the Blob client pipeline. |
-| `AzureBlobCreatedEventPolicy` | Converts a completed Blob upload into the event payload and sends it to Service Bus. | Uses the Service Bus emulator client; invoked by Blob SDK uploads in integration tests. |
+| **WithAzureEmulator** | Ativa os emuladores Azure e compõe Blob Storage e Service Bus opcionais. | Importa AzureEmulatorImportRegistrar; reconhecida por AzureCloudTestContextCustomizerFactory. |
+
+### br.com.portalmanager.platform.library.testing.cloud.azure.blob
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AzureBlobStorageContainer** | Inicia Azurite e cria os containers Blob declarados. | Criado pelo registrar a partir de AzureBlobStorage. |
+| **AzureBlobStorageTestSupport** | Registra a factory do BlobServiceClient. | Chamado quando Blob está habilitado; usa AzureBlobServiceClientFactoryBean. |
+
+### br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AzureBlobStorage** | Declara os containers Blob a provisionar no Azurite. | Compõe WithAzureEmulator; interpretada pelo registrar. |
+
+### br.com.portalmanager.platform.library.testing.cloud.azure.blobservicebus
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AzureBlobCreatedEventPolicy** | Converte um upload Blob concluído em evento e o envia ao Service Bus. | Usada no pipeline Blob quando a integração Blob/Service Bus está habilitada. |
+| **AzureBlobServiceClientFactoryBean** | Cria o BlobServiceClient e configura a simulação opcional de evento após upload. | Registrada por AzureBlobStorageTestSupport; adiciona AzureBlobCreatedEventPolicy quando aplicável. |
+
+### br.com.portalmanager.platform.library.testing.cloud.azure.servicebus
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AzureServiceBusClientBuilderFactoryBean** | Cria ServiceBusClientBuilder apontando para o emulador. | Usa AzureServiceBusContainer; registrada por AzureServiceBusTestSupport. |
+| **AzureServiceBusContainer** | Coordena a inicialização do emulador Service Bus e do SQL Server requerido. | Criado a partir de AzureServiceBus; fornece os dados de conexão. |
+| **AzureServiceBusTestSupport** | Registra o builder do client Service Bus. | Implementa AzureServiceTestSupport; chamado quando Service Bus está habilitado. |
+
+### br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **AzureServiceBus** | Declara filas, sessões e opções de entrega; o tipo aninhado Queue descreve cada fila. | Compõe WithAzureEmulator; configura AzureServiceBusContainer. |
 
 ### br.com.portalmanager.platform.library.testing.container
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
-| **PinnedDockerImage** | Valida nomes de imagem com tag explícita ou digest e rejeita tags flutuantes. | Usado pelas fixtures de Database, Kafka, AWS e Azure antes de criar `DockerImageName`. Os valores padrão ficam em classes do módulo proprietário. |
+| **PinnedDockerImage** | Valida nomes de imagem com tag explícita ou digest e rejeita tags flutuantes. | Usado pelas fixtures de Database, Redis, Kafka, AWS e Azure antes de criar `DockerImageName`. Os valores padrão ficam em classes do módulo proprietário. |
 
 ### br.com.portalmanager.platform.library.testing.context
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
+| **AnnotationContextCustomizerFactory** | Inclui os atributos de uma anotação na chave do cache de contexto Spring. | Classe-base do Core estendida por **AwsCloudTestContextCustomizerFactory** e **AzureCloudTestContextCustomizerFactory**, registradas via spring.factories. |
 | **TestContext** | Mantém um correlation ID por thread e cria um ID quando ainda não existe. | A factory HTTP lê o ID; as extensões de ciclo de vida limpam o contexto ao redor de cada teste. |
 
 ### br.com.portalmanager.platform.library.testing.database
@@ -359,17 +409,19 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 | **DatabaseScriptExecutor** | Resolve, valida e executa os arquivos SQL indicados. | Chamado por **DatabaseScriptExtension** em cada fase configurada. |
 | **DatabaseScriptExtension** | Executa setup e cleanup na classe ou no método e em ordem inversa para limpeza. | É ativada por **WithDatabaseScripts** e delega SQL a **DatabaseScriptExecutor**. |
 | **DatabaseSetupPhase** | Define execução do setup SQL antes da classe ou antes de cada teste. | Usado por **WithDatabaseScripts** e interpretado por **DatabaseScriptExtension**. |
-| **MySqlTestConfiguration** | Declara um MySQL Testcontainers como service connection do Spring Boot. | Importada por **WithMySql**; fornece o banco que a extensão de limpeza acessa. |
 | **DatabaseTestingTechnicalErrors** | Cria os erros de configuração do MySQL usados pela fixture. | Usado por **MySqlTestContextCustomizerFactory** ao validar a imagem. |
+| **MySqlContainerImages** | Define a imagem MySQL padrão versionada. | Usada por **WithMySql** e **MySqlTestConfiguration**. |
+| **MySqlTestConfiguration** | Declara um MySQL Testcontainers como service connection do Spring Boot. | Importada por **WithMySql**; fornece o banco que a extensão de limpeza acessa. |
+| **MySqlTestContextCustomizerFactory** | Descobre WithMySql, valida a imagem e registra suas propriedades antes do refresh. | Registrada via Spring Test SPI; usa **PinnedDockerImage** e **DatabaseTestingTechnicalErrors** e separa contextos por imagem. |
 | **MySqlTestExtension** | Aplica o modo e as exclusões definidos na anotação MySQL. | É ativada por **WithMySql** e delega a limpeza a **DatabaseCleaner**. |
 
 ### br.com.portalmanager.platform.library.testing.database.annotation
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
-| **WithMySql** | Opt-in do MySQL e da limpeza automática de tabelas. | Importa **MySqlTestConfiguration**, registra **MySqlTestExtension** e define **CleanupMode** e tabelas excluídas. |
-| **WithDatabaseScripts** | Declara arrays de scripts de setup e cleanup, fases de execução e se erros podem ser ignorados. | Registra **DatabaseScriptExtension**; agrupe arquivos na mesma anotação quando compartilham configuração e repita-a só para grupos com opções diferentes; **DatabaseScripts** é o container Java da repetibilidade. |
 | **DatabaseScripts** | Contém várias declarações de **WithDatabaseScripts** no mesmo elemento Java. | É gerado pelo mecanismo de anotação repetível e lido pela extensão. |
+| **WithDatabaseScripts** | Declara arrays de scripts de setup e cleanup, fases de execução e se erros podem ser ignorados. | Registra **DatabaseScriptExtension**; agrupe arquivos na mesma anotação quando compartilham configuração e repita-a só para grupos com opções diferentes; **DatabaseScripts** é o container Java da repetibilidade. |
+| **WithMySql** | Opt-in do MySQL e da limpeza automática de tabelas. | Importa **MySqlTestConfiguration**, registra **MySqlTestExtension** e define **CleanupMode** e tabelas excluídas. |
 
 ### br.com.portalmanager.platform.library.testing.fixture
 
@@ -382,15 +434,15 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
-| **TestDataBuilder** | Contrato funcional: **build** produz o objeto ou DTO de teste. | Implementado por builders de domínio; aceito por **AbstractTestDataFactory**. |
 | **AbstractTestDataBuilder** | Classe-base para builders fluentes com tipo concreto preservado por **self**. | Implementa **TestDataBuilder** e simplifica os métodos encadeáveis do builder do serviço. |
+| **TestDataBuilder** | Contrato funcional: **build** produz o objeto ou DTO de teste. | Implementado por builders de domínio; aceito por **AbstractTestDataFactory**. |
 
 ### br.com.portalmanager.platform.library.testing.fixture.factory
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
-| **TestDataFactory** | Contrato funcional que expõe a massa válida padrão por **valid**. | Implementado diretamente ou herdado por factories de domínio. |
 | **AbstractTestDataFactory** | Cria a massa padrão ou aplica uma customização antes de construir o resultado. | Depende de um **TestDataBuilder** concreto; implementa **TestDataFactory**. |
+| **TestDataFactory** | Contrato funcional que expõe a massa válida padrão por **valid**. | Implementado diretamente ou herdado por factories de domínio. |
 
 ### br.com.portalmanager.platform.library.testing.fixture.scenario
 
@@ -418,10 +470,11 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 
 | Classe | O que faz | Relação com as demais |
 |---|---|---|
+| **KafkaContainerImages** | Define a imagem Kafka padrão versionada. | Usada como default de **WithKafka**. |
 | **KafkaTestConfiguration** | Cria o container Kafka como service connection do Spring Boot. | Lê as opções fornecidas por **KafkaTestContextCustomizerFactory** e fornece **KafkaTestContainer**. |
-| **KafkaTestingTechnicalErrors** | Cria os erros de configuração do Kafka usados pela fixture. | Usado por **KafkaTestContextCustomizerFactory** ao validar imagem e tópicos. |
 | **KafkaTestContainer** | Inicia Kafka e cria os tópicos opcionais declarados na anotação. | Estende o container Confluent e provisiona tópicos com AdminClient; serializers e producers continuam no serviço consumidor. |
 | **KafkaTestContextCustomizerFactory** | Lê e valida imagem/tópicos da anotação e os encaminha ao contexto Spring. | É carregado via Spring Test SPI; seu customizer participa da chave do cache e separa contextos com imagem ou tópicos diferentes. |
+| **KafkaTestingTechnicalErrors** | Cria os erros de configuração do Kafka usados pela fixture. | Usado por **KafkaTestContextCustomizerFactory** ao validar imagem e tópicos. |
 
 ### br.com.portalmanager.platform.library.testing.kafka.annotation
 
@@ -443,6 +496,22 @@ Feature annotation package `testing.cloud.azure.servicebus.annotation`: `AzureSe
 |---|---|---|
 | **PlatformIntegrationTest** | Anotação composta de Spring Boot para teste HTTP de integração, profile **test** e servidor em porta aleatória. | Importa **PlatformHttpTestConfiguration** e registra **PlatformIntegrationExtension** e **TestPerformanceExtension**. |
 | **PlatformUnitTest** | Anotação composta de Mockito e isolamento leve para testes unitários. | Registra **MockitoExtension** e **PlatformUnitTestExtension**; não sobe o contexto da aplicação. |
+
+### br.com.portalmanager.platform.library.testing.redis
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **RedisContainerImages** | Define a imagem Redis padrão fixada por digest. | Usada como default de **WithRedis** e fallback de **RedisTestConfiguration**. |
+| **RedisTestConfiguration** | Inicia GenericContainer, registra host/porta/URL dinâmicos antes das conexões e fornece ServiceConnection. | Importada por **WithRedis**; encerra o container ao fechar o contexto; usa **PinnedDockerImage** e **RedisTestingTechnicalErrors**. |
+| **RedisTestContextCustomizerFactory** | Descobre a anotação, valida a imagem e configura namespace exclusivo e modo ISOLATED. | Registrada via Spring Test SPI; imagem e classe participam da chave de cache do contexto; fornece opções para **RedisTestConfiguration**. |
+| **RedisTestExtension** | Limpa somente o namespace atual antes de cada método, por SCAN/DEL. | Registrada por **WithRedis**; usa StringRedisTemplate resolvido sem ambiguidade no contexto; respeita **cleanupBeforeEach** e não executa FLUSH global. |
+| **RedisTestingTechnicalErrors** | Define erros padronizados de configuração/imagem, startup e limpeza. | Usada por configuração, customizer e extensão com PlatformConfigurationException de Messaging. |
+
+### br.com.portalmanager.platform.library.testing.redis.annotation
+
+| Classe | O que faz | Relação com as demais |
+|---|---|---|
+| **WithRedis** | Ativa Redis real, permite escolher imagem versionada e controlar a limpeza antes de cada método. | Importa **RedisTestConfiguration**, registra **RedisTestExtension** e é reconhecida por **RedisTestContextCustomizerFactory**. |
 
 ## Como manter este mapa útil
 
