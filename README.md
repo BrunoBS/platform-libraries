@@ -98,6 +98,8 @@ platform-testing-database -> platform-testing-core
 platform-testing-cloud-aws -> platform-testing-core
 platform-testing-cloud-azure -> platform-testing-core
 platform-catalog       -> platform-messaging
+platform-catalog       -> platform-authorization
+platform-catalog       -> platform-schema-validation
 platform-redis         -> platform-messaging
 
 platform-starter
