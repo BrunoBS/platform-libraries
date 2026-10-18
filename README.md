@@ -26,6 +26,7 @@ platform-libraries/
     ├── platform-starter/
     ├── platform-observability/
     ├── platform-messaging/
+    ├── platform-message-queue/
     ├── platform-schema-validation/
     ├── platform-authorization/
     ├── platform-audit/
@@ -86,6 +87,7 @@ As dependências internas entre capabilities usam `${project.version}`. Os POMs 
 
 ```text
 platform-authorization -> platform-messaging
+platform-message-queue -> platform-messaging
 platform-audit         -> platform-authorization
 platform-audit         -> platform-messaging
 platform-testing-http -> platform-testing-core
