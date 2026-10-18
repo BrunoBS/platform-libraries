@@ -20,6 +20,8 @@ Data: 2026-10-18. Estado: **em andamento**. Esta fase antecede o inventário de 
 | DOC-007 | docs/foundation/FOUNDATION-ARCHITECTURE.md | Lista parcial de módulos e testing-core único não refletem a estrutura atual com testing dividido e message-queue/redis | Contido | Aviso de vigência histórica inserido; reescrita canônica ainda pendente |
 | DOC-008 | docs/foundation/FOUNDATION-VERSIONING.md | Declara groupId `br.com.portalmanager.platform` e que parent/dependencies não usam `${revision}`, enquanto POMs atuais usam `br.com.portalmanager.platform.library` e `${revision}` | Contido | Aviso de vigência histórica inserido; revisão integral pendente |
 | DOC-009 | docs/foundation/FOUNDATION-CHECKPOINT.md | Gates históricos ainda desmarcados apesar de código atual com namespace novo; não comprovam estado de publicação atual | Contido | Aviso de caráter histórico; verificar CI/publicação/consumo antes de encerrar |
+| DOC-010 | platform-libraries/README.md vs modules/platform-catalog/pom.xml | Diagrama omitia dependências de `platform-catalog` com `platform-authorization` e `platform-schema-validation` | Corrigido nesta branch | Diagrama alinhado às dependências Maven de runtime |
+| DOC-011 | modules/platform-testing/pom.xml e README | `platform-testing-aggregator` é POM, não JAR; oito módulos de teste consumíveis | Conferido | Preservar distinção nas receitas de consumo |
 | DOC-005 | platform-libraries e account-service | Comparar cada capability consumida, configuração, auto-configuração, testes, exemplos e documentação | Não auditado integralmente | Fazer confronto módulo a módulo |
 | DOC-006 | account-service | Verificar README, POM, pacote, macrozonas, endpoints, schema, migrations, testes e docs de refinamento contra código atual | Não auditado integralmente | Fazer confronto por zona e módulo |
 
@@ -37,4 +39,4 @@ Data: 2026-10-18. Estado: **em andamento**. Esta fase antecede o inventário de 
 
 ## Escopo e limites da primeira rodada
 
-Conferidos os READMEs e POMs raiz dos três repositórios, os documentos FOUNDATION-ARCHITECTURE, FOUNDATION-VERSIONING e FOUNDATION-CHECKPOINT, os POMs `platform-parent`, `platform-dependencies`, `platform-libraries-bom` e `modules/platform-message-queue`. Ainda não foi realizada varredura de todas as classes nem execução local de Maven/Testcontainers.
+Conferidos os READMEs e POMs raiz dos três repositórios, os documentos FOUNDATION-ARCHITECTURE, FOUNDATION-VERSIONING e FOUNDATION-CHECKPOINT, os POMs `platform-parent`, `platform-dependencies`, `platform-libraries-bom` e `modules/platform-message-queue`. Também conferidos POMs de starter, authorization, audit, catalog, schema-validation, redis, message-queue e testing, além dos READMEs de message-queue, redis, audit e testing. Ainda não foi realizada varredura de todas as classes nem execução local de Maven/Testcontainers.
