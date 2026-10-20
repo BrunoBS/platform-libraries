@@ -1,5 +1,8 @@
 # Foundation Checkpoint — FOUNDATION-GOLDEN-V1
 
+> **Nota de vigência (2026-10-18):** este documento registra o checkpoint histórico e seus gates no momento em que foi escrito. As caixas não marcadas não são evidência do estado atual da publicação. Para contratos vigentes, conferir o reactor, os POMs, o BOM, o README raiz e as execuções CI atuais. A revalidação de publicação/consumo remoto precisa ser verificada separadamente.
+
+
 ## Estado
 
 O checkpoint funcional da Foundation foi previamente validado por um consumidor Golden.

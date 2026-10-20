@@ -1,5 +1,8 @@
 # Foundation Versioning
 
+> **Nota de vigência (2026-10-18):** este texto preserva decisões e exemplos do checkpoint original, incluindo nomes, quantidades de módulos e coordenadas que podem ter mudado. A estrutura e as coordenadas vigentes estão no reactor, POMs, BOM e README raiz de `platform-libraries`. Não usar as enumerações históricas abaixo como inventário completo nem como contrato Maven atual.
+
+
 ## Princípio
 
 A Foundation possui três eixos conceitualmente independentes.
