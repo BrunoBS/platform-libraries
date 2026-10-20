@@ -51,3 +51,13 @@ Conferidos os READMEs e POMs raiz dos três repositórios, os documentos FOUNDAT
 - **Autorização**: `MOCK` é intencional na fase de desenvolvimento/validação, mesmo em infraestrutura de produção usada para testes. Para operação produtiva real, `REAL` será obrigatório. Tratar como gate futuro de go-live, não como bloqueio atual.
 - **Evidência CI**: `account-service` verify #39247602027 passou `mvn clean verify` com repositório Maven isolado, após a falha #39132494569; `platform-libraries` verify #39132515600 passou no PR documental. Execuções associadas ao HEAD atual da main não foram comprovadas nesta consulta; não extrapolar.
 - **PR de correção**: BrunoBS/account-service#50 está integrado, não pendente.
+
+## Validação cruzada de implementação — Tagging (2026-10-20)
+
+Arquivos efetivamente lidos em `account-service/main`:
+
+- `core/workspace/usecase/operations/WorkspaceCommandService.java`: `create` persiste o owner via `saveAndFlush` antes de `tags.createInitialTags`; `update` executa `tags.reconcileAndReturnManualTags` em transação. `inactivate`, `restore` e `delete` consultam `tags.findManual`.
+- `core/application/usecase/operations/ApplicationCommandService.java`: repete o mesmo contrato para Application, com `resolveActiveForUpdate`/`resolveActive` do Workspace e `finder.findActiveForUpdate` antes da reconciliação.
+- `modules/platform-tagging/README.md`: define owner persistido, reconciliação na transação do consumidor e autorização/ResourceVisibility fora da library.
+
+**Resultado limitado:** fluxo de escrita de tags coerente com o README nos dois serviços inspecionados. **Não verificado:** implementação interna de `TagManager`, consultas de tags e cobertura de autorização em todos os endpoints. Pesquisa de código GitHub não retornou resultados, o que não demonstra ausência. Não homologar integralmente Tagging/Redis/ResourceVisibility sem inspeção adicional.
