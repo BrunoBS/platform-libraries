@@ -1,5 +1,8 @@
 # Platform Libraries — Golden Platform Foundation
 
+> **Inventário atualizado de capabilities:** [catálogo de módulos](docs/foundation/PLATFORM-LIBRARIES-MODULES.md) e [arquitetura vigente](docs/foundation/FOUNDATION-ARCHITECTURE.md). O reactor também contém `platform-message-queue`; consulte o POM raiz para a lista exata. O repositório separado `platform-build` é histórico e não define o parent consumido pela Golden.
+
+
 O `platform-libraries` é o repositório consolidado da Foundation da Golden Platform.
 
 A Foundation fornece capacidades reutilizáveis e governança técnica. A Golden Reference demonstra os padrões de implementação sobre essas capacidades.
