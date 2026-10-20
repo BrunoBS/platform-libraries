@@ -1,5 +1,8 @@
-# Referência documental centralizada
+# platform-messaging
 
-A documentação humana deste projeto foi centralizada na [Golden Platform](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-messaging.md).
+Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-messaging.md).
 
-O [snapshot original](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/archive/platform-libraries/modules/platform-messaging/README.md) é preservado para rastreabilidade e não define o contrato atual. Consulte o relatório central para classificação e ressalvas.
+- [POM e dependências](pom.xml)
+- [Desenvolvimento e build do reactor](../../README.md)
+
+Execute os comandos de build na raiz do repositório para incluir os módulos dependentes. Fixtures de integração exigem Docker; agregadores POM não são dependências JAR.
