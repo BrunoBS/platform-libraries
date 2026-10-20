@@ -1,114 +1,55 @@
-# Platform Libraries — módulos da Foundation
+# Platform Libraries — catálogo vigente de módulos
 
-## Estrutura consolidada
-
-```text
-platform-parent
-platform-dependencies
-platform-libraries-bom
-
-platform-starter
-platform-observability
-platform-messaging
-platform-authorization
-platform-audit
-platform-catalog
-platform-tagging
-platform-testing-core
-```
-
-Namespace:
-
-```text
-br.com.portalmanager.platform
-```
-
-Release atual:
-
-```text
-1.0.0
-```
+> Inventário baseado no reactor `pom.xml` e nos POMs dos módulos da branch `main`, revisado em 2026-10-20.
 
 ## Módulos estruturais
 
-### platform-parent
+- `platform-parent`: parent Maven, Java 25, Maven >= 3.9.9, plugins, Enforcer, testes e qualidade.
+- `platform-dependencies`: BOM tecnológico externo.
+- `platform-libraries-bom`: BOM de versões das capabilities.
+- `platform-libraries` (POM raiz): reactor/aggregator; não é starter de runtime.
 
-Governança Maven e gates de build.
+Coordenadas Maven da Foundation: `br.com.portalmanager.platform.library`. Versão de release train configurada em `.mvn/maven.config` via `revision`, atualmente `1.0.0`.
 
-### platform-dependencies
+## Capabilities de runtime
 
-Baseline tecnológico externo.
+| Módulo | Responsabilidade | Incluído pelo starter? |
+| --- | --- | --- |
+| `platform-starter` | Agregação do baseline transversal | — |
+| `platform-observability` | Logging estruturado | Sim |
+| `platform-messaging` | Mensagens, i18n e exceptions | Sim |
+| `platform-authorization` | Autorização, contexto e filtros de visibilidade | Sim |
+| `platform-audit` | Auditoria | Não |
+| `platform-catalog` | Infraestrutura de catálogos | Não |
+| `platform-tagging` | Tags e reconciliação | Não |
+| `platform-schema-validation` | Validação de payloads por schema | Não |
+| `platform-redis` | Operações de Redis | Não |
+| `platform-message-queue` | Abstrações de mensageria/filas | Não |
 
-### platform-libraries-bom
+`platform-starter` agrega **somente** observability, messaging e authorization; outras capabilities devem ser declaradas conforme necessidade. Consulte os READMEs de cada módulo para APIs e configuração.
 
-Versões das capabilities da plataforma.
+## Testes — agregador `modules/platform-testing`
 
-## Capabilities
+O módulo `platform-testing` é um agregador Maven, com submódulos:
 
-### platform-starter
+- `platform-testing-core`
+- `platform-testing-http`
+- `platform-testing-authorization`
+- `platform-testing-database`
+- `platform-testing-kafka`
+- `platform-testing-redis`
+- `platform-testing-cloud-aws`
+- `platform-testing-cloud-azure`
 
-Agrega somente:
+Dependências de teste são opt-in; declarar apenas os módulos utilizados pelo consumidor. Não tratar todo o conteúdo como parte de `platform-testing-core`.
 
-- platform-observability;
-- platform-messaging;
-- platform-authorization.
+## Remoções e renomes
 
-### platform-observability
-
-Capability de observabilidade. No baseline atual implementa logging estruturado sob:
-
-```text
-br.com.portalmanager.platform.observability.logging
-```
-
-Não implementa métricas/tracing ainda.
-
-### platform-messaging
-
-Mensagens, i18n e tratamento padronizado de exceções. JDBC/Redis permanecem integrações opcionais.
-
-### platform-authorization
-
-Autorização e contexto do usuário. Depende de messaging.
-
-### platform-audit
-
-Publicação explícita de auditoria. Depende de authorization e messaging. Não entra pelo starter.
-
-### platform-catalog
-
-Catálogos persistidos/gerenciados. Independente de CRUD genérico. Não entra pelo starter.
-
-### platform-tagging
-
-Tagging persistido, owner isolation e reconciliação de origem. Não entra pelo starter.
-
-### platform-testing-core
-
-Capability de testing reutilizável:
-
-- `@PlatformUnitTest`;
-- `@PlatformIntegrationTest`;
-- `@PlatformArchitectureTest`;
-- MySQL/Kafka Testcontainers;
-- WireMock authorization;
-- RestAssured;
-- database scripts/cleanup;
-- fixtures/builders/factories/scenarios;
-- métricas de performance de testes.
-
-Dependências pesadas permanecem opcionais e só entram quando o consumidor declara a infraestrutura correspondente.
-
-## Remoções e renames
-
-```text
-platform-crud         → removido
-platform-logging      → platform-observability
-platform-test-support → platform-testing-core
-```
-
-Os nomes antigos não são aliases e não fazem parte do baseline vigente.
+- `platform-crud`: removido, sem substituição por CRUD genérico.
+- `platform-logging`: legado; usar `platform-observability`.
+- `platform-test-support`: legado; usar os submódulos `platform-testing-*` apropriados.
+- `platform-build` (repositório separado): linha histórica, não fonte do parent atual.
 
 ## Validação
 
-O reactor completo deve permanecer verde em Java 25 e o consumidor deve validar resolução remota antes do próximo checkpoint funcional.
+Comparar este inventário ao reactor `pom.xml` e aos POMs de cada módulo em toda alteração estrutural. Publicação no GitHub Packages e `mvn clean verify` do consumidor são verificações separadas da leitura do código.
