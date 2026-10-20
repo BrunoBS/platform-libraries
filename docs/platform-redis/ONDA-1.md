@@ -1,7 +1,5 @@
-# Onda 1 — concluída
+# Referência documental centralizada
 
-Store, AsyncStore, codec seguro Jackson 3, namespace explícito, TTL/NX e builder single use; integração no reactor/BOM sem inclusão no starter. APIs passivas autoconfiguradas, reaproveitando conexão Spring Boot. Async usa ReactiveStringRedisTemplate/toFuture, sem executor bloqueante.
+A documentação humana deste projeto foi centralizada na [Golden Platform](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-redis.md).
 
-BUILD SUCCESS em 14/10/2026 23:53:49, 37.585s: mvn --offline --batch-mode --no-transfer-progress -pl modules/platform-redis -am verify. Módulo Redis: 2 unitários + 7 integrações Redis real, zero falhas/erros/skips. Reactor incluiu testes de messaging e testing-core. Log /private/tmp/platform-redis-wave1.log.
-
-Problemas corrigidos: starter reativo ausente no cache foi baixado da Central; literal JSON do teste corrigido; coerção de número para String detectada e desabilitada explicitamente no codec. Sem divergência contratual pendente.
+O [snapshot original](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/archive/platform-libraries/docs/platform-redis/ONDA-1.md) é preservado para rastreabilidade e não define o contrato atual. Consulte o relatório central para classificação e ressalvas. As URLs da branch documental aguardam publicação coordenada.

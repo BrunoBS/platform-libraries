@@ -1,7 +1,5 @@
-# Platform Testing Core
+# Referência documental centralizada
 
-Infraestrutura de testes compartilhada: regras ArchUnit, ciclo de vida de testes, `TestContext`, builders, factories, cenários, relógio e IDs.
+A documentação humana deste projeto foi centralizada na [Golden Platform](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-testing-core.md).
 
-Use este artefato quando precisar das convenções e utilitários genéricos. As integrações opcionais ficam nos artefatos irmãos; veja o [mapa completo de módulos](../README.md) e o [guia de uso](../docs/GUIA_DE_USO.md).
-
-`@PlatformUnitTest` pertence ao Core. A anotação HTTP `@PlatformIntegrationTest` pertence a `platform-testing-http`; Redis, MySQL, Kafka, autorização e cloud são selecionados nos artefatos irmãos.
+O [snapshot original](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/archive/platform-libraries/modules/platform-testing/platform-testing-core/README.md) é preservado para rastreabilidade e não define o contrato atual. Consulte o relatório central para classificação e ressalvas. As URLs da branch documental aguardam publicação coordenada.

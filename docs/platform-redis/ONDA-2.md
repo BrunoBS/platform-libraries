@@ -1,5 +1,5 @@
-# Onda 2 — concluída
+# Referência documental centralizada
 
-Hash, Set, List, Sorted Set, Atomic implementados conforme matriz da Onda 0. HLEN/SCARD + leitura completa em um Lua impedem corrida entre verificação do limite e leitura. LRANGE/ZRANGE requerem janelas limitadas. CAS atômico em Lua, compara bytes JSON e preserva TTL; expected null exige ausência. Contadores usam INCRBY/DECRBY.
+A documentação humana deste projeto foi centralizada na [Golden Platform](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-redis.md).
 
-BUILD SUCCESS em 14/10/2026 23:56:13, 38.278s. Comando verify focado no módulo com -am; log /private/tmp/platform-redis-wave2.log. Redis: 2 unitários + 11 integrações, zero falhas/erros/skips; inclui contadores concorrentes, CAS com um vencedor, tipos nativos, limites, ordenação e TTL. Sem divergências pendentes.
+O [snapshot original](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/archive/platform-libraries/docs/platform-redis/ONDA-2.md) é preservado para rastreabilidade e não define o contrato atual. Consulte o relatório central para classificação e ressalvas. As URLs da branch documental aguardam publicação coordenada.

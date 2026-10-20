@@ -1,25 +1,5 @@
-# Platform Testing Authorization
+# Referência documental centralizada
 
-O `platform-testing-authorization` fornece fixtures para simular o serviço de autorização nos testes dos microsserviços. Ele compõe o `platform-testing-core` com as APIs do `platform-authorization`; quem declara esse módulo também recebe o suporte comum de testes.
+A documentação humana deste projeto foi centralizada na [Golden Platform](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-testing-authorization.md).
 
-## Dependência Maven
-
-Declare o módulo com escopo `test` e versão gerenciada pelo `platform-libraries-bom`:
-
-```xml
-<dependency>
-    <groupId>br.com.portalmanager.platform.library</groupId>
-    <artifactId>platform-testing-authorization</artifactId>
-    <scope>test</scope>
-</dependency>
-```
-
-## Fixture
-
-Use `@WithMockAuthorization` para registrar o WireMock e configurar a resposta padrão. O módulo fornece `AuthorizationMock`, `AuthorizationSessionBuilder`, `AuthorizationSessionCustomizer`, `AuthorizationResourceMatcher` e a anotação `@WithMockAuthorization`. As regras e o cliente reais continuam em `platform-authorization`; este módulo contém apenas suporte de teste.
-
-## Documentação relacionada
-
-- [Seleção dos artefatos](../README.md)
-- [Mock de autorização no guia completo](../docs/GUIA_DE_USO.md#15-mock-de-autorização)
-- [Pacotes e relações das classes](../docs/PACKAGES_AND_CLASSES.md#brcomportalmanagerplatformlibrarytestingauthorization)
+O [snapshot original](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/archive/platform-libraries/modules/platform-testing/platform-testing-authorization/README.md) é preservado para rastreabilidade e não define o contrato atual. Consulte o relatório central para classificação e ressalvas. As URLs da branch documental aguardam publicação coordenada.

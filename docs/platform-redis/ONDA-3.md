@@ -1,5 +1,5 @@
-# Onda 3 — concluída
+# Referência documental centralizada
 
-RedisPublisher separado de Store. Descoberta de N listeners via RedisSubscribe, canais e padrões PSUBSCRIBE, resolução genérica incluindo proxies; container somente com inscrições. Handlers fora do I/O com pool/fila limitados. Saturação descarta tarefa e incrementa counters/reporta redis.saturation; sem retry garantido. ErrorHandler customizável recebe somente causas sanitizadas. Reconexão usa backoff exponencial com jitter; stop/destroy e prazo de encerramento dos executores.
+A documentação humana deste projeto foi centralizada na [Golden Platform](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-redis.md).
 
-BUILD SUCCESS em 14/10/2026 23:58:29, 37.968s; /private/tmp/platform-redis-wave3.log. Redis: 2 unitários + 16 integrações, zero falhas/erros/skips. Inclui N canais/listeners/instâncias, padrões, separação Store/Publisher, desconexão/restart sem replay, handler falho, saturação observável e bootstrap passivo com servidor indisponível. Teste adicional de reconexão de transporte previsto na revisão de segurança final.
+O [snapshot original](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/archive/platform-libraries/docs/platform-redis/ONDA-3.md) é preservado para rastreabilidade e não define o contrato atual. Consulte o relatório central para classificação e ressalvas. As URLs da branch documental aguardam publicação coordenada.
