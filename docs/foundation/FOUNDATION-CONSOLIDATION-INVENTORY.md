@@ -1,5 +1,8 @@
 # Foundation Consolidation Inventory
 
+> **Nota de vigência (2026-10-20):** este inventário registra a consolidação na data de sua elaboração. Para o conjunto de módulos realmente declarado hoje no reactor, use [PLATFORM-LIBRARIES-MODULES.md](PLATFORM-LIBRARIES-MODULES.md). Não tratar menções a módulos removidos como contrato atual.
+
+
 ## Objetivo
 
 Inventário anterior à consolidação de `platform-build` dentro de `platform-libraries`.
