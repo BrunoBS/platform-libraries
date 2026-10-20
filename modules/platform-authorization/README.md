@@ -1,5 +1,8 @@
 # Platform Authorization (`platform-authorization`)
 
+> **Contrato adicional confirmado no código:** `ResourceVisibilityAspect` rejeita sessão ausente e grupos autorizadores vazios (exceto OWNER), ativa filtro Hibernate por entidade e o remove em `finally` apenas quando foi o ativador. `ResourceVisibilityFilterManager` normaliza grupos, elimina duplicatas e limita a 500. **Filtros Hibernate não devem ser presumidos sobre SQL nativo**; consultas nativas exigem escopo explícito e testes negativos. Autorização de operação e visibilidade de entidade são controles distintos.
+
+
 O `platform-authorization` padroniza a integração dos microsserviços com a Authorization API e mantém o contexto de autorização da requisição. A decisão de autorização pertence à Authorization API; a library atua como cliente/proxy e não consulta views nem reproduz a hierarquia de permissões.
 
 ## Modos
