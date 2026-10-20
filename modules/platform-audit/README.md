@@ -1,6 +1,6 @@
 # platform-audit
 
-Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-audit.md).
+Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/main/docs/libraries/modules/platform-audit.md).
 
 - [POM e dependências](pom.xml)
 - [Desenvolvimento e build do reactor](../../README.md)

@@ -11,6 +11,11 @@
         <dependencies>
             <dependency>
                 <groupId>br.com.portalmanager.platform.library</groupId>
+                <artifactId>platform-parameter-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.portalmanager.platform.library</groupId>
                 <artifactId>platform-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
