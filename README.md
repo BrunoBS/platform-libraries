@@ -13,5 +13,3 @@ mvn --settings .github/maven-settings.xml --batch-mode --no-transfer-progress cl
 ```
 
 [Snapshot anterior e proveniência](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/archive/platform-libraries/README.md).
-
-As URLs da branch documental serão acessíveis após a publicação coordenada desta migração.
