@@ -2,26 +2,27 @@ package br.com.portalmanager.platform.library.parameterclient.internal;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.ParameterProvider;
-import br.com.portalmanager.platform.library.parameterclient.message.ParameterClientMessageKeys;
 import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterFields;
 import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterType;
 import br.com.portalmanager.platform.library.parameterclient.internal.expression.ExpressionEvaluator;
 import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;
+import br.com.portalmanager.platform.library.parameterclient.message.ParameterClientMessageKeys;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ClassUtils;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import org.springframework.util.ClassUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.JavaType;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /** Stateless, read-only adapter. Namespace application belongs exclusively to RedisStore. */
 public final class RedisParameterProvider implements ParameterProvider {
@@ -105,8 +106,7 @@ public final class RedisParameterProvider implements ParameterProvider {
     }
 
     private void validateKey(String key) {
-        // Colon/prefixes, whitespace and controls cannot be logical producer keys.
-        if (key == null || !key.matches("[A-Za-z0-9][A-Za-z0-9._-]*\\.[A-Za-z0-9][A-Za-z0-9._-]*")) {
+        if (key == null || key.isBlank()) {
             throw ParameterErrors.invalid();
         }
     }
