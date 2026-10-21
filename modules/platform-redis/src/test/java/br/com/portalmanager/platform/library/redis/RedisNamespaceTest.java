@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.redis.annotation.RedisNamespace;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.RedisNamespaceAutoConfiguration;
@@ -77,19 +78,47 @@ class RedisNamespaceTest {
         @Bean Object invalid(@RedisNamespace("session") AsyncRedisStore store) { return store; }
     }
     @Test void rejectsInvalidNamespaceTypeAndDisabledInfrastructure() {
-        context().withUserConfiguration(InvalidNamespace.class).run(ctx -> assertThat(ctx).hasFailed());
-        context().withUserConfiguration(InvalidType.class).run(ctx -> assertThat(ctx).hasFailed());
+        context().withUserConfiguration(InvalidNamespace.class).run(ctx -> assertConfigurationFailure(ctx.getStartupFailure()));
+        context().withUserConfiguration(InvalidType.class).run(ctx -> assertConfigurationFailure(ctx.getStartupFailure()));
         context().withUserConfiguration(Consumers.class).withBean(ConstructorConsumer.class).withPropertyValues("platform.redis.enabled=false")
-                .run(ctx -> assertThat(ctx).hasFailed());
+                .run(ctx -> assertConfigurationFailure(ctx.getStartupFailure()));
         new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RedisNamespaceAutoConfiguration.class))
-                .withUserConfiguration(Consumers.class).withBean(ConstructorConsumer.class).run(ctx -> assertThat(ctx).hasFailed());
+                .withUserConfiguration(Consumers.class).withBean(ConstructorConsumer.class).run(ctx -> assertConfigurationFailure(ctx.getStartupFailure()));
     }
     @Test void requiresApplicationForIsolatedAndValidatesPrefixBudget() {
-        context().withUserConfiguration(Consumers.class).withBean(ConstructorConsumer.class).withPropertyValues("spring.application.name=")
-                .run(ctx -> assertThat(ctx).hasFailed());
-        context().withUserConfiguration(Consumers.class).withBean(ConstructorConsumer.class).withPropertyValues("platform.redis.max-key-bytes=8")
-                .run(ctx -> assertThat(ctx).hasFailed());
+        // The default store remains valid in both failing contexts: only the annotation is invalid.
+        context().withUserConfiguration(Consumers.class)
+                .withPropertyValues("platform.redis.namespace-mode=SHARED",
+                        "platform.redis.namespace=d", "spring.application.name=")
+                .run(ctx -> assertConfigurationFailure(ctx.getStartupFailure()));
+        context().withBean(ConstructorConsumer.class)
+                .withPropertyValues("platform.redis.namespace-mode=SHARED",
+                        "platform.redis.namespace=d", "platform.redis.max-key-bytes=8")
+                .run(ctx -> assertConfigurationFailure(ctx.getStartupFailure()));
     }
+
+    @Test void sharedNamespaceDoesNotRequireApplicationName() {
+        context().withBean(ConstructorConsumer.class)
+                .withPropertyValues("platform.redis.namespace-mode=SHARED",
+                        "platform.redis.namespace=d", "spring.application.name=")
+                .run(ctx -> {
+                    assertThat(ctx).hasNotFailed();
+                    assertThat(ctx.getBean(ConstructorConsumer.class).store()).isNotNull();
+                    assertThat(ctx.getBean(RedisStore.class)).isNotNull();
+                });
+    }
+
+    private static void assertConfigurationFailure(Throwable failure) {
+        assertThat(failure).isNotNull();
+        Throwable rootCause = failure;
+        while (rootCause.getCause() != null) {
+            rootCause = rootCause.getCause();
+        }
+        assertThat(rootCause).isInstanceOf(PlatformConfigurationException.class);
+        PlatformConfigurationException configurationFailure = (PlatformConfigurationException) rootCause;
+        assertThat(configurationFailure.getErrorResponse().code()).isEqualTo("PLT-REDIS-008");
+    }
+
     @Test void contextCachesAreIndependent() {
         RedisStore[] first = new RedisStore[1];
         context().withUserConfiguration(Consumers.class).withBean(ConstructorConsumer.class).run(ctx -> first[0] = ctx.getBean(ConstructorConsumer.class).store());
