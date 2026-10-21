@@ -1,2 +1,3 @@
+br.com.portalmanager.platform.library.redis.configuration.RedisNamespaceAutoConfiguration
 br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration
 br.com.portalmanager.platform.library.redis.cache.PlatformRedisCacheAutoConfiguration

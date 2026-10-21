@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
@@ -41,6 +42,7 @@ import tools.jackson.databind.json.JsonMapper;
             "org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration",
             "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration"
         })
+@Import(RedisNamespaceAutoConfiguration.class)
 @EnableConfigurationProperties(PlatformRedisProperties.class)
 @ConditionalOnClass(StringRedisTemplate.class)
 @ConditionalOnProperty(
