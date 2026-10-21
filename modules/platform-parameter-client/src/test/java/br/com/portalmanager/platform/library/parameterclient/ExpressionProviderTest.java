@@ -104,6 +104,20 @@ class ExpressionProviderTest {
             assertThat(provider.matches("rules.value", new BigDecimal("0.11"))).isEqualTo(!expected);
         }
     }
+    @Test void nativeTreeReaderPreservesNestedValuesAndDoesNotChangeSharedCodecDefaults() {
+        ExactDocument document = codec.decode("{\"nested\":[9223372036854775807,123456789012345678901234567890.12,"
+                + "{\"flag\":true,\"empty\":null,\"text\":\"18\"}]}", ExactDocument.class);
+        tools.jackson.databind.JsonNode values = document.root().get("nested");
+        assertThat(values.get(0).isBigInteger()).isTrue();
+        assertThat(values.get(0).bigIntegerValue()).isEqualTo(BigInteger.valueOf(Long.MAX_VALUE));
+        assertThat(values.get(1).isBigDecimal()).isTrue();
+        assertThat(values.get(1).decimalValue()).isEqualByComparingTo("123456789012345678901234567890.12");
+        assertThat(values.get(2).get("flag").asBoolean()).isTrue();
+        assertThat(values.get(2).get("empty").isNull()).isTrue();
+        assertThat(values.get(2).get("text").asString()).isEqualTo("18");
+        assertThat(codec.decode("18", tools.jackson.databind.JsonNode.class).isBigInteger()).isFalse();
+        assertThatThrownBy(() -> codec.decode("{} {}", ExactDocument.class)).hasMessage("redis.serialization");
+    }
     @Test void numericExtremesFractionsAndScaleDoNotLosePrecision() {
         expression("EQUALS", "LONG", "9223372036854775807");
         assertThat(provider.matches("rules.value", Long.MAX_VALUE)).isTrue();

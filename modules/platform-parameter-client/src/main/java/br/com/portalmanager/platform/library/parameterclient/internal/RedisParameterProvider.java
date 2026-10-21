@@ -7,6 +7,7 @@ import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import org.springframework.util.ClassUtils;
@@ -94,8 +95,13 @@ public final class RedisParameterProvider implements ParameterProvider {
     }
 
     private void validateExpressionArguments(String key, Object input) {
-        if (input == null || key == null
-                || !key.matches("[A-Za-z0-9][A-Za-z0-9._-]*\\.[A-Za-z0-9][A-Za-z0-9._-]*")) {
+        if (input == null) throw ParameterErrors.invalid();
+        validateKey(key);
+    }
+
+    private void validateKey(String key) {
+        // Colon/prefixes, whitespace and controls cannot be logical producer keys.
+        if (key == null || !key.matches("[A-Za-z0-9][A-Za-z0-9._-]*\\.[A-Za-z0-9][A-Za-z0-9._-]*")) {
             throw ParameterErrors.invalid();
         }
     }
@@ -112,30 +118,38 @@ public final class RedisParameterProvider implements ParameterProvider {
     }
 
     private <T> T read(String key, T defaultValue, Function<String, T> convert) {
-        // Colon/prefixes, whitespace and controls cannot be logical producer keys.
-        if (key == null || !key.matches("[A-Za-z0-9][A-Za-z0-9._-]*\\.[A-Za-z0-9][A-Za-z0-9._-]*")) {
-            throw ParameterErrors.invalid();
-        }
-        JsonNode envelope;
-        try {
-            var found = store.get(key, JsonNode.class);
-            if (found.isEmpty()) return defaultValue;
-            envelope = found.get();
-        } catch (RuntimeException failure) {
-            throw ParameterErrors.readFailure(failure);
-        }
-        JsonNode type = envelope.get("type");
-        JsonNode value = envelope.get("value");
-        if (!envelope.isObject() || type == null || !type.isString()
-                || !("CONFIGURATION".equals(type.asString()) || "EXPRESSION".equals(type.asString()))
-                || value == null || value.isNull()) {
-            throw ParameterErrors.valueInvalid();
-        }
+        validateKey(key);
+        Optional<JsonNode> envelope = readEnvelope(key);
+        if (envelope.isEmpty()) return defaultValue;
+
+        JsonNode value = publishedValue(envelope.get());
         try {
             return convert.apply(value.toString());
         } catch (RuntimeException failure) {
             // RedisJsonCodec is strict; do not retain payload-bearing conversion exceptions.
             throw ParameterErrors.valueInvalid();
         }
+    }
+
+    private Optional<JsonNode> readEnvelope(String key) {
+        try {
+            return store.get(key, JsonNode.class);
+        } catch (RuntimeException failure) {
+            throw ParameterErrors.readFailure(failure);
+        }
+    }
+
+    private JsonNode publishedValue(JsonNode envelope) {
+        if (!envelope.isObject()) throw ParameterErrors.valueInvalid();
+
+        JsonNode type = envelope.get("type");
+        if (type == null || !type.isString()
+                || !("CONFIGURATION".equals(type.asString()) || "EXPRESSION".equals(type.asString()))) {
+            throw ParameterErrors.valueInvalid();
+        }
+
+        JsonNode value = envelope.get("value");
+        if (value == null || value.isNull()) throw ParameterErrors.valueInvalid();
+        return value;
     }
 }
