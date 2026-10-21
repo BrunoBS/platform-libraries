@@ -3,7 +3,8 @@ package br.com.portalmanager.platform.library.parameterclient;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterProvider;
+import br.com.portalmanager.platform.library.parameterclient.internal.RedisConfigurationProvider;
+import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
 import java.io.PrintWriter;
@@ -16,10 +17,10 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-class ParameterProviderTest {
+class ConfigurationProviderTest {
     final JsonMapper mapper = JsonMapper.builder().build();
     final RedisStore store = mock(RedisStore.class);
-    final ParameterProvider provider = new RedisParameterProvider(store, new RedisJsonCodec(mapper, 1048576));
+    final ConfigurationProvider provider = new RedisConfigurationProvider(new RedisParameterReader(store, new RedisJsonCodec(mapper, 1048576)));
 
     void value(String json) {
         when(store.get("platform.value", JsonNode.class)).thenReturn(Optional.of(mapper.readTree(json)));
@@ -67,10 +68,10 @@ class ParameterProviderTest {
 
     @Test
     void absenceReturnsTheExactDefaultWithoutFallbackLookup() {
-        var fallback = new Settings(30);
+        Settings fallback = new Settings(30);
         assertThat(provider.get("missing.settings", Settings.class, fallback)).isSameAs(fallback);
         assertThat(provider.get("missing.settings", Settings.class, null)).isNull();
-        var list = List.of("BR");
+        List<String> list = List.of("BR");
         assertThat(provider.get("missing.regions", new TypeReference<List<String>>() {}, list)).isSameAs(list);
         assertThat(provider.get("other.auditEnabled", false)).isFalse();
         verify(store, times(2)).get("missing.settings", JsonNode.class);
@@ -124,10 +125,10 @@ class ParameterProviderTest {
     }
 
     @Test
-    void expressionIsReturnedAsDataAndNeverEvaluated() {
+    void rejectsExpressionEnvelopeInsteadOfReturningItAsConfiguration() {
         value("{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"EQUALS\",\"valueType\":\"STRING\",\"value\":\"BR\"}}");
-        var result = provider.get("platform.value", JsonNode.class, null);
-        assertThat(result.get("operator").asString()).isEqualTo("EQUALS");
+        assertThatThrownBy(() -> provider.get("platform.value", JsonNode.class, null))
+                .hasMessage("parameter-client.value.invalid");
     }
 
     @Test

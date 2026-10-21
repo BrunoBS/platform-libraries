@@ -4,7 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;
-import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterProvider;
+import br.com.portalmanager.platform.library.parameterclient.internal.RedisExpressionProvider;
+import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
 import ch.qos.logback.classic.Logger;
@@ -25,7 +26,7 @@ import tools.jackson.databind.json.JsonMapper;
 class ExpressionProviderTest {
     final RedisStore store = mock(RedisStore.class);
     final RedisJsonCodec codec = new RedisJsonCodec(JsonMapper.builder().build(), 1048576);
-    final ParameterProvider provider = new RedisParameterProvider(store, codec);
+    final ExpressionProvider provider = new RedisExpressionProvider(new RedisParameterReader(store, codec));
 
     void document(String json) {
         // Exercise the actual Redis codec and exact deserializer on every read, including failures.
@@ -215,8 +216,8 @@ class ExpressionProviderTest {
         assertThatThrownBy(() -> provider.matches("rules.value", Double.NaN)).hasMessage("parameter-client.input.incompatible");
     }
     @Test void absenceInfrastructureFallbackAndSafeLogs() {
-        Logger logger = (Logger) LoggerFactory.getLogger(RedisParameterProvider.class);
-        var appender = new ListAppender<ILoggingEvent>(); appender.start(); logger.addAppender(appender);
+        Logger logger = (Logger) LoggerFactory.getLogger(RedisExpressionProvider.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<ILoggingEvent>(); appender.start(); logger.addAppender(appender);
         try {
             assertThatThrownBy(() -> provider.matches("rules.value", 18)).hasMessage("parameter-client.missing");
             assertThat(provider.matches("rules.value", 18, true)).isTrue();

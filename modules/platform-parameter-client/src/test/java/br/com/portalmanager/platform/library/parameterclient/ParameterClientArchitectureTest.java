@@ -20,8 +20,16 @@ class ParameterClientArchitectureTest {
                 .should().dependOnClassesThat().resideInAnyPackage(
                         "..library.redis..", "..parameterclient.configuration..",
                         "..parameterclient.internal.serialization..").check(classes);
-        assertThat(java.util.Arrays.stream(ParameterProvider.class.getDeclaredMethods()).map(m -> m.getName()))
-                .containsOnly("get", "matches");
+        assertThat(java.util.Arrays.stream(ConfigurationProvider.class.getDeclaredMethods()).map(m -> m.getName()))
+                .containsOnly("get");
+        assertThat(java.util.Arrays.stream(ExpressionProvider.class.getDeclaredMethods()).map(m -> m.getName()))
+                .containsOnly("matches");
+        assertThat(ConfigurationProvider.class.getInterfaces()).isEmpty();
+        assertThat(ExpressionProvider.class.getInterfaces()).isEmpty();
+        assertThatThrownBy(() -> Class.forName("br.com.portalmanager.platform.library.parameterclient.ParameterProvider"))
+                .isInstanceOf(ClassNotFoundException.class);
+        assertThatThrownBy(() -> Class.forName("br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterProvider"))
+                .isInstanceOf(ClassNotFoundException.class);
         assertThat(Files.readString(Path.of("../platform-redis/pom.xml")))
                 .doesNotContain("platform-parameter-client");
         assertThat(Files.readString(Path.of("../platform-starter/pom.xml")))
