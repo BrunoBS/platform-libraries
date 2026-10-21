@@ -39,7 +39,7 @@ class RedisNamespaceTest {
     record BeanConsumer(RedisStore store) {}
     @Configuration(proxyBeanMethods=false)
     static class Consumers {
-        
+
         @Bean FieldConsumer fieldConsumer() { return new FieldConsumer(); }
         @Bean BeanConsumer beanConsumer(@RedisNamespace("session") RedisStore store) { return new BeanConsumer(store); }
     }
