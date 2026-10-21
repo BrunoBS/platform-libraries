@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.parameterclient.internal;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.ParameterProvider;
+import br.com.portalmanager.platform.library.parameterclient.message.ParameterClientMessageKeys;
 import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterFields;
 import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterType;
 import br.com.portalmanager.platform.library.parameterclient.internal.expression.ExpressionEvaluator;
@@ -115,7 +116,7 @@ public final class RedisParameterProvider implements ParameterProvider {
         try {
             document = store.get(key, ExactDocument.class).orElseThrow(ParameterErrors::missing);
         } catch (ApiException failure) {
-            if (failure.getMessageKey().startsWith("parameter-client.")) throw failure;
+            if (failure.getMessageKey().startsWith(ParameterClientMessageKeys.PREFIX)) throw failure;
             throw ParameterErrors.readFailure(failure);
         }
         return ExpressionEvaluator.evaluate(document.root(), input);
