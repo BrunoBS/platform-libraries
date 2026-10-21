@@ -176,6 +176,21 @@ class ExpressionProviderTest {
             assertThat(provider.matches("rules.value", 18, true)).isTrue();
         }
     }
+    @Test void validatesTheEntireConfigurationBeforeEvaluatingTheInput() {
+        for (String values : List.of("[18,\"21\"]", "[18,18]", "[18,null]")) {
+            expression("CONTAINS", "INTEGER", values);
+            // A matching first element cannot hide an invalid element later in the array.
+            assertThatThrownBy(() -> provider.matches("rules.value", 18))
+                    .hasMessage("parameter-client.expression.invalid");
+            assertThat(provider.matches("rules.value", 18, false)).isFalse();
+        }
+        expression("EQUALS", "INTEGER", "18.5");
+        assertThatThrownBy(() -> provider.matches("rules.value", "invalid input"))
+                .hasMessage("parameter-client.expression.invalid");
+        expression("UNKNOWN", "INTEGER", "18");
+        assertThatThrownBy(() -> provider.matches("rules.value", "invalid input"))
+                .hasMessage("parameter-client.operator.invalid");
+    }
     @Test void incompatibleInputNeverCoercesStringsFloatsOrContainers() {
         expression("EQUALS", "INTEGER", "18");
         for (Object value : List.of("18", 18.0, new BigDecimal("18"), true, List.of(18),
