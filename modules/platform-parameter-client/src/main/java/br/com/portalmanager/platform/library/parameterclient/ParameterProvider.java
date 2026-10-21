@@ -12,4 +12,9 @@ public interface ParameterProvider {
 
     /** Jackson 3 type token for concrete generic values. */
     <T> T get(String key, TypeReference<T> type, T defaultValue);
+    /** Evaluate a published V1 EXPRESSION; absence and invalid documents are errors. */
+    boolean matches(String key, Object input);
+
+    /** Fall back on controlled read/evaluation failures, logging only the safe error key. */
+    boolean matches(String key, Object input, boolean defaultValue);
 }

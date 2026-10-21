@@ -16,7 +16,7 @@ class ParameterClientArchitectureTest {
                         "org.springframework.data.redis..", "io.lettuce..", "redis.clients..",
                         "..workspace..", "java.sql..", "org.springframework.scheduling..").check(classes);
         assertThat(java.util.Arrays.stream(ParameterProvider.class.getDeclaredMethods()).map(m -> m.getName()))
-                .containsOnly("get");
+                .containsOnly("get", "matches");
         assertThat(Files.readString(Path.of("../platform-redis/pom.xml")))
                 .doesNotContain("platform-parameter-client");
         assertThat(Files.readString(Path.of("../platform-starter/pom.xml")))

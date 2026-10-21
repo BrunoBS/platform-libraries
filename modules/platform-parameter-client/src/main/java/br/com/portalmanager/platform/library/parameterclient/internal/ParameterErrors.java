@@ -15,6 +15,11 @@ public final class ParameterErrors {
         return new ApiException("parameter-client.value.invalid");
     }
 
+    public static ApiException missing() { return new ApiException("parameter-client.missing"); }
+    public static ApiException expressionInvalid() { return new ApiException("parameter-client.expression.invalid"); }
+    public static ApiException operatorInvalid() { return new ApiException("parameter-client.operator.invalid"); }
+    public static ApiException inputIncompatible() { return new ApiException("parameter-client.input.incompatible"); }
+
     public static ApiException readFailure(RuntimeException failure) {
         if (failure instanceof ApiException api) {
             return switch (api.getMessageKey()) {

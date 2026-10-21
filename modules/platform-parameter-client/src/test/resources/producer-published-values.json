@@ -1,0 +1,34 @@
+[ {
+  "type" : "EXPRESSION",
+  "value" : {
+    "operator" : "GREATER_THAN_OR_EQUALS",
+    "valueType" : "INTEGER",
+    "value" : 18
+  }
+}, {
+  "type" : "EXPRESSION",
+  "value" : {
+    "operator" : "CONTAINS",
+    "valueType" : "STRING",
+    "value" : [ "RETAIL", "VIP" ]
+  }
+}, {
+  "type" : "EXPRESSION",
+  "value" : {
+    "operator" : "EQUALS",
+    "valueType" : "LONG",
+    "value" : 9223372036854775807
+  }
+}, {
+  "type" : "EXPRESSION",
+  "value" : {
+    "operator" : "GREATER_THAN",
+    "valueType" : "DECIMAL",
+    "value" : 123456789012345678901234567890.12
+  }
+}, {
+  "type" : "CONFIGURATION",
+  "value" : {
+    "maxAttempts" : 5
+  }
+} ]

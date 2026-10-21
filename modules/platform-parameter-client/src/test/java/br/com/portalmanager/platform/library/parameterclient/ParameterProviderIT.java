@@ -161,6 +161,73 @@ class ParameterProviderIT {
                 .run(ctx -> assertThat(ctx).doesNotHaveBean(RedisStore.class).doesNotHaveBean(ParameterProvider.class));
     }
 
+    /** Fixture serialized by the actual Workspace PublishedValue record and schema-validated.
+     * Producer source is identical at e87aefd07d11175e11e9fc8ca99752d60bd75bc5 and 883ea071.
+     */
+    @Test
+    void evaluatesActualProducerFixturesWithoutPrefixOrPrecisionLoss() throws Exception {
+        var exact = JsonMapper.builder().enable(tools.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).build();
+        JsonNode fixtures;
+        try (var source = getClass().getResourceAsStream("/producer-published-values.json")) {
+            fixtures = exact.readTree(source);
+        }
+        context().run(ctx -> {
+            var store = ctx.getBean(RedisStore.class);
+            var provider = ctx.getBean(ParameterProvider.class);
+            var raw = ctx.getBean(StringRedisTemplate.class);
+            store.setAll(Map.of("rules.minimum-age", fixtures.get(0), "rules.allowed-segments", fixtures.get(1),
+                    "rules.long-limit", fixtures.get(2), "rules.decimal-limit", fixtures.get(3),
+                    "platform.producer-settings", fixtures.get(4)));
+            assertThat(provider.matches("rules.minimum-age", 21)).isTrue();
+            assertThat(provider.matches("rules.minimum-age", 17, true)).isFalse();
+            assertThat(provider.matches("rules.allowed-segments", "RETAIL", false)).isTrue();
+            assertThat(provider.matches("rules.allowed-segments", "OTHER")).isFalse();
+            assertThat(provider.matches("rules.long-limit", Long.MAX_VALUE)).isTrue();
+            assertThat(provider.matches("rules.long-limit", Long.MAX_VALUE - 1)).isFalse();
+            assertThat(provider.matches("rules.decimal-limit", new java.math.BigDecimal("123456789012345678901234567890.13"))).isTrue();
+            assertThat(provider.matches("rules.decimal-limit", new java.math.BigDecimal("123456789012345678901234567890.12"))).isFalse();
+            assertThat(provider.get("platform.producer-settings", ParameterProviderTest.MySettings.class, null))
+                    .isEqualTo(new ParameterProviderTest.MySettings(5));
+            assertThat(raw.opsForValue().get("dynamic-parameter:rules.minimum-age"))
+                    .contains("EXPRESSION", "GREATER_THAN_OR_EQUALS");
+            assertThat(raw.hasKey("config:rules.minimum-age")).isFalse();
+            assertThat(raw.hasKey("dynamic-parameter:dynamic-parameter:rules.minimum-age")).isFalse();
+            assertThat(store.ttl("rules.minimum-age")).isEmpty();
+            store.set("rules.minimum-age", fixtures.get(2));
+            assertThat(provider.matches("rules.minimum-age", 21L)).isFalse();
+            assertThat(store.delete("rules.minimum-age")).isTrue();
+            assertThatThrownBy(() -> provider.matches("rules.minimum-age", 21)).hasMessage("parameter-client.missing");
+            assertThat(provider.matches("rules.minimum-age", 21, true)).isTrue();
+            store.set("rules.expression-ttl", fixtures.get(0), Duration.ofMillis(100));
+            assertThat(provider.matches("rules.expression-ttl", 21)).isTrue();
+            org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
+                    assertThatThrownBy(() -> provider.matches("rules.expression-ttl", 21)).hasMessage("parameter-client.missing"));
+        });
+    }
+
+    @Test
+    void expressionFailuresWithRealRedisHaveExplicitFallbackOnly() {
+        context().run(ctx -> {
+            var raw = ctx.getBean(StringRedisTemplate.class);
+            var provider = ctx.getBean(ParameterProvider.class);
+            for (String json : List.of("broken-json", "{}", "null",
+                    "{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"AND\",\"valueType\":\"INTEGER\",\"value\":18}}")) {
+                raw.opsForValue().set("dynamic-parameter:rules.corrupt", json);
+                assertThatThrownBy(() -> provider.matches("rules.corrupt", 21)).isInstanceOf(
+                        br.com.portalmanager.platform.library.messaging.exception.ApiException.class);
+                assertThat(provider.matches("rules.corrupt", 21, true)).isTrue();
+                assertThat(provider.matches("rules.corrupt", 21, false)).isFalse();
+            }
+        });
+        context().withPropertyValues("spring.data.redis.port=1",
+                "spring.data.redis.timeout=100ms", "spring.data.redis.connect-timeout=100ms").run(ctx -> {
+            var provider = ctx.getBean(ParameterProvider.class);
+            assertThatThrownBy(() -> provider.matches("rules.missing", 21)).hasMessage("parameter-client.read.failed");
+            assertThat(provider.matches("rules.missing", 21, true)).isTrue();
+            assertThat(provider.matches("rules.missing", 21, false)).isFalse();
+        });
+    }
+
     public record PublishedValue(String type, JsonNode value) {}
     public record Settings(int retries) {}
 }

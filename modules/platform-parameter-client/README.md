@@ -1,6 +1,6 @@
 # platform-parameter-client
 
-Leitura tipada de parâmetros publicados, reutilizando RedisStore. Contrato, configuração e exemplos no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/main/docs/libraries/modules/platform-parameter-client.md).
+Leitura tipada de CONFIGURATION com get e avaliação booleana de EXPRESSION V1 com matches, reutilizando RedisStore. Contrato, configuração e exemplos no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/main/docs/libraries/modules/platform-parameter-client.md).
 
 - [POM](pom.xml)
 - [Build do reactor](../../README.md)

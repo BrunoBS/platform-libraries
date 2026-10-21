@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.parameterclient.internal;
 
+import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.ParameterProvider;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
@@ -9,6 +10,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import org.springframework.util.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
@@ -16,6 +19,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /** Stateless, read-only adapter. Namespace application belongs exclusively to RedisStore. */
 public final class RedisParameterProvider implements ParameterProvider {
+    private static final Logger LOG = LoggerFactory.getLogger(RedisParameterProvider.class);
     private static final JsonMapper TYPE_MAPPER = JsonMapper.builder().build();
     private static final Set<Class<?>> INFERABLE = Set.of(
             String.class, Boolean.class, Byte.class, Short.class, Integer.class, Long.class,
@@ -70,6 +74,41 @@ public final class RedisParameterProvider implements ParameterProvider {
         }
         if (type.isArrayType() && !concrete(type.getContentType())) return false;
         return true;
+    }
+
+    @Override
+    public boolean matches(String key, Object input) {
+        validateExpressionArguments(key, input);
+        return evaluate(key, input);
+    }
+
+    @Override
+    public boolean matches(String key, Object input, boolean defaultValue) {
+        validateExpressionArguments(key, input);
+        try {
+            return evaluate(key, input);
+        } catch (ApiException failure) {
+            LOG.warn("Parameter expression fallback: error={}", failure.getMessageKey());
+            return defaultValue;
+        }
+    }
+
+    private void validateExpressionArguments(String key, Object input) {
+        if (input == null || key == null
+                || !key.matches("[A-Za-z0-9][A-Za-z0-9._-]*\\.[A-Za-z0-9][A-Za-z0-9._-]*")) {
+            throw ParameterErrors.invalid();
+        }
+    }
+
+    private boolean evaluate(String key, Object input) {
+        ExactDocument document;
+        try {
+            document = store.get(key, ExactDocument.class).orElseThrow(ParameterErrors::missing);
+        } catch (ApiException failure) {
+            if (failure.getMessageKey().startsWith("parameter-client.")) throw failure;
+            throw ParameterErrors.readFailure(failure);
+        }
+        return ExpressionEvaluator.evaluate(document.root(), input);
     }
 
     private <T> T read(String key, T defaultValue, Function<String, T> convert) {
