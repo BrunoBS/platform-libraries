@@ -2,6 +2,10 @@ package br.com.portalmanager.platform.library.parameterclient.internal;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.ParameterProvider;
+import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterFields;
+import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterType;
+import br.com.portalmanager.platform.library.parameterclient.internal.expression.ExpressionEvaluator;
+import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
 import java.math.BigDecimal;
@@ -142,13 +146,13 @@ public final class RedisParameterProvider implements ParameterProvider {
     private JsonNode publishedValue(JsonNode envelope) {
         if (!envelope.isObject()) throw ParameterErrors.valueInvalid();
 
-        JsonNode type = envelope.get("type");
+        JsonNode type = envelope.get(ParameterFields.TYPE);
         if (type == null || !type.isString()
-                || !("CONFIGURATION".equals(type.asString()) || "EXPRESSION".equals(type.asString()))) {
+                || !ParameterType.isSupported(type.asString())) {
             throw ParameterErrors.valueInvalid();
         }
 
-        JsonNode value = envelope.get("value");
+        JsonNode value = envelope.get(ParameterFields.VALUE);
         if (value == null || value.isNull()) throw ParameterErrors.valueInvalid();
         return value;
     }

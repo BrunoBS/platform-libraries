@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.parameterclient;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.*;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.domain.JavaClasses;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
@@ -10,11 +11,15 @@ import org.junit.jupiter.api.Test;
 class ParameterClientArchitectureTest {
     @Test
     void readOnlyClientDoesNotKnowDriversProducerOrSchedulers() throws Exception {
-        var classes = new ClassFileImporter().withImportOption(com.tngtech.archunit.core.importer.ImportOption.Predefined.DO_NOT_INCLUDE_TESTS).importPackages("br.com.portalmanager.platform.library.parameterclient");
+        JavaClasses classes = new ClassFileImporter().withImportOption(com.tngtech.archunit.core.importer.ImportOption.Predefined.DO_NOT_INCLUDE_TESTS).importPackages("br.com.portalmanager.platform.library.parameterclient");
         noClasses().that().resideInAnyPackage("..parameterclient.internal..", "..parameterclient.configuration..")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         "org.springframework.data.redis..", "io.lettuce..", "redis.clients..",
                         "..workspace..", "java.sql..", "org.springframework.scheduling..").check(classes);
+        noClasses().that().resideInAPackage("..parameterclient.internal.expression..")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "..library.redis..", "..parameterclient.configuration..",
+                        "..parameterclient.internal.serialization..").check(classes);
         assertThat(java.util.Arrays.stream(ParameterProvider.class.getDeclaredMethods()).map(m -> m.getName()))
                 .containsOnly("get", "matches");
         assertThat(Files.readString(Path.of("../platform-redis/pom.xml")))

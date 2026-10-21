@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.parameterclient.internal;
+package br.com.portalmanager.platform.library.parameterclient.internal.serialization;
 
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
