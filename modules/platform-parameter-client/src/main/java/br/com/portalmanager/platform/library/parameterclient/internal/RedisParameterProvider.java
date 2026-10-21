@@ -16,21 +16,13 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
-/** Stateless, read-only adapter. Namespace application belongs exclusively to RedisStore. */
 public final class RedisParameterProvider implements ParameterProvider {
     private static final Logger LOG = LoggerFactory.getLogger(RedisParameterProvider.class);
     private static final JsonMapper TYPE_MAPPER = JsonMapper.builder().build();
-    private static final Set<Class<?>> INFERABLE = Set.of(
-            String.class, Boolean.class, Byte.class, Short.class, Integer.class, Long.class,
-            Float.class, Double.class, BigInteger.class, BigDecimal.class);
     private final RedisStore store;
     private final RedisJsonCodec codec;
 
@@ -44,7 +36,7 @@ public final class RedisParameterProvider implements ParameterProvider {
     public <T> T get(String key, T defaultValue) {
         if (defaultValue == null) throw ParameterErrors.invalid();
         Class<?> type = defaultValue.getClass();
-        if (!INFERABLE.contains(type) && !(defaultValue instanceof Enum<?>)) {
+        if (!ParameterFields.INFERABLE.contains(type) && !(defaultValue instanceof Enum<?>)) {
             throw ParameterErrors.invalid();
         }
         if (defaultValue instanceof Enum<?> value) type = value.getDeclaringClass();

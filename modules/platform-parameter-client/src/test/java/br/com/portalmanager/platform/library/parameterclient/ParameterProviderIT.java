@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.parameterclient;
 import static org.assertj.core.api.Assertions.*;
 import br.com.portalmanager.platform.library.parameterclient.configuration.ParameterClientAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
+import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
 import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
@@ -225,6 +226,37 @@ class ParameterProviderIT {
             assertThatThrownBy(() -> provider.matches("rules.missing", 21)).hasMessage("parameter-client.read.failed");
             assertThat(provider.matches("rules.missing", 21, true)).isTrue();
             assertThat(provider.matches("rules.missing", 21, false)).isFalse();
+        });
+    }
+
+    @Test
+    void usesNonBlankKeysLiterallyAndKeepsRedisValidation() {
+        context().run(ctx -> {
+            RedisStore store = ctx.getBean(RedisStore.class);
+            ParameterProvider provider = ctx.getBean(ParameterProvider.class);
+            StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
+            PublishedValue configuration = new PublishedValue("CONFIGURATION", JSON.valueToTree(30));
+            PublishedValue expression = new PublishedValue("EXPRESSION", JSON.readTree(
+                    "{\"operator\":\"GREATER_THAN_OR_EQUALS\",\"valueType\":\"INTEGER\",\"value\":18}"));
+            for (String key : List.of("single", "rules..value", "config:rules.value",
+                    "dynamic-parameter:rules.value", " rules.value ")) {
+                store.set(key, configuration);
+                assertThat(provider.get(key, 1)).isEqualTo(30);
+                assertThat(raw.hasKey("dynamic-parameter:" + key)).isTrue();
+                store.set(key, expression);
+                assertThat(provider.matches(key, 21)).isTrue();
+                assertThat(provider.matches(key, 17, true)).isFalse();
+                assertThat(store.delete(key)).isTrue();
+                assertThat(provider.get(key, 7)).isEqualTo(7);
+                assertThat(provider.matches(key, 21, false)).isFalse();
+            }
+            int maxKeyBytes = ctx.getBean(PlatformRedisProperties.class).maxKeyBytes();
+            for (String key : List.of("rules.\nvalue", "x".repeat(maxKeyBytes))) {
+                assertThatThrownBy(() -> provider.get(key, 7)).hasMessage("parameter-client.validation");
+                assertThatThrownBy(() -> provider.matches(key, 21)).hasMessage("parameter-client.validation");
+                // Redis validation occurs during the controlled read and uses the explicit fallback.
+                assertThat(provider.matches(key, 21, true)).isTrue();
+            }
         });
     }
 

@@ -81,8 +81,7 @@ class ParameterProviderTest {
 
     @Test
     void rejectsAmbiguousInferenceAndInvalidInputsBeforeReading() {
-        for (String key : new String[]{null, "", " ", "single", "config:platform.value",
-                "dynamic-parameter:platform.value", "platform.value ", "platform.\nvalue"}) {
+        for (String key : new String[]{null, "", " ", "\t\n"}) {
             assertThatThrownBy(() -> provider.get(key, 1)).hasMessage("parameter-client.validation");
         }
         assertThatThrownBy(() -> provider.get("platform.value", (Object) null)).hasMessage("parameter-client.validation");
@@ -94,6 +93,17 @@ class ParameterProviderTest {
         assertThatThrownBy(() -> provider.get("platform.value", new TypeReference<List<?>>() {}, null)).hasMessage("parameter-client.validation");
         assertThatThrownBy(() -> provider.get("platform.value", Object.class, null)).hasMessage("parameter-client.validation");
         verifyNoInteractions(store);
+    }
+
+    @Test
+    void readsNonBlankKeysExactlyAsProvidedWithoutFormatValidation() {
+        JsonNode envelope = mapper.readTree("{\"type\":\"CONFIGURATION\",\"value\":30}");
+        for (String key : List.of("single", "rules..value", "config:platform.value",
+                "dynamic-parameter:platform.value", " platform.value ")) {
+            when(store.get(key, JsonNode.class)).thenReturn(Optional.of(envelope));
+            assertThat(provider.get(key, 1)).isEqualTo(30);
+            verify(store).get(key, JsonNode.class);
+        }
     }
 
     @Test

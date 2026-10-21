@@ -79,9 +79,20 @@ class ExpressionProviderTest {
             expression(op, "STRING", "\"B\"");
             assertThatThrownBy(() -> provider.matches("rules.value", "A")).hasMessage("parameter-client.expression.invalid");
         }
-        for (String key : new String[]{null, "", "single", "rules.value ", "dynamic-parameter:rules.value"}) {
+        for (String key : new String[]{null, "", " ", "\t\n"}) {
             assertThatThrownBy(() -> provider.matches(key, 1)).hasMessage("parameter-client.validation");
             assertThatThrownBy(() -> provider.matches(key, 1, false)).hasMessage("parameter-client.validation");
+        }
+    }
+    @Test void evaluatesNonBlankKeysWithoutRewriting() {
+        String json = "{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"GREATER_THAN_OR_EQUALS\",\"valueType\":\"INTEGER\",\"value\":18}}";
+        ExactDocument document = codec.decode(json, ExactDocument.class);
+        for (String key : List.of("single", "rules..value", "config:rules.value",
+                "dynamic-parameter:rules.value", " rules.value ")) {
+            when(store.get(key, ExactDocument.class)).thenReturn(Optional.of(document));
+            assertThat(provider.matches(key, 21)).isTrue();
+            assertThat(provider.matches(key, 21, false)).isTrue();
+            verify(store, times(2)).get(key, ExactDocument.class);
         }
     }
     @Test void stringAndAllNumericMembershipTypesAreExact() {
@@ -230,7 +241,7 @@ class ExpressionProviderTest {
         } finally { logger.detachAppender(appender); appender.stop(); }
     }
     @Test void argumentAndProgrammingErrorsAreNotHiddenByFallback() {
-        assertThatThrownBy(() -> provider.matches("config:rules.value", 18, false)).hasMessage("parameter-client.validation");
+        assertThatThrownBy(() -> provider.matches("", 18, false)).hasMessage("parameter-client.validation");
         assertThatThrownBy(() -> provider.matches("rules.value", null, true)).hasMessage("parameter-client.validation");
         verifyNoInteractions(store);
         doThrow(new IllegalStateException("programming error")).when(store).get("rules.value", ExactDocument.class);
