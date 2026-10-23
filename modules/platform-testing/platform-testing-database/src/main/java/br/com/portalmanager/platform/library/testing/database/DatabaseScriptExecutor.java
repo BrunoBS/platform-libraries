@@ -5,6 +5,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.util.Arrays;
 
 public final class DatabaseScriptExecutor {
@@ -37,6 +38,13 @@ public final class DatabaseScriptExecutor {
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(resources);
         populator.setContinueOnError(continueOnError);
         populator.execute(dataSource);
+    }
+
+    public static void execute(Connection connection, Resource resource, boolean continueOnError) {
+        validate(resource);
+        ResourceDatabasePopulator populator = new ResourceDatabasePopulator(resource);
+        populator.setContinueOnError(continueOnError);
+        populator.populate(connection);
     }
 
     private static void validate(Resource resource) {

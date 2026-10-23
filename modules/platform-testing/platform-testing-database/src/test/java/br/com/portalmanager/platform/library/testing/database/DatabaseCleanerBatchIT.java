@@ -7,11 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.nio.charset.StandardCharsets;
 
 @Testcontainers(disabledWithoutDocker = true)
 @PlatformIntegrationTest
@@ -28,6 +32,26 @@ class DatabaseCleanerBatchIT {
 
     @Autowired
     private MySqlCleanerDataSource cleanerDataSource;
+
+    @Test
+    void executesAnInMemoryScriptOnTheProvidedConnection() {
+        try {
+            jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
+                DatabaseScriptExecutor.execute(
+                        connection,
+                        new ByteArrayResource(
+                                "CREATE TABLE script_executor_target (id BIGINT PRIMARY KEY)"
+                                        .getBytes(StandardCharsets.UTF_8)),
+                        false);
+                return null;
+            });
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM script_executor_target", Integer.class)).isZero();
+        } finally {
+            jdbcTemplate.execute("DROP TABLE IF EXISTS script_executor_target");
+            DatabaseCleaner.clearTableCache();
+        }
+    }
 
     @Test
     void batchesTruncatesAndHonorsExcludedTables() {
