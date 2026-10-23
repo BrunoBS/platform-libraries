@@ -9,7 +9,6 @@ import org.junit.platform.commons.support.AnnotationSupport;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.sql.DataSource;
 public final class MySqlTestExtension implements BeforeEachCallback, AfterEachCallback {
 
     @Override
@@ -30,8 +29,8 @@ public final class MySqlTestExtension implements BeforeEachCallback, AfterEachCa
 
     private void clean(ExtensionContext context, WithMySql configuration) {
         ApplicationContext applicationContext = SpringExtension.getApplicationContext(context);
-        DataSource dataSource = applicationContext.getBean(DataSource.class);
-        DatabaseCleaner.clean(dataSource, configuration.excludeTables());
+        MySqlCleanerDataSource dataSource = applicationContext.getBean(MySqlCleanerDataSource.class);
+        DatabaseCleaner.clean(dataSource.dataSource(), configuration.excludeTables());
     }
 
     private WithMySql configuration(ExtensionContext context) {

@@ -14,6 +14,11 @@ public class MySqlTestConfiguration {
 
     static final String IMAGE_PROPERTY = "platform.testing.mysql.image";
 
+    @Bean
+    MySqlCleanerDataSource mySqlCleanerDataSource(MySQLContainer<?> mySqlContainer) {
+        return new MySqlCleanerDataSource(mySqlContainer);
+    }
+
     @Bean(destroyMethod = "stop")
     @ServiceConnection
     MySQLContainer<?> mySqlContainer(Environment environment) {
