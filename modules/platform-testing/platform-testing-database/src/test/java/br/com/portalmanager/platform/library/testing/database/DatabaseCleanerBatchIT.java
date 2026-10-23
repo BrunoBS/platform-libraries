@@ -1,8 +1,5 @@
-package br.com.portalmanager.platform.library.testing.integration;
+package br.com.portalmanager.platform.library.testing.database;
 
-import br.com.portalmanager.platform.library.testing.database.CleanupMode;
-import br.com.portalmanager.platform.library.testing.database.DatabaseCleaner;
-import br.com.portalmanager.platform.library.testing.database.MySqlCleanerDataSource;
 import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
 import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
 import org.junit.jupiter.api.Test;
