@@ -30,10 +30,10 @@ public final class RedisTestContextCustomizerFactory implements ContextCustomize
             throw new PlatformConfigurationException(
                     RedisTestingTechnicalErrors.invalidConfiguration());
         }
-        return new RedisContextCustomizer(image, testClass.getName());
+        return new RedisContextCustomizer(image, annotation.cleanupBeforeEach());
     }
 
-    private record RedisContextCustomizer(String image, String testClass)
+    private record RedisContextCustomizer(String image, boolean cleanupBeforeEach)
             implements ContextCustomizer {
         public void customizeContext(
                 ConfigurableApplicationContext context, MergedContextConfiguration merged) {
