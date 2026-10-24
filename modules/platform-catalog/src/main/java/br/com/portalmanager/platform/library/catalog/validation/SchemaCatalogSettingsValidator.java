@@ -24,7 +24,7 @@ final class SchemaCatalogSettingsValidator implements CatalogSettingsValidator {
     @Override
     public void validate(CatalogDTO dto, ValidationResult result) {
         try {
-            schemaValidator.validate(RESOURCE_TYPE, resourceCode, dto.settings());
+            schemaValidator.validateIfPresent(RESOURCE_TYPE, resourceCode, dto.settings());
         } catch (ValidationException exception) {
             result.mergeDetails(prefixSettings(exception.getDetails()));
         }

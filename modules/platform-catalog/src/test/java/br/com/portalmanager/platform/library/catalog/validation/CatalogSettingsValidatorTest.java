@@ -5,9 +5,12 @@ import br.com.portalmanager.platform.library.messaging.exception.ValidationExcep
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
+import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
+import br.com.portalmanager.platform.library.schemavalidation.resolver.DefaultResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.validation.ResourceSchemaValidator;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import org.junit.jupiter.api.Test;
+import java.util.Optional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -101,6 +104,18 @@ class CatalogSettingsValidatorTest {
         assertThat(invalidResult.getDetails())
                 .extracting(ValidationDetail::field)
                 .allMatch(field -> field.startsWith("settings"));
+    }
+
+    @Test
+    void shouldAllowCatalogSettingsWhenNoSchemaIsConfigured() {
+        var resolver = new DefaultResourceSchemaResolver((type, code) -> Optional.empty(),
+                new PlatformSchemaValidationProperties());
+        SchemaValidator schemaValidator = new ResourceSchemaValidator(resolver, JSON);
+        ValidationResult result = new ValidationResult();
+
+        CatalogSettingsValidator.schema("lifecycle-type", schemaValidator).validate(dto(), result);
+
+        assertThat(result.hasErrors()).isFalse();
     }
 
     @Test

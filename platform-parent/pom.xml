@@ -12,6 +12,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <argLine/>
         <maven.minimum.version>3.9.9</maven.minimum.version>
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>

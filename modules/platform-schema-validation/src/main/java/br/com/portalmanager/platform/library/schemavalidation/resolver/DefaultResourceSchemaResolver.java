@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
+import br.com.portalmanager.platform.library.schemavalidation.exception.ResourceSchemaNotFoundException;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 
 public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
@@ -48,7 +49,7 @@ public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
         }
 
         return find(type, properties.resolveFallbackCode())
-                .orElseThrow(() -> new PlatformConfigurationException(
+                .orElseThrow(() -> new ResourceSchemaNotFoundException(
                         SchemaValidationTechnicalErrors.publishedSchemaNotFound(type, code)
                 ));
     }

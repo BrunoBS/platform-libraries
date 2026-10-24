@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PlatformTestingDependenciesTest {
 
@@ -41,6 +42,21 @@ class PlatformTestingDependenciesTest {
             declared.add(text(dependency, "groupId") + ":" + text(dependency, "artifactId"));
         }
         FEATURE_DEPENDENCIES.forEach(coordinate -> assertFalse(declared.contains(coordinate), coordinate));
+    }
+
+    @Test
+    void coreProvidesDatafakerForTestDataFactories() throws Exception {
+        var document = DocumentBuilderFactory.newInstance()
+                .newDocumentBuilder()
+                .parse(Path.of("pom.xml").toFile());
+        var dependencies = document.getElementsByTagName("dependency");
+        var declared = new HashSet<String>();
+        for (int i = 0; i < dependencies.getLength(); i++) {
+            var dependency = (Element) dependencies.item(i);
+            declared.add(text(dependency, "groupId") + ":" + text(dependency, "artifactId"));
+        }
+
+        assertTrue(declared.contains("net.datafaker:datafaker"));
     }
 
 
