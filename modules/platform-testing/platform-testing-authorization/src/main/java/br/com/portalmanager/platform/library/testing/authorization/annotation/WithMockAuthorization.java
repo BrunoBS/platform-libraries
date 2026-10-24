@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.testing.authorization.Authorization
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockTestConfiguration;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -18,6 +19,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Import(AuthorizationMockTestConfiguration.class)
 @ExtendWith(AuthorizationMockExtension.class)
+@ResourceLock("platform-http-mock")
 public @interface WithMockAuthorization {
 
     AuthorizationMockResult defaultResult() default AuthorizationMockResult.ALLOWED;

@@ -22,12 +22,13 @@
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
-            <artifactId>platform-authorization</artifactId>
+            <artifactId>platform-testing-http</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wiremock</groupId>
-            <artifactId>wiremock-standalone</artifactId>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-authorization</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>

@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.testing.integration;
 import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMock;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationSessionCustomizer;
+import br.com.portalmanager.platform.library.testing.http.HttpMockServer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -30,6 +31,9 @@ class AuthorizationMockIntegrationTest {
 
     @Autowired
     private AuthorizationMock authorizationMock;
+
+    @Autowired
+    private HttpMockServer httpMockServer;
 
     @Test
     void shouldReturnCustomizedPlatformSessionAndVerifyRequestContract() throws Exception {
@@ -85,6 +89,7 @@ class AuthorizationMockIntegrationTest {
     @Test
     void shouldExposeUncalledVerification() {
         authorizationMock.verifyNotCalled();
+        assertThat(authorizationMock.baseUrl()).isEqualTo(httpMockServer.baseUrl());
     }
 
     @SpringBootConfiguration

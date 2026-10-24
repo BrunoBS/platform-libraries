@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.testing.authorization;
 
 import br.com.portalmanager.platform.library.authorization.model.UserSession;
-import com.github.tomakehurst.wiremock.WireMockServer;
+import br.com.portalmanager.platform.library.testing.http.HttpMockServer;
 import com.github.tomakehurst.wiremock.common.Json;
 
 import java.util.function.Consumer;
@@ -17,14 +17,14 @@ public final class AuthorizationMock {
     private static final String AUTHORIZATION_PATH = "/authorize";
     private static final String CONTENT_TYPE = "application/json";
 
-    private final WireMockServer server;
+    private final HttpMockServer server;
 
-    public AuthorizationMock(WireMockServer server) {
+    public AuthorizationMock(HttpMockServer server) {
         this.server = server;
     }
 
     public void reset() {
-        server.resetAll();
+        server.reset();
     }
 
     public void allow() {
