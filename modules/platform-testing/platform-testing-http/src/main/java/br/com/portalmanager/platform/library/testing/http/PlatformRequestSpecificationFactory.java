@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.testing.http;
 
 import br.com.portalmanager.platform.library.testing.context.TestContext;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import org.springframework.core.env.Environment;
@@ -56,7 +57,7 @@ public final class PlatformRequestSpecificationFactory {
         }
 
         customizers.forEach(customizer -> customizer.customize(builder));
-        return builder.build();
+        return RestAssured.given().spec(builder.build());
     }
 
     private static String bearer(String token) {

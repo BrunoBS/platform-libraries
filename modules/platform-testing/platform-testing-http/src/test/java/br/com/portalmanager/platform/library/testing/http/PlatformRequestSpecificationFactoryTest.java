@@ -11,6 +11,9 @@ import org.springframework.mock.env.MockEnvironment;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 
 class PlatformRequestSpecificationFactoryTest {
 
@@ -64,6 +67,23 @@ class PlatformRequestSpecificationFactoryTest {
         QueryableRequestSpecification specification = SpecificationQuerier.query(factory.create());
 
         assertThat(specification.getHeaders().getValue("X-Test-Header")).isEqualTo("custom-value");
+    }
+
+    @Test
+    void shouldExecuteRequestFromFactory() {
+        HttpMockServer server = new HttpMockServer();
+        server.start();
+        try {
+            server.stubFor(get(urlEqualTo("/health")).willReturn(aResponse().withStatus(204)));
+            MockEnvironment serverEnvironment = new MockEnvironment()
+                    .withProperty("local.server.port", Integer.toString(server.port()));
+            PlatformRequestSpecificationFactory factory = new PlatformRequestSpecificationFactory(
+                    serverEnvironment, List.of());
+
+            factory.create().get("/health").then().statusCode(204);
+        } finally {
+            server.stop();
+        }
     }
 
     private PlatformRequestSpecificationFactory factory() {
