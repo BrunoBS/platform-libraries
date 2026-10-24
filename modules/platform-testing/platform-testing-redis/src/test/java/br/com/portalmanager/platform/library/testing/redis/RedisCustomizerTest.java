@@ -13,6 +13,12 @@ class RedisCustomizerTest {
     @WithRedis
     static class Default {}
 
+    @WithRedis
+    static class SameImage {}
+
+    @WithRedis(cleanupBeforeEach = false)
+    static class CleanupDisabled {}
+
     @WithRedis(image = "redis:7.4.8-alpine")
     static class Versioned {}
 
@@ -24,7 +30,9 @@ class RedisCustomizerTest {
         var factory = new RedisTestContextCustomizerFactory();
         assertThat(factory.createContextCustomizer(getClass(), List.of())).isNull();
         assertThat(factory.createContextCustomizer(Default.class, List.of()))
-                .isEqualTo(factory.createContextCustomizer(Default.class, List.of()));
+                .isEqualTo(factory.createContextCustomizer(SameImage.class, List.of()));
+        assertThat(factory.createContextCustomizer(Default.class, List.of()))
+                .isNotEqualTo(factory.createContextCustomizer(CleanupDisabled.class, List.of()));
         assertThat(factory.createContextCustomizer(Default.class, List.of()))
                 .isNotEqualTo(factory.createContextCustomizer(Versioned.class, List.of()));
         assertThatThrownBy(() -> factory.createContextCustomizer(Invalid.class, List.of()))

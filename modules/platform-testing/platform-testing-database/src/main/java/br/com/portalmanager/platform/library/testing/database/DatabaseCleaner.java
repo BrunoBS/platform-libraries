@@ -64,7 +64,10 @@ public final class DatabaseCleaner {
                     statement.execute("SET FOREIGN_KEY_CHECKS = 0");
                     try {
                         for (String table : tables) {
-                            statement.execute("TRUNCATE TABLE " + quote(table));
+                            statement.addBatch("TRUNCATE TABLE " + quote(table));
+                        }
+                        if (!tables.isEmpty()) {
+                            statement.executeBatch();
                         }
                     } finally {
                         statement.execute("SET FOREIGN_KEY_CHECKS = 1");

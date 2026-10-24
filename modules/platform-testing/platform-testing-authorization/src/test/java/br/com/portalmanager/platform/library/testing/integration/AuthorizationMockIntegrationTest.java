@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.testing.integration;
 
+import br.com.portalmanager.platform.library.authorization.model.UserContext;
 import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMock;
 import br.com.portalmanager.platform.library.testing.authorization.AuthorizationSessionCustomizer;
@@ -37,6 +38,12 @@ class AuthorizationMockIntegrationTest {
 
     @Test
     void shouldReturnCustomizedPlatformSessionAndVerifyRequestContract() throws Exception {
+        assertThat(UserContext.get())
+                .hasValueSatisfying(session -> {
+                    assertThat(session.getUserName()).isEqualTo("bruno.barbosa");
+                    assertThat(session.getAccountId()).isEqualTo("account-123");
+                });
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(authorizationMock.baseUrl() + "/authorize"))
                 .header("workspaceIdentifier", "account-123")
