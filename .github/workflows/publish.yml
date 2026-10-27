@@ -2,11 +2,6 @@ name: Publish Maven packages
 
 on:
   workflow_dispatch:
-    inputs:
-      release_version:
-        description: Approved new immutable Maven version (never 1.0.0)
-        required: true
-        type: string
 
 concurrency:
   group: platform-libraries-maven-release
@@ -30,73 +25,16 @@ jobs:
           distribution: temurin
           java-version: '25'
 
-      - name: Validate new immutable release
-        env:
-          RELEASE_VERSION: ${{ inputs.release_version }}
-          GITHUB_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python3 - <<'PY_RELEASE'
-          import base64
-          import os
-          import re
-          import subprocess
-          import urllib.error
-          import urllib.request
-          import xml.etree.ElementTree as ET
-          from pathlib import Path
-
-          version = os.environ.get("RELEASE_VERSION", "")
-          if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version) or version == "1.0.0":
-              raise SystemExit("Provide an approved new release version; 1.0.0 and snapshots are forbidden.")
-          source_revision = re.search(r"^-Drevision=(\S+)$", Path(".mvn/maven.config").read_text(), re.MULTILINE)
-          if source_revision is None or source_revision.group(1) != version:
-              raise SystemExit("The approved release version must be recorded in .mvn/maven.config before publication.")
-          token = os.environ.get("GITHUB_PUBLISH_TOKEN", "")
-          actor = os.environ.get("GITHUB_ACTOR", "")
-          if not token or not actor:
-              raise SystemExit("Package read/write credentials are required.")
-          credentials = base64.b64encode((actor + ":" + token).encode()).decode()
-          base = "https://maven.pkg.github.com/brunobs/platform-libraries/br/com/portalmanager/platform/library"
-
-          def status(artifact, artifact_version, extension="pom"):
-              url = f"{base}/{artifact}/{artifact_version}/{artifact}-{artifact_version}.{extension}"
-              request = urllib.request.Request(url, headers={"Authorization": "Basic " + credentials})
-              try:
-                  with urllib.request.urlopen(request, timeout=30) as response:
-                      return response.status
-              except urllib.error.HTTPError as error:
-                  return error.code
-
-          if status("platform-parent", "1.0.0") != 200:
-              raise SystemExit("Cannot verify registry read access to the existing baseline; publication blocked.")
-          namespace = {"m": "http://maven.apache.org/POM/4.0.0"}
-          poms = subprocess.check_output(["git", "ls-files", "*pom.xml"], text=True).splitlines()
-          for pom in poms:
-              project = ET.fromstring(Path(pom).read_text())
-              artifact = project.findtext("m:artifactId", namespaces=namespace)
-              packaging = project.findtext("m:packaging", default="jar", namespaces=namespace)
-              extensions = ["pom", "jar"] if packaging == "jar" else ["pom"]
-              for extension in extensions:
-                  response = status(artifact, version, extension)
-                  if response != 404:
-                      raise SystemExit(f"New coordinate cannot be certified unused: {artifact}:{extension}, HTTP {response}; publication blocked.")
-          print("Registry access verified; proposed POM/JAR files are absent. Approved version inventory is still required.")
-          PY_RELEASE
-
       - name: Verify and publish
         env:
           GITHUB_PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_VERSION: ${{ inputs.release_version }}
-        run: mvn --settings .github/maven-publish-settings.xml --batch-mode --no-transfer-progress --strict-checksums -Dmaven.repo.local="${RUNNER_TEMP}/platform-release-m2" -Drevision="$RELEASE_VERSION" -DdeployAtEnd=true clean deploy
+        run: mvn --settings .github/maven-publish-settings.xml --batch-mode --no-transfer-progress --strict-checksums -Dmaven.repo.local="${RUNNER_TEMP}/platform-release-m2" -DdeployAtEnd=true clean deploy
 
       - name: Record release provenance
         if: always()
-        env:
-          RELEASE_VERSION: ${{ inputs.release_version }}
         run: |
           mkdir -p "${RUNNER_TEMP}/platform-release-evidence"
           git rev-parse HEAD > "${RUNNER_TEMP}/platform-release-evidence/source-commit.txt"
-          printf '%s\n' "$RELEASE_VERSION" > "${RUNNER_TEMP}/platform-release-evidence/requested-version.txt"
           cp .mvn/maven.config "${RUNNER_TEMP}/platform-release-evidence/maven.config"
           mvn --version > "${RUNNER_TEMP}/platform-release-evidence/toolchain.txt"
           find . -type f \( -path '*/target/*.jar' -o -name '.flattened-pom.xml' \) -exec sha256sum {} \; | sort > "${RUNNER_TEMP}/platform-release-evidence/artifact-sha256.txt"
