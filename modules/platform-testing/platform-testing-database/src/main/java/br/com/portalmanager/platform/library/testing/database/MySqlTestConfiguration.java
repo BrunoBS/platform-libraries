@@ -1,8 +1,5 @@
 package br.com.portalmanager.platform.library.testing.database;
 
-import org.testcontainers.utility.DockerImageName;
-import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
-
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -19,15 +16,10 @@ public class MySqlTestConfiguration {
         return new MySqlCleanerDataSource(mySqlContainer);
     }
 
-    @Bean(destroyMethod = "stop")
+    @Bean(destroyMethod = "")
     @ServiceConnection
     MySQLContainer<?> mySqlContainer(Environment environment) {
-        String image = environment.getProperty(
-                IMAGE_PROPERTY,
-                MySqlContainerImages.MYSQL);
-        return new MySQLContainer<>(DockerImageName.parse(PinnedDockerImage.validatePinnedImage(image)))
-                .withDatabaseName("integration_test")
-                .withUsername("test")
-                .withPassword("test");
+        String image = environment.getProperty(IMAGE_PROPERTY, MySqlContainerImages.MYSQL);
+        return MySqlTestContainerManager.sharedContainer(image);
     }
 }

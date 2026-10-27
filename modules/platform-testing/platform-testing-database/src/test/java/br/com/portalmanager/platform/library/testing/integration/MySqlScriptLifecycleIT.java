@@ -13,6 +13,8 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers(disabledWithoutDocker = true)
 @PlatformIntegrationTest
 @WithMySql
-@ContextConfiguration(classes = MySqlScriptLifecycleTest.TestApplication.class)
+@ContextConfiguration(classes = MySqlScriptLifecycleIT.TestApplication.class)
 @TestPropertySource(properties = {
         "platform.authorization.enabled=false",
         "platform.messaging.enabled=false"
@@ -30,10 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
         cleanup = "classpath:sql/mysql/drop-catalog-view.sql"
 )
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class MySqlScriptLifecycleTest {
+class MySqlScriptLifecycleIT {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private MySQLContainer<?> mySqlContainer;
 
     @Test
     @Order(1)
@@ -97,6 +102,25 @@ class MySqlScriptLifecycleTest {
         );
 
         assertThat(methodViews).isZero();
+    }
+
+    @Test
+    void shouldShareContainerAcrossIndependentSpringContextsAndKeepItRunningOnContextClose() {
+        MySQLContainer<?> firstContextContainer = createIndependentContextContainer();
+        MySQLContainer<?> secondContextContainer = createIndependentContextContainer();
+
+        assertThat(firstContextContainer).isSameAs(mySqlContainer);
+        assertThat(secondContextContainer).isSameAs(mySqlContainer);
+        assertThat(mySqlContainer.isRunning()).isTrue();
+    }
+
+    private MySQLContainer<?> createIndependentContextContainer() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(br.com.portalmanager.platform.library.testing.database.MySqlTestConfiguration.class);
+        context.refresh();
+        MySQLContainer<?> container = context.getBean(MySQLContainer.class);
+        context.close();
+        return container;
     }
 
     @SpringBootConfiguration
