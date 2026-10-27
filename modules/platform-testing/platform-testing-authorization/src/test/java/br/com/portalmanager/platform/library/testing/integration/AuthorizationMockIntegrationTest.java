@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
                 "platform.messaging.enabled=false",
+                "platform.authorization.service-url=http://127.0.0.1:9",
                 "spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration"
         }
 )

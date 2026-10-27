@@ -26,6 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.ResourcePropertySource;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,10 +42,21 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         configureStatusListener(loggerContext);
         loadInternalDefaults(env);
 
-        ConsoleAppender<ILoggingEvent> jsonAppender = createJsonConsoleAppender(loggerContext, env);
-        registerAppender(loggerContext, jsonAppender);
+        if (loggingFormat(env) == PlatformObservabilityProperties.Logging.Format.JSON) {
+            ConsoleAppender<ILoggingEvent> jsonAppender = createJsonConsoleAppender(loggerContext, env);
+            registerJsonAppender(loggerContext, jsonAppender);
+        }
 
         configureLogLevels(loggerContext, env);
+    }
+
+    private PlatformObservabilityProperties.Logging.Format loggingFormat(ConfigurableEnvironment env) {
+        return Binder.get(env)
+                .bind(
+                        "platform.observability.logging.format",
+                        PlatformObservabilityProperties.Logging.Format.class
+                )
+                .orElse(PlatformObservabilityProperties.Logging.Format.DEFAULT);
     }
 
     private void configureStatusListener(LoggerContext loggerContext) {
@@ -168,9 +180,22 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         );
     }
 
-    private void registerAppender(LoggerContext loggerContext, ConsoleAppender<ILoggingEvent> appender) {
+    private void registerJsonAppender(LoggerContext loggerContext, ConsoleAppender<ILoggingEvent> appender) {
         ch.qos.logback.classic.Logger rootLogger =
                 loggerContext.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+
+        ArrayList<Appender<ILoggingEvent>> consoleAppenders = new ArrayList<>();
+        rootLogger.iteratorForAppenders().forEachRemaining(existing -> {
+            if (existing instanceof ConsoleAppender<?>) {
+                consoleAppenders.add(existing);
+            }
+        });
+
+        consoleAppenders.forEach(existing -> {
+            rootLogger.detachAppender(existing);
+            existing.stop();
+        });
+
         Appender<ILoggingEvent> previousPlatformAppender = rootLogger.getAppender(APPENDER_NAME);
         if (previousPlatformAppender != null) {
             rootLogger.detachAppender(previousPlatformAppender);

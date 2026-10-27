@@ -17,12 +17,15 @@ public class PlatformObservabilityProperties {
     public void setLogging(Logging logging) { this.logging = logging == null ? new Logging() : logging; }
 
     public static class Logging {
+        private Format format = Format.DEFAULT;
         private Masking masking = new Masking();
         private RequestBody requestBody = new RequestBody();
         private Map<String, String> defaults = new LinkedHashMap<>();
         private Map<String, String> levels = new LinkedHashMap<>();
         private Map<String, String> customConverters = new LinkedHashMap<>();
 
+        public Format getFormat() { return format; }
+        public void setFormat(Format format) { this.format = format == null ? Format.DEFAULT : format; }
         public Masking getMasking() { return masking; }
         public void setMasking(Masking masking) { this.masking = masking == null ? new Masking() : masking; }
         public RequestBody getRequestBody() { return requestBody; }
@@ -33,6 +36,11 @@ public class PlatformObservabilityProperties {
         public void setLevels(Map<String, String> levels) { this.levels = levels == null ? new LinkedHashMap<>() : new LinkedHashMap<>(levels); }
         public Map<String, String> getCustomConverters() { return customConverters; }
         public void setCustomConverters(Map<String, String> customConverters) { this.customConverters = customConverters == null ? new LinkedHashMap<>() : new LinkedHashMap<>(customConverters); }
+
+        public enum Format {
+            DEFAULT,
+            JSON
+        }
     }
 
     public static class Masking {

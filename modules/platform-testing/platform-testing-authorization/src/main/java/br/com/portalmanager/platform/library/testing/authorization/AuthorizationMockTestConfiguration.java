@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.testing.authorization;
 
+import br.com.portalmanager.platform.library.authorization.client.AuthorizationClient;
+import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.testing.http.HttpMockServer;
 import br.com.portalmanager.platform.library.testing.http.HttpMockTestConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -22,6 +24,16 @@ public class AuthorizationMockTestConfiguration {
     @Bean
     AuthorizationMock authorizationMock(HttpMockServer httpMockServer) {
         return new AuthorizationMock(httpMockServer);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AuthorizationClient.class)
+    AuthorizationClient authorizationMockClient(
+            RestClient.Builder builder,
+            AuthorizationMock authorizationMock,
+            PlatformAuthorizationProperties properties
+    ) {
+        return new AuthorizationClient(builder, authorizationMock.baseUrl(), properties.getRetry());
     }
 
     @Bean

@@ -62,26 +62,23 @@ class PlatformLoggingInitializerTest {
     // ========================================================================
 
     @Test
-    void shouldInitializeJsonConsoleAppender() {
+    void shouldLeaveDefaultLoggingFormatUnchangedByDefault() {
 
         initializer.initialize(context);
 
         Logger rootLogger = rootLogger();
 
-        Appender<ILoggingEvent> appender =
-                rootLogger.getAppender("JSON_CONSOLE");
-
-        assertThat(appender)
-                .as("O appender JSON_CONSOLE deveria estar registrado.")
-                .isNotNull();
-
-        assertThat(appender)
-                .as("O appender deveria ser uma instância de ConsoleAppender.")
-                .isInstanceOf(ConsoleAppender.class);
+        assertThat(rootLogger.getAppender("JSON_CONSOLE")).isNull();
     }
 
     @Test
     void shouldInitializeSuccessfullyWithApplicationMetadata() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
+        ConsoleAppender<ILoggingEvent> applicationConsoleAppender = new ConsoleAppender<>();
+        applicationConsoleAppender.setContext(loggerContext);
+        applicationConsoleAppender.setName("APPLICATION_CONSOLE");
+        applicationConsoleAppender.start();
+        rootLogger().addAppender(applicationConsoleAppender);
 
         environment.setProperty(
                 "spring.application.name",
@@ -98,10 +95,14 @@ class PlatformLoggingInitializerTest {
 
         assertThat(rootLogger().getAppender("JSON_CONSOLE"))
                 .isNotNull();
+        assertThat(rootLogger().getAppender("APPLICATION_CONSOLE"))
+                .as("No formato JSON, o console anterior deve ser substituído para evitar duplicidade.")
+                .isNull();
     }
 
     @Test
     void shouldInitializeSuccessfullyWithoutApplicationMetadata() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
 
         assertThatCode(() -> initializer.initialize(context))
                 .doesNotThrowAnyException();
@@ -113,6 +114,7 @@ class PlatformLoggingInitializerTest {
 
     @Test
     void shouldConfigureStructuredJsonContextAndResolveHostFallback() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
 
         environment.setProperty("HOSTNAME", "null");
 
@@ -416,6 +418,7 @@ class PlatformLoggingInitializerTest {
 
     @Test
     void shouldReplacePreviousJsonAppenderWhenInitializedAgain() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
 
         initializer.initialize(context);
 
@@ -439,7 +442,7 @@ class PlatformLoggingInitializerTest {
     }
 
     @Test
-    void shouldPreserveApplicationAppenderWhenPlatformLoggingIsInitialized() {
+    void shouldPreserveApplicationAppenderInDefaultFormat() {
         ConsoleAppender<ILoggingEvent> applicationAppender = new ConsoleAppender<>();
         applicationAppender.setContext(loggerContext);
         applicationAppender.setName("APPLICATION_APPENDER");
@@ -451,11 +454,12 @@ class PlatformLoggingInitializerTest {
         assertThat(rootLogger().getAppender("APPLICATION_APPENDER"))
                 .isNotNull();
         assertThat(rootLogger().getAppender("JSON_CONSOLE"))
-                .isNotNull();
+                .isNull();
     }
 
     @Test
     void shouldFailFastWhenCustomConverterClassDoesNotExist() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
         environment.setProperty(
                 "platform.observability.logging.custom-converters.audit",
                 "com.example.DoesNotExistConverter"

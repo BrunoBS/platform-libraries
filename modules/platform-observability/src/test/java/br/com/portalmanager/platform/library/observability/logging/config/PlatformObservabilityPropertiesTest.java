@@ -16,6 +16,8 @@ class PlatformObservabilityPropertiesTest {
         contextRunner.run(context -> {
             PlatformObservabilityProperties properties = context.getBean(PlatformObservabilityProperties.class);
 
+            assertThat(properties.getLogging().getFormat())
+                    .isEqualTo(PlatformObservabilityProperties.Logging.Format.DEFAULT);
             assertThat(properties.getLogging().getMasking().isEnabled()).isTrue();
             assertThat(properties.getLogging().getRequestBody().isEnabled()).isFalse();
             assertThat(properties.getLogging().getRequestBody().getMaxSize().toBytes()).isEqualTo(1024 * 1024);
@@ -26,6 +28,7 @@ class PlatformObservabilityPropertiesTest {
     void shouldBindLoggingConfigurationFromSingleRoot() {
         contextRunner.withPropertyValues(
                 "platform.observability.logging.masking.enabled=false",
+                "platform.observability.logging.format=JSON",
                 "platform.observability.logging.request-body.enabled=true",
                 "platform.observability.logging.request-body.max-size=256KB",
                 "platform.observability.logging.masking.additional-sensitive-fields[0]=privateKey",
@@ -36,6 +39,8 @@ class PlatformObservabilityPropertiesTest {
             PlatformObservabilityProperties properties = context.getBean(PlatformObservabilityProperties.class);
 
             assertThat(properties.getLogging().getMasking().isEnabled()).isFalse();
+            assertThat(properties.getLogging().getFormat())
+                    .isEqualTo(PlatformObservabilityProperties.Logging.Format.JSON);
             assertThat(properties.getLogging().getRequestBody().isEnabled()).isTrue();
             assertThat(properties.getLogging().getRequestBody().getMaxSize().toBytes()).isEqualTo(256 * 1024);
             assertThat(properties.getLogging().getMasking().getAdditionalSensitiveFields()).contains("privateKey");
