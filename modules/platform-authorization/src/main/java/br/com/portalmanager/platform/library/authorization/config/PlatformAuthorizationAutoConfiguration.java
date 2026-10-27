@@ -30,6 +30,11 @@ public class PlatformAuthorizationAutoConfiguration {
     public SmartInitializingSingleton authorizationContextPropagationConfigurationValidator(
             PlatformAuthorizationProperties properties, Environment environment) {
         return () -> {
+            String configuredMode = environment.getProperty("platform.authorization.mode");
+            if (configuredMode != null
+                    && !properties.getMode().name().equalsIgnoreCase(configuredMode)) {
+                throw new PlatformConfigurationException(AuthorizationTechnicalErrors.MODE_INVALID);
+            }
             if (properties.getMode() == AuthorizationMode.MOCK) {
                 Set<String> permitted = Set.of("local", "test", "dev");
                 String[] active = environment.getActiveProfiles();
@@ -37,7 +42,7 @@ public class PlatformAuthorizationAutoConfiguration {
                     throw new PlatformConfigurationException(AuthorizationTechnicalErrors.MOCK_MODE_FORBIDDEN);
                 }
             }
-            var settings = properties.getContextPropagation();
+            PlatformAuthorizationProperties.ContextPropagation settings = properties.getContextPropagation();
             if (settings.isDefaultExecutor() && !settings.isEnabled()) {
                 throw new PlatformConfigurationException(
                         AuthorizationTechnicalErrors.CONTEXT_PROPAGATION_REQUIRED);

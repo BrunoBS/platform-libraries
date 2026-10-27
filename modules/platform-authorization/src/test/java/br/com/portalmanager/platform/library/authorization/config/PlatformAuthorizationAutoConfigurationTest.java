@@ -40,6 +40,23 @@ class PlatformAuthorizationAutoConfigurationTest {
     }
 
     @Test
+    void shouldRejectBlankModeBeforeServingRequests() {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class)
+                .withPropertyValues("platform.authorization.mode=", "platform.authorization.service-url=http://localhost")
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
+    void shouldRejectModeThatDoesNotSelectAnAuthorizationAspect() {
+        contextRunner.withUserConfiguration(InfrastructureConfiguration.class)
+                .withPropertyValues("platform.authorization.service-url=http://localhost")
+                .withInitializer(context -> context.getEnvironment().getPropertySources().addFirst(
+                        new org.springframework.core.env.MapPropertySource("untrimmedMode",
+                                java.util.Map.of("platform.authorization.mode", " REAL "))))
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
     void shouldUseRealModeByDefaultWhenPropertyIsMissing() {
         contextRunner.withUserConfiguration(InfrastructureConfiguration.class)
                 .withPropertyValues("platform.authorization.service-url=http://localhost")

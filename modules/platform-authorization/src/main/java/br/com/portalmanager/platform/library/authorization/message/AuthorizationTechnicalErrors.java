@@ -36,6 +36,14 @@ public final class AuthorizationTechnicalErrors {
                     500
             );
 
+    public static final PlatformErrorDefinition MODE_INVALID =
+            new PlatformErrorDefinition(
+                    "PLT-AUTH-005",
+                    "platform.authorization.mode must select REAL or MOCK explicitly when supplied",
+                    "Use REAL or MOCK without surrounding whitespace; an empty mode is not permitted.",
+                    500
+            );
+
     private AuthorizationTechnicalErrors() {
     }
 }
