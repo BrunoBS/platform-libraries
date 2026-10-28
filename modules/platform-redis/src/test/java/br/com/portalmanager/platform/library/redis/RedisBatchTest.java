@@ -30,6 +30,23 @@ class RedisBatchTest {
     private final RedisJsonCodec codec = new RedisJsonCodec(new JsonMapper(), 1024);
 
     @Test
+    void deletesInOneCommandWithNamespaceAndValidatesTheWholeBatchBeforeIo() {
+        StringRedisTemplate template = mock(StringRedisTemplate.class);
+        DefaultRedisStore store = new DefaultRedisStore(template, codec, access);
+        clearInvocations(template);
+        assertThat(store.deleteAll(List.of())).isZero();
+        verifyNoInteractions(template);
+        when(template.delete(List.of("test.unit:a", "test.unit:b"))).thenReturn(2L);
+        assertThat(store.deleteAll(List.of("a", "b", "a"))).isEqualTo(2L);
+        verify(template).delete(List.of("test.unit:a", "test.unit:b"));
+        clearInvocations(template);
+        assertThatThrownBy(() -> store.deleteAll(List.of("a", ""))).hasMessage("redis.validation");
+        assertThatThrownBy(() -> store.deleteAll(null)).hasMessage("redis.validation");
+        assertThatThrownBy(() -> store.deleteAll(Collections.nCopies(1001, "a"))).hasMessage("redis.validation");
+        verifyNoInteractions(template);
+    }
+
+    @Test
     void performsOneMultiCommandAndNoIndividualCommandsAndEmptyBatchesDoNotUseRedis() {
         var template = mock(StringRedisTemplate.class);
         ValueOperations<String, String> values = mock(ValueOperations.class);

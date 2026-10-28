@@ -44,6 +44,20 @@ final class RedisBatches {
         return result;
     }
 
+    Collection<String> deletionKeys(Collection<String> keys) {
+        if (keys == null) throw RedisErrors.invalid();
+        if (keys.isEmpty()) return List.of();
+        access.batch(keys.size());
+        Set<String> physicalKeys = new LinkedHashSet<>();
+        for (String key : keys) physicalKeys.add(access.key(key));
+        sameSlot(physicalKeys);
+        return List.copyOf(physicalKeys);
+    }
+
+    void requireSingleNodeScan() {
+        if (cluster) throw RedisErrors.configuration();
+    }
+
     private void sameSlot(Collection<String> keys) {
         if (!cluster || keys.size() < 2) return;
         var iterator = keys.iterator();

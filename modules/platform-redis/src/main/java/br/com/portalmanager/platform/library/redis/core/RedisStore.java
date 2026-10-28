@@ -29,6 +29,16 @@ public interface RedisStore {
 
     boolean delete(String key);
 
+    /** One DEL, respecting namespace and batch limits; missing keys are successful no-ops. */
+    long deleteAll(Collection<String> keys);
+
+    /**
+     * One namespace-scoped SCAN using a literal logical prefix. Start with cursor "0".
+     * Empty pages may have a nonzero cursor; duplicates and concurrent changes are possible.
+     * Supported on standalone/Sentinel, not Redis Cluster.
+     */
+    RedisKeyPage scan(String prefix, String cursor, int count);
+
     Optional<Duration> ttl(String key);
 
     boolean expire(String key, Duration ttl);

@@ -17,6 +17,33 @@ import java.util.concurrent.TimeUnit;
 
 class RedisBatchIT extends RedisIntegrationSupport {
     @Test
+    void batchDeletionIsIdempotentAndDoesNotTouchAnotherNamespace() {
+        context().run(ctx -> {
+            RedisStore store = ctx.getBean(RedisStore.class);
+            StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
+            String a = key();
+            String b = key();
+            store.setAll(Map.of(a, "one", b, "two"));
+            raw.opsForValue().set("foreign:" + a, "foreign");
+            assertThat(store.deleteAll(List.of(a, b, key(), a))).isEqualTo(2L);
+            assertThat(store.deleteAll(List.of(a, b))).isZero();
+            assertThat(store.getAll(List.of(a, b), String.class)).isEmpty();
+            assertThat(raw.opsForValue().get("foreign:" + a)).isEqualTo("foreign");
+        });
+    }
+
+    @Test
+    void batchDeletionPropagatesRealConnectionFailureInsteadOfReturningZero() {
+        context().withPropertyValues("spring.data.redis.port=1", "spring.data.redis.timeout=100ms",
+                "spring.data.redis.connect-timeout=100ms").run(ctx -> {
+            RedisStore store = ctx.getBean(RedisStore.class);
+            assertThat(store.deleteAll(List.of())).isZero();
+            assertThatThrownBy(() -> store.deleteAll(List.of("missing")))
+                    .isInstanceOf(ApiException.class);
+        });
+    }
+
+    @Test
     void roundTripsOneThreeFiveHundredAndFiveHundredOneIndependentKeys() {
         context()
                 .run(

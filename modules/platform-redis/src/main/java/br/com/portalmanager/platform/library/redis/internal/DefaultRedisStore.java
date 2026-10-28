@@ -1,10 +1,13 @@
 package br.com.portalmanager.platform.library.redis.internal;
 
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
+import br.com.portalmanager.platform.library.redis.core.RedisKeyPage;
 import br.com.portalmanager.platform.library.redis.core.RedisWrite;
 import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import java.nio.charset.StandardCharsets;
 
 import tools.jackson.core.type.TypeReference;
 
@@ -19,6 +22,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public final class DefaultRedisStore implements RedisStore {
+    // Spring's cursor iterator does not expose a resumable single page. This bounded script
+    // returns one SCAN reply through the existing template/serializer, without retaining a cursor.
+    private static final DefaultRedisScript<List> SCAN = new DefaultRedisScript<>(
+            "return redis.call('SCAN', ARGV[1], 'MATCH', ARGV[2], 'COUNT', ARGV[3])", List.class);
     private final StringRedisTemplate redis;
     private final RedisJsonCodec codec;
     private final RedisAccess access;
@@ -100,6 +107,54 @@ public final class DefaultRedisStore implements RedisStore {
 
     public boolean delete(String key) {
         return RedisErrors.call(() -> Boolean.TRUE.equals(redis.delete(access.key(key))));
+    }
+
+    @Override
+    public long deleteAll(Collection<String> keys) {
+        Collection<String> physicalKeys = batches.deletionKeys(keys);
+        if (physicalKeys.isEmpty()) return 0;
+        Long removed = RedisErrors.call(() -> redis.delete(physicalKeys));
+        if (removed == null) throw RedisErrors.error("unavailable", null);
+        return removed;
+    }
+
+    @Override
+    public RedisKeyPage scan(String prefix, String cursor, int count) {
+        if (prefix == null) throw RedisErrors.invalid();
+        requireCursor(cursor);
+        access.limit(count);
+        if (!prefix.isEmpty()) access.key(prefix);
+        batches.requireSingleNodeScan();
+        String physicalPrefix = access.prefix() + prefix;
+        String pattern = physicalPrefix.replace("\\", "\\\\").replace("*", "\\*")
+                .replace("?", "\\?").replace("[", "\\[").replace("]", "\\]") + "*";
+        List<?> response = RedisErrors.call(() -> redis.execute(SCAN, List.of(), cursor, pattern, Integer.toString(count)));
+        if (response == null || response.size() != 2 || !(response.get(1) instanceof List<?> values)) {
+            throw RedisErrors.error("unavailable", null);
+        }
+        String next = scanText(response.get(0));
+        try { requireCursor(next); }
+        catch (RuntimeException malformed) { throw RedisErrors.error("unavailable", null); }
+        List<String> keys = new ArrayList<>();
+        for (Object value : values) {
+            String physicalKey = scanText(value);
+            if (physicalKey.startsWith(physicalPrefix)) {
+                keys.add(physicalKey.substring(access.prefix().length()));
+            }
+        }
+        return new RedisKeyPage(next, keys);
+    }
+
+    private static void requireCursor(String cursor) {
+        if (cursor == null || !cursor.matches("0|[1-9][0-9]{0,19}")) throw RedisErrors.invalid();
+        try { Long.parseUnsignedLong(cursor); }
+        catch (NumberFormatException invalid) { throw RedisErrors.invalid(); }
+    }
+
+    private static String scanText(Object value) {
+        if (value instanceof String text) return text;
+        if (value instanceof byte[] bytes) return new String(bytes, StandardCharsets.UTF_8);
+        throw RedisErrors.error("unavailable", null);
     }
 
     public Optional<Duration> ttl(String key) {
