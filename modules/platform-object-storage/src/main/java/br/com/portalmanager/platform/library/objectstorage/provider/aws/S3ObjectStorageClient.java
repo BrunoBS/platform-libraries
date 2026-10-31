@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.objectstorage.configuration.ObjectS
 import br.com.portalmanager.platform.library.objectstorage.contract.*;
 import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageException;
 import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageException.Reason;
+import br.com.portalmanager.platform.library.objectstorage.contract.ObjectVersion;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

@@ -11,7 +11,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobListDetails;
 import com.azure.storage.blob.models.ListBlobsOptions;
-import com.azure.storage.blob.models.BlobParallelUploadOptions;
+import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobRequestConditions;
 import com.azure.storage.blob.models.BlobStorageException;
@@ -116,7 +116,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
             versions.add(new ObjectVersion(new ObjectReference(destination, key, item.getVersionId()), itemProperties.getETag(),
                     itemProperties.getContentLength() == null ? 0L : itemProperties.getContentLength(),
                     itemProperties.getLastModified() == null ? null : itemProperties.getLastModified().toInstant(),
-                    Boolean.TRUE.equals(item.isLatestVersion()), Boolean.TRUE.equals(item.isDeleted())));
+                    Boolean.TRUE.equals(item.isCurrentVersion()), Boolean.TRUE.equals(item.isDeleted())));
         }
         return new VersionPage(versions, page.getContinuationToken());
     }
