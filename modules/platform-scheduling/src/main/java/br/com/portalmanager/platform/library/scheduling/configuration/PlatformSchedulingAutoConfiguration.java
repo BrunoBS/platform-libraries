@@ -149,7 +149,8 @@ final class PlatformSchedulingLockExtensionScheduler {
         prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "true", matchIfMissing = true)
 class PlatformSchedulingEnabledConfiguration {
     @Bean
-    PlatformSchedulingTaskSchedulerRouter platformSchedulingTaskSchedulerRouter(BeanFactory beanFactory) {
+    PlatformSchedulingTaskSchedulerRouter platformSchedulingTaskSchedulerRouter(
+            BeanFactory beanFactory, LockProvider lockProvider) {
         return new PlatformSchedulingTaskSchedulerRouter(beanFactory);
     }
 
@@ -169,8 +170,10 @@ class PlatformSchedulingEnabledConfiguration {
                 if (delegate == null) {
                     delegate = schedulerRouter.router();
                 }
-                registrar.setTaskScheduler(new LockingTaskScheduler(
-                        delegate, lockProvider, serviceName, properties, metrics));
+                LockingTaskScheduler lockingScheduler = new LockingTaskScheduler(
+                        delegate, lockProvider, serviceName, properties, metrics);
+                schedulerRouter.setLockingScheduler(lockingScheduler);
+                registrar.setTaskScheduler(lockingScheduler);
             }
         };
     }
@@ -179,6 +182,7 @@ class PlatformSchedulingEnabledConfiguration {
 /** Owns Spring's fallback router so its internally created executor is shut down with the context. */
 final class PlatformSchedulingTaskSchedulerRouter implements org.springframework.beans.factory.DisposableBean {
     private final TaskSchedulerRouter router;
+    private volatile LockingTaskScheduler lockingScheduler;
 
     PlatformSchedulingTaskSchedulerRouter(BeanFactory beanFactory) {
         this.router = new TaskSchedulerRouter();
@@ -189,8 +193,16 @@ final class PlatformSchedulingTaskSchedulerRouter implements org.springframework
         return router;
     }
 
+    void setLockingScheduler(LockingTaskScheduler lockingScheduler) {
+        this.lockingScheduler = lockingScheduler;
+    }
+
     @Override
     public void destroy() {
         router.destroy();
+        LockingTaskScheduler lockingScheduler = this.lockingScheduler;
+        if (lockingScheduler != null) {
+            lockingScheduler.shutdownAndAwaitInFlightTasks();
+        }
     }
 }
