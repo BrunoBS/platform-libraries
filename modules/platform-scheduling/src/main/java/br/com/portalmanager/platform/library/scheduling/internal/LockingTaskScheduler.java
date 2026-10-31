@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -75,20 +76,22 @@ public final class LockingTaskScheduler implements TaskScheduler {
     }
 
     private Runnable guard(Runnable task) {
-        if (ScheduledTaskIdentity.disablesLock(task)) {
-            return task;
-        }
-        String lockName = ScheduledTaskIdentity.from(task, serviceName, "scheduled");
+        boolean lockEnabled = !(task instanceof PlatformScheduledTask programmaticTask
+                && !programmaticTask.lockEnabled())
+                && !ScheduledTaskIdentity.disablesLock(task);
+        String lockName = lockEnabled
+                ? ScheduledTaskIdentity.from(task, serviceName, "scheduled")
+                : null;
         String qualifier = task instanceof SchedulingAwareRunnable aware ? aware.getQualifier() : null;
-        return new LockedRunnable(task, qualifier, lockName);
+        return new GuardedRunnable(task, qualifier, lockName);
     }
 
-    private final class LockedRunnable implements SchedulingAwareRunnable {
+    private final class GuardedRunnable implements SchedulingAwareRunnable {
         private final Runnable task;
         private final String qualifier;
         private final String lockName;
 
-        private LockedRunnable(Runnable task, String qualifier, String lockName) {
+        private GuardedRunnable(Runnable task, String qualifier, String lockName) {
             this.task = task;
             this.qualifier = qualifier;
             this.lockName = lockName;
@@ -117,6 +120,10 @@ public final class LockingTaskScheduler implements TaskScheduler {
         }
 
         private void executeLockedTask() {
+            if (lockName == null) {
+                task.run();
+                return;
+            }
             AtomicBoolean taskStarted = new AtomicBoolean();
             LockConfiguration lock = new LockConfiguration(
                     Instant.now(getClock()), lockName,
