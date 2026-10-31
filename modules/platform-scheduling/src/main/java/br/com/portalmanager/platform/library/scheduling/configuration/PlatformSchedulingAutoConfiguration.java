@@ -52,7 +52,7 @@ public class PlatformSchedulingAutoConfiguration {
             RedisConnectionFactory connectionFactory,
             PlatformSchedulingProperties properties,
             org.springframework.core.env.Environment environment,
-            ObjectProvider<ScheduledExecutorService> extensionScheduler) {
+            ObjectProvider<PlatformSchedulingLockExtensionScheduler> extensionScheduler) {
         String serviceName = requireServiceName(environment);
         validate(properties);
         verifyRedis(connectionFactory);
@@ -60,7 +60,7 @@ public class PlatformSchedulingAutoConfiguration {
         if (!properties.isKeepAlive()) {
             return provider;
         }
-        return new KeepAliveLockProvider(provider, extensionScheduler.getObject());
+        return new KeepAliveLockProvider(provider, extensionScheduler.getObject().executor());
     }
 
     @Bean(destroyMethod = "shutdown")
@@ -68,12 +68,13 @@ public class PlatformSchedulingAutoConfiguration {
             prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnProperty(
             prefix = "golden.scheduling.distributed-lock", name = "keep-alive", havingValue = "true", matchIfMissing = true)
-    ScheduledExecutorService platformSchedulingLockExtensionScheduler() {
-        return Executors.newSingleThreadScheduledExecutor(task -> {
-            Thread thread = new Thread(task, "platform-scheduling-lock-extension");
-            thread.setDaemon(true);
-            return thread;
-        });
+    PlatformSchedulingLockExtensionScheduler platformSchedulingLockExtensionScheduler() {
+        return new PlatformSchedulingLockExtensionScheduler(
+                Executors.newSingleThreadScheduledExecutor(task -> {
+                    Thread thread = new Thread(task, "platform-scheduling-lock-extension");
+                    thread.setDaemon(true);
+                    return thread;
+                }));
     }
 
     @Bean
@@ -124,6 +125,22 @@ public class PlatformSchedulingAutoConfiguration {
         return new PlatformConfigurationException(new PlatformErrorDefinition(
                 "PLT-SCHED-003", "Invalid distributed scheduling lock configuration: " + reason,
                 "Review golden.scheduling.distributed-lock and spring.application.name.", 500));
+    }
+}
+
+final class PlatformSchedulingLockExtensionScheduler {
+    private final ScheduledExecutorService executor;
+
+    PlatformSchedulingLockExtensionScheduler(ScheduledExecutorService executor) {
+        this.executor = executor;
+    }
+
+    ScheduledExecutorService executor() {
+        return executor;
+    }
+
+    void shutdown() {
+        executor.shutdown();
     }
 }
 
