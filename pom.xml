@@ -14,6 +14,7 @@
         <module>modules/platform-observability</module>
         <module>modules/platform-messaging</module>
         <module>modules/platform-redis</module>
+        <module>modules/platform-scheduling</module>
         <module>modules/platform-parameter-client</module>
         <module>modules/platform-message-queue</module>
         <module>modules/platform-object-storage</module>
