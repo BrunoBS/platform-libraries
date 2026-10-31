@@ -43,6 +43,8 @@ class AzureBlobObjectStorageClientIT {
                 new UploadRequest("audit", KEY, firstContent.length, "application/json", Map.of("revision", "first")),
                 new ByteArrayInputStream(firstContent));
         assertNull(first.reference().versionId());
+        assertNotNull(first.eTag());
+        assertEquals(firstContent.length, first.sizeBytes());
 
         assertThrows(ConflictException.class, () -> storage.upload(
                 new UploadRequest("audit", KEY, firstContent.length, "application/json", Map.of("revision", "duplicate")),

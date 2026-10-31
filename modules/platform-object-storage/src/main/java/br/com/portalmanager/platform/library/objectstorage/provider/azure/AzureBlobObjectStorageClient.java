@@ -19,13 +19,14 @@ import com.azure.core.http.rest.PagedIterable;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlockBlobItem;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobListDetails;
-import com.azure.storage.blob.models.ListBlobsOptions;
-import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobRequestConditions;
 import com.azure.storage.blob.models.BlobStorageException;
+import com.azure.storage.blob.models.ListBlobsOptions;
+import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -59,10 +60,9 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
             options.setRequestConditions(new BlobRequestConditions().setIfNoneMatch("*"));
         }
         try {
-            blob.uploadWithResponse(options, Duration.ofMinutes(5), Context.NONE);
-            BlobProperties result = blob.getProperties();
+            BlockBlobItem result = blob.uploadWithResponse(options, Duration.ofMinutes(5), Context.NONE).getValue();
             return new UploadResult(new ObjectReference(request.destination(), request.key(), result.getVersionId()),
-                    result.getETag(), result.getBlobSize());
+                    result.getETag(), request.contentLength());
         } catch (BlobStorageException exception) { throw translate(exception, "upload object"); }
         catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("upload object", exception); }
     }
