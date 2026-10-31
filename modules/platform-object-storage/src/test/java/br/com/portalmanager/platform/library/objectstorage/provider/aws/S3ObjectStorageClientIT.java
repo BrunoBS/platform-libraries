@@ -8,7 +8,7 @@ import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorag
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadRequest;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.WriteMode;
-import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageException;
+import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
 import java.io.ByteArrayInputStream;
@@ -60,10 +60,9 @@ class S3ObjectStorageClientIT {
                 new ByteArrayInputStream(firstContent));
         assertNotNull(first.reference().versionId());
 
-        ObjectStorageException duplicate = assertThrows(ObjectStorageException.class, () -> storage.upload(
+        assertThrows(ConflictException.class, () -> storage.upload(
                 new UploadRequest("audit", KEY, firstContent.length, "application/json", Map.of("revision", "duplicate")),
                 new ByteArrayInputStream(firstContent)));
-        assertEquals(ObjectStorageException.Reason.ALREADY_EXISTS, duplicate.getReason());
 
         byte[] secondContent = "second".getBytes(StandardCharsets.UTF_8);
         UploadResult second = storage.upload(

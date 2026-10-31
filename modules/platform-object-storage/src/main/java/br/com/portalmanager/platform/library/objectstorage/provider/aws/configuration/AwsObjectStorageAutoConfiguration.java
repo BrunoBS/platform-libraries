@@ -2,9 +2,10 @@ package br.com.portalmanager.platform.library.objectstorage.provider.aws.configu
 
 import br.com.portalmanager.platform.library.objectstorage.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.objectstorage.provider.aws.S3ObjectStorageClient;
+import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageTechnicalErrors;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -17,10 +18,12 @@ public class AwsObjectStorageAutoConfiguration {
     @Bean(destroyMethod = "close")
     @ConditionalOnMissingBean(S3Client.class)
     S3Client objectStorageS3Client(ObjectStorageProperties properties) {
-        if (properties.getRegion() == null || properties.getRegion().isBlank()) {
-            throw new IllegalStateException("platform.object-storage.region is required for AWS");
+        try {
+            return S3Client.builder().region(Region.of(properties.getRegion())).build();
+        } catch (RuntimeException exception) {
+            throw new PlatformConfigurationException(
+                    ObjectStorageTechnicalErrors.invalidConfiguration("AWS region is invalid"), exception);
         }
-        return S3Client.builder().region(Region.of(properties.getRegion())).build();
     }
 
     @Bean

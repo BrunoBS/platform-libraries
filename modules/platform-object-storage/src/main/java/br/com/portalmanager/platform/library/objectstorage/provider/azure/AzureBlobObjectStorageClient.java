@@ -1,9 +1,20 @@
 package br.com.portalmanager.platform.library.objectstorage.provider.azure;
 
 import br.com.portalmanager.platform.library.objectstorage.configuration.ObjectStorageProperties;
-import br.com.portalmanager.platform.library.objectstorage.contract.*;
-import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageException;
-import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageException.Reason;
+import br.com.portalmanager.platform.library.objectstorage.contract.DownloadedObject;
+import br.com.portalmanager.platform.library.objectstorage.contract.ObjectMetadata;
+import br.com.portalmanager.platform.library.objectstorage.contract.ObjectPage;
+import br.com.portalmanager.platform.library.objectstorage.contract.ObjectReference;
+import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
+import br.com.portalmanager.platform.library.objectstorage.contract.ObjectSummary;
+import br.com.portalmanager.platform.library.objectstorage.contract.ObjectVersion;
+import br.com.portalmanager.platform.library.objectstorage.contract.UploadRequest;
+import br.com.portalmanager.platform.library.objectstorage.contract.UploadResult;
+import br.com.portalmanager.platform.library.objectstorage.contract.VersionPage;
+import br.com.portalmanager.platform.library.objectstorage.contract.WriteMode;
+import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageFailureMapper;
+import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageValidation;
+import com.azure.core.exception.AzureException;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -35,6 +46,8 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
 
     @Override
     public UploadResult upload(UploadRequest request, InputStream content) {
+        if (request == null) throw ObjectStorageValidation.invalid("request");
+        if (content == null) throw ObjectStorageValidation.invalid("content");
         Resolved resolved = resolve(request.destination(), request.key());
         BlobClient blob = container(resolved.container()).getBlobClient(resolved.key());
         BlobParallelUploadOptions options = new BlobParallelUploadOptions(content, request.contentLength())
@@ -51,10 +64,12 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
             return new UploadResult(new ObjectReference(request.destination(), request.key(), result.getVersionId()),
                     result.getETag(), result.getBlobSize());
         } catch (BlobStorageException exception) { throw translate(exception, "upload object"); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("upload object", exception); }
     }
 
     @Override
     public DownloadedObject download(ObjectReference reference) {
+        ObjectStorageValidation.requireReference(reference);
         Resolved resolved = resolve(reference.destination(), reference.key());
         BlobClient blob = blob(resolved, reference.versionId());
         try {
@@ -62,67 +77,91 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
             BlobProperties result = stream.getProperties();
             return new DownloadedObject(metadata(reference, result), stream);
         } catch (BlobStorageException exception) { throw translate(exception, "download object"); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("download object", exception); }
     }
 
     @Override
     public ObjectMetadata head(ObjectReference reference) {
+        ObjectStorageValidation.requireReference(reference);
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { return metadata(reference, blob(resolved, reference.versionId()).getProperties()); }
         catch (BlobStorageException exception) { throw translate(exception, "read object properties"); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("read object properties", exception); }
     }
 
     @Override
     public boolean exists(ObjectReference reference) {
+        ObjectStorageValidation.requireReference(reference);
         try { return blob(resolve(reference.destination(), reference.key()), reference.versionId()).exists(); }
-        catch (BlobStorageException exception) { throw translate(exception, "check object existence"); }
+        catch (BlobStorageException exception) {
+            if (exception.getStatusCode() == 404) return false;
+            throw translate(exception, "check object existence");
+        }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("check object existence", exception); }
     }
 
     @Override
     public ObjectPage list(String destination, String prefix, String continuationToken, int pageSize) {
+        ObjectStorageValidation.requireText(destination, "destination");
         requirePageSize(pageSize);
         ObjectStorageProperties.Destination target = destination(destination);
         String fullPrefix = join(target.getPrefix(), prefix == null ? "" : prefix);
-        ListBlobsOptions options = new ListBlobsOptions().setPrefix(fullPrefix);
-        PagedIterable<BlobItem> items = container(target.getContainer()).listBlobs(options, Duration.ofMinutes(2));
-        Iterator<com.azure.core.http.rest.PagedResponse<BlobItem>> pages = items.iterableByPage(continuationToken, pageSize).iterator();
-        if (!pages.hasNext()) return new ObjectPage(List.of(), null);
-        com.azure.core.http.rest.PagedResponse<BlobItem> page = pages.next();
-        List<ObjectSummary> result = new ArrayList<>();
-        for (BlobItem item : page.getValue()) {
-            String relative = stripPrefix(target.getPrefix(), item.getName());
-            com.azure.storage.blob.models.BlobItemProperties itemProperties = item.getProperties();
-            result.add(new ObjectSummary(ObjectReference.current(destination, relative),
-                    itemProperties.getContentLength() == null ? 0L : itemProperties.getContentLength(),
-                    itemProperties.getETag(),
-                    itemProperties.getLastModified() == null ? null : itemProperties.getLastModified().toInstant()));
+        try {
+            ListBlobsOptions options = new ListBlobsOptions().setPrefix(fullPrefix);
+            PagedIterable<BlobItem> items = container(target.getContainer()).listBlobs(options, Duration.ofMinutes(2));
+            Iterator<com.azure.core.http.rest.PagedResponse<BlobItem>> pages = items.iterableByPage(continuationToken, pageSize).iterator();
+            if (!pages.hasNext()) return new ObjectPage(List.of(), null);
+            com.azure.core.http.rest.PagedResponse<BlobItem> page = pages.next();
+            List<ObjectSummary> result = new ArrayList<>();
+            for (BlobItem item : page.getValue()) {
+                String relative = stripPrefix(target.getPrefix(), item.getName());
+                com.azure.storage.blob.models.BlobItemProperties itemProperties = item.getProperties();
+                result.add(new ObjectSummary(ObjectReference.current(destination, relative),
+                        itemProperties.getContentLength() == null ? 0L : itemProperties.getContentLength(),
+                        itemProperties.getETag(),
+                        itemProperties.getLastModified() == null ? null : itemProperties.getLastModified().toInstant()));
+            }
+            return new ObjectPage(result, page.getContinuationToken());
+        } catch (BlobStorageException exception) {
+            throw translate(exception, "list objects");
+        } catch (AzureException exception) {
+            throw ObjectStorageFailureMapper.fromProviderFailure("list objects", exception);
         }
-        return new ObjectPage(result, page.getContinuationToken());
     }
 
     @Override
     public VersionPage listVersions(String destination, String key, String continuationToken, int pageSize) {
+        ObjectStorageValidation.requireText(destination, "destination");
+        ObjectStorageValidation.requireText(key, "key");
         requirePageSize(pageSize);
         Resolved resolved = resolve(destination, key);
-        BlobListDetails details = new BlobListDetails().setRetrieveVersions(true);
-        ListBlobsOptions options = new ListBlobsOptions().setPrefix(resolved.key()).setDetails(details);
-        PagedIterable<BlobItem> items = container(resolved.container()).listBlobs(options, Duration.ofMinutes(2));
-        Iterator<com.azure.core.http.rest.PagedResponse<BlobItem>> pages = items.iterableByPage(continuationToken, pageSize).iterator();
-        if (!pages.hasNext()) return new VersionPage(List.of(), null);
-        com.azure.core.http.rest.PagedResponse<BlobItem> page = pages.next();
-        List<ObjectVersion> versions = new ArrayList<>();
-        for (BlobItem item : page.getValue()) {
-            if (!item.getName().equals(resolved.key())) continue;
-            com.azure.storage.blob.models.BlobItemProperties itemProperties = item.getProperties();
-            versions.add(new ObjectVersion(new ObjectReference(destination, key, item.getVersionId()), itemProperties.getETag(),
-                    itemProperties.getContentLength() == null ? 0L : itemProperties.getContentLength(),
-                    itemProperties.getLastModified() == null ? null : itemProperties.getLastModified().toInstant(),
-                    Boolean.TRUE.equals(item.isCurrentVersion()), Boolean.TRUE.equals(item.isDeleted())));
+        try {
+            BlobListDetails details = new BlobListDetails().setRetrieveVersions(true);
+            ListBlobsOptions options = new ListBlobsOptions().setPrefix(resolved.key()).setDetails(details);
+            PagedIterable<BlobItem> items = container(resolved.container()).listBlobs(options, Duration.ofMinutes(2));
+            Iterator<com.azure.core.http.rest.PagedResponse<BlobItem>> pages = items.iterableByPage(continuationToken, pageSize).iterator();
+            if (!pages.hasNext()) return new VersionPage(List.of(), null);
+            com.azure.core.http.rest.PagedResponse<BlobItem> page = pages.next();
+            List<ObjectVersion> versions = new ArrayList<>();
+            for (BlobItem item : page.getValue()) {
+                if (!item.getName().equals(resolved.key())) continue;
+                com.azure.storage.blob.models.BlobItemProperties itemProperties = item.getProperties();
+                versions.add(new ObjectVersion(new ObjectReference(destination, key, item.getVersionId()), itemProperties.getETag(),
+                        itemProperties.getContentLength() == null ? 0L : itemProperties.getContentLength(),
+                        itemProperties.getLastModified() == null ? null : itemProperties.getLastModified().toInstant(),
+                        Boolean.TRUE.equals(item.isCurrentVersion()), Boolean.TRUE.equals(item.isDeleted())));
+            }
+            return new VersionPage(versions, page.getContinuationToken());
+        } catch (BlobStorageException exception) {
+            throw translate(exception, "list object versions");
+        } catch (AzureException exception) {
+            throw ObjectStorageFailureMapper.fromProviderFailure("list object versions", exception);
         }
-        return new VersionPage(versions, page.getContinuationToken());
     }
 
     @Override
     public Optional<ObjectVersion> findVersionByETag(String destination, String key, String eTag) {
+        ObjectStorageValidation.requireText(eTag, "eTag");
         String token = null;
         do {
             VersionPage page = listVersions(destination, key, token, 5000);
@@ -135,17 +174,21 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
 
     @Override
     public void delete(ObjectReference reference) {
+        ObjectStorageValidation.requireReference(reference);
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { blob(resolved, null).delete(); }
         catch (BlobStorageException exception) { throw translate(exception, "delete object"); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object", exception); }
     }
 
     @Override
     public void deleteVersion(ObjectReference reference) {
-        if (reference.versionId() == null) throw new IllegalArgumentException("versionId is required to delete a specific version");
+        ObjectStorageValidation.requireReference(reference);
+        if (reference.versionId() == null) throw ObjectStorageValidation.invalid("versionId");
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { container(resolved.container()).getBlobVersionClient(resolved.key(), reference.versionId()).delete(); }
         catch (BlobStorageException exception) { throw translate(exception, "delete object version"); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object version", exception); }
     }
 
     private ObjectMetadata metadata(ObjectReference requested, BlobProperties result) {
@@ -167,7 +210,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
     private ObjectStorageProperties.Destination destination(String logical) {
         ObjectStorageProperties.Destination target = properties.getDestinations().get(logical);
         if (target == null || target.getContainer() == null || target.getContainer().isBlank())
-            throw new IllegalArgumentException("Unknown or unconfigured object storage destination: " + logical);
+            throw ObjectStorageValidation.invalid("destination");
         return target;
     }
     private static String join(String prefix, String key) {
@@ -180,20 +223,13 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
         return key.startsWith(normalized) ? key.substring(normalized.length()) : key;
     }
     private static void requirePageSize(int pageSize) {
-        if (pageSize < 1 || pageSize > 5000) throw new IllegalArgumentException("pageSize must be between 1 and 5000");
+        if (pageSize < 1 || pageSize > 5000) throw ObjectStorageValidation.invalid("pageSize");
     }
     private static boolean sameETag(String first, String second) {
         return first != null && second != null && first.replace("\"", "").equals(second.replace("\"", ""));
     }
-    private static ObjectStorageException translate(BlobStorageException exception, String operation) {
-        Reason reason = switch (exception.getStatusCode()) {
-            case 404 -> Reason.NOT_FOUND;
-            case 403 -> Reason.ACCESS_DENIED;
-            case 409, 412 -> Reason.ALREADY_EXISTS;
-            case 408, 429, 500, 502, 503, 504 -> Reason.TRANSIENT;
-            default -> Reason.PROVIDER_FAILURE;
-        };
-        return new ObjectStorageException(reason, "Unable to " + operation + " in Azure Blob Storage", exception);
+    private static RuntimeException translate(BlobStorageException exception, String operation) {
+        return ObjectStorageFailureMapper.fromHttpStatus(exception.getStatusCode(), operation, exception);
     }
     private record Resolved(String container, String key) { }
 }

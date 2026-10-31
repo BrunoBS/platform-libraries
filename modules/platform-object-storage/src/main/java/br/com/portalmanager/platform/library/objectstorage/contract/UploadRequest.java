@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.objectstorage.contract;
 
+import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageValidation;
 import java.util.Map;
-import java.util.Objects;
 
 public record UploadRequest(
         String destination,
@@ -12,11 +12,13 @@ public record UploadRequest(
         WriteMode writeMode) {
 
     public UploadRequest {
-        Objects.requireNonNull(destination, "destination is required");
-        Objects.requireNonNull(key, "key is required");
-        Objects.requireNonNull(writeMode, "writeMode is required");
-        if (destination.isBlank() || key.isBlank() || contentLength < 0) {
-            throw new IllegalArgumentException("destination/key must not be blank and contentLength must be non-negative");
+        if (destination == null || destination.isBlank()) throw ObjectStorageValidation.invalid("destination");
+        if (key == null || key.isBlank()) throw ObjectStorageValidation.invalid("key");
+        if (writeMode == null) throw ObjectStorageValidation.invalid("writeMode");
+        if (contentLength < 0) throw ObjectStorageValidation.invalid("contentLength");
+        if (metadata != null && metadata.entrySet().stream()
+                .anyMatch(entry -> entry.getKey() == null || entry.getKey().isBlank() || entry.getValue() == null)) {
+            throw ObjectStorageValidation.invalid("metadata");
         }
         metadata = metadata == null ? Map.of() : Map.copyOf(metadata);
     }

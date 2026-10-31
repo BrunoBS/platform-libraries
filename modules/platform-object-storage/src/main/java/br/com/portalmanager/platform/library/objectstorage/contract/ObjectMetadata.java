@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.objectstorage.contract;
 
+import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageValidation;
 import java.time.Instant;
 import java.util.Map;
 
@@ -11,6 +12,12 @@ public record ObjectMetadata(
         Instant lastModified,
         Map<String, String> metadata) {
     public ObjectMetadata {
+        if (reference == null) throw ObjectStorageValidation.invalid("reference");
+        if (sizeBytes < 0) throw ObjectStorageValidation.invalid("sizeBytes");
+        if (metadata != null && metadata.entrySet().stream()
+                .anyMatch(entry -> entry.getKey() == null || entry.getKey().isBlank() || entry.getValue() == null)) {
+            throw ObjectStorageValidation.invalid("metadata");
+        }
         metadata = metadata == null ? Map.of() : Map.copyOf(metadata);
     }
 }
