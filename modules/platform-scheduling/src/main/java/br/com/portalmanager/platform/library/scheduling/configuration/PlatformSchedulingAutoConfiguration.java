@@ -4,9 +4,11 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 import br.com.portalmanager.platform.library.scheduling.internal.LockingTaskScheduler;
 import br.com.portalmanager.platform.library.scheduling.metrics.SchedulingLockMetrics;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import net.javacrumbs.shedlock.core.ExtensibleLockProvider;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider;
 import net.javacrumbs.shedlock.support.KeepAliveLockProvider;
@@ -26,7 +28,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.config.TaskSchedulerRouter;
-import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.LoggerFactory;
 
 @AutoConfiguration
@@ -55,7 +56,7 @@ public class PlatformSchedulingAutoConfiguration {
         String serviceName = requireServiceName(environment);
         validate(properties);
         verifyRedis(connectionFactory);
-        LockProvider provider = new RedisLockProvider(connectionFactory, serviceName);
+        ExtensibleLockProvider provider = new RedisLockProvider(connectionFactory, serviceName);
         if (!properties.isKeepAlive()) {
             return provider;
         }

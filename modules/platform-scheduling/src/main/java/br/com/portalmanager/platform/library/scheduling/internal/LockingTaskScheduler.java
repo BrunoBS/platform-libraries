@@ -109,7 +109,7 @@ public final class LockingTaskScheduler implements TaskScheduler {
                     Instant.now(getClock()), lockName,
                     properties.getLockAtMostFor(), properties.getLockAtLeastFor());
             try {
-                lockExecutor.executeWithLock(() -> {
+                lockExecutor.executeWithLock((Runnable) () -> {
                     taskStarted.set(true);
                     task.run();
                 }, lock);
