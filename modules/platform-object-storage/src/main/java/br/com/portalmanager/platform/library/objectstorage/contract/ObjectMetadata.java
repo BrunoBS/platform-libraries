@@ -7,7 +7,7 @@ import java.util.Map;
 public record ObjectMetadata(
         ObjectReference reference,
         long sizeBytes,
-        String contentType,
+        ObjectHeaders headers,
         String eTag,
         Instant lastModified,
         Map<String, String> metadata) {
@@ -19,5 +19,20 @@ public record ObjectMetadata(
             throw ObjectStorageValidation.invalid("metadata");
         }
         metadata = metadata == null ? Map.of() : Map.copyOf(metadata);
+        headers = headers == null ? ObjectHeaders.empty() : headers;
+    }
+
+    public ObjectMetadata(
+            ObjectReference reference,
+            long sizeBytes,
+            String contentType,
+            String eTag,
+            Instant lastModified,
+            Map<String, String> metadata) {
+        this(reference, sizeBytes, new ObjectHeaders(contentType, null, null, null, null), eTag, lastModified, metadata);
+    }
+
+    public String contentType() {
+        return headers.contentType();
     }
 }

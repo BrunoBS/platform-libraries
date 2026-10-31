@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.objectstorage.provider.aws;
 import br.com.portalmanager.platform.library.objectstorage.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.contract.DownloadedObject;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectMetadata;
+import br.com.portalmanager.platform.library.objectstorage.contract.ObjectHeaders;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectPage;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectReference;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
@@ -15,6 +16,8 @@ import br.com.portalmanager.platform.library.objectstorage.contract.WriteMode;
 import br.com.portalmanager.platform.library.messaging.exception.NotFoundException;
 import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageFailureMapper;
 import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageValidation;
+import br.com.portalmanager.platform.library.objectstorage.internal.ObjectStorageKey;
+import br.com.portalmanager.platform.library.objectstorage.internal.ObjectStorageUploadContent;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
@@ -41,16 +45,24 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
         if (request == null) throw ObjectStorageValidation.invalid("request");
         if (content == null) throw ObjectStorageValidation.invalid("content");
         Resolved resolved = resolve(request.destination(), request.key());
+        ObjectStorageUploadContent uploadContent = ObjectStorageUploadContent.from(content);
         try {
+            ObjectHeaders headers = request.headers();
             PutObjectRequest.Builder builder = PutObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key())
-                    .contentLength(request.contentLength()).metadata(request.metadata());
-            if (request.contentType() != null) builder.contentType(request.contentType());
+                    .contentLength(request.contentLength()).metadata(request.metadata())
+                    .contentType(headers.contentType()).cacheControl(headers.cacheControl())
+                    .contentDisposition(headers.contentDisposition()).contentEncoding(headers.contentEncoding())
+                    .contentLanguage(headers.contentLanguage());
             if (request.writeMode() == WriteMode.CREATE_ONLY) builder.ifNoneMatch("*");
-            PutObjectResponse response = client.putObject(builder.build(), RequestBody.fromInputStream(content, request.contentLength()));
+            PutObjectResponse response = client.putObject(builder.build(),
+                    RequestBody.fromInputStream(uploadContent.stream(), request.contentLength()));
             String version = response.versionId();
-            return new UploadResult(new ObjectReference(request.destination(), request.key(), version), response.eTag(), request.contentLength());
+            return new UploadResult(new ObjectReference(request.destination(), request.key(), version), response.eTag(),
+                    request.contentLength(), uploadContent.sha256());
         } catch (S3Exception exception) {
             throw translate(exception, "upload object");
+        } catch (SdkClientException exception) {
+            throw ObjectStorageFailureMapper.fromClientFailure("upload object", exception);
         } catch (SdkException exception) {
             throw ObjectStorageFailureMapper.fromProviderFailure("upload object", exception);
         }
@@ -67,11 +79,14 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
             GetObjectResponse result = response.response();
             ObjectReference actual = reference.versionId() == null && result.versionId() != null
                     ? new ObjectReference(reference.destination(), reference.key(), result.versionId()) : reference;
-            ObjectMetadata metadata = new ObjectMetadata(actual, result.contentLength(), result.contentType(),
+            ObjectMetadata metadata = new ObjectMetadata(actual, result.contentLength(), headers(result.contentType(),
+                    result.cacheControl(), result.contentDisposition(), result.contentEncoding(), result.contentLanguage()),
                     result.eTag(), result.lastModified(), result.metadata());
             return new DownloadedObject(metadata, response);
         } catch (S3Exception exception) {
             throw translate(exception, "download object");
+        } catch (SdkClientException exception) {
+            throw ObjectStorageFailureMapper.fromClientFailure("download object", exception);
         } catch (SdkException exception) {
             throw ObjectStorageFailureMapper.fromProviderFailure("download object", exception);
         }
@@ -87,9 +102,13 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
             HeadObjectResponse response = client.headObject(builder.build());
             ObjectReference actual = reference.versionId() == null && response.versionId() != null
                     ? new ObjectReference(reference.destination(), reference.key(), response.versionId()) : reference;
-            return new ObjectMetadata(actual, response.contentLength(), response.contentType(), response.eTag(), response.lastModified(), response.metadata());
+            return new ObjectMetadata(actual, response.contentLength(), headers(response.contentType(), response.cacheControl(),
+                    response.contentDisposition(), response.contentEncoding(), response.contentLanguage()), response.eTag(),
+                    response.lastModified(), response.metadata());
         } catch (S3Exception exception) {
             throw translate(exception, "read object properties");
+        } catch (SdkClientException exception) {
+            throw ObjectStorageFailureMapper.fromClientFailure("read object properties", exception);
         } catch (SdkException exception) {
             throw ObjectStorageFailureMapper.fromProviderFailure("read object properties", exception);
         }
@@ -107,7 +126,7 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
         ObjectStorageValidation.requireText(destination, "destination");
         requirePageSize(pageSize);
         ObjectStorageProperties.Destination target = destination(destination);
-        String fullPrefix = join(target.getPrefix(), prefix == null ? "" : prefix);
+        String fullPrefix = ObjectStorageKey.resolvePrefix(target.getPrefix(), prefix);
         ListObjectsV2Request.Builder builder = ListObjectsV2Request.builder().bucket(target.getBucket())
                 .prefix(fullPrefix).maxKeys(pageSize);
         if (continuationToken != null) builder.continuationToken(continuationToken);
@@ -115,12 +134,14 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
             ListObjectsV2Response response = client.listObjectsV2(builder.build());
             List<ObjectSummary> objects = new ArrayList<>();
             for (S3Object item : response.contents()) {
-                String relative = stripPrefix(target.getPrefix(), item.key());
+                String relative = ObjectStorageKey.logical(target.getPrefix(), target.getSuffix(), item.key());
+                if (relative == null) continue;
                 ObjectReference reference = ObjectReference.current(destination, relative);
                 objects.add(new ObjectSummary(reference, item.size(), item.eTag(), item.lastModified()));
             }
             return new ObjectPage(objects, response.nextContinuationToken());
         } catch (S3Exception exception) { throw translate(exception, "list objects"); }
+        catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("list objects", exception); }
         catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("list objects", exception); }
     }
 
@@ -148,6 +169,7 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
             String next = response.isTruncated() ? encodeToken(response.nextKeyMarker(), response.nextVersionIdMarker()) : null;
             return new VersionPage(versions, next);
         } catch (S3Exception exception) { throw translate(exception, "list object versions"); }
+        catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("list object versions", exception); }
         catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("list object versions", exception); }
     }
 
@@ -170,6 +192,7 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { client.deleteObject(DeleteObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key()).build()); }
         catch (S3Exception exception) { throw translate(exception, "delete object"); }
+        catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("delete object", exception); }
         catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object", exception); }
     }
 
@@ -180,12 +203,13 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { client.deleteObject(DeleteObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key()).versionId(reference.versionId()).build()); }
         catch (S3Exception exception) { throw translate(exception, "delete object version"); }
+        catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("delete object version", exception); }
         catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object version", exception); }
     }
 
     private Resolved resolve(String logical, String key) {
         ObjectStorageProperties.Destination target = destination(logical);
-        return new Resolved(target.getBucket(), join(target.getPrefix(), key));
+        return new Resolved(target.getBucket(), ObjectStorageKey.resolve(target.getPrefix(), target.getSuffix(), key));
     }
 
     private ObjectStorageProperties.Destination destination(String logical) {
@@ -195,14 +219,9 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
         return target;
     }
 
-    private static String join(String prefix, String key) {
-        if (prefix == null || prefix.isBlank()) return key;
-        return key == null || key.isBlank() ? prefix : prefix.replaceAll("/$", "") + "/" + key.replaceAll("^/", "");
-    }
-    private static String stripPrefix(String prefix, String key) {
-        if (prefix == null || prefix.isBlank()) return key;
-        String normalized = prefix.replaceAll("/$", "") + "/";
-        return key.startsWith(normalized) ? key.substring(normalized.length()) : key;
+    private static ObjectHeaders headers(String contentType, String cacheControl, String contentDisposition,
+            String contentEncoding, String contentLanguage) {
+        return new ObjectHeaders(contentType, cacheControl, contentDisposition, contentEncoding, contentLanguage);
     }
     private static void requirePageSize(int pageSize) {
         if (pageSize < 1 || pageSize > 1000) throw ObjectStorageValidation.invalid("pageSize");

@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.objectstorage.configuration;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.objectstorage.internal.ObjectStorageKey;
 import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageTechnicalErrors;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +74,12 @@ public class ObjectStorageProperties implements InitializingBean {
                 String propertyName = provider == ObjectStorageProvider.AWS ? "bucket" : "container";
                 throw invalidConfiguration("Destination '" + entry.getKey() + "' is missing " + propertyName);
             }
+            try {
+                ObjectStorageKey.validateConfiguredPrefix(destination.getPrefix());
+                ObjectStorageKey.validateConfiguredSuffix(destination.getSuffix());
+            } catch (ValidationException exception) {
+                throw invalidConfiguration("Destination '" + entry.getKey() + "' has an invalid prefix or suffix");
+            }
         }
     }
 
@@ -83,6 +91,7 @@ public class ObjectStorageProperties implements InitializingBean {
         private String bucket;
         private String container;
         private String prefix = "";
+        private String suffix = "";
 
         public String getBucket() {
             return bucket;
@@ -106,6 +115,14 @@ public class ObjectStorageProperties implements InitializingBean {
 
         public void setPrefix(String prefix) {
             this.prefix = prefix;
+        }
+
+        public String getSuffix() {
+            return suffix;
+        }
+
+        public void setSuffix(String suffix) {
+            this.suffix = suffix;
         }
     }
 }
