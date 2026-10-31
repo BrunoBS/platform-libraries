@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,6 +28,7 @@ class ObjectStorageAutoConfigurationTest {
                         "platform.object-storage.destinations.audit.bucket=audit-bucket")
                 .run(application -> assertThat(application).hasNotFailed()
                         .hasSingleBean(S3Client.class)
+                        .hasSingleBean(S3Presigner.class)
                         .hasSingleBean(ObjectStorageClient.class)
                         .doesNotHaveBean(BlobServiceClient.class));
     }

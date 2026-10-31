@@ -2,9 +2,9 @@ package br.com.portalmanager.platform.library.objectstorage.internal;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageMessageKeys;
-import java.io.DigestInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;

@@ -9,6 +9,9 @@ import br.com.portalmanager.platform.library.objectstorage.contract.ObjectRefere
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectSummary;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectVersion;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlOperation;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadRequest;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.VersionPage;
@@ -18,8 +21,10 @@ import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStora
 import br.com.portalmanager.platform.library.objectstorage.exception.ObjectStorageValidation;
 import br.com.portalmanager.platform.library.objectstorage.internal.ObjectStorageKey;
 import br.com.portalmanager.platform.library.objectstorage.internal.ObjectStorageUploadContent;
+import java.net.URI;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -29,14 +34,21 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 import software.amazon.awssdk.services.s3.model.*;
 
 public class S3ObjectStorageClient implements ObjectStorageClient {
     private final S3Client client;
+    private final S3Presigner presigner;
     private final ObjectStorageProperties properties;
 
-    public S3ObjectStorageClient(S3Client client, ObjectStorageProperties properties) {
+    public S3ObjectStorageClient(S3Client client, S3Presigner presigner, ObjectStorageProperties properties) {
         this.client = client;
+        this.presigner = presigner;
         this.properties = properties;
     }
 
@@ -205,6 +217,53 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
         catch (S3Exception exception) { throw translate(exception, "delete object version"); }
         catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("delete object version", exception); }
         catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object version", exception); }
+    }
+
+    @Override
+    public SignedUrlResult createSignedUrl(SignedUrlRequest request) {
+        if (request == null) throw ObjectStorageValidation.invalid("request");
+        Resolved resolved = resolve(request.reference().destination(), request.reference().key());
+        try {
+            URI url;
+            Instant expiresAt;
+            if (request.operation() == SignedUrlOperation.DOWNLOAD) {
+                GetObjectRequest.Builder objectRequest = GetObjectRequest.builder()
+                        .bucket(resolved.bucket()).key(resolved.key());
+                if (request.reference().versionId() != null) {
+                    objectRequest.versionId(request.reference().versionId());
+                }
+                GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                        .signatureDuration(request.validity()).getObjectRequest(objectRequest.build()).build();
+                PresignedGetObjectRequest signedRequest = presigner.presignGetObject(presignRequest);
+                url = signedRequest.url().toURI();
+                expiresAt = signedRequest.expiration();
+            } else {
+                ObjectHeaders headers = request.headers();
+                PutObjectRequest objectRequest = PutObjectRequest.builder()
+                        .bucket(resolved.bucket()).key(resolved.key())
+                        .contentType(headers.contentType()).cacheControl(headers.cacheControl())
+                        .contentDisposition(headers.contentDisposition()).contentEncoding(headers.contentEncoding())
+                        .contentLanguage(headers.contentLanguage()).build();
+                PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                        .signatureDuration(request.validity()).putObjectRequest(objectRequest).build();
+                PresignedPutObjectRequest signedRequest = presigner.presignPutObject(presignRequest);
+                url = signedRequest.url().toURI();
+                expiresAt = signedRequest.expiration();
+            }
+            Map<String, String> requiredHeaders = request.operation() == SignedUrlOperation.UPLOAD
+                    ? request.headers().asHttpHeaders() : Map.of();
+            return new SignedUrlResult(url, request.operation(), expiresAt, requiredHeaders);
+        } catch (S3Exception exception) {
+            throw translate(exception, "create signed object URL");
+        } catch (SdkClientException exception) {
+            throw ObjectStorageFailureMapper.fromClientFailure("create signed object URL", exception);
+        } catch (SdkException exception) {
+            throw ObjectStorageFailureMapper.fromProviderFailure("create signed object URL", exception);
+        } catch (java.net.URISyntaxException exception) {
+            throw ObjectStorageFailureMapper.fromProviderFailure("create signed object URL", exception);
+        } catch (IllegalArgumentException exception) {
+            throw ObjectStorageFailureMapper.fromClientFailure("create signed object URL", exception);
+        }
     }
 
     private Resolved resolve(String logical, String key) {

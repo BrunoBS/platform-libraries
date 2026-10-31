@@ -9,6 +9,9 @@ import br.com.portalmanager.platform.library.objectstorage.contract.ObjectRefere
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectSummary;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectVersion;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlOperation;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadRequest;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.VersionPage;
@@ -30,9 +33,16 @@ import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobRequestConditions;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.ListBlobsOptions;
+import com.azure.storage.blob.models.UserDelegationKey;
+import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import com.azure.storage.common.sas.SasProtocol;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
+import java.net.URI;
 import java.io.InputStream;
 import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -209,6 +219,43 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
         catch (BlobStorageException exception) { throw translate(exception, "delete object version"); }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "delete object version", exception); }
         catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object version", exception); }
+    }
+
+    @Override
+    public SignedUrlResult createSignedUrl(SignedUrlRequest request) {
+        if (request == null) throw ObjectStorageValidation.invalid("request");
+        Resolved resolved = resolve(request.reference().destination(), request.reference().key());
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime startsAt = now.minusMinutes(5);
+        OffsetDateTime expiresAt = now.plus(request.validity());
+        BlobClient target = blob(resolved, request.reference().versionId());
+        String blobUrl = target.getBlobUrl();
+        SasProtocol protocol = blobUrl.startsWith("https://")
+                ? SasProtocol.HTTPS_ONLY : SasProtocol.HTTPS_HTTP;
+        BlobSasPermission permissions = request.operation() == SignedUrlOperation.DOWNLOAD
+                ? new BlobSasPermission().setReadPermission(true)
+                : new BlobSasPermission().setCreatePermission(true).setWritePermission(true);
+        BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiresAt, permissions)
+                .setStartTime(startsAt)
+                .setProtocol(protocol);
+        Map<String, String> requiredHeaders = request.operation() == SignedUrlOperation.UPLOAD
+                ? request.headers().asHttpHeaders() : Map.of();
+        if (!requiredHeaders.isEmpty()) values.setRequestHeaders(requiredHeaders);
+        try {
+            UserDelegationKey delegationKey = client.getUserDelegationKey(startsAt, expiresAt.plusMinutes(5));
+            String sasToken = target.generateUserDelegationSas(values, delegationKey);
+            String separator = blobUrl.contains("?") ? "&" : "?";
+            URI url = URI.create(blobUrl + separator + sasToken);
+            return new SignedUrlResult(url, request.operation(), expiresAt.toInstant(), requiredHeaders);
+        } catch (BlobStorageException exception) {
+            throw translate(exception, "create signed object URL");
+        } catch (ClientAuthenticationException exception) {
+            throw ObjectStorageFailureMapper.fromHttpStatus(401, "create signed object URL", exception);
+        } catch (AzureException exception) {
+            throw ObjectStorageFailureMapper.fromProviderFailure("create signed object URL", exception);
+        } catch (IllegalArgumentException exception) {
+            throw ObjectStorageFailureMapper.fromClientFailure("create signed object URL", exception);
+        }
     }
 
     private ObjectMetadata metadata(ObjectReference requested, BlobProperties result) {

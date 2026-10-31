@@ -22,4 +22,6 @@ public interface ObjectStorageClient {
     void delete(ObjectReference reference);
 
     void deleteVersion(ObjectReference reference);
+
+    SignedUrlResult createSignedUrl(SignedUrlRequest request);
 }

@@ -6,14 +6,22 @@ import br.com.portalmanager.platform.library.objectstorage.contract.DownloadedOb
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectHeaders;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectReference;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlOperation;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadRequest;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.WriteMode;
 import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
+import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackConnection;
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
 import java.io.ByteArrayInputStream;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -29,6 +37,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.model.BucketVersioningStatus;
 import software.amazon.awssdk.services.s3.model.PutBucketVersioningRequest;
 import software.amazon.awssdk.services.s3.model.VersioningConfiguration;
@@ -152,6 +162,38 @@ class S3ObjectStorageClientIT {
         storage.delete(ObjectReference.current("audit", largeKey));
     }
 
+    @Test
+    void shouldCreateTemporaryUrlsForExactGetAndPutOperations() throws Exception {
+        byte[] original = "signed get".getBytes(StandardCharsets.UTF_8);
+        UploadResult uploaded = storage.upload(
+                new UploadRequest("audit", "signed-get.json", original.length, "application/json", Map.of()),
+                new ByteArrayInputStream(original));
+
+        SignedUrlResult download = storage.createSignedUrl(new SignedUrlRequest(
+                uploaded.reference(), SignedUrlOperation.DOWNLOAD, Duration.ofMinutes(5), null));
+        HttpResponse<byte[]> downloadResponse = HttpClient.newHttpClient().send(
+                HttpRequest.newBuilder(download.url()).GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+        assertEquals(200, downloadResponse.statusCode());
+        assertEquals("signed get", new String(downloadResponse.body(), StandardCharsets.UTF_8));
+        assertTrue(download.expiresAt().isAfter(java.time.Instant.now()));
+        assertTrue(download.requiredHeaders().isEmpty());
+
+        ObjectHeaders uploadHeaders = new ObjectHeaders("application/json", "no-cache", null, null, null);
+        SignedUrlResult upload = storage.createSignedUrl(new SignedUrlRequest(
+                ObjectReference.current("audit", "signed-put.json"), SignedUrlOperation.UPLOAD,
+                Duration.ofMinutes(5), uploadHeaders));
+        HttpRequest.Builder putRequest = HttpRequest.newBuilder(upload.url());
+        upload.requiredHeaders().forEach(putRequest::header);
+        HttpResponse<Void> uploadResponse = HttpClient.newHttpClient().send(
+                putRequest.PUT(HttpRequest.BodyPublishers.ofString("signed put")).build(), HttpResponse.BodyHandlers.discarding());
+        assertEquals(200, uploadResponse.statusCode());
+        try (DownloadedObject downloaded = storage.download(ObjectReference.current("audit", "signed-put.json"))) {
+            assertEquals("signed put", new String(downloaded.content().readAllBytes(), StandardCharsets.UTF_8));
+        }
+        storage.delete(ObjectReference.current("audit", "signed-get.json"));
+        storage.delete(ObjectReference.current("audit", "signed-put.json"));
+    }
+
     private boolean get(Future<Boolean> result) {
         try {
             return result.get(20, TimeUnit.SECONDS);
@@ -163,8 +205,16 @@ class S3ObjectStorageClientIT {
     @Configuration(proxyBeanMethods = false)
     @WithAwsLocalStack(s3 = @AwsS3(buckets = BUCKET))
     static class LocalStackConfiguration {
+        @Bean(destroyMethod = "close")
+        S3Presigner s3Presigner(AwsLocalStackConnection connection) {
+            return S3Presigner.builder().endpointOverride(connection.endpoint()).region(connection.region())
+                    .credentialsProvider(connection.credentialsProvider())
+                    .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
+                    .build();
+        }
+
         @Bean
-        ObjectStorageClient objectStorageClient(S3Client s3Client) {
+        ObjectStorageClient objectStorageClient(S3Client s3Client, S3Presigner presigner) {
             ObjectStorageProperties properties = new ObjectStorageProperties();
             properties.setProvider(ObjectStorageProvider.AWS);
             properties.setRegion("us-east-1");
@@ -173,7 +223,7 @@ class S3ObjectStorageClientIT {
             destination.setPrefix("objects/");
             destination.setSuffix(".data");
             properties.setDestinations(Map.of("audit", destination));
-            return new S3ObjectStorageClient(s3Client, properties);
+            return new S3ObjectStorageClient(s3Client, presigner, properties);
         }
     }
 }
