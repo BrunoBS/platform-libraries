@@ -26,6 +26,9 @@ public final class LockingTaskScheduler implements TaskScheduler {
     private final PlatformSchedulingProperties properties;
     private final SchedulingLockMetrics metrics;
     private final AtomicBoolean redisFailureLogged = new AtomicBoolean();
+    private final Object lifecycleMonitor = new Object();
+    private int activeExecutions;
+    private boolean shuttingDown;
 
     public LockingTaskScheduler(
             TaskScheduler delegate,
@@ -104,6 +107,17 @@ public final class LockingTaskScheduler implements TaskScheduler {
 
         @Override
         public void run() {
+            if (!beginExecution()) {
+                return;
+            }
+            try {
+                executeLockedTask();
+            } finally {
+                endExecution();
+            }
+        }
+
+        private void executeLockedTask() {
             AtomicBoolean taskStarted = new AtomicBoolean();
             LockConfiguration lock = new LockConfiguration(
                     Instant.now(getClock()), lockName,
@@ -134,6 +148,41 @@ public final class LockingTaskScheduler implements TaskScheduler {
             } else {
                 metrics.skipped();
             }
+        }
+    }
+
+    private boolean beginExecution() {
+        synchronized (lifecycleMonitor) {
+            if (shuttingDown) {
+                return false;
+            }
+            activeExecutions++;
+            return true;
+        }
+    }
+
+    private void endExecution() {
+        synchronized (lifecycleMonitor) {
+            activeExecutions--;
+            lifecycleMonitor.notifyAll();
+        }
+    }
+
+    /** Stop admitting task runs and wait for current lock releases before Redis is destroyed. */
+    public void shutdownAndAwaitInFlightTasks() {
+        boolean interrupted = false;
+        synchronized (lifecycleMonitor) {
+            shuttingDown = true;
+            while (activeExecutions > 0) {
+                try {
+                    lifecycleMonitor.wait();
+                } catch (InterruptedException ignored) {
+                    interrupted = true;
+                }
+            }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 }
