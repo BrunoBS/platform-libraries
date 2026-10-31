@@ -41,6 +41,7 @@ Tarefas registradas por código devem usar `PlatformTaskScheduler` e informar um
 
 ```java
 import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduleOptions;
 import java.time.Duration;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
@@ -56,7 +57,8 @@ class ParameterReconciliationJob {
     @PostConstruct
     void register() {
         scheduler.scheduleWithFixedDelay(
-                "parameter-reconciliation", this::reconcileParameters, Duration.ofMinutes(1));
+                this::reconcileParameters, Duration.ofMinutes(1),
+                PlatformScheduleOptions.withLock("parameter-reconciliation"));
     }
 
     private void reconcileParameters() {
@@ -67,6 +69,19 @@ class ParameterReconciliationJob {
 
 O ID identifica a tarefa lógica e deve ser igual em todas as instâncias. Lambdas e `Runnable`s só podem ser registrados por essa fachada, que associa o ID ao lock; o acesso direto a `TaskScheduler` não é uma API de coordenação de tarefas programáticas.
 
+`ParameterReconciliationJob` é apenas um exemplo de classe consumidora; ela não faz parte da biblioteca. Para selecionar o lock sem repetir métodos `WithoutLock`, passe `PlatformScheduleOptions` ao método de agendamento:
+
+```java
+scheduler.scheduleWithFixedDelay(this::reconcileParameters, Duration.ofMinutes(1),
+        PlatformScheduleOptions.withLock("reconcile-parameters"));
+scheduler.scheduleWithFixedDelay(this::cleanupExpired, Duration.ofHours(1),
+        PlatformScheduleOptions.withLock("cleanup-expired"));
+scheduler.scheduleWithFixedDelay(this::refreshLocalCache, Duration.ofMinutes(5),
+        PlatformScheduleOptions.withoutLock());
+```
+
+As duas primeiras tarefas usam lock distribuído. A terceira é encaminhada ao mesmo scheduler, mas executa sem tentar adquirir lock no Redis. Em várias instâncias, essa terceira tarefa pode rodar simultaneamente em cada uma delas.
+
 ## Cobertura e limites
 
 O contrato de execução automática cobre tarefas síncronas e reativas `@Scheduled` com cron, `fixedRate` e `fixedDelay`, inclusive em múltiplas instâncias, `@Schedules` repetidos, schedulers nomeados e proxies Spring. Para métodos reativos, a lib bloqueia a thread do scheduler até o `Publisher` completar ou falhar; assim, o lock cobre o processamento inteiro. `@DisableScheduledLock` deixa a tarefa marcada fora desse comportamento e ela segue a assinatura reativa nativa do Spring.
@@ -75,7 +90,7 @@ Como a thread do scheduler fica ocupada durante o fluxo, configure um pool com c
 
 Os testes de integração também exercitam a indisponibilidade real e temporária do Redis enquanto um lock está ativo, o comportamento fail-closed e a retomada após a recuperação do Redis, além da expiração de um lease abandonado para simular a queda do detentor. Redis indisponível na inicialização impede o contexto de subir; `enabled=false` mantém a execução sem coordenação.
 
-O Spring 7 encapsula as tarefas em um wrapper de acompanhamento antes de chamar o `TaskScheduler`; o decorator usa a identidade pública da tarefa, sem acessar campos privados. O router default do Spring é mantido por um bean com ciclo de vida gerenciado. No shutdown ele para de aceitar novas execuções, interrompe o scheduler default e aguarda as execuções ativas liberarem seus locks antes de o provider Redis ser destruído. As métricas são exportadas quando a aplicação fornece um `MeterRegistry`. KeepAlive não elimina o risco de concorrência após perda de conectividade ou perda dos dados do Redis durante uma execução; tarefas devem ser idempotentes.
+O Spring 7 encapsula as tarefas em um wrapper de acompanhamento antes de chamar o `TaskScheduler`; o decorator usa a identidade pública da tarefa, sem acessar campos privados. O router default do Spring é mantido por um bean com ciclo de vida gerenciado. No shutdown ele para de aceitar novas execuções, interrompe o scheduler default e aguarda as execuções ativas terminarem antes de o provider Redis ser destruído. KeepAlive não elimina o risco de concorrência após perda de conectividade ou perda dos dados do Redis durante uma execução; tarefas devem ser idempotentes.
 
 Aplicações consumidoras devem declarar explicitamente `platform-scheduling` e `platform-redis`; não dependa da transitividade. O pipeline completo `mvn clean verify` com Java 25, incluindo Redis via Testcontainers, é a validação de referência. A publicação do artefato ocorre no fluxo de release após o merge aprovado; `clean verify` não publica.
 
