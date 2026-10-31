@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         classes = ResourceVisibilitySpringJpaIntegrationTest.TestApplication.class,
         properties = {
                 "platform.authorization.enabled=false",
-                "platform.messaging.enabled=false",
+                "spring.autoconfigure.exclude=br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueAutoConfiguration",
                 "spring.main.web-application-type=none",
                 "spring.jpa.hibernate.ddl-auto=create-drop",
                 "spring.jpa.show-sql=false"
