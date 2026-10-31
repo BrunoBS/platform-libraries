@@ -8,4 +8,9 @@ package br.com.portalmanager.platform.library.scheduling.task;
  */
 public interface PlatformScheduledTask extends Runnable {
     String lockName();
+
+    /** Whether this programmatic task should acquire the distributed lock. */
+    default boolean lockEnabled() {
+        return true;
+    }
 }
