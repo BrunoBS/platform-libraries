@@ -64,8 +64,11 @@ public class S3ObjectStorageClient implements ObjectStorageClient {
             GetObjectRequest.Builder builder = GetObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key());
             if (reference.versionId() != null) builder.versionId(reference.versionId());
             software.amazon.awssdk.core.ResponseInputStream<GetObjectResponse> response = client.getObject(builder.build());
-            ObjectMetadata metadata = new ObjectMetadata(reference, response.response().contentLength(), response.response().contentType(),
-                    response.response().eTag(), response.response().lastModified(), response.response().metadata());
+            GetObjectResponse result = response.response();
+            ObjectReference actual = reference.versionId() == null && result.versionId() != null
+                    ? new ObjectReference(reference.destination(), reference.key(), result.versionId()) : reference;
+            ObjectMetadata metadata = new ObjectMetadata(actual, result.contentLength(), result.contentType(),
+                    result.eTag(), result.lastModified(), result.metadata());
             return new DownloadedObject(metadata, response);
         } catch (S3Exception exception) {
             throw translate(exception, "download object");

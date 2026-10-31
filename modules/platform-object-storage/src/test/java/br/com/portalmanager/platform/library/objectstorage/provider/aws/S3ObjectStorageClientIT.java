@@ -76,6 +76,10 @@ class S3ObjectStorageClientIT {
         try (DownloadedObject downloaded = storage.download(first.reference())) {
             assertEquals("first", new String(downloaded.content().readAllBytes(), StandardCharsets.UTF_8));
         }
+        try (DownloadedObject downloaded = storage.download(ObjectReference.current("audit", KEY))) {
+            assertEquals(second.reference().versionId(), downloaded.metadata().reference().versionId());
+            assertEquals("second", new String(downloaded.content().readAllBytes(), StandardCharsets.UTF_8));
+        }
 
         assertEquals(1, storage.list("audit", "sample", null, 10).objects().size());
         assertEquals(2, storage.listVersions("audit", KEY, null, 10).versions().size());
