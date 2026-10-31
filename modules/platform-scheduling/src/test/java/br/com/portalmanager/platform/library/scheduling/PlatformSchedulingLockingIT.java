@@ -11,10 +11,12 @@ import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import net.javacrumbs.shedlock.core.LockConfiguration;
+import net.javacrumbs.shedlock.core.LockProvider;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
@@ -26,8 +28,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
-import net.javacrumbs.shedlock.core.LockConfiguration;
-import net.javacrumbs.shedlock.core.LockProvider;
 
 @WithRedis
 @ExtendWith(SpringExtension.class)
@@ -390,6 +390,15 @@ class PlatformSchedulingLockingIT {
 
     @Configuration(proxyBeanMethods = false)
     static class RepeatedScheduledApplication {
+        @Bean
+        org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler taskScheduler() {
+            org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler scheduler =
+                    new org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler();
+            scheduler.setPoolSize(4);
+            scheduler.setThreadNamePrefix("repeated-schedules-it-");
+            return scheduler;
+        }
+
         @Bean
         RepeatedScheduledProbe repeatedScheduledProbe() {
             return new RepeatedScheduledProbe();

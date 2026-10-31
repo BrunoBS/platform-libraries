@@ -2,9 +2,9 @@ package br.com.portalmanager.platform.library.scheduling.internal;
 
 import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
-import org.springframework.core.ReactiveAdapterRegistry;
 
 final class ScheduledTaskIdentity {
     private ScheduledTaskIdentity() {}
