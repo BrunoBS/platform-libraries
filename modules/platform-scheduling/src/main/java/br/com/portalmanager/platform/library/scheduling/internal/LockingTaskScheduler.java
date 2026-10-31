@@ -1,7 +1,6 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
-import br.com.portalmanager.platform.library.scheduling.metrics.SchedulingLockMetrics;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,7 +23,6 @@ public final class LockingTaskScheduler implements TaskScheduler {
     private final LockingTaskExecutor lockExecutor;
     private final String serviceName;
     private final PlatformSchedulingProperties properties;
-    private final SchedulingLockMetrics metrics;
     private final AtomicBoolean redisFailureLogged = new AtomicBoolean();
     private final Object lifecycleMonitor = new Object();
     private int activeExecutions;
@@ -34,13 +32,11 @@ public final class LockingTaskScheduler implements TaskScheduler {
             TaskScheduler delegate,
             LockProvider lockProvider,
             String serviceName,
-            PlatformSchedulingProperties properties,
-            SchedulingLockMetrics metrics) {
+            PlatformSchedulingProperties properties) {
         this.delegate = delegate;
         this.lockExecutor = new DefaultLockingTaskExecutor(lockProvider);
         this.serviceName = serviceName;
         this.properties = properties;
-        this.metrics = metrics;
     }
 
     @Override
@@ -135,7 +131,6 @@ public final class LockingTaskScheduler implements TaskScheduler {
                     redisFailureLogged.set(false);
                     throw failure;
                 }
-                metrics.failed();
                 if (redisFailureLogged.compareAndSet(false, true)) {
                     LOGGER.atError()
                             .addKeyValue("service", serviceName)
@@ -146,11 +141,6 @@ public final class LockingTaskScheduler implements TaskScheduler {
                 return;
             }
             redisFailureLogged.set(false);
-            if (taskStarted.get()) {
-                metrics.acquired();
-            } else {
-                metrics.skipped();
-            }
         }
     }
 
