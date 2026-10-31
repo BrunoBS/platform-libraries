@@ -46,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         properties = {
                 "platform.authorization.enabled=false",
                 "spring.autoconfigure.exclude=br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueAutoConfiguration",
+                "platform.messaging.enabled=false",
                 "spring.main.web-application-type=none",
                 "spring.jpa.hibernate.ddl-auto=create-drop",
                 "spring.jpa.show-sql=false"
