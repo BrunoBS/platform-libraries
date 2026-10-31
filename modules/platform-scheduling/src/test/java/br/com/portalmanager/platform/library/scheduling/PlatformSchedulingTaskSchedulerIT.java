@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -63,6 +64,24 @@ class PlatformSchedulingTaskSchedulerIT {
                             .isPositive();
                     assertThat(NamedSchedulerProbe.primaryExecutions()).isPositive();
                     assertThat(NamedSchedulerProbe.secondaryExecutions()).isPositive();
+                });
+    }
+
+    @Test
+    void defaultRouterStopsScheduledTasksWhenApplicationContextCloses() throws InterruptedException {
+        LifecycleProbe.reset();
+        newApplicationContextRunner(LifecycleApplication.class, "scheduling-lifecycle-it")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
+                    while (LifecycleProbe.executions() < 2 && System.nanoTime() < deadline) {
+                        Thread.sleep(20L);
+                    }
+                    assertThat(LifecycleProbe.executions()).isGreaterThanOrEqualTo(2);
+                    ((ConfigurableApplicationContext) context).close();
+                    int afterClose = LifecycleProbe.executions();
+                    Thread.sleep(350L);
+                    assertThat(LifecycleProbe.executions()).isEqualTo(afterClose);
                 });
     }
 
@@ -148,6 +167,31 @@ class PlatformSchedulingTaskSchedulerIT {
 
         static boolean allModesExecuted() {
             return fixedRateExecutions() > 0 && fixedDelayExecutions() > 0 && cronExecutions() > 0;
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class LifecycleApplication {
+        @Bean
+        LifecycleProbe lifecycleProbe() {
+            return new LifecycleProbe();
+        }
+    }
+
+    static class LifecycleProbe {
+        private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+
+        @Scheduled(fixedDelay = 50)
+        void run() {
+            EXECUTIONS.incrementAndGet();
+        }
+
+        static void reset() {
+            EXECUTIONS.set(0);
+        }
+
+        static int executions() {
+            return EXECUTIONS.get();
         }
     }
 
