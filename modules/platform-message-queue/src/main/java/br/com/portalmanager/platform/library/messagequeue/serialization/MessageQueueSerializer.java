@@ -27,7 +27,13 @@ public class MessageQueueSerializer {
         try {
             JavaType type = objectMapper.getTypeFactory()
                     .constructParametricType(MessageQueueMessage.class, payloadType);
-            return objectMapper.readValue(content, type);
+            MessageQueueMessage<T> message = objectMapper.readValue(content, type);
+            br.com.portalmanager.platform.library.messagequeue.annotation.QueueMessage expected = payloadType.getAnnotation(br.com.portalmanager.platform.library.messagequeue.annotation.QueueMessage.class);
+            if (expected != null && (message == null || message.payload() == null
+                    || !expected.type().equals(message.messageType()) || !expected.version().equals(message.messageVersion()))) {
+                throw new MessageSerializationException(MessageQueueMessageKeys.DESERIALIZATION_FAILED, null);
+            }
+            return message;
         } catch (JacksonException exception) {
             throw new MessageSerializationException(MessageQueueMessageKeys.DESERIALIZATION_FAILED, exception);
         }

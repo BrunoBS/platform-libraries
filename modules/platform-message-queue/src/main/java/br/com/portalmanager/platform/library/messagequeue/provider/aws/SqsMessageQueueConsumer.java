@@ -29,6 +29,16 @@ import java.util.function.BiConsumer;
 
 public class SqsMessageQueueConsumer implements SmartLifecycle {
 
+    private static final ThreadLocal<Delivery> CURRENT_DELIVERY = new ThreadLocal<>();
+
+    /** Read-only transport evidence. Only this consumer can open its scope; never propagated to async work. */
+    public static java.util.Optional<Delivery> currentDelivery() {
+        return java.util.Optional.ofNullable(CURRENT_DELIVERY.get());
+    }
+
+    public record Delivery(String entryPoint, String destination, String queueUrl,
+            String transportMessageId, String messageId, String correlationId, java.time.Instant timestamp) { }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SqsMessageQueueConsumer.class);
 
     private final SqsClient sqsClient;
@@ -165,19 +175,38 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         String correlationId = null;
         try {
             var message = serializer.deserialize(receivedMessage.body(), listener.payloadType());
-            messageId = message.messageId();
-            correlationId = message.correlationId();
-            listener.invoke(message);
+            messageId = safeLogIdentifier(message.messageId()) ? message.messageId() : null;
+            correlationId = safeLogIdentifier(message.correlationId()) ? message.correlationId() : null;
+            Delivery previous = CURRENT_DELIVERY.get();
+            Map<String, String> previousMdc = org.slf4j.MDC.getCopyOfContextMap();
+            try {
+                String entryPoint = org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName()
+                        + "#" + listener.method().getName();
+                CURRENT_DELIVERY.set(new Delivery(entryPoint, listener.destination(), queueUrl,
+                        receivedMessage.messageId(), message.messageId(), message.correlationId(), message.timestamp()));
+                for (String key : java.util.List.of("correlationId", "messageId", "username", "accountId", "applicationId",
+                        "environmentId", "workspaceIdentifier", "clientIp", "userAgent", "uri")) org.slf4j.MDC.remove(key);
+                if (safeLogIdentifier(message.correlationId())) org.slf4j.MDC.put("correlationId", message.correlationId());
+                if (safeLogIdentifier(message.messageId())) org.slf4j.MDC.put("messageId", message.messageId());
+                listener.invoke(message);
+            } finally {
+                if (previous == null) CURRENT_DELIVERY.remove(); else CURRENT_DELIVERY.set(previous);
+                if (previousMdc == null) org.slf4j.MDC.clear(); else org.slf4j.MDC.setContextMap(previousMdc);
+            }
         } catch (RuntimeException exception) {
             LOGGER.warn(
                     "Message processing failed for destination {}; messageId={} correlationId={}; "
-                            + "message will not be deleted and can be redelivered",
-                    listener.destination(), messageId, correlationId, exception);
+                            + "message will not be deleted and can be redelivered; errorType={}",
+                    listener.destination(), messageId, correlationId, exception.getClass().getName());
             return;
         }
 
         deleteProcessedMessage(
                 listener.destination(), queueUrl, receivedMessage.receiptHandle(), messageId, correlationId, false);
+    }
+
+    private boolean safeLogIdentifier(String value) {
+        return value != null && !value.isBlank() && value.length() <= 128 && value.chars().noneMatch(Character::isISOControl);
     }
 
     private void processDeadLetter(
@@ -189,8 +218,8 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         String correlationId = null;
         try {
             var message = serializer.deserialize(receivedMessage.body(), listener.payloadType());
-            messageId = message.messageId();
-            correlationId = message.correlationId();
+            messageId = safeLogIdentifier(message.messageId()) ? message.messageId() : null;
+            correlationId = safeLogIdentifier(message.correlationId()) ? message.correlationId() : null;
             Integer deliveryCount = approximateReceiveCount(receivedMessage);
             var deadLetterMessage = new DeadLetterMessage<>(
                     message,
@@ -203,8 +232,8 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         } catch (RuntimeException exception) {
             LOGGER.warn(
                     "Dead-letter processing failed for destination {}; messageId={} correlationId={}; "
-                            + "message will remain in the dead-letter queue",
-                    listener.destination(), messageId, correlationId, exception);
+                            + "message will remain in the dead-letter queue; errorType={}",
+                    listener.destination(), messageId, correlationId, exception.getClass().getName());
             return;
         }
 

@@ -10,7 +10,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "platform.authorization")
 public class PlatformAuthorizationProperties {
 
-    private AuthorizationMode mode = AuthorizationMode.REAL;
+    private java.util.Map<String, br.com.portalmanager.platform.library.authorization.model.AuthorizationEntryPolicy> entryPolicies = new java.util.LinkedHashMap<>();
+    private Set<String> technicalPrincipals = new LinkedHashSet<>();
+
+    public java.util.Map<String, br.com.portalmanager.platform.library.authorization.model.AuthorizationEntryPolicy> getEntryPolicies() { return entryPolicies; }
+    public void setEntryPolicies(java.util.Map<String, br.com.portalmanager.platform.library.authorization.model.AuthorizationEntryPolicy> value) {
+        entryPolicies = value == null ? new java.util.LinkedHashMap<>() : new java.util.LinkedHashMap<>(value);
+    }
+    public Set<String> getTechnicalPrincipals() { return technicalPrincipals; }
+    public void setTechnicalPrincipals(Set<String> value) { technicalPrincipals = value == null ? new LinkedHashSet<>() : new LinkedHashSet<>(value); }
+
+    private AuthorizationExecutionMode mode = AuthorizationExecutionMode.REAL;
     private String serviceUrl;
     private Duration connectTimeout = Duration.ofMillis(500);
     private Duration readTimeout = Duration.ofSeconds(2);
@@ -19,12 +29,12 @@ public class PlatformAuthorizationProperties {
     private Headers headers = new Headers();
     private ContextPropagation contextPropagation = new ContextPropagation();
 
-    public AuthorizationMode getMode() {
+    public AuthorizationExecutionMode getMode() {
         return mode;
     }
 
-    public void setMode(AuthorizationMode mode) {
-        this.mode = mode == null ? AuthorizationMode.REAL : mode;
+    public void setMode(AuthorizationExecutionMode mode) {
+        this.mode = mode == null ? AuthorizationExecutionMode.REAL : mode;
     }
 
     public String getServiceUrl() {

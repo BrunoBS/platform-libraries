@@ -44,6 +44,10 @@ public final class AuthorizationTechnicalErrors {
                     500
             );
 
+    public static final PlatformErrorDefinition ENTRY_POLICY_INVALID = new PlatformErrorDefinition(
+            "PLT-AUTH-006", "Invalid or ambiguous authorization entry policy configuration",
+            "Configure a unique protected facade and listener, known technical principal, exact destination and explicit permitted scopes.", 500);
+
     private AuthorizationTechnicalErrors() {
     }
 }

@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.authorization.aop;
 
 import br.com.portalmanager.platform.library.authorization.annotation.AuthorizationRequired;
+import br.com.portalmanager.platform.library.authorization.model.AuthorizationMechanism;
 import br.com.portalmanager.platform.library.authorization.exception.UnauthorizedAccessException;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationMessageKeys;
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationContext;
@@ -15,13 +16,24 @@ import org.aspectj.lang.annotation.Aspect;
 @Aspect
 public class AuthorizationFacadeAspect {
     private final AuthorizationClient client;
+    private final br.com.portalmanager.platform.library.authorization.aop.EntryPolicyAuthorizer policyAuthorizer;
 
     public AuthorizationFacadeAspect(AuthorizationClient client) {
+        this(client, new br.com.portalmanager.platform.library.authorization.aop.EntryPolicyAuthorizer(
+                new br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties(), java.util.List.of()));
+    }
+
+    public AuthorizationFacadeAspect(AuthorizationClient client,
+            br.com.portalmanager.platform.library.authorization.aop.EntryPolicyAuthorizer policyAuthorizer) {
         this.client = client;
+        this.policyAuthorizer = policyAuthorizer;
     }
 
     @Around("@annotation(required)")
     public Object authorize(ProceedingJoinPoint joinPoint, AuthorizationRequired required) throws Throwable {
+        if (required.mechanism() == AuthorizationMechanism.POLICY) {
+            return policyAuthorizer.authorize(joinPoint, required);
+        }
         AuthorizationContext context = null;
         for (Object argument : joinPoint.getArgs()) {
             if (argument instanceof AuthorizationContext candidate) {

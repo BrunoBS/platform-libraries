@@ -14,6 +14,8 @@ public final class AuthorizationMessageKeys {
     public static final String SERVICE_CONTRACT_ERROR = "authorization.service.contract.error";
     public static final String TOO_MANY_AUTHORIZER_GROUPS = "authorization.authorizer-groups.limit.exceeded";
 
+    public static final String POLICY_DENIED = "authorization.policy.denied";
+
     private AuthorizationMessageKeys() {
     }
 }
