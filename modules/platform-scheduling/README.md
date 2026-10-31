@@ -22,7 +22,7 @@ Esses valores ainda não são defaults homologados. Com `enabled=true`, Redis pr
 
 ## Tarefas programáticas
 
-Tarefas registradas por `TaskScheduler` devem implementar `PlatformScheduledTask` e retornar um nome estável. Todas as instâncias que executam a mesma tarefa devem usar o mesmo nome:
+Tarefas registradas por código devem usar `PlatformTaskScheduler` e informar um nome estável. Todas as instâncias que executam a mesma tarefa devem usar o mesmo nome:
 
 ```java
 import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
