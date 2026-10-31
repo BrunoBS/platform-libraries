@@ -3,9 +3,7 @@ package br.com.portalmanager.platform.library.scheduling.configuration;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 import br.com.portalmanager.platform.library.scheduling.internal.LockingTaskScheduler;
-import br.com.portalmanager.platform.library.scheduling.metrics.SchedulingLockMetrics;
 import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
-import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -14,7 +12,6 @@ import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider;
 import net.javacrumbs.shedlock.support.KeepAliveLockProvider;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -76,20 +73,6 @@ public class PlatformSchedulingAutoConfiguration {
                     thread.setDaemon(true);
                     return thread;
                 }));
-    }
-
-    @Bean
-    @ConditionalOnProperty(
-            prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "true", matchIfMissing = true)
-    SchedulingLockMetrics platformSchedulingLockMetrics(ObjectProvider<MeterRegistry> registries) {
-        MeterRegistry registry = registries.getIfAvailable();
-        if (registry == null) {
-            LoggerFactory.getLogger(PlatformSchedulingAutoConfiguration.class)
-                    .atWarn()
-                    .addKeyValue("errorCode", "PLT-SCHED-004")
-                    .log("No MeterRegistry found; distributed scheduling metrics are not exported");
-        }
-        return new SchedulingLockMetrics(registry);
     }
 
     private static String requireServiceName(org.springframework.core.env.Environment environment) {
@@ -161,11 +144,10 @@ class PlatformSchedulingEnabledConfiguration {
             LockProvider lockProvider,
             PlatformSchedulingProperties properties,
             org.springframework.core.env.Environment environment,
-            PlatformSchedulingTaskSchedulerRouter schedulerRouter,
-            SchedulingLockMetrics metrics) {
+            PlatformSchedulingTaskSchedulerRouter schedulerRouter) {
         LockingTaskScheduler lockingScheduler = new LockingTaskScheduler(
                 schedulerRouter.router(), lockProvider,
-                environment.getRequiredProperty("spring.application.name"), properties, metrics);
+                environment.getRequiredProperty("spring.application.name"), properties);
         schedulerRouter.setLockingScheduler(lockingScheduler);
         return new PlatformTaskScheduler(() -> lockingScheduler);
     }
@@ -182,8 +164,7 @@ class PlatformSchedulingEnabledConfiguration {
             LockProvider lockProvider,
             PlatformSchedulingProperties properties,
             org.springframework.core.env.Environment environment,
-            PlatformSchedulingTaskSchedulerRouter schedulerRouter,
-            SchedulingLockMetrics metrics) {
+            PlatformSchedulingTaskSchedulerRouter schedulerRouter) {
         String serviceName = environment.getRequiredProperty("spring.application.name");
         return new SchedulingConfigurer() {
             @Override
@@ -195,7 +176,7 @@ class PlatformSchedulingEnabledConfiguration {
                 LockingTaskScheduler lockingScheduler = schedulerRouter.lockingScheduler();
                 if (lockingScheduler == null) {
                     lockingScheduler = new LockingTaskScheduler(
-                            delegate, lockProvider, serviceName, properties, metrics);
+                            delegate, lockProvider, serviceName, properties);
                 }
                 schedulerRouter.setLockingScheduler(lockingScheduler);
                 registrar.setTaskScheduler(lockingScheduler);
