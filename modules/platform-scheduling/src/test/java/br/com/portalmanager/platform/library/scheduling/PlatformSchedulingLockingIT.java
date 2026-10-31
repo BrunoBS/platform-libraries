@@ -181,7 +181,7 @@ class PlatformSchedulingLockingIT {
     }
 
     static class LongRunningScheduledProbe {
-        private static final long TASK_DURATION_MILLIS = Duration.ofSeconds(35).toMillis();
+        private static final long TASK_DURATION_MILLIS = Duration.ofSeconds(60).toMillis();
         private static final AtomicInteger RUNNING = new AtomicInteger();
         private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
         private static final AtomicInteger EXECUTIONS = new AtomicInteger();

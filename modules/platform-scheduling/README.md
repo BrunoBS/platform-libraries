@@ -1,6 +1,6 @@
 # platform-scheduling
 
-POC isolada de proteção distribuída para tarefas agendadas do Spring, conforme o refinamento [`platform-scheduling-shedlock-refinamento-v1.md`](https://github.com/BrunoBS/guideline-java/blob/20b9414b4cc6b560cbd6916adb1f38cac3ed0709/docs/refinamento/20-platform-scheduling/platform-scheduling-shedlock-refinamento-v1.md).
+POC isolada de proteção distribuída para tarefas agendadas do Spring, conforme o refinamento [`platform-scheduling-shedlock-refinamento-v1.md`](https://github.com/BrunoBS/guideline-java/blob/main/docs/refinamento/20-platform-scheduling/platform-scheduling-shedlock-refinamento-v1.md).
 
 O lock Redis é namespaced por `spring.application.name` e pela classe, assinatura do método e tipo de agendamento. Agendamentos repetidos do mesmo método compartilham o lock, evitando execuções simultâneas quando a configuração muda entre instâncias.
 

@@ -2,9 +2,9 @@ package br.com.portalmanager.platform.library.scheduling.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
 import br.com.portalmanager.platform.library.scheduling.metrics.SchedulingLockMetrics;
@@ -28,7 +28,7 @@ class LockingTaskSchedulerTest {
     void skipsTaskWhenAnotherInstanceOwnsTheLock() throws NoSuchMethodException {
         TaskScheduler delegate = mock(TaskScheduler.class);
         ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
-        when(delegate.schedule(any(Runnable.class), any(Instant.class))).thenReturn(scheduledFuture);
+        doReturn(scheduledFuture).when(delegate).schedule(any(Runnable.class), any(Instant.class));
         LockProvider lockProvider = configuration -> Optional.empty();
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         AtomicInteger executions = new AtomicInteger();
@@ -48,7 +48,7 @@ class LockingTaskSchedulerTest {
     @Test
     void failsClosedWhenRedisCannotAcquireTheLock() throws NoSuchMethodException {
         TaskScheduler delegate = mock(TaskScheduler.class);
-        when(delegate.schedule(any(Runnable.class), any(Instant.class))).thenReturn(mock(ScheduledFuture.class));
+        doReturn(mock(ScheduledFuture.class)).when(delegate).schedule(any(Runnable.class), any(Instant.class));
         LockProvider lockProvider = configuration -> {
             throw new IllegalStateException("Redis unavailable");
         };
@@ -70,7 +70,7 @@ class LockingTaskSchedulerTest {
     @Test
     void runsTaskWhenLockIsAcquired() throws NoSuchMethodException {
         TaskScheduler delegate = mock(TaskScheduler.class);
-        when(delegate.schedule(any(Runnable.class), any(Instant.class))).thenReturn(mock(ScheduledFuture.class));
+        doReturn(mock(ScheduledFuture.class)).when(delegate).schedule(any(Runnable.class), any(Instant.class));
         SimpleLock lock = mock(SimpleLock.class);
         LockProvider lockProvider = configuration -> Optional.of(lock);
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
