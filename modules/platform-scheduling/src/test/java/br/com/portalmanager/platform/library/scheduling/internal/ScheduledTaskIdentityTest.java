@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
+import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
 class ScheduledTaskIdentityTest {
@@ -30,7 +31,21 @@ class ScheduledTaskIdentityTest {
                 .withMessageContaining("stable distributed-lock identity");
     }
 
+    @Test
+    void springOutcomeTrackingWrapperKeepsTheScheduledMethodIdentity() throws NoSuchMethodException {
+        Method method = SampleScheduledTasks.class.getDeclaredMethod("refreshAll");
+        ScheduledMethodRunnable scheduledTask = new ScheduledMethodRunnable(new SampleScheduledTasks(), method);
+        Runnable registeredTask = new Task(scheduledTask).getRunnable();
+
+        String identity = ScheduledTaskIdentity.from(registeredTask, SERVICE_NAME, "scheduled");
+
+        assertThat(identity)
+                .isEqualTo(SERVICE_NAME + ":" + SampleScheduledTasks.class.getName() + "#refreshAll():scheduled");
+    }
+
     static class SampleScheduledTasks {
         void refresh(String tenant) {}
+
+        void refreshAll() {}
     }
 }
