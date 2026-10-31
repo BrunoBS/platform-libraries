@@ -1,0 +1,3 @@
+br.com.portalmanager.platform.library.objectstorage.configuration.ObjectStorageAutoConfiguration
+br.com.portalmanager.platform.library.objectstorage.provider.aws.configuration.AwsObjectStorageAutoConfiguration
+br.com.portalmanager.platform.library.objectstorage.provider.azure.configuration.AzureObjectStorageAutoConfiguration

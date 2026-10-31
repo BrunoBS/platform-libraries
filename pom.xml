@@ -16,6 +16,7 @@
         <module>modules/platform-redis</module>
         <module>modules/platform-parameter-client</module>
         <module>modules/platform-message-queue</module>
+        <module>modules/platform-object-storage</module>
         <module>modules/platform-schema-validation</module>
         <module>modules/platform-testing</module>
         <module>modules/platform-authorization</module>
