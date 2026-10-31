@@ -3,7 +3,6 @@ package br.com.portalmanager.platform.library.scheduling.internal;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
-import org.springframework.util.ClassUtils;
 
 final class ScheduledTaskIdentity {
     private ScheduledTaskIdentity() {}
@@ -15,7 +14,7 @@ final class ScheduledTaskIdentity {
             }
             throw unsupportedTask(task);
         }
-        Class<?> targetClass = ClassUtils.getUserClass(scheduledMethod.getTarget());
+        Class<?> targetClass = AopUtils.getTargetClass(scheduledMethod.getTarget());
         java.lang.reflect.Method method = AopUtils.getMostSpecificMethod(
                 scheduledMethod.getMethod(), targetClass);
         return serviceName + ":" + method.getDeclaringClass().getName() + "#"

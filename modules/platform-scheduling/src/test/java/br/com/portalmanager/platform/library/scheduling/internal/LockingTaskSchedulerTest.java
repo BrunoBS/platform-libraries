@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -90,6 +91,24 @@ class LockingTaskSchedulerTest {
         verify(lock).unlock();
     }
 
+    @Test
+    void propagatesTaskFailureAndStillReleasesTheLock() throws NoSuchMethodException {
+        TaskScheduler delegate = mock(TaskScheduler.class);
+        doReturn(mock(ScheduledFuture.class)).when(delegate).schedule(any(Runnable.class), any(Instant.class));
+        SimpleLock lock = mock(SimpleLock.class);
+        LockProvider lockProvider = configuration -> Optional.of(lock);
+        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider, new SimpleMeterRegistry());
+
+        scheduler.schedule(failingTask(), Instant.now());
+        ArgumentCaptor<Runnable> registered = ArgumentCaptor.forClass(Runnable.class);
+        verify(delegate).schedule(registered.capture(), any(Instant.class));
+
+        assertThatCode(registered.getValue()::run)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("scheduled task failed");
+        verify(lock).unlock();
+    }
+
     private static LockingTaskScheduler scheduler(
             TaskScheduler delegate, LockProvider lockProvider, SimpleMeterRegistry registry) {
         when(delegate.getClock()).thenReturn(Clock.systemUTC());
@@ -104,6 +123,11 @@ class LockingTaskSchedulerTest {
         return new ScheduledMethodRunnable(new TaskProbe(executions), method);
     }
 
+    private static ScheduledMethodRunnable failingTask() throws NoSuchMethodException {
+        Method method = TaskProbe.class.getDeclaredMethod("fail");
+        return new ScheduledMethodRunnable(new TaskProbe(new AtomicInteger()), method);
+    }
+
     static class TaskProbe {
         private final AtomicInteger executions;
 
@@ -113,6 +137,10 @@ class LockingTaskSchedulerTest {
 
         void runTask() {
             executions.incrementAndGet();
+        }
+
+        void fail() {
+            throw new IllegalStateException("scheduled task failed");
         }
     }
 }

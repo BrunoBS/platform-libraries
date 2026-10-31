@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration;
@@ -70,6 +72,23 @@ class PlatformSchedulingLockingIT {
     }
 
     @Test
+    void cglibProxiesKeepAStableLockIdentityAcrossServiceContexts() throws InterruptedException {
+        ProxyScheduledProbe.reset();
+        ApplicationContextRunner runner = applicationContextRunner(
+                ProxiedScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+
+        runner.run(firstContext -> runner.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            awaitProxyExecution();
+            Thread.sleep(TASK_DURATION_MILLIS + 500L);
+
+            assertThat(ProxyScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
+            assertThat(ProxyScheduledProbe.executions()).isPositive();
+        }));
+    }
+
+    @Test
     void keepAliveRenewsLeaseWhileScheduledTaskRunsLongerThanItsInitialTtl() throws InterruptedException {
         LongRunningScheduledProbe.reset();
         ApplicationContextRunner runner = applicationContextRunner(
@@ -82,6 +101,9 @@ class PlatformSchedulingLockingIT {
             Thread.sleep(Duration.ofSeconds(31).toMillis());
 
             assertThat(LongRunningScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
+            assertThat(LongRunningScheduledProbe.executions()).isEqualTo(1);
+            secondContext.close();
+            awaitLongRunningTaskCompletion();
             assertThat(LongRunningScheduledProbe.executions()).isEqualTo(1);
         }));
     }
@@ -128,6 +150,22 @@ class PlatformSchedulingLockingIT {
             Thread.sleep(25L);
         }
         assertThat(LongRunningScheduledProbe.executions()).isPositive();
+    }
+
+    private static void awaitLongRunningTaskCompletion() throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+        while (LongRunningScheduledProbe.isRunning() && System.nanoTime() < deadline) {
+            Thread.sleep(25L);
+        }
+        assertThat(LongRunningScheduledProbe.isRunning()).isFalse();
+    }
+
+    private static void awaitProxyExecution() throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+        while (ProxyScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
+            Thread.sleep(25L);
+        }
+        assertThat(ProxyScheduledProbe.executions()).isPositive();
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -181,13 +219,62 @@ class PlatformSchedulingLockingIT {
     }
 
     static class LongRunningScheduledProbe {
-        private static final long TASK_DURATION_MILLIS = Duration.ofSeconds(60).toMillis();
+        private static final long TASK_DURATION_MILLIS = Duration.ofSeconds(40).toMillis();
+        private static final AtomicInteger RUNNING = new AtomicInteger();
+        private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
+        private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+
+        @Scheduled(fixedDelay = 600_000)
+        void runLongTask() {
+            int concurrent = RUNNING.incrementAndGet();
+            MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
+            EXECUTIONS.incrementAndGet();
+            try {
+                Thread.sleep(TASK_DURATION_MILLIS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            } finally {
+                RUNNING.decrementAndGet();
+            }
+        }
+
+        static void reset() {
+            RUNNING.set(0);
+            MAXIMUM_RUNNING.set(0);
+            EXECUTIONS.set(0);
+        }
+
+        static int maximumConcurrentExecutions() {
+            return MAXIMUM_RUNNING.get();
+        }
+
+        static int executions() {
+            return EXECUTIONS.get();
+        }
+
+        static boolean isRunning() {
+            return RUNNING.get() > 0;
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class ProxiedScheduledApplication {
+        @Bean
+        ProxyScheduledProbe proxiedScheduledProbe() {
+            ProxyFactory proxyFactory = new ProxyFactory(new ProxyScheduledProbe());
+            proxyFactory.setProxyTargetClass(true);
+            proxyFactory.addAdvice((MethodInterceptor) invocation -> invocation.proceed());
+            return (ProxyScheduledProbe) proxyFactory.getProxy();
+        }
+    }
+
+    static class ProxyScheduledProbe {
         private static final AtomicInteger RUNNING = new AtomicInteger();
         private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
         private static final AtomicInteger EXECUTIONS = new AtomicInteger();
 
         @Scheduled(fixedDelay = 100)
-        void runLongTask() {
+        void runPeriodically() {
             int concurrent = RUNNING.incrementAndGet();
             MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
             EXECUTIONS.incrementAndGet();

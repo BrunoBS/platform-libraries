@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
@@ -43,8 +44,47 @@ class ScheduledTaskIdentityTest {
                 .isEqualTo(SERVICE_NAME + ":" + SampleScheduledTasks.class.getName() + "#refreshAll():scheduled");
     }
 
-    static class SampleScheduledTasks {
-        void refresh(String tenant) {}
+    @Test
+    void identityUsesTheTargetClassForJdkProxies() throws NoSuchMethodException {
+        SampleScheduledTasks target = new SampleScheduledTasks();
+        ProxyFactory proxyFactory = new ProxyFactory(target);
+        proxyFactory.setInterfaces(SampleScheduledTaskContract.class);
+        Object proxy = proxyFactory.getProxy();
+        Method method = SampleScheduledTaskContract.class.getMethod("refresh", String.class);
+        ScheduledMethodRunnable task = new ScheduledMethodRunnable(proxy, method);
+
+        String identity = ScheduledTaskIdentity.from(task, SERVICE_NAME, "fixed-rate:PT1M");
+
+        assertThat(identity)
+                .isEqualTo(SERVICE_NAME + ":" + SampleScheduledTasks.class.getName()
+                        + "#refresh(java.lang.String):fixed-rate:PT1M");
+    }
+
+    @Test
+    void overloadedMethodsHaveDifferentLockIdentities() throws NoSuchMethodException {
+        SampleScheduledTasks target = new SampleScheduledTasks();
+        String noArguments = ScheduledTaskIdentity.from(
+                new ScheduledMethodRunnable(target, SampleScheduledTasks.class.getDeclaredMethod("refresh")),
+                SERVICE_NAME,
+                "scheduled");
+        String withTenant = ScheduledTaskIdentity.from(
+                new ScheduledMethodRunnable(
+                        target, SampleScheduledTasks.class.getDeclaredMethod("refresh", String.class)),
+                SERVICE_NAME,
+                "scheduled");
+
+        assertThat(noArguments).isNotEqualTo(withTenant);
+    }
+
+    interface SampleScheduledTaskContract {
+        void refresh(String tenant);
+    }
+
+    static class SampleScheduledTasks implements SampleScheduledTaskContract {
+        void refresh() {}
+
+        @Override
+        public void refresh(String tenant) {}
 
         void refreshAll() {}
     }
