@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.reactivestreams.Publisher;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -53,9 +52,7 @@ public final class BlockingReactiveScheduledMethodPostProcessor implements BeanP
                 throw new IllegalStateException("Reactive @Scheduled method returned null: " + targetMethod);
             }
             ReactiveAdapter adapter = adapters.getAdapter(targetMethod.getReturnType());
-            @SuppressWarnings("unchecked")
-            Publisher<Object> publisher = (Publisher<Object>) adapter.toPublisher(result);
-            return new BlockingReactivePublisher<>(publisher);
+            return adapter.fromPublisher(new BlockingReactivePublisher<>(adapter.toPublisher(result)));
         });
         return proxyFactory.getProxy(bean.getClass().getClassLoader());
     }
