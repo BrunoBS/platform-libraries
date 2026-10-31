@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
+import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -35,13 +36,20 @@ class ScheduledTaskIdentityTest {
     }
 
     @Test
-    void reactiveScheduledMethodIsRejectedBeforeItCanRunWithoutTheLock() throws NoSuchMethodException {
+    void reactiveScheduledMethodHasAStableLockIdentity() throws NoSuchMethodException {
         Method method = SampleScheduledTasks.class.getDeclaredMethod("refreshReactive");
         ScheduledMethodRunnable task = new ScheduledMethodRunnable(new SampleScheduledTasks(), method);
 
-        assertThatIllegalStateException()
-                .isThrownBy(() -> ScheduledTaskIdentity.from(task, SERVICE_NAME, "scheduled"))
-                .withMessageContaining("Reactive @Scheduled methods are unsupported");
+        assertThat(ScheduledTaskIdentity.from(task, SERVICE_NAME, "scheduled"))
+                .isEqualTo(SERVICE_NAME + ":" + SampleScheduledTasks.class.getName() + "#refreshReactive():scheduled");
+    }
+
+    @Test
+    void identifiesSpringWrappedMethodThatOptsOutOfTheDistributedLock() throws NoSuchMethodException {
+        Method method = SampleScheduledTasks.class.getDeclaredMethod("runWithoutLock");
+        Runnable task = new Task(new ScheduledMethodRunnable(new SampleScheduledTasks(), method)).getRunnable();
+
+        assertThat(ScheduledTaskIdentity.disablesLock(task)).isTrue();
     }
 
     @Test
@@ -136,5 +144,9 @@ class ScheduledTaskIdentityTest {
         Mono<Void> refreshReactive() {
             return Mono.empty();
         }
+
+        @org.springframework.scheduling.annotation.Scheduled(fixedRate = 1000)
+        @DisableScheduledLock
+        void runWithoutLock() {}
     }
 }

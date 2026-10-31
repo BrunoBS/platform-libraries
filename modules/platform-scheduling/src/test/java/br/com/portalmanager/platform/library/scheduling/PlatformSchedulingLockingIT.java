@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.scheduling;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
+import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingAutoConfiguration;
 import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
 import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
@@ -30,6 +31,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @WithRedis
 @ExtendWith(SpringExtension.class)
@@ -58,6 +61,40 @@ class PlatformSchedulingLockingIT {
 
             assertThat(ScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
             assertThat(ScheduledProbe.executions()).isPositive();
+        }));
+    }
+
+    @Test
+    void reactiveMonoAndFluxKeepTheLockUntilTheirPublishersComplete() throws InterruptedException {
+        ReactiveScheduledProbe.reset();
+        ApplicationContextRunner runner = applicationContextRunner(
+                ReactiveScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+
+        runner.run(firstContext -> runner.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            awaitReactiveExecution();
+            Thread.sleep(Duration.ofMillis(1_500).toMillis());
+
+            assertThat(ReactiveScheduledProbe.monoMaximumConcurrency()).isEqualTo(1);
+            assertThat(ReactiveScheduledProbe.fluxMaximumConcurrency()).isEqualTo(1);
+            assertThat(ReactiveScheduledProbe.monoExecutions()).isPositive();
+            assertThat(ReactiveScheduledProbe.fluxExecutions()).isPositive();
+        }));
+    }
+
+    @Test
+    void disabledLockAnnotationAllowsTwoInstancesToRunTheSameScheduledTask() throws InterruptedException {
+        ExcludedLockScheduledProbe.reset();
+        ApplicationContextRunner runner = applicationContextRunner(
+                ExcludedLockScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+
+        runner.run(firstContext -> runner.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            awaitExcludedTaskConcurrency();
+
+            assertThat(ExcludedLockScheduledProbe.maximumConcurrentExecutions()).isEqualTo(2);
         }));
     }
 
@@ -300,6 +337,24 @@ class PlatformSchedulingLockingIT {
         assertThat(ProgrammaticScheduledProbe.executions()).isPositive();
     }
 
+    private static void awaitReactiveExecution() throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(8).toNanos();
+        while ((!ReactiveScheduledProbe.hasMonoExecuted() || !ReactiveScheduledProbe.hasFluxExecuted())
+                && System.nanoTime() < deadline) {
+            Thread.sleep(25L);
+        }
+        assertThat(ReactiveScheduledProbe.hasMonoExecuted()).isTrue();
+        assertThat(ReactiveScheduledProbe.hasFluxExecuted()).isTrue();
+    }
+
+    private static void awaitExcludedTaskConcurrency() throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+        while (ExcludedLockScheduledProbe.maximumConcurrentExecutions() < 2 && System.nanoTime() < deadline) {
+            Thread.sleep(25L);
+        }
+        assertThat(ExcludedLockScheduledProbe.maximumConcurrentExecutions()).isGreaterThanOrEqualTo(2);
+    }
+
     @Configuration(proxyBeanMethods = false)
     static class ScheduledApplication {
         @Bean
@@ -339,6 +394,116 @@ class PlatformSchedulingLockingIT {
 
         static int executions() {
             return EXECUTIONS.get();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class ReactiveScheduledApplication {
+        @Bean
+        ReactiveScheduledProbe reactiveScheduledProbe() {
+            return new ReactiveScheduledProbe();
+        }
+    }
+
+    static class ReactiveScheduledProbe {
+        private static final AtomicInteger MONO_RUNNING = new AtomicInteger();
+        private static final AtomicInteger MONO_MAXIMUM = new AtomicInteger();
+        private static final AtomicInteger MONO_EXECUTIONS = new AtomicInteger();
+        private static final AtomicInteger FLUX_RUNNING = new AtomicInteger();
+        private static final AtomicInteger FLUX_MAXIMUM = new AtomicInteger();
+        private static final AtomicInteger FLUX_EXECUTIONS = new AtomicInteger();
+
+        @Scheduled(fixedRate = 100)
+        Mono<Void> runMono() {
+            return Mono.defer(() -> {
+                enter(MONO_RUNNING, MONO_MAXIMUM, MONO_EXECUTIONS);
+                return Mono.delay(Duration.ofMillis(1_200)).doFinally(signal -> MONO_RUNNING.decrementAndGet()).then();
+            });
+        }
+
+        @Scheduled(fixedRate = 100)
+        Flux<Long> runFlux() {
+            return Flux.defer(() -> {
+                enter(FLUX_RUNNING, FLUX_MAXIMUM, FLUX_EXECUTIONS);
+                return Flux.interval(Duration.ofMillis(150))
+                        .take(8)
+                        .doFinally(signal -> FLUX_RUNNING.decrementAndGet());
+            });
+        }
+
+        private static void enter(AtomicInteger running, AtomicInteger maximum, AtomicInteger executions) {
+            int concurrent = running.incrementAndGet();
+            maximum.accumulateAndGet(concurrent, Math::max);
+            executions.incrementAndGet();
+        }
+
+        static void reset() {
+            MONO_RUNNING.set(0);
+            MONO_MAXIMUM.set(0);
+            MONO_EXECUTIONS.set(0);
+            FLUX_RUNNING.set(0);
+            FLUX_MAXIMUM.set(0);
+            FLUX_EXECUTIONS.set(0);
+        }
+
+        static boolean hasMonoExecuted() {
+            return MONO_EXECUTIONS.get() > 0;
+        }
+
+        static boolean hasFluxExecuted() {
+            return FLUX_EXECUTIONS.get() > 0;
+        }
+
+        static int monoExecutions() {
+            return MONO_EXECUTIONS.get();
+        }
+
+        static int fluxExecutions() {
+            return FLUX_EXECUTIONS.get();
+        }
+
+        static int monoMaximumConcurrency() {
+            return MONO_MAXIMUM.get();
+        }
+
+        static int fluxMaximumConcurrency() {
+            return FLUX_MAXIMUM.get();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class ExcludedLockScheduledApplication {
+        @Bean
+        ExcludedLockScheduledProbe excludedLockScheduledProbe() {
+            return new ExcludedLockScheduledProbe();
+        }
+    }
+
+    static class ExcludedLockScheduledProbe {
+        private static final AtomicInteger RUNNING = new AtomicInteger();
+        private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
+
+        @DisableScheduledLock
+        @Scheduled(fixedRate = 100)
+        void runWithoutLock() {
+            int concurrent = RUNNING.incrementAndGet();
+            MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
+            try {
+                Thread.sleep(TASK_DURATION_MILLIS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            } finally {
+                RUNNING.decrementAndGet();
+            }
+        }
+
+        static void reset() {
+            RUNNING.set(0);
+            MAXIMUM_RUNNING.set(0);
+        }
+
+        static int maximumConcurrentExecutions() {
+            return MAXIMUM_RUNNING.get();
         }
     }
 

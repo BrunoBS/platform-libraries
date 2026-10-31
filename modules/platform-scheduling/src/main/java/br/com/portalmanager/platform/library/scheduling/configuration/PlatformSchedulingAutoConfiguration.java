@@ -150,6 +150,13 @@ final class PlatformSchedulingLockExtensionScheduler {
         prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "true", matchIfMissing = true)
 class PlatformSchedulingEnabledConfiguration {
     @Bean
+    static br.com.portalmanager.platform.library.scheduling.internal.BlockingReactiveScheduledMethodPostProcessor
+            platformBlockingReactiveScheduledMethodPostProcessor() {
+        return new br.com.portalmanager.platform.library.scheduling.internal
+                .BlockingReactiveScheduledMethodPostProcessor();
+    }
+
+    @Bean
     PlatformTaskScheduler platformTaskScheduler(
             LockProvider lockProvider,
             PlatformSchedulingProperties properties,

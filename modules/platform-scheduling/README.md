@@ -20,6 +20,21 @@ golden:
 
 Esses valores ainda não são defaults homologados. Com `enabled=true`, Redis precisa responder na inicialização e falhas ao obter o lock não executam a tarefa. Com `enabled=false`, as tarefas rodam sem coordenação e um WARN é emitido.
 
+Com o locking habilitado, toda tarefa Spring `@Scheduled` é protegida por padrão. Para excluir uma tarefa específica, use a anotação da lib:
+
+```java
+import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
+import org.springframework.scheduling.annotation.Scheduled;
+
+@Scheduled(fixedDelay = 60_000)
+@DisableScheduledLock
+void refreshLocalCache() {
+    // Esta tarefa roda sem lock distribuído.
+}
+```
+
+A anotação vale somente para o método marcado; as demais tarefas continuam protegidas.
+
 ## Tarefas programáticas
 
 Tarefas registradas por código devem usar `PlatformTaskScheduler` e informar um nome estável. Todas as instâncias que executam a mesma tarefa devem usar o mesmo nome:
@@ -54,7 +69,9 @@ O ID identifica a tarefa lógica e deve ser igual em todas as instâncias. Lambd
 
 ## Cobertura e limites
 
-O contrato de execução automática cobre tarefas síncronas `@Scheduled` com cron, `fixedRate` e `fixedDelay`, inclusive em múltiplas instâncias, `@Schedules` repetidos, schedulers nomeados e proxies Spring. Tarefas reativas não são suportadas: em cron e `fixedRate`, o Spring pode retornar do `Runnable` após iniciar a assinatura, antes de o publisher terminar, liberando o lock cedo demais. Não registre métodos reativos enquanto esse caso não tiver uma estratégia de lock até o término do publisher.
+O contrato de execução automática cobre tarefas síncronas e reativas `@Scheduled` com cron, `fixedRate` e `fixedDelay`, inclusive em múltiplas instâncias, `@Schedules` repetidos, schedulers nomeados e proxies Spring. Para métodos reativos, a lib bloqueia a thread do scheduler até o `Publisher` completar ou falhar; assim, o lock cobre o processamento inteiro. `@DisableScheduledLock` deixa a tarefa marcada fora desse comportamento e ela segue a assinatura reativa nativa do Spring.
+
+Como a thread do scheduler fica ocupada durante o fluxo, configure um pool com capacidade suficiente para as demais tarefas. O tempo máximo do lock deve superar a duração máxima esperada; `keep-alive` pode renovar o lease enquanto a tarefa permanece ativa.
 
 Os testes de integração também exercitam a indisponibilidade real e temporária do Redis enquanto um lock está ativo, o comportamento fail-closed e a retomada após a recuperação do Redis, além da expiração de um lease abandonado para simular a queda do detentor. Redis indisponível na inicialização impede o contexto de subir; `enabled=false` mantém a execução sem coordenação.
 

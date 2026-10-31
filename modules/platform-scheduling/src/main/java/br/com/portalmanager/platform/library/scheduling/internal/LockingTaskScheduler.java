@@ -79,6 +79,9 @@ public final class LockingTaskScheduler implements TaskScheduler {
     }
 
     private Runnable guard(Runnable task) {
+        if (ScheduledTaskIdentity.disablesLock(task)) {
+            return task;
+        }
         String lockName = ScheduledTaskIdentity.from(task, serviceName, "scheduled");
         String qualifier = task instanceof SchedulingAwareRunnable aware ? aware.getQualifier() : null;
         return new LockedRunnable(task, qualifier, lockName);
