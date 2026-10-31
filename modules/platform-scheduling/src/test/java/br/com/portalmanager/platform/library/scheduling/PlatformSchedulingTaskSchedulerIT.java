@@ -7,7 +7,9 @@ import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSc
 import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -82,6 +84,18 @@ class PlatformSchedulingTaskSchedulerIT {
                     int afterClose = LifecycleProbe.executions();
                     Thread.sleep(350L);
                     assertThat(LifecycleProbe.executions()).isEqualTo(afterClose);
+                });
+    }
+
+    @Test
+    void contextShutdownWaitsForInFlightTaskToReleaseItsRedisLock() throws InterruptedException {
+        InFlightShutdownProbe.reset();
+        newApplicationContextRunner(InFlightShutdownApplication.class, "scheduling-in-flight-shutdown-it")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(InFlightShutdownProbe.started().await(3, TimeUnit.SECONDS)).isTrue();
+                    ((ConfigurableApplicationContext) context).close();
+                    assertThat(InFlightShutdownProbe.completed().getCount()).isZero();
                 });
     }
 
@@ -192,6 +206,44 @@ class PlatformSchedulingTaskSchedulerIT {
 
         static int executions() {
             return EXECUTIONS.get();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class InFlightShutdownApplication {
+        @Bean
+        InFlightShutdownProbe inFlightShutdownProbe() {
+            return new InFlightShutdownProbe();
+        }
+    }
+
+    static class InFlightShutdownProbe {
+        private static volatile CountDownLatch STARTED = new CountDownLatch(1);
+        private static volatile CountDownLatch COMPLETED = new CountDownLatch(1);
+
+        @Scheduled(fixedDelay = 100)
+        void run() {
+            STARTED.countDown();
+            try {
+                Thread.sleep(30_000L);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            } finally {
+                COMPLETED.countDown();
+            }
+        }
+
+        static void reset() {
+            STARTED = new CountDownLatch(1);
+            COMPLETED = new CountDownLatch(1);
+        }
+
+        static CountDownLatch started() {
+            return STARTED;
+        }
+
+        static CountDownLatch completed() {
+            return COMPLETED;
         }
     }
 
