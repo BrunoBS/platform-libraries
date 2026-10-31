@@ -5,11 +5,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
 import br.com.portalmanager.platform.library.scheduling.metrics.SchedulingLockMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.lang.reflect.Method;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
@@ -90,6 +92,7 @@ class LockingTaskSchedulerTest {
 
     private static LockingTaskScheduler scheduler(
             TaskScheduler delegate, LockProvider lockProvider, SimpleMeterRegistry registry) {
+        when(delegate.getClock()).thenReturn(Clock.systemUTC());
         PlatformSchedulingProperties properties = new PlatformSchedulingProperties();
         properties.setKeepAlive(false);
         return new LockingTaskScheduler(
