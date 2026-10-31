@@ -1,6 +1,6 @@
 # platform-testing-http
 
-Contratos e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/main/docs/libraries/modules/platform-testing-http.md).
+Contratos e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-testing-http.md).
 
 `@PlatformIntegrationTest` starts the application on a random port and provides
 `PlatformRequestSpecificationFactory` for requests to its controllers.

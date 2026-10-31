@@ -1,6 +1,6 @@
 # platform-catalog
 
-Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/main/docs/libraries/modules/platform-catalog.md).
+Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-catalog.md).
 
 - [POM e dependências](pom.xml)
 - [Desenvolvimento e build do reactor](../../README.md)
