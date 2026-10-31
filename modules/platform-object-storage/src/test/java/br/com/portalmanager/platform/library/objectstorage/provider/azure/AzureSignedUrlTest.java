@@ -3,9 +3,9 @@ package br.com.portalmanager.platform.library.objectstorage.provider.azure;
 import br.com.portalmanager.platform.library.objectstorage.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectHeaders;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectReference;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlOperation;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlRequest;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlResult;
+import br.com.portalmanager.platform.library.objectstorage.contract.DownloadUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrl;
+import br.com.portalmanager.platform.library.objectstorage.contract.UploadUrlRequest;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -46,11 +46,10 @@ class AzureSignedUrlTest {
         properties.setDestinations(Map.of("audit", destination));
         AzureBlobObjectStorageClient client = new AzureBlobObjectStorageClient(serviceClient, properties);
 
-        SignedUrlResult result = client.createSignedUrl(new SignedUrlRequest(
-                ObjectReference.current("audit", "feature"), SignedUrlOperation.DOWNLOAD, Duration.ofMinutes(4), null));
+        SignedUrl result = client.createDownloadUrl(new DownloadUrlRequest(
+                ObjectReference.current("audit", "feature"), Duration.ofMinutes(4)));
 
         assertTrue(result.url().toString().contains("sp=r"));
-        assertEquals(SignedUrlOperation.DOWNLOAD, result.operation());
         assertTrue(result.requiredHeaders().isEmpty());
         verify(blobClient).generateUserDelegationSas(any(BlobServiceSasSignatureValues.class), same(delegationKey));
     }
@@ -77,12 +76,11 @@ class AzureSignedUrlTest {
         AzureBlobObjectStorageClient client = new AzureBlobObjectStorageClient(serviceClient, properties);
         ObjectHeaders headers = new ObjectHeaders("application/json", "no-cache", null, null, null);
 
-        SignedUrlResult result = client.createSignedUrl(new SignedUrlRequest(
-                ObjectReference.current("audit", "feature"), SignedUrlOperation.UPLOAD, Duration.ofMinutes(4), headers));
+        SignedUrl result = client.createUploadUrl(new UploadUrlRequest(
+                ObjectReference.current("audit", "feature"), Duration.ofMinutes(4), headers));
 
         assertEquals("https://account.blob.core.windows.net/audit-container/objects/feature.json?sv=2026-01-01&sp=cw&sig=signature",
                 result.url().toString());
-        assertEquals(SignedUrlOperation.UPLOAD, result.operation());
         assertEquals(Map.of("Content-Type", "application/json", "Cache-Control", "no-cache"), result.requiredHeaders());
         assertTrue(result.expiresAt().isAfter(java.time.Instant.now()));
         verify(serviceClient).getUserDelegationKey(any(), any());

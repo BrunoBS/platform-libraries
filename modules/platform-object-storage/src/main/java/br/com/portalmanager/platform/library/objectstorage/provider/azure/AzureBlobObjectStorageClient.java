@@ -9,9 +9,10 @@ import br.com.portalmanager.platform.library.objectstorage.contract.ObjectRefere
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectSummary;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectVersion;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlOperation;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlRequest;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlResult;
+import br.com.portalmanager.platform.library.objectstorage.contract.DownloadUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrl;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlClient;
+import br.com.portalmanager.platform.library.objectstorage.contract.UploadUrlRequest;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadRequest;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.VersionPage;
@@ -50,7 +51,7 @@ import java.util.Map;
 import java.util.Optional;
 import com.azure.core.util.Context;
 
-public class AzureBlobObjectStorageClient implements ObjectStorageClient {
+public class AzureBlobObjectStorageClient implements ObjectStorageClient, SignedUrlClient {
     private final BlobServiceClient client;
     private final ObjectStorageProperties properties;
 
@@ -222,39 +223,49 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
     }
 
     @Override
-    public SignedUrlResult createSignedUrl(SignedUrlRequest request) {
+    public SignedUrl createDownloadUrl(DownloadUrlRequest request) {
         if (request == null) throw ObjectStorageValidation.invalid("request");
         Resolved resolved = resolve(request.reference().destination(), request.reference().key());
+        return createSignedUrl(resolved, request.reference().versionId(), request.validity(),
+                new BlobSasPermission().setReadPermission(true), Map.of());
+    }
+
+    @Override
+    public SignedUrl createUploadUrl(UploadUrlRequest request) {
+        if (request == null) throw ObjectStorageValidation.invalid("request");
+        Resolved resolved = resolve(request.reference().destination(), request.reference().key());
+        return createSignedUrl(resolved, null, request.validity(),
+                new BlobSasPermission().setCreatePermission(true).setWritePermission(true),
+                request.headers().asHttpHeaders());
+    }
+
+    private SignedUrl createSignedUrl(Resolved resolved, String versionId, Duration validity,
+            BlobSasPermission permissions, Map<String, String> requiredHeaders) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         OffsetDateTime startsAt = now.minusMinutes(5);
-        OffsetDateTime expiresAt = now.plus(request.validity());
-        BlobClient target = blob(resolved, request.reference().versionId());
+        OffsetDateTime expiresAt = now.plus(validity);
+        BlobClient target = blob(resolved, versionId);
         String blobUrl = target.getBlobUrl();
         SasProtocol protocol = blobUrl.startsWith("https://")
                 ? SasProtocol.HTTPS_ONLY : SasProtocol.HTTPS_HTTP;
-        BlobSasPermission permissions = request.operation() == SignedUrlOperation.DOWNLOAD
-                ? new BlobSasPermission().setReadPermission(true)
-                : new BlobSasPermission().setCreatePermission(true).setWritePermission(true);
         BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiresAt, permissions)
                 .setStartTime(startsAt)
                 .setProtocol(protocol);
-        Map<String, String> requiredHeaders = request.operation() == SignedUrlOperation.UPLOAD
-                ? request.headers().asHttpHeaders() : Map.of();
         if (!requiredHeaders.isEmpty()) values.setRequestHeaders(requiredHeaders);
         try {
             UserDelegationKey delegationKey = client.getUserDelegationKey(startsAt, expiresAt.plusMinutes(5));
             String sasToken = target.generateUserDelegationSas(values, delegationKey);
             String separator = blobUrl.contains("?") ? "&" : "?";
             URI url = URI.create(blobUrl + separator + sasToken);
-            return new SignedUrlResult(url, request.operation(), expiresAt.toInstant(), requiredHeaders);
+            return new SignedUrl(url, expiresAt.toInstant(), requiredHeaders);
         } catch (BlobStorageException exception) {
-            throw translate(exception, "create signed object URL");
+            throw translate(exception, "create signed URL");
         } catch (ClientAuthenticationException exception) {
-            throw ObjectStorageFailureMapper.fromHttpStatus(401, "create signed object URL", exception);
+            throw ObjectStorageFailureMapper.fromHttpStatus(401, "create signed URL", exception);
         } catch (AzureException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("create signed object URL", exception);
+            throw ObjectStorageFailureMapper.fromProviderFailure("create signed URL", exception);
         } catch (IllegalArgumentException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("create signed object URL", exception);
+            throw ObjectStorageFailureMapper.fromClientFailure("create signed URL", exception);
         }
     }
 

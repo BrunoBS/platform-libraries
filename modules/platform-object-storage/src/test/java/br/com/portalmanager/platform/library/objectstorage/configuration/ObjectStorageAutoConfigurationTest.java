@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.objectstorage.configuration;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlClient;
 import br.com.portalmanager.platform.library.objectstorage.provider.aws.configuration.AwsObjectStorageAutoConfiguration;
 import br.com.portalmanager.platform.library.objectstorage.provider.azure.configuration.AzureObjectStorageAutoConfiguration;
 import com.azure.storage.blob.BlobServiceClient;
@@ -30,6 +31,7 @@ class ObjectStorageAutoConfigurationTest {
                         .hasSingleBean(S3Client.class)
                         .hasSingleBean(S3Presigner.class)
                         .hasSingleBean(ObjectStorageClient.class)
+                        .hasSingleBean(SignedUrlClient.class)
                         .doesNotHaveBean(BlobServiceClient.class));
     }
 
@@ -42,6 +44,7 @@ class ObjectStorageAutoConfigurationTest {
                 .run(application -> assertThat(application).hasNotFailed()
                         .hasSingleBean(BlobServiceClient.class)
                         .hasSingleBean(ObjectStorageClient.class)
+                        .hasSingleBean(SignedUrlClient.class)
                         .doesNotHaveBean(S3Client.class));
     }
 

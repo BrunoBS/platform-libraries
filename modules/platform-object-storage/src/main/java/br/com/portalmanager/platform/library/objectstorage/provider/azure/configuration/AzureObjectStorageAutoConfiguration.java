@@ -30,7 +30,7 @@ public class AzureObjectStorageAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ObjectStorageClient.class)
-    ObjectStorageClient azureObjectStorageClient(BlobServiceClient client, ObjectStorageProperties properties) {
+    AzureBlobObjectStorageClient azureObjectStorageClient(BlobServiceClient client, ObjectStorageProperties properties) {
         return new AzureBlobObjectStorageClient(client, properties);
     }
 }

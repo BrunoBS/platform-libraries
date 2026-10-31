@@ -6,9 +6,10 @@ import br.com.portalmanager.platform.library.objectstorage.contract.DownloadedOb
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectHeaders;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectReference;
 import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlOperation;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlRequest;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlResult;
+import br.com.portalmanager.platform.library.objectstorage.contract.DownloadUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrl;
+import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrlClient;
+import br.com.portalmanager.platform.library.objectstorage.contract.UploadUrlRequest;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadRequest;
 import br.com.portalmanager.platform.library.objectstorage.contract.UploadResult;
 import br.com.portalmanager.platform.library.objectstorage.contract.WriteMode;
@@ -59,6 +60,9 @@ class S3ObjectStorageClientIT {
 
     @Autowired
     private ObjectStorageClient storage;
+
+    @Autowired
+    private SignedUrlClient signedUrls;
 
     @BeforeEach
     void enableBucketVersioning() {
@@ -169,8 +173,8 @@ class S3ObjectStorageClientIT {
                 new UploadRequest("audit", "signed-get.json", original.length, "application/json", Map.of()),
                 new ByteArrayInputStream(original));
 
-        SignedUrlResult download = storage.createSignedUrl(new SignedUrlRequest(
-                uploaded.reference(), SignedUrlOperation.DOWNLOAD, Duration.ofMinutes(5), null));
+        SignedUrl download = signedUrls.createDownloadUrl(new DownloadUrlRequest(
+                uploaded.reference(), Duration.ofMinutes(5)));
         HttpResponse<byte[]> downloadResponse = HttpClient.newHttpClient().send(
                 HttpRequest.newBuilder(download.url()).GET().build(), HttpResponse.BodyHandlers.ofByteArray());
         assertEquals(200, downloadResponse.statusCode());
@@ -179,9 +183,8 @@ class S3ObjectStorageClientIT {
         assertTrue(download.requiredHeaders().isEmpty());
 
         ObjectHeaders uploadHeaders = new ObjectHeaders("application/json", "no-cache", null, null, null);
-        SignedUrlResult upload = storage.createSignedUrl(new SignedUrlRequest(
-                ObjectReference.current("audit", "signed-put.json"), SignedUrlOperation.UPLOAD,
-                Duration.ofMinutes(5), uploadHeaders));
+        SignedUrl upload = signedUrls.createUploadUrl(new UploadUrlRequest(
+                ObjectReference.current("audit", "signed-put.json"), Duration.ofMinutes(5), uploadHeaders));
         HttpRequest.Builder putRequest = HttpRequest.newBuilder(upload.url());
         upload.requiredHeaders().forEach(putRequest::header);
         HttpResponse<Void> uploadResponse = HttpClient.newHttpClient().send(
@@ -214,7 +217,7 @@ class S3ObjectStorageClientIT {
         }
 
         @Bean
-        ObjectStorageClient objectStorageClient(S3Client s3Client, S3Presigner presigner) {
+        S3ObjectStorageClient objectStorageClient(S3Client s3Client, S3Presigner presigner) {
             ObjectStorageProperties properties = new ObjectStorageProperties();
             properties.setProvider(ObjectStorageProvider.AWS);
             properties.setRegion("us-east-1");

@@ -50,7 +50,7 @@ public class AwsObjectStorageAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ObjectStorageClient.class)
-    ObjectStorageClient awsObjectStorageClient(S3Client client, S3Presigner presigner, ObjectStorageProperties properties) {
+    S3ObjectStorageClient awsObjectStorageClient(S3Client client, S3Presigner presigner, ObjectStorageProperties properties) {
         return new S3ObjectStorageClient(client, presigner, properties);
     }
 }
