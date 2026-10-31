@@ -9,8 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
-import br.com.portalmanager.platform.library.scheduling.metrics.SchedulingLockMetrics;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.lang.reflect.Method;
 import java.time.Clock;
 import java.time.Instant;
@@ -33,9 +31,8 @@ class LockingTaskSchedulerTest {
         ScheduledFuture<?> scheduledFuture = mock(ScheduledFuture.class);
         doReturn(scheduledFuture).when(delegate).schedule(any(Runnable.class), any(Instant.class));
         LockProvider lockProvider = configuration -> Optional.empty();
-        SimpleMeterRegistry registry = new SimpleMeterRegistry();
         AtomicInteger executions = new AtomicInteger();
-        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider, registry);
+        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider);
 
         scheduler.schedule(task(executions), Instant.now());
         ArgumentCaptor<Runnable> registered = ArgumentCaptor.forClass(Runnable.class);
@@ -44,8 +41,6 @@ class LockingTaskSchedulerTest {
         registered.getValue().run();
 
         assertThat(executions).hasValue(0);
-        assertThat(registry.counter("golden.scheduling.lock", "outcome", "skipped").count()).isEqualTo(1);
-        assertThat(registry.counter("golden.scheduling.lock", "outcome", "failed").count()).isZero();
     }
 
     @Test
@@ -55,9 +50,8 @@ class LockingTaskSchedulerTest {
         LockProvider lockProvider = configuration -> {
             throw new IllegalStateException("Redis unavailable");
         };
-        SimpleMeterRegistry registry = new SimpleMeterRegistry();
         AtomicInteger executions = new AtomicInteger();
-        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider, registry);
+        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider);
 
         scheduler.schedule(task(executions), Instant.now());
         ArgumentCaptor<Runnable> registered = ArgumentCaptor.forClass(Runnable.class);
@@ -66,8 +60,6 @@ class LockingTaskSchedulerTest {
         registered.getValue().run();
 
         assertThat(executions).hasValue(0);
-        assertThat(registry.counter("golden.scheduling.lock", "outcome", "failed").count()).isEqualTo(1);
-        assertThat(registry.counter("golden.scheduling.lock", "outcome", "acquired").count()).isZero();
     }
 
     @Test
@@ -76,9 +68,8 @@ class LockingTaskSchedulerTest {
         doReturn(mock(ScheduledFuture.class)).when(delegate).schedule(any(Runnable.class), any(Instant.class));
         SimpleLock lock = mock(SimpleLock.class);
         LockProvider lockProvider = configuration -> Optional.of(lock);
-        SimpleMeterRegistry registry = new SimpleMeterRegistry();
         AtomicInteger executions = new AtomicInteger();
-        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider, registry);
+        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider);
 
         scheduler.schedule(task(executions), Instant.now());
         ArgumentCaptor<Runnable> registered = ArgumentCaptor.forClass(Runnable.class);
@@ -87,7 +78,6 @@ class LockingTaskSchedulerTest {
         registered.getValue().run();
 
         assertThat(executions).hasValue(1);
-        assertThat(registry.counter("golden.scheduling.lock", "outcome", "acquired").count()).isEqualTo(1);
         verify(lock).unlock();
     }
 
@@ -97,7 +87,7 @@ class LockingTaskSchedulerTest {
         doReturn(mock(ScheduledFuture.class)).when(delegate).schedule(any(Runnable.class), any(Instant.class));
         SimpleLock lock = mock(SimpleLock.class);
         LockProvider lockProvider = configuration -> Optional.of(lock);
-        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider, new SimpleMeterRegistry());
+        LockingTaskScheduler scheduler = scheduler(delegate, lockProvider);
 
         scheduler.schedule(failingTask(), Instant.now());
         ArgumentCaptor<Runnable> registered = ArgumentCaptor.forClass(Runnable.class);
@@ -109,13 +99,11 @@ class LockingTaskSchedulerTest {
         verify(lock).unlock();
     }
 
-    private static LockingTaskScheduler scheduler(
-            TaskScheduler delegate, LockProvider lockProvider, SimpleMeterRegistry registry) {
+    private static LockingTaskScheduler scheduler(TaskScheduler delegate, LockProvider lockProvider) {
         when(delegate.getClock()).thenReturn(Clock.systemUTC());
         PlatformSchedulingProperties properties = new PlatformSchedulingProperties();
         properties.setKeepAlive(false);
-        return new LockingTaskScheduler(
-                delegate, lockProvider, SERVICE_NAME, properties, new SchedulingLockMetrics(registry));
+        return new LockingTaskScheduler(delegate, lockProvider, SERVICE_NAME, properties);
     }
 
     private static ScheduledMethodRunnable task(AtomicInteger executions) throws NoSuchMethodException {
