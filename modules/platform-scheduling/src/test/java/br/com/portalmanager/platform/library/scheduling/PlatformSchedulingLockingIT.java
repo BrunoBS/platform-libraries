@@ -39,7 +39,7 @@ class PlatformSchedulingLockingIT {
     @Test
     void registeredScheduledRunnableIsMutuallyExclusiveAcrossServiceContexts() throws InterruptedException {
         ScheduledProbe.reset();
-        ApplicationContextRunner runner = applicationContextRunner();
+        ApplicationContextRunner runner = applicationContextRunner(ScheduledApplication.class, SERVICE_NAME, false, "PT30S");
 
         runner.run(firstContext -> runner.run(secondContext -> {
             assertThat(firstContext).hasNotFailed();
@@ -52,23 +52,58 @@ class PlatformSchedulingLockingIT {
         }));
     }
 
-    private static ApplicationContextRunner applicationContextRunner() {
+    @Test
+    void differentServicesUseIndependentLockNamespaces() throws InterruptedException {
+        ScheduledProbe.reset();
+        ApplicationContextRunner firstService = applicationContextRunner(
+                ScheduledApplication.class, "scheduling-namespace-a", false, "PT30S");
+        ApplicationContextRunner secondService = applicationContextRunner(
+                ScheduledApplication.class, "scheduling-namespace-b", false, "PT30S");
+
+        firstService.run(firstContext -> secondService.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            awaitConcurrentExecutions(2, Duration.ofSeconds(5));
+
+            assertThat(ScheduledProbe.maximumConcurrentExecutions()).isEqualTo(2);
+        }));
+    }
+
+    @Test
+    void keepAliveRenewsLeaseWhileScheduledTaskRunsLongerThanItsInitialTtl() throws InterruptedException {
+        LongRunningScheduledProbe.reset();
+        ApplicationContextRunner runner = applicationContextRunner(
+                LongRunningApplication.class, SERVICE_NAME, true, "PT30S");
+
+        runner.run(firstContext -> runner.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            awaitLongRunningExecution();
+            Thread.sleep(Duration.ofSeconds(31).toMillis());
+
+            assertThat(LongRunningScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
+            assertThat(LongRunningScheduledProbe.executions()).isEqualTo(1);
+        }));
+    }
+
+    private static ApplicationContextRunner applicationContextRunner(
+            Class<?> scheduledApplication, String serviceName, boolean keepAlive, String lockAtMostFor) {
         return new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
                         DataRedisAutoConfiguration.class,
                         DataRedisReactiveAutoConfiguration.class,
                         PlatformRedisAutoConfiguration.class,
                         PlatformSchedulingAutoConfiguration.class))
-                .withUserConfiguration(ScheduledApplication.class)
+                .withUserConfiguration(scheduledApplication)
                 .withPropertyValues(
-                        "spring.application.name=" + SERVICE_NAME,
+                        "spring.application.name=" + serviceName,
                         "spring.data.redis.host=" + redis.getHost(),
                         "spring.data.redis.port=" + redis.getMappedPort(6379),
                         "spring.data.redis.timeout=1s",
                         "spring.data.redis.connect-timeout=1s",
-                        "golden.scheduling.distributed-lock.lock-at-most-for=PT30S",
+                        "golden.scheduling.distributed-lock.lock-at-most-for=" + lockAtMostFor,
                         "golden.scheduling.distributed-lock.lock-at-least-for=PT0S",
-                        "golden.scheduling.distributed-lock.keep-alive=false");
+                        "golden.scheduling.distributed-lock.keep-alive=" + keepAlive);
     }
 
     private static void awaitAtLeastOneExecution() throws InterruptedException {
@@ -77,6 +112,22 @@ class PlatformSchedulingLockingIT {
             Thread.sleep(25L);
         }
         assertThat(ScheduledProbe.executions()).isPositive();
+    }
+
+    private static void awaitConcurrentExecutions(int expected, Duration timeout) throws InterruptedException {
+        long deadline = System.nanoTime() + timeout.toNanos();
+        while (ScheduledProbe.maximumConcurrentExecutions() < expected && System.nanoTime() < deadline) {
+            Thread.sleep(25L);
+        }
+        assertThat(ScheduledProbe.maximumConcurrentExecutions()).isGreaterThanOrEqualTo(expected);
+    }
+
+    private static void awaitLongRunningExecution() throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+        while (LongRunningScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
+            Thread.sleep(25L);
+        }
+        assertThat(LongRunningScheduledProbe.executions()).isPositive();
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -94,6 +145,49 @@ class PlatformSchedulingLockingIT {
 
         @Scheduled(fixedDelay = 100)
         void runPeriodically() {
+            int concurrent = RUNNING.incrementAndGet();
+            MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
+            EXECUTIONS.incrementAndGet();
+            try {
+                Thread.sleep(TASK_DURATION_MILLIS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            } finally {
+                RUNNING.decrementAndGet();
+            }
+        }
+
+        static void reset() {
+            RUNNING.set(0);
+            MAXIMUM_RUNNING.set(0);
+            EXECUTIONS.set(0);
+        }
+
+        static int maximumConcurrentExecutions() {
+            return MAXIMUM_RUNNING.get();
+        }
+
+        static int executions() {
+            return EXECUTIONS.get();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class LongRunningApplication {
+        @Bean
+        LongRunningScheduledProbe longRunningScheduledProbe() {
+            return new LongRunningScheduledProbe();
+        }
+    }
+
+    static class LongRunningScheduledProbe {
+        private static final long TASK_DURATION_MILLIS = Duration.ofSeconds(35).toMillis();
+        private static final AtomicInteger RUNNING = new AtomicInteger();
+        private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
+        private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+
+        @Scheduled(fixedDelay = 100)
+        void runLongTask() {
             int concurrent = RUNNING.incrementAndGet();
             MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
             EXECUTIONS.incrementAndGet();
