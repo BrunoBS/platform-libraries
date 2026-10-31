@@ -144,6 +144,22 @@ class PlatformSchedulingLockingIT {
     }
 
     @Test
+    void failsStartupWhenTheRealRedisContainerIsUnavailable() {
+        ApplicationContextRunner runner = applicationContextRunner(
+                ScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+        redis.stop();
+        try {
+            runner.run(context -> {
+                assertThat(context).hasFailed();
+                assertThat(context.getStartupFailure())
+                        .hasStackTraceContaining("Distributed scheduling lock Redis is unavailable");
+            });
+        } finally {
+            redis.start();
+        }
+    }
+
+    @Test
     void anAbandonedLeaseCanBeAcquiredAgainAfterItsExpiry() throws InterruptedException {
         ApplicationContextRunner runner = applicationContextRunner(
                 ScheduledApplication.class, SERVICE_NAME, false, "PT30S");
