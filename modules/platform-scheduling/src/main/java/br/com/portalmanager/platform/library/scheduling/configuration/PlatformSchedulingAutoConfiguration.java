@@ -149,12 +149,17 @@ final class PlatformSchedulingLockExtensionScheduler {
         prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "true", matchIfMissing = true)
 class PlatformSchedulingEnabledConfiguration {
     @Bean
+    PlatformSchedulingTaskSchedulerRouter platformSchedulingTaskSchedulerRouter(BeanFactory beanFactory) {
+        return new PlatformSchedulingTaskSchedulerRouter(beanFactory);
+    }
+
+    @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
     SchedulingConfigurer platformSchedulingConfigurer(
             LockProvider lockProvider,
             PlatformSchedulingProperties properties,
             org.springframework.core.env.Environment environment,
-            BeanFactory beanFactory,
+            PlatformSchedulingTaskSchedulerRouter schedulerRouter,
             SchedulingLockMetrics metrics) {
         String serviceName = environment.getRequiredProperty("spring.application.name");
         return new SchedulingConfigurer() {
@@ -162,13 +167,30 @@ class PlatformSchedulingEnabledConfiguration {
             public void configureTasks(ScheduledTaskRegistrar registrar) {
                 TaskScheduler delegate = registrar.getScheduler();
                 if (delegate == null) {
-                    TaskSchedulerRouter router = new TaskSchedulerRouter();
-                    router.setBeanFactory(beanFactory);
-                    delegate = router;
+                    delegate = schedulerRouter.router();
                 }
                 registrar.setTaskScheduler(new LockingTaskScheduler(
                         delegate, lockProvider, serviceName, properties, metrics));
             }
         };
+    }
+}
+
+/** Owns Spring's fallback router so its internally created executor is shut down with the context. */
+final class PlatformSchedulingTaskSchedulerRouter implements org.springframework.beans.factory.DisposableBean {
+    private final TaskSchedulerRouter router;
+
+    PlatformSchedulingTaskSchedulerRouter(BeanFactory beanFactory) {
+        this.router = new TaskSchedulerRouter();
+        this.router.setBeanFactory(beanFactory);
+    }
+
+    TaskSchedulerRouter router() {
+        return router;
+    }
+
+    @Override
+    public void destroy() {
+        router.destroy();
     }
 }
