@@ -7,6 +7,9 @@ import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSc
 import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,6 +26,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
+import net.javacrumbs.shedlock.core.LockConfiguration;
+import net.javacrumbs.shedlock.core.LockProvider;
 
 @WithRedis
 @ExtendWith(SpringExtension.class)
@@ -85,6 +90,82 @@ class PlatformSchedulingLockingIT {
 
             assertThat(ProxyScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
             assertThat(ProxyScheduledProbe.executions()).isPositive();
+        }));
+    }
+
+    @Test
+    void cronTasksAreMutuallyExclusiveAcrossServiceContexts() throws InterruptedException {
+        CronScheduledProbe.reset();
+        ApplicationContextRunner runner = applicationContextRunner(
+                CronScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+
+        runner.run(firstContext -> runner.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            awaitCronExecution();
+            Thread.sleep(Duration.ofSeconds(3).toMillis());
+
+            assertThat(CronScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
+            assertThat(CronScheduledProbe.executions()).isPositive();
+        }));
+    }
+
+    @Test
+    void repeatedSchedulesOnOneMethodShareTheSameLockIdentity() throws InterruptedException {
+        RepeatedScheduledProbe.reset();
+        applicationContextRunner(RepeatedScheduledApplication.class, SERVICE_NAME, false, "PT30S")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Thread.sleep(Duration.ofSeconds(2).toMillis());
+
+                    assertThat(RepeatedScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
+                    assertThat(RepeatedScheduledProbe.executions()).isPositive();
+                });
+    }
+
+    @Test
+    void failsClosedDuringRealRedisOutageAndResumesAfterRedisRecovers() throws Exception {
+        OutageScheduledProbe.reset();
+        ApplicationContextRunner runner = applicationContextRunner(
+                OutageScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+
+        runner.run(firstContext -> runner.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            assertThat(OutageScheduledProbe.started().await(5, TimeUnit.SECONDS)).isTrue();
+
+            redis.execInContainer("redis-cli", "CLIENT", "PAUSE", "2500", "ALL");
+            Thread.sleep(1_500L);
+            assertThat(OutageScheduledProbe.executions()).isEqualTo(1);
+
+            assertThat(OutageScheduledProbe.secondExecution().await(12, TimeUnit.SECONDS)).isTrue();
+            assertThat(OutageScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
+        }));
+    }
+
+    @Test
+    void anAbandonedLeaseCanBeAcquiredAgainAfterItsExpiry() throws InterruptedException {
+        ApplicationContextRunner runner = applicationContextRunner(
+                ScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+        runner.run(firstContext -> runner.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            LockProvider firstProvider = firstContext.getBean(LockProvider.class);
+            LockProvider secondProvider = secondContext.getBean(LockProvider.class);
+            String abandonedLockName = SERVICE_NAME + ":simulated-crashed-worker";
+            assertThat(firstProvider.lock(new LockConfiguration(
+                            Instant.now(), abandonedLockName, Duration.ofSeconds(2), Duration.ZERO)))
+                    .isPresent();
+            assertThat(secondProvider.lock(new LockConfiguration(
+                            Instant.now(), abandonedLockName, Duration.ofSeconds(2), Duration.ZERO)))
+                    .isEmpty();
+
+            Thread.sleep(Duration.ofMillis(2_500).toMillis());
+
+            var recoveredLock = secondProvider.lock(new LockConfiguration(
+                    Instant.now(), abandonedLockName, Duration.ofSeconds(2), Duration.ZERO));
+            assertThat(recoveredLock).isPresent();
+            recoveredLock.orElseThrow().unlock();
         }));
     }
 
@@ -166,6 +247,14 @@ class PlatformSchedulingLockingIT {
             Thread.sleep(25L);
         }
         assertThat(ProxyScheduledProbe.executions()).isPositive();
+    }
+
+    private static void awaitCronExecution() throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+        while (CronScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
+            Thread.sleep(25L);
+        }
+        assertThat(CronScheduledProbe.executions()).isPositive();
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -254,6 +343,150 @@ class PlatformSchedulingLockingIT {
 
         static boolean isRunning() {
             return RUNNING.get() > 0;
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class CronScheduledApplication {
+        @Bean
+        CronScheduledProbe cronScheduledProbe() {
+            return new CronScheduledProbe();
+        }
+    }
+
+    static class CronScheduledProbe {
+        private static final AtomicInteger RUNNING = new AtomicInteger();
+        private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
+        private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+
+        @Scheduled(cron = "*/1 * * * * *")
+        void runWithCron() {
+            int concurrent = RUNNING.incrementAndGet();
+            MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
+            EXECUTIONS.incrementAndGet();
+            try {
+                Thread.sleep(TASK_DURATION_MILLIS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            } finally {
+                RUNNING.decrementAndGet();
+            }
+        }
+
+        static void reset() {
+            RUNNING.set(0);
+            MAXIMUM_RUNNING.set(0);
+            EXECUTIONS.set(0);
+        }
+
+        static int executions() {
+            return EXECUTIONS.get();
+        }
+
+        static int maximumConcurrentExecutions() {
+            return MAXIMUM_RUNNING.get();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class RepeatedScheduledApplication {
+        @Bean
+        RepeatedScheduledProbe repeatedScheduledProbe() {
+            return new RepeatedScheduledProbe();
+        }
+    }
+
+    static class RepeatedScheduledProbe {
+        private static final AtomicInteger RUNNING = new AtomicInteger();
+        private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
+        private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+
+        @org.springframework.scheduling.annotation.Schedules({
+            @Scheduled(fixedRate = 100), @Scheduled(fixedDelay = 100)
+        })
+        void runRepeatedly() {
+            int concurrent = RUNNING.incrementAndGet();
+            MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
+            EXECUTIONS.incrementAndGet();
+            try {
+                Thread.sleep(350L);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            } finally {
+                RUNNING.decrementAndGet();
+            }
+        }
+
+        static void reset() {
+            RUNNING.set(0);
+            MAXIMUM_RUNNING.set(0);
+            EXECUTIONS.set(0);
+        }
+
+        static int executions() {
+            return EXECUTIONS.get();
+        }
+
+        static int maximumConcurrentExecutions() {
+            return MAXIMUM_RUNNING.get();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class OutageScheduledApplication {
+        @Bean
+        OutageScheduledProbe outageScheduledProbe() {
+            return new OutageScheduledProbe();
+        }
+    }
+
+    static class OutageScheduledProbe {
+        private static final AtomicInteger RUNNING = new AtomicInteger();
+        private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
+        private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+        private static volatile CountDownLatch STARTED = new CountDownLatch(1);
+        private static volatile CountDownLatch SECOND_EXECUTION = new CountDownLatch(1);
+
+        @Scheduled(fixedDelay = 100)
+        void runPeriodically() {
+            int execution = EXECUTIONS.incrementAndGet();
+            int concurrent = RUNNING.incrementAndGet();
+            MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
+            STARTED.countDown();
+            if (execution > 1) {
+                SECOND_EXECUTION.countDown();
+            }
+            try {
+                Thread.sleep(8_000L);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            } finally {
+                RUNNING.decrementAndGet();
+            }
+        }
+
+        static void reset() {
+            RUNNING.set(0);
+            MAXIMUM_RUNNING.set(0);
+            EXECUTIONS.set(0);
+            STARTED = new CountDownLatch(1);
+            SECOND_EXECUTION = new CountDownLatch(1);
+        }
+
+        static CountDownLatch started() {
+            return STARTED;
+        }
+
+        static CountDownLatch secondExecution() {
+            return SECOND_EXECUTION;
+        }
+
+        static int executions() {
+            return EXECUTIONS.get();
+        }
+
+        static int maximumConcurrentExecutions() {
+            return MAXIMUM_RUNNING.get();
         }
     }
 

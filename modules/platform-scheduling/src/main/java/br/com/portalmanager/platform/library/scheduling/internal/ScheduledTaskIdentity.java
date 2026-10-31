@@ -1,13 +1,22 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
+import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
+import org.springframework.core.ReactiveAdapterRegistry;
 
 final class ScheduledTaskIdentity {
     private ScheduledTaskIdentity() {}
 
     static String from(Runnable task, String serviceName, String scheduleDiscriminator) {
+        if (task instanceof PlatformScheduledTask programmaticTask) {
+            String taskName = programmaticTask.lockName();
+            if (taskName == null || taskName.isBlank() || !taskName.equals(taskName.trim())) {
+                throw new IllegalStateException("Programmatic scheduled task must provide a non-blank stable lock name");
+            }
+            return serviceName + ":programmatic:" + taskName + ":" + scheduleDiscriminator;
+        }
         if (!(task instanceof ScheduledMethodRunnable scheduledMethod)) {
             if (task instanceof SchedulingAwareRunnable) {
                 return fromSpringDisplayName(task.toString(), serviceName, scheduleDiscriminator);
@@ -17,6 +26,7 @@ final class ScheduledTaskIdentity {
         Class<?> targetClass = AopUtils.getTargetClass(scheduledMethod.getTarget());
         java.lang.reflect.Method method = AopUtils.getMostSpecificMethod(
                 scheduledMethod.getMethod(), targetClass);
+        assertSynchronous(method);
         return serviceName + ":" + method.getDeclaringClass().getName() + "#"
                 + method.getName() + "("
                 + java.util.Arrays.stream(method.getParameterTypes())
@@ -39,7 +49,21 @@ final class ScheduledTaskIdentity {
             throw new IllegalStateException("Spring scheduled task display name is unstable: " + displayName);
         }
 
+        try {
+            java.lang.reflect.Method method = Class.forName(className).getDeclaredMethod(methodName);
+            assertSynchronous(method);
+        } catch (ClassNotFoundException | NoSuchMethodException ignored) {
+            // Spring's public display name remains the identity source for wrappers.
+        }
+
         return serviceName + ":" + className + "#" + methodName + "():" + scheduleDiscriminator;
+    }
+
+    private static void assertSynchronous(java.lang.reflect.Method method) {
+        if (ReactiveAdapterRegistry.getSharedInstance().getAdapter(method.getReturnType()) != null) {
+            throw new IllegalStateException("Reactive @Scheduled methods are unsupported by distributed locking: "
+                    + method.getDeclaringClass().getName() + "#" + method.getName());
+        }
     }
 
     private static boolean isJavaIdentifier(String value) {

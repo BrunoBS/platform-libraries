@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 import br.com.portalmanager.platform.library.scheduling.internal.LockingTaskScheduler;
 import br.com.portalmanager.platform.library.scheduling.metrics.SchedulingLockMetrics;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.util.concurrent.Executors;
@@ -149,6 +150,20 @@ final class PlatformSchedulingLockExtensionScheduler {
         prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "true", matchIfMissing = true)
 class PlatformSchedulingEnabledConfiguration {
     @Bean
+    PlatformTaskScheduler platformTaskScheduler(
+            LockProvider lockProvider,
+            PlatformSchedulingProperties properties,
+            org.springframework.core.env.Environment environment,
+            PlatformSchedulingTaskSchedulerRouter schedulerRouter,
+            SchedulingLockMetrics metrics) {
+        LockingTaskScheduler lockingScheduler = new LockingTaskScheduler(
+                schedulerRouter.router(), lockProvider,
+                environment.getRequiredProperty("spring.application.name"), properties, metrics);
+        schedulerRouter.setLockingScheduler(lockingScheduler);
+        return new PlatformTaskScheduler(() -> lockingScheduler);
+    }
+
+    @Bean
     PlatformSchedulingTaskSchedulerRouter platformSchedulingTaskSchedulerRouter(
             BeanFactory beanFactory, LockProvider lockProvider) {
         return new PlatformSchedulingTaskSchedulerRouter(beanFactory);
@@ -170,8 +185,11 @@ class PlatformSchedulingEnabledConfiguration {
                 if (delegate == null) {
                     delegate = schedulerRouter.router();
                 }
-                LockingTaskScheduler lockingScheduler = new LockingTaskScheduler(
-                        delegate, lockProvider, serviceName, properties, metrics);
+                LockingTaskScheduler lockingScheduler = schedulerRouter.lockingScheduler();
+                if (lockingScheduler == null) {
+                    lockingScheduler = new LockingTaskScheduler(
+                            delegate, lockProvider, serviceName, properties, metrics);
+                }
                 schedulerRouter.setLockingScheduler(lockingScheduler);
                 registrar.setTaskScheduler(lockingScheduler);
             }
@@ -229,6 +247,10 @@ final class PlatformSchedulingTaskSchedulerRouter
 
     void setLockingScheduler(LockingTaskScheduler lockingScheduler) {
         this.lockingScheduler = lockingScheduler;
+    }
+
+    LockingTaskScheduler lockingScheduler() {
+        return lockingScheduler;
     }
 
     @Override
