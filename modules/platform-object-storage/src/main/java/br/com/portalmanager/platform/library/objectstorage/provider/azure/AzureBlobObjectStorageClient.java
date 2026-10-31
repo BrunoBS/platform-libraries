@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 4018)
-Total output lines: 248
-
 package br.com.portalmanager.platform.library.objectstorage.provider.azure;
 
 import br.com.portalmanager.platform.library.objectstorage.configuration.ObjectStorageProperties;
@@ -126,7 +123,8 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
             ListBlobsOptions options = new ListBlobsOptions().setPrefix(fullPrefix);
             PagedIterable<BlobItem> items = container(target.getContainer()).listBlobs(options, Duration.ofMinutes(2));
             Iterator<com.azure.core.http.rest.PagedResponse<BlobItem>> pages = items.iterableByPage(continuationToken, pageSize).iterator();
-            if (!pages.hasNext()) return new…18 tokens truncated…dResponse<BlobItem> page = pages.next();
+            if (!pages.hasNext()) return new ObjectPage(List.of(), null);
+            com.azure.core.http.rest.PagedResponse<BlobItem> page = pages.next();
             List<ObjectSummary> result = new ArrayList<>();
             for (BlobItem item : page.getValue()) {
                 String relative = ObjectStorageKey.logical(target.getPrefix(), target.getSuffix(), item.getName());
@@ -216,9 +214,9 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient {
     private ObjectMetadata metadata(ObjectReference requested, BlobProperties result) {
         ObjectReference actual = requested.versionId() == null && result.getVersionId() != null
                 ? new ObjectReference(requested.destination(), requested.key(), result.getVersionId()) : requested;
-        return new ObjectMetadata(actual, result.getBlobSize(), new ObjectHeaders(result.getContentType(),
-                result.getCacheControl(), result.getContentDisposition(), result.getContentEncoding(),
-                result.getContentLanguage()), result.getETag(),
+        ObjectHeaders headers = new ObjectHeaders(result.getContentType(), result.getCacheControl(),
+                result.getContentDisposition(), result.getContentEncoding(), result.getContentLanguage());
+        return new ObjectMetadata(actual, result.getBlobSize(), headers, result.getETag(),
                 result.getLastModified() == null ? null : result.getLastModified().toInstant(),
                 result.getMetadata() == null ? Map.of() : result.getMetadata());
     }
