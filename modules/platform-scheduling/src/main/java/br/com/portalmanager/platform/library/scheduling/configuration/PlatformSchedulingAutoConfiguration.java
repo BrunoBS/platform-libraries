@@ -180,9 +180,12 @@ class PlatformSchedulingEnabledConfiguration {
 }
 
 /** Owns Spring's fallback router so its internally created executor is shut down with the context. */
-final class PlatformSchedulingTaskSchedulerRouter implements org.springframework.beans.factory.DisposableBean {
+final class PlatformSchedulingTaskSchedulerRouter
+        implements org.springframework.context.SmartLifecycle, org.springframework.beans.factory.DisposableBean {
     private final TaskSchedulerRouter router;
     private volatile LockingTaskScheduler lockingScheduler;
+    private final java.util.concurrent.atomic.AtomicBoolean stopped = new java.util.concurrent.atomic.AtomicBoolean();
+    private volatile boolean running = true;
 
     PlatformSchedulingTaskSchedulerRouter(BeanFactory beanFactory) {
         this.router = new TaskSchedulerRouter();
@@ -193,16 +196,55 @@ final class PlatformSchedulingTaskSchedulerRouter implements org.springframework
         return router;
     }
 
+    @Override
+    public void start() {
+        running = true;
+    }
+
+    @Override
+    public void stop() {
+        stopScheduler();
+    }
+
+    @Override
+    public void stop(Runnable callback) {
+        stopScheduler();
+        callback.run();
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public boolean isAutoStartup() {
+        return true;
+    }
+
+    @Override
+    public int getPhase() {
+        return Integer.MAX_VALUE;
+    }
+
     void setLockingScheduler(LockingTaskScheduler lockingScheduler) {
         this.lockingScheduler = lockingScheduler;
     }
 
     @Override
     public void destroy() {
+        stopScheduler();
+    }
+
+    private void stopScheduler() {
+        if (!stopped.compareAndSet(false, true)) {
+            return;
+        }
         router.destroy();
         LockingTaskScheduler lockingScheduler = this.lockingScheduler;
         if (lockingScheduler != null) {
             lockingScheduler.shutdownAndAwaitInFlightTasks();
         }
+        running = false;
     }
 }
