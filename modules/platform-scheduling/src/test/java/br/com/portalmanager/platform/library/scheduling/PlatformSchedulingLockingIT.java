@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingAutoConfiguration;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
 import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
 import java.time.Duration;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration;
@@ -186,6 +188,23 @@ class PlatformSchedulingLockingIT {
     }
 
     @Test
+    void publicProgrammaticSchedulerCoordinatesTheSameTaskAcrossContexts() throws InterruptedException {
+        ProgrammaticScheduledProbe.reset();
+        ApplicationContextRunner runner = applicationContextRunner(
+                ProgrammaticScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+
+        runner.run(firstContext -> runner.run(secondContext -> {
+            assertThat(firstContext).hasNotFailed();
+            assertThat(secondContext).hasNotFailed();
+            awaitProgrammaticExecution();
+            Thread.sleep(TASK_DURATION_MILLIS + 500L);
+
+            assertThat(ProgrammaticScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
+            assertThat(ProgrammaticScheduledProbe.executions()).isPositive();
+        }));
+    }
+
+    @Test
     void keepAliveRenewsLeaseWhileScheduledTaskRunsLongerThanItsInitialTtl() throws InterruptedException {
         LongRunningScheduledProbe.reset();
         ApplicationContextRunner runner = applicationContextRunner(
@@ -271,6 +290,14 @@ class PlatformSchedulingLockingIT {
             Thread.sleep(25L);
         }
         assertThat(CronScheduledProbe.executions()).isPositive();
+    }
+
+    private static void awaitProgrammaticExecution() throws InterruptedException {
+        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+        while (ProgrammaticScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
+            Thread.sleep(25L);
+        }
+        assertThat(ProgrammaticScheduledProbe.executions()).isPositive();
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -504,6 +531,48 @@ class PlatformSchedulingLockingIT {
 
         static CountDownLatch secondExecution() {
             return SECOND_EXECUTION;
+        }
+
+        static int executions() {
+            return EXECUTIONS.get();
+        }
+
+        static int maximumConcurrentExecutions() {
+            return MAXIMUM_RUNNING.get();
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class ProgrammaticScheduledApplication {
+        @Bean
+        SmartInitializingSingleton registerProgrammaticTask(PlatformTaskScheduler scheduler) {
+            return () -> scheduler.scheduleWithFixedDelay(
+                    "programmatic-probe", ProgrammaticScheduledProbe::runTask, Duration.ofMillis(100));
+        }
+    }
+
+    static class ProgrammaticScheduledProbe {
+        private static final AtomicInteger RUNNING = new AtomicInteger();
+        private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
+        private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+
+        static void runTask() {
+            int concurrent = RUNNING.incrementAndGet();
+            MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
+            EXECUTIONS.incrementAndGet();
+            try {
+                Thread.sleep(TASK_DURATION_MILLIS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            } finally {
+                RUNNING.decrementAndGet();
+            }
+        }
+
+        static void reset() {
+            RUNNING.set(0);
+            MAXIMUM_RUNNING.set(0);
+            EXECUTIONS.set(0);
         }
 
         static int executions() {
