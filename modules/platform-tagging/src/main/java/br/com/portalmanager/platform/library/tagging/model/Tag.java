@@ -12,6 +12,7 @@ import br.com.portalmanager.platform.library.messaging.exception.ValidationExcep
 import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 import br.com.portalmanager.platform.library.tagging.message.TaggingMessageKeys;
+import br.com.portalmanager.platform.library.tagging.internal.TagNameNormalizer;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public abstract class Tag<OWNER extends TagOwner> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = TagName.MAX_LENGTH)
+    @Column(name = "name", nullable = false, length = TagNameNormalizer.MAX_LENGTH)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -33,7 +34,7 @@ public abstract class Tag<OWNER extends TagOwner> {
     }
 
     protected Tag(String name, TagOriginType originType) {
-        this.name = TagName.of(name).value();
+        this.name = TagNameNormalizer.normalizeRequired(name);
         if (originType == null) {
             throw validation("origin", TaggingMessageKeys.TAG_ORIGIN_REQUIRED);
         }
