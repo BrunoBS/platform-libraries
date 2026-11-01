@@ -7,5 +7,5 @@ import br.com.portalmanager.platform.library.tagging.model.TagOwner;
 @FunctionalInterface
 public interface TagFactory<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
-    TAG create(OWNER owner, TagName name, TagOriginType originType);
+    TAG create(OWNER owner, String name, TagOriginType originType);
 }
