@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.tagging.model;
 
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,14 +25,20 @@ class TagNameTest {
     }
 
     @Test
-    void shouldRejectNullBlankSpecialCharacterOnlyAndOversizedNames() {
-        assertThatThrownBy(() -> TagName.of(null)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> TagName.of("   ")).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> TagName.of("!!!")).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> TagName.of("\\u0301")).isInstanceOf(IllegalArgumentException.class);
+    void shouldIgnoreAbsentAndEmptyNamesAfterNormalization() {
+        assertThat(TagName.ofIfPresent(null)).isEmpty();
+        assertThat(TagName.ofIfPresent("   ")).isEmpty();
+        assertThat(TagName.ofIfPresent("!!!")).isEmpty();
+        assertThat(TagName.ofIfPresent(" \\u0301 ")).isEmpty();
+    }
+
+    @Test
+    void shouldRejectInvalidDirectTagNameWithPlatformValidationException() {
+        assertThatThrownBy(() -> TagName.of(null)).isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> TagName.of("   ")).isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> TagName.of("!!!")).isInstanceOf(ValidationException.class);
         assertThatThrownBy(() -> TagName.of("a".repeat(TagName.MAX_LENGTH + 1)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("150");
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
