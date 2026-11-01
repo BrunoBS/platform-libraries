@@ -9,7 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
-import java.util.Objects;
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
+import br.com.portalmanager.platform.library.tagging.message.TaggingMessageKeys;
+
+import java.util.List;
 
 @MappedSuperclass
 public abstract class Tag<OWNER extends TagOwner> {
@@ -30,8 +35,14 @@ public abstract class Tag<OWNER extends TagOwner> {
     }
 
     protected Tag(TagName name, TagOriginType originType) {
-        this.name = Objects.requireNonNull(name, "tag name must not be null");
-        this.originType = Objects.requireNonNull(originType, "tag origin must not be null");
+        if (name == null) {
+            throw validation("tag", TaggingMessageKeys.TAG_NAME_INVALID);
+        }
+        if (originType == null) {
+            throw validation("origin", TaggingMessageKeys.TAG_ORIGIN_REQUIRED);
+        }
+        this.name = name;
+        this.originType = originType;
     }
 
     public Long getId() {
@@ -47,7 +58,17 @@ public abstract class Tag<OWNER extends TagOwner> {
     }
 
     public void changeOrigin(TagOriginType originType) {
-        this.originType = Objects.requireNonNull(originType, "tag origin must not be null");
+        if (originType == null) {
+            throw validation("origin", TaggingMessageKeys.TAG_ORIGIN_REQUIRED);
+        }
+        this.originType = originType;
+    }
+
+    private static ValidationException validation(String field, String messageKey) {
+        return new ValidationException(
+                PlatformMessageKeys.VALIDATION_FAILED,
+                List.of(new ValidationDetail(field, messageKey))
+        );
     }
 
     public abstract OWNER getOwner();
