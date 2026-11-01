@@ -48,11 +48,11 @@ class TagManagerTest {
     }
 
     @Test
-    void shouldRejectInvalidProjectionWithPlatformConfigurationException() {
+    void shouldRejectInvalidProjectionWithApiException() {
         assertThatThrownBy(() -> new TagOwnerTagName(null, TagName.of("tag")))
-                .isInstanceOf(PlatformConfigurationException.class);
+                .isInstanceOf(ApiException.class);
         assertThatThrownBy(() -> new TagOwnerTagName("workspace-10", null))
-                .isInstanceOf(PlatformConfigurationException.class);
+                .isInstanceOf(ApiException.class);
     }
 
     @Test
@@ -289,7 +289,7 @@ class TagManagerTest {
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
         assertThatThrownBy(() -> manager.createInitialTags(owner, List.of()))
-                .isInstanceOf(PlatformConfigurationException.class);
+                .isInstanceOf(ApiException.class);
         org.mockito.Mockito.verifyNoInteractions(repository);
     }
 
