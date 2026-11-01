@@ -21,17 +21,26 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
     private final TagRepository<TAG, OWNER> repository;
     private final TagFactory<TAG, OWNER> factory;
+    private final SystemTagProvider<OWNER> systemTagProvider;
 
     public TagManager(TagRepository<TAG, OWNER> repository, TagFactory<TAG, OWNER> factory) {
+        this(repository, factory, SystemTagProvider.none());
+    }
+
+    public TagManager(
+            TagRepository<TAG, OWNER> repository,
+            TagFactory<TAG, OWNER> factory,
+            SystemTagProvider<OWNER> systemTagProvider) {
         this.repository = Objects.requireNonNull(repository, "tag repository must not be null");
         this.factory = Objects.requireNonNull(factory, "tag factory must not be null");
+        this.systemTagProvider = Objects.requireNonNull(systemTagProvider, "system tag provider must not be null");
     }
 
     /**
      * Inserts tags for a newly persisted owner that has no existing tags.
      * The caller must use the same transaction as owner creation.
      */
-    public List<String> createInitialTags(OWNER owner, Collection<String> manualTags, Collection<String> systemTags) {
+    public List<String> createInitialTags(OWNER owner, Collection<String> manualTags) {
         requireOwner(owner);
         Map<TagName, TagOriginType> desired = desiredTags(manualTags, systemTags);
         List<TAG> created = createTags(owner, desired);
@@ -41,12 +50,12 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         return manualTagNames(desired);
     }
 
-    public void reconcile(OWNER owner, Collection<String> manualTags, Collection<String> systemTags) {
-        reconcileAndReturnManualTags(owner, manualTags, systemTags);
+    public void reconcile(OWNER owner, Collection<String> manualTags) {
+        reconcileAndReturnManualTags(owner, manualTags);
     }
 
     /** Returns normalized, sorted manual tags without querying them again. */
-    public List<String> reconcileAndReturnManualTags(OWNER owner, Collection<String> manualTags, Collection<String> systemTags) {
+    public List<String> reconcileAndReturnManualTags(OWNER owner, Collection<String> manualTags) {
         requireOwner(owner);
         Map<TagName, TagOriginType> desired = desiredTags(manualTags, systemTags);
         List<String> normalizedManualTags = manualTagNames(desired);
@@ -184,9 +193,11 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         return Objects.requireNonNull(tag.getName(), "persisted tag name must not be null");
     }
 
-    private static Map<TagName, TagOriginType> desiredTags(Collection<String> manualTags, Collection<String> systemTags) {
+    private Map<TagName, TagOriginType> desiredTags(OWNER owner, Collection<String> manualTags) {
         Map<TagName, TagOriginType> desired = new LinkedHashMap<>();
         tagNames(manualTags).forEach(name -> desired.put(name, TagOriginType.MANUAL));
+        Collection<String> systemTags = Objects.requireNonNull(
+                systemTagProvider.resolve(owner), "system tag provider must not return null");
         tagNames(systemTags).forEach(name -> desired.putIfAbsent(name, TagOriginType.SYSTEM));
         return desired;
     }
