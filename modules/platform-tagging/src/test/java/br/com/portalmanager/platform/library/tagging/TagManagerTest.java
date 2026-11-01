@@ -147,6 +147,22 @@ class TagManagerTest {
     }
 
     @Test
+    void shouldDeduplicateTagsAfterRemovingSpecialCharacters() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10");
+        when(repository.findByOwnerId(10L)).thenReturn(List.of());
+
+        new TagManager<TestTag, Owner>(repository, TestTag::new)
+                .reconcile(owner, List.of("work+space", "work@space", "workspace"), List.of());
+
+        verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
+            List<TestTag> saved = new java.util.ArrayList<>();
+            tags.forEach(saved::add);
+            return saved.size() == 1 && saved.getFirst().getName().equals(TagName.of("workspace"));
+        }));
+    }
+
+    @Test
     void shouldRejectDuplicatePersistedTags() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
