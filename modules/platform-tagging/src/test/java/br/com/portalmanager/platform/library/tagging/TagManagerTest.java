@@ -26,6 +26,35 @@ import static org.mockito.Mockito.when;
 class TagManagerTest {
 
     @Test
+    void shouldUsePlatformExceptionTypesForInvalidManagerConfiguration() {
+        assertThatThrownBy(() -> new TagManager<TestTag, Owner>(null, TestTag::new))
+                .isInstanceOf(PlatformConfigurationException.class);
+        assertThatThrownBy(() -> new TagManager<TestTag, Owner>(repository(), null))
+                .isInstanceOf(PlatformConfigurationException.class);
+    }
+
+    @Test
+    void shouldUsePlatformValidationForInvalidTagState() {
+        Owner owner = new Owner(10L, "workspace-10");
+
+        assertThatThrownBy(() -> new TestTag(owner, null, TagOriginType.MANUAL))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> new TestTag(owner, TagName.of("tag"), null))
+                .isInstanceOf(ValidationException.class);
+        assertThatThrownBy(() -> new TestTag(owner, TagName.of("tag"), TagOriginType.MANUAL)
+                .changeOrigin(null))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void shouldRejectInvalidProjectionWithPlatformConfigurationException() {
+        assertThatThrownBy(() -> new TagOwnerTagName(null, TagName.of("tag")))
+                .isInstanceOf(PlatformConfigurationException.class);
+        assertThatThrownBy(() -> new TagOwnerTagName("workspace-10", null))
+                .isInstanceOf(PlatformConfigurationException.class);
+    }
+
+    @Test
     void shouldReconcileAndPersistOriginChangesExplicitly() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
