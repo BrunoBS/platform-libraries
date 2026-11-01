@@ -12,7 +12,6 @@ public final class TaggingTechnicalErrors {
                     500
             );
 
-    public static final String SYSTEM_TAGS_REQUIRED = "tagging.error.system-tags.required";
     public static final String FACTORY_RESULT_INVALID = "tagging.error.factory-result.invalid";
     public static final String PERSISTED_STATE_INVALID = "tagging.error.persisted-state.invalid";
     public static final String PERSISTED_NAME_INVALID = "tagging.error.persisted-name.invalid";
