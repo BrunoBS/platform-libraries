@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.tagging.storage;
 
 import br.com.portalmanager.platform.library.tagging.exception.TaggingTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.tagging.model.TagName;
+import br.com.portalmanager.platform.library.tagging.internal.TagNameNormalizer;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 
 /**
@@ -15,7 +15,7 @@ public record TagOwnerTagName(String ownerIdentifier, String tagName) {
             throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
         }
         try {
-            tagName = TagName.of(tagName).value();
+            tagName = TagNameNormalizer.normalizeRequired(tagName);
         } catch (ValidationException exception) {
             throw new ApiException(TaggingTechnicalErrors.PERSISTED_NAME_INVALID, exception);
         }
