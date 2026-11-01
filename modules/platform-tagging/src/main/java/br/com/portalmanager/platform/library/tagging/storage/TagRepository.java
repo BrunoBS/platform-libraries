@@ -1,7 +1,6 @@
 package br.com.portalmanager.platform.library.tagging.storage;
 
 import br.com.portalmanager.platform.library.tagging.model.Tag;
-import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.library.tagging.model.TagOwner;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,7 +49,7 @@ public interface TagRepository<TAG extends Tag<OWNER>, OWNER extends TagOwner>
              where t.name = :name
              order by t.owner.identifier
             """)
-    List<String> findOwnerIdentifiersByTag(@Param("name") TagName name);
+    List<String> findOwnerIdentifiersByTag(@Param("name") String name);
 
     @Modifying(flushAutomatically = true)
     @Query("delete from #{#entityName} t where t.owner.id = :ownerId")
