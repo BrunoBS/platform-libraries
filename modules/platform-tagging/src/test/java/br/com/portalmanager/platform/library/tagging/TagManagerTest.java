@@ -6,6 +6,9 @@ import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.library.tagging.model.TagOwner;
 import br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName;
 import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
+import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -81,6 +84,17 @@ class TagManagerTest {
     }
 
     @Test
+    void shouldReturnNoOwnersForTagThatNormalizesToEmpty() {
+        TagRepository<TestTag, Owner> repository = repository();
+
+        List<String> ownerKeys = new TagManager<TestTag, Owner>(repository, TestTag::new)
+                .findOwnerKeysByTag("!!!");
+
+        assertThat(ownerKeys).isEmpty();
+        org.mockito.Mockito.verifyNoInteractions(repository);
+    }
+
+    @Test
     void shouldReturnManualTagsDeterministically() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
@@ -102,8 +116,7 @@ class TagManagerTest {
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
         assertThatThrownBy(() -> manager.reconcile(new Owner(10L, "   "), List.of()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("identifier");
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -114,8 +127,7 @@ class TagManagerTest {
         TagManager<TestTag, Owner> manager = new TagManager<TestTag, Owner>(repository, (ignoredOwner, name, origin) -> null);
 
         assertThatThrownBy(() -> manager.reconcile(owner, List.of("tag-a")))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining("factory");
+                .isInstanceOf(PlatformConfigurationException.class);
     }
 
     @Test
@@ -187,8 +199,7 @@ class TagManagerTest {
                 new TestTag(owner, TagName.of("same"), TagOriginType.SYSTEM)));
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
         assertThatThrownBy(() -> manager.reconcile(owner, List.of("same")))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("duplicate persisted tag");
+                .isInstanceOf(ConflictException.class);
     }
 
     @Test
@@ -248,8 +259,7 @@ class TagManagerTest {
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
         assertThatThrownBy(() -> manager.createInitialTags(owner, List.of()))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining("tag owner system tags");
+                .isInstanceOf(PlatformConfigurationException.class);
         org.mockito.Mockito.verifyNoInteractions(repository);
     }
 
@@ -259,7 +269,7 @@ class TagManagerTest {
         Owner owner = new Owner(10L, "workspace-10", List.of("system", "a-tag"));
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
         assertThat(manager.createInitialTags(owner,
-                java.util.Arrays.asList(" Z Tag ", "a tag", "A Tag", " ", null)))
+                java.util.Arrays.asList(" Z Tag ", "a tag", "A Tag", " ", "!!!", null)))
                 .containsExactly("a-tag", "z-tag");
         verify(repository, never()).findByOwnerId(any());
         verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
@@ -276,7 +286,7 @@ class TagManagerTest {
         assertThat(manager.createInitialTags(new Owner(10L, "workspace-10"), null)).isEmpty();
         org.mockito.Mockito.verifyNoInteractions(repository);
         assertThatThrownBy(() -> manager.createInitialTags(new Owner(null, "workspace-10"), List.of("tag")))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
