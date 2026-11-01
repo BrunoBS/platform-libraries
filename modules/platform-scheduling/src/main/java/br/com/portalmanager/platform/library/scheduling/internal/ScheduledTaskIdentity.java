@@ -13,22 +13,22 @@ import org.springframework.scheduling.support.ScheduledMethodRunnable;
 final class ScheduledTaskIdentity {
     private ScheduledTaskIdentity() {}
 
-    static String from(Runnable task, String serviceName, String scheduleDiscriminator) {
+    static String from(Runnable task, String scheduleDiscriminator) {
         if (task instanceof PlatformScheduledTask programmaticTask) {
             String taskName = programmaticTask.lockName();
             if (taskName == null || taskName.isBlank() || !taskName.equals(taskName.trim())) {
                 throw taskIdentityFailure("programmatic tasks require a non-blank stable lock name");
             }
-            return serviceName + ":programmatic:" + taskName + ":" + scheduleDiscriminator;
+            return "programmatic:" + taskName + ":" + scheduleDiscriminator;
         }
         Method method = methodOf(task);
         if (method == null) {
             if (task instanceof SchedulingAwareRunnable) {
-                return fromSpringDisplayName(task.toString(), serviceName, scheduleDiscriminator);
+                return fromSpringDisplayName(task.toString(), scheduleDiscriminator);
             }
             throw unsupportedTask(task);
         }
-        return serviceName + ":" + method.getDeclaringClass().getName() + "#"
+        return method.getDeclaringClass().getName() + "#
                 + method.getName() + "("
                 + java.util.Arrays.stream(method.getParameterTypes())
                         .map(Class::getName)
@@ -66,7 +66,7 @@ final class ScheduledTaskIdentity {
     }
 
     private static String fromSpringDisplayName(
-            String displayName, String serviceName, String scheduleDiscriminator) {
+            String displayName, String scheduleDiscriminator) {
         int methodSeparator = displayName.lastIndexOf('.');
         if (methodSeparator <= 0 || methodSeparator == displayName.length() - 1) {
             throw taskIdentityFailure("Spring did not provide a stable class and method display name");
@@ -81,11 +81,11 @@ final class ScheduledTaskIdentity {
 
         Method method = methodOfDisplayName(className, methodName);
         if (method != null) {
-            return serviceName + ":" + method.getDeclaringClass().getName() + "#"
+            return method.getDeclaringClass().getName() + "#
                     + method.getName() + "():" + scheduleDiscriminator;
         }
 
-        return serviceName + ":" + className + "#" + methodName + "():" + scheduleDiscriminator;
+        return className + "#" + methodName + "():" + scheduleDiscriminator;
     }
 
     private static Method methodOfDisplayName(String className, String methodName) {

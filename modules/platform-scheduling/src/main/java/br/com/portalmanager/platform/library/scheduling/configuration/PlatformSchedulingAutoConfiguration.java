@@ -41,6 +41,7 @@ import org.springframework.scheduling.config.TaskSchedulerRouter;
 @EnableConfigurationProperties(PlatformSchedulingProperties.class)
 @Import(PlatformSchedulingEnabledConfiguration.class)
 public class PlatformSchedulingAutoConfiguration {
+    private static final String LOCK_KEY_CATEGORY = "job-lock";
     @Bean
     @ConditionalOnProperty(
             prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "false")
@@ -62,7 +63,7 @@ public class PlatformSchedulingAutoConfiguration {
         String serviceName = requireServiceName(environment);
         validate(properties);
         verifyRedis(connectionFactory);
-        ExtensibleLockProvider provider = new RedisLockProvider(connectionFactory, serviceName);
+        ExtensibleLockProvider provider = new RedisLockProvider(connectionFactory, LOCK_KEY_CATEGORY, serviceName);
         if (!properties.isKeepAlive()) {
             return provider;
         }

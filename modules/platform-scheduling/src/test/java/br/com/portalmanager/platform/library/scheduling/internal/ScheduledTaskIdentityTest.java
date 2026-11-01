@@ -14,24 +14,23 @@ import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
 class ScheduledTaskIdentityTest {
-    private static final String SERVICE_NAME = "audit-service";
 
     @Test
     void identityIsStableAndContainsServiceMethodSignatureAndSchedule() throws NoSuchMethodException {
         Method method = SampleScheduledTasks.class.getDeclaredMethod("refresh", String.class);
         ScheduledMethodRunnable task = new ScheduledMethodRunnable(new SampleScheduledTasks(), method);
 
-        String identity = ScheduledTaskIdentity.from(task, SERVICE_NAME, "fixed-rate:PT1M");
+        String identity = ScheduledTaskIdentity.from(task, "fixed-rate:PT1M");
 
         assertThat(identity)
-                .isEqualTo(SERVICE_NAME + ":" + SampleScheduledTasks.class.getName()
+                .isEqualTo(SampleScheduledTasks.class.getName()
                         + "#refresh(java.lang.String):fixed-rate:PT1M");
     }
 
     @Test
     void unsupportedRunnableFailsInsteadOfRunningWithoutDistributedLock() {
         assertThatThrownBy(() -> ScheduledTaskIdentity.from(
-                        () -> {}, SERVICE_NAME, "programmatic"))
+                        () -> {}, "programmatic"))
                 .isInstanceOf(PlatformConfigurationException.class)
                 .satisfies(failure -> assertThat(((PlatformConfigurationException) failure)
                                 .getErrorResponse().code())
@@ -43,8 +42,8 @@ class ScheduledTaskIdentityTest {
         Method method = SampleScheduledTasks.class.getDeclaredMethod("refreshReactive");
         ScheduledMethodRunnable task = new ScheduledMethodRunnable(new SampleScheduledTasks(), method);
 
-        assertThat(ScheduledTaskIdentity.from(task, SERVICE_NAME, "scheduled"))
-                .isEqualTo(SERVICE_NAME + ":" + SampleScheduledTasks.class.getName() + "#refreshReactive():scheduled");
+        assertThat(ScheduledTaskIdentity.from(task, "scheduled"))
+                .isEqualTo(SampleScheduledTasks.class.getName() + "#refreshReactive():scheduled");
     }
 
     @Test
@@ -67,8 +66,8 @@ class ScheduledTaskIdentityTest {
             public void run() {}
         };
 
-        assertThat(ScheduledTaskIdentity.from(task, SERVICE_NAME, "scheduled"))
-                .isEqualTo(SERVICE_NAME + ":programmatic:parameter-reconciliation:scheduled");
+        assertThat(ScheduledTaskIdentity.from(task, "scheduled"))
+                .isEqualTo("programmatic:parameter-reconciliation:scheduled");
     }
 
     @Test
@@ -83,7 +82,7 @@ class ScheduledTaskIdentityTest {
             public void run() {}
         };
 
-        assertThatThrownBy(() -> ScheduledTaskIdentity.from(task, SERVICE_NAME, "scheduled"))
+        assertThatThrownBy(() -> ScheduledTaskIdentity.from(task, "scheduled"))
                 .isInstanceOf(PlatformConfigurationException.class)
                 .satisfies(failure -> assertThat(((PlatformConfigurationException) failure)
                                 .getErrorResponse().code())
@@ -96,10 +95,10 @@ class ScheduledTaskIdentityTest {
         ScheduledMethodRunnable scheduledTask = new ScheduledMethodRunnable(new SampleScheduledTasks(), method);
         Runnable registeredTask = new Task(scheduledTask).getRunnable();
 
-        String identity = ScheduledTaskIdentity.from(registeredTask, SERVICE_NAME, "scheduled");
+        String identity = ScheduledTaskIdentity.from(registeredTask, "scheduled");
 
         assertThat(identity)
-                .isEqualTo(SERVICE_NAME + ":" + SampleScheduledTasks.class.getName() + "#refreshAll():scheduled");
+                .isEqualTo(SampleScheduledTasks.class.getName() + "#refreshAll():scheduled");
     }
 
     @Test
@@ -111,10 +110,10 @@ class ScheduledTaskIdentityTest {
         Method method = SampleScheduledTaskContract.class.getMethod("refresh", String.class);
         ScheduledMethodRunnable task = new ScheduledMethodRunnable(proxy, method);
 
-        String identity = ScheduledTaskIdentity.from(task, SERVICE_NAME, "fixed-rate:PT1M");
+        String identity = ScheduledTaskIdentity.from(task, "fixed-rate:PT1M");
 
         assertThat(identity)
-                .isEqualTo(SERVICE_NAME + ":" + SampleScheduledTasks.class.getName()
+                .isEqualTo(SampleScheduledTasks.class.getName()
                         + "#refresh(java.lang.String):fixed-rate:PT1M");
     }
 
@@ -123,12 +122,10 @@ class ScheduledTaskIdentityTest {
         SampleScheduledTasks target = new SampleScheduledTasks();
         String noArguments = ScheduledTaskIdentity.from(
                 new ScheduledMethodRunnable(target, SampleScheduledTasks.class.getDeclaredMethod("refresh")),
-                SERVICE_NAME,
                 "scheduled");
         String withTenant = ScheduledTaskIdentity.from(
                 new ScheduledMethodRunnable(
                         target, SampleScheduledTasks.class.getDeclaredMethod("refresh", String.class)),
-                SERVICE_NAME,
                 "scheduled");
 
         assertThat(noArguments).isNotEqualTo(withTenant);
