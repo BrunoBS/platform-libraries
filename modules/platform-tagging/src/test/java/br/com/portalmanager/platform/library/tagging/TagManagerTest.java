@@ -121,10 +121,9 @@ class TagManagerTest {
     @Test
     void shouldPreferManualOverSystem() {
         TagRepository<TestTag, Owner> repository = repository();
-        Owner owner = new Owner(10L, "workspace-10");
+        Owner owner = new Owner(10L, "workspace-10", List.of("shared"));
         when(repository.findByOwnerId(10L)).thenReturn(List.of());
-        SystemTagProvider<Owner> provider = ignoredOwner -> List.of("shared");
-        new TagManager<TestTag, Owner>(repository, TestTag::new, provider)
+        new TagManager<TestTag, Owner>(repository, TestTag::new)
                 .reconcile(owner, List.of("shared"));
         verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
             List<TestTag> saved = new java.util.ArrayList<>();
@@ -187,10 +186,8 @@ class TagManagerTest {
     @Test
     void shouldCreateSystemTagsFromProviderWhenCreatingInitialTags() {
         TagRepository<TestTag, Owner> repository = repository();
-        Owner owner = new Owner(10L, "workspace-active");
-        SystemTagProvider<Owner> provider = candidate ->
-                candidate.getIdentifier().endsWith("-active") ? List.of("active") : List.of();
-        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new, provider);
+        Owner owner = new Owner(10L, "workspace-active", List.of("active"));
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
         assertThat(manager.createInitialTags(owner, List.of("manual")))
                 .containsExactly("manual");
@@ -209,12 +206,10 @@ class TagManagerTest {
     @Test
     void shouldCalculateSystemTagsAndRemoveObsoleteOnReconciliation() {
         TagRepository<TestTag, Owner> repository = repository();
-        Owner owner = new Owner(10L, "workspace-active");
+        Owner owner = new Owner(10L, "workspace-active", List.of("active"));
         TestTag obsoleteSystemTag = new TestTag(owner, TagName.of("previous-state"), TagOriginType.SYSTEM);
         when(repository.findByOwnerId(10L)).thenReturn(List.of(obsoleteSystemTag));
-        SystemTagProvider<Owner> provider = candidate ->
-                candidate.getIdentifier().endsWith("-active") ? List.of("active") : List.of();
-        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new, provider);
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
         manager.reconcile(owner, List.of("manual"));
 
@@ -231,24 +226,22 @@ class TagManagerTest {
     }
 
     @Test
-    void shouldRejectNullCollectionFromSystemTagProvider() {
+    void shouldRejectNullSystemTagsFromOwner() {
         TagRepository<TestTag, Owner> repository = repository();
-        Owner owner = new Owner(10L, "workspace-10");
-        SystemTagProvider<Owner> provider = ignoredOwner -> null;
-        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new, provider);
+        Owner owner = new Owner(10L, "workspace-10", null);
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
         assertThatThrownBy(() -> manager.createInitialTags(owner, List.of()))
                 .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining("system tag provider");
+                .hasMessageContaining("tag owner system tags");
         org.mockito.Mockito.verifyNoInteractions(repository);
     }
 
     @Test
     void shouldCreateInitialTagsWithoutReadingPersistedTags() {
         TagRepository<TestTag, Owner> repository = repository();
-        Owner owner = new Owner(10L, "workspace-10");
-        SystemTagProvider<Owner> provider = ignoredOwner -> List.of("system", "a-tag");
-        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new, provider);
+        Owner owner = new Owner(10L, "workspace-10", List.of("system", "a-tag"));
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
         assertThat(manager.createInitialTags(owner,
                 java.util.Arrays.asList(" Z Tag ", "a tag", "A Tag", " ", null)))
                 .containsExactly("a-tag", "z-tag");
@@ -273,11 +266,10 @@ class TagManagerTest {
     @Test
     void shouldReturnManualTagsAfterReconciliationWithOneRead() {
         TagRepository<TestTag, Owner> repository = repository();
-        Owner owner = new Owner(10L, "workspace-10");
+        Owner owner = new Owner(10L, "workspace-10", List.of("system"));
         TestTag existing = new TestTag(owner, TagName.of("a-tag"), TagOriginType.SYSTEM);
         when(repository.findByOwnerId(10L)).thenReturn(List.of(existing));
-        SystemTagProvider<Owner> provider = ignoredOwner -> List.of("system");
-        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new, provider);
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
         assertThat(manager.reconcileAndReturnManualTags(owner, List.of("Z Tag", " A Tag ", "a-tag")))
                 .containsExactly("a-tag", "z-tag");
         assertThat(existing.getOriginType()).isEqualTo(TagOriginType.MANUAL);
@@ -289,7 +281,11 @@ class TagManagerTest {
         return mock(TagRepository.class);
     }
 
-    private record Owner(Long id, String identifier) implements TagOwner {
+    private record Owner(Long id, String identifier, List<String> systemTags) implements TagOwner {
+        private Owner(Long id, String identifier) {
+            this(id, identifier, List.of());
+        }
+
         @Override
         public Long getId() {
             return id;
@@ -298,6 +294,11 @@ class TagManagerTest {
         @Override
         public String getIdentifier() {
             return identifier;
+        }
+
+        @Override
+        public List<String> getSystemTags() {
+            return systemTags;
         }
     }
 

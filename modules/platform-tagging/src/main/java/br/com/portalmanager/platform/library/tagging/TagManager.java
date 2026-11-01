@@ -21,19 +21,10 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
     private final TagRepository<TAG, OWNER> repository;
     private final TagFactory<TAG, OWNER> factory;
-    private final SystemTagProvider<OWNER> systemTagProvider;
 
     public TagManager(TagRepository<TAG, OWNER> repository, TagFactory<TAG, OWNER> factory) {
-        this(repository, factory, SystemTagProvider.none());
-    }
-
-    public TagManager(
-            TagRepository<TAG, OWNER> repository,
-            TagFactory<TAG, OWNER> factory,
-            SystemTagProvider<OWNER> systemTagProvider) {
         this.repository = Objects.requireNonNull(repository, "tag repository must not be null");
         this.factory = Objects.requireNonNull(factory, "tag factory must not be null");
-        this.systemTagProvider = Objects.requireNonNull(systemTagProvider, "system tag provider must not be null");
     }
 
     /**
@@ -197,7 +188,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         Map<TagName, TagOriginType> desired = new LinkedHashMap<>();
         tagNames(manualTags).forEach(name -> desired.put(name, TagOriginType.MANUAL));
         Collection<String> systemTags = Objects.requireNonNull(
-                systemTagProvider.resolve(owner), "system tag provider must not return null");
+                owner.getSystemTags(), "tag owner system tags must not be null");
         tagNames(systemTags).forEach(name -> desired.putIfAbsent(name, TagOriginType.SYSTEM));
         return desired;
     }
