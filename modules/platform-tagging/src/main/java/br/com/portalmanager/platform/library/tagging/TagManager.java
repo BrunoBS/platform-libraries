@@ -4,7 +4,15 @@ import br.com.portalmanager.platform.library.tagging.model.Tag;
 import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.library.tagging.model.TagOwner;
+import br.com.portalmanager.platform.library.tagging.exception.TaggingTechnicalErrors;
+import br.com.portalmanager.platform.library.tagging.message.TaggingMessageKeys;
+import br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName;
 import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
+import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,8 +30,11 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
     private final TagFactory<TAG, OWNER> factory;
 
     public TagManager(TagRepository<TAG, OWNER> repository, TagFactory<TAG, OWNER> factory) {
-        this.repository = Objects.requireNonNull(repository, "tag repository must not be null");
-        this.factory = Objects.requireNonNull(factory, "tag factory must not be null");
+        if (repository == null || factory == null) {
+            throw new PlatformConfigurationException(TaggingTechnicalErrors.MANAGER_DEPENDENCIES_REQUIRED);
+        }
+        this.repository = repository;
+        this.factory = factory;
     }
 
     /**
@@ -84,7 +94,13 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
     private List<TAG> createTags(OWNER owner, Map<TagName, TagOriginType> desired) {
         return desired.entrySet().stream()
-                .map(entry -> Objects.requireNonNull(factory.create(owner, entry.getKey(), entry.getValue()), "tag factory must not return null"))
+                .map(entry -> {
+                    TAG tag = factory.create(owner, entry.getKey(), entry.getValue());
+                    if (tag == null) {
+                        throw new PlatformConfigurationException(TaggingTechnicalErrors.FACTORY_RESULT_INVALID);
+                    }
+                    return tag;
+                })
                 .toList();
     }
 
@@ -98,7 +114,9 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
     public List<String> findManual(OWNER owner) {
         requireOwner(owner);
-        return repository.findByOwnerId(owner.getId()).stream()
+        List<TAG> current = repository.findByOwnerId(owner.getId());
+        validateCurrent(current);
+        return current.stream()
                 .filter(tag -> tag.getOriginType() == TagOriginType.MANUAL)
                 .map(this::requireTagName)
                 .map(TagName::value)
@@ -124,13 +142,20 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         Map<String, List<String>> result = new LinkedHashMap<>();
         requested.forEach(key -> result.put(key, new ArrayList<>()));
 
-        repository.findOwnerTagNamesByIdentifiersAndOrigin(requested, TagOriginType.MANUAL)
-                .forEach(tag -> {
-                    List<String> tags = result.get(tag.ownerIdentifier());
-                    if (tags != null) {
-                        tags.add(tag.tagName().value());
-                    }
-                });
+        List<TagOwnerTagName> persisted = repository.findOwnerTagNamesByIdentifiersAndOrigin(
+                requested, TagOriginType.MANUAL);
+        if (persisted == null) {
+            throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+        }
+        persisted.forEach(tag -> {
+            if (tag == null || tag.ownerIdentifier() == null || tag.tagName() == null) {
+                throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+            }
+            List<String> tags = result.get(tag.ownerIdentifier());
+            if (tags != null) {
+                tags.add(tag.tagName().value());
+            }
+        });
 
         return result.entrySet().stream()
                 .collect(Collectors.toMap(
@@ -145,10 +170,12 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         if (tag == null || tag.isBlank()) {
             return List.of();
         }
-        return repository.findOwnerIdentifiersByTag(TagName.of(tag)).stream()
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
+        return TagName.ofIfPresent(tag)
+                .map(name -> repository.findOwnerIdentifiersByTag(name).stream()
+                        .filter(java.util.Objects::nonNull)
+                        .distinct()
+                        .toList())
+                .orElseGet(List::of);
     }
 
     public void deleteAll(OWNER owner) {
@@ -157,38 +184,46 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
     }
 
     private OWNER requireOwner(OWNER owner) {
-        Objects.requireNonNull(owner, "tag owner must not be null");
-        Objects.requireNonNull(owner.getId(), "tag owner id must not be null");
-        String identifier = Objects.requireNonNull(
-                owner.getIdentifier(), "tag owner identifier must not be null");
-        if (identifier.isBlank()) {
-            throw new IllegalArgumentException("tag owner identifier must not be blank");
+        if (owner == null || owner.getId() == null
+                || owner.getIdentifier() == null || owner.getIdentifier().isBlank()) {
+            throw new ValidationException(
+                    PlatformMessageKeys.VALIDATION_FAILED,
+                    List.of(new ValidationDetail("owner", TaggingMessageKeys.OWNER_INVALID))
+            );
         }
         return owner;
     }
 
     private void validateCurrent(Collection<TAG> tags) {
-        Objects.requireNonNull(tags, "persisted tags must not be null");
+        if (tags == null) {
+            throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+        }
         Set<TagName> names = new HashSet<>();
         for (TAG tag : tags) {
             TagName name = requireTagName(tag);
-            Objects.requireNonNull(tag.getOriginType(), "persisted tag origin must not be null");
+            if (tag.getOriginType() == null) {
+                throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+            }
             if (!names.add(name)) {
-                throw new IllegalStateException("duplicate persisted tag for owner: " + name.value());
+                throw new ConflictException(PlatformMessageKeys.DATA_INTEGRITY);
             }
         }
     }
 
     private TagName requireTagName(TAG tag) {
-        Objects.requireNonNull(tag, "persisted tag must not be null");
-        return Objects.requireNonNull(tag.getName(), "persisted tag name must not be null");
+        if (tag == null || tag.getName() == null) {
+            throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+        }
+        return tag.getName();
     }
 
     private Map<TagName, TagOriginType> desiredTags(OWNER owner, Collection<String> manualTags) {
         Map<TagName, TagOriginType> desired = new LinkedHashMap<>();
         tagNames(manualTags).forEach(name -> desired.put(name, TagOriginType.MANUAL));
-        Collection<String> systemTags = Objects.requireNonNull(
-                owner.getSystemTags(), "tag owner system tags must not be null");
+        Collection<String> systemTags = owner.getSystemTags();
+        if (systemTags == null) {
+            throw new PlatformConfigurationException(TaggingTechnicalErrors.SYSTEM_TAGS_REQUIRED);
+        }
         tagNames(systemTags).forEach(name -> desired.putIfAbsent(name, TagOriginType.SYSTEM));
         return desired;
     }
@@ -199,9 +234,8 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         }
         Set<TagName> names = new LinkedHashSet<>();
         values.stream()
-                .filter(Objects::nonNull)
-                .filter(value -> !value.isBlank())
-                .map(TagName::of)
+                .map(TagName::ofIfPresent)
+                .flatMap(java.util.Optional::stream)
                 .forEach(names::add);
         return names;
     }
