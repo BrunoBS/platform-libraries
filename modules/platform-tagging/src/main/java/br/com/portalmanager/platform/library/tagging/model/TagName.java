@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.tagging.model;
 
+import java.text.Normalizer;
 import java.util.Locale;
 
 public record TagName(String value) {
@@ -24,11 +25,11 @@ public record TagName(String value) {
         if (value == null) {
             return null;
         }
-        String normalized = value.trim();
-        if (normalized.isBlank()) {
-            return null;
-        }
-        return normalized.toLowerCase(Locale.ROOT).replaceAll("\\s+", "-");
+        String normalized = Normalizer.normalize(value.trim(), Normalizer.Form.NFC)
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[^\\p{L}\\p{N}\\s-]", "")
+                .replaceAll("\\s+", "-");
+        return normalized.isBlank() ? null : normalized;
     }
 
     @Override
