@@ -13,13 +13,14 @@ class TagNameTest {
     }
 
     @Test
-    void shouldRemoveSpecialCharactersAndPreserveUnicodeLettersAndDigits() {
-        assertThat(TagName.of("  Revisão #1 + urgente!  ").value()).isEqualTo("revisão-1-urgente");
+    void shouldRemoveDiacriticsAndSpecialCharactersWhilePreservingLettersAndDigits() {
+        assertThat(TagName.of("  Revisão #1 + urgente!  ").value()).isEqualTo("revisao-1-urgente");
     }
 
     @Test
-    void shouldNormalizeCanonicallyEquivalentUnicodeLetters() {
-        assertThat(TagName.of("Cafe\u0301").value()).isEqualTo("café");
+    void shouldStripDiacriticsFromCanonicallyEquivalentUnicodeLetters() {
+        assertThat(TagName.of("Café").value()).isEqualTo("cafe");
+        assertThat(TagName.of("Cafe\u0301").value()).isEqualTo("cafe");
     }
 
     @Test
