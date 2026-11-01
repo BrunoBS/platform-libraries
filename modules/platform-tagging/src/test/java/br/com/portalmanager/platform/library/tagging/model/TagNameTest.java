@@ -13,9 +13,20 @@ class TagNameTest {
     }
 
     @Test
-    void shouldRejectNullBlankAndOversizedNames() {
+    void shouldRemoveSpecialCharactersAndPreserveUnicodeLettersAndDigits() {
+        assertThat(TagName.of("  Revisão #1 + urgente!  ").value()).isEqualTo("revisão-1-urgente");
+    }
+
+    @Test
+    void shouldNormalizeCanonicallyEquivalentUnicodeLetters() {
+        assertThat(TagName.of("Cafe\u0301").value()).isEqualTo("café");
+    }
+
+    @Test
+    void shouldRejectNullBlankSpecialCharacterOnlyAndOversizedNames() {
         assertThatThrownBy(() -> TagName.of(null)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> TagName.of("   ")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> TagName.of("!!!")).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> TagName.of("a".repeat(TagName.MAX_LENGTH + 1)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("150");
