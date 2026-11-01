@@ -184,7 +184,7 @@ class TagManagerTest {
     }
 
     @Test
-    void shouldCreateSystemTagsFromProviderWhenCreatingInitialTags() {
+    void shouldCreateSystemTagsFromOwnerWhenCreatingInitialTags() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-active", List.of("active"));
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
