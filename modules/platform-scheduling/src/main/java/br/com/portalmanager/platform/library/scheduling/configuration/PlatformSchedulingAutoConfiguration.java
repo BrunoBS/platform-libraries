@@ -41,6 +41,7 @@ import org.springframework.scheduling.config.TaskSchedulerRouter;
 @EnableConfigurationProperties(PlatformSchedulingProperties.class)
 @Import(PlatformSchedulingEnabledConfiguration.class)
 public class PlatformSchedulingAutoConfiguration {
+    private static final String REDIS_LOCK_KEY_CATEGORY = "job-lock";
     private static final String LOCK_KEY_CATEGORY = "job-lock";
     @Bean
     @ConditionalOnProperty(
