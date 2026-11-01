@@ -33,6 +33,22 @@ class TagNameTest {
     }
 
     @Test
+    void shouldPersistTheCanonicalTagName() {
+        TagNameConverter converter = new TagNameConverter();
+
+        assertThat(converter.convertToDatabaseColumn(TagName.of("C++")))
+                .isEqualTo("c");
+    }
+
+    @Test
+    void shouldNormalizeSpecialCharactersWhenReadingTheTagName() {
+        TagNameConverter converter = new TagNameConverter();
+
+        assertThat(converter.convertToEntityAttribute("C++"))
+                .isEqualTo(TagName.of("c"));
+    }
+
+    @Test
     void shouldAcceptMaximumLength() {
         assertThat(TagName.of("a".repeat(TagName.MAX_LENGTH)).value()).hasSize(TagName.MAX_LENGTH);
     }
