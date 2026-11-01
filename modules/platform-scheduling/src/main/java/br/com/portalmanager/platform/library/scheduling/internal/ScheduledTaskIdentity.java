@@ -28,7 +28,7 @@ final class ScheduledTaskIdentity {
             }
             throw unsupportedTask(task);
         }
-        return method.getDeclaringClass().getName() + "#
+        return method.getDeclaringClass().getName() + "#"
                 + method.getName() + "("
                 + java.util.Arrays.stream(method.getParameterTypes())
                         .map(Class::getName)
@@ -81,7 +81,7 @@ final class ScheduledTaskIdentity {
 
         Method method = methodOfDisplayName(className, methodName);
         if (method != null) {
-            return method.getDeclaringClass().getName() + "#
+            return method.getDeclaringClass().getName() + "#"
                     + method.getName() + "():" + scheduleDiscriminator;
         }
 
