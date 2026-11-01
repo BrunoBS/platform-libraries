@@ -159,21 +159,21 @@ public final class LockingTaskScheduler implements TaskScheduler {
 
         private void logLockAcquired() {
             LOGGER.info(
-                    "Scheduled task acquired distributed lock: service={}, lockName={}",
+                    "platform-scheduling: distributed lock acquired: service={}, lockName={}",
                     serviceName,
                     lockName);
         }
 
         private void logLockSkipped() {
             LOGGER.debug(
-                    "Scheduled task skipped because distributed lock is held: service={}, lockName={}",
+                    "platform-scheduling: scheduled task skipped because the distributed lock is held: service={}, lockName={}",
                     serviceName,
                     lockName);
         }
 
         private void logTaskCompleted() {
             LOGGER.info(
-                    "Scheduled task completed: service={}, lockName={}",
+                    "platform-scheduling: scheduled task completed: service={}, lockName={}",
                     serviceName,
                     lockName);
         }
