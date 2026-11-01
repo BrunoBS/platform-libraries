@@ -59,7 +59,7 @@ class TagNameTest {
     }
 
     @Test
-    void shouldReportInvalidPersistedNamesWithPlatformConfigurationException() {
+    void shouldReportInvalidPersistedNamesWithApiException() {
         TagNameConverter converter = new TagNameConverter();
 
         assertThatThrownBy(() -> converter.convertToEntityAttribute("!!!"))
