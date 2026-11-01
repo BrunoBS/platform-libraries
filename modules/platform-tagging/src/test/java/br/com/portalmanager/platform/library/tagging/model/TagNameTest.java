@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.tagging.model;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -55,6 +56,14 @@ class TagNameTest {
 
         assertThat(converter.convertToEntityAttribute("C++"))
                 .isEqualTo(TagName.of("c"));
+    }
+
+    @Test
+    void shouldReportInvalidPersistedNamesWithPlatformConfigurationException() {
+        TagNameConverter converter = new TagNameConverter();
+
+        assertThatThrownBy(() -> converter.convertToEntityAttribute("!!!"))
+                .isInstanceOf(PlatformConfigurationException.class);
     }
 
     @Test
