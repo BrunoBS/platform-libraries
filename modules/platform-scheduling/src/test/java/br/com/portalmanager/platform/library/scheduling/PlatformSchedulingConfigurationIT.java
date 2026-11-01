@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.scheduling;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,10 +65,8 @@ class PlatformSchedulingConfigurationIT {
     }
 
     private static void awaitDisabledTaskExecution() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
-        while (DisabledScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> assertThat(DisabledScheduledProbe.executions()).isPositive());
     }
 
     @Configuration(proxyBeanMethods = false)

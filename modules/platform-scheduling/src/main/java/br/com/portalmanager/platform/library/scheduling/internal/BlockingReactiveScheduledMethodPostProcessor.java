@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
 import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +51,7 @@ public final class BlockingReactiveScheduledMethodPostProcessor implements BeanP
 
             Object result = invocation.proceed();
             if (result == null) {
-                throw new IllegalStateException("Reactive @Scheduled method returned null: " + targetMethod);
+                throw new PlatformConfigurationException(SchedulingTechnicalErrors.REACTIVE_TASK_RETURNED_NULL);
             }
             ReactiveAdapter adapter = adapters.getAdapter(targetMethod.getReturnType());
             return adapter.fromPublisher(new BlockingReactivePublisher<>(adapter.toPublisher(result)));

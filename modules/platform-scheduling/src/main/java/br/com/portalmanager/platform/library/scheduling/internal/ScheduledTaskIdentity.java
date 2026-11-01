@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
 import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
 import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
 import java.lang.reflect.Method;
 import org.springframework.aop.support.AopUtils;
@@ -15,7 +17,7 @@ final class ScheduledTaskIdentity {
         if (task instanceof PlatformScheduledTask programmaticTask) {
             String taskName = programmaticTask.lockName();
             if (taskName == null || taskName.isBlank() || !taskName.equals(taskName.trim())) {
-                throw new IllegalStateException("Programmatic scheduled task must provide a non-blank stable lock name");
+                throw taskIdentityFailure("programmatic tasks require a non-blank stable lock name");
             }
             return serviceName + ":programmatic:" + taskName + ":" + scheduleDiscriminator;
         }
@@ -67,14 +69,14 @@ final class ScheduledTaskIdentity {
             String displayName, String serviceName, String scheduleDiscriminator) {
         int methodSeparator = displayName.lastIndexOf('.');
         if (methodSeparator <= 0 || methodSeparator == displayName.length() - 1) {
-            throw new IllegalStateException("Spring scheduled task has no stable class and method display name");
+            throw taskIdentityFailure("Spring did not provide a stable class and method display name");
         }
 
         String className = displayName.substring(0, methodSeparator);
         String methodName = displayName.substring(methodSeparator + 1);
         if (className.contains("$$") || className.matches(".*\\$Proxy[0-9]+.*")
                 || !isJavaIdentifier(methodName)) {
-            throw new IllegalStateException("Spring scheduled task display name is unstable: " + displayName);
+            throw taskIdentityFailure("Spring provided an unstable task display name: " + displayName);
         }
 
         Method method = methodOfDisplayName(className, methodName);
@@ -111,8 +113,11 @@ final class ScheduledTaskIdentity {
         return true;
     }
 
-    private static IllegalStateException unsupportedTask(Runnable task) {
-        return new IllegalStateException("Cannot create a stable distributed-lock identity for scheduled task type "
-                + task.getClass().getName());
+    private static PlatformConfigurationException unsupportedTask(Runnable task) {
+        return taskIdentityFailure("unsupported scheduled task type " + task.getClass().getName());
+    }
+
+    private static PlatformConfigurationException taskIdentityFailure(String reason) {
+        return new PlatformConfigurationException(SchedulingTechnicalErrors.taskIdentityUnavailable(reason));
     }
 }

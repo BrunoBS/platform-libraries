@@ -1,10 +1,11 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -29,10 +30,12 @@ class ScheduledTaskIdentityTest {
 
     @Test
     void unsupportedRunnableFailsInsteadOfRunningWithoutDistributedLock() {
-        assertThatIllegalStateException()
-                .isThrownBy(() -> ScheduledTaskIdentity.from(
+        assertThatThrownBy(() -> ScheduledTaskIdentity.from(
                         () -> {}, SERVICE_NAME, "programmatic"))
-                .withMessageContaining("stable distributed-lock identity");
+                .isInstanceOf(PlatformConfigurationException.class)
+                .satisfies(failure -> assertThat(((PlatformConfigurationException) failure)
+                                .getErrorResponse().code())
+                        .isEqualTo("PLT-SCHED-004"));
     }
 
     @Test
@@ -80,9 +83,11 @@ class ScheduledTaskIdentityTest {
             public void run() {}
         };
 
-        assertThatIllegalStateException()
-                .isThrownBy(() -> ScheduledTaskIdentity.from(task, SERVICE_NAME, "scheduled"))
-                .withMessageContaining("stable lock name");
+        assertThatThrownBy(() -> ScheduledTaskIdentity.from(task, SERVICE_NAME, "scheduled"))
+                .isInstanceOf(PlatformConfigurationException.class)
+                .satisfies(failure -> assertThat(((PlatformConfigurationException) failure)
+                                .getErrorResponse().code())
+                        .isEqualTo("PLT-SCHED-004"));
     }
 
     @Test

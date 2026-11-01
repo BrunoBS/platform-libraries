@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.scheduling.task;
 
+import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
@@ -53,7 +55,7 @@ public final class PlatformTaskScheduler {
     private TaskScheduler scheduler() {
         TaskScheduler scheduler = schedulerSupplier.get();
         if (scheduler == null) {
-            throw new IllegalStateException("Platform scheduling has not been initialized yet");
+            throw new PlatformConfigurationException(SchedulingTechnicalErrors.SCHEDULER_NOT_INITIALIZED);
         }
         return scheduler;
     }
