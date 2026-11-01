@@ -8,6 +8,7 @@ import br.com.portalmanager.platform.library.tagging.exception.TaggingTechnicalE
 import br.com.portalmanager.platform.library.tagging.message.TaggingMessageKeys;
 import br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName;
 import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
+import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
@@ -97,7 +98,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
                 .map(entry -> {
                     TAG tag = factory.create(owner, entry.getKey(), entry.getValue());
                     if (tag == null) {
-                        throw new PlatformConfigurationException(TaggingTechnicalErrors.FACTORY_RESULT_INVALID);
+                        throw new ApiException(TaggingTechnicalErrors.FACTORY_RESULT_INVALID);
                     }
                     return tag;
                 })
@@ -145,11 +146,11 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         List<TagOwnerTagName> persisted = repository.findOwnerTagNamesByIdentifiersAndOrigin(
                 requested, TagOriginType.MANUAL);
         if (persisted == null) {
-            throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+            throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
         }
         persisted.forEach(tag -> {
             if (tag == null || tag.ownerIdentifier() == null || tag.tagName() == null) {
-                throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+                throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
             }
             List<String> tags = result.get(tag.ownerIdentifier());
             if (tags != null) {
@@ -196,13 +197,13 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
     private void validateCurrent(Collection<TAG> tags) {
         if (tags == null) {
-            throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+            throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
         }
         Set<TagName> names = new HashSet<>();
         for (TAG tag : tags) {
             TagName name = requireTagName(tag);
             if (tag.getOriginType() == null) {
-                throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+                throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
             }
             if (!names.add(name)) {
                 throw new ConflictException(PlatformMessageKeys.DATA_INTEGRITY);
@@ -212,7 +213,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
 
     private TagName requireTagName(TAG tag) {
         if (tag == null || tag.getName() == null) {
-            throw new PlatformConfigurationException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
+            throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
         }
         return tag.getName();
     }
@@ -222,7 +223,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         tagNames(manualTags).forEach(name -> desired.put(name, TagOriginType.MANUAL));
         Collection<String> systemTags = owner.getSystemTags();
         if (systemTags == null) {
-            throw new PlatformConfigurationException(TaggingTechnicalErrors.SYSTEM_TAGS_REQUIRED);
+            throw new ApiException(TaggingTechnicalErrors.SYSTEM_TAGS_REQUIRED);
         }
         tagNames(systemTags).forEach(name -> desired.putIfAbsent(name, TagOriginType.SYSTEM));
         return desired;
