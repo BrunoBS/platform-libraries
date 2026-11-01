@@ -22,7 +22,7 @@ class TagNameNormalizerTest {
     @Test
     void shouldStripDiacriticsFromCanonicallyEquivalentUnicodeLetters() {
         assertThat(TagNameNormalizer.normalizeRequired("Café")).isEqualTo("cafe");
-        assertThat(TagNameNormalizer.normalizeRequired("Cafe\\u0301")).isEqualTo("cafe");
+        assertThat(TagNameNormalizer.normalizeRequired("Café")).isEqualTo("cafe");
     }
 
     @Test
@@ -30,7 +30,7 @@ class TagNameNormalizerTest {
         assertThat(TagNameNormalizer.normalizeIfPresent(null)).isEmpty();
         assertThat(TagNameNormalizer.normalizeIfPresent("   ")).isEmpty();
         assertThat(TagNameNormalizer.normalizeIfPresent("!!!")).isEmpty();
-        assertThat(TagNameNormalizer.normalizeIfPresent(" \\u0301 ")).isEmpty();
+        assertThat(TagNameNormalizer.normalizeIfPresent(" ́ ")).isEmpty();
     }
 
     @Test
