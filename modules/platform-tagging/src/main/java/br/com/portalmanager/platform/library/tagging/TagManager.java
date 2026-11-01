@@ -222,9 +222,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         Map<TagName, TagOriginType> desired = new LinkedHashMap<>();
         tagNames(manualTags).forEach(name -> desired.put(name, TagOriginType.MANUAL));
         Collection<String> systemTags = owner.getSystemTags();
-        if (systemTags == null) {
-            throw new ApiException(TaggingTechnicalErrors.SYSTEM_TAGS_REQUIRED);
-        }
+        systemTags = systemTags == null ? List.of() : systemTags;
         tagNames(systemTags).forEach(name -> desired.putIfAbsent(name, TagOriginType.SYSTEM));
         return desired;
     }
