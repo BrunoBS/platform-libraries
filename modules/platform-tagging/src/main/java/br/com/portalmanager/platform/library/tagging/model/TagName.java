@@ -25,10 +25,12 @@ public record TagName(String value) {
         if (value == null) {
             return null;
         }
-        String normalized = Normalizer.normalize(value.trim(), Normalizer.Form.NFC)
+        String normalized = Normalizer.normalize(value.trim(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
                 .toLowerCase(Locale.ROOT)
                 .replaceAll("[^\\p{L}\\p{N}\\s-]", "")
                 .replaceAll("\\s+", "-");
+        normalized = Normalizer.normalize(normalized, Normalizer.Form.NFC);
         return normalized.isBlank() ? null : normalized;
     }
 
