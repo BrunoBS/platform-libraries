@@ -16,7 +16,7 @@ import org.springframework.scheduling.support.ScheduledMethodRunnable;
 class ScheduledTaskIdentityTest {
 
     @Test
-    void identityIsStableAndContainsServiceMethodSignatureAndSchedule() throws NoSuchMethodException {
+    void identityIsStableAndContainsMethodSignatureAndSchedule() throws NoSuchMethodException {
         Method method = SampleScheduledTasks.class.getDeclaredMethod("refresh", String.class);
         ScheduledMethodRunnable task = new ScheduledMethodRunnable(new SampleScheduledTasks(), method);
 
