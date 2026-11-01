@@ -28,6 +28,7 @@ class TagNameTest {
         assertThatThrownBy(() -> TagName.of(null)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> TagName.of("   ")).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> TagName.of("!!!")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> TagName.of("\\u0301")).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> TagName.of("a".repeat(TagName.MAX_LENGTH + 1)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("150");
