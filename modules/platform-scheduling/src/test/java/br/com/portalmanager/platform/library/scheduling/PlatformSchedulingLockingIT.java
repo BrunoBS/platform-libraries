@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.scheduling;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
@@ -11,11 +12,13 @@ import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguratio
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockProvider;
+import net.javacrumbs.shedlock.core.SimpleLock;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -218,7 +221,7 @@ class PlatformSchedulingLockingIT {
 
             Thread.sleep(Duration.ofMillis(2_500).toMillis());
 
-            var recoveredLock = secondProvider.lock(new LockConfiguration(
+            Optional<SimpleLock> recoveredLock = secondProvider.lock(new LockConfiguration(
                     Instant.now(), abandonedLockName, Duration.ofSeconds(2), Duration.ZERO));
             assertThat(recoveredLock).isPresent();
             recoveredLock.orElseThrow().unlock();
@@ -300,77 +303,53 @@ class PlatformSchedulingLockingIT {
     }
 
     private static void awaitAtLeastOneExecution() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
-        while (ScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(ScheduledProbe.executions()).isPositive();
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> assertThat(ScheduledProbe.executions()).isPositive());
     }
 
     private static void awaitConcurrentExecutions(int expected, Duration timeout) throws InterruptedException {
-        long deadline = System.nanoTime() + timeout.toNanos();
-        while (ScheduledProbe.maximumConcurrentExecutions() < expected && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(ScheduledProbe.maximumConcurrentExecutions()).isGreaterThanOrEqualTo(expected);
+        await().atMost(timeout)
+                .untilAsserted(() -> assertThat(ScheduledProbe.maximumConcurrentExecutions())
+                        .isGreaterThanOrEqualTo(expected));
     }
 
     private static void awaitLongRunningExecution() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
-        while (LongRunningScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(LongRunningScheduledProbe.executions()).isPositive();
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> assertThat(LongRunningScheduledProbe.executions()).isPositive());
     }
 
     private static void awaitLongRunningTaskCompletion() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
-        while (LongRunningScheduledProbe.isRunning() && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(LongRunningScheduledProbe.isRunning()).isFalse();
+        await().atMost(Duration.ofSeconds(15))
+                .untilAsserted(() -> assertThat(LongRunningScheduledProbe.isRunning()).isFalse());
     }
 
     private static void awaitProxyExecution() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
-        while (ProxyScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(ProxyScheduledProbe.executions()).isPositive();
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> assertThat(ProxyScheduledProbe.executions()).isPositive());
     }
 
     private static void awaitCronExecution() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
-        while (CronScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(CronScheduledProbe.executions()).isPositive();
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> assertThat(CronScheduledProbe.executions()).isPositive());
     }
 
     private static void awaitProgrammaticExecution() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
-        while (ProgrammaticScheduledProbe.executions() == 0 && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(ProgrammaticScheduledProbe.executions()).isPositive();
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> assertThat(ProgrammaticScheduledProbe.executions()).isPositive());
     }
 
     private static void awaitReactiveExecution() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(8).toNanos();
-        while ((!ReactiveScheduledProbe.hasMonoExecuted() || !ReactiveScheduledProbe.hasFluxExecuted())
-                && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(ReactiveScheduledProbe.hasMonoExecuted()).isTrue();
-        assertThat(ReactiveScheduledProbe.hasFluxExecuted()).isTrue();
+        await().atMost(Duration.ofSeconds(8))
+                .untilAsserted(() -> {
+                    assertThat(ReactiveScheduledProbe.hasMonoExecuted()).isTrue();
+                    assertThat(ReactiveScheduledProbe.hasFluxExecuted()).isTrue();
+                });
     }
 
     private static void awaitExcludedTaskConcurrency() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
-        while (ExcludedLockScheduledProbe.maximumConcurrentExecutions() < 2 && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
-        assertThat(ExcludedLockScheduledProbe.maximumConcurrentExecutions()).isGreaterThanOrEqualTo(2);
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> assertThat(ExcludedLockScheduledProbe.maximumConcurrentExecutions())
+                        .isGreaterThanOrEqualTo(2));
     }
 
     @Configuration(proxyBeanMethods = false)

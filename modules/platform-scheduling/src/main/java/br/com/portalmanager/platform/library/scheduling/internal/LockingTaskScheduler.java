@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
+import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
 import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
 import java.time.Clock;
 import java.time.Duration;
@@ -142,7 +143,7 @@ public final class LockingTaskScheduler implements TaskScheduler {
                     LOGGER.atError()
                             .addKeyValue("service", serviceName)
                             .addKeyValue("lockName", lockName)
-                            .addKeyValue("errorCode", "PLT-SCHED-002")
+                            .addKeyValue("errorCode", SchedulingTechnicalErrors.REDIS_UNAVAILABLE.code())
                             .log("Distributed scheduled lock unavailable; execution skipped");
                 }
                 return;

@@ -1,25 +1,33 @@
 package br.com.portalmanager.platform.library.scheduling.configuration;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.scheduling.internal.BlockingReactiveScheduledMethodPostProcessor;
 import br.com.portalmanager.platform.library.scheduling.internal.LockingTaskScheduler;
+import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
 import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
 import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.javacrumbs.shedlock.core.ExtensibleLockProvider;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider;
 import net.javacrumbs.shedlock.support.KeepAliveLockProvider;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.scheduling.TaskScheduler;
@@ -27,7 +35,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.config.TaskSchedulerRouter;
-import org.slf4j.LoggerFactory;
 
 @AutoConfiguration
 @EnableScheduling
@@ -37,10 +44,10 @@ public class PlatformSchedulingAutoConfiguration {
     @Bean
     @ConditionalOnProperty(
             prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "false")
-    org.springframework.beans.factory.SmartInitializingSingleton platformSchedulingBypassWarning() {
+    SmartInitializingSingleton platformSchedulingBypassWarning() {
         return () -> LoggerFactory.getLogger(PlatformSchedulingAutoConfiguration.class)
                 .atWarn()
-                .addKeyValue("errorCode", "PLT-SCHED-001")
+                .addKeyValue("errorCode", SchedulingTechnicalErrors.LOCK_DISABLED.code())
                 .log("Distributed scheduled lock disabled; scheduled tasks run without coordination");
     }
 
@@ -50,7 +57,7 @@ public class PlatformSchedulingAutoConfiguration {
     LockProvider platformSchedulingLockProvider(
             RedisConnectionFactory connectionFactory,
             PlatformSchedulingProperties properties,
-            org.springframework.core.env.Environment environment,
+            Environment environment,
             ObjectProvider<PlatformSchedulingLockExtensionScheduler> extensionScheduler) {
         String serviceName = requireServiceName(environment);
         validate(properties);
@@ -99,17 +106,13 @@ public class PlatformSchedulingAutoConfiguration {
             connection.ping();
         } catch (RuntimeException failure) {
             throw new PlatformConfigurationException(
-                    new PlatformErrorDefinition(
-                            "PLT-SCHED-002", "Distributed scheduling lock Redis is unavailable",
-                            "Check the Redis connection and retry the service startup.", 500),
+                    SchedulingTechnicalErrors.REDIS_UNAVAILABLE,
                     failure);
         }
     }
 
     static PlatformConfigurationException configurationFailure(String reason) {
-        return new PlatformConfigurationException(new PlatformErrorDefinition(
-                "PLT-SCHED-003", "Invalid distributed scheduling lock configuration: " + reason,
-                "Review golden.scheduling.distributed-lock and spring.application.name.", 500));
+        return new PlatformConfigurationException(SchedulingTechnicalErrors.invalidConfiguration(reason));
     }
 }
 
@@ -129,22 +132,20 @@ final class PlatformSchedulingLockExtensionScheduler {
     }
 }
 
-@org.springframework.context.annotation.Configuration(proxyBeanMethods = false)
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(
         prefix = "golden.scheduling.distributed-lock", name = "enabled", havingValue = "true", matchIfMissing = true)
 class PlatformSchedulingEnabledConfiguration {
     @Bean
-    static br.com.portalmanager.platform.library.scheduling.internal.BlockingReactiveScheduledMethodPostProcessor
-            platformBlockingReactiveScheduledMethodPostProcessor() {
-        return new br.com.portalmanager.platform.library.scheduling.internal
-                .BlockingReactiveScheduledMethodPostProcessor();
+    static BlockingReactiveScheduledMethodPostProcessor platformBlockingReactiveScheduledMethodPostProcessor() {
+        return new BlockingReactiveScheduledMethodPostProcessor();
     }
 
     @Bean
     PlatformTaskScheduler platformTaskScheduler(
             LockProvider lockProvider,
             PlatformSchedulingProperties properties,
-            org.springframework.core.env.Environment environment,
+            Environment environment,
             PlatformSchedulingTaskSchedulerRouter schedulerRouter) {
         LockingTaskScheduler lockingScheduler = new LockingTaskScheduler(
                 schedulerRouter.router(), lockProvider,
@@ -154,8 +155,7 @@ class PlatformSchedulingEnabledConfiguration {
     }
 
     @Bean
-    PlatformSchedulingTaskSchedulerRouter platformSchedulingTaskSchedulerRouter(
-            BeanFactory beanFactory, LockProvider lockProvider) {
+    PlatformSchedulingTaskSchedulerRouter platformSchedulingTaskSchedulerRouter(BeanFactory beanFactory) {
         return new PlatformSchedulingTaskSchedulerRouter(beanFactory);
     }
 
@@ -164,34 +164,31 @@ class PlatformSchedulingEnabledConfiguration {
     SchedulingConfigurer platformSchedulingConfigurer(
             LockProvider lockProvider,
             PlatformSchedulingProperties properties,
-            org.springframework.core.env.Environment environment,
+            Environment environment,
             PlatformSchedulingTaskSchedulerRouter schedulerRouter) {
         String serviceName = environment.getRequiredProperty("spring.application.name");
-        return new SchedulingConfigurer() {
-            @Override
-            public void configureTasks(ScheduledTaskRegistrar registrar) {
-                TaskScheduler delegate = registrar.getScheduler();
-                if (delegate == null) {
-                    delegate = schedulerRouter.router();
-                }
-                LockingTaskScheduler lockingScheduler = schedulerRouter.lockingScheduler();
-                if (lockingScheduler == null) {
-                    lockingScheduler = new LockingTaskScheduler(
-                            delegate, lockProvider, serviceName, properties);
-                }
-                schedulerRouter.setLockingScheduler(lockingScheduler);
-                registrar.setTaskScheduler(lockingScheduler);
+        return registrar -> {
+            TaskScheduler delegate = registrar.getScheduler();
+            if (delegate == null) {
+                delegate = schedulerRouter.router();
             }
+            LockingTaskScheduler lockingScheduler = schedulerRouter.lockingScheduler();
+            if (lockingScheduler == null) {
+                lockingScheduler = new LockingTaskScheduler(
+                        delegate, lockProvider, serviceName, properties);
+            }
+            schedulerRouter.setLockingScheduler(lockingScheduler);
+            registrar.setTaskScheduler(lockingScheduler);
         };
     }
 }
 
 /** Owns Spring's fallback router so its internally created executor is shut down with the context. */
 final class PlatformSchedulingTaskSchedulerRouter
-        implements org.springframework.context.SmartLifecycle, org.springframework.beans.factory.DisposableBean {
+        implements SmartLifecycle, DisposableBean {
     private final TaskSchedulerRouter router;
     private volatile LockingTaskScheduler lockingScheduler;
-    private final java.util.concurrent.atomic.AtomicBoolean stopped = new java.util.concurrent.atomic.AtomicBoolean();
+    private final AtomicBoolean stopped = new AtomicBoolean();
     private volatile boolean running = true;
 
     PlatformSchedulingTaskSchedulerRouter(BeanFactory beanFactory) {

@@ -1,9 +1,12 @@
 package br.com.portalmanager.platform.library.scheduling;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingAutoConfiguration;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduleOptions;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
 import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
 import java.time.Duration;
@@ -11,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +40,17 @@ class PlatformSchedulingTaskSchedulerIT {
     @BeforeAll
     static void setUpRedis(@org.springframework.beans.factory.annotation.Autowired GenericContainer<?> container) {
         redis = container;
+    }
+
+    @Test
+    void programmaticTaskCanBeRegisteredFromPostConstruct() {
+        PostConstructRegistrationProbe.reset();
+        newApplicationContextRunner(PostConstructRegistrationApplication.class, "scheduling-postconstruct-it")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    await().atMost(Duration.ofSeconds(5))
+                            .untilAsserted(() -> assertThat(PostConstructRegistrationProbe.executions()).isPositive());
+                });
     }
 
     @Test
@@ -75,11 +90,8 @@ class PlatformSchedulingTaskSchedulerIT {
         newApplicationContextRunner(LifecycleApplication.class, "scheduling-lifecycle-it")
                 .run(context -> {
                     assertThat(context).hasNotFailed();
-                    long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
-                    while (LifecycleProbe.executions() < 2 && System.nanoTime() < deadline) {
-                        Thread.sleep(20L);
-                    }
-                    assertThat(LifecycleProbe.executions()).isGreaterThanOrEqualTo(2);
+                    await().atMost(Duration.ofSeconds(3))
+                            .untilAsserted(() -> assertThat(LifecycleProbe.executions()).isGreaterThanOrEqualTo(2));
                     ((ConfigurableApplicationContext) context).close();
                     int afterClose = LifecycleProbe.executions();
                     Thread.sleep(350L);
@@ -119,17 +131,48 @@ class PlatformSchedulingTaskSchedulerIT {
     }
 
     private static void awaitTriggerModes() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(6).toNanos();
-        while (!TriggerProbe.allModesExecuted() && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
-        }
+        await().atMost(Duration.ofSeconds(6))
+                .untilAsserted(() -> assertThat(TriggerProbe.allModesExecuted()).isTrue());
     }
 
     private static void awaitNamedSchedulers() throws InterruptedException {
-        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
-        while ((!NamedSchedulerProbe.primaryExecuted() || !NamedSchedulerProbe.secondaryExecuted())
-                && System.nanoTime() < deadline) {
-            Thread.sleep(25L);
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(() -> {
+                    assertThat(NamedSchedulerProbe.primaryExecuted()).isTrue();
+                    assertThat(NamedSchedulerProbe.secondaryExecuted()).isTrue();
+                });
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class PostConstructRegistrationApplication {
+        @Bean
+        PostConstructRegistrationProbe postConstructRegistrationProbe(PlatformTaskScheduler scheduler) {
+            return new PostConstructRegistrationProbe(scheduler);
+        }
+    }
+
+    static class PostConstructRegistrationProbe {
+        private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+        private final PlatformTaskScheduler scheduler;
+
+        PostConstructRegistrationProbe(PlatformTaskScheduler scheduler) {
+            this.scheduler = scheduler;
+        }
+
+        @PostConstruct
+        void register() {
+            scheduler.scheduleWithFixedDelay(
+                    EXECUTIONS::incrementAndGet,
+                    Duration.ofMillis(100),
+                    PlatformScheduleOptions.withLock("postconstruct-registration"));
+        }
+
+        static void reset() {
+            EXECUTIONS.set(0);
+        }
+
+        static int executions() {
+            return EXECUTIONS.get();
         }
     }
 
