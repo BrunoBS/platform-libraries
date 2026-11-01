@@ -1,7 +1,6 @@
 package br.com.portalmanager.platform.library.tagging;
 
 import br.com.portalmanager.platform.library.tagging.model.Tag;
-import br.com.portalmanager.platform.library.tagging.model.TagName;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.library.tagging.model.TagOwner;
 import br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName;
@@ -40,16 +39,16 @@ class TagManagerTest {
 
         assertThatThrownBy(() -> new TestTag(owner, null, TagOriginType.MANUAL))
                 .isInstanceOf(ValidationException.class);
-        assertThatThrownBy(() -> new TestTag(owner, TagName.of("tag"), null))
+        assertThatThrownBy(() -> new TestTag(owner, "tag", null))
                 .isInstanceOf(ValidationException.class);
-        assertThatThrownBy(() -> new TestTag(owner, TagName.of("tag"), TagOriginType.MANUAL)
+        assertThatThrownBy(() -> new TestTag(owner, "tag", TagOriginType.MANUAL)
                 .changeOrigin(null))
                 .isInstanceOf(ValidationException.class);
     }
 
     @Test
     void shouldRejectInvalidProjectionWithApiException() {
-        assertThatThrownBy(() -> new TagOwnerTagName(null, TagName.of("tag")))
+        assertThatThrownBy(() -> new TagOwnerTagName(null, "tag"))
                 .isInstanceOf(ApiException.class);
         assertThatThrownBy(() -> new TagOwnerTagName("workspace-10", null))
                 .isInstanceOf(ApiException.class);
@@ -59,7 +58,7 @@ class TagManagerTest {
     void shouldReconcileAndPersistOriginChangesExplicitly() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
-        TestTag existing = new TestTag(owner, TagName.of("same-tag"), TagOriginType.SYSTEM);
+        TestTag existing = new TestTag(owner, "same-tag", TagOriginType.SYSTEM);
 
         when(repository.findByOwnerId(10L)).thenReturn(List.of(existing));
 
@@ -75,7 +74,7 @@ class TagManagerTest {
     void shouldCreateAndDeleteDuringReconciliation() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
-        TestTag obsolete = new TestTag(owner, TagName.of("obsolete"), TagOriginType.MANUAL);
+        TestTag obsolete = new TestTag(owner, "obsolete", TagOriginType.MANUAL);
 
         when(repository.findByOwnerId(10L)).thenReturn(List.of(obsolete));
 
@@ -93,7 +92,7 @@ class TagManagerTest {
                 anyCollection(),
                 eq(TagOriginType.MANUAL)
         )).thenReturn(List.of(
-                new TagOwnerTagName("workspace-10", TagName.of("manual-a"))
+                new TagOwnerTagName("workspace-10", "manual-a")
         ));
 
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
@@ -105,7 +104,7 @@ class TagManagerTest {
     @Test
     void shouldNormalizeLookupInsideTagging() {
         TagRepository<TestTag, Owner> repository = repository();
-        when(repository.findOwnerIdentifiersByTag(TagName.of("manual-a")))
+        when(repository.findOwnerIdentifiersByTag("manual-a"))
                 .thenReturn(List.of("workspace-10"));
 
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
@@ -129,9 +128,9 @@ class TagManagerTest {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
         when(repository.findByOwnerId(10L)).thenReturn(List.of(
-                new TestTag(owner, TagName.of("z-tag"), TagOriginType.MANUAL),
-                new TestTag(owner, TagName.of("system"), TagOriginType.SYSTEM),
-                new TestTag(owner, TagName.of("a-tag"), TagOriginType.MANUAL)
+                new TestTag(owner, "z-tag", TagOriginType.MANUAL),
+                new TestTag(owner, "system", TagOriginType.SYSTEM),
+                new TestTag(owner, "a-tag", TagOriginType.MANUAL)
         ));
 
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
@@ -184,7 +183,7 @@ class TagManagerTest {
         verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
             List<TestTag> saved = new java.util.ArrayList<>();
             tags.forEach(saved::add);
-            return saved.size() == 1 && saved.getFirst().getName().equals(TagName.of("my-tag"));
+            return saved.size() == 1 && saved.getFirst().getName().equals("my-tag");
         }));
     }
 
@@ -200,7 +199,7 @@ class TagManagerTest {
         verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
             List<TestTag> saved = new java.util.ArrayList<>();
             tags.forEach(saved::add);
-            return saved.size() == 1 && saved.getFirst().getName().equals(TagName.of("workspace"));
+            return saved.size() == 1 && saved.getFirst().getName().equals("workspace");
         }));
     }
 
@@ -216,7 +215,7 @@ class TagManagerTest {
         verify(repository).saveAll(org.mockito.ArgumentMatchers.argThat(tags -> {
             List<TestTag> saved = new java.util.ArrayList<>();
             tags.forEach(saved::add);
-            return saved.size() == 1 && saved.getFirst().getName().equals(TagName.of("cafe"));
+            return saved.size() == 1 && saved.getFirst().getName().equals("cafe");
         }));
     }
 
@@ -225,8 +224,8 @@ class TagManagerTest {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10");
         when(repository.findByOwnerId(10L)).thenReturn(List.of(
-                new TestTag(owner, TagName.of("same"), TagOriginType.MANUAL),
-                new TestTag(owner, TagName.of("same"), TagOriginType.SYSTEM)));
+                new TestTag(owner, "same", TagOriginType.MANUAL),
+                new TestTag(owner, "same", TagOriginType.SYSTEM)));
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
         assertThatThrownBy(() -> manager.reconcile(owner, List.of("same")))
                 .isInstanceOf(ConflictException.class);
@@ -253,9 +252,9 @@ class TagManagerTest {
             List<TestTag> saved = new java.util.ArrayList<>();
             tags.forEach(saved::add);
             return saved.size() == 2
-                    && saved.stream().anyMatch(tag -> tag.getName().equals(TagName.of("active"))
+                    && saved.stream().anyMatch(tag -> tag.getName().equals("active")
                     && tag.getOriginType() == TagOriginType.SYSTEM)
-                    && saved.stream().anyMatch(tag -> tag.getName().equals(TagName.of("manual"))
+                    && saved.stream().anyMatch(tag -> tag.getName().equals("manual")
                     && tag.getOriginType() == TagOriginType.MANUAL);
         }));
     }
@@ -264,7 +263,7 @@ class TagManagerTest {
     void shouldCalculateSystemTagsAndRemoveObsoleteOnReconciliation() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-active", List.of("active"));
-        TestTag obsoleteSystemTag = new TestTag(owner, TagName.of("previous-state"), TagOriginType.SYSTEM);
+        TestTag obsoleteSystemTag = new TestTag(owner, "previous-state", TagOriginType.SYSTEM);
         when(repository.findByOwnerId(10L)).thenReturn(List.of(obsoleteSystemTag));
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
@@ -275,9 +274,9 @@ class TagManagerTest {
             List<TestTag> saved = new java.util.ArrayList<>();
             tags.forEach(saved::add);
             return saved.size() == 2
-                    && saved.stream().anyMatch(tag -> tag.getName().equals(TagName.of("active"))
+                    && saved.stream().anyMatch(tag -> tag.getName().equals("active")
                     && tag.getOriginType() == TagOriginType.SYSTEM)
-                    && saved.stream().anyMatch(tag -> tag.getName().equals(TagName.of("manual"))
+                    && saved.stream().anyMatch(tag -> tag.getName().equals("manual")
                     && tag.getOriginType() == TagOriginType.MANUAL);
         }));
     }
@@ -333,7 +332,7 @@ class TagManagerTest {
     void shouldReturnManualTagsAfterReconciliationWithOneRead() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10", List.of("system"));
-        TestTag existing = new TestTag(owner, TagName.of("a-tag"), TagOriginType.SYSTEM);
+        TestTag existing = new TestTag(owner, "a-tag", TagOriginType.SYSTEM);
         when(repository.findByOwnerId(10L)).thenReturn(List.of(existing));
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
         assertThat(manager.reconcileAndReturnManualTags(owner, List.of("Z Tag", " A Tag ", "a-tag")))
@@ -371,7 +370,7 @@ class TagManagerTest {
     private static final class TestTag extends Tag<Owner> {
         private final Owner owner;
 
-        private TestTag(Owner owner, TagName name, TagOriginType originType) {
+        private TestTag(Owner owner, String name, TagOriginType originType) {
             super(name, originType);
             this.owner = owner;
         }
