@@ -96,7 +96,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
     private List<TAG> createTags(OWNER owner, Map<TagName, TagOriginType> desired) {
         return desired.entrySet().stream()
                 .map(entry -> {
-                    TAG tag = factory.create(owner, entry.getKey(), entry.getValue());
+                    TAG tag = factory.create(owner, entry.getKey().value(), entry.getValue());
                     if (tag == null) {
                         throw new ApiException(TaggingTechnicalErrors.FACTORY_RESULT_INVALID);
                     }
@@ -172,7 +172,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
             return List.of();
         }
         return TagName.ofIfPresent(tag)
-                .map(name -> repository.findOwnerIdentifiersByTag(name).stream()
+                 .map(name -> repository.findOwnerIdentifiersByTag(name.value()).stream()
                         .filter(java.util.Objects::nonNull)
                         .distinct()
                         .toList())
@@ -215,7 +215,11 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         if (tag == null || tag.getName() == null) {
             throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
         }
-        return tag.getName();
+        try {
+            return TagName.of(tag.getName());
+        } catch (ValidationException exception) {
+            throw new ApiException(TaggingTechnicalErrors.PERSISTED_NAME_INVALID, exception);
+        }
     }
 
     private Map<TagName, TagOriginType> desiredTags(OWNER owner, Collection<String> manualTags) {
