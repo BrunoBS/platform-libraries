@@ -59,7 +59,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
     /** Returns normalized, sorted manual tags without querying them again. */
     public List<String> reconcileAndReturnManualTags(OWNER owner, Collection<String> manualTags) {
         requireOwner(owner);
-        Map<TagName, TagOriginType> desired = desiredTags(owner, manualTags);
+        Map<String, TagOriginType> desired = desiredTags(owner, manualTags);
         List<String> normalizedManualTags = manualTagNames(desired);
         List<TAG> current = repository.findByOwnerId(owner.getId());
         validateCurrent(current);
@@ -93,7 +93,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         return normalizedManualTags;
     }
 
-    private List<TAG> createTags(OWNER owner, Map<TagName, TagOriginType> desired) {
+    private List<TAG> createTags(OWNER owner, Map<String, TagOriginType> desired) {
         return desired.entrySet().stream()
                 .map(entry -> {
                     TAG tag = factory.create(owner, entry.getKey(), entry.getValue());
@@ -105,10 +105,10 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
                 .toList();
     }
 
-    private static List<String> manualTagNames(Map<TagName, TagOriginType> desired) {
+    private static List<String> manualTagNames(Map<String, TagOriginType> desired) {
         return desired.entrySet().stream()
                 .filter(entry -> entry.getValue() == TagOriginType.MANUAL)
-                .map(entry -> entry.getKey().value())
+                .map(entry -> entry.getKey())
                 .sorted()
                 .toList();
     }
@@ -200,7 +200,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         }
         Set<String> names = new HashSet<>();
         for (TAG tag : tags) {
-            TagName name = requireTagName(tag);
+            String name = requireTagName(tag);
             if (tag.getOriginType() == null) {
                 throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
             }
@@ -221,8 +221,8 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         }
     }
 
-    private Map<TagName, TagOriginType> desiredTags(OWNER owner, Collection<String> manualTags) {
-        Map<TagName, TagOriginType> desired = new LinkedHashMap<>();
+    private Map<String, TagOriginType> desiredTags(OWNER owner, Collection<String> manualTags) {
+        Map<String, TagOriginType> desired = new LinkedHashMap<>();
         tagNames(manualTags).forEach(name -> desired.put(name, TagOriginType.MANUAL));
         Collection<String> systemTags = owner.getSystemTags();
         systemTags = systemTags == null ? List.of() : systemTags;
@@ -230,7 +230,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         return desired;
     }
 
-    private static Set<TagName> tagNames(Collection<String> values) {
+    private static Set<String> tagNames(Collection<String> values) {
         if (values == null) {
             return Set.of();
         }
