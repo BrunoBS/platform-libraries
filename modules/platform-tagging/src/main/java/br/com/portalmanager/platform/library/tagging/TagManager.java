@@ -33,7 +33,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
      */
     public List<String> createInitialTags(OWNER owner, Collection<String> manualTags) {
         requireOwner(owner);
-        Map<TagName, TagOriginType> desired = desiredTags(manualTags, systemTags);
+        Map<TagName, TagOriginType> desired = desiredTags(owner, manualTags);
         List<TAG> created = createTags(owner, desired);
         if (!created.isEmpty()) {
             repository.saveAll(created);
@@ -48,7 +48,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
     /** Returns normalized, sorted manual tags without querying them again. */
     public List<String> reconcileAndReturnManualTags(OWNER owner, Collection<String> manualTags) {
         requireOwner(owner);
-        Map<TagName, TagOriginType> desired = desiredTags(manualTags, systemTags);
+        Map<TagName, TagOriginType> desired = desiredTags(owner, manualTags);
         List<String> normalizedManualTags = manualTagNames(desired);
         List<TAG> current = repository.findByOwnerId(owner.getId());
         validateCurrent(current);
