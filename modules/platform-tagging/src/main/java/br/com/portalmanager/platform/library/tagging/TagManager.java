@@ -154,7 +154,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
             }
             List<String> tags = result.get(tag.ownerIdentifier());
             if (tags != null) {
-                tags.add(tag.tagName().value());
+                tags.add(tag.tagName());
             }
         });
 
@@ -172,7 +172,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
             return List.of();
         }
         return TagName.ofIfPresent(tag)
-                 .map(name -> repository.findOwnerIdentifiersByTag(name.value()).stream()
+                .map(name -> repository.findOwnerIdentifiersByTag(name.value()).stream()
                         .filter(java.util.Objects::nonNull)
                         .distinct()
                         .toList())
