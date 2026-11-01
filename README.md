@@ -2,7 +2,7 @@
 
 Capabilities técnicas reutilizáveis da Golden Platform, com builds e releases independentes.
 
-A documentação humana vigente está na [Golden Platform](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/README.md).
+A documentação humana vigente está na [Golden Platform](https://github.com/BrunoBS/golden-platform/blob/docs/library-module-guide-standard/docs/libraries/README.md).
 
 ## Desenvolvimento local
 
