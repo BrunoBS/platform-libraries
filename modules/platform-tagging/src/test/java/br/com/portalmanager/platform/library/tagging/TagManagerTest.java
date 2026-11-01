@@ -293,6 +293,17 @@ class TagManagerTest {
     }
 
     @Test
+    void shouldIgnoreNullAndEmptySystemTagsAfterNormalization() {
+        TagRepository<TestTag, Owner> repository = repository();
+        Owner owner = new Owner(10L, "workspace-10",
+                java.util.Arrays.asList(null, "", "   ", "!!!"));
+        TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
+
+        assertThat(manager.createInitialTags(owner, List.of())).isEmpty();
+        org.mockito.Mockito.verifyNoInteractions(repository);
+    }
+
+    @Test
     void shouldCreateInitialTagsWithoutReadingPersistedTags() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10", List.of("system", "a-tag"));
