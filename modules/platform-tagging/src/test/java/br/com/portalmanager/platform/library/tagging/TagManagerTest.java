@@ -157,7 +157,7 @@ class TagManagerTest {
         TagManager<TestTag, Owner> manager = new TagManager<TestTag, Owner>(repository, (ignoredOwner, name, origin) -> null);
 
         assertThatThrownBy(() -> manager.reconcile(owner, List.of("tag-a")))
-                .isInstanceOf(PlatformConfigurationException.class);
+                .isInstanceOf(ApiException.class);
     }
 
     @Test
