@@ -6,8 +6,6 @@ import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTa
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
@@ -23,7 +21,6 @@ import org.springframework.scheduling.Trigger;
 /** Decorates the scheduler selected by Spring; schedule timing remains delegated unchanged. */
 public final class LockingTaskScheduler implements TaskScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(LockingTaskScheduler.class);
-    private static final String INSTANCE_ID = resolveInstanceId();
     private final TaskScheduler delegate;
     private final LockingTaskExecutor lockExecutor;
     private final String serviceName;
@@ -162,39 +159,24 @@ public final class LockingTaskScheduler implements TaskScheduler {
 
         private void logLockAcquired() {
             LOGGER.info(
-                    "Scheduled task acquired distributed lock: service={}, lockName={}, instanceId={}",
+                    "Scheduled task acquired distributed lock: service={}, lockName={}",
                     serviceName,
-                    lockName,
-                    INSTANCE_ID);
+                    lockName);
         }
 
         private void logLockSkipped() {
             LOGGER.debug(
-                    "Scheduled task skipped because distributed lock is held: service={}, lockName={}, instanceId={}",
+                    "Scheduled task skipped because distributed lock is held: service={}, lockName={}",
                     serviceName,
-                    lockName,
-                    INSTANCE_ID);
+                    lockName);
         }
 
         private void logTaskCompleted() {
             LOGGER.info(
-                    "Scheduled task completed: service={}, lockName={}, instanceId={}",
+                    "Scheduled task completed: service={}, lockName={}",
                     serviceName,
-                    lockName,
-                    INSTANCE_ID);
+                    lockName);
         }
-    }
-
-    private static String resolveInstanceId() {
-        String host = System.getenv("HOSTNAME");
-        if (host == null || host.isBlank() || "null".equalsIgnoreCase(host)) {
-            try {
-                host = InetAddress.getLocalHost().getHostName();
-            } catch (UnknownHostException ignored) {
-                host = "unknown-host";
-            }
-        }
-        return host.trim() + ":" + ProcessHandle.current().pid();
     }
 
     private boolean beginExecution() {
