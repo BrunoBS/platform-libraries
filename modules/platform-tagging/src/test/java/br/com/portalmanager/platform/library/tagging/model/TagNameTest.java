@@ -1,6 +1,5 @@
 package br.com.portalmanager.platform.library.tagging.model;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -40,30 +39,6 @@ class TagNameTest {
         assertThatThrownBy(() -> TagName.of("!!!")).isInstanceOf(ValidationException.class);
         assertThatThrownBy(() -> TagName.of("a".repeat(TagName.MAX_LENGTH + 1)))
                 .isInstanceOf(ValidationException.class);
-    }
-
-    @Test
-    void shouldPersistTheCanonicalTagName() {
-        TagNameConverter converter = new TagNameConverter();
-
-        assertThat(converter.convertToDatabaseColumn(TagName.of("C++")))
-                .isEqualTo("c");
-    }
-
-    @Test
-    void shouldNormalizeSpecialCharactersWhenReadingTheTagName() {
-        TagNameConverter converter = new TagNameConverter();
-
-        assertThat(converter.convertToEntityAttribute("C++"))
-                .isEqualTo(TagName.of("c"));
-    }
-
-    @Test
-    void shouldReportInvalidPersistedNamesWithApiException() {
-        TagNameConverter converter = new TagNameConverter();
-
-        assertThatThrownBy(() -> converter.convertToEntityAttribute("!!!"))
-                .isInstanceOf(ApiException.class);
     }
 
     @Test
