@@ -1,7 +1,6 @@
 package br.com.portalmanager.platform.library.tagging.model;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -23,9 +22,8 @@ public abstract class Tag<OWNER extends TagOwner> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Convert(converter = TagNameConverter.class)
     @Column(name = "name", nullable = false, length = TagName.MAX_LENGTH)
-    private TagName name;
+    private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "origin_type", nullable = false, length = 20)
@@ -34,14 +32,11 @@ public abstract class Tag<OWNER extends TagOwner> {
     protected Tag() {
     }
 
-    protected Tag(TagName name, TagOriginType originType) {
-        if (name == null) {
-            throw validation("tag", TaggingMessageKeys.TAG_NAME_INVALID);
-        }
+    protected Tag(String name, TagOriginType originType) {
+        this.name = TagName.of(name).value();
         if (originType == null) {
             throw validation("origin", TaggingMessageKeys.TAG_ORIGIN_REQUIRED);
         }
-        this.name = name;
         this.originType = originType;
     }
 
@@ -49,7 +44,7 @@ public abstract class Tag<OWNER extends TagOwner> {
         return id;
     }
 
-    public TagName getName() {
+    public String getName() {
         return name;
     }
 
