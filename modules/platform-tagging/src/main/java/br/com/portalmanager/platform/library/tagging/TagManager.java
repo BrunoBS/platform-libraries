@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.tagging;
 
 import br.com.portalmanager.platform.library.tagging.model.Tag;
-import br.com.portalmanager.platform.library.tagging.model.TagName;
+import br.com.portalmanager.platform.library.tagging.internal.TagNameNormalizer;
 import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.library.tagging.model.TagOwner;
 import br.com.portalmanager.platform.library.tagging.exception.TaggingTechnicalErrors;
@@ -44,7 +44,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
      */
     public List<String> createInitialTags(OWNER owner, Collection<String> manualTags) {
         requireOwner(owner);
-        Map<TagName, TagOriginType> desired = desiredTags(owner, manualTags);
+        Map<String, TagOriginType> desired = desiredTags(owner, manualTags);
         List<TAG> created = createTags(owner, desired);
         if (!created.isEmpty()) {
             repository.saveAll(created);
@@ -68,7 +68,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         List<TAG> changed = new ArrayList<>();
 
         for (TAG tag : current) {
-            TagName name = requireTagName(tag);
+            String name = requireTagName(tag);
             TagOriginType desiredOrigin = desired.remove(name);
             if (desiredOrigin == null) {
                 obsolete.add(tag);
@@ -96,7 +96,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
     private List<TAG> createTags(OWNER owner, Map<TagName, TagOriginType> desired) {
         return desired.entrySet().stream()
                 .map(entry -> {
-                    TAG tag = factory.create(owner, entry.getKey().value(), entry.getValue());
+                    TAG tag = factory.create(owner, entry.getKey(), entry.getValue());
                     if (tag == null) {
                         throw new ApiException(TaggingTechnicalErrors.FACTORY_RESULT_INVALID);
                     }
@@ -120,7 +120,6 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         return current.stream()
                 .filter(tag -> tag.getOriginType() == TagOriginType.MANUAL)
                 .map(this::requireTagName)
-                .map(TagName::value)
                 .sorted()
                 .toList();
     }
@@ -171,8 +170,8 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         if (tag == null || tag.isBlank()) {
             return List.of();
         }
-        return TagName.ofIfPresent(tag)
-                .map(name -> repository.findOwnerIdentifiersByTag(name.value()).stream()
+        return TagNameNormalizer.normalizeIfPresent(tag)
+                .map(name -> repository.findOwnerIdentifiersByTag(name).stream()
                         .filter(java.util.Objects::nonNull)
                         .distinct()
                         .toList())
@@ -199,7 +198,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         if (tags == null) {
             throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
         }
-        Set<TagName> names = new HashSet<>();
+        Set<String> names = new HashSet<>();
         for (TAG tag : tags) {
             TagName name = requireTagName(tag);
             if (tag.getOriginType() == null) {
@@ -211,12 +210,12 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         }
     }
 
-    private TagName requireTagName(TAG tag) {
+    private String requireTagName(TAG tag) {
         if (tag == null || tag.getName() == null) {
             throw new ApiException(TaggingTechnicalErrors.PERSISTED_STATE_INVALID);
         }
         try {
-            return TagName.of(tag.getName());
+            return TagNameNormalizer.normalizeRequired(tag.getName());
         } catch (ValidationException exception) {
             throw new ApiException(TaggingTechnicalErrors.PERSISTED_NAME_INVALID, exception);
         }
@@ -235,9 +234,9 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
         if (values == null) {
             return Set.of();
         }
-        Set<TagName> names = new LinkedHashSet<>();
+        Set<String> names = new LinkedHashSet<>();
         values.stream()
-                .map(TagName::ofIfPresent)
+                .map(TagNameNormalizer::normalizeIfPresent)
                 .flatMap(java.util.Optional::stream)
                 .forEach(names::add);
         return names;
