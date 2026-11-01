@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
-import br.com.portalmanager.platform.library.scheduling.metrics.SchedulingLockMetrics;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,7 +24,6 @@ public final class LockingTaskScheduler implements TaskScheduler {
     private final LockingTaskExecutor lockExecutor;
     private final String serviceName;
     private final PlatformSchedulingProperties properties;
-    private final SchedulingLockMetrics metrics;
     private final AtomicBoolean redisFailureLogged = new AtomicBoolean();
     private final Object lifecycleMonitor = new Object();
     private int activeExecutions;
@@ -34,13 +33,11 @@ public final class LockingTaskScheduler implements TaskScheduler {
             TaskScheduler delegate,
             LockProvider lockProvider,
             String serviceName,
-            PlatformSchedulingProperties properties,
-            SchedulingLockMetrics metrics) {
+            PlatformSchedulingProperties properties) {
         this.delegate = delegate;
         this.lockExecutor = new DefaultLockingTaskExecutor(lockProvider);
         this.serviceName = serviceName;
         this.properties = properties;
-        this.metrics = metrics;
     }
 
     @Override
@@ -79,20 +76,22 @@ public final class LockingTaskScheduler implements TaskScheduler {
     }
 
     private Runnable guard(Runnable task) {
-        if (ScheduledTaskIdentity.disablesLock(task)) {
-            return task;
-        }
-        String lockName = ScheduledTaskIdentity.from(task, serviceName, "scheduled");
+        boolean lockEnabled = !(task instanceof PlatformScheduledTask programmaticTask
+                && !programmaticTask.lockEnabled())
+                && !ScheduledTaskIdentity.disablesLock(task);
+        String lockName = lockEnabled
+                ? ScheduledTaskIdentity.from(task, serviceName, "scheduled")
+                : null;
         String qualifier = task instanceof SchedulingAwareRunnable aware ? aware.getQualifier() : null;
-        return new LockedRunnable(task, qualifier, lockName);
+        return new GuardedRunnable(task, qualifier, lockName);
     }
 
-    private final class LockedRunnable implements SchedulingAwareRunnable {
+    private final class GuardedRunnable implements SchedulingAwareRunnable {
         private final Runnable task;
         private final String qualifier;
         private final String lockName;
 
-        private LockedRunnable(Runnable task, String qualifier, String lockName) {
+        private GuardedRunnable(Runnable task, String qualifier, String lockName) {
             this.task = task;
             this.qualifier = qualifier;
             this.lockName = lockName;
@@ -121,6 +120,10 @@ public final class LockingTaskScheduler implements TaskScheduler {
         }
 
         private void executeLockedTask() {
+            if (lockName == null) {
+                task.run();
+                return;
+            }
             AtomicBoolean taskStarted = new AtomicBoolean();
             LockConfiguration lock = new LockConfiguration(
                     Instant.now(getClock()), lockName,
@@ -135,7 +138,6 @@ public final class LockingTaskScheduler implements TaskScheduler {
                     redisFailureLogged.set(false);
                     throw failure;
                 }
-                metrics.failed();
                 if (redisFailureLogged.compareAndSet(false, true)) {
                     LOGGER.atError()
                             .addKeyValue("service", serviceName)
@@ -146,11 +148,6 @@ public final class LockingTaskScheduler implements TaskScheduler {
                 return;
             }
             redisFailureLogged.set(false);
-            if (taskStarted.get()) {
-                metrics.acquired();
-            } else {
-                metrics.skipped();
-            }
         }
     }
 

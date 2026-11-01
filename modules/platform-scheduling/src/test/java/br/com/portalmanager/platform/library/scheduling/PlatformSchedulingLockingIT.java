@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingAutoConfiguration;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduleOptions;
 import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
 import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
@@ -239,6 +240,23 @@ class PlatformSchedulingLockingIT {
             assertThat(ProgrammaticScheduledProbe.maximumConcurrentExecutions()).isEqualTo(1);
             assertThat(ProgrammaticScheduledProbe.executions()).isPositive();
         }));
+    }
+
+    @Test
+    void programmaticSchedulerCanSkipTheLockForOneTaskAcrossContexts() throws InterruptedException {
+        ProgrammaticScheduledProbe.reset();
+        ApplicationContextRunner runner = applicationContextRunner(
+                UnlockedProgrammaticScheduledApplication.class, SERVICE_NAME, false, "PT30S");
+
+        runner.run(firstContext -> {
+            assertThat(firstContext).hasNotFailed();
+            awaitProgrammaticExecution();
+            runner.run(secondContext -> {
+                assertThat(secondContext).hasNotFailed();
+                assertThat(ProgrammaticScheduledProbe.concurrentExecution().await(3, TimeUnit.SECONDS)).isTrue();
+                assertThat(ProgrammaticScheduledProbe.maximumConcurrentExecutions()).isGreaterThan(1);
+            });
+        });
     }
 
     @Test
@@ -712,7 +730,20 @@ class PlatformSchedulingLockingIT {
         @Bean
         SmartInitializingSingleton registerProgrammaticTask(PlatformTaskScheduler scheduler) {
             return () -> scheduler.scheduleWithFixedDelay(
-                    "programmatic-probe", ProgrammaticScheduledProbe::runTask, Duration.ofMillis(100));
+                    ProgrammaticScheduledProbe::runTask,
+                    Duration.ofMillis(100),
+                    PlatformScheduleOptions.withLock("programmatic-probe"));
+        }
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class UnlockedProgrammaticScheduledApplication {
+        @Bean
+        SmartInitializingSingleton registerProgrammaticTask(PlatformTaskScheduler scheduler) {
+            return () -> scheduler.scheduleWithFixedDelay(
+                    ProgrammaticScheduledProbe::runTask,
+                    Duration.ofMillis(100),
+                    PlatformScheduleOptions.withoutLock());
         }
     }
 
@@ -720,10 +751,14 @@ class PlatformSchedulingLockingIT {
         private static final AtomicInteger RUNNING = new AtomicInteger();
         private static final AtomicInteger MAXIMUM_RUNNING = new AtomicInteger();
         private static final AtomicInteger EXECUTIONS = new AtomicInteger();
+        private static CountDownLatch CONCURRENT_EXECUTION = new CountDownLatch(1);
 
         static void runTask() {
             int concurrent = RUNNING.incrementAndGet();
             MAXIMUM_RUNNING.accumulateAndGet(concurrent, Math::max);
+            if (concurrent > 1) {
+                CONCURRENT_EXECUTION.countDown();
+            }
             EXECUTIONS.incrementAndGet();
             try {
                 Thread.sleep(TASK_DURATION_MILLIS);
@@ -738,6 +773,7 @@ class PlatformSchedulingLockingIT {
             RUNNING.set(0);
             MAXIMUM_RUNNING.set(0);
             EXECUTIONS.set(0);
+            CONCURRENT_EXECUTION = new CountDownLatch(1);
         }
 
         static int executions() {
@@ -746,6 +782,10 @@ class PlatformSchedulingLockingIT {
 
         static int maximumConcurrentExecutions() {
             return MAXIMUM_RUNNING.get();
+        }
+
+        static CountDownLatch concurrentExecution() {
+            return CONCURRENT_EXECUTION;
         }
     }
 
