@@ -6,6 +6,7 @@ import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
 import br.com.portalmanager.platform.library.tagging.model.TagOwner;
 import br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName;
 import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
+import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
