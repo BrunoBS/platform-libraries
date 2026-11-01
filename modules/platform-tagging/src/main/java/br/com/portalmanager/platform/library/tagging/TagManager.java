@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -108,7 +109,7 @@ public final class TagManager<TAG extends Tag<OWNER>, OWNER extends TagOwner> {
     private static List<String> manualTagNames(Map<String, TagOriginType> desired) {
         return desired.entrySet().stream()
                 .filter(entry -> entry.getValue() == TagOriginType.MANUAL)
-                .map(entry -> entry.getKey())
+                .map(Map.Entry::getKey)
                 .sorted()
                 .toList();
     }
