@@ -283,13 +283,12 @@ class TagManagerTest {
     }
 
     @Test
-    void shouldRejectNullSystemTagsFromOwner() {
+    void shouldTreatNullSystemTagsFromOwnerAsEmpty() {
         TagRepository<TestTag, Owner> repository = repository();
         Owner owner = new Owner(10L, "workspace-10", null);
         TagManager<TestTag, Owner> manager = new TagManager<>(repository, TestTag::new);
 
-        assertThatThrownBy(() -> manager.createInitialTags(owner, List.of()))
-                .isInstanceOf(ApiException.class);
+        assertThat(manager.createInitialTags(owner, List.of())).isEmpty();
         org.mockito.Mockito.verifyNoInteractions(repository);
     }
 
