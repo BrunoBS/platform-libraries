@@ -29,10 +29,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PlatformLoggingInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
     private static final String APPENDER_NAME = "JSON_CONSOLE";
+    private static final String INSTANCE_START_ID = UUID.randomUUID().toString();
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -81,6 +83,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         String serviceName = env.getProperty("spring.application.name", "unknown-service");
         String appVersion = BuildVersionResolver.resolve(env);
         String host = HostResolver.resolve(env);
+        String instanceId = host + ":" + ProcessHandle.current().pid() + ":" + INSTANCE_START_ID;
         boolean maskingEnabled = env.getProperty(
                 "platform.observability.logging.masking.enabled",
                 Boolean.class,
@@ -98,7 +101,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(loggerContext);
-        encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, maskingEnabled, customConverters));
+        encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, instanceId, maskingEnabled, customConverters));
         encoder.start();
 
         ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
@@ -163,6 +166,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
             String serviceName,
             String appVersion,
             String host,
+            String instanceId,
             boolean maskingEnabled,
             Map<String, String> customConverters
     ) {
@@ -172,11 +176,12 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         }
 
         return String.format(
-                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"context\":%%jsonMdc,\"error\":%%jsonError,\"exception\":%%jsonThrowable}%%n",
+                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"instanceId\":\"%s\",\"context\":%%jsonMdc,\"error\":%%jsonError,\"exception\":%%jsonThrowable}%%n",
                 messageToken,
                 serviceName,
                 appVersion,
-                host
+                host,
+                instanceId
         );
     }
 
