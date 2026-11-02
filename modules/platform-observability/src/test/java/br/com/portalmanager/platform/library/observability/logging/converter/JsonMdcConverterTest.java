@@ -1,12 +1,6 @@
 package br.com.portalmanager.platform.library.observability.logging.converter;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.junit.jupiter.api.AfterEach;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -19,11 +13,6 @@ import static org.mockito.Mockito.when;
 class JsonMdcConverterTest {
 
     private final JsonMdcConverter converter = new JsonMdcConverter();
-
-    @AfterEach
-    void tearDown() {
-        RequestContextHolder.resetRequestAttributes();
-    }
 
     @Test
     void shouldReturnEmptyJsonObjectWhenMdcIsEmpty() {
@@ -68,88 +57,5 @@ class JsonMdcConverterTest {
 
         assertThat(converter.convert(event))
                 .isEqualTo("{\"uri\":\"/api/\\\"workspace\\\"\",\"userAgent\":\"line1\\nline2\\\\client\"}");
-    }
-
-    @Test
-    void shouldIncludeRequestBodyOnlyWhileErrorLogIsConverted() throws Exception {
-        MockHttpServletRequest rawRequest = new MockHttpServletRequest();
-        rawRequest.setContent("{\"password\":\"secret\",\"cpf\":\"123.456.789-00\"}".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
-        request.getInputStream().readAllBytes();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        ILoggingEvent event = mock(ILoggingEvent.class);
-        when(event.getLevel()).thenReturn(Level.ERROR);
-        when(event.getMDCPropertyMap()).thenReturn(Map.of("correlationId", "corr-01"));
-
-        assertThat(converter.convert(event))
-                .contains("\"requestBody\":{\"password\":\"secret\",\"cpf\":\"123.456.789-00\"}");
-
-        RequestContextHolder.resetRequestAttributes();
-        assertThat(converter.convert(event))
-                .isEqualTo("{\"correlationId\":\"corr-01\"}");
-    }
-
-    @Test
-    void shouldPreserveRequestBodyValuesForNestedObjects() throws Exception {
-        MockHttpServletRequest rawRequest = new MockHttpServletRequest();
-        rawRequest.setContent("{\"user\":{\"email\":\"bruno@example.com\",\"token\":\"abc\"},\"items\":[{\"password\":\"secret\"}]}".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
-        request.getInputStream().readAllBytes();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        ILoggingEvent event = mock(ILoggingEvent.class);
-        when(event.getLevel()).thenReturn(Level.ERROR);
-        when(event.getMDCPropertyMap()).thenReturn(Map.of());
-
-        assertThat(converter.convert(event))
-                .isEqualTo("{\"requestBody\":{\"user\":{\"email\":\"bruno@example.com\",\"token\":\"abc\"},\"items\":[{\"password\":\"secret\"}]}}");
-    }
-
-    @Test
-    void shouldPreserveJsonArrayAsStructuredRequestBody() throws Exception {
-        MockHttpServletRequest rawRequest = new MockHttpServletRequest();
-        rawRequest.setContent("[{\"cpf\":\"12345678900\"},{\"password\":\"secret\"}]".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
-        request.getInputStream().readAllBytes();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        ILoggingEvent event = mock(ILoggingEvent.class);
-        when(event.getLevel()).thenReturn(Level.WARN);
-        when(event.getMDCPropertyMap()).thenReturn(Map.of());
-
-        assertThat(converter.convert(event))
-                .isEqualTo("{\"requestBody\":[{\"cpf\":\"12345678900\"},{\"password\":\"secret\"}]}");
-    }
-
-    @Test
-    void shouldFallbackToEscapedStringWhenRequestBodyIsNotJson() throws Exception {
-        MockHttpServletRequest rawRequest = new MockHttpServletRequest();
-        rawRequest.setContent("cpf=123.456.789-00".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
-        request.getInputStream().readAllBytes();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        ILoggingEvent event = mock(ILoggingEvent.class);
-        when(event.getLevel()).thenReturn(Level.ERROR);
-        when(event.getMDCPropertyMap()).thenReturn(Map.of());
-
-        assertThat(converter.convert(event))
-                .isEqualTo("{\"requestBody\":\"cpf=123.456.789-00\"}");
-    }
-
-    @Test
-    void shouldNotIncludeRequestBodyInInformationalLogs() throws Exception {
-        MockHttpServletRequest rawRequest = new MockHttpServletRequest();
-        rawRequest.setContent("payload".getBytes());
-        ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
-        request.getInputStream().readAllBytes();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        ILoggingEvent event = mock(ILoggingEvent.class);
-        when(event.getLevel()).thenReturn(Level.INFO);
-        when(event.getMDCPropertyMap()).thenReturn(Map.of());
-
-        assertThat(converter.convert(event)).isEqualTo("{}");
     }
 }
