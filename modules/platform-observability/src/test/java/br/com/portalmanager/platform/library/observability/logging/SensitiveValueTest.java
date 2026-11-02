@@ -26,15 +26,17 @@ class SensitiveValueTest {
     }
 
     @Test
-    void shouldKeepOneCharacterAtEachEndForValuesFromThreeToSixCharacters() {
+    void shouldKeepOneCharacterAtEachEndForValuesFromThreeToTenCharacters() {
         assertThat(SensitiveValue.of("abc").toString()).isEqualTo("a*c");
         assertThat(SensitiveValue.of("abcdef").toString()).isEqualTo("a****f");
+        assertThat(SensitiveValue.of("abcdefgh").toString()).isEqualTo("a******h");
+        assertThat(SensitiveValue.of("abcdefghij").toString()).isEqualTo("a********j");
     }
 
     @Test
-    void shouldKeepThreeCharactersAtEachEndForValuesWithAtLeastSevenCharacters() {
-        assertThat(SensitiveValue.of("abcdefg").toString()).isEqualTo("abc*efg");
-        assertThat(SensitiveValue.of("abcdefghij").toString()).isEqualTo("abc****hij");
+    void shouldKeepTwoCharactersAtEachEndForValuesWithAtLeastElevenCharacters() {
+        assertThat(SensitiveValue.of("abcdefghijk").toString()).isEqualTo("ab*******jk");
+        assertThat(SensitiveValue.of("abcdefghijkl").toString()).isEqualTo("ab********kl");
     }
 
     @Test
@@ -62,6 +64,6 @@ class SensitiveValueTest {
                 new Object[]{SensitiveValue.of("abcdefghij")}
         ).getMessage();
 
-        assertThat(message).isEqualTo("credential=abc****hij");
+        assertThat(message).isEqualTo("credential=a********j");
     }
 }

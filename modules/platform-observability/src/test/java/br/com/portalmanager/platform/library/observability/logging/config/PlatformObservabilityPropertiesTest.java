@@ -26,7 +26,7 @@ class PlatformObservabilityPropertiesTest {
             assertThat(properties.getLogging().getFormat())
                     .isEqualTo(PlatformObservabilityProperties.Logging.Format.DEFAULT);
             assertThat(properties.getLogging().getMasking().isEnabled()).isTrue();
-            assertThat(SensitiveValue.of("abcdefghij").toString()).isEqualTo("abc****hij");
+            assertThat(SensitiveValue.of("abcdefghij").toString()).isEqualTo("a********j");
             assertThat(properties.getLogging().getRequestBody().isEnabled()).isFalse();
             assertThat(properties.getLogging().getRequestBody().getMaxSize().toBytes()).isEqualTo(1024 * 1024);
         });

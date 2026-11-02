@@ -38,7 +38,7 @@ public final class SensitiveValue {
             return "*".repeat(codePoints.length);
         }
 
-        int visibleAtEachEnd = codePoints.length >= 7 ? 3 : 1;
+        int visibleAtEachEnd = codePoints.length > 10 ? 2 : 1;
         StringBuilder masked = new StringBuilder(value.length());
         for (int index = 0; index < visibleAtEachEnd; index++) {
             masked.appendCodePoint(codePoints[index]);

@@ -33,7 +33,7 @@ platform:
         enabled: false
 ```
 
-Com a máscara habilitada, valores com até dois caracteres são totalmente ocultados; de três a seis, apenas o primeiro e o último caracteres ficam visíveis; a partir de sete, ficam visíveis os três primeiros e os três últimos. Sem `SensitiveValue.of(...)`, a lib não tenta identificar ou mascarar valores automaticamente.
+Com a máscara habilitada, valores com até dois caracteres são totalmente ocultados; de três a dez, apenas o primeiro e o último caracteres ficam visíveis; a partir de onze, ficam visíveis os dois primeiros e os dois últimos. Sem `SensitiveValue.of(...)`, a lib não tenta identificar ou mascarar valores automaticamente.
 
 - [POM e dependências](pom.xml)
 - [Desenvolvimento e build do reactor](../../README.md)
