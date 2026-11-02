@@ -14,22 +14,18 @@
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-observability</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-messaging-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-messaging</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-authorization</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -19,12 +19,10 @@
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-messaging-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-testing-core</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

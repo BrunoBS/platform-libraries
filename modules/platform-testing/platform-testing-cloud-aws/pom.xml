@@ -14,7 +14,6 @@
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-testing-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -31,7 +30,6 @@
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-messaging-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>tools.jackson.core</groupId>
