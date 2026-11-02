@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.observability.logging.converter;
 
+import br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers;
 import ch.qos.logback.classic.pattern.MessageConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
@@ -7,7 +8,7 @@ public class JsonMessageConverter extends MessageConverter {
 
     @Override
     public String convert(ILoggingEvent event) {
-        return escapeJson(super.convert(event));
+        return escapeJson(LogSanitizers.sanitizeSensitiveFields(super.convert(event)));
     }
 
     static String escapeJson(String value) {
