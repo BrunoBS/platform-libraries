@@ -78,7 +78,6 @@ public class JsonErrorMdcConverter extends ClassicConverter {
         }
         return details.stream()
                 .map(String::valueOf)
-                .map(br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers::sanitize)
                 .map(this::jsonString)
                 .collect(Collectors.joining(",", "[", "]"));
     }

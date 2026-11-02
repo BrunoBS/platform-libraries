@@ -1,12 +1,21 @@
 package br.com.portalmanager.platform.library.observability.logging.converter;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.model.ApiErrorResponse;
+import br.com.portalmanager.platform.library.messaging.model.ApiValidationDetail;
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizer;
+import br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -15,6 +24,11 @@ import static org.mockito.Mockito.when;
 class JsonErrorMdcConverterTest {
 
     private final JsonErrorMdcConverter converter = new JsonErrorMdcConverter();
+
+    @AfterEach
+    void tearDown() {
+        LogSanitizers.configureAdditionalSensitiveFields(Set.of());
+    }
 
     @Test
     void shouldReturnNullWhenStructuredErrorIsMissing() {
@@ -107,5 +121,52 @@ class JsonErrorMdcConverterTest {
         org.assertj.core.api.Assertions.assertThat(converted)
                 .doesNotContain("bruno@example.com")
                 .contains("b****@example.com");
+    }
+
+    @Test
+    void shouldSanitizeEachValidationDetailOnlyOnce() {
+        AtomicInteger detailSanitizations = new AtomicInteger();
+        LogSanitizer sanitizer = value -> {
+            if (value.startsWith("ApiValidationDetail[")) {
+                detailSanitizations.incrementAndGet();
+            }
+            return value;
+        };
+        LogSanitizers.register(sanitizer);
+
+        try {
+            ILoggingEvent event = mock(ILoggingEvent.class);
+            PlatformConfigurationException exception = new DetailedConfigurationException();
+            when(event.getMDCPropertyMap()).thenReturn(Map.of());
+            when(event.getThrowableProxy()).thenReturn(new ThrowableProxy(exception));
+
+            String converted = converter.convert(event);
+
+            assertThat(converted).contains("detail-value");
+            assertThat(detailSanitizations).hasValue(1);
+        } finally {
+            LogSanitizers.unregister(sanitizer);
+        }
+    }
+
+    private static final class DetailedConfigurationException extends PlatformConfigurationException {
+        private final ApiErrorResponse response = new ApiErrorResponse(
+                "ERR",
+                "message",
+                "solution",
+                List.of(new ApiValidationDetail("field", "detail-value")),
+                Instant.EPOCH,
+                null,
+                null
+        );
+
+        private DetailedConfigurationException() {
+            super(new PlatformErrorDefinition("ERR", "message", "solution", 500));
+        }
+
+        @Override
+        public ApiErrorResponse getErrorResponse() {
+            return response;
+        }
     }
 }

@@ -143,6 +143,23 @@ class PlatformLoggingInitializerTest {
                 .doesNotContain("\"host\":\"null\"");
     }
 
+    @Test
+    void shouldUseSensitiveFieldConverterWhenOptionalMessageMaskingIsDisabled() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
+        environment.setProperty("platform.observability.logging.masking.enabled", "false");
+
+        initializer.initialize(context);
+
+        @SuppressWarnings("unchecked")
+        ConsoleAppender<ILoggingEvent> appender =
+                (ConsoleAppender<ILoggingEvent>) rootLogger().getAppender("JSON_CONSOLE");
+        PatternLayoutEncoder encoder = (PatternLayoutEncoder) appender.getEncoder();
+
+        assertThat(encoder.getPattern())
+                .contains("\"message\":\"%jsonMessage\"")
+                .doesNotContain("%corporateLgpdMask");
+    }
+
     // ========================================================================
     // LOGBACK STATUS
     // ========================================================================
