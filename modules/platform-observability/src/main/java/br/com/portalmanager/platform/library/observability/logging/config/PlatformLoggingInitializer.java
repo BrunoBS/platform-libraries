@@ -62,7 +62,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
                         "platform.observability.logging.format",
                         PlatformObservabilityProperties.Logging.Format.class
                 )
-                .orElse(PlatformObservabilityProperties.Logging.Format.DEFAULT);
+                .orElse(PlatformObservabilityProperties.Logging.Format.JSON);
     }
 
     private void configureStatusListener(LoggerContext loggerContext) {
