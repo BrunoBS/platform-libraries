@@ -28,7 +28,7 @@
         <jna.version>5.17.0</jna.version>
         <jna-platform.version>5.17.0</jna-platform.version>
         <logback.version>1.6.5</logback.version>
-        <tomcat.version>11.0.26</tomcat.version>
+        <tomcat.version>11.0.27</tomcat.version>
         <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
         <json-schema-validator.version>3.0.7</json-schema-validator.version>
         <rest-assured.version>6.0.1</rest-assured.version>
@@ -36,6 +36,7 @@
         <datafaker.version>2.5.4</datafaker.version>
         <archunit.version>1.5.0</archunit.version>
         <shedlock.version>7.10.1</shedlock.version>
+        <lz4-java.version>1.11.4</lz4-java.version>
     </properties>
 
     <dependencyManagement>
@@ -93,7 +94,7 @@
             <dependency>
                 <groupId>at.yawk.lz4</groupId>
                 <artifactId>lz4-java</artifactId>
-                <version>1.11.2</version>
+                <version>${lz4-java.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ow2.asm</groupId>
