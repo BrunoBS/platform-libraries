@@ -14,7 +14,7 @@ public class PlatformObservabilityProperties {
     public void setLogging(Logging logging) { this.logging = logging == null ? new Logging() : logging; }
 
     public static class Logging {
-        private Format format = Format.DEFAULT;
+        private Format format = Format.JSON;
         private Masking masking = new Masking();
         private Map<String, String> defaults = new LinkedHashMap<>();
         private Map<String, String> levels = new LinkedHashMap<>();

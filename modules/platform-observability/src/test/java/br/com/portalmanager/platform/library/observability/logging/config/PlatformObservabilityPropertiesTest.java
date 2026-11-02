@@ -24,7 +24,7 @@ class PlatformObservabilityPropertiesTest {
             PlatformObservabilityProperties properties = context.getBean(PlatformObservabilityProperties.class);
 
             assertThat(properties.getLogging().getFormat())
-                    .isEqualTo(PlatformObservabilityProperties.Logging.Format.DEFAULT);
+                    .isEqualTo(PlatformObservabilityProperties.Logging.Format.JSON);
             assertThat(properties.getLogging().getMasking().isEnabled()).isTrue();
             assertThat(SensitiveValue.of("abcdefghij").toString()).isEqualTo("a********j");
         });

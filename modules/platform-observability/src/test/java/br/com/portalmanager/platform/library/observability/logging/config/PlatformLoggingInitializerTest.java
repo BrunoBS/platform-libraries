@@ -64,13 +64,13 @@ class PlatformLoggingInitializerTest {
     // ========================================================================
 
     @Test
-    void shouldLeaveDefaultLoggingFormatUnchangedByDefault() {
+    void shouldUseJsonLoggingByDefault() {
 
         initializer.initialize(context);
 
         Logger rootLogger = rootLogger();
 
-        assertThat(rootLogger.getAppender("JSON_CONSOLE")).isNull();
+        assertThat(rootLogger.getAppender("JSON_CONSOLE")).isNotNull();
     }
 
     @Test
@@ -449,6 +449,8 @@ class PlatformLoggingInitializerTest {
 
     @Test
     void shouldPreserveApplicationAppenderInDefaultFormat() {
+        environment.setProperty("platform.observability.logging.format", "DEFAULT");
+
         ConsoleAppender<ILoggingEvent> applicationAppender = new ConsoleAppender<>();
         applicationAppender.setContext(loggerContext);
         applicationAppender.setName("APPLICATION_APPENDER");

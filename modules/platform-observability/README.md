@@ -2,16 +2,18 @@
 
 Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-observability.md).
 
-O formato de saída padrão é preservado. Para substituir os appenders de console pelo formato JSON da plataforma, configure:
+O formato JSON da plataforma é usado por padrão. No formato JSON, o módulo substitui os appenders de console do logger raiz pelo appender JSON da plataforma.
+
+Para manter explicitamente o formato de saída já configurado pelo serviço, configure:
 
 ```yaml
 platform:
   observability:
     logging:
-      format: JSON
+      format: DEFAULT
 ```
 
-Os valores aceitos são `DEFAULT` (padrão) e `JSON`.
+Os valores aceitos são `JSON` (padrão) e `DEFAULT` (formato existente do serviço).
 
 ## Mascaramento explícito de valores
 
