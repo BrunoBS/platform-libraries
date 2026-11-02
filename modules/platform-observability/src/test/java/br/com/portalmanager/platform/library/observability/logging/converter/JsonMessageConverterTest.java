@@ -1,11 +1,10 @@
 package br.com.portalmanager.platform.library.observability.logging.converter;
 
-import br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers;
+import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
+import org.slf4j.helpers.MessageFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -15,25 +14,20 @@ class JsonMessageConverterTest {
 
     private final JsonMessageConverter converter = new JsonMessageConverter();
 
-    @AfterEach
-    void tearDown() {
-        LogSanitizers.configureAdditionalSensitiveFields(Set.of());
+    @BeforeEach
+    void setUp() {
+        SensitiveValue.setMaskingEnabled(true);
     }
 
     @Test
-    void shouldEscapeMessageWithoutMaskingWhenMaskingConverterIsDisabled() {
+    void shouldRenderExplicitSensitiveValueWithTheSameMaskInJsonMessages() {
         ILoggingEvent event = mock(ILoggingEvent.class);
-        when(event.getFormattedMessage()).thenReturn(
-                "{\"password\":\"secret\",\"privateKey\":\"private\",\"contact\":\"person@example.com\"}"
-        );
-        LogSanitizers.configureAdditionalSensitiveFields(Set.of("privateKey"));
+        String message = MessageFormatter.arrayFormat(
+                "credential={}",
+                new Object[]{SensitiveValue.of("abcdefghij")}
+        ).getMessage();
+        when(event.getFormattedMessage()).thenReturn(message);
 
-        String converted = converter.convert(event);
-
-        assertThat(converted)
-                .isEqualTo("{\\\"password\\\":\\\"secret\\\",\\\"privateKey\\\":\\\"private\\\","
-                        + "\\\"contact\\\":\\\"person@example.com\\\"}")
-                .contains("secret", "private", "person@example.com")
-                .doesNotContain("***");
+        assertThat(converter.convert(event)).isEqualTo("credential=abc****hij");
     }
 }

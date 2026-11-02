@@ -4,9 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.unit.DataSize;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 @ConfigurationProperties(prefix = "platform.observability")
 public class PlatformObservabilityProperties {
@@ -45,16 +43,9 @@ public class PlatformObservabilityProperties {
 
     public static class Masking {
         private boolean enabled = true;
-        private Set<String> additionalSensitiveFields = new LinkedHashSet<>();
 
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
-        public Set<String> getAdditionalSensitiveFields() { return additionalSensitiveFields; }
-        public void setAdditionalSensitiveFields(Set<String> additionalSensitiveFields) {
-            this.additionalSensitiveFields = additionalSensitiveFields == null
-                    ? new LinkedHashSet<>()
-                    : new LinkedHashSet<>(additionalSensitiveFields);
-        }
     }
 
     public static class RequestBody {

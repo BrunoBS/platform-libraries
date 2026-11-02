@@ -1,12 +1,10 @@
 package br.com.portalmanager.platform.library.observability.logging.converter;
 
-import br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers;
+import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -16,9 +14,9 @@ class JsonThrowableConverterTest {
 
     private final JsonThrowableConverter converter = new JsonThrowableConverter();
 
-    @AfterEach
-    void tearDown() {
-        LogSanitizers.configureAdditionalSensitiveFields(Set.of());
+    @BeforeEach
+    void setUp() {
+        SensitiveValue.setMaskingEnabled(true);
     }
 
     @Test
@@ -47,17 +45,17 @@ class JsonThrowableConverterTest {
     }
 
     @Test
-    void shouldSanitizeSensitiveFieldsInThrowableOutput() {
+    void shouldRenderExplicitSensitiveValueInThrowableOutput() {
         ILoggingEvent event = mock(ILoggingEvent.class);
         ThrowableProxy throwableProxy = new ThrowableProxy(
-                new IllegalStateException("request failed: {\"password\":\"secret\"}")
+                new IllegalStateException("credential=" + SensitiveValue.of("abcdefghij"))
         );
         when(event.getThrowableProxy()).thenReturn(throwableProxy);
 
         String converted = converter.convert(event);
 
         assertThat(converted)
-                .contains("\\\"password\\\":\\\"***\\\"")
-                .doesNotContain("secret");
+                .contains("credential=abc****hij")
+                .doesNotContain("abcdefghij");
     }
 }

@@ -39,7 +39,7 @@ public class JsonErrorMdcConverter extends ClassicConverter {
         if (error == null || error.isBlank()) {
             return null;
         }
-        return sanitizeStructuredJson(error);
+        return structuredJson(error);
     }
 
     private ApiErrorResponse resolveThrowableError(ILoggingEvent event) {
@@ -82,19 +82,18 @@ public class JsonErrorMdcConverter extends ClassicConverter {
                 .collect(Collectors.joining(",", "[", "]"));
     }
 
-    private String sanitizeStructuredJson(String value) {
-        String sanitized = br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers.sanitize(value);
+    private String structuredJson(String value) {
         try {
-            tools.jackson.databind.JsonNode json = new tools.jackson.databind.ObjectMapper().readTree(sanitized);
+            tools.jackson.databind.JsonNode json = new tools.jackson.databind.ObjectMapper().readTree(value);
             return new tools.jackson.databind.ObjectMapper().writeValueAsString(json);
         } catch (Exception ignored) {
-            return jsonString(sanitized);
+            return jsonString(value);
         }
     }
 
     private String jsonString(String value) {
         return value == null
                 ? "null"
-                : "\"" + JsonMessageConverter.escapeJson(br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers.sanitize(value)) + "\"";
+                : "\"" + JsonMessageConverter.escapeJson(value) + "\"";
     }
 }

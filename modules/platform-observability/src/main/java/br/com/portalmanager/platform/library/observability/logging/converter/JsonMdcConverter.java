@@ -1,6 +1,5 @@
 package br.com.portalmanager.platform.library.observability.logging.converter;
 
-import br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers;
 import br.com.portalmanager.platform.library.observability.logging.web.PayloadErrorLoggingFilter;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.pattern.ClassicConverter;
@@ -38,7 +37,7 @@ public class JsonMdcConverter extends ClassicConverter {
         String fields = context.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
                 .map(entry -> "\"" + escapeJson(entry.getKey()) + "\":\"" +
-                        escapeJson(LogSanitizers.sanitize(entry.getValue())) + "\"")
+                        escapeJson(entry.getValue()) + "\"")
                 .collect(Collectors.joining(","));
 
         String bodyField = resolveRequestBody(event)
@@ -89,12 +88,11 @@ public class JsonMdcConverter extends ClassicConverter {
     }
 
     private String requestBodyField(String body) {
-        String sanitized = LogSanitizers.sanitize(body);
         try {
-            JsonNode json = OBJECT_MAPPER.readTree(sanitized);
+            JsonNode json = OBJECT_MAPPER.readTree(body);
             return "\"" + REQUEST_BODY_KEY + "\":" + OBJECT_MAPPER.writeValueAsString(json);
         } catch (Exception ignored) {
-            return "\"" + REQUEST_BODY_KEY + "\":\"" + escapeJson(sanitized) + "\"";
+            return "\"" + REQUEST_BODY_KEY + "\":\"" + escapeJson(body) + "\"";
         }
     }
 
