@@ -12,6 +12,16 @@
     <name>platform-messaging</name>
     <dependencies>
         <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-messaging-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
         </dependency>
@@ -34,11 +44,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>

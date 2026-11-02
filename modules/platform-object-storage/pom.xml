@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
-            <artifactId>platform-messaging</artifactId>
+            <artifactId>platform-messaging-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

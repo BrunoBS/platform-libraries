@@ -1,11 +1,9 @@
 package br.com.portalmanager.platform.library.messaging.cache;
 
 import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.Duration;
 import java.util.Locale;
@@ -18,144 +16,73 @@ import static org.mockito.Mockito.*;
 
 class RedisApiMessageCacheTest {
 
-    private StringRedisTemplate redisTemplate;
-    private ValueOperations<String, String> valueOperations;
+    private RedisStore redisStore;
     private RedisApiMessageCache cache;
     private final Duration ttl = Duration.ofHours(1);
-    private final String delimiter = "\u0000";
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     void setUp() {
-        redisTemplate = mock(StringRedisTemplate.class);
-        valueOperations = mock(ValueOperations.class);
-
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-
-        cache = new RedisApiMessageCache(redisTemplate, ttl);
+        redisStore = mock(RedisStore.class);
+        cache = new RedisApiMessageCache(redisStore, ttl);
     }
 
     @Test
     void shouldReturnApiMessageWhenPresentInCache() {
-        // Arrange
         String key = "user.not.found";
         Locale locale = Locale.of("pt", "BR");
         String cacheKey = "platform:message:user.not.found:pt-BR";
+        ApiMessage expected = new ApiMessage(
+                "ERR-404", key, "pt-BR", "Usuário não encontrado.", "Verifique o ID.", 404);
 
-        // Monta a string no formato exato esperado pela classe real usando o delimitador nulo
-        String rawValue = String.join(delimiter,
-                "ERR-404", "user.not.found", "pt-BR", "Usuário não encontrado.", "Verifique o ID.", "404");
+        when(redisStore.get(cacheKey, ApiMessage.class)).thenReturn(Optional.of(expected));
 
-        when(valueOperations.get(cacheKey)).thenReturn(rawValue);
-
-        // Act
         Optional<ApiMessage> result = cache.get(key, locale);
 
-        // Assert
-        assertTrue(result.isPresent());
-        ApiMessage message = result.get();
-        assertEquals("ERR-404", message.code());
-        assertEquals("user.not.found", message.messageKey());
-        assertEquals("pt-BR", message.locale());
-        assertEquals("Usuário não encontrado.", message.message());
-        assertEquals("Verifique o ID.", message.solution());
-        assertEquals(404, message.httpStatus());
+        assertEquals(Optional.of(expected), result);
     }
 
     @Test
     void shouldReturnEmptyOptionalWhenCacheIsMiss() {
-        // Arrange
         String key = "unknown.key";
         Locale locale = Locale.US;
         String cacheKey = "platform:message:unknown.key:en-US";
 
-        when(valueOperations.get(cacheKey)).thenReturn(null);
-
-        // Act
-        Optional<ApiMessage> result = cache.get(key, locale);
-
-        // Assert
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void shouldReturnEmptyOptionalWhenPayloadIsCorrupted() {
-        // Arrange
-        String key = "invalid.key";
-        Locale locale = Locale.US;
-        String cacheKey = "platform:message:invalid.key:en-US";
-
-        // Payload inválido com menos de 6 partes separadas
-        String corruptedValue = "ERR-500" + delimiter + "invalid.key" + delimiter + "en-US";
-
-        when(valueOperations.get(cacheKey)).thenReturn(corruptedValue);
-
-        // Act
-        Optional<ApiMessage> result = cache.get(key, locale);
-
-        // Assert
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void shouldTreatCachedMessageWithoutErrorCodeAsCorrupted() {
-        String key = "invalid.code";
-        Locale locale = Locale.US;
-        String cacheKey = "platform:message:invalid.code:en-US";
-        String corruptedValue = String.join(
-                delimiter, "", key, "en-US", "Missing code", "Retry", "400"
-        );
-
-        when(valueOperations.get(cacheKey)).thenReturn(corruptedValue);
+        when(redisStore.get(cacheKey, ApiMessage.class)).thenReturn(Optional.empty());
 
         assertTrue(cache.get(key, locale).isEmpty());
     }
 
     @Test
-    void shouldReturnEmptyOptionalWhenRedisThrowsException() {
-        // Arrange
+    void shouldReturnEmptyOptionalWhenRedisStoreFails() {
         String key = "timeout.key";
         Locale locale = Locale.US;
         String cacheKey = "platform:message:timeout.key:en-US";
 
-        // Simula uma queda ou timeout de conexão do Redis
-        when(valueOperations.get(cacheKey)).thenThrow(new DataAccessResourceFailureException("Redis connection refused"));
+        when(redisStore.get(cacheKey, ApiMessage.class))
+                .thenThrow(new IllegalStateException("Redis unavailable"));
 
-        // Act
-        Optional<ApiMessage> result = cache.get(key, locale);
-
-        // Assert
-        assertTrue(result.isEmpty()); // Deve engolir o erro e retornar vazio de forma segura
+        assertTrue(cache.get(key, locale).isEmpty());
     }
 
     @Test
-    void shouldSaveMessageInCacheWithCorrectStructureAndTtl() {
-        // Arrange
+    void shouldSaveMessageInCacheWithConfiguredTtl() {
         ApiMessage message = new ApiMessage(
                 "ERR-404", "user.not.found", "pt-BR", "Usuário não encontrado.", "Verifique o ID.", 404);
         String expectedCacheKey = "platform:message:user.not.found:pt-BR";
 
-        String expectedRawValue = String.join(delimiter,
-                "ERR-404", "user.not.found", "pt-BR", "Usuário não encontrado.", "Verifique o ID.", "404");
-
-        // Act
         cache.put(message);
 
-        // Assert
-        verify(valueOperations, times(1)).set(eq(expectedCacheKey), eq(expectedRawValue), eq(ttl));
+        verify(redisStore).set(eq(expectedCacheKey), eq(message), eq(ttl));
     }
 
     @Test
-    void shouldDeleteKeyFromRedisWhenEvictIsCalled() {
-        // Arrange
+    void shouldDeleteKeyFromRedisStoreWhenEvictIsCalled() {
         String key = "user.not.found";
         Locale locale = Locale.of("pt", "BR");
         String expectedCacheKey = "platform:message:user.not.found:pt-BR";
 
-        // Act
         cache.evict(key, locale);
 
-        // Assert
-        verify(redisTemplate, times(1)).delete(eq(expectedCacheKey));
+        verify(redisStore).delete(eq(expectedCacheKey));
     }
 }

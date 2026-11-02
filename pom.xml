@@ -12,6 +12,7 @@
         <module>platform-parent</module>
         <module>platform-libraries-bom</module>
         <module>modules/platform-observability</module>
+        <module>modules/platform-messaging-core</module>
         <module>modules/platform-messaging</module>
         <module>modules/platform-redis</module>
         <module>modules/platform-scheduling</module>

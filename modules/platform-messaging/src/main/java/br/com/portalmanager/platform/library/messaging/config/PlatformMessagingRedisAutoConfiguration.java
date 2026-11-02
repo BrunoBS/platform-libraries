@@ -4,17 +4,21 @@ import br.com.portalmanager.platform.library.messaging.cache.ApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.cache.RedisApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformTechnicalErrors;
+import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
+import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.Duration;
 
-@AutoConfiguration(before = PlatformMessagingAutoConfiguration.class)
-@ConditionalOnClass(StringRedisTemplate.class)
+@AutoConfiguration(
+        after = PlatformRedisAutoConfiguration.class,
+        before = PlatformMessagingAutoConfiguration.class
+)
+@ConditionalOnBean(RedisStore.class)
 @ConditionalOnProperty(
         prefix = "platform.messaging.cache",
         name = "enabled",
@@ -26,12 +30,12 @@ public class PlatformMessagingRedisAutoConfiguration {
     @ConditionalOnMissingBean(ApiMessageCache.class)
     ApiMessageCache redisApiMessageCache(
             PlatformMessagingProperties properties,
-            StringRedisTemplate redisTemplate
+            RedisStore redisStore
     ) {
         Duration ttl = properties.getCache().getTtl();
         if (ttl == null || ttl.isZero() || ttl.isNegative()) {
             throw new PlatformConfigurationException(PlatformTechnicalErrors.CACHE_TTL_INVALID);
         }
-        return new RedisApiMessageCache(redisTemplate, ttl);
+        return new RedisApiMessageCache(redisStore, ttl);
     }
 }
