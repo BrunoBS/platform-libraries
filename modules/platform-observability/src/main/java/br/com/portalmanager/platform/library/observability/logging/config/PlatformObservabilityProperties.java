@@ -1,7 +1,6 @@
 package br.com.portalmanager.platform.library.observability.logging.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.unit.DataSize;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +16,6 @@ public class PlatformObservabilityProperties {
     public static class Logging {
         private Format format = Format.DEFAULT;
         private Masking masking = new Masking();
-        private RequestBody requestBody = new RequestBody();
         private Map<String, String> defaults = new LinkedHashMap<>();
         private Map<String, String> levels = new LinkedHashMap<>();
         private Map<String, String> customConverters = new LinkedHashMap<>();
@@ -26,8 +24,6 @@ public class PlatformObservabilityProperties {
         public void setFormat(Format format) { this.format = format == null ? Format.DEFAULT : format; }
         public Masking getMasking() { return masking; }
         public void setMasking(Masking masking) { this.masking = masking == null ? new Masking() : masking; }
-        public RequestBody getRequestBody() { return requestBody; }
-        public void setRequestBody(RequestBody requestBody) { this.requestBody = requestBody == null ? new RequestBody() : requestBody; }
         public Map<String, String> getDefaults() { return defaults; }
         public void setDefaults(Map<String, String> defaults) { this.defaults = defaults == null ? new LinkedHashMap<>() : new LinkedHashMap<>(defaults); }
         public Map<String, String> getLevels() { return levels; }
@@ -46,15 +42,5 @@ public class PlatformObservabilityProperties {
 
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
-    }
-
-    public static class RequestBody {
-        private boolean enabled = false;
-        private DataSize maxSize = DataSize.ofMegabytes(1);
-
-        public boolean isEnabled() { return enabled; }
-        public void setEnabled(boolean enabled) { this.enabled = enabled; }
-        public DataSize getMaxSize() { return maxSize; }
-        public void setMaxSize(DataSize maxSize) { this.maxSize = maxSize == null ? DataSize.ofMegabytes(1) : maxSize; }
     }
 }
