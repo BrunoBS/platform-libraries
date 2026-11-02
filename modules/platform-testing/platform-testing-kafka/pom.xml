@@ -18,7 +18,6 @@
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-testing-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -39,8 +38,7 @@
         </dependency>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
-            <artifactId>platform-messaging</artifactId>
-            <version>${project.version}</version>
+            <artifactId>platform-messaging-core</artifactId>
         </dependency>
     </dependencies>
     <build>

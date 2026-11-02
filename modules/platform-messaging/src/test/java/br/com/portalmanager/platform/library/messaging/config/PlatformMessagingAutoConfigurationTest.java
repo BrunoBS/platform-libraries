@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.messaging.config;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.repository.JdbcApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.repository.NoOpApiMessageRepository;
@@ -12,7 +13,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -34,8 +34,8 @@ class PlatformMessagingAutoConfigurationTest {
     @Configuration
     static class MockRedisInfrastructureConfiguration {
         @Bean
-        StringRedisTemplate stringRedisTemplate() {
-            return mock(StringRedisTemplate.class);
+        RedisStore redisStore() {
+            return mock(RedisStore.class);
         }
     }
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>br.com.portalmanager.platform.library</groupId>
+        <artifactId>platform-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../platform-parent/pom.xml</relativePath>
+    </parent>
+    <artifactId>platform-messaging-core</artifactId>
+    <name>platform-messaging-core</name>
+    <description>Contratos e suporte compartilhado de mensagens, erros e validação para as bibliotecas da plataforma.</description>
+    <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

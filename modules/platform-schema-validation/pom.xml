@@ -15,8 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
-            <artifactId>platform-messaging</artifactId>
-            <version>${project.version}</version>
+            <artifactId>platform-messaging-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -60,7 +59,6 @@
         <dependency>
             <groupId>br.com.portalmanager.platform.library</groupId>
             <artifactId>platform-testing-core</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -73,6 +71,11 @@
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-messaging</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

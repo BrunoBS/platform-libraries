@@ -5,17 +5,21 @@ import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolv
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.containsString;
 
 class HttpMethodNotAllowedHandlerTest {
+    private static final JsonMapper JSON = JsonMapper.builder().build();
     private final PlatformDefaultMessageProvider provider = new PlatformDefaultMessageProvider();
     private final ApiMessageResolver resolver = (key, locale) -> provider.find(key,
             locale == null ? Locale.forLanguageTag("pt-BR") : locale).orElseThrow();
@@ -24,19 +28,27 @@ class HttpMethodNotAllowedHandlerTest {
 
     @Test
     void unsupportedMethodsReturn405AndAllowInsteadOfTheUnexpectedErrorHandler() throws Exception {
-        mvc.perform(delete("/resources/identifier").header("Accept-Language", "en"))
+        MvcResult result = mvc.perform(delete("/resources/identifier").header("Accept-Language", "en"))
                 .andExpect(status().isMethodNotAllowed())
                 .andExpect(header().string("Allow", containsString("GET")))
-                .andExpect(jsonPath("$.code").value("GLOBAL-0010"))
-                .andExpect(jsonPath("$.message").value("HTTP method DELETE is not allowed for this resource."))
-                .andExpect(jsonPath("$.path").value("/resources/identifier"));
+                .andReturn();
+
+        JsonNode response = JSON.readTree(result.getResponse().getContentAsString());
+        assertThat(response.path("code").asString()).isEqualTo("GLOBAL-0010");
+        assertThat(response.path("message").asString())
+                .isEqualTo("HTTP method DELETE is not allowed for this resource.");
+        assertThat(response.path("path").asString()).isEqualTo("/resources/identifier");
     }
 
     @Test
     void the405MessageIsLocalizedInPortuguese() throws Exception {
-        mvc.perform(delete("/resources/identifier").header("Accept-Language", "pt-BR"))
+        MvcResult result = mvc.perform(delete("/resources/identifier").header("Accept-Language", "pt-BR"))
                 .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.message").value("O método HTTP DELETE não é permitido para este recurso."));
+                .andReturn();
+
+        JsonNode response = JSON.readTree(result.getResponse().getContentAsString());
+        assertThat(response.path("message").asString())
+                .isEqualTo("O método HTTP DELETE não é permitido para este recurso.");
     }
 
     @RestController
