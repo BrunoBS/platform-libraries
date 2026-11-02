@@ -16,6 +16,7 @@ class PlatformStarterMinimalConsumerTest {
     void shouldStartMinimalConsumerWithoutOptionalCapabilities() {
         SpringApplication application = new SpringApplication(MinimalConsumerApplication.class);
         application.setDefaultProperties(java.util.Map.of(
+                "spring.application.name", "minimal-consumer",
                 "spring.main.web-application-type", "none",
                 "platform.authorization.mode", "MOCK"
         ));
