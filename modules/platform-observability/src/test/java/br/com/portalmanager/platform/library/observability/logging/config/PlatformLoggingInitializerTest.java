@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.observability.logging.config;
 
+import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -51,6 +52,7 @@ class PlatformLoggingInitializerTest {
     void tearDown() {
 
         resetLogback();
+        SensitiveValue.setMaskingEnabled(true);
 
         if (context != null) {
             context.close();
@@ -127,6 +129,10 @@ class PlatformLoggingInitializerTest {
         PatternLayoutEncoder encoder = (PatternLayoutEncoder) appender.getEncoder();
 
         assertThat(encoder.getPattern())
+                .as("A mensagem JSON deveria usar o conversor do formato sem um conversor de sanitização automático.")
+                .contains("\"message\":\"%jsonMessage\"");
+
+        assertThat(encoder.getPattern())
                 .as("O contexto deveria usar o conversor JSON do MDC.")
                 .contains("\"context\":%jsonMdc");
 
@@ -141,23 +147,6 @@ class PlatformLoggingInitializerTest {
         assertThat(encoder.getPattern())
                 .as("HOSTNAME textual null não deveria ser emitido no log.")
                 .doesNotContain("\"host\":\"null\"");
-    }
-
-    @Test
-    void shouldUseSensitiveFieldConverterWhenOptionalMessageMaskingIsDisabled() {
-        environment.setProperty("platform.observability.logging.format", "JSON");
-        environment.setProperty("platform.observability.logging.masking.enabled", "false");
-
-        initializer.initialize(context);
-
-        @SuppressWarnings("unchecked")
-        ConsoleAppender<ILoggingEvent> appender =
-                (ConsoleAppender<ILoggingEvent>) rootLogger().getAppender("JSON_CONSOLE");
-        PatternLayoutEncoder encoder = (PatternLayoutEncoder) appender.getEncoder();
-
-        assertThat(encoder.getPattern())
-                .contains("\"message\":\"%jsonMessage\"")
-                .doesNotContain("%corporateLgpdMask");
     }
 
     // ========================================================================

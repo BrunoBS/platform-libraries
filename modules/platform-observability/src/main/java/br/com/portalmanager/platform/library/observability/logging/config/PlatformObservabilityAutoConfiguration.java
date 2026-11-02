@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.observability.logging.config;
 
-import br.com.portalmanager.platform.library.observability.logging.sanitizer.LogSanitizers;
+import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
 import br.com.portalmanager.platform.library.observability.logging.web.PayloadErrorLoggingFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -29,15 +29,14 @@ public class PlatformObservabilityAutoConfiguration {
     }
 
     @Bean
-    public ObservabilitySecurityConfiguration observabilitySecurityConfiguration(PlatformObservabilityProperties properties) {
-        return new ObservabilitySecurityConfiguration(properties);
+    public MaskingConfiguration sensitiveValueMaskingConfiguration(PlatformObservabilityProperties properties) {
+        return new MaskingConfiguration(properties.getLogging().getMasking().isEnabled());
     }
 
-    public static final class ObservabilitySecurityConfiguration {
-        public ObservabilitySecurityConfiguration(PlatformObservabilityProperties properties) {
-            LogSanitizers.configureAdditionalSensitiveFields(
-                    properties.getLogging().getMasking().getAdditionalSensitiveFields()
-            );
+    public static final class MaskingConfiguration {
+        public MaskingConfiguration(boolean enabled) {
+            SensitiveValue.setMaskingEnabled(enabled);
         }
     }
+
 }

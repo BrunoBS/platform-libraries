@@ -69,8 +69,9 @@ class JsonMdcConverterTest {
         assertThat(converter.convert(event))
                 .isEqualTo("{\"uri\":\"/api/\\\"workspace\\\"\",\"userAgent\":\"line1\\nline2\\\\client\"}");
     }
+
     @Test
-    void shouldIncludeSanitizedRequestBodyOnlyWhileErrorLogIsConverted() throws Exception {
+    void shouldIncludeRequestBodyOnlyWhileErrorLogIsConverted() throws Exception {
         MockHttpServletRequest rawRequest = new MockHttpServletRequest();
         rawRequest.setContent("{\"password\":\"secret\",\"cpf\":\"123.456.789-00\"}".getBytes());
         ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
@@ -82,7 +83,7 @@ class JsonMdcConverterTest {
         when(event.getMDCPropertyMap()).thenReturn(Map.of("correlationId", "corr-01"));
 
         assertThat(converter.convert(event))
-                .contains("\"requestBody\":{\"password\":\"***\",\"cpf\":\"***.***.***-**\"}");
+                .contains("\"requestBody\":{\"password\":\"secret\",\"cpf\":\"123.456.789-00\"}");
 
         RequestContextHolder.resetRequestAttributes();
         assertThat(converter.convert(event))
@@ -90,7 +91,7 @@ class JsonMdcConverterTest {
     }
 
     @Test
-    void shouldKeepSanitizationBeforeJsonParsingForNestedObjects() throws Exception {
+    void shouldPreserveRequestBodyValuesForNestedObjects() throws Exception {
         MockHttpServletRequest rawRequest = new MockHttpServletRequest();
         rawRequest.setContent("{\"user\":{\"email\":\"bruno@example.com\",\"token\":\"abc\"},\"items\":[{\"password\":\"secret\"}]}".getBytes());
         ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
@@ -102,7 +103,7 @@ class JsonMdcConverterTest {
         when(event.getMDCPropertyMap()).thenReturn(Map.of());
 
         assertThat(converter.convert(event))
-                .isEqualTo("{\"requestBody\":{\"user\":{\"email\":\"b****@example.com\",\"token\":\"***\"},\"items\":[{\"password\":\"***\"}]}}");
+                .isEqualTo("{\"requestBody\":{\"user\":{\"email\":\"bruno@example.com\",\"token\":\"abc\"},\"items\":[{\"password\":\"secret\"}]}}");
     }
 
     @Test
@@ -118,11 +119,11 @@ class JsonMdcConverterTest {
         when(event.getMDCPropertyMap()).thenReturn(Map.of());
 
         assertThat(converter.convert(event))
-                .isEqualTo("{\"requestBody\":[{\"cpf\":\"***.***.***-**\"},{\"password\":\"***\"}]}");
+                .isEqualTo("{\"requestBody\":[{\"cpf\":\"12345678900\"},{\"password\":\"secret\"}]}");
     }
 
     @Test
-    void shouldFallbackToSanitizedStringWhenRequestBodyIsNotJson() throws Exception {
+    void shouldFallbackToEscapedStringWhenRequestBodyIsNotJson() throws Exception {
         MockHttpServletRequest rawRequest = new MockHttpServletRequest();
         rawRequest.setContent("cpf=123.456.789-00".getBytes());
         ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(rawRequest, 1024 * 1024);
@@ -134,7 +135,7 @@ class JsonMdcConverterTest {
         when(event.getMDCPropertyMap()).thenReturn(Map.of());
 
         assertThat(converter.convert(event))
-                .isEqualTo("{\"requestBody\":\"cpf=***.***.***-**\"}");
+                .isEqualTo("{\"requestBody\":\"cpf=123.456.789-00\"}");
     }
 
     @Test

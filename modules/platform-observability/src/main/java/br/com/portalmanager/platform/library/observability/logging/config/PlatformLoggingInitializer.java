@@ -1,10 +1,10 @@
 package br.com.portalmanager.platform.library.observability.logging.config;
 
+import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
 import br.com.portalmanager.platform.library.observability.logging.converter.JsonErrorMdcConverter;
 import br.com.portalmanager.platform.library.observability.logging.converter.JsonMdcConverter;
 import br.com.portalmanager.platform.library.observability.logging.converter.JsonMessageConverter;
 import br.com.portalmanager.platform.library.observability.logging.converter.JsonThrowableConverter;
-import br.com.portalmanager.platform.library.observability.logging.converter.MaskingConverter;
 import br.com.portalmanager.platform.library.observability.logging.metadata.BuildVersionResolver;
 import br.com.portalmanager.platform.library.observability.logging.metadata.HostResolver;
 import ch.qos.logback.classic.Level;
@@ -43,7 +43,11 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
 
         configureStatusListener(loggerContext);
         loadInternalDefaults(env);
-
+        SensitiveValue.setMaskingEnabled(env.getProperty(
+                "platform.observability.logging.masking.enabled",
+                Boolean.class,
+                true
+        ));
         if (loggingFormat(env) == PlatformObservabilityProperties.Logging.Format.JSON) {
             ConsoleAppender<ILoggingEvent> jsonAppender = createJsonConsoleAppender(loggerContext, env);
             registerJsonAppender(loggerContext, jsonAppender);
@@ -84,12 +88,6 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         String appVersion = BuildVersionResolver.resolve(env);
         String host = HostResolver.resolve(env);
         String instanceId = host + ":" + ProcessHandle.current().pid() + ":" + INSTANCE_START_ID;
-        boolean maskingEnabled = env.getProperty(
-                "platform.observability.logging.masking.enabled",
-                Boolean.class,
-                true
-        );
-
         Map<String, String> customConverters = Binder.get(env)
                 .bind(
                         "platform.observability.logging.custom-converters",
@@ -97,11 +95,11 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
                 )
                 .orElse(new HashMap<>());
 
-        registerPatternConverters(loggerContext, maskingEnabled, customConverters);
+        registerPatternConverters(loggerContext, customConverters);
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(loggerContext);
-        encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, instanceId, maskingEnabled, customConverters));
+        encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, instanceId, customConverters));
         encoder.start();
 
         ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
@@ -116,7 +114,6 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     @SuppressWarnings("unchecked")
     private void registerPatternConverters(
             LoggerContext loggerContext,
-            boolean maskingEnabled,
             Map<String, String> customConverters
     ) {
         Map<String, String> converters = new HashMap<>();
@@ -133,10 +130,6 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         converters.put("jsonMdc", JsonMdcConverter.class.getName());
         converters.put("jsonError", JsonErrorMdcConverter.class.getName());
         converters.put("jsonThrowable", JsonThrowableConverter.class.getName());
-        if (maskingEnabled) {
-            converters.put("corporateLgpdMask", MaskingConverter.class.getName());
-        }
-
         customConverters.forEach((wordTag, className) -> {
             validateCustomConverter(wordTag, className);
             converters.put(wordTag, className);
@@ -167,10 +160,9 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
             String appVersion,
             String host,
             String instanceId,
-            boolean maskingEnabled,
             Map<String, String> customConverters
     ) {
-        String messageToken = maskingEnabled ? "%corporateLgpdMask" : "%jsonMessage";
+        String messageToken = "%jsonMessage";
         for (String userTag : customConverters.keySet()) {
             messageToken = String.format("%%%s({%s})", userTag, messageToken);
         }
