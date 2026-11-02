@@ -127,6 +127,10 @@ class PlatformLoggingInitializerTest {
         PatternLayoutEncoder encoder = (PatternLayoutEncoder) appender.getEncoder();
 
         assertThat(encoder.getPattern())
+                .as("Com o mascaramento habilitado, a mensagem deveria passar pelo sanitizador.")
+                .contains("%corporateLgpdMask");
+
+        assertThat(encoder.getPattern())
                 .as("O contexto deveria usar o conversor JSON do MDC.")
                 .contains("\"context\":%jsonMdc");
 
@@ -144,7 +148,7 @@ class PlatformLoggingInitializerTest {
     }
 
     @Test
-    void shouldUseSensitiveFieldConverterWhenOptionalMessageMaskingIsDisabled() {
+    void shouldUseUnmaskedJsonConverterWhenMessageMaskingIsDisabled() {
         environment.setProperty("platform.observability.logging.format", "JSON");
         environment.setProperty("platform.observability.logging.masking.enabled", "false");
 

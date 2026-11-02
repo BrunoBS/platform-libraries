@@ -21,7 +21,7 @@ class JsonMessageConverterTest {
     }
 
     @Test
-    void shouldAlwaysMaskSensitiveFieldNamesButLeaveOptionalTextPatternsUnchanged() {
+    void shouldEscapeMessageWithoutMaskingWhenMaskingConverterIsDisabled() {
         ILoggingEvent event = mock(ILoggingEvent.class);
         when(event.getFormattedMessage()).thenReturn(
                 "{\"password\":\"secret\",\"privateKey\":\"private\",\"contact\":\"person@example.com\"}"
@@ -31,8 +31,9 @@ class JsonMessageConverterTest {
         String converted = converter.convert(event);
 
         assertThat(converted)
-                .isEqualTo("{\\\"password\\\":\\\"***\\\",\\\"privateKey\\\":\\\"***\\\","
+                .isEqualTo("{\\\"password\\\":\\\"secret\\\",\\\"privateKey\\\":\\\"private\\\","
                         + "\\\"contact\\\":\\\"person@example.com\\\"}")
-                .doesNotContain("\\\"secret\\\"", "\\\"private\\\"");
+                .contains("secret", "private", "person@example.com")
+                .doesNotContain("***");
     }
 }

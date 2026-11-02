@@ -15,10 +15,6 @@ public final class LogSanitizers {
         return applyCustomSanitizers(builtIn.sanitize(value));
     }
 
-    public static String sanitizeSensitiveFields(String value) {
-        return applyCustomSanitizers(builtIn.sanitizeSensitiveFields(value));
-    }
-
     public static void configureAdditionalSensitiveFields(Collection<String> fields) {
         builtIn = DefaultLogSanitizer.withAdditionalSensitiveFields(fields);
     }

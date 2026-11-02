@@ -65,7 +65,7 @@ public final class DefaultLogSanitizer implements LogSanitizer {
         return maskEmails(sanitized);
     }
 
-    String sanitizeSensitiveFields(String value) {
+    private String sanitizeSensitiveFields(String value) {
         if (value == null || value.isBlank()) {
             return value;
         }
