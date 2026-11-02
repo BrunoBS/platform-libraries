@@ -55,7 +55,7 @@ class JsonThrowableConverterTest {
         String converted = converter.convert(event);
 
         assertThat(converted)
-                .contains("credential=abc****hij")
+                .contains("credential=a********j")
                 .doesNotContain("abcdefghij");
     }
 }

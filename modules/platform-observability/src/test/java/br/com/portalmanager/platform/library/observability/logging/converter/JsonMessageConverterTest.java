@@ -28,6 +28,6 @@ class JsonMessageConverterTest {
         ).getMessage();
         when(event.getFormattedMessage()).thenReturn(message);
 
-        assertThat(converter.convert(event)).isEqualTo("credential=abc****hij");
+        assertThat(converter.convert(event)).isEqualTo("credential=a********j");
     }
 }
