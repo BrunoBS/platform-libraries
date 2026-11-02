@@ -36,8 +36,7 @@ class PlatformObservabilityPropertiesTest {
                 "platform.observability.logging.masking.enabled=false",
                 "platform.observability.logging.format=JSON",
                 "platform.observability.logging.levels.br.com.portalmanager=DEBUG",
-                "platform.observability.logging.defaults.org.springframework=ERROR",
-                "platform.observability.logging.custom-converters.audit=com.example.AuditConverter"
+                "platform.observability.logging.defaults.org.springframework=ERROR"
         ).run(context -> {
             PlatformObservabilityProperties properties = context.getBean(PlatformObservabilityProperties.class);
 
@@ -47,7 +46,6 @@ class PlatformObservabilityPropertiesTest {
                     .isEqualTo(PlatformObservabilityProperties.Logging.Format.JSON);
             assertThat(properties.getLogging().getLevels()).containsEntry("br.com.portalmanager", "DEBUG");
             assertThat(properties.getLogging().getDefaults()).containsEntry("org.springframework", "ERROR");
-            assertThat(properties.getLogging().getCustomConverters()).containsEntry("audit", "com.example.AuditConverter");
         });
     }
 }

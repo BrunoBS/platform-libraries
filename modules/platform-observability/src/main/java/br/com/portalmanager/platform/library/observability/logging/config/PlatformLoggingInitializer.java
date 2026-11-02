@@ -88,18 +88,11 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         String appVersion = BuildVersionResolver.resolve(env);
         String host = HostResolver.resolve(env);
         String instanceId = host + ":" + ProcessHandle.current().pid() + ":" + INSTANCE_START_ID;
-        Map<String, String> customConverters = Binder.get(env)
-                .bind(
-                        "platform.observability.logging.custom-converters",
-                        Bindable.mapOf(String.class, String.class)
-                )
-                .orElse(new HashMap<>());
-
-        registerPatternConverters(loggerContext, customConverters);
+        registerPatternConverters(loggerContext);
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(loggerContext);
-        encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, instanceId, customConverters));
+        encoder.setPattern(buildJsonPattern(serviceName, appVersion, host, instanceId));
         encoder.start();
 
         ConsoleAppender<ILoggingEvent> appender = new ConsoleAppender<>();
@@ -112,10 +105,7 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
     }
 
     @SuppressWarnings("unchecked")
-    private void registerPatternConverters(
-            LoggerContext loggerContext,
-            Map<String, String> customConverters
-    ) {
+    private void registerPatternConverters(LoggerContext loggerContext) {
         Map<String, String> converters = new HashMap<>();
         Object registeredConverters = loggerContext.getObject(CoreConstants.PATTERN_RULE_REGISTRY);
         if (registeredConverters instanceof Map<?, ?> existingConverters) {
@@ -130,46 +120,18 @@ public class PlatformLoggingInitializer implements ApplicationContextInitializer
         converters.put("jsonMdc", JsonMdcConverter.class.getName());
         converters.put("jsonError", JsonErrorMdcConverter.class.getName());
         converters.put("jsonThrowable", JsonThrowableConverter.class.getName());
-        customConverters.forEach((wordTag, className) -> {
-            validateCustomConverter(wordTag, className);
-            converters.put(wordTag, className);
-        });
 
         loggerContext.putObject(CoreConstants.PATTERN_RULE_REGISTRY, converters);
     }
 
-    private void validateCustomConverter(String wordTag, String className) {
-        if (wordTag == null || wordTag.isBlank() || className == null || className.isBlank()) {
-            throw new IllegalStateException("Custom logging converter tag and class must not be blank");
-        }
-        try {
-            Class.forName(className);
-        } catch (ClassNotFoundException exception) {
-            throw new IllegalStateException(
-                    "Custom logging converter class not found for tag '" + wordTag + "': " + className,
-                    exception
-            );
-        }
-    }
-
-    /**
-     * Monta a String do template estruturado do JSON aplicando o envelopamento infinito em cascata.
-     */
     private String buildJsonPattern(
             String serviceName,
             String appVersion,
             String host,
-            String instanceId,
-            Map<String, String> customConverters
+            String instanceId
     ) {
-        String messageToken = "%jsonMessage";
-        for (String userTag : customConverters.keySet()) {
-            messageToken = String.format("%%%s({%s})", userTag, messageToken);
-        }
-
         return String.format(
-                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%s\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"instanceId\":\"%s\",\"context\":%%jsonMdc,\"error\":%%jsonError,\"exception\":%%jsonThrowable}%%n",
-                messageToken,
+                "{\"timestamp\":\"%%d{yyyy-MM-dd'T'HH:mm:ss.SSSX,UTC}\",\"level\":\"%%level\",\"thread\":\"%%thread\",\"logger\":\"%%logger\",\"message\":\"%%jsonMessage\",\"service\":\"%s\",\"version\":\"%s\",\"host\":\"%s\",\"instanceId\":\"%s\",\"context\":%%jsonMdc,\"error\":%%jsonError,\"exception\":%%jsonThrowable}%%n",
                 JsonMessageConverter.escapeJson(serviceName),
                 JsonMessageConverter.escapeJson(appVersion),
                 JsonMessageConverter.escapeJson(host),

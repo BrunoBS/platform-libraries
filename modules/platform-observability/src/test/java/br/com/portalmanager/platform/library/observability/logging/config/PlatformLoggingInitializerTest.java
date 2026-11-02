@@ -19,7 +19,6 @@ import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PlatformLoggingInitializerTest {
 
@@ -463,19 +462,6 @@ class PlatformLoggingInitializerTest {
                 .isNotNull();
         assertThat(rootLogger().getAppender("JSON_CONSOLE"))
                 .isNull();
-    }
-
-    @Test
-    void shouldFailFastWhenCustomConverterClassDoesNotExist() {
-        environment.setProperty("platform.observability.logging.format", "JSON");
-        environment.setProperty(
-                "platform.observability.logging.custom-converters.audit",
-                "com.example.DoesNotExistConverter"
-        );
-
-        assertThatThrownBy(() -> initializer.initialize(context))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("DoesNotExistConverter");
     }
 
     // ========================================================================

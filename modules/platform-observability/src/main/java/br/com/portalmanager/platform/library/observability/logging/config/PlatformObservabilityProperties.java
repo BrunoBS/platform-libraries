@@ -18,7 +18,6 @@ public class PlatformObservabilityProperties {
         private Masking masking = new Masking();
         private Map<String, String> defaults = new LinkedHashMap<>();
         private Map<String, String> levels = new LinkedHashMap<>();
-        private Map<String, String> customConverters = new LinkedHashMap<>();
 
         public Format getFormat() { return format; }
         public void setFormat(Format format) { this.format = format == null ? Format.DEFAULT : format; }
@@ -28,8 +27,6 @@ public class PlatformObservabilityProperties {
         public void setDefaults(Map<String, String> defaults) { this.defaults = defaults == null ? new LinkedHashMap<>() : new LinkedHashMap<>(defaults); }
         public Map<String, String> getLevels() { return levels; }
         public void setLevels(Map<String, String> levels) { this.levels = levels == null ? new LinkedHashMap<>() : new LinkedHashMap<>(levels); }
-        public Map<String, String> getCustomConverters() { return customConverters; }
-        public void setCustomConverters(Map<String, String> customConverters) { this.customConverters = customConverters == null ? new LinkedHashMap<>() : new LinkedHashMap<>(customConverters); }
 
         public enum Format {
             DEFAULT,
