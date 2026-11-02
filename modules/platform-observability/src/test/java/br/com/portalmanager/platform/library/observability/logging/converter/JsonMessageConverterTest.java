@@ -33,6 +33,6 @@ class JsonMessageConverterTest {
         assertThat(converted)
                 .isEqualTo("{\\\"password\\\":\\\"***\\\",\\\"privateKey\\\":\\\"***\\\","
                         + "\\\"contact\\\":\\\"person@example.com\\\"}")
-                .doesNotContain("secret", "private");
+                .doesNotContain("\\\"secret\\\"", "\\\"private\\\"");
     }
 }
