@@ -46,7 +46,7 @@ public record PlatformRedisCacheProperties(
         }
     }
 
-    static void name(String name) {
+    public static void name(String name) {
         if (name == null || !name.matches("[A-Za-z0-9][A-Za-z0-9._-]{0,127}"))
             throw RedisErrors.configuration();
     }

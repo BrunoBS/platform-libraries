@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.redis.internal.pubsub;
 
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.common.ListenerSupport;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
 import br.com.portalmanager.platform.library.redis.pubsub.RedisKeyspaceSubscribe;
 import br.com.portalmanager.platform.library.redis.pubsub.RedisSubscribe;

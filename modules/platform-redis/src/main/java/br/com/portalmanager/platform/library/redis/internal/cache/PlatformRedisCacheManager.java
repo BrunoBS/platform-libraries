@@ -25,7 +25,7 @@ public final class PlatformRedisCacheManager extends RedisCacheManager {
     private final RedisAccess access;
     private final ConcurrentMap<String, Cache> reads = new ConcurrentHashMap<>();
 
-    PlatformRedisCacheManager(
+    public PlatformRedisCacheManager(
             RedisCacheWriter writer,
             PlatformRedisCacheProperties properties,
             CacheReturnTypes types,
@@ -66,7 +66,7 @@ public final class PlatformRedisCacheManager extends RedisCacheManager {
                                 new CacheJsonSerializer(name, types, codec)));
     }
 
-    Cache readCache(String name) {
+    public Cache readCache(String name) {
         if (properties.failurePolicy() == PlatformRedisCacheProperties.FailurePolicy.FAIL_FAST)
             return getCache(name);
         getCache(name);

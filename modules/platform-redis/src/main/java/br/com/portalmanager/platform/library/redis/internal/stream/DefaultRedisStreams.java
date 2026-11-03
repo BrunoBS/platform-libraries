@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.redis.internal.stream;
 
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 import br.com.portalmanager.platform.library.redis.stream.GroupStart;

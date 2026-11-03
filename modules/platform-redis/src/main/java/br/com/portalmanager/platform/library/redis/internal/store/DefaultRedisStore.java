@@ -1,6 +1,8 @@
 package br.com.portalmanager.platform.library.redis.internal.store;
 
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisReadScripts;
 
 import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import br.com.portalmanager.platform.library.redis.store.RedisKeyPage;
