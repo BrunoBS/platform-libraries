@@ -1,5 +1,7 @@
-package br.com.portalmanager.platform.library.redis.internal.common;
+package br.com.portalmanager.platform.library.redis.internal.store;
 
+import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 
 import org.springframework.data.redis.connection.ClusterSlotHashUtil;

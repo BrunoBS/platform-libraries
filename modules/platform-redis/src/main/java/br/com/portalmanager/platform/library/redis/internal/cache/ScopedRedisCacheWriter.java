@@ -15,11 +15,11 @@ import java.util.function.Supplier;
 /**
  * Namespaces native writer bookkeeping/locks as well as entry keys; delegates every Redis command.
  */
-final class ScopedRedisCacheWriter implements RedisCacheWriter {
+public final class ScopedRedisCacheWriter implements RedisCacheWriter {
     private final RedisCacheWriter delegate;
     private final String scope;
 
-    ScopedRedisCacheWriter(RedisCacheWriter delegate, String scope) {
+    public ScopedRedisCacheWriter(RedisCacheWriter delegate, String scope) {
         this.delegate = delegate;
         this.scope = scope;
     }
