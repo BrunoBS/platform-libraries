@@ -46,7 +46,7 @@ final class RedisBatches {
         Map<String, String> result = new LinkedHashMap<>();
         for (String key : keys) {
             result.putIfAbsent(key, key(namespace, key));
-            if (result.size() > access.properties().maxReadSize()) throw RedisErrors.invalid();
+            if (result.size() > access.properties().limits().maxReadSize()) throw RedisErrors.invalid();
         }
         sameSlot(result.values());
         return result;

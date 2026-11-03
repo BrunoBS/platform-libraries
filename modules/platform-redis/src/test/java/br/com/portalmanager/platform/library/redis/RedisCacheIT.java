@@ -359,9 +359,9 @@ class RedisCacheIT extends RedisIntegrationSupport {
     void failurePolicyBypassesOnlyReadsAndNeverRepositoryOrExplicitWrites() {
         caching()
                 .withPropertyValues(
-                        "spring.data.redis.port=1",
-                        "spring.data.redis.connect-timeout=50ms",
-                        "spring.data.redis.timeout=50ms")
+                        "platform.redis.connection.port=1",
+                        "platform.redis.connection.connect-timeout=50ms",
+                        "platform.redis.connection.command-timeout=50ms")
                 .run(
                         ctx ->
                                 assertThatThrownBy(() -> ctx.getBean(Queries.class).find(key()))
@@ -369,9 +369,9 @@ class RedisCacheIT extends RedisIntegrationSupport {
         caching()
                 .withPropertyValues(
                         "platform.redis.cache.failure-policy=FAIL_OPEN_READ",
-                        "spring.data.redis.port=1",
-                        "spring.data.redis.connect-timeout=50ms",
-                        "spring.data.redis.timeout=50ms")
+                        "platform.redis.connection.port=1",
+                        "platform.redis.connection.connect-timeout=50ms",
+                        "platform.redis.connection.command-timeout=50ms")
                 .run(
                         ctx -> {
                             var q = ctx.getBean(Queries.class);

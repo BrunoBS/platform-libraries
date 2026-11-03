@@ -17,10 +17,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @SpringBootTest(
         classes = RedisFixtureIT.Application.class,
         properties = {
-            "spring.application.name=redis-fixture",
-            "spring.data.redis.cluster.nodes=127.0.0.1:1",
-            "spring.data.redis.sentinel.master=unused",
-            "spring.data.redis.sentinel.nodes=127.0.0.1:2"
+            "spring.application.name=redis-fixture"
         })
 @WithRedis
 @org.junit.jupiter.api.TestMethodOrder(org.junit.jupiter.api.MethodOrderer.OrderAnnotation.class)

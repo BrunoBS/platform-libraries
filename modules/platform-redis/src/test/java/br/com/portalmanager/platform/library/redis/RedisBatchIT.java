@@ -34,8 +34,8 @@ class RedisBatchIT extends RedisIntegrationSupport {
 
     @Test
     void batchDeletionPropagatesRealConnectionFailureInsteadOfReturningZero() {
-        context().withPropertyValues("spring.data.redis.port=1", "spring.data.redis.timeout=100ms",
-                "spring.data.redis.connect-timeout=100ms").run(ctx -> {
+        context().withPropertyValues("platform.redis.connection.port=1", "platform.redis.connection.command-timeout=100ms",
+                "platform.redis.connection.connect-timeout=100ms").run(ctx -> {
             RedisStore store = ctx.getBean(RedisStore.class);
             assertThat(store.deleteAll(List.of())).isZero();
             assertThatThrownBy(() -> store.deleteAll(List.of("missing")))
@@ -145,7 +145,7 @@ class RedisBatchIT extends RedisIntegrationSupport {
     void validatesAllEntriesBeforeWritingAndUsesExistingLimitsAndErrors() {
         context()
                 .withPropertyValues(
-                        "platform.redis.max-batch-size=500", "platform.redis.max-read-size=500")
+                        "platform.redis.limits.max-batch-size=500", "platform.redis.limits.max-read-size=500")
                 .run(
                         ctx -> {
                             var store = ctx.getBean(RedisStore.class);
@@ -219,7 +219,7 @@ class RedisBatchIT extends RedisIntegrationSupport {
     @Test
     void oversizedPayloadsAreRejectedAndNamespacesRemainIsolated() {
         context()
-                .withPropertyValues("platform.redis.max-payload-bytes=32")
+                .withPropertyValues("platform.redis.limits.max-payload-bytes=32")
                 .run(
                         ctx -> {
                             var store = ctx.getBean(RedisStore.class);
@@ -240,9 +240,9 @@ class RedisBatchIT extends RedisIntegrationSupport {
     void connectionFailuresAreNotConvertedToEmptyMapsAndEmptyBatchesDoNotConnect() {
         context()
                 .withPropertyValues(
-                        "spring.data.redis.port=1",
-                        "spring.data.redis.timeout=100ms",
-                        "spring.data.redis.connect-timeout=100ms")
+                        "platform.redis.connection.port=1",
+                        "platform.redis.connection.command-timeout=100ms",
+                        "platform.redis.connection.connect-timeout=100ms")
                 .run(
                         ctx -> {
                             var store = ctx.getBean(RedisStore.class);

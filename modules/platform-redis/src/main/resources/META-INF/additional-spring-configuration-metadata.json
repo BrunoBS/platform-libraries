@@ -4,7 +4,167 @@
       "name": "platform.redis.enabled",
       "type": "java.lang.Boolean",
       "defaultValue": true,
-      "description": "Enable passive Platform Redis APIs and declared listener infrastructure."
+      "description": "Enable Platform Redis APIs and their connection infrastructure."
+    },
+    {
+      "name": "platform.redis.connection.topology",
+      "type": "br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties$Topology",
+      "defaultValue": "STANDALONE",
+      "description": "Redis connection topology: STANDALONE, SENTINEL, or CLUSTER."
+    },
+    {
+      "name": "platform.redis.connection.host",
+      "type": "java.lang.String",
+      "defaultValue": "localhost",
+      "description": "Redis server host for STANDALONE topology."
+    },
+    {
+      "name": "platform.redis.connection.port",
+      "type": "java.lang.Integer",
+      "defaultValue": 6379,
+      "description": "Redis server port for STANDALONE topology."
+    },
+    {
+      "name": "platform.redis.connection.database",
+      "type": "java.lang.Integer",
+      "defaultValue": 0,
+      "description": "Redis database index for STANDALONE topology."
+    },
+    {
+      "name": "platform.redis.connection.username",
+      "type": "java.lang.String",
+      "description": "Redis server username, when authentication requires one."
+    },
+    {
+      "name": "platform.redis.connection.password",
+      "type": "java.lang.String",
+      "description": "Redis server password."
+    },
+    {
+      "name": "platform.redis.connection.command-timeout",
+      "type": "java.time.Duration",
+      "defaultValue": "PT60S",
+      "description": "Maximum time allowed for a Redis command."
+    },
+    {
+      "name": "platform.redis.connection.connect-timeout",
+      "type": "java.time.Duration",
+      "defaultValue": "PT60S",
+      "description": "Maximum time allowed to establish a Redis connection."
+    },
+    {
+      "name": "platform.redis.connection.ssl.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Enable TLS for the Redis connection."
+    },
+    {
+      "name": "platform.redis.connection.ssl.bundle",
+      "type": "java.lang.String",
+      "description": "Spring SSL bundle used to trust or authenticate the Redis server."
+    },
+    {
+      "name": "platform.redis.connection.cluster.nodes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Initial Redis Cluster nodes, each formatted as host:port."
+    },
+    {
+      "name": "platform.redis.connection.sentinel.master",
+      "type": "java.lang.String",
+      "description": "Redis Sentinel master name."
+    },
+    {
+      "name": "platform.redis.connection.sentinel.nodes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Redis Sentinel nodes, each formatted as host:port."
+    },
+    {
+      "name": "platform.redis.connection.sentinel.database",
+      "type": "java.lang.Integer",
+      "defaultValue": 0,
+      "description": "Redis database index selected through Sentinel."
+    },
+    {
+      "name": "platform.redis.connection.sentinel.username",
+      "type": "java.lang.String",
+      "description": "Username for authenticating with Redis Sentinel nodes."
+    },
+    {
+      "name": "platform.redis.connection.sentinel.password",
+      "type": "java.lang.String",
+      "description": "Password for authenticating with Redis Sentinel nodes."
+    },
+    {
+      "name": "platform.redis.limits.max-key-bytes",
+      "type": "java.lang.Integer",
+      "defaultValue": 256,
+      "description": "Maximum encoded size of a Redis key, including its namespace."
+    },
+    {
+      "name": "platform.redis.limits.max-payload-bytes",
+      "type": "java.lang.Integer",
+      "defaultValue": 1048576,
+      "description": "Maximum encoded size of a stored payload."
+    },
+    {
+      "name": "platform.redis.limits.max-batch-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 1000,
+      "description": "Maximum number of entries accepted by a batch operation."
+    },
+    {
+      "name": "platform.redis.limits.max-read-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 1000,
+      "description": "Maximum number of entries accepted by a read operation."
+    },
+    {
+      "name": "platform.redis.listener.threads",
+      "type": "java.lang.Integer",
+      "defaultValue": 16,
+      "description": "Worker threads used to process Redis listener messages."
+    },
+    {
+      "name": "platform.redis.listener.queue-capacity",
+      "type": "java.lang.Integer",
+      "defaultValue": 256,
+      "description": "Maximum queued Redis listener messages before back-pressure is applied."
+    },
+    {
+      "name": "platform.redis.listener.reconnect-min",
+      "type": "java.time.Duration",
+      "defaultValue": "PT0.1S",
+      "description": "Minimum delay before reconnecting a Redis listener."
+    },
+    {
+      "name": "platform.redis.listener.reconnect-max",
+      "type": "java.time.Duration",
+      "defaultValue": "PT5S",
+      "description": "Maximum delay before reconnecting a Redis listener."
+    },
+    {
+      "name": "platform.redis.listener.keyspace-enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Enable Redis keyspace notification listeners."
+    },
+    {
+      "name": "platform.redis.lifecycle.shutdown-timeout",
+      "type": "java.time.Duration",
+      "defaultValue": "PT5S",
+      "description": "Maximum wait for listener and stream workers to stop during shutdown."
+    },
+    {
+      "name": "platform.redis.streams.max-workers",
+      "type": "java.lang.Integer",
+      "defaultValue": 16,
+      "description": "Maximum number of workers used by Redis Stream consumers."
+    },
+    {
+      "name": "platform.redis.streams.max-length",
+      "type": "java.lang.Long",
+      "defaultValue": 10000,
+      "description": "Default maximum retained length for a Redis Stream."
     }
   ]
 }

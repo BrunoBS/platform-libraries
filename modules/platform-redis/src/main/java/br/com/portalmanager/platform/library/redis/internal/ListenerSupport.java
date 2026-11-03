@@ -90,13 +90,13 @@ public final class ListenerSupport {
     public BackOff backoff() {
         return () ->
                 new BackOffExecution() {
-                    private long delay = properties.reconnectMin().toMillis();
+                    private long delay = properties.listener().reconnectMin().toMillis();
 
                     public long nextBackOff() {
                         long base = delay;
                         delay =
                                 Math.min(
-                                        properties.reconnectMax().toMillis(),
+                                        properties.listener().reconnectMax().toMillis(),
                                         delay > Long.MAX_VALUE / 2 ? Long.MAX_VALUE : delay * 2);
                         return ThreadLocalRandom.current()
                                 .nextLong(Math.max(1, base / 2), base + 1);
@@ -109,7 +109,7 @@ public final class ListenerSupport {
         executor.shutdown();
         try {
             if (!executor.awaitTermination(
-                    properties.shutdownTimeout().toMillis(), TimeUnit.MILLISECONDS))
+                    properties.lifecycle().shutdownTimeout().toMillis(), TimeUnit.MILLISECONDS))
                 executor.shutdownNow();
         } catch (InterruptedException interrupted) {
             executor.shutdownNow();

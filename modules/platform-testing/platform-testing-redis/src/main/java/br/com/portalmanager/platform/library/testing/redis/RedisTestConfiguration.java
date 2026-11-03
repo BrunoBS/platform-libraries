@@ -4,7 +4,6 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
 
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -16,7 +15,6 @@ import java.util.Map;
 @TestConfiguration(proxyBeanMethods = false)
 public class RedisTestConfiguration {
     @Bean(destroyMethod = "stop")
-    @ServiceConnection(name = "redis")
     GenericContainer<?> redisTestContainer(ConfigurableEnvironment environment) {
         GenericContainer<?> container;
         try {
@@ -46,33 +44,21 @@ public class RedisTestConfiguration {
                         new MapPropertySource(
                                 "platformTestingRedisConnection",
                                 Map.of(
-                                        "spring.data.redis.host",
+                                        "platform.redis.connection.host",
                                         container.getHost(),
-                                        "spring.data.redis.port",
+                                        "platform.redis.connection.port",
                                         container.getMappedPort(6379),
-                                        "spring.data.redis.database",
+                                        "platform.redis.connection.database",
                                         0,
-                                        "spring.data.redis.ssl.enabled",
-                                        false,
-                                        "spring.data.redis.username",
-                                        "",
-                                        "spring.data.redis.password",
-                                        "",
-                                        "spring.data.redis.url",
-                                        "redis://"
-                                                + (container.getHost().contains(":")
-                                                        ? "[" + container.getHost() + "]"
-                                                        : container.getHost())
-                                                + ":"
-                                                + container.getMappedPort(6379)
-                                                + "/0")));
+                                        "platform.redis.connection.ssl.enabled",
+                                        false)));
         return container;
     }
 
     @Bean
     static org.springframework.beans.factory.config.BeanFactoryPostProcessor
             redisTestConnectionInitializer() {
-        // Establish dynamic connection properties before Boot creates connection details/factories.
+        // Establish dynamic Platform Redis properties before connection details/factories are created.
         return factory -> factory.getBean("redisTestContainer");
     }
 }

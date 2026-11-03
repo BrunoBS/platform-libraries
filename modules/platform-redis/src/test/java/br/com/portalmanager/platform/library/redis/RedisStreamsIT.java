@@ -38,7 +38,7 @@ class RedisStreamsIT extends RedisIntegrationSupport {
     @Test
     void passiveBootstrapDoesNotPoll() {
         context()
-                .withPropertyValues("spring.data.redis.port=1")
+                .withPropertyValues("platform.redis.connection.port=1")
                 .run(
                         ctx ->
                                 assertThat(ctx.getBean(RedisStreamsLifecycle.class).isRunning())

@@ -34,7 +34,7 @@ class RedisKeyspaceIT extends RedisIntegrationSupport {
                                 assertThat(ctx.getBean(RedisPubSubLifecycle.class).isRunning())
                                         .isFalse());
         context()
-                .withPropertyValues("platform.redis.keyspace-enabled=true")
+                .withPropertyValues("platform.redis.listener.keyspace-enabled=true")
                 .withBean(Listener.class, () -> listener)
                 .run(
                         ctx -> {
@@ -74,7 +74,7 @@ class RedisKeyspaceIT extends RedisIntegrationSupport {
     void optInWithServerNotificationsDisabledDoesNotEnableThem() {
         var listener = new Listener();
         context()
-                .withPropertyValues("platform.redis.keyspace-enabled=true")
+                .withPropertyValues("platform.redis.listener.keyspace-enabled=true")
                 .withBean(Listener.class, () -> listener)
                 .run(
                         ctx -> {

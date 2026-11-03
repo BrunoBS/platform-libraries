@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
+import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
 import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingAutoConfiguration;
 import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduleOptions;
@@ -288,15 +289,16 @@ class PlatformSchedulingLockingIT {
                 .withConfiguration(AutoConfigurations.of(
                         DataRedisAutoConfiguration.class,
                         DataRedisReactiveAutoConfiguration.class,
+                        PlatformRedisConnectionAutoConfiguration.class,
                         PlatformRedisAutoConfiguration.class,
                         PlatformSchedulingAutoConfiguration.class))
                 .withUserConfiguration(scheduledApplication)
                 .withPropertyValues(
                         "spring.application.name=" + serviceName,
-                        "spring.data.redis.host=" + redis.getHost(),
-                        "spring.data.redis.port=" + redis.getMappedPort(6379),
-                        "spring.data.redis.timeout=1s",
-                        "spring.data.redis.connect-timeout=1s",
+                        "platform.redis.connection.host=" + redis.getHost(),
+                        "platform.redis.connection.port=" + redis.getMappedPort(6379),
+                        "platform.redis.connection.command-timeout=1s",
+                        "platform.redis.connection.connect-timeout=1s",
                         "golden.scheduling.distributed-lock.lock-at-most-for=" + lockAtMostFor,
                         "golden.scheduling.distributed-lock.lock-at-least-for=PT0S",
                         "golden.scheduling.distributed-lock.keep-alive=" + keepAlive);

@@ -42,7 +42,7 @@ public final class DefaultRedisStreams implements RedisStreams {
     }
 
     public <T> String append(String stream, T payload) {
-        return append(stream, payload, access.properties().streamMaxLength());
+        return append(stream, payload, access.properties().streams().maxLength());
     }
 
     public <T> String append(String stream, T payload, long maxLength) {
@@ -208,7 +208,7 @@ public final class DefaultRedisStreams implements RedisStreams {
     }
 
     void retention(long length) {
-        if (length < 1 || length > access.properties().streamMaxLength())
+        if (length < 1 || length > access.properties().streams().maxLength())
             throw RedisErrors.invalid();
     }
 

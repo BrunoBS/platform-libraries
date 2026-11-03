@@ -32,9 +32,79 @@ interpreta nomes de namespace. A visão também pode ser usada para leitura, exc
 TTL, operações em lote e `scan`.
 
 O ambiente não entra no nome da chave. Cada ambiente deve usar sua própria instância
-ou implantação Redis. Host, porta e credenciais são configurados pelas propriedades
-de conexão do Spring Boot em `spring.data.redis.*`; `platform.redis.*` contém os limites
-e opções próprios do módulo.
+ou implantação Redis. Toda a conexão é configurada pelo próprio módulo em
+`platform.redis.connection.*`; o serviço consumidor não precisa configurar propriedades
+de conexão do Spring Data Redis.
+
+```yaml
+platform:
+  redis:
+    connection:
+      topology: STANDALONE # STANDALONE, SENTINEL ou CLUSTER
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+      username: ${REDIS_USERNAME:}
+      password: ${REDIS_PASSWORD:}
+      command-timeout: 2s
+      connect-timeout: 2s
+      ssl:
+        enabled: false # true para habilitar TLS
+        # bundle: redis-server-trust # bundle TLS opcional da aplicação
+    limits:
+      max-key-bytes: 256
+      max-payload-bytes: 1048576
+      max-batch-size: 1000
+      max-read-size: 1000
+    listener:
+      threads: 16
+      queue-capacity: 256
+      reconnect-min: 100ms
+      reconnect-max: 5s
+      keyspace-enabled: false
+    lifecycle:
+      shutdown-timeout: 5s
+    streams:
+      max-workers: 16
+      max-length: 10000
+```
+
+`connection.topology` seleciona a conexão simples ou a configuração `cluster.nodes`
+ou `sentinel.master`/`sentinel.nodes`. Para TLS com certificado confiável pelo bundle
+da aplicação, informe `connection.ssl.bundle`. As demais propriedades ficam agrupadas
+por responsabilidade: limites de operações, listeners, ciclo de vida e streams.
+As propriedades de cache são um contexto próprio em `platform.redis.cache.*` (`enabled`,
+`default-ttl`, `regions`, `failure-policy` e `lock-ttl`).
+
+Exemplo de Cluster:
+
+```yaml
+platform:
+  redis:
+    connection:
+      topology: CLUSTER
+      cluster:
+        nodes:
+          - redis-1.internal:6379
+          - redis-2.internal:6379
+```
+
+Exemplo de Sentinel:
+
+```yaml
+platform:
+  redis:
+    connection:
+      topology: SENTINEL
+      sentinel:
+        master: primary
+        nodes:
+          - sentinel-1.internal:26379
+          - sentinel-2.internal:26379
+        database: 0
+        username: ${REDIS_SENTINEL_USERNAME:}
+        password: ${REDIS_SENTINEL_PASSWORD:}
+```
 
 ## Desenvolvimento
 

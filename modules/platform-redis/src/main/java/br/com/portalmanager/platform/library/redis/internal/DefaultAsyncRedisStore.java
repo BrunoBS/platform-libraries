@@ -140,7 +140,7 @@ public final class DefaultAsyncRedisStore implements AsyncRedisStore {
                                     List.of(physicalKey(key, namespace)),
                                     List.of(
                                             Integer.toString(
-                                                    access.properties().maxPayloadBytes())))
+                                                    access.properties().limits().maxPayloadBytes())))
                             .next()
                             .map(json -> Optional.of(codec.decode(json, type)))
                             .defaultIfEmpty(Optional.empty());
@@ -164,7 +164,7 @@ public final class DefaultAsyncRedisStore implements AsyncRedisStore {
                                     List.of(physicalKey(key, namespace)),
                                     List.of(
                                             Integer.toString(
-                                                    access.properties().maxPayloadBytes())))
+                                                    access.properties().limits().maxPayloadBytes())))
                             .next()
                             .map(json -> Optional.of(codec.decode(json, type)))
                             .defaultIfEmpty(Optional.empty());

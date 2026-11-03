@@ -23,8 +23,8 @@ class RedisBootstrapIT extends RedisIntegrationSupport {
                 .withUserConfiguration(DependencyOnly.class)
                 .withPropertyValues(
                         "spring.application.name=dependency-only",
-                        "spring.data.redis.host=" + REDIS.getHost(),
-                        "spring.data.redis.port=" + REDIS.getMappedPort(6379))
+                        "platform.redis.connection.host=" + REDIS.getHost(),
+                        "platform.redis.connection.port=" + REDIS.getMappedPort(6379))
                 .run(
                         ctx -> {
                             assertThat(ctx)
@@ -46,7 +46,7 @@ class RedisBootstrapIT extends RedisIntegrationSupport {
                 .withPropertyValues("platform.redis.enabled=false")
                 .run(ctx -> assertThat(ctx).doesNotHaveBean(RedisStore.class));
         context()
-                .withPropertyValues("platform.redis.max-read-size=0")
+                .withPropertyValues("platform.redis.limits.max-read-size=0")
                 .run(ctx -> assertThat(ctx).hasFailed());
     }
 }

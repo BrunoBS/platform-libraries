@@ -23,19 +23,10 @@ class RedisAsyncTest {
         var redis = mock(ReactiveStringRedisTemplate.class);
         var response = Sinks.<String>one();
         var properties =
-                new PlatformRedisProperties(
-                        256,
-                        1024,
-                        10,
-                        10,
-                        1,
-                        2,
-                        2,
-                        100,
-                        Duration.ofSeconds(1),
-                        Duration.ofMillis(10),
-                        Duration.ofSeconds(1),
-                        false);
+                new org.springframework.boot.context.properties.bind.Binder(
+                                new org.springframework.boot.context.properties.source.MapConfigurationPropertySource(
+                                        java.util.Map.of("limits.max-payload-bytes", 1024)))
+                        .bindOrCreate("platform.redis", PlatformRedisProperties.class);
         when(redis.execute(eq(RedisReadScripts.GET), anyList(), anyList()))
                 .thenReturn(response.asMono().flux());
         var async =

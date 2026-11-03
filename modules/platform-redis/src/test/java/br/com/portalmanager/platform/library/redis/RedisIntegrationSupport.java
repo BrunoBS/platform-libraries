@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.redis;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
+import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.*;
@@ -27,13 +28,13 @@ abstract class RedisIntegrationSupport {
                         AutoConfigurations.of(
                                 DataRedisAutoConfiguration.class,
                                 DataRedisReactiveAutoConfiguration.class,
-                                PlatformRedisAutoConfiguration.class))
+                                PlatformRedisConnectionAutoConfiguration.class, PlatformRedisAutoConfiguration.class))
                 .withPropertyValues(
                         "spring.application.name=redis-test",
-                        "spring.data.redis.host=" + REDIS.getHost(),
-                        "spring.data.redis.port=" + REDIS.getMappedPort(6379),
-                        "spring.data.redis.timeout=1s",
-                        "spring.data.redis.connect-timeout=1s");
+                        "platform.redis.connection.host=" + REDIS.getHost(),
+                        "platform.redis.connection.port=" + REDIS.getMappedPort(6379),
+                        "platform.redis.connection.command-timeout=1s",
+                        "platform.redis.connection.connect-timeout=1s");
     }
 
     String key() {

@@ -15,7 +15,7 @@ public final class RedisAccess {
         if (!validNamespace(applicationName)) throw RedisErrors.configuration();
         defaultNamespace = applicationName;
         prefix = defaultPrefix(applicationName);
-        if (prefix.getBytes(StandardCharsets.UTF_8).length >= properties.maxKeyBytes())
+        if (prefix.getBytes(StandardCharsets.UTF_8).length >= properties.limits().maxKeyBytes())
             throw RedisErrors.configuration();
     }
 
@@ -34,7 +34,7 @@ public final class RedisAccess {
     public String prefix(String namespace) {
         if (!validNamespace(namespace)) throw RedisErrors.invalid();
         String value = namespace + ":";
-        if (value.getBytes(StandardCharsets.UTF_8).length >= properties.maxKeyBytes())
+        if (value.getBytes(StandardCharsets.UTF_8).length >= properties.limits().maxKeyBytes())
             throw RedisErrors.invalid();
         return value;
     }
@@ -57,7 +57,7 @@ public final class RedisAccess {
     public String text(String text) {
         if (text == null
                 || text.isBlank()
-                || text.getBytes(StandardCharsets.UTF_8).length > properties.maxKeyBytes()
+                || text.getBytes(StandardCharsets.UTF_8).length > properties.limits().maxKeyBytes()
                 || text.chars().anyMatch(Character::isISOControl)) throw RedisErrors.invalid();
         return text;
     }
@@ -74,16 +74,16 @@ public final class RedisAccess {
     }
 
     public int limit(int limit) {
-        if (limit < 1 || limit > properties.maxReadSize()) throw RedisErrors.invalid();
+        if (limit < 1 || limit > properties.limits().maxReadSize()) throw RedisErrors.invalid();
         return limit;
     }
 
     public void batch(int size) {
-        if (size < 1 || size > properties.maxBatchSize()) throw RedisErrors.invalid();
+        if (size < 1 || size > properties.limits().maxBatchSize()) throw RedisErrors.invalid();
     }
 
     public void range(long start, long end) {
-        if (start < 0 || end < start || end - start >= properties.maxReadSize())
+        if (start < 0 || end < start || end - start >= properties.limits().maxReadSize())
             throw RedisErrors.invalid();
     }
 }

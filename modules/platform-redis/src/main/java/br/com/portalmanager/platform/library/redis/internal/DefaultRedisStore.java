@@ -135,7 +135,7 @@ public final class DefaultRedisStore implements RedisStore {
                                                 RedisReadScripts.GET,
                                                 List.of(physicalKey(key, namespace)),
                                                 Integer.toString(
-                                                        access.properties().maxPayloadBytes()))))
+                                                        access.properties().limits().maxPayloadBytes()))))
                 .map(json -> codec.decode(json, type));
     }
 
@@ -156,7 +156,7 @@ public final class DefaultRedisStore implements RedisStore {
                                                 RedisReadScripts.GET,
                                                 List.of(physicalKey(key, namespace)),
                                                 Integer.toString(
-                                                        access.properties().maxPayloadBytes()))))
+                                                        access.properties().limits().maxPayloadBytes()))))
                 .map(json -> codec.decode(json, type));
     }
 

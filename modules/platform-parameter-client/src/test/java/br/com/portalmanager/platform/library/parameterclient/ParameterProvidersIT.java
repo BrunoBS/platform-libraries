@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.parameterclient;
 import static org.assertj.core.api.Assertions.*;
 import br.com.portalmanager.platform.library.parameterclient.configuration.ParameterClientAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
+import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
@@ -42,11 +43,11 @@ class ParameterProvidersIT {
     ApplicationContextRunner context() {
         return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
                 DataRedisAutoConfiguration.class, DataRedisReactiveAutoConfiguration.class,
-                PlatformRedisAutoConfiguration.class, ParameterClientAutoConfiguration.class))
+                PlatformRedisConnectionAutoConfiguration.class, PlatformRedisAutoConfiguration.class, ParameterClientAutoConfiguration.class))
                 .withPropertyValues("spring.application.name=parameter-consumer",
-                        "spring.data.redis.host=" + redisContainer.getHost(),
-                        "spring.data.redis.port=" + redisContainer.getMappedPort(6379),
-                        "spring.data.redis.timeout=1s", "spring.data.redis.connect-timeout=1s");
+                        "platform.redis.connection.host=" + redisContainer.getHost(),
+                        "platform.redis.connection.port=" + redisContainer.getMappedPort(6379),
+                        "platform.redis.connection.command-timeout=1s", "platform.redis.connection.connect-timeout=1s");
     }
 
     @Test
@@ -142,11 +143,11 @@ class ParameterProvidersIT {
 
     @Test
     void actualConnectionFailureAndTimeoutAreNotAbsence() {
-        context().withPropertyValues("spring.data.redis.port=1",
-                "spring.data.redis.timeout=100ms", "spring.data.redis.connect-timeout=100ms")
+        context().withPropertyValues("platform.redis.connection.port=1",
+                "platform.redis.connection.command-timeout=100ms", "platform.redis.connection.connect-timeout=100ms")
                 .run(ctx -> assertThatThrownBy(() -> ctx.getBean(ConfigurationProvider.class)
                         .get("platform.missing", 7)).hasMessage("parameter-client.read.failed"));
-        context().withPropertyValues("spring.data.redis.timeout=100ms").run(ctx -> {
+        context().withPropertyValues("platform.redis.connection.command-timeout=100ms").run(ctx -> {
             ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
             ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
             assertThat(provider.get("platform.missing", 7)).isEqualTo(7); // Warm connection first.
@@ -225,8 +226,8 @@ class ParameterProvidersIT {
                 assertThat(expressions.matches("rules.corrupt", 21, false)).isFalse();
             }
         });
-        context().withPropertyValues("spring.data.redis.port=1",
-                "spring.data.redis.timeout=100ms", "spring.data.redis.connect-timeout=100ms").run(ctx -> {
+        context().withPropertyValues("platform.redis.connection.port=1",
+                "platform.redis.connection.command-timeout=100ms", "platform.redis.connection.connect-timeout=100ms").run(ctx -> {
             ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
             ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
             assertThatThrownBy(() -> expressions.matches("rules.missing", 21)).hasMessage("parameter-client.read.failed");
@@ -257,7 +258,7 @@ class ParameterProvidersIT {
                 assertThat(provider.get(key, 7)).isEqualTo(7);
                 assertThat(expressions.matches(key, 21, false)).isFalse();
             }
-            int maxKeyBytes = ctx.getBean(PlatformRedisProperties.class).maxKeyBytes();
+            int maxKeyBytes = ctx.getBean(PlatformRedisProperties.class).limits().maxKeyBytes();
             for (String key : List.of("rules.\nvalue", "x".repeat(maxKeyBytes))) {
                 assertThatThrownBy(() -> provider.get(key, 7)).hasMessage("parameter-client.validation");
                 assertThatThrownBy(() -> expressions.matches(key, 21)).hasMessage("parameter-client.validation");

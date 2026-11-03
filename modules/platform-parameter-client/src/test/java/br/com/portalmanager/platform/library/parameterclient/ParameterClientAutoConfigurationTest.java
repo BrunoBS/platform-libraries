@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import br.com.portalmanager.platform.library.parameterclient.configuration.ParameterClientAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
+import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -14,7 +15,7 @@ class ParameterClientAutoConfigurationTest {
     ApplicationContextRunner context() {
         return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
                 DataRedisAutoConfiguration.class, org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration.class,
-                PlatformRedisAutoConfiguration.class, ParameterClientAutoConfiguration.class))
+                PlatformRedisConnectionAutoConfiguration.class, PlatformRedisAutoConfiguration.class, ParameterClientAutoConfiguration.class))
                 .withPropertyValues("spring.application.name=consumer");
     }
 

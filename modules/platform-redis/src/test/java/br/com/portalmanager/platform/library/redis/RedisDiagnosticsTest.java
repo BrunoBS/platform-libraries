@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.*;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
+import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.internal.ListenerSupport;
 
 import ch.qos.logback.classic.Logger;
@@ -29,7 +30,7 @@ class RedisDiagnosticsTest {
                             AutoConfigurations.of(
                                     DataRedisAutoConfiguration.class,
                                     DataRedisReactiveAutoConfiguration.class,
-                                    PlatformRedisAutoConfiguration.class))
+                                    PlatformRedisConnectionAutoConfiguration.class, PlatformRedisAutoConfiguration.class))
                     .withPropertyValues("spring.application.name=diagnostics")
                     .run(
                             ctx -> {

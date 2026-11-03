@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Native Redis notifications. Requires platform.redis.keyspace-enabled and server configuration.
+ * Native Redis notifications. Requires platform.redis.listener.keyspace-enabled and server configuration.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

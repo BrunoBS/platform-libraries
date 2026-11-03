@@ -150,9 +150,9 @@ class RedisStoreIT extends RedisIntegrationSupport {
     void unavailableFailsAsyncWithoutBlockingCaller() {
         context()
                 .withPropertyValues(
-                        "spring.data.redis.port=1",
-                        "spring.data.redis.timeout=100ms",
-                        "spring.data.redis.connect-timeout=100ms")
+                        "platform.redis.connection.port=1",
+                        "platform.redis.connection.command-timeout=100ms",
+                        "platform.redis.connection.connect-timeout=100ms")
                 .run(
                         ctx -> {
                             var stage =

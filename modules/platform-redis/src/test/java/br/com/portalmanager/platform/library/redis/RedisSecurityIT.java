@@ -25,7 +25,7 @@ class RedisSecurityIT extends RedisIntegrationSupport {
     }
 
     @Test
-    void tlsAndAuthenticationUseBootConnectionAndTrustConfiguration() {
+    void tlsAndAuthenticationUsePlatformConnectionAndTrustConfiguration() {
         try (var secure =
                 new GenericContainer<>(DockerImageName.parse(REDIS.getDockerImageName()))
                         .withExposedPorts(6379)
@@ -57,12 +57,12 @@ class RedisSecurityIT extends RedisIntegrationSupport {
                     context()
                             .withConfiguration(AutoConfigurations.of(SslAutoConfiguration.class))
                             .withPropertyValues(
-                                    "spring.data.redis.host=localhost",
-                                    "spring.data.redis.port=" + secure.getMappedPort(6379),
-                                    "spring.data.redis.ssl.enabled=true",
-                                    "spring.data.redis.ssl.bundle=redis-test",
+                                    "platform.redis.connection.host=localhost",
+                                    "platform.redis.connection.port=" + secure.getMappedPort(6379),
+                                    "platform.redis.connection.ssl.enabled=true",
+                                    "platform.redis.connection.ssl.bundle=redis-test",
                                     "spring.ssl.bundle.pem.redis-test.truststore.certificate=classpath:tls/server.crt",
-                                    "spring.data.redis.password=test-only-password");
+                                    "platform.redis.connection.password=test-only-password");
             runner.run(
                     ctx -> {
                         var store = ctx.getBean(RedisStore.class);
@@ -76,7 +76,7 @@ class RedisSecurityIT extends RedisIntegrationSupport {
                                                 .get(4, TimeUnit.SECONDS))
                                 .contains(new Event("tls", 1));
                     });
-            runner.withPropertyValues("spring.data.redis.password=wrong-test-password")
+            runner.withPropertyValues("platform.redis.connection.password=wrong-test-password")
                     .run(
                             ctx -> {
                                 Throwable failure =
@@ -97,7 +97,7 @@ class RedisSecurityIT extends RedisIntegrationSupport {
     @Test
     void timeoutsAreErrorsAndNotAbsenceForSyncAndAsync() {
         context()
-                .withPropertyValues("spring.data.redis.timeout=100ms")
+                .withPropertyValues("platform.redis.connection.command-timeout=100ms")
                 .run(
                         ctx -> {
                             var store = ctx.getBean(RedisStore.class);
@@ -164,7 +164,7 @@ class RedisSecurityIT extends RedisIntegrationSupport {
     void sizeLimitsCoverExternalValuesAndAsyncFailures() {
         context()
                 .withPropertyValues(
-                        "platform.redis.max-payload-bytes=32", "platform.redis.max-key-bytes=64")
+                        "platform.redis.limits.max-payload-bytes=32", "platform.redis.limits.max-key-bytes=64")
                 .run(
                         ctx -> {
                             var store = ctx.getBean(RedisStore.class);

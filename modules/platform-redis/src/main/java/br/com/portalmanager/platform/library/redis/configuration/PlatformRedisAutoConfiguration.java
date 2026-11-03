@@ -60,7 +60,7 @@ public class PlatformRedisAutoConfiguration {
     RedisJsonCodec redisJsonCodec(
             ObjectProvider<ObjectMapper> mapper, PlatformRedisProperties properties) {
         return new RedisJsonCodec(
-                mapper.getIfAvailable(JsonMapper::new), properties.maxPayloadBytes());
+                mapper.getIfAvailable(JsonMapper::new), properties.limits().maxPayloadBytes());
     }
 
     @Bean

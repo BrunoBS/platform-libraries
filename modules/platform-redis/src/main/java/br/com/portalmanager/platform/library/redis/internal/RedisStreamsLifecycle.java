@@ -64,7 +64,7 @@ public final class RedisStreamsLifecycle implements SmartLifecycle {
                         });
         if (bindings.isEmpty()) return;
         long count = bindings.stream().mapToLong(binding -> binding.settings().concurrency()).sum();
-        if (count > access.properties().maxStreamWorkers()) throw RedisErrors.configuration();
+        if (count > access.properties().streams().maxWorkers()) throw RedisErrors.configuration();
         long currentGeneration = generation + 1;
         String instance = UUID.randomUUID().toString();
         List<Runnable> jobs = new ArrayList<>();
@@ -97,7 +97,7 @@ public final class RedisStreamsLifecycle implements SmartLifecycle {
         access.text(settings.group());
         access.batch(settings.batchSize());
         access.limit(settings.batchSize());
-        long shutdown = access.properties().shutdownTimeout().toMillis();
+        long shutdown = access.properties().lifecycle().shutdownTimeout().toMillis();
         if (settings.concurrency() < 1
                 || settings.blockMillis() < 1
                 || settings.blockMillis() > Math.min(5000, shutdown)
@@ -105,7 +105,7 @@ public final class RedisStreamsLifecycle implements SmartLifecycle {
                 || settings.recoveryIntervalMillis() < 1) throw RedisErrors.configuration();
         streams.retention(
                 settings.maxLength() == 0
-                        ? access.properties().streamMaxLength()
+                        ? access.properties().streams().maxLength()
                         : settings.maxLength());
     }
 
@@ -136,7 +136,7 @@ public final class RedisStreamsLifecycle implements SmartLifecycle {
                     streams.trim(
                             settings.stream(),
                             settings.maxLength() == 0
-                                    ? access.properties().streamMaxLength()
+                                    ? access.properties().streams().maxLength()
                                     : settings.maxLength());
                     recoverAt =
                             now + TimeUnit.MILLISECONDS.toNanos(settings.recoveryIntervalMillis());

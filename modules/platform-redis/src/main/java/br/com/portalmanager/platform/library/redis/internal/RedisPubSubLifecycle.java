@@ -57,14 +57,14 @@ public final class RedisPubSubLifecycle implements SmartLifecycle {
         if (running) return;
         Map<MessageListener, Collection<? extends Topic>> registrations = new LinkedHashMap<>();
         registerBusinessListeners(registrations);
-        if (access.properties().keyspaceEnabled()) registerKeyspaceListeners(registrations);
+        if (access.properties().listener().keyspaceEnabled()) registerKeyspaceListeners(registrations);
         if (registrations.isEmpty()) return;
         access.batch(registrations.size());
         handlers =
                 support.executor(
                         "pubsub",
-                        access.properties().listenerThreads(),
-                        access.properties().listenerQueueCapacity());
+                        access.properties().listener().threads(),
+                        access.properties().listener().queueCapacity());
         subscriptions = support.executor("subscription", 1, 16);
         container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connections);
@@ -146,7 +146,7 @@ public final class RedisPubSubLifecycle implements SmartLifecycle {
     }
 
     private String body(Message message) {
-        if (message.getBody().length > access.properties().maxPayloadBytes())
+        if (message.getBody().length > access.properties().limits().maxPayloadBytes())
             throw RedisErrors.error("limit", null);
         return new String(message.getBody(), StandardCharsets.UTF_8);
     }

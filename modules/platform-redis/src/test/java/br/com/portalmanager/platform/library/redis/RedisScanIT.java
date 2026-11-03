@@ -55,8 +55,8 @@ class RedisScanIT extends RedisIntegrationSupport {
     }
 
     @Test void unavailableRedisIsAnErrorRatherThanAnEmptyPage() {
-        context().withPropertyValues("spring.data.redis.port=1", "spring.data.redis.timeout=100ms",
-                "spring.data.redis.connect-timeout=100ms").run(ctx -> {
+        context().withPropertyValues("platform.redis.connection.port=1", "platform.redis.connection.command-timeout=100ms",
+                "platform.redis.connection.connect-timeout=100ms").run(ctx -> {
             RedisStore store = ctx.getBean(RedisStore.class);
             assertThatThrownBy(() -> store.scan("service.", "0", 10)).isInstanceOf(ApiException.class);
         });

@@ -57,7 +57,7 @@ public class PlatformRedisCacheAutoConfiguration {
                                     config.immediateWrites(true)
                                             .batchStrategy(
                                                     BatchStrategies.scan(
-                                                            access.properties().maxReadSize()))
+                                                            access.properties().limits().maxReadSize()))
                                             .enableLocking(
                                                     lock ->
                                                             lock.sleepTime(Duration.ofMillis(10))

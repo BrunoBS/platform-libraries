@@ -56,7 +56,7 @@ class RedisPubSubIT extends RedisIntegrationSupport {
     @Test
     void passiveBootstrapHasNoSubscriberAndStoreDoesNotPublish() {
         context()
-                .withPropertyValues("spring.data.redis.port=1")
+                .withPropertyValues("platform.redis.connection.port=1")
                 .run(
                         ctx ->
                                 assertThat(ctx.getBean(RedisPubSubLifecycle.class).isRunning())
@@ -159,8 +159,8 @@ class RedisPubSubIT extends RedisIntegrationSupport {
         var slow = new Slow();
         context()
                 .withPropertyValues(
-                        "platform.redis.listener-threads=1",
-                        "platform.redis.listener-queue-capacity=1")
+                        "platform.redis.listener.threads=1",
+                        "platform.redis.listener.queue-capacity=1")
                 .withBean(Slow.class, () -> slow)
                 .run(
                         ctx -> {
