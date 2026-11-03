@@ -7,22 +7,14 @@ import java.time.Duration;
 
 public final class RedisAccess {
     private final PlatformRedisProperties properties;
+    private final String defaultNamespace;
     private final String prefix;
 
     public RedisAccess(PlatformRedisProperties properties, String applicationName) {
         this.properties = properties;
-        String namespace = properties.namespace();
-        if (properties.namespaceMode() == PlatformRedisProperties.NamespaceMode.ISOLATED) {
-            if (!validNamespace(applicationName)) throw RedisErrors.configuration();
-            namespace =
-                    namespace == null || namespace.isBlank()
-                            ? applicationName
-                            : namespace + "." + applicationName;
-        } else if (namespace == null || namespace.isBlank()) {
-            throw RedisErrors.configuration();
-        }
-        if (!validNamespace(namespace)) throw RedisErrors.configuration();
-        prefix = namespace + ":";
+        if (!validNamespace(applicationName)) throw RedisErrors.configuration();
+        defaultNamespace = applicationName;
+        prefix = defaultPrefix(applicationName);
         if (prefix.getBytes(StandardCharsets.UTF_8).length >= properties.maxKeyBytes())
             throw RedisErrors.configuration();
     }
@@ -39,9 +31,27 @@ public final class RedisAccess {
         return prefix;
     }
 
+    public String prefix(String namespace) {
+        if (!validNamespace(namespace)) throw RedisErrors.invalid();
+        String value = namespace + ":";
+        if (value.getBytes(StandardCharsets.UTF_8).length >= properties.maxKeyBytes())
+            throw RedisErrors.invalid();
+        return value;
+    }
+
     public String key(String key) {
+        return key(defaultNamespace, key);
+    }
+
+    /** Explicit namespace replaces the application-name default; it is never nested under it. */
+    public String key(String namespace, String key) {
         text(key);
-        return text(prefix + key);
+        return text(prefix(namespace) + key);
+    }
+
+    private String defaultPrefix(String namespace) {
+        if (!validNamespace(namespace)) throw RedisErrors.configuration();
+        return namespace + ":";
     }
 
     public String text(String text) {

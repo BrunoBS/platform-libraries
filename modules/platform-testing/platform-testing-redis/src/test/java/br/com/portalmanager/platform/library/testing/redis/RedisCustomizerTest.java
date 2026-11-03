@@ -40,15 +40,17 @@ class RedisCustomizerTest {
     }
 
     @Test
-    void namespaceIsUniquePerContextAndFixtureHasNoProductionDomainDependency() {
+    void fixtureDoesNotOverrideTheApplicationNamespace() {
         var factory = new RedisTestContextCustomizerFactory();
         var customizer = factory.createContextCustomizer(Default.class, List.of());
         try (var first = new org.springframework.context.support.GenericApplicationContext();
                 var second = new org.springframework.context.support.GenericApplicationContext()) {
             customizer.customizeContext(first, null);
             customizer.customizeContext(second, null);
-            assertThat(first.getEnvironment().getProperty("platform.redis.namespace"))
-                    .isNotEqualTo(second.getEnvironment().getProperty("platform.redis.namespace"));
+            assertThat(first.getEnvironment().getProperty("spring.application.name"))
+                    .isNull();
+            assertThat(second.getEnvironment().getProperty("spring.application.name"))
+                    .isNull();
         }
         var classes =
                 new com.tngtech.archunit.core.importer.ClassFileImporter()

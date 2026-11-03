@@ -1,45 +1,43 @@
 # platform-redis
 
-Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no [guia oficial](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-redis.md).
+Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no
+[guia oficial](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-redis.md).
 
 - [POM e dependências](pom.xml)
 - [Desenvolvimento e build do reactor](../../README.md)
 
-Execute os comandos de build na raiz do repositório para incluir os módulos dependentes. Fixtures de integração exigem Docker; agregadores POM não são dependências JAR.
+## Namespace das chaves
 
-## Stores por ponto de injeção
+O namespace padrão é o valor de `spring.application.name`. Portanto, uma chave lógica
+`customer:42` será armazenada como `workspace-service:customer:42` quando o nome da
+aplicação for `workspace-service`.
 
-`@RedisNamespace` seleciona um `RedisStore` síncrono sem alterar `platform.redis.*`:
+Para usar outro namespace em uma ou mais operações, crie uma visão leve com
+`withNamespace`. O namespace explícito substitui o nome da aplicação; não cria outro
+bean e não empilha prefixos:
 
 ```java
-public RedisSessionRepository(
-        @RedisNamespace("session") RedisStore store) {
-    this.store = store;
-}
+import java.time.Duration;
+
+store.set("account-service.customer-limit", 42);
+store.withNamespace("dynamic-parameter").set("account-service.customer-limit", 42);
+store.withNamespace("dynamic-parameter").get("account-service.customer-limit", Integer.class);
+store.withNamespace("dynamic-parameter").set(
+        "account-service.customer-limit", 42, Duration.ofMinutes(5));
 ```
 
-Importe `br.com.portalmanager.platform.library.redis.annotation.RedisNamespace`.
-O modo padrão da anotação é `ISOLATED`: `session.<spring.application.name>:<chave>`.
-Para compartilhar uma publicação entre aplicações, use
-`@RedisNamespace(value = "dynamic-parameter", mode = NamespaceMode.SHARED)`, importando
-`PlatformRedisProperties.NamespaceMode`: `dynamic-parameter:<chave>`.
-Não inclua o prefixo na chave lógica. Namespace não é autorização.
+Sem `withNamespace`, as operações usam `spring.application.name`. O namespace
+`dynamic-parameter` é uma escolha do consumidor; o `platform-redis` não reserva nem
+interpreta nomes de namespace. A visão também pode ser usada para leitura, exclusão,
+TTL, operações em lote e `scan`.
 
-Construtores, parâmetros de métodos `@Bean` e campos `@Autowired` são suportados no
-contexto Spring JVM. Sem anotação, o store padrão, qualifiers, `@Primary` e overrides
-continuam com a resolução original. Cada par namespace/modo usa um store próprio
-por contexto; todos reutilizam o template, conexão e codec existentes. Os limites
-configurados continuam válidos. Redis desabilitado ou infraestrutura ausente não
-produzem fallback para o store padrão. A anotação aceita somente `RedisStore`, não
-`AsyncRedisStore`, operações, cache, pub/sub ou streams.
+O ambiente não entra no nome da chave. Cada ambiente deve usar sua própria instância
+ou implantação Redis. Host, porta e credenciais são configurados pelas propriedades
+de conexão do Spring Boot em `spring.data.redis.*`; `platform.redis.*` contém os limites
+e opções próprios do módulo.
 
-Encapsule acesso de negócio atrás de uma interface do consumidor, como
-`SessionRepository`, implementada por `RedisSessionRepository`; o `SessionService`
-depende dessa interface. Isso é recomendação para fronteiras de negócio, não uma
-exigência de interface redundante para cada componente interno. O guia oficial
-contém o exemplo completo e a estratégia de migração da configuração global.
+## Desenvolvimento
 
-A integração usa resolução dinâmica de dependências do Spring. Native Image/AOT
-não foi validado e não é anunciado como suportado nesta entrega. Testes de namespace
-estão em `RedisNamespaceTest` e `RedisNamespaceIT`, este com Redis real por
-`platform-testing-redis`; a suíte existente continua cobrindo as demais operações.
+Os testes de namespace verificam o prefixo padrão e a substituição por namespace
+explícito; os testes de integração precisam de Docker por meio de
+`platform-testing-redis`.

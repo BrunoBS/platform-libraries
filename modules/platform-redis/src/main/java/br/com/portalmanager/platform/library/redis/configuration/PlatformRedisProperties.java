@@ -9,8 +9,6 @@ import java.time.Duration;
 
 @ConfigurationProperties("platform.redis")
 public record PlatformRedisProperties(
-        @DefaultValue("") String namespace,
-        @DefaultValue("ISOLATED") NamespaceMode namespaceMode,
         @DefaultValue("256") int maxKeyBytes,
         @DefaultValue("1048576") int maxPayloadBytes,
         @DefaultValue("1000") int maxBatchSize,
@@ -23,14 +21,8 @@ public record PlatformRedisProperties(
         @DefaultValue("PT0.1S") Duration reconnectMin,
         @DefaultValue("PT5S") Duration reconnectMax,
         @DefaultValue("false") boolean keyspaceEnabled) {
-    public enum NamespaceMode {
-        ISOLATED,
-        SHARED
-    }
-
     public PlatformRedisProperties {
-        if (namespaceMode == null
-                || maxKeyBytes < 1
+        if (maxKeyBytes < 1
                 || maxKeyBytes > 65536
                 || maxPayloadBytes < 1
                 || maxPayloadBytes > 67108864

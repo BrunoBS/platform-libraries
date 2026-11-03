@@ -21,7 +21,6 @@ public final class PlatformRedisCacheManager extends RedisCacheManager {
     private final CacheReturnTypes types;
     private final RedisJsonCodec codec;
     private final RedisAccess access;
-    private final String service, environment;
     private final ConcurrentMap<String, Cache> reads = new ConcurrentHashMap<>();
 
     PlatformRedisCacheManager(
@@ -29,18 +28,12 @@ public final class PlatformRedisCacheManager extends RedisCacheManager {
             PlatformRedisCacheProperties properties,
             CacheReturnTypes types,
             RedisJsonCodec codec,
-            RedisAccess access,
-            String service,
-            String environment) {
+            RedisAccess access) {
         super(writer, RedisCacheConfiguration.defaultCacheConfig().disableCachingNullValues());
         this.properties = properties;
         this.types = types;
         this.codec = codec;
         this.access = access;
-        this.service = service;
-        this.environment = environment;
-        access.text(service);
-        PlatformRedisCacheProperties.name(environment);
         setTransactionAware(true);
     }
 
@@ -50,7 +43,7 @@ public final class PlatformRedisCacheManager extends RedisCacheManager {
 
     private RedisCacheConfiguration configuration(String name) {
         PlatformRedisCacheProperties.name(name);
-        String prefix = access.key("cache:" + service + ":" + environment + ":" + name) + "::";
+        String prefix = access.key("cache:" + name) + "::";
         RedisSerializer<String> keys =
                 new RedisSerializer<>() {
                     public byte[] serialize(String value) {

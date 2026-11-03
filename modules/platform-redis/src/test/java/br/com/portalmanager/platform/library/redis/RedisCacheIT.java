@@ -138,8 +138,7 @@ class RedisCacheIT extends RedisIntegrationSupport {
                         .getKeyPrefixFor(region);
         assertThat(prefix)
                 .isEqualTo(
-                        ctx.getBean(RedisAccess.class).key("cache:redis-test:default:" + region)
-                                + "::");
+                        ctx.getBean(RedisAccess.class).key("cache:" + region) + "::");
         return prefix + key;
     }
 
@@ -289,14 +288,6 @@ class RedisCacheIT extends RedisIntegrationSupport {
                             q.find(id);
                             q.unknown(id);
                             assertThat(q.readCount()).isEqualTo(6);
-                            caching()
-                                    .withPropertyValues("platform.redis.cache.environment=prod")
-                                    .run(
-                                            other -> {
-                                                other.getBean(Queries.class).find(id);
-                                                assertThat(other.getBean(Queries.class).readCount())
-                                                        .isEqualTo(1);
-                                            });
                             caching()
                                     .withPropertyValues("spring.application.name=another-service")
                                     .run(

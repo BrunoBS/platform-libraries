@@ -25,13 +25,15 @@ import tools.jackson.databind.json.JsonMapper;
 
 class ExpressionProviderTest {
     final RedisStore store = mock(RedisStore.class);
+    final RedisStore scoped = mock(RedisStore.class);
+    { when(store.withNamespace("dynamic-parameter")).thenReturn(scoped); }
     final RedisJsonCodec codec = new RedisJsonCodec(JsonMapper.builder().build(), 1048576);
     final ExpressionProvider provider = new RedisExpressionProvider(new RedisParameterReader(store, codec));
 
     void document(String json) {
         // Exercise the actual Redis codec and exact deserializer on every read, including failures.
         doAnswer(call -> Optional.of(codec.decode(json, ExactDocument.class)))
-                .when(store).get("rules.value", ExactDocument.class);
+                .when(scoped).get("rules.value", ExactDocument.class);
     }
     void expression(String operator, String type, String value) {
         document("{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"" + operator
@@ -90,10 +92,10 @@ class ExpressionProviderTest {
         ExactDocument document = codec.decode(json, ExactDocument.class);
         for (String key : List.of("single", "rules..value", "config:rules.value",
                 "dynamic-parameter:rules.value", " rules.value ")) {
-            when(store.get(key, ExactDocument.class)).thenReturn(Optional.of(document));
+            when(scoped.get(key, ExactDocument.class)).thenReturn(Optional.of(document));
             assertThat(provider.matches(key, 21)).isTrue();
             assertThat(provider.matches(key, 21, false)).isTrue();
-            verify(store, times(2)).get(key, ExactDocument.class);
+            verify(scoped, times(2)).get(key, ExactDocument.class);
         }
     }
     @Test void stringAndAllNumericMembershipTypesAreExact() {
@@ -223,7 +225,7 @@ class ExpressionProviderTest {
             assertThat(provider.matches("rules.value", 18, true)).isTrue();
             for (String error : List.of("redis.unavailable", "redis.timeout", "redis.serialization", "redis.type")) {
                 doThrow(new ApiException(error, new RuntimeException("SECRET_JSON")))
-                        .when(store).get("rules.value", ExactDocument.class);
+                        .when(scoped).get("rules.value", ExactDocument.class);
                 String expected = error.equals("redis.timeout") ? "parameter-client.timeout"
                         : error.equals("redis.unavailable") ? "parameter-client.read.failed" : "parameter-client.value.invalid";
                 assertThatThrownBy(() -> provider.matches("rules.value", 18)).hasMessage(expected).hasCause(null);
@@ -245,9 +247,9 @@ class ExpressionProviderTest {
         assertThatThrownBy(() -> provider.matches("", 18, false)).hasMessage("parameter-client.validation");
         assertThatThrownBy(() -> provider.matches("rules.value", null, true)).hasMessage("parameter-client.validation");
         verifyNoInteractions(store);
-        doThrow(new IllegalStateException("programming error")).when(store).get("rules.value", ExactDocument.class);
+        doThrow(new IllegalStateException("programming error")).when(scoped).get("rules.value", ExactDocument.class);
         assertThatThrownBy(() -> provider.matches("rules.value", 18, false)).isInstanceOf(IllegalStateException.class);
-        doThrow(new AssertionError("fatal")).when(store).get("rules.value", ExactDocument.class);
+        doThrow(new AssertionError("fatal")).when(scoped).get("rules.value", ExactDocument.class);
         assertThatThrownBy(() -> provider.matches("rules.value", 18, false)).isInstanceOf(AssertionError.class);
     }
 }

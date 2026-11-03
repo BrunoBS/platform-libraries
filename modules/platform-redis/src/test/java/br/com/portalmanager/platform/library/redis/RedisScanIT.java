@@ -13,22 +13,21 @@ import static org.assertj.core.api.Assertions.*;
 
 class RedisScanIT extends RedisIntegrationSupport {
     @Test void pagesThroughOnlyLogicalKeysOfTheLiteralPrefixWithoutReadingValues() {
-        context().withPropertyValues("platform.redis.namespace=dynamic-parameter", "platform.redis.namespace-mode=SHARED")
-                .run(ctx -> {
+        context().run(ctx -> {
                     RedisStore store = ctx.getBean(RedisStore.class);
                     StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
                     String prefix = key() + ".";
                     Map<String, String> entries = new LinkedHashMap<>();
                     for (int index = 0; index < 73; index++) entries.put(prefix + index, "secret-value");
-                    store.setAll(entries);
-                    store.set(prefix.substring(0, prefix.length() - 1) + "-other.key", "foreign-service");
+                    store.withNamespace("dynamic-parameter").setAll(entries);
+                    store.withNamespace("dynamic-parameter").set(prefix.substring(0, prefix.length() - 1) + "-other.key", "foreign-service");
                     raw.opsForValue().set("foreign:" + prefix + "key", "secret-foreign");
                     raw.opsForValue().set("dynamic-parameter:" + prefix + "invalid-json", "not-json");
                     Set<String> keys = new LinkedHashSet<>();
                     String cursor = "0";
                     int pages = 0;
                     do {
-                        RedisKeyPage page = store.scan(prefix, cursor, 1);
+                        RedisKeyPage page = store.withNamespace("dynamic-parameter").scan(prefix, cursor, 1);
                         keys.addAll(page.keys());
                         cursor = page.cursor();
                         assertThat(++pages).isLessThan(10000);

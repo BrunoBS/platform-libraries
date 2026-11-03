@@ -15,7 +15,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public final class RedisTestContextCustomizerFactory implements ContextCustomizerFactory {
     public ContextCustomizer createContextCustomizer(
@@ -37,7 +36,6 @@ public final class RedisTestContextCustomizerFactory implements ContextCustomize
             implements ContextCustomizer {
         public void customizeContext(
                 ConfigurableApplicationContext context, MergedContextConfiguration merged) {
-            String namespace = "test-" + UUID.randomUUID().toString().replace("-", "");
             context.getEnvironment()
                     .getPropertySources()
                     .addFirst(
@@ -45,11 +43,7 @@ public final class RedisTestContextCustomizerFactory implements ContextCustomize
                                     "platformTestingRedis",
                                     Map.of(
                                             "platform.testing.redis.image",
-                                            image,
-                                            "platform.redis.namespace",
-                                            namespace,
-                                            "platform.redis.namespace-mode",
-                                            "ISOLATED")));
+                                            image)));
         }
     }
 }

@@ -58,20 +58,11 @@ class RedisFixtureIT {
 
     @Test
     @org.junit.jupiter.api.Order(1)
-    void startsAndConfiguresConnectionAndExclusiveNamespace() {
-        assertThat(environment.getProperty("platform.redis.namespace")).startsWith("test-");
+    void startsAndUsesApplicationNameAsNamespace() {
+        String namespace = environment.getRequiredProperty("spring.application.name");
         redis.opsForValue().set("other-service:untouched", "preserved");
-        redis.opsForValue()
-                .set(
-                        environment.getProperty("platform.redis.namespace")
-                                + ".redis-fixture:fixture",
-                        "value");
-        assertThat(
-                        redis.opsForValue()
-                                .get(
-                                        environment.getProperty("platform.redis.namespace")
-                                                + ".redis-fixture:fixture"))
-                .isEqualTo("value");
+        redis.opsForValue().set(namespace + ":fixture", "value");
+        assertThat(redis.opsForValue().get(namespace + ":fixture")).isEqualTo("value");
     }
 
     @Test
@@ -81,8 +72,8 @@ class RedisFixtureIT {
         assertThat(
                         redis.opsForValue()
                                 .get(
-                                        environment.getProperty("platform.redis.namespace")
-                                                + ".redis-fixture:fixture"))
+                                        environment.getRequiredProperty("spring.application.name")
+                                                + ":fixture"))
                 .isNull();
     }
 }

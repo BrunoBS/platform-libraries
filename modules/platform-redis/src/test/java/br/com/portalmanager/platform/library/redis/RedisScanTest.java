@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.*;
 
 class RedisScanTest {
     private final PlatformRedisProperties properties = new Binder(new MapConfigurationPropertySource(
-            Map.of("platform.redis.namespace", "test"))).bindOrCreate("platform.redis", PlatformRedisProperties.class);
+            Map.of())).bindOrCreate("platform.redis", PlatformRedisProperties.class);
     private final RedisAccess access = new RedisAccess(properties, "unit");
     private final RedisJsonCodec codec = new RedisJsonCodec(new JsonMapper(), 1024);
 
@@ -51,7 +51,7 @@ class RedisScanTest {
 
     @Test void continuationPreservesUnsignedCursorAndNeverReturnsForeignPrefixes() {
         StringRedisTemplate template = mock(StringRedisTemplate.class);
-        doReturn(List.of("18446744073709551615", List.of("test.unit:service.a", "foreign:service.b", "test.unit:service-other.c")))
+        doReturn(List.of("18446744073709551615", List.of("unit:service.a", "foreign:service.b", "unit:service-other.c")))
                 .when(template).execute(any(RedisScript.class), anyList(), any(Object[].class));
         DefaultRedisStore store = new DefaultRedisStore(template, codec, access);
         br.com.portalmanager.platform.library.redis.core.RedisKeyPage page = store.scan("service.", "0", 1);

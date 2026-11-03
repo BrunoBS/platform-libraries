@@ -24,8 +24,6 @@ class RedisAsyncTest {
         var response = Sinks.<String>one();
         var properties =
                 new PlatformRedisProperties(
-                        "",
-                        PlatformRedisProperties.NamespaceMode.ISOLATED,
                         256,
                         1024,
                         10,

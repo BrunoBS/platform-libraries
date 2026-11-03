@@ -20,10 +20,12 @@ import tools.jackson.databind.json.JsonMapper;
 class ConfigurationProviderTest {
     final JsonMapper mapper = JsonMapper.builder().build();
     final RedisStore store = mock(RedisStore.class);
+    final RedisStore scoped = mock(RedisStore.class);
+    { when(store.withNamespace("dynamic-parameter")).thenReturn(scoped); }
     final ConfigurationProvider provider = new RedisConfigurationProvider(new RedisParameterReader(store, new RedisJsonCodec(mapper, 1048576)));
 
     void value(String json) {
-        when(store.get("platform.value", JsonNode.class)).thenReturn(Optional.of(mapper.readTree(json)));
+        when(scoped.get("platform.value", JsonNode.class)).thenReturn(Optional.of(mapper.readTree(json)));
     }
 
     @Test
@@ -51,7 +53,7 @@ class ConfigurationProviderTest {
                 "platform.operationMode", "\"STANDARD\"",
                 "platform.settings", "{\"maxAttempts\":5}",
                 "platform.regions", "[\"BR\",\"US\"]");
-        values.forEach((key, json) -> when(store.get(key, JsonNode.class)).thenReturn(
+        values.forEach((key, json) -> when(scoped.get(key, JsonNode.class)).thenReturn(
                 Optional.of(mapper.readTree("{\"type\":\"CONFIGURATION\",\"value\":" + json + "}"))));
         int days = provider.get("key-service.quarantineDays", 30);
         boolean audit = provider.get("platform.auditEnabled", false);
@@ -63,7 +65,7 @@ class ConfigurationProviderTest {
         assertThat(mode).isEqualTo("STANDARD");
         assertThat(settings).isEqualTo(new MySettings(5));
         assertThat(regions).containsExactly("BR", "US");
-        verify(store, never()).get("orders.auditEnabled", JsonNode.class);
+        verify(scoped, never()).get("orders.auditEnabled", JsonNode.class);
     }
 
     @Test
@@ -74,9 +76,10 @@ class ConfigurationProviderTest {
         List<String> list = List.of("BR");
         assertThat(provider.get("missing.regions", new TypeReference<List<String>>() {}, list)).isSameAs(list);
         assertThat(provider.get("other.auditEnabled", false)).isFalse();
-        verify(store, times(2)).get("missing.settings", JsonNode.class);
-        verify(store).get("missing.regions", JsonNode.class);
-        verify(store).get("other.auditEnabled", JsonNode.class);
+        verify(scoped, times(2)).get("missing.settings", JsonNode.class);
+        verify(scoped).get("missing.regions", JsonNode.class);
+        verify(scoped).get("other.auditEnabled", JsonNode.class);
+        verify(store, times(4)).withNamespace("dynamic-parameter");
         verifyNoMoreInteractions(store);
     }
 
@@ -101,9 +104,9 @@ class ConfigurationProviderTest {
         JsonNode envelope = mapper.readTree("{\"type\":\"CONFIGURATION\",\"value\":30}");
         for (String key : List.of("single", "rules..value", "config:platform.value",
                 "dynamic-parameter:platform.value", " platform.value ")) {
-            when(store.get(key, JsonNode.class)).thenReturn(Optional.of(envelope));
+            when(scoped.get(key, JsonNode.class)).thenReturn(Optional.of(envelope));
             assertThat(provider.get(key, 1)).isEqualTo(30);
-            verify(store).get(key, JsonNode.class);
+            verify(scoped).get(key, JsonNode.class);
         }
     }
 
@@ -135,7 +138,7 @@ class ConfigurationProviderTest {
     void failuresAreControlledAndDoNotRetainSensitiveCauses() {
         for (String key : List.of("redis.unavailable", "redis.timeout", "redis.serialization", "redis.type")) {
             doThrow(new ApiException(key, new RuntimeException("SECRET_TOKEN_123")))
-                    .when(store).get("platform.value", JsonNode.class);
+                    .when(scoped).get("platform.value", JsonNode.class);
             Throwable failure = catchThrowable(() -> provider.get("platform.value", 7));
             String expected = switch(key) {
                 case "redis.timeout" -> "parameter-client.timeout";

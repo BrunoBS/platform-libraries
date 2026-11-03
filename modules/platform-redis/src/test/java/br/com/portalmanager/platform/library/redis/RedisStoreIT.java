@@ -165,20 +165,21 @@ class RedisStoreIT extends RedisIntegrationSupport {
     }
 
     @Test
-    void namespaceIsolationSharedModeAndOverrides() {
+    void applicationNameIsDefaultAndExplicitNamespaceOverridesIt() {
         context()
-                .withPropertyValues("platform.redis.namespace-mode=SHARED")
-                .run(ctx -> assertThat(ctx).hasFailed());
-        context()
-                .withPropertyValues(
-                        "platform.redis.namespace-mode=SHARED", "platform.redis.namespace=team")
                 .run(
                         ctx -> {
                             var store = ctx.getBean(RedisStore.class);
+                            var raw = ctx.getBean(StringRedisTemplate.class);
                             String key = key();
                             store.set(key, "value");
-                            assertThat(ctx.getBean(StringRedisTemplate.class).hasKey("team:" + key))
+                            store.withNamespace("team").set(key, "shared-value");
+                            assertThat(raw.hasKey("redis-test:" + key))
                                     .isTrue();
+                            assertThat(raw.hasKey("team:" + key)).isTrue();
+                            assertThat(raw.hasKey("redis-test:team:" + key)).isFalse();
+                            assertThat(store.get(key, String.class)).contains("value");
+                            assertThat(store.withNamespace("team").get(key, String.class)).contains("shared-value");
                         });
         RedisStore custom = org.mockito.Mockito.mock(RedisStore.class);
         context()

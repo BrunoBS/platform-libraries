@@ -15,6 +15,7 @@ import tools.jackson.databind.JsonNode;
 
 /** Shared Redis read/decoding boundary; providers never expose a RedisStore. */
 public final class RedisParameterReader {
+    private static final String NAMESPACE = "dynamic-parameter";
     private final RedisStore store;
     private final RedisJsonCodec codec;
 
@@ -62,7 +63,7 @@ public final class RedisParameterReader {
 
     private <T> Optional<T> read(String key, Class<T> type) {
         try {
-            return store.get(key, type);
+            return store.withNamespace(NAMESPACE).get(key, type);
         } catch (ApiException failure) {
             if (failure.getMessageKey().startsWith(ParameterClientMessageKeys.PREFIX)) throw failure;
             throw ParameterErrors.readFailure(failure);

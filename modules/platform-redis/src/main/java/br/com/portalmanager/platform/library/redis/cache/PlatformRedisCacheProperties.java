@@ -13,7 +13,6 @@ public record PlatformRedisCacheProperties(
         @DefaultValue("false") boolean enabled,
         @DefaultValue("PT30M") Duration defaultTtl,
         Map<String, Region> regions,
-        @DefaultValue("") String environment,
         @DefaultValue("FAIL_FAST") FailurePolicy failurePolicy,
         @DefaultValue("PT5S") Duration lockTtl) {
     public enum FailurePolicy {

@@ -42,20 +42,18 @@ class ParameterProvidersIT {
     ApplicationContextRunner context() {
         return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
                 DataRedisAutoConfiguration.class, DataRedisReactiveAutoConfiguration.class,
-                PlatformRedisAutoConfiguration.class, br.com.portalmanager.platform.library.redis.configuration.RedisNamespaceAutoConfiguration.class, ParameterClientAutoConfiguration.class))
-                .withUserConfiguration(StoreConfiguration.class)
+                PlatformRedisAutoConfiguration.class, ParameterClientAutoConfiguration.class))
                 .withPropertyValues("spring.application.name=parameter-consumer",
                         "spring.data.redis.host=" + redisContainer.getHost(),
                         "spring.data.redis.port=" + redisContainer.getMappedPort(6379),
-                        "spring.data.redis.timeout=1s", "spring.data.redis.connect-timeout=1s",
-                        "platform.redis.namespace-mode=ISOLATED", "platform.redis.namespace=workspace-default");
+                        "spring.data.redis.timeout=1s", "spring.data.redis.connect-timeout=1s");
     }
 
     @Test
     void interoperatesWithActualProducerShapeAndPrefixForEveryValueKind() {
         context().run(ctx -> {
             assertThat(ctx).hasSingleBean(ConfigurationProvider.class).hasSingleBean(ExpressionProvider.class).hasSingleBean(RedisStore.class);
-            RedisStore store = ctx.getBean(Stores.class).parameters();
+            RedisStore store = ctx.getBean(RedisStore.class);
             ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
             ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
             StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
@@ -65,7 +63,7 @@ class ParameterProvidersIT {
             // Same setAll and PublishedValue field names as ParameterKeyPublisherService.send.
             java.util.LinkedHashMap<String, PublishedValue> published = new java.util.LinkedHashMap<String, PublishedValue>();
             values.forEach((key, value) -> published.put(key, new PublishedValue("CONFIGURATION", JSON.valueToTree(value))));
-            store.setAll(published);
+            store.withNamespace("dynamic-parameter").setAll(published);
             assertThat(provider.get("orders.days", 1)).isEqualTo(30);
             assertThat(provider.get("platform.audit-enabled", false)).isTrue();
             assertThat(provider.get("platform.mode", "fallback")).isEqualTo("STANDARD");
@@ -74,27 +72,27 @@ class ParameterProvidersIT {
                     .containsExactly("BR", "US");
             values.forEach((key, value) -> {
                 assertThat(raw.hasKey("dynamic-parameter:" + key)).isTrue();
-                assertThat(raw.hasKey("dynamic-parameter:dynamic-parameter:" + key)).isFalse();
+                assertThat(raw.hasKey("parameter-consumer:dynamic-parameter:" + key)).isFalse();
                 assertThat(raw.hasKey("config:" + key)).isFalse();
-                assertThat(store.ttl(key)).isEmpty();
+                assertThat(store.withNamespace("dynamic-parameter").ttl(key)).isEmpty();
                 JsonNode envelope = JSON.readTree(raw.opsForValue().get("dynamic-parameter:" + key));
                 assertThat(envelope.get("type").asString()).isEqualTo("CONFIGURATION");
                 assertThat(envelope.get("value")).isEqualTo(JSON.valueToTree(value));
             });
             // Overwrite via the public store as specified in the implementation contract.
-            store.set("orders.days", new PublishedValue("CONFIGURATION", JSON.valueToTree(60)));
+            store.withNamespace("dynamic-parameter").set("orders.days", new PublishedValue("CONFIGURATION", JSON.valueToTree(60)));
             assertThat(provider.get("orders.days", 1)).isEqualTo(60);
-            store.set("platform.audit-enabled", new PublishedValue("CONFIGURATION", JSON.valueToTree(false)));
-            store.set("platform.mode", new PublishedValue("CONFIGURATION", JSON.valueToTree("UPDATED")));
-            store.set("platform.settings", new PublishedValue("CONFIGURATION", JSON.valueToTree(new Settings(4))));
-            store.set("platform.regions", new PublishedValue("CONFIGURATION", JSON.valueToTree(List.of("EU"))));
+            store.withNamespace("dynamic-parameter").set("platform.audit-enabled", new PublishedValue("CONFIGURATION", JSON.valueToTree(false)));
+            store.withNamespace("dynamic-parameter").set("platform.mode", new PublishedValue("CONFIGURATION", JSON.valueToTree("UPDATED")));
+            store.withNamespace("dynamic-parameter").set("platform.settings", new PublishedValue("CONFIGURATION", JSON.valueToTree(new Settings(4))));
+            store.withNamespace("dynamic-parameter").set("platform.regions", new PublishedValue("CONFIGURATION", JSON.valueToTree(List.of("EU"))));
             assertThat(provider.get("platform.audit-enabled", true)).isFalse();
             assertThat(provider.get("platform.mode", "fallback")).isEqualTo("UPDATED");
             assertThat(provider.get("platform.settings", Settings.class, null)).isEqualTo(new Settings(4));
             assertThat(provider.get("platform.regions", new TypeReference<List<String>>() {}, List.of()))
                     .containsExactly("EU");
             assertThat(provider.get("other.days", 7)).isEqualTo(7);
-            for (String key : values.keySet()) assertThat(store.delete(key)).isTrue();
+            for (String key : values.keySet()) assertThat(store.withNamespace("dynamic-parameter").delete(key)).isTrue();
             assertThat(provider.get("orders.days", 7)).isEqualTo(7);
             assertThat(provider.get("platform.audit-enabled", true)).isTrue();
             assertThat(provider.get("platform.mode", "fallback")).isEqualTo("fallback");
@@ -128,16 +126,16 @@ class ParameterProvidersIT {
     @Test
     void ttlExpiryIsAbsenceButProducerOverwritesArePersistent() {
         context().run(ctx -> {
-            RedisStore store = ctx.getBean(Stores.class).parameters();
+            RedisStore store = ctx.getBean(RedisStore.class);
             ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
             ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
             PublishedValue envelope = new PublishedValue("CONFIGURATION", JSON.valueToTree(3));
-            store.set("orders.ttl", envelope, Duration.ofMillis(100));
+            store.withNamespace("dynamic-parameter").set("orders.ttl", envelope, Duration.ofMillis(100));
             org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(3)).untilAsserted(
                     () -> assertThat(provider.get("orders.ttl", 7)).isEqualTo(7));
-            store.set("orders.ttl", envelope, Duration.ofMinutes(1));
-            store.set("orders.ttl", new PublishedValue("CONFIGURATION", JSON.valueToTree(4)));
-            assertThat(store.ttl("orders.ttl")).isEmpty();
+            store.withNamespace("dynamic-parameter").set("orders.ttl", envelope, Duration.ofMinutes(1));
+            store.withNamespace("dynamic-parameter").set("orders.ttl", new PublishedValue("CONFIGURATION", JSON.valueToTree(4)));
+            assertThat(store.withNamespace("dynamic-parameter").ttl("orders.ttl")).isEmpty();
             assertThat(provider.get("orders.ttl", 7)).isEqualTo(4);
         });
     }
@@ -178,11 +176,11 @@ class ParameterProvidersIT {
             fixtures = exact.readTree(source);
         }
         context().run(ctx -> {
-            RedisStore store = ctx.getBean(Stores.class).parameters();
+            RedisStore store = ctx.getBean(RedisStore.class);
             ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
             ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
             StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
-            store.setAll(Map.of("rules.minimum-age", fixtures.get(0), "rules.allowed-segments", fixtures.get(1),
+            store.withNamespace("dynamic-parameter").setAll(Map.of("rules.minimum-age", fixtures.get(0), "rules.allowed-segments", fixtures.get(1),
                     "rules.long-limit", fixtures.get(2), "rules.decimal-limit", fixtures.get(3),
                     "platform.producer-settings", fixtures.get(4)));
             assertThat(expressions.matches("rules.minimum-age", 21)).isTrue();
@@ -198,14 +196,14 @@ class ParameterProvidersIT {
             assertThat(raw.opsForValue().get("dynamic-parameter:rules.minimum-age"))
                     .contains("EXPRESSION", "GREATER_THAN_OR_EQUALS");
             assertThat(raw.hasKey("config:rules.minimum-age")).isFalse();
-            assertThat(raw.hasKey("dynamic-parameter:dynamic-parameter:rules.minimum-age")).isFalse();
-            assertThat(store.ttl("rules.minimum-age")).isEmpty();
-            store.set("rules.minimum-age", fixtures.get(2));
+            assertThat(raw.hasKey("parameter-consumer:dynamic-parameter:rules.minimum-age")).isFalse();
+            assertThat(store.withNamespace("dynamic-parameter").ttl("rules.minimum-age")).isEmpty();
+            store.withNamespace("dynamic-parameter").set("rules.minimum-age", fixtures.get(2));
             assertThat(expressions.matches("rules.minimum-age", 21L)).isFalse();
-            assertThat(store.delete("rules.minimum-age")).isTrue();
+            assertThat(store.withNamespace("dynamic-parameter").delete("rules.minimum-age")).isTrue();
             assertThatThrownBy(() -> expressions.matches("rules.minimum-age", 21)).hasMessage("parameter-client.missing");
             assertThat(expressions.matches("rules.minimum-age", 21, true)).isTrue();
-            store.set("rules.expression-ttl", fixtures.get(0), Duration.ofMillis(100));
+            store.withNamespace("dynamic-parameter").set("rules.expression-ttl", fixtures.get(0), Duration.ofMillis(100));
             assertThat(expressions.matches("rules.expression-ttl", 21)).isTrue();
             org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
                     assertThatThrownBy(() -> expressions.matches("rules.expression-ttl", 21)).hasMessage("parameter-client.missing"));
@@ -240,7 +238,7 @@ class ParameterProvidersIT {
     @Test
     void usesNonBlankKeysLiterallyAndKeepsRedisValidation() {
         context().run(ctx -> {
-            RedisStore store = ctx.getBean(Stores.class).parameters();
+            RedisStore store = ctx.getBean(RedisStore.class);
             ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
             ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
             StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
@@ -249,13 +247,13 @@ class ParameterProvidersIT {
                     "{\"operator\":\"GREATER_THAN_OR_EQUALS\",\"valueType\":\"INTEGER\",\"value\":18}"));
             for (String key : List.of("single", "rules..value", "config:rules.value",
                     "dynamic-parameter:rules.value", " rules.value ")) {
-                store.set(key, configuration);
+                store.withNamespace("dynamic-parameter").set(key, configuration);
                 assertThat(provider.get(key, 1)).isEqualTo(30);
                 assertThat(raw.hasKey("dynamic-parameter:" + key)).isTrue();
-                store.set(key, expression);
+                store.withNamespace("dynamic-parameter").set(key, expression);
                 assertThat(expressions.matches(key, 21)).isTrue();
                 assertThat(expressions.matches(key, 17, true)).isFalse();
-                assertThat(store.delete(key)).isTrue();
+                assertThat(store.withNamespace("dynamic-parameter").delete(key)).isTrue();
                 assertThat(provider.get(key, 7)).isEqualTo(7);
                 assertThat(expressions.matches(key, 21, false)).isFalse();
             }
@@ -273,7 +271,6 @@ class ParameterProvidersIT {
     void bothProvidersShareTheirNamespaceWhileOtherStoresRemainIndependent() {
         context().run(ctx -> {
             RedisStore standard = ctx.getBean(RedisStore.class);
-            Stores stores = ctx.getBean(Stores.class);
             ConfigurationProvider configurations = ctx.getBean(ConfigurationProvider.class);
             ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
             StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
@@ -281,38 +278,24 @@ class ParameterProvidersIT {
             PublishedValue expression = new PublishedValue("EXPRESSION", JSON.readTree(
                     "{\"operator\":\"GREATER_THAN_OR_EQUALS\",\"valueType\":\"INTEGER\",\"value\":18}"));
             standard.set("shared.key", "default");
-            stores.session().set("shared.key", "session");
-            stores.parameters().set("shared.key", configuration);
+            standard.withNamespace("session").set("shared.key", "session");
+            standard.withNamespace("dynamic-parameter").set("shared.key", configuration);
             assertThat(configurations.get("shared.key", 1)).isEqualTo(30);
             assertThatThrownBy(() -> expressions.matches("shared.key", 21))
                     .hasMessage("parameter-client.expression.invalid");
             assertThat(expressions.matches("shared.key", 21, false)).isFalse();
-            stores.parameters().set("shared.key", expression);
+            standard.withNamespace("dynamic-parameter").set("shared.key", expression);
             assertThat(expressions.matches("shared.key", 21)).isTrue();
             assertThatThrownBy(() -> configurations.get("shared.key", JsonNode.class, null))
                     .hasMessage("parameter-client.value.invalid");
             assertThat(standard.get("shared.key", String.class)).contains("default");
-            assertThat(stores.session().get("shared.key", String.class)).contains("session");
-            assertThat(raw.hasKey("workspace-default.parameter-consumer:shared.key")).isTrue();
-            assertThat(raw.hasKey("session.parameter-consumer:shared.key")).isTrue();
+            assertThat(standard.withNamespace("session").get("shared.key", String.class)).contains("session");
+            assertThat(raw.hasKey("parameter-consumer:shared.key")).isTrue();
+            assertThat(raw.hasKey("session:shared.key")).isTrue();
             assertThat(raw.hasKey("dynamic-parameter:shared.key")).isTrue();
-            assertThat(raw.hasKey("dynamic-parameter:dynamic-parameter:shared.key")).isFalse();
+            assertThat(raw.hasKey("parameter-consumer:dynamic-parameter:shared.key")).isFalse();
         });
     }
-
-    @org.springframework.context.annotation.Configuration(proxyBeanMethods = false)
-    @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-            prefix = "platform.redis", name = "enabled", havingValue = "true", matchIfMissing = true)
-    static class StoreConfiguration {
-        @org.springframework.context.annotation.Bean
-        Stores stores(@br.com.portalmanager.platform.library.redis.annotation.RedisNamespace(
-                value = "dynamic-parameter", mode = PlatformRedisProperties.NamespaceMode.SHARED) RedisStore parameters,
-                @br.com.portalmanager.platform.library.redis.annotation.RedisNamespace("session") RedisStore session) {
-            return new Stores(parameters, session);
-        }
-    }
-
-    record Stores(RedisStore parameters, RedisStore session) {}
 
     public record PublishedValue(String type, JsonNode value) {}
     public record Settings(int retries) {}

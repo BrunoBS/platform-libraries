@@ -24,20 +24,28 @@ final class RedisBatches {
     }
 
     Map<String, String> encode(Map<String, ?> entries) {
+        return encode(null, entries);
+    }
+
+    Map<String, String> encode(String namespace, Map<String, ?> entries) {
         if (entries == null) throw RedisErrors.invalid();
         if (entries.isEmpty()) return Map.of();
         access.batch(entries.size());
         Map<String, String> encoded = new LinkedHashMap<>();
-        entries.forEach((key, value) -> encoded.put(access.key(key), codec.encode(value)));
+        entries.forEach((key, value) -> encoded.put(key(namespace, key), codec.encode(value)));
         sameSlot(encoded.keySet());
         return encoded;
     }
 
     Map<String, String> keys(Collection<String> keys) {
+        return keys(null, keys);
+    }
+
+    Map<String, String> keys(String namespace, Collection<String> keys) {
         if (keys == null) throw RedisErrors.invalid();
         Map<String, String> result = new LinkedHashMap<>();
         for (String key : keys) {
-            result.putIfAbsent(key, access.key(key));
+            result.putIfAbsent(key, key(namespace, key));
             if (result.size() > access.properties().maxReadSize()) throw RedisErrors.invalid();
         }
         sameSlot(result.values());
@@ -45,13 +53,21 @@ final class RedisBatches {
     }
 
     Collection<String> deletionKeys(Collection<String> keys) {
+        return deletionKeys(null, keys);
+    }
+
+    Collection<String> deletionKeys(String namespace, Collection<String> keys) {
         if (keys == null) throw RedisErrors.invalid();
         if (keys.isEmpty()) return List.of();
         access.batch(keys.size());
         Set<String> physicalKeys = new LinkedHashSet<>();
-        for (String key : keys) physicalKeys.add(access.key(key));
+        for (String key : keys) physicalKeys.add(key(namespace, key));
         sameSlot(physicalKeys);
         return List.copyOf(physicalKeys);
+    }
+
+    private String key(String namespace, String key) {
+        return namespace == null ? access.key(key) : access.key(namespace, key);
     }
 
     void requireSingleNodeScan() {

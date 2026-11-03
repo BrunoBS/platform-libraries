@@ -13,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Cleans only the namespace allocated to the current Spring test context. */
+/** Cleans only the application namespace used by the current Spring test context. */
 public final class RedisTestExtension implements BeforeEachCallback {
     public void beforeEach(ExtensionContext context) {
         var annotation =
@@ -23,15 +23,12 @@ public final class RedisTestExtension implements BeforeEachCallback {
         var application = SpringExtension.getApplicationContext(context);
         var redis = application.getBeanProvider(StringRedisTemplate.class).getIfUnique();
         if (redis == null) return;
-        String namespace = application.getEnvironment().getProperty("platform.redis.namespace");
         String service = application.getEnvironment().getProperty("spring.application.name");
-        if (namespace == null
-                || !namespace.matches("test-[A-Za-z0-9-]+")
-                || service == null
+        if (service == null
                 || !service.matches("[A-Za-z0-9._-]+"))
             throw new PlatformConfigurationException(
                     RedisTestingTechnicalErrors.invalidConfiguration());
-        String prefix = namespace + "." + service + ":";
+        String prefix = service + ":";
         try (var keys =
                 redis.scan(ScanOptions.scanOptions().match(prefix + "*").count(1000).build())) {
             List<String> batch = new ArrayList<>();

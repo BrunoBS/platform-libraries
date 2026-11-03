@@ -16,14 +16,11 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.data.redis.cache.BatchStrategies;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.TreeSet;
 
 @AutoConfiguration(
         after = PlatformRedisAutoConfiguration.class,
@@ -52,16 +49,7 @@ public class PlatformRedisCacheAutoConfiguration {
                 PlatformRedisCacheProperties properties,
                 CacheReturnTypes types,
                 RedisJsonCodec codec,
-                RedisAccess access,
-                Environment environment) {
-            String scope = properties.environment();
-            if (scope == null || scope.isBlank())
-                scope =
-                        environment.getActiveProfiles().length == 0
-                                ? "default"
-                                : String.join(
-                                        ".",
-                                        new TreeSet<>(List.of(environment.getActiveProfiles())));
+                RedisAccess access) {
             var writer =
                     RedisCacheWriter.create(
                             connection,
@@ -79,12 +67,11 @@ public class PlatformRedisCacheAutoConfiguration {
                                                                                     .just(
                                                                                             properties
                                                                                                     .lockTtl()))));
-            String service = environment.getRequiredProperty("spring.application.name");
             var scopedWriter =
                     new ScopedRedisCacheWriter(
-                            writer, access.key("cache:" + service + ":" + scope + ":"));
+                            writer, access.key("cache:"));
             return new PlatformRedisCacheManager(
-                    scopedWriter, properties, types, codec, access, service, scope);
+                    scopedWriter, properties, types, codec, access);
         }
     }
 

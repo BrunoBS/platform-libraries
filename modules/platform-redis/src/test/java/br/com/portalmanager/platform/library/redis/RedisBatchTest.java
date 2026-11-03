@@ -24,7 +24,7 @@ class RedisBatchTest {
     private final PlatformRedisProperties properties =
             new Binder(
                             new MapConfigurationPropertySource(
-                                    Map.of("platform.redis.namespace", "test")))
+                                    Map.of()))
                     .bindOrCreate("platform.redis", PlatformRedisProperties.class);
     private final RedisAccess access = new RedisAccess(properties, "unit");
     private final RedisJsonCodec codec = new RedisJsonCodec(new JsonMapper(), 1024);
@@ -36,9 +36,9 @@ class RedisBatchTest {
         clearInvocations(template);
         assertThat(store.deleteAll(List.of())).isZero();
         verifyNoInteractions(template);
-        when(template.delete(List.of("test.unit:a", "test.unit:b"))).thenReturn(2L);
+        when(template.delete(List.of("unit:a", "unit:b"))).thenReturn(2L);
         assertThat(store.deleteAll(List.of("a", "b", "a"))).isEqualTo(2L);
-        verify(template).delete(List.of("test.unit:a", "test.unit:b"));
+        verify(template).delete(List.of("unit:a", "unit:b"));
         clearInvocations(template);
         assertThatThrownBy(() -> store.deleteAll(List.of("a", ""))).hasMessage("redis.validation");
         assertThatThrownBy(() -> store.deleteAll(null)).hasMessage("redis.validation");
@@ -60,12 +60,12 @@ class RedisBatchTest {
         entries.put("a", "one");
         entries.put("b", "two");
         store.setAll(entries);
-        verify(values).multiSet(Map.of("test.unit:a", "\"one\"", "test.unit:b", "\"two\""));
+        verify(values).multiSet(Map.of("unit:a", "\"one\"", "unit:b", "\"two\""));
         when(values.multiGet(anyCollection()))
                 .thenReturn(Arrays.asList("\"one\"", null, "\"two\""));
         assertThat(store.getAll(List.of("a", "missing", "b", "a"), String.class))
                 .containsExactly(entry("a", "one"), entry("b", "two"));
-        verify(values).multiGet(List.of("test.unit:a", "test.unit:missing", "test.unit:b"));
+        verify(values).multiGet(List.of("unit:a", "unit:missing", "unit:b"));
         verifyNoMoreInteractions(values);
         assertThatThrownBy(() -> store.setAll(null)).hasMessage("redis.validation");
         assertThatThrownBy(() -> store.getAll(null, String.class)).hasMessage("redis.validation");
@@ -91,8 +91,8 @@ class RedisBatchTest {
         assertThat(result).isNotDone();
         read.tryEmitValue(Arrays.asList(null, "\"value\""));
         assertThat(result.join()).containsExactly(entry("a", "value"));
-        verify(values).multiSet(Map.of("test.unit:a", "\"value\""));
-        verify(values).multiGet(List.of("test.unit:missing", "test.unit:a"));
+        verify(values).multiSet(Map.of("unit:a", "\"value\""));
+        verify(values).multiGet(List.of("unit:missing", "unit:a"));
         verifyNoMoreInteractions(values);
         assertThatThrownBy(
                         () ->

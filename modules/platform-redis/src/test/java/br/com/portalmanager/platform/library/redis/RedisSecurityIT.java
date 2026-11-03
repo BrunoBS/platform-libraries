@@ -193,40 +193,16 @@ class RedisSecurityIT extends RedisIntegrationSupport {
     @Test
     void namespaceIsolationAndExplicitSharingAcrossServices() {
         String key = key();
-        context()
-                .withPropertyValues("platform.redis.namespace=team")
-                .run(
-                        a -> {
-                            a.getBean(RedisStore.class).set(key, "isolated");
-                            context()
-                                    .withPropertyValues(
-                                            "spring.application.name=another",
-                                            "platform.redis.namespace=team")
-                                    .run(
-                                            b ->
-                                                    assertThat(
-                                                                    b.getBean(RedisStore.class)
-                                                                            .get(key, String.class))
-                                                            .isEmpty());
-                        });
-        context()
-                .withPropertyValues(
-                        "platform.redis.namespace=team", "platform.redis.namespace-mode=SHARED")
-                .run(
-                        a -> {
-                            a.getBean(RedisStore.class).set(key, "shared");
-                            context()
-                                    .withPropertyValues(
-                                            "spring.application.name=another",
-                                            "platform.redis.namespace=team",
-                                            "platform.redis.namespace-mode=SHARED")
-                                    .run(
-                                            b ->
-                                                    assertThat(
-                                                                    b.getBean(RedisStore.class)
-                                                                            .get(key, String.class))
-                                                            .contains("shared"));
-                        });
+        context().run(a -> {
+            a.getBean(RedisStore.class).set(key, "application-isolated");
+            a.getBean(RedisStore.class).withNamespace("team").set(key, "explicitly-shared");
+            context().withPropertyValues("spring.application.name=another")
+                    .run(b -> {
+                        RedisStore store = b.getBean(RedisStore.class);
+                        assertThat(store.get(key, String.class)).isEmpty();
+                        assertThat(store.withNamespace("team").get(key, String.class)).contains("explicitly-shared");
+                    });
+        });
     }
 
     private static String stack(Throwable failure) {

@@ -30,16 +30,34 @@ public final class DefaultRedisStore implements RedisStore {
     private final RedisJsonCodec codec;
     private final RedisAccess access;
     private final RedisBatches batches;
+    private final String namespace;
 
     public DefaultRedisStore(StringRedisTemplate redis, RedisJsonCodec codec, RedisAccess access) {
+        this(redis, codec, access, null);
+    }
+
+    private DefaultRedisStore(StringRedisTemplate redis, RedisJsonCodec codec, RedisAccess access, String namespace) {
         this.redis = redis;
         this.codec = codec;
         this.access = access;
         this.batches = new RedisBatches(access, codec, redis.getConnectionFactory());
+        this.namespace = namespace;
+    }
+
+    @Override
+    public RedisStore withNamespace(String namespace) {
+        access.prefix(namespace); // validate before creating the scoped view
+        return new DefaultRedisStore(redis, codec, access, namespace);
     }
 
     public <T> void setAll(Map<String, T> entries) {
-        var encoded = batches.encode(entries);
+        var encoded = namespace == null ? batches.encode(entries) : batches.encode(namespace, entries);
+        if (encoded.isEmpty()) return;
+        RedisErrors.call(() -> { redis.opsForValue().multiSet(encoded); return null; });
+    }
+
+    public <T> void setAll(String namespace, Map<String, T> entries) {
+        var encoded = batches.encode(namespace, entries);
         if (encoded.isEmpty()) return;
         RedisErrors.call(
                 () -> {
@@ -50,16 +68,33 @@ public final class DefaultRedisStore implements RedisStore {
 
     public <T> Map<String, T> getAll(Collection<String> keys, Class<T> type) {
         if (type == null) throw RedisErrors.invalid();
-        return readAll(keys, json -> codec.decode(json, type));
+        return readAll(namespace, keys, json -> codec.decode(json, type));
+    }
+
+    public <T> Map<String, T> getAll(String namespace, Collection<String> keys, Class<T> type) {
+        if (type == null) throw RedisErrors.invalid();
+        return readAll(namespace, keys, json -> codec.decode(json, type));
     }
 
     public <T> Map<String, T> getAll(Collection<String> keys, TypeReference<T> type) {
         if (type == null) throw RedisErrors.invalid();
-        return readAll(keys, json -> codec.decode(json, type));
+        return readAll(namespace, keys, json -> codec.decode(json, type));
+    }
+
+    public <T> Map<String, T> getAll(String namespace, Collection<String> keys, TypeReference<T> type) {
+        if (type == null) throw RedisErrors.invalid();
+        return readAll(namespace, keys, json -> codec.decode(json, type));
     }
 
     private <T> Map<String, T> readAll(Collection<String> keys, Function<String, T> decoder) {
-        var prepared = batches.keys(keys);
+        var prepared = namespace == null ? batches.keys(keys) : batches.keys(namespace, keys);
+        if (prepared.isEmpty()) return Map.of();
+        var values = RedisErrors.call(() -> redis.opsForValue().multiGet(new ArrayList<>(prepared.values())));
+        return batches.decode(prepared, values, decoder);
+    }
+
+    private <T> Map<String, T> readAll(String namespace, Collection<String> keys, Function<String, T> decoder) {
+        var prepared = batches.keys(namespace, keys);
         if (prepared.isEmpty()) return Map.of();
         var values =
                 RedisErrors.call(
@@ -71,47 +106,87 @@ public final class DefaultRedisStore implements RedisStore {
         write(key, value).execute();
     }
 
+    public <T> void set(String namespace, String key, T value) {
+        write(namespace, key, value).execute();
+    }
+
     public <T> void set(String key, T value, Duration ttl) {
         write(key, value).ttl(ttl).execute();
     }
 
+    public <T> void setWithTtl(String namespace, String key, T value, Duration ttl) {
+        write(namespace, key, value).ttl(ttl).execute();
+    }
+
     public <T> Optional<T> get(String key, Class<T> type) {
+        return getValue(key, type, namespace);
+    }
+
+    public <T> Optional<T> get(String namespace, String key, Class<T> type) {
+        return getValue(key, type, namespace);
+    }
+
+    private <T> Optional<T> getValue(String key, Class<T> type, String namespace) {
         if (type == null) throw RedisErrors.invalid();
         return Optional.ofNullable(
                         RedisErrors.call(
                                 () ->
                                         redis.execute(
                                                 RedisReadScripts.GET,
-                                                List.of(access.key(key)),
+                                                List.of(physicalKey(key, namespace)),
                                                 Integer.toString(
                                                         access.properties().maxPayloadBytes()))))
                 .map(json -> codec.decode(json, type));
     }
 
     public <T> Optional<T> get(String key, TypeReference<T> type) {
+        return getValue(key, type, namespace);
+    }
+
+    public <T> Optional<T> get(String namespace, String key, TypeReference<T> type) {
+        return getValue(key, type, namespace);
+    }
+
+    private <T> Optional<T> getValue(String key, TypeReference<T> type, String namespace) {
         if (type == null) throw RedisErrors.invalid();
         return Optional.ofNullable(
                         RedisErrors.call(
                                 () ->
                                         redis.execute(
                                                 RedisReadScripts.GET,
-                                                List.of(access.key(key)),
+                                                List.of(physicalKey(key, namespace)),
                                                 Integer.toString(
                                                         access.properties().maxPayloadBytes()))))
                 .map(json -> codec.decode(json, type));
     }
 
     public boolean exists(String key) {
-        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.hasKey(access.key(key))));
+        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.hasKey(physicalKey(key, namespace))));
+    }
+
+    public boolean exists(String namespace, String key) {
+        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.hasKey(physicalKey(key, namespace))));
     }
 
     public boolean delete(String key) {
-        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.delete(access.key(key))));
+        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.delete(physicalKey(key, namespace))));
+    }
+
+    public boolean delete(String namespace, String key) {
+        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.delete(physicalKey(key, namespace))));
     }
 
     @Override
     public long deleteAll(Collection<String> keys) {
-        Collection<String> physicalKeys = batches.deletionKeys(keys);
+        return deleteAllWithNamespace(keys, namespace);
+    }
+
+    public long deleteAll(String namespace, Collection<String> keys) {
+        return deleteAllWithNamespace(keys, namespace);
+    }
+
+    private long deleteAllWithNamespace(Collection<String> keys, String namespace) {
+        Collection<String> physicalKeys = batches.deletionKeys(namespace, keys);
         if (physicalKeys.isEmpty()) return 0;
         Long removed = RedisErrors.call(() -> redis.delete(physicalKeys));
         if (removed == null) throw RedisErrors.error("unavailable", null);
@@ -120,12 +195,21 @@ public final class DefaultRedisStore implements RedisStore {
 
     @Override
     public RedisKeyPage scan(String prefix, String cursor, int count) {
+        return scanWithNamespace(prefix, cursor, count, namespace);
+    }
+
+    public RedisKeyPage scan(String namespace, String prefix, String cursor, int count) {
+        return scanWithNamespace(prefix, cursor, count, namespace);
+    }
+
+    private RedisKeyPage scanWithNamespace(String prefix, String cursor, int count, String namespace) {
         if (prefix == null) throw RedisErrors.invalid();
         requireCursor(cursor);
         access.limit(count);
-        if (!prefix.isEmpty()) access.key(prefix);
+        if (!prefix.isEmpty()) physicalKey(prefix, namespace);
         batches.requireSingleNodeScan();
-        String physicalPrefix = access.prefix() + prefix;
+        String scopePrefix = namespace == null ? access.prefix() : access.prefix(namespace);
+        String physicalPrefix = scopePrefix + prefix;
         String pattern = physicalPrefix.replace("\\", "\\\\").replace("*", "\\*")
                 .replace("?", "\\?").replace("[", "\\[").replace("]", "\\]") + "*";
         List<?> response = RedisErrors.call(() -> redis.execute(SCAN, List.of(), cursor, pattern, Integer.toString(count)));
@@ -139,7 +223,7 @@ public final class DefaultRedisStore implements RedisStore {
         for (Object value : values) {
             String physicalKey = scanText(value);
             if (physicalKey.startsWith(physicalPrefix)) {
-                keys.add(physicalKey.substring(access.prefix().length()));
+                keys.add(physicalKey.substring(scopePrefix.length()));
             }
         }
         return new RedisKeyPage(next, keys);
@@ -158,32 +242,63 @@ public final class DefaultRedisStore implements RedisStore {
     }
 
     public Optional<Duration> ttl(String key) {
+        return ttlWithNamespace(key, namespace);
+    }
+
+    public Optional<Duration> ttl(String namespace, String key) {
+        return ttlWithNamespace(key, namespace);
+    }
+
+    private Optional<Duration> ttlWithNamespace(String key, String namespace) {
         Long millis =
-                RedisErrors.call(() -> redis.getExpire(access.key(key), TimeUnit.MILLISECONDS));
+                RedisErrors.call(() -> redis.getExpire(physicalKey(key, namespace), TimeUnit.MILLISECONDS));
         return millis == null || millis < 0
                 ? Optional.empty()
                 : Optional.of(Duration.ofMillis(millis));
     }
 
     public boolean expire(String key, Duration ttl) {
+        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.expire(physicalKey(key, namespace), access.duration(ttl))));
+    }
+
+    public boolean expire(String namespace, String key, Duration ttl) {
         return RedisErrors.call(
-                () -> Boolean.TRUE.equals(redis.expire(access.key(key), access.duration(ttl))));
+                () -> Boolean.TRUE.equals(redis.expire(physicalKey(key, namespace), access.duration(ttl))));
     }
 
     public boolean persist(String key) {
-        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.persist(access.key(key))));
+        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.persist(physicalKey(key, namespace))));
+    }
+
+    public boolean persist(String namespace, String key) {
+        return RedisErrors.call(() -> Boolean.TRUE.equals(redis.persist(physicalKey(key, namespace))));
     }
 
     public <T> boolean setIfAbsent(String key, T value) {
         return write(key, value).ifAbsent().execute();
     }
 
+    public <T> boolean setIfAbsent(String namespace, String key, T value) {
+        return write(namespace, key, value).ifAbsent().execute();
+    }
+
     public <T> boolean setIfAbsent(String key, T value, Duration ttl) {
         return write(key, value).ttl(ttl).ifAbsent().execute();
     }
 
+    public <T> boolean setIfAbsentWithTtl(String namespace, String key, T value, Duration ttl) {
+        return write(namespace, key, value).ttl(ttl).ifAbsent().execute();
+    }
+
     public <T> RedisWrite<T> write(String key, T value) {
-        String physicalKey = access.key(key);
+        return createWrite(physicalKey(key, namespace), value);
+    }
+
+    public <T> RedisWrite<T> write(String namespace, String key, T value) {
+        return createWrite(physicalKey(key, namespace), value);
+    }
+
+    private <T> RedisWrite<T> createWrite(String physicalKey, T value) {
         String json = codec.encode(value);
         return new RedisWrite<T>() {
             private final AtomicBoolean used = new AtomicBoolean();
@@ -222,5 +337,9 @@ public final class DefaultRedisStore implements RedisStore {
                         });
             }
         };
+    }
+
+    private String physicalKey(String key, String namespace) {
+        return namespace == null ? access.key(key) : access.key(namespace, key);
     }
 }

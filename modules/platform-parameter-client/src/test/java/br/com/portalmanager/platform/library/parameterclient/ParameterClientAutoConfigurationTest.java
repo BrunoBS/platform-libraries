@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import br.com.portalmanager.platform.library.parameterclient.configuration.ParameterClientAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.configuration.RedisNamespaceAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.core.RedisStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -14,10 +13,9 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 class ParameterClientAutoConfigurationTest {
     ApplicationContextRunner context() {
         return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
-                DataRedisAutoConfiguration.class, org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration.class, RedisNamespaceAutoConfiguration.class,
+                DataRedisAutoConfiguration.class, org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration.class,
                 PlatformRedisAutoConfiguration.class, ParameterClientAutoConfiguration.class))
-                .withPropertyValues("spring.application.name=consumer",
-                        "platform.redis.namespace-mode=ISOLATED", "platform.redis.namespace=orders");
+                .withPropertyValues("spring.application.name=consumer");
     }
 
     @Test
