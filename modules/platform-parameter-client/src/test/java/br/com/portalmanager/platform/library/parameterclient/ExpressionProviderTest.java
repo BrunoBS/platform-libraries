@@ -32,7 +32,11 @@ class ExpressionProviderTest {
 
     void document(String json) {
         // Exercise the exact deserializer on every read, including failures.
-        doAnswer(call -> Optional.of(mapper.readValue(json, ExactDocument.class)))
+        doAnswer(call -> {
+            ExactDocument exact = mapper.readValue(json, ExactDocument.class);
+            if (exact == null) throw new ApiException("redis.serialization", new RuntimeException());
+            return Optional.of(exact);
+        })
                 .when(scoped).get("rules.value", ExactDocument.class);
     }
     void expression(String operator, String type, String value) {

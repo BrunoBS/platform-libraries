@@ -25,8 +25,13 @@ class ConfigurationProviderTest {
     final ConfigurationProvider provider = new RedisConfigurationProvider(new RedisParameterReader(store, mapper));
 
     void value(String json) {
-        when(scoped.get("platform.value", ExactDocument.class))
-                .thenReturn(Optional.of(readExact(json)));
+        if ("null".equals(json)) {
+            doThrow(new ApiException("redis.serialization", new RuntimeException()))
+                    .when(scoped).get("platform.value", ExactDocument.class);
+            return;
+        }
+        ExactDocument exact = readExact(json);
+        when(scoped.get("platform.value", ExactDocument.class)).thenReturn(Optional.of(exact));
     }
 
     private ExactDocument readExact(String json) {
@@ -108,7 +113,9 @@ class ConfigurationProviderTest {
         assertThatThrownBy(() -> provider.get("platform.value", List.class, null)).hasMessage("parameter-client.validation");
         assertThatThrownBy(() -> provider.get("platform.value", new TypeReference<List<?>>() {}, null)).hasMessage("parameter-client.validation");
         assertThatThrownBy(() -> provider.get("platform.value", Object.class, null)).hasMessage("parameter-client.validation");
-        verifyNoInteractions(store);
+        verify(store).withNamespace("dynamic-parameter");
+        verifyNoInteractions(scoped);
+        verifyNoMoreInteractions(store);
     }
 
     @Test
