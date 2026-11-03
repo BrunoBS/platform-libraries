@@ -1,7 +1,7 @@
 # platform-redis
 
 Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão no
-[guia oficial](https://github.com/BrunoBS/golden-platform/blob/docs/golden-platform-foundation/docs/libraries/modules/platform-redis.md).
+[guia oficial](https://github.com/BrunoBS/golden-platform/blob/main/docs/libraries/modules/platform-redis.md).
 
 - [POM e dependências](pom.xml)
 - [Desenvolvimento e build do reactor](../../README.md)
@@ -34,13 +34,13 @@ TTL, operações em lote e `scan`.
 O ambiente não entra no nome da chave. Cada ambiente deve usar sua própria instância
 ou implantação Redis. Toda a conexão é configurada pelo próprio módulo em
 `platform.redis.connection.*`; o serviço consumidor não precisa configurar propriedades
-de conexão do Spring Data Redis.
+de conexão do Spring Data Redis. O módulo suporta somente conexão Standalone por host e
+porta; Redis Cluster e Sentinel não são suportados.
 
 ```yaml
 platform:
   redis:
     connection:
-      topology: STANDALONE # STANDALONE, SENTINEL ou CLUSTER
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       database: 0
@@ -69,42 +69,12 @@ platform:
       max-length: 10000
 ```
 
-`connection.topology` seleciona a conexão simples ou a configuração `cluster.nodes`
-ou `sentinel.master`/`sentinel.nodes`. Para TLS com certificado confiável pelo bundle
-da aplicação, informe `connection.ssl.bundle`. As demais propriedades ficam agrupadas
-por responsabilidade: limites de operações, listeners, ciclo de vida e streams.
+O endpoint configurado deve aceitar conexão Standalone. Para TLS com certificado
+confiável pelo bundle da aplicação, informe `connection.ssl.bundle`. As demais
+propriedades ficam agrupadas por responsabilidade: limites de operações, listeners,
+ciclo de vida e streams.
 As propriedades de cache são um contexto próprio em `platform.redis.cache.*` (`enabled`,
 `default-ttl`, `regions`, `failure-policy` e `lock-ttl`).
-
-Exemplo de Cluster:
-
-```yaml
-platform:
-  redis:
-    connection:
-      topology: CLUSTER
-      cluster:
-        nodes:
-          - redis-1.internal:6379
-          - redis-2.internal:6379
-```
-
-Exemplo de Sentinel:
-
-```yaml
-platform:
-  redis:
-    connection:
-      topology: SENTINEL
-      sentinel:
-        master: primary
-        nodes:
-          - sentinel-1.internal:26379
-          - sentinel-2.internal:26379
-        database: 0
-        username: ${REDIS_SENTINEL_USERNAME:}
-        password: ${REDIS_SENTINEL_PASSWORD:}
-```
 
 ## Desenvolvimento
 

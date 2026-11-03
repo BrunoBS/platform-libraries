@@ -6,7 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.Duration;
-import java.util.List;
 
 @ConfigurationProperties("platform.redis")
 public record PlatformRedisProperties(
@@ -23,7 +22,6 @@ public record PlatformRedisProperties(
     }
 
     public record Connection(
-            @DefaultValue("STANDALONE") Topology topology,
             @DefaultValue("localhost") String host,
             @DefaultValue("6379") int port,
             @DefaultValue("0") int database,
@@ -31,60 +29,22 @@ public record PlatformRedisProperties(
             String password,
             @DefaultValue("PT60S") Duration commandTimeout,
             @DefaultValue("PT60S") Duration connectTimeout,
-            @DefaultValue Ssl ssl,
-            @DefaultValue Cluster cluster,
-            @DefaultValue Sentinel sentinel) {
+            @DefaultValue Ssl ssl) {
         public Connection {
-            if (topology == null
-                    || host == null
+            if (host == null
                     || host.isBlank()
                     || port < 1
                     || port > 65535
                     || database < 0
                     || !positive(commandTimeout)
                     || !positive(connectTimeout)
-                    || ssl == null
-                    || cluster == null
-                    || sentinel == null) {
-                throw RedisErrors.configuration();
-            }
-            if (topology == Topology.CLUSTER && cluster.nodes().isEmpty()) {
-                throw RedisErrors.configuration();
-            }
-            if (topology == Topology.SENTINEL
-                    && (sentinel.master() == null
-                            || sentinel.master().isBlank()
-                            || sentinel.nodes().isEmpty())) {
+                    || ssl == null) {
                 throw RedisErrors.configuration();
             }
         }
-    }
-
-    public enum Topology {
-        STANDALONE,
-        SENTINEL,
-        CLUSTER
     }
 
     public record Ssl(@DefaultValue("false") boolean enabled, String bundle) {}
-
-    public record Cluster(@DefaultValue List<String> nodes) {
-        public Cluster {
-            nodes = nodes == null ? List.of() : List.copyOf(nodes);
-        }
-    }
-
-    public record Sentinel(
-            String master,
-            @DefaultValue List<String> nodes,
-            @DefaultValue("0") int database,
-            String username,
-            String password) {
-        public Sentinel {
-            nodes = nodes == null ? List.of() : List.copyOf(nodes);
-            if (database < 0) throw RedisErrors.configuration();
-        }
-    }
 
     public record Limits(
             @DefaultValue("256") int maxKeyBytes,

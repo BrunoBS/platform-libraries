@@ -7,28 +7,22 @@
       "description": "Enable Platform Redis APIs and their connection infrastructure."
     },
     {
-      "name": "platform.redis.connection.topology",
-      "type": "br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties$Topology",
-      "defaultValue": "STANDALONE",
-      "description": "Redis connection topology: STANDALONE, SENTINEL, or CLUSTER."
-    },
-    {
       "name": "platform.redis.connection.host",
       "type": "java.lang.String",
       "defaultValue": "localhost",
-      "description": "Redis server host for STANDALONE topology."
+      "description": "Redis server host."
     },
     {
       "name": "platform.redis.connection.port",
       "type": "java.lang.Integer",
       "defaultValue": 6379,
-      "description": "Redis server port for STANDALONE topology."
+      "description": "Redis server port."
     },
     {
       "name": "platform.redis.connection.database",
       "type": "java.lang.Integer",
       "defaultValue": 0,
-      "description": "Redis database index for STANDALONE topology."
+      "description": "Redis database index."
     },
     {
       "name": "platform.redis.connection.username",
@@ -62,37 +56,6 @@
       "name": "platform.redis.connection.ssl.bundle",
       "type": "java.lang.String",
       "description": "Spring SSL bundle used to trust or authenticate the Redis server."
-    },
-    {
-      "name": "platform.redis.connection.cluster.nodes",
-      "type": "java.util.List<java.lang.String>",
-      "description": "Initial Redis Cluster nodes, each formatted as host:port."
-    },
-    {
-      "name": "platform.redis.connection.sentinel.master",
-      "type": "java.lang.String",
-      "description": "Redis Sentinel master name."
-    },
-    {
-      "name": "platform.redis.connection.sentinel.nodes",
-      "type": "java.util.List<java.lang.String>",
-      "description": "Redis Sentinel nodes, each formatted as host:port."
-    },
-    {
-      "name": "platform.redis.connection.sentinel.database",
-      "type": "java.lang.Integer",
-      "defaultValue": 0,
-      "description": "Redis database index selected through Sentinel."
-    },
-    {
-      "name": "platform.redis.connection.sentinel.username",
-      "type": "java.lang.String",
-      "description": "Username for authenticating with Redis Sentinel nodes."
-    },
-    {
-      "name": "platform.redis.connection.sentinel.password",
-      "type": "java.lang.String",
-      "description": "Password for authenticating with Redis Sentinel nodes."
     },
     {
       "name": "platform.redis.limits.max-key-bytes",

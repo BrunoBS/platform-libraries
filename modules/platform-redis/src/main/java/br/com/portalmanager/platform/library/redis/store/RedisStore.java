@@ -12,7 +12,7 @@ public interface RedisStore {
     /** Returns a lightweight view that uses this namespace instead of spring.application.name. */
     RedisStore withNamespace(String namespace);
 
-    /** One MSET, persistent values. Cluster batches require a common hash slot. */
+    /** One MSET, persistent values. */
     <T> void setAll(Map<String, T> entries);
 
     /** One MGET; missing entries omitted, first requested occurrence order preserved. */
@@ -34,7 +34,7 @@ public interface RedisStore {
     /**
      * One scan in this view's namespace using a literal logical prefix. Start with cursor "0".
      * Empty pages may have a nonzero cursor; duplicates and concurrent changes are possible.
-     * Supported on standalone/Sentinel, not Redis Cluster.
+     * Supported by the Platform Redis Standalone connection.
      */
     RedisKeyPage scan(String prefix, String cursor, int count);
 
