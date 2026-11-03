@@ -15,6 +15,8 @@ import tools.jackson.core.type.TypeReference;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +30,13 @@ public final class DefaultRedisStore implements RedisStore {
     // returns one SCAN reply through the existing template/serializer, without retaining a cursor.
     private static final DefaultRedisScript<List> SCAN = new DefaultRedisScript<>(
             "return redis.call('SCAN', ARGV[1], 'MATCH', ARGV[2], 'COUNT', ARGV[3])", List.class);
+    private static final int MAX_CACHED_NAMESPACE_VIEWS = 64;
     private final StringRedisTemplate redis;
     private final RedisJsonCodec codec;
     private final RedisAccess access;
     private final RedisBatches batches;
     private final String namespace;
+    private final Map<String, RedisStore> namespaceViews;
 
     public DefaultRedisStore(StringRedisTemplate redis, RedisJsonCodec codec, RedisAccess access) {
         this(
@@ -40,7 +44,8 @@ public final class DefaultRedisStore implements RedisStore {
                 codec,
                 access,
                 new RedisBatches(access, codec, redis.getConnectionFactory()),
-                null);
+                null,
+                new LinkedHashMap<>(16, 0.75f, true));
     }
 
     private DefaultRedisStore(
@@ -48,18 +53,32 @@ public final class DefaultRedisStore implements RedisStore {
             RedisJsonCodec codec,
             RedisAccess access,
             RedisBatches batches,
-            String namespace) {
+            String namespace,
+            Map<String, RedisStore> namespaceViews) {
         this.redis = redis;
         this.codec = codec;
         this.access = access;
         this.batches = batches;
         this.namespace = namespace;
+        this.namespaceViews = namespaceViews;
     }
 
     @Override
     public RedisStore withNamespace(String namespace) {
-        access.prefix(namespace); // validate before creating the scoped view
-        return new DefaultRedisStore(redis, codec, access, batches, namespace);
+        access.prefix(namespace); // validate before looking up a scoped view
+        synchronized (namespaceViews) {
+            RedisStore scoped = namespaceViews.get(namespace);
+            if (scoped != null) return scoped;
+
+            scoped = new DefaultRedisStore(redis, codec, access, batches, namespace, namespaceViews);
+            namespaceViews.put(namespace, scoped);
+            if (namespaceViews.size() > MAX_CACHED_NAMESPACE_VIEWS) {
+                Iterator<String> eldest = namespaceViews.keySet().iterator();
+                eldest.next();
+                eldest.remove();
+            }
+            return scoped;
+        }
     }
 
     public <T> void setAll(Map<String, T> entries) {
