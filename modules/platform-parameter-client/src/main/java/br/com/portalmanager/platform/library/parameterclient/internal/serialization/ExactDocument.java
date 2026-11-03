@@ -9,7 +9,7 @@ import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.json.JsonMapper;
 
-/** Read through RedisJsonCodec without its application's floating-point tree defaults. */
+/** Reads a JSON tree while preserving exact integer and decimal values. */
 @JsonDeserialize(using = ExactDocument.Deserializer.class)
 public record ExactDocument(JsonNode root) {
     public static final class Deserializer extends ValueDeserializer<ExactDocument> {

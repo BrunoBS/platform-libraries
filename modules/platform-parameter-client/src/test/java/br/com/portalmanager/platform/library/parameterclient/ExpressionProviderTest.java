@@ -7,7 +7,6 @@ import br.com.portalmanager.platform.library.parameterclient.internal.serializat
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisExpressionProvider;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
 import br.com.portalmanager.platform.library.redis.store.RedisStore;
-import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -22,17 +21,18 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
 
 class ExpressionProviderTest {
     final RedisStore store = mock(RedisStore.class);
     final RedisStore scoped = mock(RedisStore.class);
     { when(store.withNamespace("dynamic-parameter")).thenReturn(scoped); }
-    final RedisJsonCodec codec = new RedisJsonCodec(JsonMapper.builder().build(), 1048576);
-    final ExpressionProvider provider = new RedisExpressionProvider(new RedisParameterReader(store, codec));
+    final ObjectMapper mapper = JsonMapper.builder().build();
+    final ExpressionProvider provider = new RedisExpressionProvider(new RedisParameterReader(store, mapper));
 
     void document(String json) {
-        // Exercise the actual Redis codec and exact deserializer on every read, including failures.
-        doAnswer(call -> Optional.of(codec.decode(json, ExactDocument.class)))
+        // Exercise the exact deserializer on every read, including failures.
+        doAnswer(call -> Optional.of(mapper.readValue(json, ExactDocument.class)))
                 .when(scoped).get("rules.value", ExactDocument.class);
     }
     void expression(String operator, String type, String value) {
@@ -118,8 +118,8 @@ class ExpressionProviderTest {
             assertThat(provider.matches("rules.value", new BigDecimal("0.11"))).isEqualTo(!expected);
         }
     }
-    @Test void nativeTreeReaderPreservesNestedValuesAndDoesNotChangeSharedCodecDefaults() {
-        ExactDocument document = codec.decode("{\"nested\":[9223372036854775807,123456789012345678901234567890.12,"
+    @Test void nativeTreeReaderPreservesNestedValuesWithoutChangingTheSharedMapper() throws Exception {
+        ExactDocument document = mapper.readValue("{\"nested\":[9223372036854775807,123456789012345678901234567890.12,"
                 + "{\"flag\":true,\"empty\":null,\"text\":\"18\"}]}", ExactDocument.class);
         tools.jackson.databind.JsonNode values = document.root().get("nested");
         assertThat(values.get(0).isBigInteger()).isTrue();
@@ -129,8 +129,8 @@ class ExpressionProviderTest {
         assertThat(values.get(2).get("flag").asBoolean()).isTrue();
         assertThat(values.get(2).get("empty").isNull()).isTrue();
         assertThat(values.get(2).get("text").asString()).isEqualTo("18");
-        assertThat(codec.decode("18", tools.jackson.databind.JsonNode.class).isBigInteger()).isFalse();
-        assertThatThrownBy(() -> codec.decode("{} {}", ExactDocument.class)).hasMessage("redis.serialization");
+        assertThat(mapper.readTree("18").isBigInteger()).isFalse();
+        assertThatThrownBy(() -> mapper.readValue("{} {}", ExactDocument.class)).isInstanceOf(RuntimeException.class);
     }
     @Test void numericExtremesFractionsAndScaleDoNotLosePrecision() {
         expression("EQUALS", "LONG", "9223372036854775807");

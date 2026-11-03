@@ -7,13 +7,15 @@ import br.com.portalmanager.platform.library.parameterclient.internal.RedisExpre
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.store.RedisStore;
-import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @AutoConfiguration(after = PlatformRedisAutoConfiguration.class)
 @ConditionalOnClass(RedisStore.class)
@@ -21,10 +23,10 @@ import org.springframework.context.annotation.Bean;
 public class ParameterClientAutoConfiguration {
     @Bean
     @ConditionalOnProperty(prefix = "platform.redis", name = "enabled", havingValue = "true", matchIfMissing = true)
-    @ConditionalOnBean({RedisStore.class, RedisJsonCodec.class})
+    @ConditionalOnBean(RedisStore.class)
     @ConditionalOnMissingBean(RedisParameterReader.class)
-    RedisParameterReader redisParameterReader(RedisStore store, RedisJsonCodec codec) {
-        return new RedisParameterReader(store, codec);
+    RedisParameterReader redisParameterReader(RedisStore store, ObjectProvider<ObjectMapper> mapper) {
+        return new RedisParameterReader(store, mapper.getIfAvailable(JsonMapper::new));
     }
 
     @Bean

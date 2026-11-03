@@ -6,10 +6,16 @@ import br.com.portalmanager.platform.library.parameterclient.internal.contract.P
 import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;
 import br.com.portalmanager.platform.library.parameterclient.message.ParameterClientMessageKeys;
 import br.com.portalmanager.platform.library.redis.store.RedisStore;
-import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.CoercionAction;
+import tools.jackson.databind.cfg.CoercionInputShape;
+import tools.jackson.databind.type.LogicalType;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 
@@ -17,10 +23,22 @@ import tools.jackson.databind.JsonNode;
 public final class RedisParameterReader {
     private static final String NAMESPACE = "dynamic-parameter";
     private final RedisStore scopedStore;
-    private final RedisJsonCodec codec;
+    private final ObjectMapper mapper;
 
-    public RedisParameterReader(RedisStore store, RedisJsonCodec codec) {
-        this.codec = Objects.requireNonNull(codec);
+    public RedisParameterReader(RedisStore store, ObjectMapper mapper) {
+        this.mapper =
+                Objects.requireNonNull(mapper)
+                        .rebuild()
+                        .deactivateDefaultTyping()
+                        .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
+                        .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)
+                        .withCoercionConfig(
+                                LogicalType.Textual,
+                                config ->
+                                        config.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail)
+                                                .setCoercion(CoercionInputShape.Float, CoercionAction.Fail)
+                                                .setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail))
+                        .build();
         this.scopedStore = Objects.requireNonNull(store).withNamespace(NAMESPACE);
     }
 
@@ -29,28 +47,32 @@ public final class RedisParameterReader {
     }
 
     public <T> T configuration(String key, Class<T> type, T defaultValue) {
-        return configuration(key, defaultValue, json -> codec.decode(json, type));
+        Objects.requireNonNull(type);
+        JavaType targetType = mapper.constructType(type);
+        return configuration(key, defaultValue, value -> mapper.convertValue(value, targetType));
     }
 
     public <T> T configuration(String key, TypeReference<T> type, T defaultValue) {
-        return configuration(key, defaultValue, json -> codec.decode(json, type));
+        Objects.requireNonNull(type);
+        JavaType targetType = mapper.constructType(type);
+        return configuration(key, defaultValue, value -> mapper.convertValue(value, targetType));
     }
 
-    private <T> T configuration(String key, T defaultValue, Function<String, T> convert) {
+    private <T> T configuration(String key, T defaultValue, Function<JsonNode, T> convert) {
         validateKey(key);
-        Optional<JsonNode> envelope;
+        Optional<ExactDocument> document;
         try {
-            envelope = read(key, JsonNode.class);
+            document = read(key, ExactDocument.class);
         } catch (RuntimeException failure) {
             // Keep CONFIGURATION's existing controlled read-failure semantics.
             if (failure instanceof ApiException api
                     && api.getMessageKey().startsWith(ParameterClientMessageKeys.PREFIX)) throw api;
             throw ParameterErrors.readFailure(failure);
         }
-        if (envelope.isEmpty()) return defaultValue;
-        JsonNode value = configurationValue(envelope.get());
+        if (document.isEmpty()) return defaultValue;
+        JsonNode value = configurationValue(document.get().root());
         try {
-            return convert.apply(value.toString());
+            return convert.apply(value);
         } catch (RuntimeException failure) {
             // Never retain payload-bearing conversion exceptions.
             throw ParameterErrors.valueInvalid();

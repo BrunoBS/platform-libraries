@@ -40,12 +40,11 @@ class ParameterClientAutoConfigurationTest {
     }
 
     @Test
-    void disabledRedisDoesNotCreateProvidersEvenWithCustomStoreAndCodec() {
+    void disabledRedisDoesNotCreateProvidersEvenWithCustomStoreAndMapper() {
         context().withPropertyValues("platform.redis.enabled=false")
                 .withBean(RedisStore.class, () -> mock(RedisStore.class))
-                .withBean(br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec.class,
-                        () -> new br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec(
-                                new tools.jackson.databind.json.JsonMapper(), 1048576))
+                .withBean(tools.jackson.databind.ObjectMapper.class,
+                        () -> new tools.jackson.databind.json.JsonMapper())
                 .run(ctx -> assertThat(ctx).hasNotFailed().doesNotHaveBean(ConfigurationProvider.class)
                         .doesNotHaveBean(ExpressionProvider.class));
     }

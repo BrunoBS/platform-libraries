@@ -6,7 +6,6 @@ import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisConfigurationProvider;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
 import br.com.portalmanager.platform.library.redis.store.RedisStore;
-import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -22,10 +21,19 @@ class ConfigurationProviderTest {
     final RedisStore store = mock(RedisStore.class);
     final RedisStore scoped = mock(RedisStore.class);
     { when(store.withNamespace("dynamic-parameter")).thenReturn(scoped); }
-    final ConfigurationProvider provider = new RedisConfigurationProvider(new RedisParameterReader(store, new RedisJsonCodec(mapper, 1048576)));
+    final ConfigurationProvider provider = new RedisConfigurationProvider(new RedisParameterReader(store, mapper));
 
     void value(String json) {
-        when(scoped.get("platform.value", JsonNode.class)).thenReturn(Optional.of(mapper.readTree(json)));
+        when(scoped.get("platform.value", ExactDocument.class))
+                .thenReturn(Optional.of(readExact(json)));
+    }
+
+    private ExactDocument readExact(String json) {
+        try {
+            return mapper.readValue(json, ExactDocument.class);
+        } catch (Exception failure) {
+            throw new AssertionError(failure);
+        }
     }
 
     @Test
@@ -43,6 +51,9 @@ class ConfigurationProviderTest {
         value("{\"type\":\"CONFIGURATION\",\"value\":[\"BR\",\"US\"]}");
         assertThat(provider.get("platform.value", new TypeReference<List<String>>() {}, List.of()))
                 .containsExactly("BR", "US");
+        value("{\"type\":\"CONFIGURATION\",\"value\":0.00999999999999999999}");
+        assertThat(provider.get("platform.value", java.math.BigDecimal.class, null))
+                .isEqualByComparingTo("0.00999999999999999999");
     }
 
     @Test
@@ -53,8 +64,8 @@ class ConfigurationProviderTest {
                 "platform.operationMode", "\"STANDARD\"",
                 "platform.settings", "{\"maxAttempts\":5}",
                 "platform.regions", "[\"BR\",\"US\"]");
-        values.forEach((key, json) -> when(scoped.get(key, JsonNode.class)).thenReturn(
-                Optional.of(mapper.readTree("{\"type\":\"CONFIGURATION\",\"value\":" + json + "}"))));
+        values.forEach((key, json) -> when(scoped.get(key, ExactDocument.class)).thenReturn(
+                Optional.of(readExact("{\"type\":\"CONFIGURATION\",\"value\":" + json + "}"))));
         int days = provider.get("key-service.quarantineDays", 30);
         boolean audit = provider.get("platform.auditEnabled", false);
         String mode = provider.get("platform.operationMode", "STANDARD");
@@ -65,7 +76,7 @@ class ConfigurationProviderTest {
         assertThat(mode).isEqualTo("STANDARD");
         assertThat(settings).isEqualTo(new MySettings(5));
         assertThat(regions).containsExactly("BR", "US");
-        verify(scoped, never()).get("orders.auditEnabled", JsonNode.class);
+        verify(scoped, never()).get("orders.auditEnabled", ExactDocument.class);
     }
 
     @Test
@@ -76,9 +87,9 @@ class ConfigurationProviderTest {
         List<String> list = List.of("BR");
         assertThat(provider.get("missing.regions", new TypeReference<List<String>>() {}, list)).isSameAs(list);
         assertThat(provider.get("other.auditEnabled", false)).isFalse();
-        verify(scoped, times(2)).get("missing.settings", JsonNode.class);
-        verify(scoped).get("missing.regions", JsonNode.class);
-        verify(scoped).get("other.auditEnabled", JsonNode.class);
+        verify(scoped, times(2)).get("missing.settings", ExactDocument.class);
+        verify(scoped).get("missing.regions", ExactDocument.class);
+        verify(scoped).get("other.auditEnabled", ExactDocument.class);
         verify(store).withNamespace("dynamic-parameter");
         verifyNoMoreInteractions(store);
     }
@@ -101,12 +112,12 @@ class ConfigurationProviderTest {
 
     @Test
     void readsNonBlankKeysExactlyAsProvidedWithoutFormatValidation() {
-        JsonNode envelope = mapper.readTree("{\"type\":\"CONFIGURATION\",\"value\":30}");
+        ExactDocument envelope = readExact("{\"type\":\"CONFIGURATION\",\"value\":30}");
         for (String key : List.of("single", "rules..value", "config:platform.value",
                 "dynamic-parameter:platform.value", " platform.value ")) {
-            when(scoped.get(key, JsonNode.class)).thenReturn(Optional.of(envelope));
+            when(scoped.get(key, ExactDocument.class)).thenReturn(Optional.of(envelope));
             assertThat(provider.get(key, 1)).isEqualTo(30);
-            verify(scoped).get(key, JsonNode.class);
+            verify(scoped).get(key, ExactDocument.class);
         }
     }
 
@@ -138,7 +149,7 @@ class ConfigurationProviderTest {
     void failuresAreControlledAndDoNotRetainSensitiveCauses() {
         for (String key : List.of("redis.unavailable", "redis.timeout", "redis.serialization", "redis.type")) {
             doThrow(new ApiException(key, new RuntimeException("SECRET_TOKEN_123")))
-                    .when(scoped).get("platform.value", JsonNode.class);
+                    .when(scoped).get("platform.value", ExactDocument.class);
             Throwable failure = catchThrowable(() -> provider.get("platform.value", 7));
             String expected = switch(key) {
                 case "redis.timeout" -> "parameter-client.timeout";

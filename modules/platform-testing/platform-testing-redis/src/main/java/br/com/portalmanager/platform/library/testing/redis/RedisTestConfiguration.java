@@ -51,6 +51,16 @@ public class RedisTestConfiguration {
                                         "platform.redis.connection.database",
                                         0,
                                         "platform.redis.connection.ssl.enabled",
+                                        false,
+                                        // This module also supports tests that use Spring Data Redis
+                                        // without Platform Redis being on the classpath.
+                                        "spring.data.redis.host",
+                                        container.getHost(),
+                                        "spring.data.redis.port",
+                                        container.getMappedPort(6379),
+                                        "spring.data.redis.database",
+                                        0,
+                                        "spring.data.redis.ssl.enabled",
                                         false)));
         return container;
     }
