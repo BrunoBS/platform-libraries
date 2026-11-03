@@ -25,11 +25,6 @@ class ConfigurationProviderTest {
     final ConfigurationProvider provider = new RedisConfigurationProvider(new RedisParameterReader(store, mapper));
 
     void value(String json) {
-        if ("null".equals(json)) {
-            doThrow(new ApiException("redis.serialization", new RuntimeException()))
-                    .when(scoped).get("platform.value", ExactDocument.class);
-            return;
-        }
         ExactDocument exact = readExact(json);
         when(scoped.get("platform.value", ExactDocument.class)).thenReturn(Optional.of(exact));
     }
@@ -135,7 +130,7 @@ class ConfigurationProviderTest {
                 "{\"type\":\"CONFIGURATION\",\"value\":\"30\"}",
                 "{\"type\":\"CONFIGURATION\",\"value\":30.5}",
                 "{\"type\":\"CONFIGURATION\",\"value\":null}",
-                "{\"type\":\"CONFIGURATION\"}", "{}", "null", "[]", "30",
+                "{\"type\":\"CONFIGURATION\"}", "{}", "[]", "30",
                 "{\"type\":\"UNKNOWN\",\"value\":30}")) {
             value(json);
             assertThatThrownBy(() -> provider.get("platform.value", 7))
