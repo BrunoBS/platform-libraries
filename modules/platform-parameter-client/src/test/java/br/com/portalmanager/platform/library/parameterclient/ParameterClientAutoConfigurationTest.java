@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 import br.com.portalmanager.platform.library.parameterclient.configuration.ParameterClientAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
@@ -43,8 +43,8 @@ class ParameterClientAutoConfigurationTest {
     void disabledRedisDoesNotCreateProvidersEvenWithCustomStoreAndCodec() {
         context().withPropertyValues("platform.redis.enabled=false")
                 .withBean(RedisStore.class, () -> mock(RedisStore.class))
-                .withBean(br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec.class,
-                        () -> new br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec(
+                .withBean(br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec.class,
+                        () -> new br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec(
                                 new tools.jackson.databind.json.JsonMapper(), 1048576))
                 .run(ctx -> assertThat(ctx).hasNotFailed().doesNotHaveBean(ConfigurationProvider.class)
                         .doesNotHaveBean(ExpressionProvider.class));

@@ -1,21 +1,19 @@
 package br.com.portalmanager.platform.library.redis.configuration;
 
-import br.com.portalmanager.platform.library.redis.core.AsyncRedisStore;
-import br.com.portalmanager.platform.library.redis.core.RedisListenerErrorHandler;
-import br.com.portalmanager.platform.library.redis.core.RedisListenerMetrics;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
-import br.com.portalmanager.platform.library.redis.internal.DefaultAsyncRedisStore;
-import br.com.portalmanager.platform.library.redis.internal.DefaultRedisOperations;
-import br.com.portalmanager.platform.library.redis.internal.DefaultRedisPublisher;
-import br.com.portalmanager.platform.library.redis.internal.DefaultRedisStore;
-import br.com.portalmanager.platform.library.redis.internal.DefaultRedisStreams;
-import br.com.portalmanager.platform.library.redis.internal.ListenerSupport;
-import br.com.portalmanager.platform.library.redis.internal.RedisAccess;
-import br.com.portalmanager.platform.library.redis.internal.RedisPubSubLifecycle;
-import br.com.portalmanager.platform.library.redis.internal.RedisStreamsLifecycle;
+import br.com.portalmanager.platform.library.redis.pubsub.RedisListenerErrorHandler;
+import br.com.portalmanager.platform.library.redis.pubsub.RedisListenerMetrics;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.internal.operations.DefaultRedisOperations;
+import br.com.portalmanager.platform.library.redis.internal.pubsub.DefaultRedisPublisher;
+import br.com.portalmanager.platform.library.redis.internal.store.DefaultRedisStore;
+import br.com.portalmanager.platform.library.redis.internal.stream.DefaultRedisStreams;
+import br.com.portalmanager.platform.library.redis.internal.common.ListenerSupport;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
+import br.com.portalmanager.platform.library.redis.internal.pubsub.RedisPubSubLifecycle;
+import br.com.portalmanager.platform.library.redis.internal.stream.RedisStreamsLifecycle;
 import br.com.portalmanager.platform.library.redis.operations.RedisOperations;
 import br.com.portalmanager.platform.library.redis.pubsub.RedisPublisher;
-import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
+import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 import br.com.portalmanager.platform.library.redis.stream.RedisStreams;
 
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import tools.jackson.databind.ObjectMapper;
@@ -38,7 +35,6 @@ import tools.jackson.databind.json.JsonMapper;
 @AutoConfiguration(
         afterName = {
             "org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration",
-            "org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration",
             "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration"
         })
 @EnableConfigurationProperties(PlatformRedisProperties.class)
@@ -67,13 +63,6 @@ public class PlatformRedisAutoConfiguration {
     @ConditionalOnMissingBean(RedisStore.class)
     RedisStore redisStore(StringRedisTemplate redis, RedisJsonCodec codec, RedisAccess access) {
         return new DefaultRedisStore(redis, codec, access);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(AsyncRedisStore.class)
-    AsyncRedisStore asyncRedisStore(
-            ReactiveStringRedisTemplate redis, RedisJsonCodec codec, RedisAccess access) {
-        return new DefaultAsyncRedisStore(redis, codec, access);
     }
 
     @Bean

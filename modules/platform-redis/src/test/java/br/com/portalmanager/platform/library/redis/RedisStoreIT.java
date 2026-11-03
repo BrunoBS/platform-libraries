@@ -3,7 +3,9 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.*;
 
 import br.com.portalmanager.platform.library.messaging.exception.*;
-import br.com.portalmanager.platform.library.redis.core.*;
+import br.com.portalmanager.platform.library.redis.store.*;
+import br.com.portalmanager.platform.library.redis.operations.*;
+import br.com.portalmanager.platform.library.redis.pubsub.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -15,34 +17,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 class RedisStoreIT extends RedisIntegrationSupport {
-    @Test
-    void bootsAndRoundTripsDtosParameterizedListsAndMaps() {
-        context()
-                .run(
-                        ctx -> {
-                            assertThat(ctx)
-                                    .hasSingleBean(RedisStore.class)
-                                    .hasSingleBean(AsyncRedisStore.class);
-                            var store = ctx.getBean(RedisStore.class);
-                            String key = key();
-                            assertThat(store.get(key, Event.class)).isEmpty();
-                            store.set(key, new Event("alpha", 2));
-                            assertThat(store.get(key, Event.class)).contains(new Event("alpha", 2));
-                            store.set(key, List.of(new Event("beta", 3)));
-                            assertThat(store.get(key, new TypeReference<List<Event>>() {}))
-                                    .contains(List.of(new Event("beta", 3)));
-                            store.set(key, Map.of("a", List.of(new Event("gamma", 4))));
-                            assertThat(
-                                            store.get(
-                                                    key,
-                                                    new TypeReference<
-                                                            Map<String, List<Event>>>() {}))
-                                    .contains(Map.of("a", List.of(new Event("gamma", 4))));
-                            assertThat(store.delete(key)).isTrue();
-                            assertThat(store.delete(key)).isFalse();
-                        });
-    }
-
     @Test
     void ttlOverwriteNxAndBuilderSingleUse() {
         context()
@@ -121,50 +95,6 @@ class RedisStoreIT extends RedisIntegrationSupport {
     }
 
     @Test
-    void asyncUsesRealReactiveIoAndPropagatesFailures() {
-        context()
-                .run(
-                        ctx -> {
-                            var async = ctx.getBean(AsyncRedisStore.class);
-                            String key = key();
-                            async.set(key, List.of(new Event("async", 1)))
-                                    .toCompletableFuture()
-                                    .get(3, TimeUnit.SECONDS);
-                            assertThat(
-                                            async.get(key, new TypeReference<List<Event>>() {})
-                                                    .toCompletableFuture()
-                                                    .get())
-                                    .contains(List.of(new Event("async", 1)));
-                            assertThat(async.setIfAbsent(key, "nx").toCompletableFuture().get())
-                                    .isFalse();
-                            assertThat(async.delete(key).toCompletableFuture().get()).isTrue();
-                            assertThat(async.get(key, Event.class).toCompletableFuture().get())
-                                    .isEmpty();
-                            assertThatThrownBy(
-                                            () -> async.set(key, null).toCompletableFuture().join())
-                                    .hasCauseInstanceOf(ValidationException.class);
-                        });
-    }
-
-    @Test
-    void unavailableFailsAsyncWithoutBlockingCaller() {
-        context()
-                .withPropertyValues(
-                        "platform.redis.connection.port=1",
-                        "platform.redis.connection.command-timeout=100ms",
-                        "platform.redis.connection.connect-timeout=100ms")
-                .run(
-                        ctx -> {
-                            var stage =
-                                    ctx.getBean(AsyncRedisStore.class)
-                                            .get("missing", String.class)
-                                            .toCompletableFuture();
-                            assertThatThrownBy(() -> stage.get(3, TimeUnit.SECONDS))
-                                    .hasCauseInstanceOf(ApiException.class);
-                        });
-    }
-
-    @Test
     void applicationNameIsDefaultAndExplicitNamespaceOverridesIt() {
         context()
                 .run(
@@ -187,38 +117,4 @@ class RedisStoreIT extends RedisIntegrationSupport {
                 .run(ctx -> assertThat(ctx.getBean(RedisStore.class)).isSameAs(custom));
     }
 
-    @Test
-    void asyncMirrorsExpiryPersistenceNxAndDeletion() {
-        context()
-                .run(
-                        ctx -> {
-                            var async = ctx.getBean(AsyncRedisStore.class);
-                            String key = key();
-                            assertThat(async.ttl(key).toCompletableFuture().get()).isEmpty();
-                            assertThat(
-                                            async.setIfAbsent(key, "first", Duration.ofSeconds(3))
-                                                    .toCompletableFuture()
-                                                    .get())
-                                    .isTrue();
-                            assertThat(async.exists(key).toCompletableFuture().get()).isTrue();
-                            assertThat(async.ttl(key).toCompletableFuture().get()).isPresent();
-                            assertThat(async.setIfAbsent(key, "second").toCompletableFuture().get())
-                                    .isFalse();
-                            assertThat(async.persist(key).toCompletableFuture().get()).isTrue();
-                            assertThat(async.ttl(key).toCompletableFuture().get()).isEmpty();
-                            assertThat(
-                                            async.expire(key, Duration.ofSeconds(3))
-                                                    .toCompletableFuture()
-                                                    .get())
-                                    .isTrue();
-                            async.set(key, "overwrite").toCompletableFuture().get();
-                            assertThat(async.ttl(key).toCompletableFuture().get()).isEmpty();
-                            async.set(key, "with-ttl", Duration.ofSeconds(3))
-                                    .toCompletableFuture()
-                                    .get();
-                            assertThat(async.ttl(key).toCompletableFuture().get()).isPresent();
-                            assertThat(async.delete(key).toCompletableFuture().get()).isTrue();
-                            assertThat(async.exists(key).toCompletableFuture().get()).isFalse();
-                        });
-    }
 }

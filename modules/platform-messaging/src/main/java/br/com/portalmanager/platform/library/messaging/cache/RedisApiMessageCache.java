@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messaging.cache;
 
 import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
 
 import java.time.Duration;
 import java.util.Locale;

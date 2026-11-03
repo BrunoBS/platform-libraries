@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import br.com.portalmanager.platform.library.redis.operations.RedisOperations;
 
 import org.junit.jupiter.api.Test;

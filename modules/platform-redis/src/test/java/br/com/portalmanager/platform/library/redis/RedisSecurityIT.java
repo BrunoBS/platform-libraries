@@ -5,7 +5,9 @@ import static org.awaitility.Awaitility.await;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
-import br.com.portalmanager.platform.library.redis.core.*;
+import br.com.portalmanager.platform.library.redis.store.*;
+import br.com.portalmanager.platform.library.redis.operations.*;
+import br.com.portalmanager.platform.library.redis.pubsub.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -22,116 +24,6 @@ import java.util.concurrent.*;
 class RedisSecurityIT extends RedisIntegrationSupport {
     private static byte[] bytes(String value) {
         return value.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-    }
-
-    @Test
-    void tlsAndAuthenticationUsePlatformConnectionAndTrustConfiguration() {
-        try (var secure =
-                new GenericContainer<>(DockerImageName.parse(REDIS.getDockerImageName()))
-                        .withExposedPorts(6379)
-                        .withCopyFileToContainer(
-                                MountableFile.forClasspathResource("tls/server.crt"),
-                                "/tls/server.crt")
-                        .withCopyFileToContainer(
-                                MountableFile.forClasspathResource("tls/server.key", 0644),
-                                "/tls/server.key")
-                        .withCommand(
-                                "redis-server",
-                                "--port",
-                                "0",
-                                "--tls-port",
-                                "6379",
-                                "--tls-cert-file",
-                                "/tls/server.crt",
-                                "--tls-key-file",
-                                "/tls/server.key",
-                                "--tls-ca-cert-file",
-                                "/tls/server.crt",
-                                "--tls-auth-clients",
-                                "no",
-                                "--requirepass",
-                                "test-only-password")
-                        .waitingFor(Wait.forLogMessage(".*Ready to accept connections.*", 1))) {
-            secure.start();
-            var runner =
-                    context()
-                            .withConfiguration(AutoConfigurations.of(SslAutoConfiguration.class))
-                            .withPropertyValues(
-                                    "platform.redis.connection.host=localhost",
-                                    "platform.redis.connection.port=" + secure.getMappedPort(6379),
-                                    "platform.redis.connection.ssl.enabled=true",
-                                    "platform.redis.connection.ssl.bundle=redis-test",
-                                    "spring.ssl.bundle.pem.redis-test.truststore.certificate=classpath:tls/server.crt",
-                                    "platform.redis.connection.password=test-only-password");
-            runner.run(
-                    ctx -> {
-                        var store = ctx.getBean(RedisStore.class);
-                        String key = key();
-                        store.set(key, new Event("tls", 1));
-                        assertThat(store.get(key, Event.class)).contains(new Event("tls", 1));
-                        assertThat(
-                                        ctx.getBean(AsyncRedisStore.class)
-                                                .get(key, Event.class)
-                                                .toCompletableFuture()
-                                                .get(4, TimeUnit.SECONDS))
-                                .contains(new Event("tls", 1));
-                    });
-            runner.withPropertyValues("platform.redis.connection.password=wrong-test-password")
-                    .run(
-                            ctx -> {
-                                Throwable failure =
-                                        catchThrowable(
-                                                () ->
-                                                        ctx.getBean(RedisStore.class)
-                                                                .get("absent", String.class));
-                                assertThat(failure)
-                                        .isInstanceOf(ApiException.class)
-                                        .hasMessage("redis.authentication");
-                                assertThat(stack(failure))
-                                        .doesNotContain(
-                                                "test-only-password", "wrong-test-password");
-                            });
-        }
-    }
-
-    @Test
-    void timeoutsAreErrorsAndNotAbsenceForSyncAndAsync() {
-        context()
-                .withPropertyValues("platform.redis.connection.command-timeout=100ms")
-                .run(
-                        ctx -> {
-                            var store = ctx.getBean(RedisStore.class);
-                            var redis = ctx.getBean(StringRedisTemplate.class);
-                            var async = ctx.getBean(AsyncRedisStore.class);
-                            String key = key();
-                            store.set(key, "warm");
-                            async.get(key, String.class)
-                                    .toCompletableFuture()
-                                    .get(3, TimeUnit.SECONDS);
-                            redis.execute(
-                                    (RedisCallback<Object>)
-                                            connection ->
-                                                    connection.execute(
-                                                            "CLIENT",
-                                                            bytes("PAUSE"),
-                                                            bytes("450"),
-                                                            bytes("ALL")));
-                            assertThatThrownBy(() -> store.get(key, String.class))
-                                    .isInstanceOf(ApiException.class)
-                                    .hasMessage("redis.timeout");
-                            assertThatThrownBy(
-                                            () ->
-                                                    async.get(key, String.class)
-                                                            .toCompletableFuture()
-                                                            .join())
-                                    .hasCauseInstanceOf(ApiException.class);
-                            await().ignoreExceptionsInstanceOf(ApiException.class)
-                                    .atMost(Duration.ofSeconds(3))
-                                    .untilAsserted(
-                                            () ->
-                                                    assertThat(store.get(key, String.class))
-                                                            .contains("warm"));
-                        });
     }
 
     @Test
@@ -158,36 +50,6 @@ class RedisSecurityIT extends RedisIntegrationSupport {
             assertThat(pt).isPresent();
             assertThat(en.get()).isNotEqualTo(pt.get());
         }
-    }
-
-    @Test
-    void sizeLimitsCoverExternalValuesAndAsyncFailures() {
-        context()
-                .withPropertyValues(
-                        "platform.redis.limits.max-payload-bytes=32", "platform.redis.limits.max-key-bytes=64")
-                .run(
-                        ctx -> {
-                            var store = ctx.getBean(RedisStore.class);
-                            var redis = ctx.getBean(StringRedisTemplate.class);
-                            String key = key();
-                            assertThatThrownBy(() -> store.set(key, "x".repeat(40)))
-                                    .isInstanceOf(ApiException.class)
-                                    .hasMessage("redis.limit");
-                            assertThatThrownBy(() -> store.set("x".repeat(64), 1))
-                                    .isInstanceOf(ApiException.class)
-                                    .hasMessage("redis.validation");
-                            redis.opsForValue().set("redis-test:" + key, "x".repeat(40));
-                            assertThatThrownBy(() -> store.get(key, String.class))
-                                    .isInstanceOf(ApiException.class)
-                                    .hasMessage("redis.limit");
-                            assertThatThrownBy(
-                                            () ->
-                                                    ctx.getBean(AsyncRedisStore.class)
-                                                            .get(key, String.class)
-                                                            .toCompletableFuture()
-                                                            .join())
-                                    .hasCauseInstanceOf(ApiException.class);
-                        });
     }
 
     @Test

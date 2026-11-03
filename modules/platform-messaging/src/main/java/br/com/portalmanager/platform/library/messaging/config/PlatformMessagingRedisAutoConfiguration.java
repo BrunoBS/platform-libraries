@@ -5,7 +5,7 @@ import br.com.portalmanager.platform.library.messaging.cache.RedisApiMessageCach
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformTechnicalErrors;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

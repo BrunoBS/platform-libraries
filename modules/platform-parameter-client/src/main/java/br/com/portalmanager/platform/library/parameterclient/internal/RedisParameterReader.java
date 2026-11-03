@@ -5,8 +5,8 @@ import br.com.portalmanager.platform.library.parameterclient.internal.contract.P
 import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterType;
 import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;
 import br.com.portalmanager.platform.library.parameterclient.message.ParameterClientMessageKeys;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
-import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;

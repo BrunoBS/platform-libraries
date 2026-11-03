@@ -2,9 +2,9 @@ package br.com.portalmanager.platform.library.redis;
 
 import static org.assertj.core.api.Assertions.*;
 
-import br.com.portalmanager.platform.library.redis.annotation.RedisKeyspaceSubscribe;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
-import br.com.portalmanager.platform.library.redis.internal.RedisPubSubLifecycle;
+import br.com.portalmanager.platform.library.redis.pubsub.RedisKeyspaceSubscribe;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.internal.pubsub.RedisPubSubLifecycle;
 import br.com.portalmanager.platform.library.redis.pubsub.*;
 
 import org.junit.jupiter.api.Test;

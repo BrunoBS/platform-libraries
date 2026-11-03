@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.redis;
 
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
-import br.com.portalmanager.platform.library.redis.core.RedisKeyPage;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.store.RedisKeyPage;
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;

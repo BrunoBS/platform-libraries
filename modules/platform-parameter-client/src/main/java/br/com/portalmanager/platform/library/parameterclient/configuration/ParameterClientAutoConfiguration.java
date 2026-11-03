@@ -6,8 +6,8 @@ import br.com.portalmanager.platform.library.parameterclient.internal.RedisConfi
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisExpressionProvider;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
-import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

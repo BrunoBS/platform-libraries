@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messaging.config;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.repository.JdbcApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.repository.NoOpApiMessageRepository;

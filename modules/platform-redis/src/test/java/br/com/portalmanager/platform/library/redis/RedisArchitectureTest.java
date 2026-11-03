@@ -15,11 +15,11 @@ class RedisArchitectureTest {
         noClasses()
                 .that()
                 .resideInAnyPackage(
-                        "..redis.core..",
+                        "..redis.store..",
                         "..redis.operations..",
                         "..redis.pubsub..",
                         "..redis.stream..",
-                        "..redis.annotation..")
+                        "..redis.configuration..")
                 .should()
                 .dependOnClassesThat()
                 .resideInAnyPackage(

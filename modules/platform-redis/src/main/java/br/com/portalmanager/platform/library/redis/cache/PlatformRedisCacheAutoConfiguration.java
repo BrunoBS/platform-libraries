@@ -1,8 +1,11 @@
 package br.com.portalmanager.platform.library.redis.cache;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.internal.RedisAccess;
-import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
+import br.com.portalmanager.platform.library.redis.internal.cache.CacheReturnTypes;
+import br.com.portalmanager.platform.library.redis.internal.cache.PlatformRedisCacheManager;
+import br.com.portalmanager.platform.library.redis.internal.cache.ScopedRedisCacheWriter;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
+import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -81,7 +84,7 @@ public class PlatformRedisCacheAutoConfiguration {
         return context -> {
             CacheManager manager = managers.getIfUnique();
             if (manager == null)
-                throw br.com.portalmanager.platform.library.redis.internal.RedisErrors
+                throw br.com.portalmanager.platform.library.redis.internal.common.RedisErrors
                         .configuration();
             return context.getOperation().getCacheNames().stream()
                     .map(

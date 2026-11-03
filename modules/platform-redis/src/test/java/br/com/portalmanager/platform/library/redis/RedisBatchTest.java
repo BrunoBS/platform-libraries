@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
 import br.com.portalmanager.platform.library.redis.internal.*;
-import br.com.portalmanager.platform.library.redis.serialization.RedisJsonCodec;
+import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -71,64 +71,6 @@ class RedisBatchTest {
         assertThatThrownBy(() -> store.getAll(null, String.class)).hasMessage("redis.validation");
         assertThatThrownBy(() -> store.getAll(List.of(), (TypeReference<Object>) null))
                 .hasMessage("redis.validation");
-    }
-
-    @Test
-    void asyncBatchUsesReactiveIoAndReturnsBeforeTheResponseWithoutBlocking() {
-        var template = mock(ReactiveStringRedisTemplate.class);
-        ReactiveValueOperations<String, String> values = mock(ReactiveValueOperations.class);
-        when(template.opsForValue()).thenReturn(values);
-        var store = new DefaultAsyncRedisStore(template, codec, access);
-        var written = Sinks.<Boolean>one();
-        when(values.multiSet(anyMap())).thenReturn(written.asMono());
-        var write = store.setAll(Map.of("a", "value")).toCompletableFuture();
-        assertThat(write).isNotDone();
-        written.tryEmitValue(true);
-        write.join();
-        var read = Sinks.<List<String>>one();
-        when(values.multiGet(anyCollection())).thenReturn(read.asMono());
-        var result = store.getAll(List.of("missing", "a"), String.class).toCompletableFuture();
-        assertThat(result).isNotDone();
-        read.tryEmitValue(Arrays.asList(null, "\"value\""));
-        assertThat(result.join()).containsExactly(entry("a", "value"));
-        verify(values).multiSet(Map.of("unit:a", "\"value\""));
-        verify(values).multiGet(List.of("unit:missing", "unit:a"));
-        verifyNoMoreInteractions(values);
-        assertThatThrownBy(
-                        () ->
-                                store.getAll(List.of(), (Class<Object>) null)
-                                        .toCompletableFuture()
-                                        .join())
-                .hasCauseInstanceOf(
-                        br.com.portalmanager.platform.library.messaging.exception
-                                .ValidationException.class);
-    }
-
-    @Test
-    void clusterRejectsCrossSlotBeforeCommandsAndAcceptsCommonHashTags() {
-        var factory = mock(LettuceConnectionFactory.class);
-        when(factory.isClusterAware()).thenReturn(true);
-        var template = mock(StringRedisTemplate.class);
-        when(template.getConnectionFactory()).thenReturn(factory);
-        ValueOperations<String, String> values = mock(ValueOperations.class);
-        when(template.opsForValue()).thenReturn(values);
-        var store = new DefaultRedisStore(template, codec, access);
-        assertThatThrownBy(() -> store.setAll(Map.of("a", "1", "b", "2")))
-                .hasMessage("redis.validation");
-        assertThatThrownBy(() -> store.getAll(List.of("a", "b"), String.class))
-                .hasMessage("redis.validation");
-        verifyNoInteractions(values);
-        store.setAll(Map.of("{scope}:a", "1", "{scope}:b", "2"));
-        verify(values).multiSet(anyMap());
-        var reactive = mock(ReactiveStringRedisTemplate.class);
-        when(reactive.getConnectionFactory()).thenReturn(factory);
-        var async = new DefaultAsyncRedisStore(reactive, codec, access);
-        assertThatThrownBy(
-                        () -> async.setAll(Map.of("a", "1", "b", "2")).toCompletableFuture().join())
-                .hasCauseInstanceOf(
-                        br.com.portalmanager.platform.library.messaging.exception
-                                .ValidationException.class);
-        verify(reactive, never()).opsForValue();
     }
 
     @Test

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.redis.cache;
 
-import br.com.portalmanager.platform.library.redis.internal.RedisErrors;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;

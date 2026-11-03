@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.internal.ListenerSupport;
+import br.com.portalmanager.platform.library.redis.internal.common.ListenerSupport;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;

@@ -3,9 +3,9 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
-import br.com.portalmanager.platform.library.redis.annotation.RedisStreamListener;
-import br.com.portalmanager.platform.library.redis.core.RedisListenerMetrics;
-import br.com.portalmanager.platform.library.redis.internal.RedisStreamsLifecycle;
+import br.com.portalmanager.platform.library.redis.stream.RedisStreamListener;
+import br.com.portalmanager.platform.library.redis.pubsub.RedisListenerMetrics;
+import br.com.portalmanager.platform.library.redis.internal.stream.RedisStreamsLifecycle;
 import br.com.portalmanager.platform.library.redis.stream.*;
 
 import org.junit.jupiter.api.Test;

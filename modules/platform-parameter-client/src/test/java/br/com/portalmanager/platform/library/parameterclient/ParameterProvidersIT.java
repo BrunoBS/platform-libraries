@@ -5,7 +5,7 @@ import br.com.portalmanager.platform.library.parameterclient.configuration.Param
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
 import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
 import java.nio.charset.StandardCharsets;

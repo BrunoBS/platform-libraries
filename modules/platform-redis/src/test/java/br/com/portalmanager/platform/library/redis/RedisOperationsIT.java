@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.*;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.redis.core.RedisStore;
+import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import br.com.portalmanager.platform.library.redis.operations.*;
 
 import org.junit.jupiter.api.Test;

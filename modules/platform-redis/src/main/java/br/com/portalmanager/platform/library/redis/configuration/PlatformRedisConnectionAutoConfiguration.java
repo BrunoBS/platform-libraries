@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.redis.configuration;
 
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties.Connection;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties.Topology;
-import br.com.portalmanager.platform.library.redis.internal.RedisErrors;
+import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
 import io.lettuce.core.SocketOptions;
 
@@ -22,8 +22,7 @@ import java.util.List;
 
 @AutoConfiguration(
         beforeName = {
-            "org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration",
-            "org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration"
+            "org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration"
         })
 @ConditionalOnClass(DataRedisConnectionDetails.class)
 @ConditionalOnProperty(
