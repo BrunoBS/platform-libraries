@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 
 import br.com.portalmanager.platform.library.redis.store.*;
 import br.com.portalmanager.platform.library.redis.operations.*;
-import br.com.portalmanager.platform.library.redis.pubsub.*;
 import br.com.portalmanager.platform.library.redis.operations.RedisOperations;
 import br.com.portalmanager.platform.library.redis.pubsub.RedisPublisher;
 import br.com.portalmanager.platform.library.redis.stream.RedisStreams;

@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.redis.pubsub;
+package br.com.portalmanager.platform.library.redis.listener;
 
 import java.util.concurrent.atomic.LongAdder;
 

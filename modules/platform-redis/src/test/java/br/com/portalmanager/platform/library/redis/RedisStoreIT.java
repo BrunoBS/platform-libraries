@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.*;
 import br.com.portalmanager.platform.library.messaging.exception.*;
 import br.com.portalmanager.platform.library.redis.store.*;
 import br.com.portalmanager.platform.library.redis.operations.*;
-import br.com.portalmanager.platform.library.redis.pubsub.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;

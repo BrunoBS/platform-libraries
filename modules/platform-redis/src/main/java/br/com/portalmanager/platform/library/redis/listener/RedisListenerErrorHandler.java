@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.redis.pubsub;
+package br.com.portalmanager.platform.library.redis.listener;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 

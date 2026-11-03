@@ -4,10 +4,10 @@ import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.common.ListenerSupport;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
-import br.com.portalmanager.platform.library.redis.pubsub.RedisKeyspaceSubscribe;
+import br.com.portalmanager.platform.library.redis.pubsub.keyspace.RedisKeyspaceSubscribe;
 import br.com.portalmanager.platform.library.redis.pubsub.RedisSubscribe;
-import br.com.portalmanager.platform.library.redis.pubsub.RedisKeyspaceEvent;
-import br.com.portalmanager.platform.library.redis.pubsub.RedisKeyspaceListener;
+import br.com.portalmanager.platform.library.redis.pubsub.keyspace.RedisKeyspaceEvent;
+import br.com.portalmanager.platform.library.redis.pubsub.keyspace.RedisKeyspaceListener;
 import br.com.portalmanager.platform.library.redis.pubsub.RedisMessageListener;
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 

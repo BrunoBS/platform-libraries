@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 import br.com.portalmanager.platform.library.redis.stream.RedisStreamListener;
-import br.com.portalmanager.platform.library.redis.pubsub.RedisListenerMetrics;
+import br.com.portalmanager.platform.library.redis.listener.RedisListenerMetrics;
 import br.com.portalmanager.platform.library.redis.internal.stream.RedisStreamsLifecycle;
 import br.com.portalmanager.platform.library.redis.stream.*;
 

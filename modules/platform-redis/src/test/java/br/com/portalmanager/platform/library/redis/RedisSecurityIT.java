@@ -7,7 +7,6 @@ import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
 import br.com.portalmanager.platform.library.redis.store.*;
 import br.com.portalmanager.platform.library.redis.operations.*;
-import br.com.portalmanager.platform.library.redis.pubsub.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 import br.com.portalmanager.platform.library.redis.pubsub.RedisSubscribe;
+import br.com.portalmanager.platform.library.redis.pubsub.RedisPublisher;
+import br.com.portalmanager.platform.library.redis.pubsub.RedisMessageListener;
 import br.com.portalmanager.platform.library.redis.store.*;
 import br.com.portalmanager.platform.library.redis.operations.*;
-import br.com.portalmanager.platform.library.redis.pubsub.*;
+import br.com.portalmanager.platform.library.redis.listener.RedisListenerErrorHandler;
+import br.com.portalmanager.platform.library.redis.listener.RedisListenerMetrics;
 import br.com.portalmanager.platform.library.redis.internal.pubsub.RedisPubSubLifecycle;
-import br.com.portalmanager.platform.library.redis.pubsub.*;
 
 import org.junit.jupiter.api.Test;
 

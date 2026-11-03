@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.redis.pubsub;
+package br.com.portalmanager.platform.library.redis.pubsub.keyspace;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

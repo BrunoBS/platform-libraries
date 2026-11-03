@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.redis.configuration;
 
-import br.com.portalmanager.platform.library.redis.pubsub.RedisListenerErrorHandler;
-import br.com.portalmanager.platform.library.redis.pubsub.RedisListenerMetrics;
+import br.com.portalmanager.platform.library.redis.listener.RedisListenerErrorHandler;
+import br.com.portalmanager.platform.library.redis.listener.RedisListenerMetrics;
 import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import br.com.portalmanager.platform.library.redis.internal.operations.DefaultRedisOperations;
 import br.com.portalmanager.platform.library.redis.internal.pubsub.DefaultRedisPublisher;

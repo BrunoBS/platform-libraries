@@ -17,6 +17,7 @@ class RedisArchitectureTest {
                 .resideInAnyPackage(
                         "..redis.store..",
                         "..redis.operations..",
+                        "..redis.listener..",
                         "..redis.pubsub..",
                         "..redis.stream..")
                 .should()
