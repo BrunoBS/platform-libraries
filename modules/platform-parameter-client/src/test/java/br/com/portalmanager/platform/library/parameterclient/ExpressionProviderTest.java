@@ -87,9 +87,9 @@ class ExpressionProviderTest {
             assertThatThrownBy(() -> provider.matches(key, 1, false)).hasMessage("parameter-client.validation");
         }
     }
-    @Test void evaluatesNonBlankKeysWithoutRewriting() {
+    @Test void evaluatesNonBlankKeysWithoutRewriting() throws Exception {
         String json = "{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"GREATER_THAN_OR_EQUALS\",\"valueType\":\"INTEGER\",\"value\":18}}";
-        ExactDocument document = codec.decode(json, ExactDocument.class);
+        ExactDocument document = mapper.readValue(json, ExactDocument.class);
         for (String key : List.of("single", "rules..value", "config:rules.value",
                 "dynamic-parameter:rules.value", " rules.value ")) {
             when(scoped.get(key, ExactDocument.class)).thenReturn(Optional.of(document));
