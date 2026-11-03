@@ -16,12 +16,12 @@ import tools.jackson.databind.JsonNode;
 /** Shared Redis read/decoding boundary; providers never expose a RedisStore. */
 public final class RedisParameterReader {
     private static final String NAMESPACE = "dynamic-parameter";
-    private final RedisStore store;
+    private final RedisStore scopedStore;
     private final RedisJsonCodec codec;
 
     public RedisParameterReader(RedisStore store, RedisJsonCodec codec) {
-        this.store = Objects.requireNonNull(store);
         this.codec = Objects.requireNonNull(codec);
+        this.scopedStore = Objects.requireNonNull(store).withNamespace(NAMESPACE);
     }
 
     public static void validateKey(String key) {
@@ -63,7 +63,7 @@ public final class RedisParameterReader {
 
     private <T> Optional<T> read(String key, Class<T> type) {
         try {
-            return store.withNamespace(NAMESPACE).get(key, type);
+            return scopedStore.get(key, type);
         } catch (ApiException failure) {
             if (failure.getMessageKey().startsWith(ParameterClientMessageKeys.PREFIX)) throw failure;
             throw ParameterErrors.readFailure(failure);

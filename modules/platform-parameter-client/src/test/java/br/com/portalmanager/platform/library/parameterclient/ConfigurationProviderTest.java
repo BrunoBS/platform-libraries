@@ -79,7 +79,7 @@ class ConfigurationProviderTest {
         verify(scoped, times(2)).get("missing.settings", JsonNode.class);
         verify(scoped).get("missing.regions", JsonNode.class);
         verify(scoped).get("other.auditEnabled", JsonNode.class);
-        verify(store, times(4)).withNamespace("dynamic-parameter");
+        verify(store).withNamespace("dynamic-parameter");
         verifyNoMoreInteractions(store);
     }
 

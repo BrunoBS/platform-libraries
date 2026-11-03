@@ -35,21 +35,31 @@ public final class DefaultRedisStore implements RedisStore {
     private final String namespace;
 
     public DefaultRedisStore(StringRedisTemplate redis, RedisJsonCodec codec, RedisAccess access) {
-        this(redis, codec, access, null);
+        this(
+                redis,
+                codec,
+                access,
+                new RedisBatches(access, codec, redis.getConnectionFactory()),
+                null);
     }
 
-    private DefaultRedisStore(StringRedisTemplate redis, RedisJsonCodec codec, RedisAccess access, String namespace) {
+    private DefaultRedisStore(
+            StringRedisTemplate redis,
+            RedisJsonCodec codec,
+            RedisAccess access,
+            RedisBatches batches,
+            String namespace) {
         this.redis = redis;
         this.codec = codec;
         this.access = access;
-        this.batches = new RedisBatches(access, codec, redis.getConnectionFactory());
+        this.batches = batches;
         this.namespace = namespace;
     }
 
     @Override
     public RedisStore withNamespace(String namespace) {
         access.prefix(namespace); // validate before creating the scoped view
-        return new DefaultRedisStore(redis, codec, access, namespace);
+        return new DefaultRedisStore(redis, codec, access, batches, namespace);
     }
 
     public <T> void setAll(Map<String, T> entries) {

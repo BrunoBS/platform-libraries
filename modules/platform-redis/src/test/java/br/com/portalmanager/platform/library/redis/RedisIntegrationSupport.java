@@ -27,7 +27,6 @@ abstract class RedisIntegrationSupport {
                 .withConfiguration(
                         AutoConfigurations.of(
                                 DataRedisAutoConfiguration.class,
-                                DataRedisReactiveAutoConfiguration.class,
                                 PlatformRedisConnectionAutoConfiguration.class, PlatformRedisAutoConfiguration.class))
                 .withPropertyValues(
                         "spring.application.name=redis-test",

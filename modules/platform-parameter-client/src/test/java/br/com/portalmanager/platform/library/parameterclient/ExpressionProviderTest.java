@@ -246,7 +246,8 @@ class ExpressionProviderTest {
     @Test void argumentAndProgrammingErrorsAreNotHiddenByFallback() {
         assertThatThrownBy(() -> provider.matches("", 18, false)).hasMessage("parameter-client.validation");
         assertThatThrownBy(() -> provider.matches("rules.value", null, true)).hasMessage("parameter-client.validation");
-        verifyNoInteractions(store);
+        verify(store).withNamespace("dynamic-parameter");
+        verifyNoInteractions(scoped);
         doThrow(new IllegalStateException("programming error")).when(scoped).get("rules.value", ExactDocument.class);
         assertThatThrownBy(() -> provider.matches("rules.value", 18, false)).isInstanceOf(IllegalStateException.class);
         doThrow(new AssertionError("fatal")).when(scoped).get("rules.value", ExactDocument.class);

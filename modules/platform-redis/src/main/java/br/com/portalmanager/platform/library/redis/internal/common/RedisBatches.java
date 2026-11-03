@@ -8,7 +8,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import java.util.*;
 import java.util.function.Function;
 
-/** Shared preparation/alignment only; transport remains in the sync/reactive stores. */
+/** Shared batch preparation and alignment for the Redis Store. */
 final class RedisBatches {
     private final RedisAccess access;
     private final RedisJsonCodec codec;

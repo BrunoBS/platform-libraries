@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
-import org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 class RedisDiagnosticsTest {
@@ -29,8 +28,7 @@ class RedisDiagnosticsTest {
                     .withConfiguration(
                             AutoConfigurations.of(
                                     DataRedisAutoConfiguration.class,
-                                    DataRedisReactiveAutoConfiguration.class,
-                                    PlatformRedisConnectionAutoConfiguration.class, PlatformRedisAutoConfiguration.class))
+                                        PlatformRedisConnectionAutoConfiguration.class, PlatformRedisAutoConfiguration.class))
                     .withPropertyValues("spring.application.name=diagnostics")
                     .run(
                             ctx -> {
