@@ -35,7 +35,9 @@ O ambiente não entra no nome da chave. Cada ambiente deve usar sua própria ins
 ou implantação Redis. Toda a conexão é configurada pelo próprio módulo em
 `platform.redis.connection.*`; o serviço consumidor não precisa configurar propriedades
 de conexão do Spring Data Redis. O módulo suporta somente conexão Standalone por host e
-porta; Redis Cluster e Sentinel não são suportados.
+porta; Redis Cluster e Sentinel não são suportados. Os consumidores de Streams e a recuperação de pendências requerem Redis 6.2 ou compatível. Essa é a versão mínima técnica; em produção, use uma versão ainda suportada pelo provedor.
+
+A entrega dos Streams é pelo menos uma vez: handlers devem ser idempotentes. Falhas deixam registros pendentes para recuperação; a biblioteca não aplica limite automático de tentativas nem encaminha mensagens para uma DLQ. Dimensione a retenção e defina o tratamento operacional dessas mensagens no serviço.
 
 ```yaml
 platform:
