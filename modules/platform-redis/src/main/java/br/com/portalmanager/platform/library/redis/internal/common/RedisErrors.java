@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.redis.internal.common;
 import br.com.portalmanager.platform.library.messaging.exception.*;
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 
+import java.util.Map;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
@@ -13,6 +14,12 @@ public final class RedisErrors {
 
     public static ValidationException invalid() {
         return new ValidationException("redis.validation");
+    }
+
+    public static ValidationException batchLimit(String operation, int size, int maximum) {
+        return new ValidationException(
+                "redis.batch.limit",
+                Map.of("0", operation, "1", size, "2", maximum));
     }
 
     public static PlatformConfigurationException configuration() {

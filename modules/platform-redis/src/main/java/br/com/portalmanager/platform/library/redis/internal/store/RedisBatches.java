@@ -32,7 +32,7 @@ final class RedisBatches {
     Map<String, String> encode(String namespace, Map<String, ?> entries) {
         if (entries == null) throw RedisErrors.invalid();
         if (entries.isEmpty()) return Map.of();
-        access.batch(entries.size());
+        access.batch("setAll", entries.size(), access.properties().limits().maxBatchSize());
         Map<String, String> encoded = new LinkedHashMap<>();
         entries.forEach((key, value) -> encoded.put(key(namespace, key), codec.encode(value)));
         sameSlot(encoded.keySet());
@@ -48,7 +48,12 @@ final class RedisBatches {
         Map<String, String> result = new LinkedHashMap<>();
         for (String key : keys) {
             result.putIfAbsent(key, key(namespace, key));
-            if (result.size() > access.properties().limits().maxReadSize()) throw RedisErrors.invalid();
+            if (result.size() > access.properties().limits().maxBatchSize())
+                throw RedisErrors.batchLimit(
+                        "getAll", result.size(), access.properties().limits().maxBatchSize());
+            if (result.size() > access.properties().limits().maxReadSize())
+                throw RedisErrors.batchLimit(
+                        "getAll", result.size(), access.properties().limits().maxReadSize());
         }
         sameSlot(result.values());
         return result;
@@ -61,7 +66,7 @@ final class RedisBatches {
     Collection<String> deletionKeys(String namespace, Collection<String> keys) {
         if (keys == null) throw RedisErrors.invalid();
         if (keys.isEmpty()) return List.of();
-        access.batch(keys.size());
+        access.batch("deleteAll", keys.size(), access.properties().limits().maxBatchSize());
         Set<String> physicalKeys = new LinkedHashSet<>();
         for (String key : keys) physicalKeys.add(key(namespace, key));
         sameSlot(physicalKeys);

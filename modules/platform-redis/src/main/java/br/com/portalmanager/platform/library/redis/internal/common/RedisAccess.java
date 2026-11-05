@@ -82,6 +82,11 @@ public final class RedisAccess {
         if (size < 1 || size > properties.limits().maxBatchSize()) throw RedisErrors.invalid();
     }
 
+    public void batch(String operation, int size, int maximum) {
+        if (size < 1) throw RedisErrors.invalid();
+        if (size > maximum) throw RedisErrors.batchLimit(operation, size, maximum);
+    }
+
     public void range(long start, long end) {
         if (start < 0 || end < start || end - start >= properties.limits().maxReadSize())
             throw RedisErrors.invalid();

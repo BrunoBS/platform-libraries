@@ -43,7 +43,8 @@ class RedisBatchTest {
         clearInvocations(template);
         assertThatThrownBy(() -> store.deleteAll(List.of("a", ""))).hasMessage("redis.validation");
         assertThatThrownBy(() -> store.deleteAll(null)).hasMessage("redis.validation");
-        assertThatThrownBy(() -> store.deleteAll(Collections.nCopies(1001, "a"))).hasMessage("redis.validation");
+        assertThatThrownBy(() -> store.deleteAll(Collections.nCopies(1001, "a")))
+                .hasMessage("redis.batch.limit");
         verifyNoInteractions(template);
     }
 
