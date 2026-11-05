@@ -50,10 +50,10 @@ final class RedisBatches {
             result.putIfAbsent(key, key(namespace, key));
             if (result.size() > access.properties().limits().maxBatchSize())
                 throw RedisErrors.batchLimit(
-                        "getAll", result.size(), access.properties().limits().maxBatchSize());
+                        "getAll", keys.size(), access.properties().limits().maxBatchSize());
             if (result.size() > access.properties().limits().maxReadSize())
                 throw RedisErrors.batchLimit(
-                        "getAll", result.size(), access.properties().limits().maxReadSize());
+                        "getAll", keys.size(), access.properties().limits().maxReadSize());
         }
         sameSlot(result.values());
         return result;
