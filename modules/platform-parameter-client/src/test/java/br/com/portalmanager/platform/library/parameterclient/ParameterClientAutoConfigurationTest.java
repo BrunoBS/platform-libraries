@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 1327)
+Total output lines: 100
+
 package br.com.portalmanager.platform.library.parameterclient;
 
 import static org.assertj.core.api.Assertions.*;
@@ -42,17 +45,7 @@ class ParameterClientAutoConfigurationTest {
     }
 
     @Test
-    void failsToStartWithoutRedisInfrastructure() {
-        new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(ParameterClientAutoConfiguration.class))
-                .run(ctx -> assertThat(ctx).hasFailed());
-        context().withPropertyValues("platform.redis.enabled=false")
-                .run(ctx -> assertThat(ctx).hasFailed());
-    }
-
-    @Test
-    void customRedisStoreWorksWhenPlatformRedisAutoConfigurationIsDisabled() {
-        context().withPropertyValues("platform.redis.enabled=false")
-                .withBean(RedisStore.class, () -> mock(RedisStore.class))
+    void failsToSt…127 tokens truncated…             .withBean(RedisStore.class, () -> mock(RedisStore.class))
                 .withBean(RedisConnectionFactory.class, ParameterClientAutoConfigurationTest::healthyConnectionFactory)
                 .withBean(tools.jackson.databind.ObjectMapper.class,
                         () -> new tools.jackson.databind.json.JsonMapper())
@@ -66,8 +59,8 @@ class ParameterClientAutoConfigurationTest {
         when(factory.getConnection()).thenThrow(new IllegalStateException("connection refused"));
         contextWithoutRedisConnectionFactory()
                 .withBean(RedisConnectionFactory.class, () -> factory)
-                .run(ctx -> assertThat(ctx).hasFailed()
-                        .getStartupFailure().hasStackTraceContaining("Redis is required by platform-parameter-client"));
+                .run(ctx -> assertThat(ctx.getStartupFailure())
+                        .hasStackTraceContaining("Redis is required by platform-parameter-client"));
     }
 
     @Test
