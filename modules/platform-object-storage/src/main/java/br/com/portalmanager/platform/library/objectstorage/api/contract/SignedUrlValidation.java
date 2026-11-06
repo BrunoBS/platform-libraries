@@ -1,6 +1,5 @@
 package br.com.portalmanager.platform.library.objectstorage.api.contract;
 
-import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
 import java.time.Duration;
 
 final class SignedUrlValidation {
@@ -10,7 +9,7 @@ final class SignedUrlValidation {
 
     static void requireValidity(Duration validity) {
         if (validity == null || validity.isZero() || validity.isNegative() || validity.compareTo(MAX_VALIDITY) > 0) {
-            throw ObjectStorageValidation.invalid("validity");
+            throw ContractValidation.invalid("validity");
         }
     }
 }

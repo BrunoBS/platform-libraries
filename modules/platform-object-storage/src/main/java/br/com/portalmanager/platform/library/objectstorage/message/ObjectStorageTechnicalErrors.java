@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.objectstorage.internal.message;
+package br.com.portalmanager.platform.library.objectstorage.message;
 
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 

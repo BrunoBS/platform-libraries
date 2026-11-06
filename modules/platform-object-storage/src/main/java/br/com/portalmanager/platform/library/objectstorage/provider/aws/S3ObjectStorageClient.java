@@ -19,10 +19,11 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.VersionP
 import br.com.portalmanager.platform.library.objectstorage.api.contract.WriteMode;
 import br.com.portalmanager.platform.library.messaging.exception.NotFoundException;
 import br.com.portalmanager.platform.library.objectstorage.internal.error.ObjectStorageFailureMapper;
-import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
+import br.com.portalmanager.platform.library.objectstorage.validation.ObjectStorageValidation;
 import br.com.portalmanager.platform.library.objectstorage.internal.key.ObjectStorageKey;
 import br.com.portalmanager.platform.library.objectstorage.internal.content.ObjectStorageUploadContent;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -41,6 +42,10 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import software.amazon.awssdk.services.s3.model.*;
 
 public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClient {
+    private static final byte[] VERSION_TOKEN_MAGIC = {
+            (byte) 0xff, 'P', 'S', 'T', 'V', 1
+    };
+
     private final S3Client client;
     private final S3Presigner presigner;
     private final ObjectStorageProperties properties;
@@ -71,11 +76,13 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
             return new UploadResult(new ObjectReference(request.destination(), request.key(), version), response.eTag(),
                     request.contentLength(), uploadContent.sha256());
         } catch (S3Exception exception) {
-            throw translate(exception, "upload object");
+            throw translate(exception, "upload object", request.writeMode() == WriteMode.CREATE_ONLY);
         } catch (SdkClientException exception) {
             throw ObjectStorageFailureMapper.fromClientFailure("upload object", exception);
         } catch (SdkException exception) {
             throw ObjectStorageFailureMapper.fromProviderFailure("upload object", exception);
+        } catch (IllegalArgumentException exception) {
+            throw ObjectStorageFailureMapper.fromClientFailure("upload object", exception);
         }
     }
 
@@ -129,7 +136,10 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
     public boolean exists(ObjectReference reference) {
         ObjectStorageValidation.requireReference(reference);
         try { head(reference); return true; }
-        catch (NotFoundException exception) { return false; }
+        catch (NotFoundException exception) {
+            if (isMissingObject(exception)) return false;
+            throw exception;
+        }
     }
 
     @Override
@@ -166,7 +176,8 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
                 .prefix(resolved.key()).maxKeys(pageSize);
         if (continuationToken != null) {
             String[] markers = decodeToken(continuationToken);
-            builder.keyMarker(markers[0]).versionIdMarker(markers[1]);
+            builder.keyMarker(markers[0]);
+            if (markers[1] != null) builder.versionIdMarker(markers[1]);
         }
         try {
             ListObjectVersionsResponse response = client.listObjectVersions(builder.build());
@@ -189,7 +200,7 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
         ObjectStorageValidation.requireText(eTag, "eTag");
         String token = null;
         do {
-            VersionPage page = listVersions(destination, key, token, 1000);
+            VersionPage page = listVersions(destination, key, token, ObjectStorageClient.MAX_PAGE_SIZE);
             Optional<ObjectVersion> found = page.versions().stream().filter(version -> sameETag(version.eTag(), eTag)).findFirst();
             if (found.isPresent()) return found;
             token = page.continuationToken();
@@ -200,6 +211,10 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
     @Override
     public void delete(ObjectReference reference) {
         ObjectStorageValidation.requireReference(reference);
+        if (reference.versionId() != null) {
+            deleteVersion(reference);
+            return;
+        }
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { client.deleteObject(DeleteObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key()).build()); }
         catch (S3Exception exception) { throw translate(exception, "delete object"); }
@@ -290,27 +305,101 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
         return new ObjectHeaders(contentType, cacheControl, contentDisposition, contentEncoding, contentLanguage);
     }
     private static void requirePageSize(int pageSize) {
-        if (pageSize < 1 || pageSize > 1000) throw ObjectStorageValidation.invalid("pageSize");
+        if (pageSize < 1 || pageSize > ObjectStorageClient.MAX_PAGE_SIZE) {
+            throw ObjectStorageValidation.invalid("pageSize");
+        }
     }
-    private static String encodeToken(String key, String version) {
-        return Base64.getUrlEncoder().withoutPadding().encodeToString((key + "\n" + version).getBytes(StandardCharsets.UTF_8));
+    static String encodeToken(String key, String version) {
+        if (key == null) throw ObjectStorageValidation.invalid("continuationToken");
+        if (!key.contains("\n") && version != null && !version.contains("\n")) {
+            return Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString((key + "\n" + version).getBytes(StandardCharsets.UTF_8));
+        }
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+        byte[] versionBytes = version == null ? null : version.getBytes(StandardCharsets.UTF_8);
+        int versionLength = versionBytes == null ? -1 : versionBytes.length;
+        ByteBuffer buffer = ByteBuffer.allocate(VERSION_TOKEN_MAGIC.length + Integer.BYTES * 2 + keyBytes.length
+                + (versionBytes == null ? 0 : versionBytes.length));
+        buffer.put(VERSION_TOKEN_MAGIC);
+        buffer.putInt(keyBytes.length).put(keyBytes).putInt(versionLength);
+        if (versionBytes != null) buffer.put(versionBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(buffer.array());
     }
-    private static String[] decodeToken(String token) {
+    static String[] decodeToken(String token) {
         byte[] decoded;
         try {
             decoded = Base64.getUrlDecoder().decode(token);
         } catch (IllegalArgumentException exception) {
             throw ObjectStorageValidation.invalid("continuationToken");
         }
-        String[] parts = new String(decoded, StandardCharsets.UTF_8).split("\n", 2);
-        if (parts.length != 2) throw ObjectStorageValidation.invalid("continuationToken");
-        return parts;
+        if (!hasStructuredTokenMagic(decoded)) {
+            String[] parts = new String(decoded, StandardCharsets.UTF_8).split("\n", 2);
+            if (parts.length != 2 || parts[0].isEmpty()) {
+                throw ObjectStorageValidation.invalid("continuationToken");
+            }
+            return parts;
+        }
+        try {
+            ByteBuffer buffer = ByteBuffer.wrap(decoded);
+            buffer.position(VERSION_TOKEN_MAGIC.length);
+            if (buffer.remaining() < Integer.BYTES) throw ObjectStorageValidation.invalid("continuationToken");
+            int keyLength = buffer.getInt();
+            if (keyLength < 0 || keyLength > buffer.remaining() - Integer.BYTES) {
+                throw ObjectStorageValidation.invalid("continuationToken");
+            }
+            byte[] key = new byte[keyLength];
+            buffer.get(key);
+            if (key.length == 0) throw ObjectStorageValidation.invalid("continuationToken");
+            if (buffer.remaining() < Integer.BYTES) throw ObjectStorageValidation.invalid("continuationToken");
+            int versionLength = buffer.getInt();
+            if (versionLength == -1 && !buffer.hasRemaining()) {
+                return new String[] {new String(key, StandardCharsets.UTF_8), null};
+            }
+            if (versionLength < 0 || versionLength != buffer.remaining()) {
+                throw ObjectStorageValidation.invalid("continuationToken");
+            }
+            byte[] version = new byte[versionLength];
+            buffer.get(version);
+            return new String[] {
+                    new String(key, StandardCharsets.UTF_8),
+                    new String(version, StandardCharsets.UTF_8)
+            };
+        } catch (java.nio.BufferUnderflowException exception) {
+            throw ObjectStorageValidation.invalid("continuationToken");
+        }
+    }
+    private static boolean hasStructuredTokenMagic(byte[] token) {
+        if (token.length < VERSION_TOKEN_MAGIC.length) return false;
+        for (int index = 0; index < VERSION_TOKEN_MAGIC.length; index++) {
+            if (token[index] != VERSION_TOKEN_MAGIC[index]) return false;
+        }
+        return true;
     }
     private static boolean sameETag(String first, String second) {
         return first != null && second != null && first.replace("\"", "").equals(second.replace("\"", ""));
     }
     private static RuntimeException translate(S3Exception exception, String operation) {
-        return ObjectStorageFailureMapper.fromHttpStatus(exception.statusCode(), operation, exception);
+        return translate(exception, operation, false);
+    }
+    private static RuntimeException translate(S3Exception exception, String operation, boolean createOnly) {
+        String providerCode = exception.awsErrorDetails() == null
+                ? null
+                : exception.awsErrorDetails().errorCode();
+        return ObjectStorageFailureMapper.fromAwsFailure(
+                exception.statusCode(), providerCode, operation, createOnly, exception);
+    }
+    private static boolean isMissingObject(Throwable failure) {
+        Throwable current = failure;
+        while (current != null) {
+            if (current instanceof S3Exception exception) {
+                String errorCode = exception.awsErrorDetails() == null
+                        ? null
+                        : exception.awsErrorDetails().errorCode();
+                return "NoSuchKey".equals(errorCode) || "NoSuchVersion".equals(errorCode);
+            }
+            current = current.getCause();
+        }
+        return false;
     }
     private record Resolved(String bucket, String key) { }
 }

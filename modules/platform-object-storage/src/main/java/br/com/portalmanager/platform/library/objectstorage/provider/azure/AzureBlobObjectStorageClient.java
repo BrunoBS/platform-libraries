@@ -18,7 +18,7 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.UploadRe
 import br.com.portalmanager.platform.library.objectstorage.api.contract.VersionPage;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.WriteMode;
 import br.com.portalmanager.platform.library.objectstorage.internal.error.ObjectStorageFailureMapper;
-import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
+import br.com.portalmanager.platform.library.objectstorage.validation.ObjectStorageValidation;
 import br.com.portalmanager.platform.library.objectstorage.internal.key.ObjectStorageKey;
 import br.com.portalmanager.platform.library.objectstorage.internal.content.ObjectStorageUploadContent;
 import com.azure.core.exception.AzureException;
@@ -30,6 +30,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.BlockBlobItem;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobListDetails;
+import com.azure.storage.blob.models.BlobErrorCode;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobRequestConditions;
 import com.azure.storage.blob.models.BlobStorageException;
@@ -65,27 +66,30 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         if (request == null) throw ObjectStorageValidation.invalid("request");
         if (content == null) throw ObjectStorageValidation.invalid("content");
         Resolved resolved = resolve(request.destination(), request.key());
-        BlobClient blob = container(resolved.container()).getBlobClient(resolved.key());
-        ObjectStorageUploadContent uploadContent = ObjectStorageUploadContent.from(content);
-        BlobParallelUploadOptions options = new BlobParallelUploadOptions(uploadContent.stream(), request.contentLength())
-                .setMetadata(request.metadata());
-        ObjectHeaders headers = request.headers();
-        options.setHeaders(new com.azure.storage.blob.models.BlobHttpHeaders()
-                .setContentType(headers.contentType())
-                .setCacheControl(headers.cacheControl())
-                .setContentDisposition(headers.contentDisposition())
-                .setContentEncoding(headers.contentEncoding())
-                .setContentLanguage(headers.contentLanguage()));
-        if (request.writeMode() == WriteMode.CREATE_ONLY) {
-            options.setRequestConditions(new BlobRequestConditions().setIfNoneMatch("*"));
-        }
         try {
+            BlobClient blob = container(resolved.container()).getBlobClient(resolved.key());
+            ObjectStorageUploadContent uploadContent = ObjectStorageUploadContent.from(content);
+            BlobParallelUploadOptions options = new BlobParallelUploadOptions(
+                    uploadContent.stream(), request.contentLength()).setMetadata(request.metadata());
+            ObjectHeaders headers = request.headers();
+            options.setHeaders(new com.azure.storage.blob.models.BlobHttpHeaders()
+                    .setContentType(headers.contentType())
+                    .setCacheControl(headers.cacheControl())
+                    .setContentDisposition(headers.contentDisposition())
+                    .setContentEncoding(headers.contentEncoding())
+                    .setContentLanguage(headers.contentLanguage()));
+            if (request.writeMode() == WriteMode.CREATE_ONLY) {
+                options.setRequestConditions(new BlobRequestConditions().setIfNoneMatch("*"));
+            }
             BlockBlobItem result = blob.uploadWithResponse(options, Duration.ofMinutes(5), Context.NONE).getValue();
             return new UploadResult(new ObjectReference(request.destination(), request.key(), result.getVersionId()),
                     result.getETag(), request.contentLength(), uploadContent.sha256());
-        } catch (BlobStorageException exception) { throw translate(exception, "upload object"); }
+        } catch (BlobStorageException exception) {
+            throw translate(exception, "upload object", request.writeMode() == WriteMode.CREATE_ONLY);
+        }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "upload object", exception); }
         catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("upload object", exception); }
+        catch (IllegalArgumentException exception) { throw ObjectStorageFailureMapper.fromClientFailure("upload object", exception); }
     }
 
     @Override
@@ -115,9 +119,12 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
     @Override
     public boolean exists(ObjectReference reference) {
         ObjectStorageValidation.requireReference(reference);
-        try { return blob(resolve(reference.destination(), reference.key()), reference.versionId()).exists(); }
+        try {
+            blob(resolve(reference.destination(), reference.key()), reference.versionId()).getProperties();
+            return true;
+        }
         catch (BlobStorageException exception) {
-            if (exception.getStatusCode() == 404) return false;
+            if (BlobErrorCode.BLOB_NOT_FOUND.equals(exception.getErrorCode())) return false;
             throw translate(exception, "check object existence");
         }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "check object existence", exception); }
@@ -176,7 +183,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
                 versions.add(new ObjectVersion(new ObjectReference(destination, key, item.getVersionId()), itemProperties.getETag(),
                         itemProperties.getContentLength() == null ? 0L : itemProperties.getContentLength(),
                         itemProperties.getLastModified() == null ? null : itemProperties.getLastModified().toInstant(),
-                        Boolean.TRUE.equals(item.isCurrentVersion()), Boolean.TRUE.equals(item.isDeleted())));
+                        Boolean.TRUE.equals(item.isCurrentVersion()), false));
             }
             return new VersionPage(versions, page.getContinuationToken());
         } catch (BlobStorageException exception) {
@@ -193,7 +200,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         ObjectStorageValidation.requireText(eTag, "eTag");
         String token = null;
         do {
-            VersionPage page = listVersions(destination, key, token, 5000);
+            VersionPage page = listVersions(destination, key, token, ObjectStorageClient.MAX_PAGE_SIZE);
             Optional<ObjectVersion> found = page.versions().stream().filter(version -> sameETag(version.eTag(), eTag)).findFirst();
             if (found.isPresent()) return found;
             token = page.continuationToken();
@@ -204,6 +211,10 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
     @Override
     public void delete(ObjectReference reference) {
         ObjectStorageValidation.requireReference(reference);
+        if (reference.versionId() != null) {
+            deleteVersion(reference);
+            return;
+        }
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { blob(resolved, null).delete(); }
         catch (BlobStorageException exception) { throw translate(exception, "delete object"); }
@@ -294,13 +305,23 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         return target;
     }
     private static void requirePageSize(int pageSize) {
-        if (pageSize < 1 || pageSize > 5000) throw ObjectStorageValidation.invalid("pageSize");
+        if (pageSize < 1 || pageSize > ObjectStorageClient.MAX_PAGE_SIZE) {
+            throw ObjectStorageValidation.invalid("pageSize");
+        }
     }
     private static boolean sameETag(String first, String second) {
         return first != null && second != null && first.replace("\"", "").equals(second.replace("\"", ""));
     }
     private static RuntimeException translate(BlobStorageException exception, String operation) {
-        return ObjectStorageFailureMapper.fromHttpStatus(exception.getStatusCode(), operation, exception);
+        return translate(exception, operation, false);
+    }
+    private static RuntimeException translate(
+            BlobStorageException exception, String operation, boolean createOnly) {
+        String providerCode = exception.getErrorCode() == null
+                ? null
+                : exception.getErrorCode().toString();
+        return ObjectStorageFailureMapper.fromAzureFailure(
+                exception.getStatusCode(), providerCode, operation, createOnly, exception);
     }
     private record Resolved(String container, String key) { }
 }

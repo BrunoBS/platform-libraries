@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.objectstorage.api.configuration.Obj
 import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.objectstorage.provider.azure.AzureBlobObjectStorageClient;
-import br.com.portalmanager.platform.library.objectstorage.internal.message.ObjectStorageTechnicalErrors;
+import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageTechnicalErrors;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;

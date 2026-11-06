@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.objectstorage.internal.content;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.objectstorage.internal.message.ObjectStorageMessageKeys;
+import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageMessageKeys;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
@@ -44,6 +44,12 @@ public final class ObjectStorageUploadContent {
 
         private ChecksumInputStream(InputStream content, MessageDigest digest) {
             super(content, digest);
+        }
+
+        /** Provider SDK cleanup is shielded because the caller owns and closes the original stream. */
+        @Override
+        public void close() {
+            // Do not close the stream supplied by the caller.
         }
 
         @Override

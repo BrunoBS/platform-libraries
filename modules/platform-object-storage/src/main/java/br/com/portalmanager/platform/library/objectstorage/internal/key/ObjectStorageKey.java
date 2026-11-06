@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.objectstorage.internal.key;
 
-import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
+import br.com.portalmanager.platform.library.objectstorage.validation.ObjectStorageValidation;
 
 /** Applies destination prefix/suffix rules and rejects ambiguous logical keys. */
 public final class ObjectStorageKey {
@@ -29,6 +29,7 @@ public final class ObjectStorageKey {
             if (!relative.endsWith(normalizedSuffix)) return null;
             relative = relative.substring(0, relative.length() - normalizedSuffix.length());
         }
+        if (relative.isBlank()) return null;
         return relative;
     }
 

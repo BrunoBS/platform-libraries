@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.objectstorage.internal.validation;
+package br.com.portalmanager.platform.library.objectstorage.validation;
 
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectReference;
-import br.com.portalmanager.platform.library.objectstorage.internal.message.ObjectStorageMessageKeys;
+import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageMessageKeys;
 import java.util.Map;
 
 public final class ObjectStorageValidation {

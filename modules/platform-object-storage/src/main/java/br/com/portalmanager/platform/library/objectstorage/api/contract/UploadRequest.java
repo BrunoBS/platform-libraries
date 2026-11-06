@@ -1,8 +1,11 @@
 package br.com.portalmanager.platform.library.objectstorage.api.contract;
 
-import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
 import java.util.Map;
 
+/**
+ * Upload metadata and write policy. {@code contentLength} is the exact number of bytes the supplied stream contains;
+ * the caller is responsible for providing a matching length.
+ */
 public record UploadRequest(
         String destination,
         String key,
@@ -12,14 +15,14 @@ public record UploadRequest(
         WriteMode writeMode) {
 
     public UploadRequest {
-        if (destination == null || destination.isBlank()) throw ObjectStorageValidation.invalid("destination");
-        if (key == null || key.isBlank()) throw ObjectStorageValidation.invalid("key");
-        if (writeMode == null) throw ObjectStorageValidation.invalid("writeMode");
-        if (contentLength < 0) throw ObjectStorageValidation.invalid("contentLength");
+        if (destination == null || destination.isBlank()) throw ContractValidation.invalid("destination");
+        if (key == null || key.isBlank()) throw ContractValidation.invalid("key");
+        if (writeMode == null) throw ContractValidation.invalid("writeMode");
+        if (contentLength < 0) throw ContractValidation.invalid("contentLength");
         headers = headers == null ? ObjectHeaders.empty() : headers;
         if (metadata != null && metadata.entrySet().stream()
                 .anyMatch(entry -> entry.getKey() == null || entry.getKey().isBlank() || entry.getValue() == null)) {
-            throw ObjectStorageValidation.invalid("metadata");
+            throw ContractValidation.invalid("metadata");
         }
         metadata = metadata == null ? Map.of() : Map.copyOf(metadata);
     }

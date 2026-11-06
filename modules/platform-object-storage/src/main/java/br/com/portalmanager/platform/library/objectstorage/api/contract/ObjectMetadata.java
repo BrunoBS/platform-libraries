@@ -1,9 +1,9 @@
 package br.com.portalmanager.platform.library.objectstorage.api.contract;
 
-import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
 import java.time.Instant;
 import java.util.Map;
 
+/** Metadata returned for an object. ETags are provider values and are not guaranteed to be content hashes. */
 public record ObjectMetadata(
         ObjectReference reference,
         long sizeBytes,
@@ -12,11 +12,11 @@ public record ObjectMetadata(
         Instant lastModified,
         Map<String, String> metadata) {
     public ObjectMetadata {
-        if (reference == null) throw ObjectStorageValidation.invalid("reference");
-        if (sizeBytes < 0) throw ObjectStorageValidation.invalid("sizeBytes");
+        if (reference == null) throw ContractValidation.invalid("reference");
+        if (sizeBytes < 0) throw ContractValidation.invalid("sizeBytes");
         if (metadata != null && metadata.entrySet().stream()
                 .anyMatch(entry -> entry.getKey() == null || entry.getKey().isBlank() || entry.getValue() == null)) {
-            throw ObjectStorageValidation.invalid("metadata");
+            throw ContractValidation.invalid("metadata");
         }
         metadata = metadata == null ? Map.of() : Map.copyOf(metadata);
         headers = headers == null ? ObjectHeaders.empty() : headers;

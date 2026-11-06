@@ -23,6 +23,13 @@ class ObjectStoragePropertiesTest {
     }
 
     @Test
+    void shouldRejectPathSeparatorInConfiguredSuffix() {
+        ObjectStorageProperties properties = properties("events", ".json/archive");
+
+        assertThrows(PlatformConfigurationException.class, properties::afterPropertiesSet);
+    }
+
+    @Test
     void shouldRequireProviderAndDestinationConfiguration() {
         assertThrows(PlatformConfigurationException.class, new ObjectStorageProperties()::afterPropertiesSet);
     }

@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.objectstorage.internal.message;
+package br.com.portalmanager.platform.library.objectstorage.message;
 
 public final class ObjectStorageMessageKeys {
     private static final String PREFIX = "objectstorage.";

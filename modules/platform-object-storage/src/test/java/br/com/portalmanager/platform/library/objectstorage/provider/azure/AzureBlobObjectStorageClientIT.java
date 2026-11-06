@@ -10,6 +10,7 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.UploadRe
 import br.com.portalmanager.platform.library.objectstorage.api.contract.UploadResult;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.WriteMode;
 import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
+import br.com.portalmanager.platform.library.messaging.exception.NotFoundException;
 import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
 import br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation.AzureBlobStorage;
 import com.azure.storage.blob.BlobServiceClient;
@@ -47,19 +48,26 @@ class AzureBlobObjectStorageClientIT {
     @Test
     void shouldSupportBlobLifecycleThroughPublicContract() throws Exception {
         byte[] firstContent = "first".getBytes(StandardCharsets.UTF_8);
+        TrackingInputStream firstStream = new TrackingInputStream(firstContent);
         UploadResult first = storage.upload(
                 new UploadRequest("audit", KEY, firstContent.length,
                         new ObjectHeaders("application/json", "no-cache", "inline", "identity", "en"),
                         Map.of("revision", "first"), WriteMode.CREATE_ONLY),
-                new ByteArrayInputStream(firstContent));
+                firstStream);
+        assertFalse(firstStream.closed());
+        firstStream.close();
+        assertTrue(firstStream.closed());
         assertNull(first.reference().versionId());
         assertNotNull(first.eTag());
         assertEquals(firstContent.length, first.sizeBytes());
         assertEquals("p5N7ZLjKpY8Dchu2us9ceMsjX+vg5wsbhM2ZVBRhoI4=", first.sha256());
 
+        TrackingInputStream duplicateStream = new TrackingInputStream(firstContent);
         assertThrows(ConflictException.class, () -> storage.upload(
                 new UploadRequest("audit", KEY, firstContent.length, "application/json", Map.of("revision", "duplicate")),
-                new ByteArrayInputStream(firstContent)));
+                duplicateStream));
+        assertFalse(duplicateStream.closed());
+        duplicateStream.close();
 
         byte[] secondContent = "second".getBytes(StandardCharsets.UTF_8);
         UploadResult second = storage.upload(
@@ -80,6 +88,8 @@ class AzureBlobObjectStorageClientIT {
         assertEquals(1, storage.list("audit", "sample", null, 10).objects().size());
         storage.delete(ObjectReference.current("audit", KEY));
         assertFalse(storage.exists(ObjectReference.current("audit", KEY)));
+        assertThrows(NotFoundException.class,
+                () -> storage.exists(ObjectReference.current("unavailable", KEY)));
     }
 
     @Test
@@ -136,6 +146,23 @@ class AzureBlobObjectStorageClientIT {
         }
     }
 
+    private static final class TrackingInputStream extends ByteArrayInputStream {
+        private boolean closed;
+
+        private TrackingInputStream(byte[] content) {
+            super(content);
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+        }
+
+        private boolean closed() {
+            return closed;
+        }
+    }
+
     @Configuration(proxyBeanMethods = false)
     @WithAzureEmulator(blobStorage = @AzureBlobStorage(containers = CONTAINER))
     static class AzuriteConfiguration {
@@ -148,7 +175,9 @@ class AzureBlobObjectStorageClientIT {
             destination.setContainer(CONTAINER);
             destination.setPrefix("objects/");
             destination.setSuffix(".data");
-            properties.setDestinations(Map.of("audit", destination));
+            ObjectStorageProperties.Destination unavailable = new ObjectStorageProperties.Destination();
+            unavailable.setContainer("object-storage-missing");
+            properties.setDestinations(Map.of("audit", destination, "unavailable", unavailable));
             return new AzureBlobObjectStorageClient(blobServiceClient, properties);
         }
     }

@@ -1,12 +1,11 @@
 package br.com.portalmanager.platform.library.objectstorage.api.contract;
 
-import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
 import java.time.Duration;
 
 /** Request for a temporary URL that downloads one object, optionally at an exact version. */
 public record DownloadUrlRequest(ObjectReference reference, Duration validity) {
     public DownloadUrlRequest {
-        ObjectStorageValidation.requireReference(reference);
+        ContractValidation.requireReference(reference);
         SignedUrlValidation.requireValidity(validity);
     }
 }

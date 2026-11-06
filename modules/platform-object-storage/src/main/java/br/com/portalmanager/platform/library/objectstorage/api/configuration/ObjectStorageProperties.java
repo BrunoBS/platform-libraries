@@ -1,9 +1,5 @@
 package br.com.portalmanager.platform.library.objectstorage.api.configuration;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
-import br.com.portalmanager.platform.library.objectstorage.internal.key.ObjectStorageKey;
-import br.com.portalmanager.platform.library.objectstorage.internal.message.ObjectStorageTechnicalErrors;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.InitializingBean;
@@ -50,41 +46,7 @@ public class ObjectStorageProperties implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        if (provider == null) {
-            throw invalidConfiguration("platform.object-storage.provider is required");
-        }
-        if (destinations == null || destinations.isEmpty()) {
-            throw invalidConfiguration("At least one destination must be configured");
-        }
-        if (provider == ObjectStorageProvider.AWS && (region == null || region.isBlank())) {
-            throw invalidConfiguration("platform.object-storage.region is required for AWS");
-        }
-        if (provider == ObjectStorageProvider.AZURE && (endpoint == null || endpoint.isBlank())) {
-            throw invalidConfiguration("platform.object-storage.endpoint is required for AZURE");
-        }
-        for (Map.Entry<String, Destination> entry : destinations.entrySet()) {
-            Destination destination = entry.getValue();
-            if (entry.getKey() == null || entry.getKey().isBlank() || destination == null) {
-                throw invalidConfiguration("Destination names and values must be present");
-            }
-            String physicalName = provider == ObjectStorageProvider.AWS
-                    ? destination.getBucket()
-                    : destination.getContainer();
-            if (physicalName == null || physicalName.isBlank()) {
-                String propertyName = provider == ObjectStorageProvider.AWS ? "bucket" : "container";
-                throw invalidConfiguration("Destination '" + entry.getKey() + "' is missing " + propertyName);
-            }
-            try {
-                ObjectStorageKey.validateConfiguredPrefix(destination.getPrefix());
-                ObjectStorageKey.validateConfiguredSuffix(destination.getSuffix());
-            } catch (ValidationException exception) {
-                throw invalidConfiguration("Destination '" + entry.getKey() + "' has an invalid prefix or suffix");
-            }
-        }
-    }
-
-    private PlatformConfigurationException invalidConfiguration(String reason) {
-        return new PlatformConfigurationException(ObjectStorageTechnicalErrors.invalidConfiguration(reason));
+        ObjectStorageConfigurationValidation.validate(this);
     }
 
     public static class Destination {
