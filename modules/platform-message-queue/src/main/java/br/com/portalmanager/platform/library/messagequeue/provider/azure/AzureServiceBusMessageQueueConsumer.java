@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
+import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueMdcContext;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage;
 import br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver;
@@ -289,7 +290,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             var message = serializer.deserialize(received.getBody().toString(), listener.payloadType());
             messageId = message.messageId();
             correlationId = message.correlationId();
-            listener.invoke(message);
+            MessageQueueMdcContext.run(message, () -> listener.invoke(message));
             complete(receiver, received, listener.destination(), message, false);
         } catch (RuntimeException exception) {
             LOGGER.warn(
@@ -317,7 +318,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
                     Math.toIntExact(received.getDeliveryCount()),
                     null,
                     providerMetadata(received));
-            listener.invoke(deadLetterMessage);
+            MessageQueueMdcContext.run(message, () -> listener.invoke(deadLetterMessage));
             complete(receiver, received, listener.destination(), message, true);
         } catch (RuntimeException exception) {
             LOGGER.warn(

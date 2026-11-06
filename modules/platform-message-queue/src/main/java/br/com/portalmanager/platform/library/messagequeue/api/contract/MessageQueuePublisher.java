@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.api.contract;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public interface MessageQueuePublisher {
     default void publish(String destination, Object payload, MessageQueuePublishOptions options) {
         MessageQueuePublishOptions safeOptions = options == null ? MessageQueuePublishOptions.defaults() : options;
         if (safeOptions.orderingKey() != null || safeOptions.deduplicationId() != null) {
-            throw new ApiException("messagequeue.publish.options.unsupported");
+            throw new ValidationException("messagequeue.publish.options.unsupported");
         }
         publish(destination, payload, safeOptions.correlationId(), safeOptions.headers());
     }

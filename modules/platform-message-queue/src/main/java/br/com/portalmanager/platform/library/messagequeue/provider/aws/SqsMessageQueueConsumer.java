@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
+import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueMdcContext;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueTechnicalErrors;
@@ -178,26 +179,20 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             messageId = safeLogIdentifier(message.messageId()) ? message.messageId() : null;
             correlationId = safeLogIdentifier(message.correlationId()) ? message.correlationId() : null;
             Delivery previous = CURRENT_DELIVERY.get();
-            Map<String, String> previousMdc = org.slf4j.MDC.getCopyOfContextMap();
             try {
                 String entryPoint = org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName()
                         + "#" + listener.method().getName();
                 CURRENT_DELIVERY.set(new Delivery(entryPoint, listener.destination(), queueUrl,
                         receivedMessage.messageId(), message.messageId(), message.correlationId(), message.timestamp()));
-                for (String key : java.util.List.of("correlationId", "messageId", "username", "accountId", "applicationId",
-                        "environmentId", "workspaceIdentifier", "clientIp", "userAgent", "uri")) org.slf4j.MDC.remove(key);
-                if (safeLogIdentifier(message.correlationId())) org.slf4j.MDC.put("correlationId", message.correlationId());
-                if (safeLogIdentifier(message.messageId())) org.slf4j.MDC.put("messageId", message.messageId());
-                listener.invoke(message);
+                MessageQueueMdcContext.run(message, () -> listener.invoke(message));
             } finally {
                 if (previous == null) CURRENT_DELIVERY.remove(); else CURRENT_DELIVERY.set(previous);
-                if (previousMdc == null) org.slf4j.MDC.clear(); else org.slf4j.MDC.setContextMap(previousMdc);
             }
         } catch (RuntimeException exception) {
             LOGGER.warn(
                     "Message processing failed for destination {}; messageId={} correlationId={}; "
-                            + "message will not be deleted and can be redelivered; errorType={}",
-                    listener.destination(), messageId, correlationId, exception.getClass().getName());
+                            + "message will not be deleted and can be redelivered",
+                    listener.destination(), messageId, correlationId, exception);
             return;
         }
 
@@ -228,12 +223,12 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
                     deliveryCount,
                     null,
                     Map.of("provider", "AWS", "queue", deadLetterQueue));
-            listener.invoke(deadLetterMessage);
+            MessageQueueMdcContext.run(message, () -> listener.invoke(deadLetterMessage));
         } catch (RuntimeException exception) {
             LOGGER.warn(
                     "Dead-letter processing failed for destination {}; messageId={} correlationId={}; "
-                            + "message will remain in the dead-letter queue; errorType={}",
-                    listener.destination(), messageId, correlationId, exception.getClass().getName());
+                            + "message will remain in the dead-letter queue",
+                    listener.destination(), messageId, correlationId, exception);
             return;
         }
 

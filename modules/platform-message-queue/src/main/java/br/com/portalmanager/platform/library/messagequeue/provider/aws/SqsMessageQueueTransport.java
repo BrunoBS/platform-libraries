@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.internal.transport.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.internal.resolver.ResolvedDestination;
@@ -57,9 +58,13 @@ public class SqsMessageQueueTransport implements MessageQueueTransport {
 
             sqsClient.sendMessage(request.build());
         } catch (RuntimeException exception) {
-            if (!(exception instanceof IllegalArgumentException)) {
-                capabilitiesRegistry.invalidate(destination.queue());
+            if (exception instanceof IllegalArgumentException) {
+                throw new ValidationException(
+                        MessageQueueMessageKeys.PUBLISH_OPTIONS_INVALID,
+                        Map.of("0", destination.logicalName()),
+                        exception);
             }
+            capabilitiesRegistry.invalidate(destination.queue());
             throw new ApiException(
                     MessageQueueMessageKeys.PUBLISH_FAILED,
                     Map.of("0", destination.logicalName()),
