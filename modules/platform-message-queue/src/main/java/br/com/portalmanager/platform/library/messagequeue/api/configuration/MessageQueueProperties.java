@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messagequeue.api.configuration;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -102,7 +102,11 @@ public class MessageQueueProperties implements InitializingBean {
     }
 
     private PlatformConfigurationException invalid(String reason) {
-        return new PlatformConfigurationException(MessageQueueTechnicalErrors.invalidConfiguration(reason));
+        return new PlatformConfigurationException(new PlatformErrorDefinition(
+                "PLT-MQ-001",
+                "Invalid platform.message-queue configuration: " + reason,
+                "Review the message-queue provider, destination and listener settings.",
+                500));
     }
 
     public static class Aws {
@@ -173,4 +177,5 @@ public class MessageQueueProperties implements InitializingBean {
         public String getDeadLetterQueue() { return deadLetterQueue; }
         public void setDeadLetterQueue(String deadLetterQueue) { this.deadLetterQueue = deadLetterQueue; }
     }
+
 }

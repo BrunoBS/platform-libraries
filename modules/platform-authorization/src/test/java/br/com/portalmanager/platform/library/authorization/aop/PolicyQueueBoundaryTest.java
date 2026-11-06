@@ -9,7 +9,7 @@ import br.com.portalmanager.platform.library.messagequeue.internal.capability.Qu
 import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage;
-import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueConsumer;
+import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDeliveryContext;
 import br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.internal.serialization.MessageQueueSerializer;
 import java.lang.reflect.Method;
@@ -47,8 +47,8 @@ class PolicyQueueBoundaryTest {
             properties.setEntryPolicies(Map.of("boundary",new AuthorizationEntryPolicy(Listener.class.getName()+"#receive",
                 Facade.class.getName()+"#ingest","configured","https://sqs.example/account/queue","technical",AuthorizationAction.CREATE,
                 AuthorizationLevel.ADM,Set.of(new AuthorizationEntryPolicy.Scope("allowed-account",null,null)))));
-            EntryPolicyAuthorizer authorizer=new EntryPolicyAuthorizer(properties,List.of(()->SqsMessageQueueConsumer.currentDelivery()
-                .map(delivery->new AuthorizationEntryOrigin(delivery.entryPoint(),delivery.destination(),delivery.queueUrl(),
+            EntryPolicyAuthorizer authorizer=new EntryPolicyAuthorizer(properties,List.of(()->MessageQueueDeliveryContext.current()
+                .map(delivery->new AuthorizationEntryOrigin(delivery.entryPoint(),delivery.destination(),delivery.resourceIdentifier(),
                     delivery.messageId(),delivery.correlationId(),delivery.timestamp()))));
             Facade target=new Facade(); AspectJProxyFactory factory=new AspectJProxyFactory(target);
             AuthorizationClient authorizationClient=mock(AuthorizationClient.class);
@@ -68,12 +68,12 @@ class PolicyQueueBoundaryTest {
                 .isInstanceOf(br.com.portalmanager.platform.library.authorization.exception.ForbiddenAccessException.class);
             process.invoke(consumer,definition,"https://sqs.example/account/queue",received);
             assertThat(target.effects).hasValue(1); verify(sqs).deleteMessage(any(DeleteMessageRequest.class));
-            assertThat(SqsMessageQueueConsumer.currentDelivery()).isEmpty(); assertThat(UserContext.get()).isEmpty();
+            assertThat(MessageQueueDeliveryContext.current()).isEmpty(); assertThat(UserContext.get()).isEmpty();
             reset(sqs);
             when(serializer.deserialize("body",String.class)).thenReturn(new MessageQueueMessage<>("event","existing","1",Instant.now(),"correlation",Map.of("principal","technical"),"other-account"));
             process.invoke(consumer,definition,"https://sqs.example/account/queue",received);
             assertThat(target.effects).hasValue(1); verify(sqs,never()).deleteMessage(any(DeleteMessageRequest.class));
-            assertThat(SqsMessageQueueConsumer.currentDelivery()).isEmpty(); assertThat(UserContext.get()).isEmpty();
+            assertThat(MessageQueueDeliveryContext.current()).isEmpty(); assertThat(UserContext.get()).isEmpty();
             verifyNoInteractions(authorizationClient);
         }
     }

@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.messagequeue.api.configuration.Mess
 import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry.ListenerDefinition;
 import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage;
+import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDeliveryContext;
 import br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.internal.serialization.MessageQueueSerializer;
 import java.lang.reflect.Method;
@@ -28,7 +29,7 @@ class SqsDeliverySecurityTest {
         public void receive(MessageQueueMessage<String> value) { effect.run(); }
     }
     final Listener listener=new Listener();
-    @AfterEach void cleanup() { MDC.clear(); assertThat(SqsMessageQueueConsumer.currentDelivery()).isEmpty(); }
+    @AfterEach void cleanup() { MDC.clear(); assertThat(MessageQueueDeliveryContext.current()).isEmpty(); }
     void deliver() throws Exception {
         MessageQueueMessage<String> envelope=new MessageQueueMessage<>("event-id","existing","1",Instant.now(),"correlation",Map.of("destination","forged"),"payload");
         when(serializer.deserialize("body",String.class,"configured")).thenReturn(envelope);
@@ -40,9 +41,9 @@ class SqsDeliverySecurityTest {
     @Test void proofComesFromConsumerAndAckFollowsEffect() throws Exception {
         MDC.put("correlationId","before"); MDC.put("accountId","previous-account");
         listener.effect=()->{
-            SqsMessageQueueConsumer.Delivery proof=SqsMessageQueueConsumer.currentDelivery().orElseThrow();
+            MessageQueueDeliveryContext.Delivery proof=MessageQueueDeliveryContext.current().orElseThrow();
             assertThat(proof.destination()).isEqualTo("configured");
-            assertThat(proof.queueUrl()).isEqualTo("https://sqs.example/account/queue");
+            assertThat(proof.resourceIdentifier()).isEqualTo("https://sqs.example/account/queue");
             assertThat(proof.transportMessageId()).isEqualTo("sqs-id");
             assertThat(proof.correlationId()).isEqualTo("correlation");
             assertThat(MDC.get("correlationId")).isEqualTo("correlation");
@@ -57,13 +58,13 @@ class SqsDeliverySecurityTest {
     @Test void failedHandlerClearsProofAndDoesNotAck() throws Exception {
         listener.effect=()->{ throw new IllegalStateException("transient-test-failure"); };
         deliver();
-        assertThat(SqsMessageQueueConsumer.currentDelivery()).isEmpty();
+        assertThat(MessageQueueDeliveryContext.current()).isEmpty();
         verify(client,never()).deleteMessage(any(DeleteMessageRequest.class));
     }
     @Test void proofIsNotInheritedByAsyncWork() throws Exception {
         listener.effect=()->{
             try (ExecutorService executor=Executors.newVirtualThreadPerTaskExecutor()) {
-                try { assertThat(executor.submit(()->SqsMessageQueueConsumer.currentDelivery().isPresent()).get(3,TimeUnit.SECONDS)).isFalse(); }
+                try { assertThat(executor.submit(()->MessageQueueDeliveryContext.current().isPresent()).get(3,TimeUnit.SECONDS)).isFalse(); }
                 catch(Exception failure) { throw new IllegalStateException(failure); }
             }
         };
@@ -72,10 +73,10 @@ class SqsDeliverySecurityTest {
     }
     @Test void ackFailureAllowsRedeliveryWithoutResidualContext() throws Exception {
         java.util.concurrent.atomic.AtomicInteger commits=new java.util.concurrent.atomic.AtomicInteger();
-        listener.effect=()->{ assertThat(SqsMessageQueueConsumer.currentDelivery()).isPresent(); commits.incrementAndGet(); };
+        listener.effect=()->{ assertThat(MessageQueueDeliveryContext.current()).isPresent(); commits.incrementAndGet(); };
         when(client.deleteMessage(any(DeleteMessageRequest.class))).thenThrow(new IllegalStateException("network-test-failure"));
         deliver();
-        assertThat(SqsMessageQueueConsumer.currentDelivery()).isEmpty();
+        assertThat(MessageQueueDeliveryContext.current()).isEmpty();
         deliver();
         assertThat(commits).hasValue(2); // Business deduplication belongs to the transactional use case, not the queue.
         verify(client,times(2)).deleteMessage(any(DeleteMessageRequest.class));

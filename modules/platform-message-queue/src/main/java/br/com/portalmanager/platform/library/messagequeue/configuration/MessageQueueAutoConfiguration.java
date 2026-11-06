@@ -54,10 +54,8 @@ public class MessageQueueAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    QueueCapabilitiesRegistry queueCapabilitiesRegistry(
-            MessageQueueProperties properties,
-            QueueCapabilitiesResolver capabilitiesResolver) {
-        return new QueueCapabilitiesRegistry(properties, capabilitiesResolver);
+    QueueCapabilitiesRegistry queueCapabilitiesRegistry(QueueCapabilitiesResolver capabilitiesResolver) {
+        return new QueueCapabilitiesRegistry(capabilitiesResolver);
     }
 
     @Bean

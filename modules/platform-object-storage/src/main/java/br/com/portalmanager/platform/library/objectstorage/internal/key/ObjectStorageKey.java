@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.objectstorage.internal.key;
 
-import br.com.portalmanager.platform.library.objectstorage.validation.ObjectStorageValidation;
+import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
 
 /** Applies destination prefix/suffix rules and rejects ambiguous logical keys. */
 public final class ObjectStorageKey {

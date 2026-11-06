@@ -19,7 +19,7 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.VersionP
 import br.com.portalmanager.platform.library.objectstorage.api.contract.WriteMode;
 import br.com.portalmanager.platform.library.messaging.exception.NotFoundException;
 import br.com.portalmanager.platform.library.objectstorage.internal.error.ObjectStorageFailureMapper;
-import br.com.portalmanager.platform.library.objectstorage.validation.ObjectStorageValidation;
+import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
 import br.com.portalmanager.platform.library.objectstorage.internal.key.ObjectStorageKey;
 import br.com.portalmanager.platform.library.objectstorage.internal.content.ObjectStorageUploadContent;
 import java.io.InputStream;
@@ -188,6 +188,8 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
             response.deleteMarkers().stream().filter(item -> item.key().equals(resolved.key())).forEach(item ->
                     versions.add(new ObjectVersion(new ObjectReference(destination, key, item.versionId()), null, 0,
                             item.lastModified(), item.isLatest(), true)));
+            versions.sort(java.util.Comparator.comparing(ObjectVersion::lastModified,
+                    java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())));
             String next = response.isTruncated() ? encodeToken(response.nextKeyMarker(), response.nextVersionIdMarker()) : null;
             return new VersionPage(versions, next);
         } catch (S3Exception exception) { throw translate(exception, "list object versions"); }

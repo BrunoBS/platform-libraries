@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.objectstorage.api.contract;
 
 import java.util.List;
 
-/** One version-listing page. The continuation token is opaque and is reused with the same destination and key. */
+/** One version-listing page, ordered newest-first by last-modified time. The token is opaque and bound to destination/key. */
 public record VersionPage(List<ObjectVersion> versions, String continuationToken) {
     public VersionPage {
         if (versions == null) throw ContractValidation.invalid("versions");

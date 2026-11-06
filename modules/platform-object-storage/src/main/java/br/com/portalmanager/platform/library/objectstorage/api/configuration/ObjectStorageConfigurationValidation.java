@@ -2,8 +2,6 @@ package br.com.portalmanager.platform.library.objectstorage.api.configuration;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
-import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageMessageKeys;
-import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageTechnicalErrors;
 import java.util.Map;
 
 /** Validates the consumer-facing storage configuration without depending on provider internals. */
@@ -71,10 +69,12 @@ final class ObjectStorageConfigurationValidation {
     }
 
     private static ValidationException invalid(String field) {
-        return new ValidationException(ObjectStorageMessageKeys.INVALID_REQUEST, Map.of("0", field));
+        return new ValidationException("objectstorage.request.invalid", Map.of("0", field));
     }
 
     private static PlatformConfigurationException invalidConfiguration(String reason) {
-        return new PlatformConfigurationException(ObjectStorageTechnicalErrors.invalidConfiguration(reason));
+        return new PlatformConfigurationException(new br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition(
+                "PLT-OS-001", "Invalid platform.object-storage configuration: " + reason,
+                "Review the selected provider, credentials, region or endpoint, and logical destinations.", 500));
     }
 }

@@ -5,7 +5,7 @@ import br.com.portalmanager.platform.library.messagequeue.api.configuration.Mess
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueTechnicalErrors;
 
-public class DestinationResolver {
+public class DestinationResolver implements br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDestinationCatalog {
 
     private final MessageQueueProperties properties;
 
@@ -40,6 +40,13 @@ public class DestinationResolver {
                 firstNonNull(providerOverride.getWaitTime(), configured.getConsumer().getWaitTime(), providerDefaults.getWaitTime()),
                 firstNonNull(providerOverride.getConcurrency(), configured.getConsumer().getConcurrency(), providerDefaults.getConcurrency())
         );
+    }
+
+    @Override
+    public br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDestinationCatalog.ResolvedDestination resolveForIntegration(String destination) {
+        ResolvedDestination resolved = resolve(destination);
+        return new br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDestinationCatalog.ResolvedDestination(
+                resolved.logicalName(), resolved.queue(), resolved.consumerEnabled());
     }
 
     private java.time.Duration resolveVisibilityTimeout(

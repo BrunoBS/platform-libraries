@@ -30,16 +30,6 @@ import java.util.function.BiConsumer;
 
 public class SqsMessageQueueConsumer implements SmartLifecycle {
 
-    private static final ThreadLocal<Delivery> CURRENT_DELIVERY = new ThreadLocal<>();
-
-    /** Read-only transport evidence. Only this consumer can open its scope; never propagated to async work. */
-    public static java.util.Optional<Delivery> currentDelivery() {
-        return java.util.Optional.ofNullable(CURRENT_DELIVERY.get());
-    }
-
-    public record Delivery(String entryPoint, String destination, String queueUrl,
-            String transportMessageId, String messageId, String correlationId, java.time.Instant timestamp) { }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SqsMessageQueueConsumer.class);
 
     private final SqsClient sqsClient;
@@ -178,15 +168,13 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
             var message = serializer.deserialize(receivedMessage.body(), listener.payloadType(), listener.destination());
             messageId = safeLogIdentifier(message.messageId()) ? message.messageId() : null;
             correlationId = safeLogIdentifier(message.correlationId()) ? message.correlationId() : null;
-            Delivery previous = CURRENT_DELIVERY.get();
-            try {
-                String entryPoint = org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName()
-                        + "#" + listener.method().getName();
-                CURRENT_DELIVERY.set(new Delivery(entryPoint, listener.destination(), queueUrl,
-                        receivedMessage.messageId(), message.messageId(), message.correlationId(), message.timestamp()));
+            String entryPoint = org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName()
+                    + "#" + listener.method().getName();
+            try (var ignored = br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDeliveryContext.open(
+                    new br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDeliveryContext.Delivery(
+                            "AWS", entryPoint, listener.destination(), queueUrl, receivedMessage.messageId(),
+                            message.messageId(), message.correlationId(), message.timestamp()))) {
                 MessageQueueMdcContext.run(message, () -> listener.invoke(message));
-            } finally {
-                if (previous == null) CURRENT_DELIVERY.remove(); else CURRENT_DELIVERY.set(previous);
             }
         } catch (RuntimeException exception) {
             LOGGER.warn(

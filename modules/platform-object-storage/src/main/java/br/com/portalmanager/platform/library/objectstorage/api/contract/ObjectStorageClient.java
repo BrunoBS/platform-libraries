@@ -49,7 +49,7 @@ public interface ObjectStorageClient {
     }
 
     /**
-     * Returns the first matching version in provider listing order. This may read every version page,
+     * Returns the first matching version in newest-first listing order. This may read every version page,
      * and an ETag can be shared by multiple versions; use a versionId when an exact version is known.
      */
     Optional<ObjectVersion> findVersionByETag(String destination, String key, String eTag);

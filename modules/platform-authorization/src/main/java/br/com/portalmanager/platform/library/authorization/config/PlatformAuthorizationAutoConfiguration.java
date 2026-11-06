@@ -22,7 +22,10 @@ import java.util.Set;
 import org.springframework.core.env.Environment;
 
 
-@AutoConfiguration(afterName = "br.com.portalmanager.platform.library.messagequeue.provider.aws.configuration.AwsMessageQueueAutoConfiguration")
+@AutoConfiguration(afterName = {
+        "br.com.portalmanager.platform.library.messagequeue.provider.aws.configuration.AwsMessageQueueAutoConfiguration",
+        "br.com.portalmanager.platform.library.messagequeue.provider.azure.configuration.AzureMessageQueueAutoConfiguration"
+})
 @EnableConfigurationProperties(PlatformAuthorizationProperties.class)
 public class PlatformAuthorizationAutoConfiguration {
 
@@ -115,39 +118,52 @@ public class PlatformAuthorizationAutoConfiguration {
     }
 
     @org.springframework.context.annotation.Configuration(proxyBeanMethods = false)
-    @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(name = "br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueConsumer")
-    static class SqsPolicyConfiguration {
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(name = "br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDeliveryContext")
+    static class MessageQueuePolicyConfiguration {
         @Bean
-        @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(type = "br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueConsumer")
-        br.com.portalmanager.platform.library.authorization.model.AuthorizationEntryOriginResolver sqsAuthorizationEntryOriginResolver() {
-            return () -> br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueConsumer.currentDelivery()
+        @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(type = "br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueListenerCatalog")
+        br.com.portalmanager.platform.library.authorization.model.AuthorizationEntryOriginResolver messageQueueAuthorizationEntryOriginResolver() {
+            return () -> br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDeliveryContext.current()
                     .map(value -> new br.com.portalmanager.platform.library.authorization.model.AuthorizationEntryOrigin(
-                        value.entryPoint(), value.destination(), value.queueUrl(), value.messageId(), value.correlationId(), value.timestamp()));
+                            value.entryPoint(), value.destination(), value.resourceIdentifier(), value.messageId(),
+                            value.correlationId(), value.timestamp()));
         }
 
         @Bean
-        SmartInitializingSingleton sqsEntryPolicyDestinationValidator(PlatformAuthorizationProperties properties,
-                org.springframework.beans.factory.ObjectProvider<br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry> registries,
-                org.springframework.beans.factory.ObjectProvider<br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver> destinations) {
+        SmartInitializingSingleton messageQueueEntryPolicyDestinationValidator(PlatformAuthorizationProperties properties,
+                org.springframework.beans.factory.ObjectProvider<br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueListenerCatalog> registries,
+                org.springframework.beans.factory.ObjectProvider<br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDestinationCatalog> destinations) {
             return () -> {
                 if (properties.getEntryPolicies().isEmpty()) return;
-                if (registries.stream().count() != 1 || destinations.stream().count() != 1) throw invalid();
-                for (br.com.portalmanager.platform.library.authorization.model.AuthorizationEntryPolicy policy : properties.getEntryPolicies().values()) {
-                    if (policy == null) throw invalid();
-                    long matches = registries.getObject().listeners().stream().filter(listener ->
-                        listener.destination().equals(policy.destination())
-                        && (org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName() + "#" + listener.method().getName()).equals(policy.entryPoint())).count();
-                    if (matches != 1) throw invalid();
-                    br.com.portalmanager.platform.library.messagequeue.internal.resolver.ResolvedDestination destination = destinations.getObject().resolve(policy.destination());
-                    java.net.URI uri;
-                    try { uri = java.net.URI.create(policy.queueUrl()); } catch (RuntimeException failure) { throw invalid(); }
-                    if (!destination.consumerEnabled() || uri.getHost() == null || uri.getRawUserInfo() != null || uri.getQuery() != null
-                            || uri.getFragment() != null || !("https".equals(uri.getScheme()) || "http".equals(uri.getScheme()))
-                            || !uri.getPath().endsWith("/" + destination.queue())) throw invalid();
+                if (registries.stream().count() != 1 || destinations.stream().count() != 1) throw invalidEntryPolicy();
+                var registry = registries.getObject();
+                var destinationCatalog = destinations.getObject();
+                for (var policy : properties.getEntryPolicies().values()) {
+                    if (policy == null) throw invalidEntryPolicy();
+                    long matches = registry.registrations().stream().filter(listener ->
+                            listener.destination().equals(policy.destination())
+                                    && listener.entryPoint().equals(policy.entryPoint())).count();
+                    if (matches != 1) throw invalidEntryPolicy();
+                    var destination = destinationCatalog.resolveForIntegration(policy.destination());
+                    if (!destination.consumerEnabled() || !matchesResource(policy.queueUrl(), destination.resourceIdentifier())) {
+                        throw invalidEntryPolicy();
+                    }
                 }
             };
         }
-        private static PlatformConfigurationException invalid() {
+
+        private static boolean matchesResource(String configured, String resolved) {
+            if (configured == null || resolved == null) return false;
+            if (configured.equals(resolved)) return true;
+            try {
+                java.net.URI uri = java.net.URI.create(configured);
+                return uri.getHost() != null && uri.getRawUserInfo() == null && uri.getQuery() == null
+                        && uri.getFragment() == null && ("https".equals(uri.getScheme()) || "http".equals(uri.getScheme()))
+                        && uri.getPath().endsWith("/" + resolved);
+            } catch (RuntimeException failure) { return false; }
+        }
+
+        private static PlatformConfigurationException invalidEntryPolicy() {
             return new PlatformConfigurationException(AuthorizationTechnicalErrors.ENTRY_POLICY_INVALID);
         }
     }

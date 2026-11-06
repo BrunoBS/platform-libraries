@@ -36,9 +36,7 @@ public class AzureMessageQueueAutoConfiguration {
     @ConditionalOnMissingBean(ServiceBusAdministrationClient.class)
     ServiceBusAdministrationClient messageQueueAzureAdministrationClient(MessageQueueProperties properties) {
         return new ServiceBusAdministrationClientBuilder()
-                .credential(
-                        properties.getAzure().getNamespace(),
-                        new DefaultAzureCredentialBuilder().build())
+                .credential(properties.getAzure().getNamespace(), new DefaultAzureCredentialBuilder().build())
                 .buildClient();
     }
 

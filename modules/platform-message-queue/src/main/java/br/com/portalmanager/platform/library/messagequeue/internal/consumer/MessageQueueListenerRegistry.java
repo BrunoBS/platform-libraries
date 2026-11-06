@@ -21,7 +21,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MessageQueueListenerRegistry implements BeanPostProcessor {
+public class MessageQueueListenerRegistry implements BeanPostProcessor,
+        br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueListenerCatalog {
 
     private final Map<String, ListenerDefinition> listeners = new LinkedHashMap<>();
     private final Map<String, DeadLetterListenerDefinition> deadLetterListeners = new LinkedHashMap<>();
@@ -50,6 +51,14 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor {
 
     public Collection<ListenerDefinition> listeners() {
         return listeners.values();
+    }
+
+    @Override
+    public Collection<br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueListenerCatalog.Registration> registrations() {
+        return listeners.values().stream().map(listener ->
+                new br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueListenerCatalog.Registration(
+                        listener.destination(), AopUtils.getTargetClass(listener.bean()).getName()
+                                + "#" + listener.method().getName())).toList();
     }
 
     public Collection<DeadLetterListenerDefinition> deadLetterListeners() {

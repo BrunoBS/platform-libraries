@@ -290,7 +290,15 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
             var message = serializer.deserialize(received.getBody().toString(), listener.payloadType(), listener.destination());
             messageId = message.messageId();
             correlationId = message.correlationId();
-            MessageQueueMdcContext.run(message, () -> listener.invoke(message));
+            String entryPoint = org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName()
+                    + "#" + listener.method().getName();
+            try (var ignored = br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDeliveryContext.open(
+                    new br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDeliveryContext.Delivery(
+                            "AZURE", entryPoint, listener.destination(), properties.getAzure().getNamespace()
+                            + "/" + destinationResolver.resolve(listener.destination()).queue(),
+                            received.getMessageId(), message.messageId(), message.correlationId(), message.timestamp()))) {
+                MessageQueueMdcContext.run(message, () -> listener.invoke(message));
+            }
             complete(receiver, received, listener.destination(), message, false);
         } catch (RuntimeException exception) {
             LOGGER.warn(

@@ -18,7 +18,7 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.UploadRe
 import br.com.portalmanager.platform.library.objectstorage.api.contract.VersionPage;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.WriteMode;
 import br.com.portalmanager.platform.library.objectstorage.internal.error.ObjectStorageFailureMapper;
-import br.com.portalmanager.platform.library.objectstorage.validation.ObjectStorageValidation;
+import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
 import br.com.portalmanager.platform.library.objectstorage.internal.key.ObjectStorageKey;
 import br.com.portalmanager.platform.library.objectstorage.internal.content.ObjectStorageUploadContent;
 import com.azure.core.exception.AzureException;
@@ -185,6 +185,8 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
                         itemProperties.getLastModified() == null ? null : itemProperties.getLastModified().toInstant(),
                         Boolean.TRUE.equals(item.isCurrentVersion()), false));
             }
+            versions.sort(java.util.Comparator.comparing(ObjectVersion::lastModified,
+                    java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())));
             return new VersionPage(versions, page.getContinuationToken());
         } catch (BlobStorageException exception) {
             throw translate(exception, "list object versions");
