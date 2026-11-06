@@ -1,5 +1,6 @@
-package br.com.portalmanager.platform.library.messagequeue.api.configuration;
+package br.com.portalmanager.platform.library.messagequeue.configuration;
 
+import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesResolver;
 import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
