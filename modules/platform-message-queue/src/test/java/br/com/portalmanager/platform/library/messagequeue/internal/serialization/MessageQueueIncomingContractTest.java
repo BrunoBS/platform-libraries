@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.*;
 class MessageQueueIncomingContractTest {
     @QueueMessage(type="contract-test",version="1")
     public record Payload(String id) { }
+    public record PlainPayload(String id) { }
     final MessageQueueSerializer serializer=new MessageQueueSerializer(JsonMapper.builder().build());
     String message(String type,String version,Payload payload) {
         return serializer.serialize(new MessageQueueMessage<>("id",type,version,Instant.now(),"correlation",Map.of(),payload));
@@ -27,6 +28,12 @@ class MessageQueueIncomingContractTest {
     }
     @Test void missingPayloadIsRejected() {
         assertThatThrownBy(()->serializer.deserialize(message("contract-test","1",null),Payload.class)).isInstanceOf(ApiException.class);
+    }
+    @Test void nullEnvelopeIsRejectedEvenWithoutQueueMessageAnnotation() {
+        assertThatThrownBy(()->serializer.deserialize("null",PlainPayload.class)).isInstanceOf(ApiException.class);
+    }
+    @Test void nullPayloadIsRejectedEvenWithoutQueueMessageAnnotation() {
+        assertThatThrownBy(()->serializer.deserialize("{\"payload\":null}",PlainPayload.class)).isInstanceOf(ApiException.class);
     }
     @Test void nativeS3NotificationIsNotMistakenForPlatformEnvelope() {
         assertThatThrownBy(()->serializer.deserialize("{\"Records\":[{\"eventSource\":\"aws:s3\"}]}",Payload.class))

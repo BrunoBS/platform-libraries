@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.messagequeue.internal.publisher;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublisher;
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.internal.transport.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver;
@@ -40,6 +41,9 @@ public class DefaultMessageQueuePublisher implements MessageQueuePublisher {
 
     @Override
     public void publish(String destination, Object payload, MessageQueuePublishOptions options) {
+        if (payload == null) {
+            throw new ValidationException(MessageQueueMessageKeys.PUBLISH_PAYLOAD_INVALID);
+        }
         var resolved = destinationResolver.resolve(destination);
         if (!resolved.publisherEnabled()) {
             throw new ApiException(
