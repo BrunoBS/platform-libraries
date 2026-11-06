@@ -1,11 +1,11 @@
 package br.com.portalmanager.platform.library.objectstorage.provider.azure;
 
-import br.com.portalmanager.platform.library.objectstorage.configuration.ObjectStorageProperties;
-import br.com.portalmanager.platform.library.objectstorage.contract.ObjectHeaders;
-import br.com.portalmanager.platform.library.objectstorage.contract.ObjectReference;
-import br.com.portalmanager.platform.library.objectstorage.contract.DownloadUrlRequest;
-import br.com.portalmanager.platform.library.objectstorage.contract.SignedUrl;
-import br.com.portalmanager.platform.library.objectstorage.contract.UploadUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectHeaders;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectReference;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.DownloadUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.SignedUrl;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.UploadUrlRequest;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;

@@ -1,10 +1,10 @@
 package br.com.portalmanager.platform.library.objectstorage.provider.aws.configuration;
 
-import br.com.portalmanager.platform.library.objectstorage.configuration.ObjectStorageProperties;
-import br.com.portalmanager.platform.library.objectstorage.contract.ObjectStorageClient;
+import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.objectstorage.provider.aws.S3ObjectStorageClient;
-import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageTechnicalErrors;
+import br.com.portalmanager.platform.library.objectstorage.internal.message.ObjectStorageTechnicalErrors;
 import java.net.URI;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

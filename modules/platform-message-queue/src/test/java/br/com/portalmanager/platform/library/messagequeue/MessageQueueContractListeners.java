@@ -1,9 +1,9 @@
 package br.com.portalmanager.platform.library.messagequeue;
 
-import br.com.portalmanager.platform.library.messagequeue.annotation.MessageQueueDeadLetterListener;
-import br.com.portalmanager.platform.library.messagequeue.annotation.MessageQueueListener;
-import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
-import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueueMessage;
+import br.com.portalmanager.platform.library.messagequeue.api.annotation.MessageQueueDeadLetterListener;
+import br.com.portalmanager.platform.library.messagequeue.api.annotation.MessageQueueListener;
+import br.com.portalmanager.platform.library.messagequeue.api.contract.DeadLetterMessage;
+import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

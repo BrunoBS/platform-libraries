@@ -1,15 +1,15 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.azure.configuration;
 
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesResolver;
-import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
-import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
-import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesResolver;
+import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProperties;
+import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
+import br.com.portalmanager.platform.library.messagequeue.internal.transport.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureQueueCapabilitiesResolver;
 import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureServiceBusMessageQueueConsumer;
 import br.com.portalmanager.platform.library.messagequeue.provider.azure.AzureServiceBusMessageQueueTransport;
-import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
-import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
+import br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver;
+import br.com.portalmanager.platform.library.messagequeue.internal.serialization.MessageQueueSerializer;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.administration.ServiceBusAdministrationClient;

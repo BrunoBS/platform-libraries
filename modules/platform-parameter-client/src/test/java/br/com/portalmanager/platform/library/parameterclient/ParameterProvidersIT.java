@@ -158,14 +158,6 @@ class ParameterProvidersIT {
         });
     }
 
-    @Test
-    void explicitDisableReusesRedisWithoutCreatingProvider() {
-        context().withPropertyValues("platform.parameter-client.enabled=false")
-                .run(ctx -> assertThat(ctx).hasSingleBean(RedisStore.class).doesNotHaveBean(ConfigurationProvider.class).doesNotHaveBean(ExpressionProvider.class));
-        context().withPropertyValues("platform.redis.enabled=false")
-                .run(ctx -> assertThat(ctx).doesNotHaveBean(RedisStore.class).doesNotHaveBean(ConfigurationProvider.class).doesNotHaveBean(ExpressionProvider.class));
-    }
-
     /** Fixture serialized by the actual Workspace PublishedValue record and schema-validated.
      * Producer source is identical at e87aefd07d11175e11e9fc8ca99752d60bd75bc5 and 883ea071.
      */

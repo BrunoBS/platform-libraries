@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilities;
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesResolver;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilities;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesResolver;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;

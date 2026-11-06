@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilities;
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesResolver;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilities;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesResolver;
 import com.azure.messaging.servicebus.administration.ServiceBusAdministrationClient;
 
 public class AzureQueueCapabilitiesResolver implements QueueCapabilitiesResolver {

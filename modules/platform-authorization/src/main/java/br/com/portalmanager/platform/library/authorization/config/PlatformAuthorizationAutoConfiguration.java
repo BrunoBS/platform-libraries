@@ -127,8 +127,8 @@ public class PlatformAuthorizationAutoConfiguration {
 
         @Bean
         SmartInitializingSingleton sqsEntryPolicyDestinationValidator(PlatformAuthorizationProperties properties,
-                org.springframework.beans.factory.ObjectProvider<br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry> registries,
-                org.springframework.beans.factory.ObjectProvider<br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver> destinations) {
+                org.springframework.beans.factory.ObjectProvider<br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry> registries,
+                org.springframework.beans.factory.ObjectProvider<br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver> destinations) {
             return () -> {
                 if (properties.getEntryPolicies().isEmpty()) return;
                 if (registries.stream().count() != 1 || destinations.stream().count() != 1) throw invalid();
@@ -138,7 +138,7 @@ public class PlatformAuthorizationAutoConfiguration {
                         listener.destination().equals(policy.destination())
                         && (org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName() + "#" + listener.method().getName()).equals(policy.entryPoint())).count();
                     if (matches != 1) throw invalid();
-                    br.com.portalmanager.platform.library.messagequeue.resolver.ResolvedDestination destination = destinations.getObject().resolve(policy.destination());
+                    br.com.portalmanager.platform.library.messagequeue.internal.resolver.ResolvedDestination destination = destinations.getObject().resolve(policy.destination());
                     java.net.URI uri;
                     try { uri = java.net.URI.create(policy.queueUrl()); } catch (RuntimeException failure) { throw invalid(); }
                     if (!destination.consumerEnabled() || uri.getHost() == null || uri.getRawUserInfo() != null || uri.getQuery() != null

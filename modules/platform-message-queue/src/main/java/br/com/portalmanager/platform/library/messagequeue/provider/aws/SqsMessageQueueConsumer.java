@@ -1,13 +1,13 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
-import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
-import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
-import br.com.portalmanager.platform.library.messagequeue.contract.DeadLetterMessage;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
+import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProperties;
+import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
+import br.com.portalmanager.platform.library.messagequeue.api.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueTechnicalErrors;
-import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
-import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
+import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueTechnicalErrors;
+import br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver;
+import br.com.portalmanager.platform.library.messagequeue.internal.serialization.MessageQueueSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;

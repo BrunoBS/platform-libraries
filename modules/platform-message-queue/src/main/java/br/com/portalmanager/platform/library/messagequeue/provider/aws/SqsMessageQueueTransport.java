@@ -1,11 +1,11 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
-import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
-import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
-import br.com.portalmanager.platform.library.messagequeue.message.MessageQueueMessageKeys;
-import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
-import br.com.portalmanager.platform.library.messagequeue.resolver.ResolvedDestination;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
+import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublishOptions;
+import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueMessageKeys;
+import br.com.portalmanager.platform.library.messagequeue.internal.transport.MessageQueueTransport;
+import br.com.portalmanager.platform.library.messagequeue.internal.resolver.ResolvedDestination;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
@@ -60,7 +60,7 @@ public class SqsMessageQueueTransport implements MessageQueueTransport {
             if (!(exception instanceof IllegalArgumentException)) {
                 capabilitiesRegistry.invalidate(destination.queue());
             }
-            throw new MessagePublishException(
+            throw new ApiException(
                     MessageQueueMessageKeys.PUBLISH_FAILED,
                     Map.of("0", destination.logicalName()),
                     exception);

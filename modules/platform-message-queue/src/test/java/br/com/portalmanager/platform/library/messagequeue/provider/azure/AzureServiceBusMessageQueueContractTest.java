@@ -2,11 +2,11 @@ package br.com.portalmanager.platform.library.messagequeue.provider.azure;
 
 import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractListeners;
 import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractTestApplication;
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilities;
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesResolver;
-import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublisher;
-import br.com.portalmanager.platform.library.messagequeue.contract.MessageQueuePublishOptions;
-import br.com.portalmanager.platform.library.messagequeue.exception.MessagePublishException;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilities;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesResolver;
+import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublisher;
+import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublishOptions;
+import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
 import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
@@ -135,7 +135,7 @@ class AzureServiceBusMessageQueueContractTest {
     void shouldRequireOrderingKeyForSessionEnabledDestination() {
         assertThatThrownBy(() -> publisher.publish("ordered-publish-contract",
                 new MessageQueueContractListeners.ContractPayload("missing-key")))
-                .isInstanceOf(MessagePublishException.class)
+                .isInstanceOf(ApiException.class)
                 .hasRootCauseMessage("orderingKey is required for an ordered destination");
     }
 
@@ -144,7 +144,7 @@ class AzureServiceBusMessageQueueContractTest {
         assertThatThrownBy(() -> publisher.publish("contract",
                 new MessageQueueContractListeners.ContractPayload("unexpected-key"),
                 new MessageQueuePublishOptions(null, java.util.Map.of(), "customer-42", null)))
-                .isInstanceOf(MessagePublishException.class)
+                .isInstanceOf(ApiException.class)
                 .hasRootCauseMessage("orderingKey can only be used with an ordered destination");
     }
 
@@ -153,7 +153,7 @@ class AzureServiceBusMessageQueueContractTest {
         assertThatThrownBy(() -> publisher.publish("ordered-publish-contract",
                 new MessageQueueContractListeners.ContractPayload("dedup"),
                 new MessageQueuePublishOptions(null, java.util.Map.of(), "customer-42", "dedup-1")))
-                .isInstanceOf(MessagePublishException.class)
+                .isInstanceOf(ApiException.class)
                 .hasRootCauseMessage(
                         "deduplicationId is an AWS SQS FIFO option and is not supported by Azure Service Bus");
     }

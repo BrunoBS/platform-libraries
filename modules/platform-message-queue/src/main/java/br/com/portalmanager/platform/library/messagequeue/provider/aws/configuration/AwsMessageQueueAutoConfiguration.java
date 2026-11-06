@@ -1,15 +1,15 @@
 package br.com.portalmanager.platform.library.messagequeue.provider.aws.configuration;
 
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesRegistry;
-import br.com.portalmanager.platform.library.messagequeue.capability.QueueCapabilitiesResolver;
-import br.com.portalmanager.platform.library.messagequeue.configuration.MessageQueueProperties;
-import br.com.portalmanager.platform.library.messagequeue.consumer.MessageQueueListenerRegistry;
-import br.com.portalmanager.platform.library.messagequeue.provider.MessageQueueTransport;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
+import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesResolver;
+import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProperties;
+import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
+import br.com.portalmanager.platform.library.messagequeue.internal.transport.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.provider.aws.AwsQueueCapabilitiesResolver;
 import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueConsumer;
 import br.com.portalmanager.platform.library.messagequeue.provider.aws.SqsMessageQueueTransport;
-import br.com.portalmanager.platform.library.messagequeue.resolver.DestinationResolver;
-import br.com.portalmanager.platform.library.messagequeue.serialization.MessageQueueSerializer;
+import br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver;
+import br.com.portalmanager.platform.library.messagequeue.internal.serialization.MessageQueueSerializer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
