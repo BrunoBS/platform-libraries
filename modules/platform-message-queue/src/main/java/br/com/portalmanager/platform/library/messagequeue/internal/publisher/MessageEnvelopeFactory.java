@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.messagequeue.internal.publisher;
 
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage;
+import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageMetadataResolver;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -10,11 +11,9 @@ import java.util.UUID;
 public class MessageEnvelopeFactory {
 
     private final Clock clock;
-    private final MessageMetadataResolver metadataResolver;
 
     public MessageEnvelopeFactory(Clock clock) {
         this.clock = clock;
-        this.metadataResolver = new MessageMetadataResolver();
     }
 
     public MessageQueueMessage<Object> create(
@@ -22,7 +21,7 @@ public class MessageEnvelopeFactory {
             Object payload,
             String correlationId,
             Map<String, String> headers) {
-        var metadata = metadataResolver.resolve(destination, payload);
+        var metadata = MessageMetadataResolver.resolve(destination, payload.getClass());
         return new MessageQueueMessage<>(
                 UUID.randomUUID().toString(),
                 metadata.type(),

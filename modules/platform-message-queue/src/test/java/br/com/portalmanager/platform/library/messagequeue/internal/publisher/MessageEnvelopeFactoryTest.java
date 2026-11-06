@@ -38,10 +38,24 @@ class MessageEnvelopeFactoryTest {
         assertThat(message.headers()).isEmpty();
     }
 
+    @Test
+    void shouldApplyTheDocumentedDefaultsWhenQueueMessageMetadataIsBlank() {
+        var factory = new MessageEnvelopeFactory(Clock.fixed(NOW, ZoneOffset.UTC));
+
+        var message = factory.create("orders", new DefaultMetadataEvent("123"), null, Map.of());
+
+        assertThat(message.messageType()).isEqualTo("orders");
+        assertThat(message.messageVersion()).isEqualTo("1");
+    }
+
     record PlainEvent(String identifier) {
     }
 
     @QueueMessage(type = "product.updated", version = "2")
     record VersionedEvent(String identifier) {
+    }
+
+    @QueueMessage(type = "", version = "")
+    record DefaultMetadataEvent(String identifier) {
     }
 }

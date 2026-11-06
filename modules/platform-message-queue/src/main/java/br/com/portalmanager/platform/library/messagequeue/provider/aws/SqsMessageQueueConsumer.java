@@ -175,7 +175,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         String messageId = null;
         String correlationId = null;
         try {
-            var message = serializer.deserialize(receivedMessage.body(), listener.payloadType());
+            var message = serializer.deserialize(receivedMessage.body(), listener.payloadType(), listener.destination());
             messageId = safeLogIdentifier(message.messageId()) ? message.messageId() : null;
             correlationId = safeLogIdentifier(message.correlationId()) ? message.correlationId() : null;
             Delivery previous = CURRENT_DELIVERY.get();
@@ -212,7 +212,7 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         String messageId = null;
         String correlationId = null;
         try {
-            var message = serializer.deserialize(receivedMessage.body(), listener.payloadType());
+            var message = serializer.deserialize(receivedMessage.body(), listener.payloadType(), listener.destination());
             messageId = safeLogIdentifier(message.messageId()) ? message.messageId() : null;
             correlationId = safeLogIdentifier(message.correlationId()) ? message.correlationId() : null;
             Integer deliveryCount = approximateReceiveCount(receivedMessage);

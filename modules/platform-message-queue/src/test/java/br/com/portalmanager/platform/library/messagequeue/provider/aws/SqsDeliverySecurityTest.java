@@ -31,7 +31,7 @@ class SqsDeliverySecurityTest {
     @AfterEach void cleanup() { MDC.clear(); assertThat(SqsMessageQueueConsumer.currentDelivery()).isEmpty(); }
     void deliver() throws Exception {
         MessageQueueMessage<String> envelope=new MessageQueueMessage<>("event-id","existing","1",Instant.now(),"correlation",Map.of("destination","forged"),"payload");
-        when(serializer.deserialize("body",String.class)).thenReturn(envelope);
+        when(serializer.deserialize("body",String.class,"configured")).thenReturn(envelope);
         ListenerDefinition definition=new ListenerDefinition("configured",listener,Listener.class.getMethod("receive",MessageQueueMessage.class),String.class);
         Method process=SqsMessageQueueConsumer.class.getDeclaredMethod("process",ListenerDefinition.class,String.class,Message.class);
         process.setAccessible(true);

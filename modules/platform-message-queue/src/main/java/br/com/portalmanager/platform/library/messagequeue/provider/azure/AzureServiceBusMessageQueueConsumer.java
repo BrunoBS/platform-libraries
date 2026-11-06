@@ -287,7 +287,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
         String messageId = null;
         String correlationId = null;
         try {
-            var message = serializer.deserialize(received.getBody().toString(), listener.payloadType());
+            var message = serializer.deserialize(received.getBody().toString(), listener.payloadType(), listener.destination());
             messageId = message.messageId();
             correlationId = message.correlationId();
             MessageQueueMdcContext.run(message, () -> listener.invoke(message));
@@ -308,7 +308,7 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
         String messageId = null;
         String correlationId = null;
         try {
-            var message = serializer.deserialize(received.getBody().toString(), listener.payloadType());
+            var message = serializer.deserialize(received.getBody().toString(), listener.payloadType(), listener.destination());
             messageId = message.messageId();
             correlationId = message.correlationId();
             var deadLetterMessage = new DeadLetterMessage<>(
