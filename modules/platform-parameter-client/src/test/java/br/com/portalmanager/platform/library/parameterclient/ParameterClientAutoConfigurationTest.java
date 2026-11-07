@@ -50,10 +50,9 @@ class ParameterClientAutoConfigurationTest {
     }
 
     @Test
-    void customRedisStoreWorksWhenPlatformRedisAutoConfigurationIsDisabled() {
+    void customRedisStoreWorksWithoutPlatformRedisAutoConfiguration() {
         context().withPropertyValues("platform.redis.enabled=false")
                 .withBean(RedisStore.class, () -> mock(RedisStore.class))
-                .withBean(RedisConnectionFactory.class, ParameterClientAutoConfigurationTest::healthyConnectionFactory)
                 .withBean(tools.jackson.databind.ObjectMapper.class,
                         () -> new tools.jackson.databind.json.JsonMapper())
                 .run(ctx -> assertThat(ctx).hasNotFailed().hasSingleBean(ConfigurationProvider.class)
@@ -61,13 +60,13 @@ class ParameterClientAutoConfigurationTest {
     }
 
     @Test
-    void failsToStartWhenRedisIsUnavailable() {
-        RedisConnectionFactory factory = mock(RedisConnectionFactory.class);
-        when(factory.getConnection()).thenThrow(new IllegalStateException("connection refused"));
-        contextWithoutRedisConnectionFactory()
-                .withBean(RedisConnectionFactory.class, () -> factory)
-                .run(ctx -> assertThat(ctx.getStartupFailure())
-                        .hasStackTraceContaining("Redis is required by platform-parameter-client"));
+    void customRedisStoreDoesNotRequireRedisDriverBeansAtStartup() {
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(ParameterClientAutoConfiguration.class))
+                .withBean(RedisStore.class, () -> mock(RedisStore.class))
+                .run(ctx -> assertThat(ctx).hasNotFailed()
+                        .hasSingleBean(ConfigurationProvider.class)
+                        .hasSingleBean(ExpressionProvider.class));
     }
 
     @Test

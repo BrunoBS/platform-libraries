@@ -10,8 +10,6 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.store.RedisStore;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -27,18 +25,10 @@ public class ParameterClientAutoConfiguration {
     @ConditionalOnMissingBean(RedisParameterReader.class)
     RedisParameterReader redisParameterReader(
             ObjectProvider<RedisStore> storeProvider,
-            ObjectProvider<RedisConnectionFactory> connectionFactoryProvider,
             ObjectProvider<ObjectMapper> mapper) {
         RedisStore store = storeProvider.getIfAvailable();
-        RedisConnectionFactory connectionFactory = connectionFactoryProvider.getIfAvailable();
-        if (store == null || connectionFactory == null) {
+        if (store == null) {
             throw new PlatformConfigurationException(ParameterClientTechnicalErrors.REDIS_REQUIRED);
-        }
-        try (RedisConnection connection = connectionFactory.getConnection()) {
-            connection.ping();
-        } catch (RuntimeException failure) {
-            throw new PlatformConfigurationException(
-                    ParameterClientTechnicalErrors.REDIS_REQUIRED, failure);
         }
         return new RedisParameterReader(store, mapper.getIfAvailable(JsonMapper::new));
     }
