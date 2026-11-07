@@ -152,40 +152,71 @@ Azure não usa `aws.*`; AWS não usa `azure.*`. Os blocos existem juntos no obje
 | `BeanPostProcessor` | Descobre listeners nas classes gerenciadas pelo Spring. |
 | `SmartLifecycle` | Inicia e encerra o polling no ciclo de vida da aplicação. |
 
+## Contratos usados nos fluxos
+
+O módulo não cria um par de request/response para cada operação. Publicação recebe parâmetros e opções; consumo entrega uma mensagem a um método anotado. O resultado do processamento é comunicado ao broker pelo acknowledge, não por um objeto de resposta da aplicação.
+
+| Fluxo | Entrada pública | Saída do contrato | O que confirma o resultado |
+|---|---|---|---|
+| Publicar | `MessageQueuePublisher.publish(destination, payload, options)`; há overloads sem opções ou com correlation ID e headers. | `void` | O método termina normalmente após o envio; falhas são lançadas como exceções padronizadas. A API não devolve message ID nem recibo do broker. |
+| Consumir mensagem | `@MessageQueueListener` e método com um único parâmetro `MessageQueueMessage<T>`; retorno `void`. | Sem valor de retorno. | SQS exclui a mensagem após sucesso. Service Bus a conclui com `complete`. |
+| Consumir dead-letter | `@MessageQueueDeadLetterListener` e método com um único parâmetro `DeadLetterMessage<T>`; retorno `void`. | Sem valor de retorno. | Após sucesso, SQS exclui a cópia da DLQ e Service Bus conclui a mensagem na dead-letter subqueue. |
+| Consultar destinos de integração | `MessageQueueDestinationCatalog.resolveForIntegration(destination)`. | `ResolvedDestination` (nome lógico, identificador físico e estado do consumer). | Consulta de metadados; não publica nem recebe mensagem. |
+| Consultar listeners registrados | `MessageQueueListenerCatalog.registrations()`. | Coleção de `Registration` (destino e entry point). | Consulta do registry descoberto pelo Spring. |
+
+`MessageQueueMessage<T>` é o envelope comum: message ID, tipo e versão, timestamp, correlation ID, headers e payload. Ele é produzido antes do envio e entregue ao listener depois da desserialização. Não é uma resposta da publicação.
+
 ## Publicação de mensagens
 
-O ponto de entrada é `MessageQueuePublisher`. A aplicação passa o nome lógico do destino e o payload. O publisher verifica payload e configuração, resolve fila e opções, constrói o envelope neutro e serializa JSON. O transport do provider faz o envio final.
+A interface de entrada é `MessageQueuePublisher`. O consumidor fornece o nome lógico do destino e o payload. Para dados opcionais, `MessageQueuePublishOptions` agrupa correlation ID, headers, ordering key e deduplication ID. Se as opções forem omitidas ou nulas, são usados valores padrão vazios.
+
+A saída declarada é `void`: a chamada só retorna normalmente quando o envio ao broker termina. A biblioteca não expõe o ID do broker nem um recibo; erros de validação, destino desabilitado, serialização ou provider sobem como exceções da plataforma.
+
+| Parte da publicação | Contrato / classe | O que carrega ou faz |
+|---|---|---|
+| Chamada | `MessageQueuePublisher` | `destination` lógico, payload e, opcionalmente, opções. |
+| Opções | `MessageQueuePublishOptions` | `correlationId`, headers, `orderingKey` e `deduplicationId`. |
+| Envelope gerado | `MessageQueueMessage<T>` | `messageId`, `messageType`, `messageVersion`, timestamp, correlation ID, headers e payload serializável. |
+| Resposta pública | `void` | Nenhum objeto de resposta. Sucesso é retorno normal; falha é exceção. |
+
+O caminho interno começa em `DefaultMessageQueuePublisher`: ele valida payload e destino, pede ao `DestinationResolver` que converta o nome lógico para a fila configurada, cria o envelope com `MessageEnvelopeFactory` e `MessageMetadataResolver`, serializa com `MessageQueueSerializer` e envia pelo `MessageQueueTransport` correspondente ao provider.
 
 ```mermaid
 sequenceDiagram
     participant App as Serviço
-    participant Pub as DefaultMessageQueuePublisher
+    participant Pub as MessageQueuePublisher
     participant Shared as Resolver, envelope e serializer
     participant Broker as Transport e broker
     App->>Pub: publish(destino, payload, opções)
-    Pub->>Shared: resolver destino e criar envelope
-    Shared-->>Pub: mensagem JSON
+    Pub->>Shared: resolver destino e criar mensagem
+    Shared-->>Pub: MessageQueueMessage serializada
     Pub->>Broker: enviar para fila física
-    Broker-->>App: confirmação ou erro padronizado
+    Broker-->>Pub: resultado do envio ou falha
+    Pub-->>App: void ou exceção
 ```
 
-`MessageEnvelopeFactory` gera `messageId`, timestamp UTC via `Clock`, tipo e versão, correlation ID, headers e payload. `@QueueMessage` permite declarar `type` e `version`; sem anotação, o tipo é o nome lógico do destino e a versão é `1`. O mesmo resolver é usado ao receber, para validar o contrato quando o payload tem a anotação.
-
-`DestinationResolver` traduz o nome lógico em fila física e combina valores globais e específicos do destino. Também verifica se a publicação está habilitada. `MessageQueueSerializer` usa o `ObjectMapper` do Spring e converte falhas em erros padronizados do `platform-messaging-core`.
+`@QueueMessage(type, version)` no tipo do payload declara metadados estáveis da mensagem. Sem a anotação, o type usa o nome lógico do destino e a version é `1`. Na recepção, a biblioteca compara esses valores para os payloads anotados.
 
 ### Ordenação e deduplicação
 
-O publisher aceita `orderingKey` e `deduplicationId` em `MessageQueuePublishOptions`. O registry consulta as capacidades reais da fila e guarda o resultado em cache:
+`orderingKey` e `deduplicationId` são opções da publicação, não campos do envelope `MessageQueueMessage`. Antes de enviar uma opção de ordenação, o `QueueCapabilitiesRegistry` consulta se a fila oferece esse recurso e guarda o resultado.
 
-- Em SQS, a ordenação é habilitada para filas FIFO. A chave vai para `MessageGroupId`; deduplicação usa `MessageDeduplicationId` quando necessário, ou a configuração de content-based deduplication da fila.
-- Em Service Bus, a ordenação usa sessões; `orderingKey` é mapeada para `SessionId`. `deduplicationId` é específico de SQS FIFO e é rejeitado no Azure.
-- Se a fila não for ordenada, não se pode enviar uma chave de ordenação. Os adapters retornam erro de validação em opções incompatíveis.
+- Em SQS FIFO, `orderingKey` vira `MessageGroupId`. `deduplicationId` vira `MessageDeduplicationId` quando necessário; se a fila usa content-based deduplication, o ID pode ser dispensado.
+- Em Service Bus com sessões, `orderingKey` vira `SessionId`. `deduplicationId` é uma opção específica de SQS FIFO e é rejeitada no Azure.
+- Fila sem ordenação não aceita `orderingKey`. Combinações incompatíveis falham com validação antes de o serviço considerar o envio concluído.
 
-`QueueCapabilitiesRegistry` mantém a descoberta comum à biblioteca; `AwsQueueCapabilitiesResolver` consulta atributos SQS e `AzureQueueCapabilitiesResolver` consulta a administração do Service Bus. Manter a consulta dentro do adapter impede que nomes de atributos ou APIs de administração dos providers vazem para o contrato.
+`AwsQueueCapabilitiesResolver` busca os atributos SQS; `AzureQueueCapabilitiesResolver` consulta a administração do Service Bus. O registry compartilhado evita que os contratos públicos dependam dos nomes ou modelos de cada SDK.
 
 ## Consumo de mensagens
 
-A aplicação anota um método com `@MessageQueueListener("orders")` e recebe `MessageQueueMessage<Pedido>`. Durante a criação dos beans, `MessageQueueListenerRegistry` guarda o método, o bean e o tipo concreto do payload. Uma única assinatura inválida ou listener duplicado para o mesmo destino faz a configuração falhar no startup, antes de o serviço começar a consumir.
+O consumidor declara `@MessageQueueListener("orders")` em um método Spring. O destino dentro da anotação é o nome lógico da configuração, não o nome físico da fila. A assinatura precisa ter exatamente um parâmetro `MessageQueueMessage<T>`, com tipo concreto `T`, e retornar `void`. `MessageQueueListenerRegistry` descobre e valida esses métodos durante a inicialização.
+
+| Parte do consumo | Contrato / classe | O que representa |
+|---|---|---|
+| Declaração | `@MessageQueueListener` | Destino lógico que esse método atende. |
+| Entrada do handler | `MessageQueueMessage<T>` | Envelope neutro desserializado, incluindo payload e metadados. |
+| Resposta do handler | `void` | O handler sinaliza sucesso ao retornar normalmente; uma exceção sinaliza falha. |
+| Resultado no broker | Provider-specific | SQS exclui após sucesso; Service Bus chama `complete`. Falhas preservam a possibilidade de redelivery. |
 
 ```mermaid
 sequenceDiagram
@@ -194,25 +225,40 @@ sequenceDiagram
     participant Shared as Serializer e listener registry
     participant App as Método anotado
     Broker->>Consumer: mensagem disponível
-    Consumer->>Shared: desserializar e recuperar listener
-    Shared->>App: invocar MessageQueueMessage<T>
-    App-->>Consumer: sucesso ou exceção
-    Consumer->>Broker: excluir/concluir ou manter para redelivery
+    Consumer->>Shared: desserializar e localizar handler
+    Shared->>App: MessageQueueMessage<T>
+    App-->>Consumer: retorno normal ou exceção
+    Consumer->>Broker: excluir/concluir ou deixar para redelivery
 ```
 
-No SQS, cada worker faz long polling de uma mensagem por chamada. Se o listener termina sem erro, o consumer exclui a mensagem. Se desserialização ou listener falha, não exclui; o SQS pode entregá-la de novo depois que a visibilidade expirar. O visibility timeout específico, se configurado, é enviado no receive.
+No SQS, cada worker faz long polling de uma mensagem por chamada. Depois do retorno normal do método, o consumer exclui a mensagem. Se desserialização ou handler falha, não exclui; a mensagem pode ser entregue de novo quando a visibilidade expirar.
 
-No Service Bus, o receiver é criado com auto-complete desabilitado. Depois do sucesso o consumer chama `complete`; em falha chama `abandon`, para que o broker possa redeliver. Filas com sessões são consumidas com receiver de sessão, preservando a ordenação por session ID. O lock é renovado segundo `azure.max-auto-lock-renewal-duration`.
+No Service Bus, o receiver desativa auto-complete. O consumer chama `complete` após sucesso e `abandon` após falha. Fila com sessões usa receiver de sessão e mantém a ordenação por session ID. O lock pode ser renovado até `azure.max-auto-lock-renewal-duration`.
 
-Antes de chamar um listener normal, ambos os adapters abrem `MessageQueueDeliveryContext` com provider, entry point, destino, identificadores do transporte e da mensagem, correlation ID e timestamp. `MessageQueueMdcContext` instala `messageId` e `correlationId` no MDC durante a chamada e restaura o contexto anterior ao sair. Nos handlers de dead-letter, o MDC também é configurado, mas o `MessageQueueDeliveryContext` não é aberto; esses handlers recebem os dados disponíveis em `DeadLetterMessage`. Assim os logs do serviço recebem o contexto sem deixar dados de uma mensagem contaminarem o worker seguinte.
+Durante a chamada normal, os adapters abrem `MessageQueueDeliveryContext` com provider, entry point, destino e IDs da entrega. `MessageQueueMdcContext` instala message ID e correlation ID no MDC, depois restaura o contexto anterior para que um worker não contamine a próxima mensagem.
 
 ## Dead-letter
 
-`@MessageQueueDeadLetterListener("orders")` registra um handler para mensagens que já estão na dead-letter queue/subqueue. O payload é `DeadLetterMessage<T>`, com a mensagem neutra e metadados disponibilizados pelo broker.
+`@MessageQueueDeadLetterListener("orders")` declara um handler separado para mensagens que chegaram à dead-letter queue/subqueue. Ele também retorna `void`, mas recebe `DeadLetterMessage<T>` em vez de `MessageQueueMessage<T>`.
 
-Em SQS, a configuração `aws.dead-letter-queue` define a fila física. Se não informada, o nome é derivado da fila de origem; um listener de dead-letter exige que a referência exista. Depois de processado com sucesso, o consumer exclui a cópia da DLQ. Se o handler falha, a mensagem continua na fila.
+| Parte do fluxo | Contrato / classe | O que representa |
+|---|---|---|
+| Declaração | `@MessageQueueDeadLetterListener` | Destino lógico associado ao handler de dead-letter. |
+| Entrada | `DeadLetterMessage<T>` | Mensagem original mais reason, description, delivery count, data e metadados do provider quando disponíveis. Campos sem suporte do provider podem ser nulos. |
+| Resposta do handler | `void` | Retorno normal indica processamento concluído; exceção mantém a mensagem disponível para redelivery. |
+| Resultado no broker | Provider-specific | SQS exclui da DLQ após sucesso; Service Bus conclui a mensagem da dead-letter subqueue. |
 
-No Service Bus, o consumer lê a dead-letter subqueue da fila e preserva razão, descrição, contagem de entregas e metadados retornados pela SDK quando disponíveis. Após sucesso conclui a mensagem na subqueue; na falha, abandona para redelivery. Campos que o provider não oferece ficam nulos, conforme o contrato de `DeadLetterMessage`.
+Em SQS, `aws.dead-letter-queue` seleciona a fila física. Se omitida, a biblioteca deriva o nome da fila de dead-letter; um handler registrado exige que essa referência resolva. Em Service Bus, a biblioteca lê a dead-letter subqueue da fila. No caminho de dead-letter o MDC é configurado, mas `MessageQueueDeliveryContext` não é aberto; metadados de dead-letter são recebidos pelo próprio `DeadLetterMessage`.
+
+## Contratos de consulta para integrações da plataforma
+
+Além da publicação e consumo de mensagens, `api.contract` expõe interfaces de leitura para integrações confiáveis:
+
+- `MessageQueueDestinationCatalog` recebe o nome lógico e retorna o destino resolvido com identificador físico e informação se o consumer está habilitado.
+- `MessageQueueListenerCatalog` retorna a coleção de registros, cada um com o destino e o entry point do listener.
+- `MessageQueueDeliveryContext.current()` retorna `Optional<Delivery>` para a entrega normal em execução na thread atual; o escopo é removido/restaurado ao terminar a chamada.
+
+Esses contratos não são requests/responses do broker. Eles permitem consultar a configuração/registro e o contexto da entrega sem expor os clients AWS/Azure.
 
 ## Classes nos fluxos
 
