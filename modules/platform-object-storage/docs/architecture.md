@@ -49,6 +49,55 @@ flowchart TB
     Module --> AzureSdk["Azure Blob e Identity"]
 ```
 
+## Propriedades de configuração
+
+As propriedades têm o prefixo `platform.object-storage`. O provider escolhido determina quais dados de conexão e de destino são obrigatórios. A configuração é validada durante a inicialização; nomes desconhecidos também causam erro, porque o binding está definido com `ignoreUnknownFields=false`.
+
+Exemplo para AWS:
+
+```yaml
+platform:
+  object-storage:
+    provider: AWS
+    region: us-east-1
+    # Opcional: endpoint customizado, por exemplo em um ambiente local.
+    endpoint: http://localhost:4566
+    destinations:
+      audit:
+        bucket: golden-audit
+        prefix: events
+        suffix: json
+```
+
+Exemplo para Azure:
+
+```yaml
+platform:
+  object-storage:
+    provider: AZURE
+    endpoint: https://conta.blob.core.windows.net
+    destinations:
+      audit:
+        container: golden-audit
+        prefix: events
+        suffix: json
+```
+
+| Propriedade | Obrigatória? | AWS | Azure | Por que existe |
+|---|---|---|---|---|
+| `provider` | Sim | Deve ser `AWS` | Deve ser `AZURE` | Escolhe a auto configuração e o adapter que atenderão os contratos públicos. |
+| `region` | Sim para AWS | Usada para criar `S3Client` e `S3Presigner` | Não usada | Informa à SDK AWS a região do serviço S3. |
+| `endpoint` | Sim para Azure; opcional para AWS | Opcional, aplicado como endpoint customizado quando informado | Usada para criar o cliente Blob | Endereço do serviço. No Azure identifica a conta; na AWS permite apontar para endpoints compatíveis, como emuladores. |
+| `destinations` | Sim; precisa ter ao menos uma entrada | Mapa de destinos lógicos para buckets | Mapa de destinos lógicos para containers | Permite ao serviço consumidor pedir um nome estável, como `audit`, sem conhecer o identificador físico do provider. |
+| `destinations.<nome>.bucket` | Sim em AWS | Nome do bucket S3 | Não usada | Informa em qual bucket o objeto será armazenado. |
+| `destinations.<nome>.container` | Sim em Azure | Não usada | Nome do container Blob | Informa em qual container o objeto será armazenado. |
+| `destinations.<nome>.prefix` | Não; padrão vazio | Usada | Usada | Restringe e organiza as chaves físicas sob um caminho, sem exigir que o consumidor repita esse caminho. |
+| `destinations.<nome>.suffix` | Não; padrão vazio | Usada | Usada | Acrescenta um sufixo configurado à chave física. É validado para evitar separadores ou segmentos de caminho. |
+
+O nome em `destinations` é o identificador lógico usado nas chamadas da API. Por exemplo, uma operação direcionada a `audit` resolve o bucket ou container configurado nessa entrada e aplica `prefix` e `suffix` à chave física. A aplicação não configura bucket e container ao mesmo tempo: cada provider valida e usa somente o campo próprio. Da mesma forma, Azure não precisa de `region`; AWS não exige `endpoint`.
+
+O módulo valida que o mapa de destinos não esteja vazio, que cada entrada tenha nome e configuração, e que o campo físico exigido pelo provider esteja preenchido. Prefixo e sufixo são opcionais, mas, quando usados, precisam obedecer às regras de chave. Uma propriedade escrita incorretamente ou que não pertence ao modelo de configuração falha no binding, em vez de ser silenciosamente ignorada.
+
 ## Inicialização no Spring
 
 1. `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` lista a configuração comum e as configurações AWS e Azure.
