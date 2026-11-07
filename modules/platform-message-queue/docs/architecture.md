@@ -204,7 +204,7 @@ No SQS, cada worker faz long polling de uma mensagem por chamada. Se o listener 
 
 No Service Bus, o receiver é criado com auto-complete desabilitado. Depois do sucesso o consumer chama `complete`; em falha chama `abandon`, para que o broker possa redeliver. Filas com sessões são consumidas com receiver de sessão, preservando a ordenação por session ID. O lock é renovado segundo `azure.max-auto-lock-renewal-duration`.
 
-Antes de chamar o listener, ambos os adapters abrem `MessageQueueDeliveryContext` com provider, entry point, destino, identificadores do transporte e da mensagem, correlation ID e timestamp. `MessageQueueMdcContext` instala `messageId` e `correlationId` no MDC durante a chamada e restaura o contexto anterior ao sair. Assim os logs do serviço recebem o contexto sem deixar dados de uma mensagem contaminarem o worker seguinte.
+Antes de chamar um listener normal, ambos os adapters abrem `MessageQueueDeliveryContext` com provider, entry point, destino, identificadores do transporte e da mensagem, correlation ID e timestamp. `MessageQueueMdcContext` instala `messageId` e `correlationId` no MDC durante a chamada e restaura o contexto anterior ao sair. Nos handlers de dead-letter, o MDC também é configurado, mas o `MessageQueueDeliveryContext` não é aberto; esses handlers recebem os dados disponíveis em `DeadLetterMessage`. Assim os logs do serviço recebem o contexto sem deixar dados de uma mensagem contaminarem o worker seguinte.
 
 ## Dead-letter
 
