@@ -1,4 +1,7 @@
-package br.com.portalmanager.platform.library.objectstorage.api.contract;
+package br.com.portalmanager.platform.library.objectstorage.api.contract.request;
+
+import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectHeaders;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectReference;
 
 import java.time.Duration;
 

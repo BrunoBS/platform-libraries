@@ -1,4 +1,6 @@
-package br.com.portalmanager.platform.library.objectstorage.api.contract;
+package br.com.portalmanager.platform.library.objectstorage.api.contract.response;
+
+import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectReference;
 
 /**
  * Result of a completed upload. {@code eTag} is provider metadata and is not a portable content checksum;

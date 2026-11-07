@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.objectstorage.api.contract;
+package br.com.portalmanager.platform.library.objectstorage.api.contract.response;
 
 import java.util.List;
 

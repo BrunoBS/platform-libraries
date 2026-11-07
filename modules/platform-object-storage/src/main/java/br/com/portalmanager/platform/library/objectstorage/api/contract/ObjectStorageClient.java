@@ -1,5 +1,15 @@
 package br.com.portalmanager.platform.library.objectstorage.api.contract;
 
+import br.com.portalmanager.platform.library.objectstorage.api.contract.request.DownloadUrlRequest;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.request.UploadRequest;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.response.DownloadedObject;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.response.ObjectMetadata;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.response.ObjectPage;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.response.ObjectVersion;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.response.UploadResult;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.response.VersionPage;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectReference;
+
 import java.io.InputStream;
 import java.util.Optional;
 

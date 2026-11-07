@@ -1,9 +1,9 @@
-package br.com.portalmanager.platform.library.objectstorage.api.contract;
+package br.com.portalmanager.platform.library.objectstorage.api.contract.request;
 
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectReference;
 import java.util.Map;
 
-/** Validation shared by the public contract value types. */
 final class ContractValidation {
     private ContractValidation() { }
 
