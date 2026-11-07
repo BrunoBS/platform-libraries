@@ -51,7 +51,7 @@ class ParameterClientAutoConfigurationTest {
 
     @Test
     void customRedisStoreWorksWithoutPlatformRedisAutoConfiguration() {
-        context().withPropertyValues("platform.redis.enabled=false")
+        contextWithoutRedisConnectionFactory().withPropertyValues("platform.redis.enabled=false")
                 .withBean(RedisStore.class, () -> mock(RedisStore.class))
                 .withBean(tools.jackson.databind.ObjectMapper.class,
                         () -> new tools.jackson.databind.json.JsonMapper())
