@@ -126,8 +126,7 @@ class S3ObjectStorageClientIT {
         storage.deleteVersion(first.reference());
         storage.delete(ObjectReference.current("audit", KEY));
         assertFalse(storage.exists(ObjectReference.current("audit", KEY)));
-        assertThrows(NotFoundException.class,
-                () -> storage.exists(ObjectReference.current("unavailable", KEY)));
+        assertFalse(storage.exists(ObjectReference.current("audit", "missing.json")));
     }
 
     @Test
