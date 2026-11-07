@@ -5,7 +5,7 @@ import br.com.portalmanager.platform.library.messaging.exception.ConflictExcepti
 import br.com.portalmanager.platform.library.messaging.exception.ForbiddenException;
 import br.com.portalmanager.platform.library.messaging.exception.NotFoundException;
 import br.com.portalmanager.platform.library.messaging.exception.UnauthorizedException;
-import br.com.portalmanager.platform.library.objectstorage.message.ObjectStorageMessageKeys;
+import br.com.portalmanager.platform.library.objectstorage.internal.message.ObjectStorageMessageKeys;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import org.junit.jupiter.api.Test;
