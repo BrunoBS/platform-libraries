@@ -13,7 +13,7 @@ public class DestinationResolver implements br.com.portalmanager.platform.librar
         this.properties = properties;
     }
 
-    public ResolvedDestination resolve(String destination) {
+    public br.com.portalmanager.platform.library.messagequeue.internal.resolver.ResolvedDestination resolve(String destination) {
         if (properties.getProvider() == null) {
             throw configurationError("Message queue provider is required");
         }
@@ -29,7 +29,7 @@ public class DestinationResolver implements br.com.portalmanager.platform.librar
         var providerDefaults = providerDefaults(properties.getProvider());
         var providerOverride = providerOverride(properties.getProvider(), configured);
 
-        return new ResolvedDestination(
+        return new br.com.portalmanager.platform.library.messagequeue.internal.resolver.ResolvedDestination(
                 destination,
                 properties.getProvider(),
                 configured.getQueue(),
@@ -44,7 +44,7 @@ public class DestinationResolver implements br.com.portalmanager.platform.librar
 
     @Override
     public br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDestinationCatalog.ResolvedDestination resolveForIntegration(String destination) {
-        ResolvedDestination resolved = resolve(destination);
+        br.com.portalmanager.platform.library.messagequeue.internal.resolver.ResolvedDestination resolved = resolve(destination);
         return new br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueDestinationCatalog.ResolvedDestination(
                 resolved.logicalName(), resolved.queue(), resolved.consumerEnabled());
     }
