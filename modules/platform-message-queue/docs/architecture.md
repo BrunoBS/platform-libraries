@@ -148,7 +148,7 @@ Azure não usa `aws.*`; AWS não usa `azure.*`. Os blocos existem juntos no obje
 | `@ConfigurationProperties` | Faz o binding de `platform.message-queue`; `ignoreUnknownFields=false` rejeita chaves estranhas. |
 | `@ConditionalOnProperty` | Escolhe AWS ou Azure conforme `provider`. |
 | `@ConditionalOnMissingBean` | Mantém defaults substituíveis por integrações customizadas. |
-| `@Bean` | Registra recursos e componentes no contexto; os clients/transports com lifecycle fecham no encerramento. |
+| `@Bean` | Registra recursos e componentes no contexto. O `SqsClient` e o transport Azure declaram fechamento; os consumers gerenciam workers e receivers no ciclo de vida do Spring. |
 | `BeanPostProcessor` | Descobre listeners nas classes gerenciadas pelo Spring. |
 | `SmartLifecycle` | Inicia e encerra o polling no ciclo de vida da aplicação. |
 
