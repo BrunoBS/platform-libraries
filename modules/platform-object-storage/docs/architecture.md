@@ -66,7 +66,7 @@ platform:
       audit:
         bucket: golden-audit
         prefix: events
-        suffix: json
+        suffix: .json
 ```
 
 Exemplo para Azure:
@@ -80,7 +80,7 @@ platform:
       audit:
         container: golden-audit
         prefix: events
-        suffix: json
+        suffix: .json
 ```
 
 | Propriedade | Obrigatória? | AWS | Azure | Por que existe |
@@ -176,7 +176,16 @@ A separação entre os dois adapters é intencional: as chamadas de SDK, condiç
 
 ## Fluxo de upload
 
-A aplicação chama o contrato neutro. O adapter escolhido resolve o destino e a chave, prepara o stream com checksum e traduz a operação para o SDK correspondente.
+A chamada pública é `ObjectStorageClient.upload(UploadRequest, InputStream)`. Não existe um request separado para o conteúdo binário: `UploadRequest` carrega os dados e a política; o `InputStream` contém os bytes.
+
+| Parte do contrato | Tipo | Papel |
+|---|---|---|
+| Entrada | `UploadRequest` | Destino lógico, chave lógica, tamanho exato, `ObjectHeaders`, metadados e `WriteMode`. |
+| Conteúdo | `InputStream` | Bytes enviados. O consumidor continua responsável por fechá-lo, mesmo se o upload falhar. |
+| Tipos auxiliares | `ObjectReference`, `ObjectHeaders`, `WriteMode` | Referência neutra, headers HTTP e política `CREATE_ONLY` ou `OVERWRITE`. |
+| Resposta | `UploadResult` | Referência criada, ETag do provider, tamanho e SHA-256 calculado enquanto o stream é consumido. |
+
+O fluxo abaixo mostra como esses contratos chegam ao provider:
 
 ```mermaid
 sequenceDiagram
@@ -192,11 +201,110 @@ sequenceDiagram
     Adapter-->>App: UploadResult neutro
 ```
 
-No download, o adapter seleciona a versão opcional e devolve `DownloadedObject`; quem recebeu o resultado fecha o stream. Na listagem, o adapter aplica o prefixo físico, remove chaves fora do escopo lógico e devolve páginas com token opaco. O mesmo token deve ser reutilizado com o mesmo destino e prefixo ou chave.
+## Fluxo de download
+
+A chamada é `ObjectStorageClient.download(ObjectReference)`. `ObjectReference` leva o destino lógico, a chave lógica e, opcionalmente, um `versionId`.
+
+| Parte do contrato | Tipo | Papel |
+|---|---|---|
+| Entrada | `ObjectReference` | Identifica o objeto lógico e, se informado, a versão exata. |
+| Resposta | `DownloadedObject` | Agrupa `ObjectMetadata` e o stream aberto. Implementa `AutoCloseable`; o consumidor deve fechá-lo. |
+| Metadados | `ObjectMetadata` | Retorna referência efetiva, tamanho, headers, ETag, data de alteração e metadados do objeto. |
+
+O adapter resolve destino, bucket/container e chave física, aplicando prefixo e sufixo. Sem `versionId`, lê a versão atual; com `versionId`, pede aquela versão ao provider. Se o provider retornar o identificador da versão atual, ele aparece na referência dentro de `ObjectMetadata`. O stream fica aberto para que o consumidor leia os bytes sem carregar o objeto inteiro em memória.
+
+```mermaid
+sequenceDiagram
+    participant App as Serviço
+    participant Adapter as Adapter do provider
+    participant Key as ObjectStorageKey
+    participant Store as S3 ou Blob
+    App->>Adapter: download(ObjectReference)
+    Adapter->>Key: resolver destino, chave e versão
+    Adapter->>Store: GET do objeto
+    Store-->>Adapter: stream e propriedades
+    Adapter-->>App: DownloadedObject
+    App->>App: ler e fechar o stream
+```
+
+## Consulta de metadados e existência
+
+Essas operações reutilizam `ObjectReference`; não criam outro request:
+
+| Chamada do contrato | Resposta | O que faz |
+|---|---|---|
+| `ObjectStorageClient.head(ObjectReference)` | `ObjectMetadata` | Lê propriedades sem devolver o conteúdo. Respeita `versionId`, se informado. |
+| `ObjectStorageClient.exists(ObjectReference)` | `boolean` | Retorna `false` quando o provider identifica que o objeto ou a versão não existe. Falhas de acesso e outros erros continuam sendo exceções. |
+
+No AWS, `head` usa `HeadObject`; no Azure, consulta as propriedades do blob. `exists` usa essa consulta e traduz somente a ausência reconhecida pelo provider para `false`.
+
+## Fluxo de listagem
+
+A chamada é `ObjectStorageClient.list(destination, prefix, continuationToken, pageSize)`; não há um record de request dedicado.
+
+| Parte do contrato | Tipo | Papel |
+|---|---|---|
+| Entrada | `destination`, `prefix`, `continuationToken`, `pageSize` | Destino lógico, prefixo lógico opcional, token da página seguinte e quantidade pedida. |
+| Resposta | `ObjectPage` | Uma página de resultados e o token opaco da próxima página, se houver. |
+| Itens | `ObjectSummary` | Referência lógica, tamanho, ETag e data de alteração, sem baixar o objeto nem consultar propriedades item a item. |
+
+O adapter combina o prefixo informado na chamada com o prefixo configurado no destino e pede a página ao provider. Para cada chave retornada, `ObjectStorageKey` remove o prefixo e o sufixo configurados; chaves que não pertencem a esse escopo lógico são descartadas. Assim, a aplicação recebe chaves lógicas e não precisa conhecer o caminho físico do bucket/container.
+
+S3 usa o continuation token da API de listagem; Azure usa o token de continuação do paginador Blob. O token é opaco: deve ser devolvido ao mesmo método junto do mesmo destino e prefixo. O tamanho deve estar entre 1 e `ObjectStorageClient.MAX_PAGE_SIZE` (1000). Como itens fora do escopo são filtrados depois da resposta do provider, uma página pode conter menos itens visíveis que o tamanho solicitado.
+
+```mermaid
+sequenceDiagram
+    participant App as Serviço
+    participant Adapter as Adapter do provider
+    participant Key as ObjectStorageKey
+    participant Store as S3 ou Blob
+    App->>Adapter: list(destino, prefixo, token, tamanho)
+    Adapter->>Key: combinar prefixos
+    Adapter->>Store: listar por prefixo físico
+    Store-->>Adapter: página física e token
+    Adapter->>Key: converter chaves para nomes lógicos
+    Adapter-->>App: ObjectPage com ObjectSummary
+```
+
+## Histórico de versões e exclusão
+
+O histórico usa `ObjectStorageClient.listVersions(destination, key, continuationToken, pageSize)`, sem request record. Ele devolve `VersionPage`, com itens `ObjectVersion` e token de continuação. Cada versão inclui um `ObjectReference` com `versionId`, ETag, tamanho, data, indicador de versão atual e, quando aplicável, indicador de delete marker. As páginas são ordenadas da mais recente para a mais antiga. O token deve ser reutilizado com o mesmo destino e chave.
+
+`findVersionByETag(destination, key, eTag)` retorna `Optional<ObjectVersion>` e pode percorrer várias páginas. ETag é valor fornecido pelo provider, não um checksum portátil, e pode se repetir entre versões. Quando se conhece a versão exata, use `versionId`.
+
+Para excluir, os contratos são `ObjectStorageClient.delete(ObjectReference)` e `ObjectStorageClient.deleteVersion(ObjectReference)`; ambos não retornam corpo:
+
+- Sem `versionId`, `delete` remove o objeto atual das leituras e listagens normais; comportamento de histórico e retenção depende do provider.
+- Com `versionId`, `delete` remove aquela versão específica. `deleteVersion` exige explicitamente o identificador da versão.
+- Os adapters traduzem erros de provider para as exceções padronizadas usadas pelo módulo.
 
 ## URLs assinadas
 
-`SignedUrlClient` recebe os tipos neutros `UploadUrlRequest` e `DownloadUrlRequest`. AWS usa `S3Presigner`; Azure cria SAS e solicita uma chave de delegação. `SignedUrl.requiredHeaders` informa os cabeçalhos que o consumidor precisa mandar ao armazenar diretamente no provider. Na implementação Azure, a identidade configurada precisa ter permissão para obter a chave de delegação quando a URL é criada.
+Os dois fluxos usam `SignedUrlClient` e retornam `SignedUrl` (URI, expiração e headers que precisam acompanhar a chamada HTTP). A operação ocorre depois, diretamente entre o cliente HTTP e o provider.
+
+### URL de download
+
+Entrada: `DownloadUrlRequest`, com um `ObjectReference` e a validade desejada. A referência pode selecionar uma versão. A saída `SignedUrl` autoriza leitura temporária do objeto.
+
+### URL de upload
+
+Entrada: `UploadUrlRequest`, com `ObjectReference`, validade e `ObjectHeaders` que serão assinados. Não aceita `versionId`, pois a URL cria ou substitui o objeto atual. A saída `SignedUrl.requiredHeaders` informa ao cliente quais headers deve enviar junto do upload.
+
+AWS usa `S3Presigner`. Azure cria um SAS e solicita uma chave de delegação; a identidade configurada precisa ter permissão para obter essa chave. Os headers enviados pelo cliente devem corresponder aos declarados no request, e a URL só é válida até `expiresAt`.
+
+```mermaid
+sequenceDiagram
+    participant App as Serviço
+    participant Api as SignedUrlClient
+    participant Provider as S3Presigner ou Blob SAS
+    participant Client as Cliente HTTP
+    App->>Api: request de URL assinada
+    Api->>Provider: criar permissão temporária
+    Provider-->>Api: URI e expiração
+    Api-->>App: SignedUrl
+    App-->>Client: URL e headers exigidos
+    Client->>Provider: upload/download direto
+```
 
 ## Revisão de simplicidade
 
