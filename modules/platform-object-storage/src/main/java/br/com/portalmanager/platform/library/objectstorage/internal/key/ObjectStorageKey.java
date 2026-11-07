@@ -47,17 +47,6 @@ public final class ObjectStorageKey {
         return trailingSlash ? physicalPrefix + "/" : physicalPrefix;
     }
 
-    public static void validateConfiguredPrefix(String prefix) {
-        normalizePrefix(prefix);
-    }
-
-    public static void validateConfiguredSuffix(String suffix) {
-        if (suffix == null || suffix.isEmpty()) return;
-        if (suffix.isBlank() || suffix.contains("/") || suffix.contains("\\") || suffix.equals(".") || suffix.equals("..")) {
-            throw ObjectStorageValidation.invalid("suffix");
-        }
-    }
-
     private static String normalizePrefix(String prefix) {
         if (prefix == null || prefix.isBlank()) return "";
         String normalized = prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix;

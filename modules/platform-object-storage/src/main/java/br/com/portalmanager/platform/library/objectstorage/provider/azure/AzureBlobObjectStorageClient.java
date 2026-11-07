@@ -88,8 +88,8 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
             throw translate(exception, "upload object", request.writeMode() == WriteMode.CREATE_ONLY);
         }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "upload object", exception); }
-        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("upload object", exception); }
-        catch (IllegalArgumentException exception) { throw ObjectStorageFailureMapper.fromClientFailure("upload object", exception); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromFailure("upload object", exception); }
+        catch (IllegalArgumentException exception) { throw ObjectStorageFailureMapper.fromFailure("upload object", exception); }
     }
 
     @Override
@@ -103,7 +103,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
             return new DownloadedObject(metadata(reference, result), stream);
         } catch (BlobStorageException exception) { throw translate(exception, "download object"); }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "download object", exception); }
-        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("download object", exception); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromFailure("download object", exception); }
     }
 
     @Override
@@ -113,7 +113,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         try { return metadata(reference, blob(resolved, reference.versionId()).getProperties()); }
         catch (BlobStorageException exception) { throw translate(exception, "read object properties"); }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "read object properties", exception); }
-        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("read object properties", exception); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromFailure("read object properties", exception); }
     }
 
     @Override
@@ -128,7 +128,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
             throw translate(exception, "check object existence");
         }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "check object existence", exception); }
-        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("check object existence", exception); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromFailure("check object existence", exception); }
     }
 
     @Override
@@ -159,7 +159,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         } catch (ClientAuthenticationException exception) {
             throw ObjectStorageFailureMapper.fromHttpStatus(401, "list objects", exception);
         } catch (AzureException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("list objects", exception);
+            throw ObjectStorageFailureMapper.fromFailure("list objects", exception);
         }
     }
 
@@ -193,7 +193,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         } catch (ClientAuthenticationException exception) {
             throw ObjectStorageFailureMapper.fromHttpStatus(401, "list object versions", exception);
         } catch (AzureException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("list object versions", exception);
+            throw ObjectStorageFailureMapper.fromFailure("list object versions", exception);
         }
     }
 
@@ -221,7 +221,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         try { blob(resolved, null).delete(); }
         catch (BlobStorageException exception) { throw translate(exception, "delete object"); }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "delete object", exception); }
-        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object", exception); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromFailure("delete object", exception); }
     }
 
     @Override
@@ -232,7 +232,7 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         try { container(resolved.container()).getBlobVersionClient(resolved.key(), reference.versionId()).delete(); }
         catch (BlobStorageException exception) { throw translate(exception, "delete object version"); }
         catch (ClientAuthenticationException exception) { throw ObjectStorageFailureMapper.fromHttpStatus(401, "delete object version", exception); }
-        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object version", exception); }
+        catch (AzureException exception) { throw ObjectStorageFailureMapper.fromFailure("delete object version", exception); }
     }
 
     @Override
@@ -276,9 +276,9 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
         } catch (ClientAuthenticationException exception) {
             throw ObjectStorageFailureMapper.fromHttpStatus(401, "create signed URL", exception);
         } catch (AzureException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("create signed URL", exception);
+            throw ObjectStorageFailureMapper.fromFailure("create signed URL", exception);
         } catch (IllegalArgumentException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("create signed URL", exception);
+            throw ObjectStorageFailureMapper.fromFailure("create signed URL", exception);
         }
     }
 

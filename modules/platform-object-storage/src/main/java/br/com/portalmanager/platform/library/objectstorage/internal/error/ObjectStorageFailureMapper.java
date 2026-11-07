@@ -45,17 +45,7 @@ public final class ObjectStorageFailureMapper {
         return fromHttpStatus(status, operation, cause);
     }
 
-    public static RuntimeException fromProviderFailure(String operation, Throwable cause) {
-        if (hasCause(cause, TimeoutException.class) || hasCause(cause, SocketTimeoutException.class)) {
-            return new ApiException(ObjectStorageMessageKeys.OPERATION_TIMEOUT, Map.of("0", operation), cause);
-        }
-        if (hasCause(cause, IOException.class)) {
-            return new ApiException(ObjectStorageMessageKeys.TRANSIENT_FAILURE, Map.of("0", operation), cause);
-        }
-        return new ApiException(ObjectStorageMessageKeys.OPERATION_FAILED, Map.of("0", operation), cause);
-    }
-
-    public static RuntimeException fromClientFailure(String operation, Throwable cause) {
+    public static RuntimeException fromFailure(String operation, Throwable cause) {
         if (hasCause(cause, TimeoutException.class) || hasCause(cause, SocketTimeoutException.class)) {
             return new ApiException(ObjectStorageMessageKeys.OPERATION_TIMEOUT, Map.of("0", operation), cause);
         }

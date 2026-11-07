@@ -66,7 +66,7 @@ class ObjectStorageFailureMapperTest {
     @Test
     void shouldNotClassifyCredentialOrInvalidClientFailuresAsTransient() {
         RuntimeException cause = new RuntimeException("invalid credentials");
-        RuntimeException mapped = ObjectStorageFailureMapper.fromClientFailure("upload object", cause);
+        RuntimeException mapped = ObjectStorageFailureMapper.fromFailure("upload object", cause);
 
         assertInstanceOf(ApiException.class, mapped);
         assertEquals(ObjectStorageMessageKeys.OPERATION_FAILED, ((ApiException) mapped).getMessageKey());
@@ -76,7 +76,7 @@ class ObjectStorageFailureMapperTest {
     @Test
     void shouldClassifyClientTimeoutAsTimeout() {
         SocketTimeoutException cause = new SocketTimeoutException("timed out");
-        RuntimeException mapped = ObjectStorageFailureMapper.fromClientFailure("upload object", cause);
+        RuntimeException mapped = ObjectStorageFailureMapper.fromFailure("upload object", cause);
 
         assertInstanceOf(ApiException.class, mapped);
         assertEquals(ObjectStorageMessageKeys.OPERATION_TIMEOUT, ((ApiException) mapped).getMessageKey());
@@ -85,12 +85,12 @@ class ObjectStorageFailureMapperTest {
 
     @Test
     void shouldClassifyOnlyKnownProviderIoFailuresAsTransient() {
-        RuntimeException unclassified = ObjectStorageFailureMapper.fromProviderFailure(
+        RuntimeException unclassified = ObjectStorageFailureMapper.fromFailure(
                 "download object", new RuntimeException("invalid provider response"));
         assertInstanceOf(ApiException.class, unclassified);
         assertEquals(ObjectStorageMessageKeys.OPERATION_FAILED, ((ApiException) unclassified).getMessageKey());
 
-        RuntimeException ioFailure = ObjectStorageFailureMapper.fromProviderFailure(
+        RuntimeException ioFailure = ObjectStorageFailureMapper.fromFailure(
                 "download object", new RuntimeException("connection reset", new IOException("reset")));
         assertInstanceOf(ApiException.class, ioFailure);
         assertEquals(ObjectStorageMessageKeys.TRANSIENT_FAILURE, ((ApiException) ioFailure).getMessageKey());

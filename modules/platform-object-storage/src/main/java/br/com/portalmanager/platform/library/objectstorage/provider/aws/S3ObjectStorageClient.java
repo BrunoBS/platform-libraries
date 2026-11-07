@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.exception.SdkException;
-import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
@@ -77,12 +76,10 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
                     request.contentLength(), uploadContent.sha256());
         } catch (S3Exception exception) {
             throw translate(exception, "upload object", request.writeMode() == WriteMode.CREATE_ONLY);
-        } catch (SdkClientException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("upload object", exception);
         } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("upload object", exception);
+            throw ObjectStorageFailureMapper.fromFailure("upload object", exception);
         } catch (IllegalArgumentException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("upload object", exception);
+            throw ObjectStorageFailureMapper.fromFailure("upload object", exception);
         }
     }
 
@@ -103,10 +100,8 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
             return new DownloadedObject(metadata, response);
         } catch (S3Exception exception) {
             throw translate(exception, "download object");
-        } catch (SdkClientException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("download object", exception);
         } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("download object", exception);
+            throw ObjectStorageFailureMapper.fromFailure("download object", exception);
         }
     }
 
@@ -125,10 +120,8 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
                     response.lastModified(), response.metadata());
         } catch (S3Exception exception) {
             throw translate(exception, "read object properties");
-        } catch (SdkClientException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("read object properties", exception);
         } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("read object properties", exception);
+            throw ObjectStorageFailureMapper.fromFailure("read object properties", exception);
         }
     }
 
@@ -162,8 +155,7 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
             }
             return new ObjectPage(objects, response.nextContinuationToken());
         } catch (S3Exception exception) { throw translate(exception, "list objects"); }
-        catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("list objects", exception); }
-        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("list objects", exception); }
+        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromFailure("list objects", exception); }
     }
 
     @Override
@@ -193,8 +185,7 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
             String next = response.isTruncated() ? encodeToken(response.nextKeyMarker(), response.nextVersionIdMarker()) : null;
             return new VersionPage(versions, next);
         } catch (S3Exception exception) { throw translate(exception, "list object versions"); }
-        catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("list object versions", exception); }
-        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("list object versions", exception); }
+        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromFailure("list object versions", exception); }
     }
 
     @Override
@@ -220,8 +211,7 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { client.deleteObject(DeleteObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key()).build()); }
         catch (S3Exception exception) { throw translate(exception, "delete object"); }
-        catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("delete object", exception); }
-        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object", exception); }
+        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromFailure("delete object", exception); }
     }
 
     @Override
@@ -231,8 +221,7 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
         Resolved resolved = resolve(reference.destination(), reference.key());
         try { client.deleteObject(DeleteObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key()).versionId(reference.versionId()).build()); }
         catch (S3Exception exception) { throw translate(exception, "delete object version"); }
-        catch (SdkClientException exception) { throw ObjectStorageFailureMapper.fromClientFailure("delete object version", exception); }
-        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromProviderFailure("delete object version", exception); }
+        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromFailure("delete object version", exception); }
     }
 
     @Override
@@ -251,14 +240,12 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
             return new SignedUrl(signedRequest.url().toURI(), signedRequest.expiration(), Map.of());
         } catch (S3Exception exception) {
             throw translate(exception, "create signed download URL");
-        } catch (SdkClientException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("create signed download URL", exception);
         } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("create signed download URL", exception);
+            throw ObjectStorageFailureMapper.fromFailure("create signed download URL", exception);
         } catch (java.net.URISyntaxException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("create signed download URL", exception);
+            throw ObjectStorageFailureMapper.fromFailure("create signed download URL", exception);
         } catch (IllegalArgumentException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("create signed download URL", exception);
+            throw ObjectStorageFailureMapper.fromFailure("create signed download URL", exception);
         }
     }
 
@@ -279,14 +266,12 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
             return new SignedUrl(signedRequest.url().toURI(), signedRequest.expiration(), headers.asHttpHeaders());
         } catch (S3Exception exception) {
             throw translate(exception, "create signed upload URL");
-        } catch (SdkClientException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("create signed upload URL", exception);
         } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("create signed upload URL", exception);
+            throw ObjectStorageFailureMapper.fromFailure("create signed upload URL", exception);
         } catch (java.net.URISyntaxException exception) {
-            throw ObjectStorageFailureMapper.fromProviderFailure("create signed upload URL", exception);
+            throw ObjectStorageFailureMapper.fromFailure("create signed upload URL", exception);
         } catch (IllegalArgumentException exception) {
-            throw ObjectStorageFailureMapper.fromClientFailure("create signed upload URL", exception);
+            throw ObjectStorageFailureMapper.fromFailure("create signed upload URL", exception);
         }
     }
 

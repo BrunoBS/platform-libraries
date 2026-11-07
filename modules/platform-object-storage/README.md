@@ -2,7 +2,7 @@
 
 Provider-neutral AWS S3 and Azure Blob Storage capability.
 
-The public contract, configuration, errors, examples, and provider limitations are documented in the [Golden Platform module guide](https://github.com/BrunoBS/golden-platform/blob/main/docs/libraries/modules/platform-object-storage.md).
+The [Golden Platform module guide](https://github.com/BrunoBS/golden-platform/blob/main/docs/libraries/modules/platform-object-storage.md) explains consumer setup and use. The [internal architecture guide](docs/architecture.md) explains the classes, dependencies, provider flows, and simplification decisions for maintainers.
 
 The consumer API is under `br.com.portalmanager.platform.library.objectstorage.api` and is grouped by responsibility:
 
