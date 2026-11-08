@@ -247,9 +247,13 @@ public class AzureBlobObjectStorageClient implements ObjectStorageClient, Signed
     public SignedUrl createUploadUrl(UploadUrlRequest request) {
         if (request == null) throw ObjectStorageValidation.invalid("request");
         Resolved resolved = resolve(request.reference().destination(), request.reference().key());
-        return createSignedUrl(resolved, null, request.validity(),
-                new BlobSasPermission().setCreatePermission(true).setWritePermission(true),
-                request.headers().asHttpHeaders());
+        Map<String, String> requiredHeaders = new java.util.LinkedHashMap<>(request.headers().asHttpHeaders());
+        requiredHeaders.put("x-ms-blob-type", "BlockBlob");
+        BlobSasPermission permissions = new BlobSasPermission().setCreatePermission(true).setWritePermission(true);
+        if (request.writeMode() == WriteMode.CREATE_ONLY) {
+            requiredHeaders.put("If-None-Match", "*");
+        }
+        return createSignedUrl(resolved, null, request.validity(), permissions, requiredHeaders);
     }
 
     private SignedUrl createSignedUrl(Resolved resolved, String versionId, Duration validity,

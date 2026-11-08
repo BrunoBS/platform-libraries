@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.objectstorage.provider.azure;
 import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectHeaders;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectReference;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.model.WriteMode;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.request.DownloadUrlRequest;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.response.SignedUrl;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.request.UploadUrlRequest;
@@ -14,14 +15,18 @@ import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import java.time.Duration;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.mockito.ArgumentCaptor;
 
 class AzureSignedUrlTest {
 
@@ -65,7 +70,7 @@ class AzureSignedUrlTest {
         when(serviceClient.getUserDelegationKey(any(), any())).thenReturn(delegationKey);
         when(blobClient.getBlobUrl()).thenReturn("https://account.blob.core.windows.net/audit-container/objects/feature.json");
         when(blobClient.generateUserDelegationSas(any(BlobServiceSasSignatureValues.class), same(delegationKey)))
-                .thenReturn("sv=2026-01-01&sp=cw&sig=signature");
+                .thenReturn("sv=2026-06-06&sp=cw&sig=signature");
 
         ObjectStorageProperties properties = new ObjectStorageProperties();
         ObjectStorageProperties.Destination destination = new ObjectStorageProperties.Destination();
@@ -79,11 +84,29 @@ class AzureSignedUrlTest {
         SignedUrl result = client.createUploadUrl(new UploadUrlRequest(
                 ObjectReference.current("audit", "feature"), Duration.ofMinutes(4), headers));
 
-        assertEquals("https://account.blob.core.windows.net/audit-container/objects/feature.json?sv=2026-01-01&sp=cw&sig=signature",
+        assertEquals("https://account.blob.core.windows.net/audit-container/objects/feature.json?sv=2026-06-06&sp=cw&sig=signature",
                 result.url().toString());
-        assertEquals(Map.of("Content-Type", "application/json", "Cache-Control", "no-cache"), result.requiredHeaders());
+        Map<String, String> createOnlyHeaders = Map.of(
+                "Content-Type", "application/json",
+                "Cache-Control", "no-cache",
+                "x-ms-blob-type", "BlockBlob",
+                "If-None-Match", "*");
+        assertEquals(createOnlyHeaders, result.requiredHeaders());
         assertTrue(result.expiresAt().isAfter(java.time.Instant.now()));
-        verify(serviceClient).getUserDelegationKey(any(), any());
-        verify(blobClient).generateUserDelegationSas(any(BlobServiceSasSignatureValues.class), same(delegationKey));
+
+        SignedUrl overwrite = client.createUploadUrl(new UploadUrlRequest(
+                ObjectReference.current("audit", "feature"), Duration.ofMinutes(4), headers, WriteMode.OVERWRITE));
+        Map<String, String> overwriteHeaders = Map.of(
+                "Content-Type", "application/json",
+                "Cache-Control", "no-cache",
+                "x-ms-blob-type", "BlockBlob");
+        assertEquals(overwriteHeaders, overwrite.requiredHeaders());
+
+        ArgumentCaptor<BlobServiceSasSignatureValues> signedValues =
+                ArgumentCaptor.forClass(BlobServiceSasSignatureValues.class);
+        verify(serviceClient, times(2)).getUserDelegationKey(any(), any());
+        verify(blobClient, times(2)).generateUserDelegationSas(signedValues.capture(), same(delegationKey));
+        assertEquals(createOnlyHeaders, signedValues.getAllValues().get(0).getRequestHeaders());
+        assertEquals(overwriteHeaders, signedValues.getAllValues().get(1).getRequestHeaders());
     }
 }

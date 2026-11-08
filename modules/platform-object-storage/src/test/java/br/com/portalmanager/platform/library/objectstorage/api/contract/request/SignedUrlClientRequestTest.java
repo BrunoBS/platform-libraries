@@ -2,6 +2,7 @@ package br.com.portalmanager.platform.library.objectstorage.api.contract.request
 
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectHeaders;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectReference;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.model.WriteMode;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.response.SignedUrl;
 
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
@@ -34,6 +35,19 @@ class SignedUrlClientRequestTest {
         SignedUrl url = new SignedUrl(URI.create("https://storage.example/feature.json"), Instant.now(), headers);
 
         assertEquals(ObjectHeaders.empty(), request.headers());
+        assertEquals(WriteMode.CREATE_ONLY, request.writeMode());
         assertEquals(headers, url.requiredHeaders());
+
+        UploadUrlRequest overwrite = new UploadUrlRequest(
+                ObjectReference.current("audit", "feature.json"),
+                Duration.ofMinutes(5),
+                ObjectHeaders.empty(),
+                WriteMode.OVERWRITE);
+        assertEquals(WriteMode.OVERWRITE, overwrite.writeMode());
+        assertThrows(ValidationException.class, () -> new UploadUrlRequest(
+                ObjectReference.current("audit", "feature.json"),
+                Duration.ofMinutes(5),
+                ObjectHeaders.empty(),
+                null));
     }
 }

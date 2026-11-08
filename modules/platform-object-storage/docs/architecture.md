@@ -135,7 +135,7 @@ O módulo valida que o mapa de destinos não esteja vazio, que cada entrada tenh
 | `SignedUrlClient` | Contrato separado para criar URL temporária de upload ou download. Mantém explícita essa capacidade sem misturá-la com a assinatura de armazenamento comum. |
 | `UploadRequest` | Entrada de upload: destino, chave, tamanho exato, cabeçalhos, metadados e política de escrita. |
 | `DownloadUrlRequest` | Entrada de geração de URL temporária de download: referência e validade. |
-| `UploadUrlRequest` | Entrada de geração de URL temporária de upload: referência, validade e cabeçalhos que o cliente HTTP terá que enviar. |
+| `UploadUrlRequest` | Entrada de geração de URL temporária de upload: referência, validade, headers e `WriteMode`. Por padrão, usa `CREATE_ONLY`, alinhado ao upload por stream; `OVERWRITE` é explícito. |
 | `ObjectReference` | Identifica destino lógico, chave e, opcionalmente, uma versão específica. É usado por operações e respostas. |
 | `ObjectHeaders` | Agrupa cabeçalhos HTTP neutros, como `Content-Type` e `Cache-Control`, usados no upload e nas respostas. |
 | `WriteMode` | Define `CREATE_ONLY` ou `OVERWRITE`, evitando que a política de sobrescrita fique implícita. |
@@ -288,9 +288,9 @@ Entrada: `DownloadUrlRequest`, com um `ObjectReference` e a validade desejada. A
 
 ### URL de upload
 
-Entrada: `UploadUrlRequest`, com `ObjectReference`, validade e `ObjectHeaders` que serão assinados. Não aceita `versionId`, pois a URL cria ou substitui o objeto atual. A saída `SignedUrl.requiredHeaders` informa ao cliente quais headers deve enviar junto do upload.
+Entrada: `UploadUrlRequest`, com `ObjectReference`, validade, `ObjectHeaders` e `WriteMode`. Não aceita `versionId`. O modo padrão é `CREATE_ONLY`; `OVERWRITE` precisa ser escolhido explicitamente. A saída `SignedUrl.requiredHeaders` contém todos os headers que o cliente HTTP precisa enviar, inclusive os específicos do provider: AWS inclui `If-None-Match: *` no modo de criação; Azure inclui `x-ms-blob-type: BlockBlob` e, em `CREATE_ONLY`, `If-None-Match: *`.
 
-AWS usa `S3Presigner`. Azure cria um SAS e solicita uma chave de delegação; a identidade configurada precisa ter permissão para obter essa chave. Os headers enviados pelo cliente devem corresponder aos declarados no request, e a URL só é válida até `expiresAt`.
+AWS usa `S3Presigner` e condiciona o PUT com `If-None-Match: *` quando o modo é `CREATE_ONLY`. Azure cria SAS de delegação de usuário e solicita uma chave de delegação; a identidade precisa poder obtê-la. A SAS exige os headers devolvidos por `SignedUrl.requiredHeaders`. Nos dois providers, `CREATE_ONLY` impede substituir um objeto atual; `OVERWRITE` permite isso. Como a transferência é direta, a resposta HTTP de conflito vem do provider e não passa pelo mapeador de exceções da biblioteca. A URL só é válida até `expiresAt`.
 
 ```mermaid
 sequenceDiagram

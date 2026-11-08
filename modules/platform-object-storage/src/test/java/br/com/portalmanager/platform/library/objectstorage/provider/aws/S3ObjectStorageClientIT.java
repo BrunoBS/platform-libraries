@@ -192,15 +192,37 @@ class S3ObjectStorageClientIT {
         assertTrue(download.requiredHeaders().isEmpty());
 
         ObjectHeaders uploadHeaders = new ObjectHeaders("application/json", "no-cache", null, null, null);
+        ObjectReference signedPutReference = ObjectReference.current("audit", "signed-put.json");
         SignedUrl upload = signedUrls.createUploadUrl(new UploadUrlRequest(
-                ObjectReference.current("audit", "signed-put.json"), Duration.ofMinutes(5), uploadHeaders));
+                signedPutReference, Duration.ofMinutes(5), uploadHeaders));
+        assertEquals("*", upload.requiredHeaders().get("If-None-Match"));
         HttpRequest.Builder putRequest = HttpRequest.newBuilder(upload.url());
         upload.requiredHeaders().forEach(putRequest::header);
-        HttpResponse<Void> uploadResponse = HttpClient.newHttpClient().send(
-                putRequest.PUT(HttpRequest.BodyPublishers.ofString("signed put")).build(), HttpResponse.BodyHandlers.discarding());
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpResponse<Void> uploadResponse = httpClient.send(
+                putRequest.PUT(HttpRequest.BodyPublishers.ofString("signed put")).build(),
+                HttpResponse.BodyHandlers.discarding());
         assertEquals(200, uploadResponse.statusCode());
-        try (DownloadedObject downloaded = storage.download(ObjectReference.current("audit", "signed-put.json"))) {
-            assertEquals("signed put", new String(downloaded.content().readAllBytes(), StandardCharsets.UTF_8));
+
+        HttpRequest.Builder duplicatePut = HttpRequest.newBuilder(upload.url());
+        upload.requiredHeaders().forEach(duplicatePut::header);
+        HttpResponse<Void> duplicateResponse = httpClient.send(
+                duplicatePut.PUT(HttpRequest.BodyPublishers.ofString("must not replace")).build(),
+                HttpResponse.BodyHandlers.discarding());
+        assertEquals(412, duplicateResponse.statusCode());
+
+        SignedUrl overwrite = signedUrls.createUploadUrl(new UploadUrlRequest(
+                signedPutReference, Duration.ofMinutes(5), uploadHeaders, WriteMode.OVERWRITE));
+        assertFalse(overwrite.requiredHeaders().containsKey("If-None-Match"));
+        HttpRequest.Builder overwritePut = HttpRequest.newBuilder(overwrite.url());
+        overwrite.requiredHeaders().forEach(overwritePut::header);
+        HttpResponse<Void> overwriteResponse = httpClient.send(
+                overwritePut.PUT(HttpRequest.BodyPublishers.ofString("signed overwrite")).build(),
+                HttpResponse.BodyHandlers.discarding());
+        assertEquals(200, overwriteResponse.statusCode());
+
+        try (DownloadedObject downloaded = storage.download(signedPutReference)) {
+            assertEquals("signed overwrite", new String(downloaded.content().readAllBytes(), StandardCharsets.UTF_8));
         }
         storage.delete(ObjectReference.current("audit", "signed-get.json"));
         storage.delete(ObjectReference.current("audit", "signed-put.json"));

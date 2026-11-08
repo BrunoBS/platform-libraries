@@ -255,15 +255,20 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
         Resolved resolved = resolve(request.reference().destination(), request.reference().key());
         try {
             ObjectHeaders headers = request.headers();
-            PutObjectRequest objectRequest = PutObjectRequest.builder()
+            Map<String, String> requiredHeaders = new java.util.LinkedHashMap<>(headers.asHttpHeaders());
+            PutObjectRequest.Builder objectRequest = PutObjectRequest.builder()
                     .bucket(resolved.bucket()).key(resolved.key())
                     .contentType(headers.contentType()).cacheControl(headers.cacheControl())
                     .contentDisposition(headers.contentDisposition()).contentEncoding(headers.contentEncoding())
-                    .contentLanguage(headers.contentLanguage()).build();
+                    .contentLanguage(headers.contentLanguage());
+            if (request.writeMode() == WriteMode.CREATE_ONLY) {
+                objectRequest.ifNoneMatch("*");
+                requiredHeaders.put("If-None-Match", "*");
+            }
             PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                    .signatureDuration(request.validity()).putObjectRequest(objectRequest).build();
+                    .signatureDuration(request.validity()).putObjectRequest(objectRequest.build()).build();
             PresignedPutObjectRequest signedRequest = presigner.presignPutObject(presignRequest);
-            return new SignedUrl(signedRequest.url().toURI(), signedRequest.expiration(), headers.asHttpHeaders());
+            return new SignedUrl(signedRequest.url().toURI(), signedRequest.expiration(), requiredHeaders);
         } catch (S3Exception exception) {
             throw translate(exception, "create signed upload URL");
         } catch (SdkException exception) {
