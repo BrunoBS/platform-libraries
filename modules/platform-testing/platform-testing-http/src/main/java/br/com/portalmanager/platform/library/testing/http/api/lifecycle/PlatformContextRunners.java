@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.lifecycle;
+package br.com.portalmanager.platform.library.testing.http.api.lifecycle;
 
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 

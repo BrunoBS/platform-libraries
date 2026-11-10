@@ -1,6 +1,7 @@
-package br.com.portalmanager.platform.library.testing.http;
+package br.com.portalmanager.platform.library.testing.http.internal;
+import br.com.portalmanager.platform.library.testing.http.api.configuration.PlatformHttpTestConfiguration;
 
-import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.http.api.lifecycle.annotation.PlatformIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.annotation.AnnotatedElementUtils;

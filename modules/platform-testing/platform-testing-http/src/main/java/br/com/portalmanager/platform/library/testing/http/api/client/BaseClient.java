@@ -1,6 +1,7 @@
-package br.com.portalmanager.platform.library.testing.http;
+package br.com.portalmanager.platform.library.testing.http.api.client;
+import br.com.portalmanager.platform.library.testing.http.api.contract.AuthorizationRequestData;
 
-import br.com.portalmanager.platform.library.testing.http.response.BaseResponse;
+import br.com.portalmanager.platform.library.testing.http.api.response.BaseResponse;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import tools.jackson.core.JacksonException;

@@ -1,9 +1,9 @@
-package br.com.portalmanager.platform.library.testing.lifecycle.annotation;
+package br.com.portalmanager.platform.library.testing.http.api.lifecycle.annotation;
 
-import br.com.portalmanager.platform.library.testing.lifecycle.PlatformIntegrationExtension;
-import br.com.portalmanager.platform.library.testing.lifecycle.TestPerformanceExtension;
+import br.com.portalmanager.platform.library.testing.core.internal.lifecycle.PlatformIntegrationExtension;
+import br.com.portalmanager.platform.library.testing.core.internal.lifecycle.TestPerformanceExtension;
 
-import br.com.portalmanager.platform.library.testing.http.PlatformHttpTestConfiguration;
+import br.com.portalmanager.platform.library.testing.http.api.configuration.PlatformHttpTestConfiguration;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.annotation.AliasFor;

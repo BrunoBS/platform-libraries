@@ -1,4 +1,5 @@
-package br.com.portalmanager.platform.library.testing.http;
+package br.com.portalmanager.platform.library.testing.http.internal;
+import br.com.portalmanager.platform.library.testing.http.api.mock.HttpMockServer;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,8 @@
-package br.com.portalmanager.platform.library.testing.http;
+package br.com.portalmanager.platform.library.testing.http.internal;
+import br.com.portalmanager.platform.library.testing.http.internal.configuration.HttpMockTestConfiguration;
+import br.com.portalmanager.platform.library.testing.http.internal.extension.HttpMockExtension;
 
-import br.com.portalmanager.platform.library.testing.http.annotation.WithHttpMock;
+import br.com.portalmanager.platform.library.testing.http.api.annotation.WithHttpMock;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.ResourceLock;

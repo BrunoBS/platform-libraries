@@ -1,4 +1,5 @@
-package br.com.portalmanager.platform.library.testing.lifecycle;
+package br.com.portalmanager.platform.library.testing.http.internal.lifecycle;
+import br.com.portalmanager.platform.library.testing.http.api.lifecycle.PlatformContextRunners;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;

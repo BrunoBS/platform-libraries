@@ -1,6 +1,9 @@
-package br.com.portalmanager.platform.library.testing.http;
+package br.com.portalmanager.platform.library.testing.http.internal;
+import br.com.portalmanager.platform.library.testing.http.api.client.PlatformRequestSpecificationFactory;
+import br.com.portalmanager.platform.library.testing.http.api.contract.AuthorizationRequestData;
+import br.com.portalmanager.platform.library.testing.http.api.mock.HttpMockServer;
 
-import br.com.portalmanager.platform.library.testing.context.TestContext;
+import br.com.portalmanager.platform.library.testing.core.internal.context.TestContext;
 import io.restassured.specification.QueryableRequestSpecification;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.SpecificationQuerier;

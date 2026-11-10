@@ -1,7 +1,7 @@
-package br.com.portalmanager.platform.library.testing.http.annotation;
+package br.com.portalmanager.platform.library.testing.http.api.annotation;
 
-import br.com.portalmanager.platform.library.testing.http.HttpMockExtension;
-import br.com.portalmanager.platform.library.testing.http.HttpMockTestConfiguration;
+import br.com.portalmanager.platform.library.testing.http.internal.extension.HttpMockExtension;
+import br.com.portalmanager.platform.library.testing.http.internal.configuration.HttpMockTestConfiguration;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.context.annotation.Import;

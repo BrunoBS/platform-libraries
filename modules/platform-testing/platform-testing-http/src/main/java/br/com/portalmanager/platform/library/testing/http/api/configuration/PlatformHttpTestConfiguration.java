@@ -1,4 +1,6 @@
-package br.com.portalmanager.platform.library.testing.http;
+package br.com.portalmanager.platform.library.testing.http.api.configuration;
+import br.com.portalmanager.platform.library.testing.http.api.client.PlatformRequestSpecificationCustomizer;
+import br.com.portalmanager.platform.library.testing.http.api.client.PlatformRequestSpecificationFactory;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.test.context.TestConfiguration;

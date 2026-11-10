@@ -1,6 +1,8 @@
-package br.com.portalmanager.platform.library.testing.http;
+package br.com.portalmanager.platform.library.testing.http.internal;
+import br.com.portalmanager.platform.library.testing.http.api.client.BaseClient;
+import br.com.portalmanager.platform.library.testing.http.api.client.PlatformRequestSpecificationFactory;
 
-import br.com.portalmanager.platform.library.testing.http.response.BaseResponse;
+import br.com.portalmanager.platform.library.testing.http.api.response.BaseResponse;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;

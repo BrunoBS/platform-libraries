@@ -1,6 +1,7 @@
-package br.com.portalmanager.platform.library.testing.http;
+package br.com.portalmanager.platform.library.testing.http.api.client;
+import br.com.portalmanager.platform.library.testing.http.api.contract.AuthorizationRequestData;
 
-import br.com.portalmanager.platform.library.testing.context.TestContext;
+import br.com.portalmanager.platform.library.testing.core.internal.context.TestContext;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
