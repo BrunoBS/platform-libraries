@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.authorization.configuration;
 
 import br.com.portalmanager.platform.library.authorization.api.configuration.PlatformAuthorizationProperties;
+import br.com.portalmanager.platform.library.authorization.api.configuration.AuthorizationExecutionMode;
 import br.com.portalmanager.platform.library.authorization.internal.message.AuthorizationTechnicalErrors;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;

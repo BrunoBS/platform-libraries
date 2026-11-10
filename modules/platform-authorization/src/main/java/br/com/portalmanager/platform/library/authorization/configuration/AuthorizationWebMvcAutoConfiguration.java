@@ -2,6 +2,8 @@ package br.com.portalmanager.platform.library.authorization.configuration;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import br.com.portalmanager.platform.library.authorization.api.configuration.PlatformAuthorizationProperties;
+import br.com.portalmanager.platform.library.authorization.internal.web.AuthorizationContextResolver;
+import br.com.portalmanager.platform.library.authorization.internal.web.AuthorizationRequestContextFilter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;

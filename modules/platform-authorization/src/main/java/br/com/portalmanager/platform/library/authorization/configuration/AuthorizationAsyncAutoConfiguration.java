@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.configuration;
 
+import br.com.portalmanager.platform.library.authorization.api.configuration.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.api.model.AuthorizationContextPropagation;
 import br.com.portalmanager.platform.library.authorization.internal.message.AuthorizationTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
