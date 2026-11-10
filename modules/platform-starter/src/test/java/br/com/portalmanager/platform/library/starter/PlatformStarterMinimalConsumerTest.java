@@ -31,7 +31,7 @@ class PlatformStarterMinimalConsumerTest {
             assertThat(context.getBeansOfType(ApiMessageResolver.class)).isEmpty();
 
             assertThat(isPresent("br.com.portalmanager.platform.library.catalog.autoconfigure.PlatformCatalogAutoConfiguration")).isFalse();
-            assertThat(isPresent("br.com.portalmanager.platform.library.audit.autoconfigure.PlatformAuditAutoConfiguration")).isFalse();
+            assertThat(isPresent("br.com.portalmanager.platform.library.audit.configuration.PlatformAuditAutoConfiguration")).isFalse();
             assertThat(isPresent("br.com.portalmanager.platform.library.tagging.autoconfigure.PlatformTaggingAutoConfiguration")).isFalse();
             assertThat(isPresent("br.com.portalmanager.platform.library.crud.autoconfigure.PlatformCrudAutoConfiguration")).isFalse();
         }
