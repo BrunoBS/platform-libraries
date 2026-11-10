@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.catalog.internal.facade;
 
 import br.com.portalmanager.platform.library.authorization.api.annotation.AuthorizationRequired;
+import br.com.portalmanager.platform.library.catalog.api.facade.AbstractCatalogFacade;
 import org.springframework.aop.support.AopUtils;
 
 import java.lang.reflect.Method;
