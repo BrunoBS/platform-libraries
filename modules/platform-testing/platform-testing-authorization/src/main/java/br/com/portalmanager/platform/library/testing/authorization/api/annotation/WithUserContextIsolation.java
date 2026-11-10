@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.testing.authorization.annotation;
+package br.com.portalmanager.platform.library.testing.authorization.api.annotation;
 
-import br.com.portalmanager.platform.library.testing.authorization.UserContextIsolationExtension;
+import br.com.portalmanager.platform.library.testing.authorization.internal.extension.UserContextIsolationExtension;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 

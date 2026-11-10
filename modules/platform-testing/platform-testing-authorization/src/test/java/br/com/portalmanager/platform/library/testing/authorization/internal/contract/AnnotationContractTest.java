@@ -1,7 +1,7 @@
-package br.com.portalmanager.platform.library.testing.contract;
+package br.com.portalmanager.platform.library.testing.authorization.internal.contract;
 
-import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockResult;
-import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
+import br.com.portalmanager.platform.library.testing.authorization.api.AuthorizationMockResult;
+import br.com.portalmanager.platform.library.testing.authorization.api.annotation.WithMockAuthorization;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.jupiter.api.parallel.ResourceLock;

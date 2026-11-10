@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.testing.authorization.annotation;
+package br.com.portalmanager.platform.library.testing.authorization.api.annotation;
 
-import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockExtension;
-import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockResult;
-import br.com.portalmanager.platform.library.testing.authorization.AuthorizationMockTestConfiguration;
+import br.com.portalmanager.platform.library.testing.authorization.internal.extension.AuthorizationMockExtension;
+import br.com.portalmanager.platform.library.testing.authorization.api.AuthorizationMockResult;
+import br.com.portalmanager.platform.library.testing.authorization.internal.configuration.AuthorizationMockTestConfiguration;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.ResourceLock;

@@ -1,6 +1,9 @@
-package br.com.portalmanager.platform.library.testing.authorization;
+package br.com.portalmanager.platform.library.testing.authorization.internal.extension;
+import br.com.portalmanager.platform.library.testing.authorization.api.AuthorizationMock;
+import br.com.portalmanager.platform.library.testing.authorization.api.AuthorizationSessionBuilder;
+import br.com.portalmanager.platform.library.testing.authorization.api.AuthorizationSessionCustomizer;
 
-import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
+import br.com.portalmanager.platform.library.testing.authorization.api.annotation.WithMockAuthorization;
 import br.com.portalmanager.platform.library.authorization.api.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.api.model.UserSession;
 

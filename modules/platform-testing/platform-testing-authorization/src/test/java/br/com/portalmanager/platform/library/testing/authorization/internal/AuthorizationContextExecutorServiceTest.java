@@ -1,4 +1,6 @@
-package br.com.portalmanager.platform.library.testing.authorization;
+package br.com.portalmanager.platform.library.testing.authorization.internal;
+import br.com.portalmanager.platform.library.testing.authorization.api.AuthorizationSessionBuilder;
+import br.com.portalmanager.platform.library.testing.authorization.internal.executor.AuthorizationContextExecutorService;
 
 import br.com.portalmanager.platform.library.authorization.api.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.api.model.UserSession;

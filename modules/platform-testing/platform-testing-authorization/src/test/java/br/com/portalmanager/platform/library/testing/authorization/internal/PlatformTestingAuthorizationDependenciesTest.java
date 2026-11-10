@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.authorization;
+package br.com.portalmanager.platform.library.testing.authorization.internal;
 
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;

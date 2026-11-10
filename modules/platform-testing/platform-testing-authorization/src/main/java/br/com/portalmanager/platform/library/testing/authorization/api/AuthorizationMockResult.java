@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.authorization;
+package br.com.portalmanager.platform.library.testing.authorization.api;
 
 public enum AuthorizationMockResult {
     ALLOWED,

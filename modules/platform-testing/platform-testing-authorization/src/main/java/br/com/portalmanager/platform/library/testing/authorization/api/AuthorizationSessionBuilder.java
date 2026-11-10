@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.authorization;
+package br.com.portalmanager.platform.library.testing.authorization.api;
 
 import br.com.portalmanager.platform.library.authorization.api.model.ParsedGroup;
 import br.com.portalmanager.platform.library.authorization.api.model.UserSession;
