@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.schemavalidation.configuration;
 
 import br.com.portalmanager.platform.library.schemavalidation.api.configuration.PlatformSchemaValidationProperties;
+import br.com.portalmanager.platform.library.schemavalidation.internal.configuration.SqlIdentifierValidator;
 
 import br.com.portalmanager.platform.library.schemavalidation.internal.repository.JdbcResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.api.contract.repository.ResourceSchemaRepository;

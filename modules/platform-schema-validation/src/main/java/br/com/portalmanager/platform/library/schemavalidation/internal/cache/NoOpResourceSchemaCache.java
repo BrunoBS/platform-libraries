@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.schemavalidation.internal.cache;
 
+import br.com.portalmanager.platform.library.schemavalidation.api.contract.cache.ResourceSchemaCache;
 import br.com.portalmanager.platform.library.schemavalidation.api.contract.model.ResourceSchema;
 
 import java.util.Optional;

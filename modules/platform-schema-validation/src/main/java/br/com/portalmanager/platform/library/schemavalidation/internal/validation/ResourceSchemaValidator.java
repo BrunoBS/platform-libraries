@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.schemavalidation.internal.validati
 import br.com.portalmanager.platform.library.schemavalidation.api.contract.cache.CompiledSchemaCache;
 import br.com.portalmanager.platform.library.schemavalidation.internal.cache.NoOpCompiledSchemaCache;
 import br.com.portalmanager.platform.library.schemavalidation.api.contract.resolver.ResourceSchemaResolver;
+import br.com.portalmanager.platform.library.schemavalidation.api.contract.validation.SchemaValidator;
 import br.com.portalmanager.platform.library.schemavalidation.api.exception.ResourceSchemaNotFoundException;
 
 import tools.jackson.databind.JsonNode;

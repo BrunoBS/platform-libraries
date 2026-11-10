@@ -4,6 +4,7 @@ import br.com.portalmanager.platform.library.messaging.api.exception.PlatformCon
 import br.com.portalmanager.platform.library.schemavalidation.api.configuration.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.internal.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.api.contract.model.ResourceSchema;
+import br.com.portalmanager.platform.library.schemavalidation.api.contract.repository.ResourceSchemaRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import br.com.portalmanager.platform.library.schemavalidation.api.contract.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.api.contract.repository.ResourceSchemaRepository;
+import br.com.portalmanager.platform.library.schemavalidation.api.contract.resolver.ResourceSchemaResolver;
 import br.com.portalmanager.platform.library.schemavalidation.internal.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.api.exception.ResourceSchemaNotFoundException;
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;

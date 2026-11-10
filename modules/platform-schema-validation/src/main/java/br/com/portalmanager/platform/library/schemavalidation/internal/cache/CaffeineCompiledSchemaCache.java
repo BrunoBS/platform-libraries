@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.schemavalidation.internal.cache;
 
+import br.com.portalmanager.platform.library.schemavalidation.api.contract.cache.CompiledSchemaCache;
 import br.com.portalmanager.platform.library.schemavalidation.api.contract.model.ResourceSchema;
 
 import com.github.benmanes.caffeine.cache.Cache;
