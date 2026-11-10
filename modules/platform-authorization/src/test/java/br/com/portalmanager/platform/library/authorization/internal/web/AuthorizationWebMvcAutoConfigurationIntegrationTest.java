@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.internal.web;
 
+import br.com.portalmanager.platform.library.authorization.configuration.AuthorizationWebMvcAutoConfiguration;
 import br.com.portalmanager.platform.library.authorization.api.configuration.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.api.model.AuthorizationContext;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.configuration;
 
+import br.com.portalmanager.platform.library.authorization.api.configuration.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.authorization.internal.aop.AuthorizationFacadeAspect;
 import br.com.portalmanager.platform.library.authorization.internal.aop.MockAuthorizationFacadeAspect;
 import br.com.portalmanager.platform.library.authorization.api.client.AuthorizationClient;

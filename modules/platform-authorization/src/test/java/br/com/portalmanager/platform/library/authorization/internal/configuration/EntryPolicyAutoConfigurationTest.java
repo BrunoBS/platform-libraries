@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.internal.configuration;
 
+import br.com.portalmanager.platform.library.authorization.configuration.PlatformAuthorizationAutoConfiguration;
 import br.com.portalmanager.platform.library.authorization.api.annotation.AuthorizationRequired;
 import br.com.portalmanager.platform.library.authorization.api.configuration.*;
 import br.com.portalmanager.platform.library.authorization.api.model.*;

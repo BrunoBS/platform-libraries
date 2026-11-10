@@ -1,5 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.internal.aop;
 
+import br.com.portalmanager.platform.library.authorization.internal.configuration.EntryPolicyConfigurationValidator;
 import br.com.portalmanager.platform.library.authorization.api.annotation.AuthorizationRequired;
 import br.com.portalmanager.platform.library.authorization.internal.aop.*;
 import br.com.portalmanager.platform.library.authorization.api.client.AuthorizationClient;
