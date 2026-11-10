@@ -3,8 +3,8 @@ package br.com.portalmanager.platform.library.audit.internal.context;
 import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.audit.internal.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.api.contract.model.AuditContext;
-import br.com.portalmanager.platform.library.authorization.model.UserContext;
-import br.com.portalmanager.platform.library.authorization.model.UserSession;
+import br.com.portalmanager.platform.library.authorization.api.model.UserContext;
+import br.com.portalmanager.platform.library.authorization.api.model.UserSession;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

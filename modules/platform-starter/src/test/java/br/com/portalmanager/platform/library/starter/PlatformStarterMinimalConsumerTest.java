@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.starter;
 
-import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
+import br.com.portalmanager.platform.library.authorization.api.configuration.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.messaging.api.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
 import org.junit.jupiter.api.Test;

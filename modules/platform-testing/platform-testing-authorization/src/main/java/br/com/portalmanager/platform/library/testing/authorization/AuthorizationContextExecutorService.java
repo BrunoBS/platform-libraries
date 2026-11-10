@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.testing.authorization;
 
-import br.com.portalmanager.platform.library.authorization.model.UserContext;
-import br.com.portalmanager.platform.library.authorization.model.UserSession;
+import br.com.portalmanager.platform.library.authorization.api.model.UserContext;
+import br.com.portalmanager.platform.library.authorization.api.model.UserSession;
 
 import java.util.List;
 import java.util.Objects;

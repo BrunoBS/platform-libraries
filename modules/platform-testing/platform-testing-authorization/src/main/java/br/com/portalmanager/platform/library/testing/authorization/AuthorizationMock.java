@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.authorization;
 
-import br.com.portalmanager.platform.library.authorization.model.UserSession;
+import br.com.portalmanager.platform.library.authorization.api.model.UserSession;
 import br.com.portalmanager.platform.library.testing.http.HttpMockServer;
 import com.github.tomakehurst.wiremock.common.Json;
 

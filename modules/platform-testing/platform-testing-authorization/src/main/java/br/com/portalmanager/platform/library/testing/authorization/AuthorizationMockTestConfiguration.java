@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.testing.authorization;
 
-import br.com.portalmanager.platform.library.authorization.client.AuthorizationClient;
-import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
+import br.com.portalmanager.platform.library.authorization.api.client.AuthorizationClient;
+import br.com.portalmanager.platform.library.authorization.api.configuration.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.testing.http.HttpMockServer;
 import br.com.portalmanager.platform.library.testing.http.HttpMockTestConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

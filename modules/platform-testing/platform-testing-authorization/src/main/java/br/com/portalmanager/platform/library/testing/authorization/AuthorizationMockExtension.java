@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.library.testing.authorization;
 
 import br.com.portalmanager.platform.library.testing.authorization.annotation.WithMockAuthorization;
-import br.com.portalmanager.platform.library.authorization.model.UserContext;
-import br.com.portalmanager.platform.library.authorization.model.UserSession;
+import br.com.portalmanager.platform.library.authorization.api.model.UserContext;
+import br.com.portalmanager.platform.library.authorization.api.model.UserSession;
 
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;

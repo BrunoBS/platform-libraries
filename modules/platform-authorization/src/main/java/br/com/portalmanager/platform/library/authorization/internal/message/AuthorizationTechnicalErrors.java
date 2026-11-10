@@ -1,0 +1,53 @@
+package br.com.portalmanager.platform.library.authorization.internal.message;
+
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
+
+public final class AuthorizationTechnicalErrors {
+
+    public static final PlatformErrorDefinition SERVICE_URL_REQUIRED =
+            new PlatformErrorDefinition(
+                    "PLT-AUTH-001",
+                    "platform.authorization.service-url is required when platform.authorization.mode=REAL",
+                    "Configure platform.authorization.service-url with the authorization service URL.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition CONTEXT_PROPAGATION_REQUIRED =
+            new PlatformErrorDefinition(
+                    "PLT-AUTH-002",
+                    "platform.authorization.context-propagation.default-executor requires enabled=true",
+                    "Set platform.authorization.context-propagation.enabled=true or disable default-executor.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition CONTEXT_PROPAGATION_INVALID_SETTINGS =
+            new PlatformErrorDefinition(
+                    "PLT-AUTH-003",
+                    "Invalid platform.authorization.context-propagation executor settings",
+                    "Use core-size >= 1, max-size >= core-size, queue-capacity >= 0, nonnegative keep-alive and a nonblank thread-name-prefix.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition MOCK_MODE_FORBIDDEN =
+            new PlatformErrorDefinition(
+                    "PLT-AUTH-004",
+                    "Authorization MOCK mode is only permitted with exclusively local, test or dev Spring profiles",
+                    "Use REAL mode outside local/test/dev. Do not activate MOCK in deployed environments.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition MODE_INVALID =
+            new PlatformErrorDefinition(
+                    "PLT-AUTH-005",
+                    "platform.authorization.mode must select REAL or MOCK explicitly when supplied",
+                    "Use REAL or MOCK without surrounding whitespace; an empty mode is not permitted.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition ENTRY_POLICY_INVALID = new PlatformErrorDefinition(
+            "PLT-AUTH-006", "Invalid or ambiguous authorization entry policy configuration",
+            "Configure a unique protected facade and listener, known technical principal, exact destination and explicit permitted scopes.", 500);
+
+    private AuthorizationTechnicalErrors() {
+    }
+}
