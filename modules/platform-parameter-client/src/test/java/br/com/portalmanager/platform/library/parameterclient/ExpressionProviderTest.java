@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisExpressionProvider;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
-import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;

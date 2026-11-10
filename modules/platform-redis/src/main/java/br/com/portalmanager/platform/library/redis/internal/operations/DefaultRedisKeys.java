@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.redis.internal.operations;
 import static br.com.portalmanager.platform.library.redis.internal.common.RedisErrors.call;
 
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
-import br.com.portalmanager.platform.library.redis.operations.RedisKeys;
+import br.com.portalmanager.platform.library.redis.api.operations.RedisKeys;
 import java.util.function.Consumer;
 import org.springframework.data.redis.core.ScanOptions;
 

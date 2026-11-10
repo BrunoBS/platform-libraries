@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.redis.cache.*;
+import br.com.portalmanager.platform.library.redis.configuration.cache.PlatformRedisCacheAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.cache.PlatformRedisCacheManager;
 

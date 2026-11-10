@@ -1,8 +1,9 @@
 package br.com.portalmanager.platform.library.redis.configuration;
 
-import br.com.portalmanager.platform.library.redis.listener.RedisListenerErrorHandler;
-import br.com.portalmanager.platform.library.redis.listener.RedisListenerMetrics;
-import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
+import br.com.portalmanager.platform.library.redis.api.listener.RedisListenerErrorHandler;
+import br.com.portalmanager.platform.library.redis.api.listener.RedisListenerMetrics;
+import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import br.com.portalmanager.platform.library.redis.internal.operations.DefaultRedisOperations;
 import br.com.portalmanager.platform.library.redis.internal.pubsub.DefaultRedisPublisher;
 import br.com.portalmanager.platform.library.redis.internal.store.DefaultRedisStore;
@@ -11,10 +12,10 @@ import br.com.portalmanager.platform.library.redis.internal.common.ListenerSuppo
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.pubsub.RedisPubSubLifecycle;
 import br.com.portalmanager.platform.library.redis.internal.stream.RedisStreamsLifecycle;
-import br.com.portalmanager.platform.library.redis.operations.RedisOperations;
-import br.com.portalmanager.platform.library.redis.pubsub.RedisPublisher;
+import br.com.portalmanager.platform.library.redis.api.operations.RedisOperations;
+import br.com.portalmanager.platform.library.redis.api.pubsub.RedisPublisher;
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
-import br.com.portalmanager.platform.library.redis.stream.RedisStreams;
+import br.com.portalmanager.platform.library.redis.api.stream.RedisStreams;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;

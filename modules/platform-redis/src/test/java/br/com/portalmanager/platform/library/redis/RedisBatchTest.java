@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.store.DefaultRedisStore;
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;

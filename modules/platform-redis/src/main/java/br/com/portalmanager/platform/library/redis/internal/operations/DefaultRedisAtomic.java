@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.redis.internal.operations;
 import static br.com.portalmanager.platform.library.redis.internal.common.RedisErrors.call;
 
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
-import br.com.portalmanager.platform.library.redis.operations.RedisAtomic;
+import br.com.portalmanager.platform.library.redis.api.operations.RedisAtomic;
 import java.util.List;
 
 final class DefaultRedisAtomic implements RedisAtomic {

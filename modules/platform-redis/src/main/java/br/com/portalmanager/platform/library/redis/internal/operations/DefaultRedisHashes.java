@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.redis.internal.operations;
 
 import static br.com.portalmanager.platform.library.redis.internal.common.RedisErrors.call;
 
-import br.com.portalmanager.platform.library.redis.operations.RedisHashes;
+import br.com.portalmanager.platform.library.redis.api.operations.RedisHashes;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;

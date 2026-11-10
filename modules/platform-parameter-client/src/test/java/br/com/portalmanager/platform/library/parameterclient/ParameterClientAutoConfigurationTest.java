@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 import br.com.portalmanager.platform.library.parameterclient.configuration.ParameterClientAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;

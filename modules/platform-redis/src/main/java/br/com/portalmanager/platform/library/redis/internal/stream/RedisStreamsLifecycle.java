@@ -4,9 +4,9 @@ import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.common.ListenerSupport;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
-import br.com.portalmanager.platform.library.redis.stream.RedisStreamListener;
+import br.com.portalmanager.platform.library.redis.api.stream.RedisStreamListener;
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
-import br.com.portalmanager.platform.library.redis.stream.RedisStreamMessageListener;
+import br.com.portalmanager.platform.library.redis.api.stream.RedisStreamMessageListener;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.SmartLifecycle;

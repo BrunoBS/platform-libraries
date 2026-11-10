@@ -1,9 +1,9 @@
 package br.com.portalmanager.platform.library.redis.internal.common;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
-import br.com.portalmanager.platform.library.redis.listener.RedisListenerErrorHandler;
-import br.com.portalmanager.platform.library.redis.listener.RedisListenerMetrics;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
+import br.com.portalmanager.platform.library.redis.api.listener.RedisListenerErrorHandler;
+import br.com.portalmanager.platform.library.redis.api.listener.RedisListenerMetrics;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;

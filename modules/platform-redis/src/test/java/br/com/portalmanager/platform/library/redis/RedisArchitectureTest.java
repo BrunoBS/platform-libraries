@@ -14,12 +14,7 @@ class RedisArchitectureTest {
                         .importPackages("br.com.portalmanager.platform.library.redis");
         noClasses()
                 .that()
-                .resideInAnyPackage(
-                        "..redis.store..",
-                        "..redis.operations..",
-                        "..redis.listener..",
-                        "..redis.pubsub..",
-                        "..redis.stream..")
+                .resideInAnyPackage("..redis.api..")
                 .should()
                 .dependOnClassesThat()
                 .resideInAnyPackage(
@@ -29,6 +24,13 @@ class RedisArchitectureTest {
                 .should()
                 .dependOnClassesThat()
                 .resideInAnyPackage("..messagequeue..", "..workspace..", "..authorization..")
+                .check(classes);
+        noClasses()
+                .that()
+                .resideInAnyPackage("..redis.api..")
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage("..redis.internal..")
                 .check(classes);
     }
 }

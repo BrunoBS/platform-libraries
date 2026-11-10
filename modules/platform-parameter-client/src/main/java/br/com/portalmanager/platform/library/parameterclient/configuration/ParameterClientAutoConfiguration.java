@@ -8,7 +8,7 @@ import br.com.portalmanager.platform.library.parameterclient.internal.RedisParam
 import br.com.portalmanager.platform.library.parameterclient.message.ParameterClientTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

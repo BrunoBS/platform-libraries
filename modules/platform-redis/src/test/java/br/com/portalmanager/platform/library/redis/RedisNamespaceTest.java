@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;

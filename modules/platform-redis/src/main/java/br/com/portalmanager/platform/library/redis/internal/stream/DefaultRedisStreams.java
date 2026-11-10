@@ -4,10 +4,10 @@ import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
-import br.com.portalmanager.platform.library.redis.stream.GroupStart;
-import br.com.portalmanager.platform.library.redis.stream.RedisStreamRecord;
-import br.com.portalmanager.platform.library.redis.stream.RedisStreamRecovery;
-import br.com.portalmanager.platform.library.redis.stream.RedisStreams;
+import br.com.portalmanager.platform.library.redis.api.stream.GroupStart;
+import br.com.portalmanager.platform.library.redis.api.stream.RedisStreamRecord;
+import br.com.portalmanager.platform.library.redis.api.stream.RedisStreamRecovery;
+import br.com.portalmanager.platform.library.redis.api.stream.RedisStreams;
 
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.RedisStreamCommands.XAddOptions;

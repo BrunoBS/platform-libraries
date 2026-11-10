@@ -2,11 +2,11 @@ package br.com.portalmanager.platform.library.redis;
 
 import static org.assertj.core.api.Assertions.*;
 
-import br.com.portalmanager.platform.library.redis.store.*;
-import br.com.portalmanager.platform.library.redis.operations.*;
-import br.com.portalmanager.platform.library.redis.operations.RedisOperations;
-import br.com.portalmanager.platform.library.redis.pubsub.RedisPublisher;
-import br.com.portalmanager.platform.library.redis.stream.RedisStreams;
+import br.com.portalmanager.platform.library.redis.api.store.*;
+import br.com.portalmanager.platform.library.redis.api.operations.*;
+import br.com.portalmanager.platform.library.redis.api.operations.RedisOperations;
+import br.com.portalmanager.platform.library.redis.api.pubsub.RedisPublisher;
+import br.com.portalmanager.platform.library.redis.api.stream.RedisStreams;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

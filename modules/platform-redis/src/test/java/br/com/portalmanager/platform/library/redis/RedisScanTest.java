@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.redis;
 
-import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
 import br.com.portalmanager.platform.library.redis.internal.store.DefaultRedisStore;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
@@ -54,7 +54,7 @@ class RedisScanTest {
         doReturn(List.of("18446744073709551615", List.of("unit:service.a", "foreign:service.b", "unit:service-other.c")))
                 .when(template).execute(any(RedisScript.class), anyList(), any(Object[].class));
         DefaultRedisStore store = new DefaultRedisStore(template, codec, access);
-        br.com.portalmanager.platform.library.redis.store.RedisKeyPage page = store.scan("service.", "0", 1);
+        br.com.portalmanager.platform.library.redis.api.store.RedisKeyPage page = store.scan("service.", "0", 1);
         assertThat(page.cursor()).isEqualTo("18446744073709551615");
         assertThat(page.keys()).containsExactly("service.a");
         assertThatThrownBy(() -> page.keys().add("extra")).isInstanceOf(UnsupportedOperationException.class);

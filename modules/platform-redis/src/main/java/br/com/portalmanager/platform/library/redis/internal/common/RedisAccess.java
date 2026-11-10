@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.redis.internal.common;
 
-import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;

@@ -3,8 +3,8 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
-import br.com.portalmanager.platform.library.redis.store.RedisStore;
-import br.com.portalmanager.platform.library.redis.operations.RedisOperations;
+import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.api.operations.RedisOperations;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;

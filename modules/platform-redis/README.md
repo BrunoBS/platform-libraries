@@ -6,6 +6,29 @@ Módulo Maven de Platform Libraries. Contratos, configuração e exemplos estão
 - [POM e dependências](pom.xml)
 - [Desenvolvimento e build do reactor](../../README.md)
 
+## Organização do módulo
+
+Os tipos usados pelos serviços ficam em `api`; a configuração automática do Spring fica
+em `configuration`; e detalhes de execução ficam em `internal`. O módulo não possui
+`provider`, pois oferece uma única integração: Redis Standalone.
+
+```text
+redis/
+├── api/
+│   ├── configuration/  # propriedades públicas
+│   ├── listener/       # tratamento de erros e métricas de listeners
+│   ├── operations/     # operações Redis por tipo de dado
+│   ├── pubsub/         # publicação, assinaturas e keyspace
+│   ├── store/          # armazenamento JSON e páginas de scan
+│   └── stream/         # consumo e recuperação de Streams
+├── configuration/     # auto configurações Spring, incluindo cache
+└── internal/          # adapters Redis, codecs e ciclo de vida
+```
+
+As propriedades de conexão e limites são `api.configuration.PlatformRedisProperties`;
+as de cache são `api.configuration.PlatformRedisCacheProperties`. Os contratos mais
+usados ficam em `api.store.RedisStore` e `api.operations.RedisOperations`.
+
 ## Namespace das chaves
 
 O namespace padrão é o valor de `spring.application.name`. Portanto, uma chave lógica

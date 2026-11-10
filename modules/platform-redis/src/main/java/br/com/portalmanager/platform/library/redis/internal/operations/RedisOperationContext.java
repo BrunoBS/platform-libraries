@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.redis.internal.operations;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
-import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import java.util.List;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;

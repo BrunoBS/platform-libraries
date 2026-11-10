@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.redis.internal.cache;
 
-import br.com.portalmanager.platform.library.redis.cache.PlatformRedisCacheProperties;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisCacheProperties;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanPostProcessor;

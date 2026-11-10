@@ -2,8 +2,8 @@ package br.com.portalmanager.platform.library.redis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import br.com.portalmanager.platform.library.redis.store.RedisKeyPage;
-import br.com.portalmanager.platform.library.redis.store.RedisStore;
+import br.com.portalmanager.platform.library.redis.api.store.RedisKeyPage;
+import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;

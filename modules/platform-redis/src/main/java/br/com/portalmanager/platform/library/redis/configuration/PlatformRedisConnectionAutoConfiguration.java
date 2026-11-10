@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.redis.configuration;
 
-import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisProperties.Connection;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
+import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties.Connection;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
 import io.lettuce.core.SocketOptions;

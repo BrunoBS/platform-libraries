@@ -3,10 +3,10 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
-import br.com.portalmanager.platform.library.redis.stream.RedisStreamListener;
-import br.com.portalmanager.platform.library.redis.listener.RedisListenerMetrics;
+import br.com.portalmanager.platform.library.redis.api.stream.RedisStreamListener;
+import br.com.portalmanager.platform.library.redis.api.listener.RedisListenerMetrics;
 import br.com.portalmanager.platform.library.redis.internal.stream.RedisStreamsLifecycle;
-import br.com.portalmanager.platform.library.redis.stream.*;
+import br.com.portalmanager.platform.library.redis.api.stream.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Range;

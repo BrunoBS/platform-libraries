@@ -1,3 +1,3 @@
 br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration
 br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration
-br.com.portalmanager.platform.library.redis.cache.PlatformRedisCacheAutoConfiguration
+br.com.portalmanager.platform.library.redis.configuration.cache.PlatformRedisCacheAutoConfiguration
