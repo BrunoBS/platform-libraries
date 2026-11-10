@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure.blobservicebus;
+package br.com.portalmanager.platform.library.testing.cloud.azure.internal.blobservicebus;
 
 import com.azure.core.http.HttpMethod;
 import com.azure.core.http.HttpPipelineCallContext;

@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure;
+package br.com.portalmanager.platform.library.testing.cloud.azure.internal.message;
 
 import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 

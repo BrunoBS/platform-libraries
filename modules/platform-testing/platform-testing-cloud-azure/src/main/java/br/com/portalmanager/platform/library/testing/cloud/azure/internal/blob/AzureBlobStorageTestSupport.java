@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure.blob;
+package br.com.portalmanager.platform.library.testing.cloud.azure.internal.blob;
 
-import br.com.portalmanager.platform.library.testing.cloud.azure.blobservicebus.AzureBlobServiceClientFactoryBean;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.blobservicebus.AzureBlobServiceClientFactoryBean;
 import com.azure.storage.blob.BlobServiceClient;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

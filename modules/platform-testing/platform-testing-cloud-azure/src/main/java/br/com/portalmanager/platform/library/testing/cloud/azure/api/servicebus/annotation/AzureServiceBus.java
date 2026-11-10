@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation;
+package br.com.portalmanager.platform.library.testing.cloud.azure.api.servicebus.annotation;
 
-import br.com.portalmanager.platform.library.testing.cloud.azure.AzureContainerImages;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.configuration.AzureContainerImages;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

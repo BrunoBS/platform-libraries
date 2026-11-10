@@ -11,8 +11,8 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.response
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.WriteMode;
 import br.com.portalmanager.platform.library.messaging.api.exception.ConflictException;
 import br.com.portalmanager.platform.library.messaging.api.exception.NotFoundException;
-import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
-import br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation.AzureBlobStorage;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.annotation.WithAzureEmulator;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.blob.annotation.AzureBlobStorage;
 import com.azure.storage.blob.BlobServiceClient;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;

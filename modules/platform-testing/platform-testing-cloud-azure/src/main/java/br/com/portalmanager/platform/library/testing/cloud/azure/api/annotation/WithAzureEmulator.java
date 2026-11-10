@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure.annotation;
+package br.com.portalmanager.platform.library.testing.cloud.azure.api.annotation;
 
-import br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation.AzureBlobStorage;
-import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
-import br.com.portalmanager.platform.library.testing.cloud.azure.AzureEmulatorImportRegistrar;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.blob.annotation.AzureBlobStorage;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.servicebus.annotation.AzureServiceBus;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.configuration.AzureEmulatorImportRegistrar;
 
 import org.springframework.context.annotation.Import;
 

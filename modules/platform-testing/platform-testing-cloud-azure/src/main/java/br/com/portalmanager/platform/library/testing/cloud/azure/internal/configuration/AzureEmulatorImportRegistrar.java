@@ -1,16 +1,17 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure;
+package br.com.portalmanager.platform.library.testing.cloud.azure.internal.configuration;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.support.AzureServiceTestSupport;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.cloud.azure.AzureTestingTechnicalErrors;
-import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.message.AzureTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.core.internal.container.PinnedDockerImage;
 
-import br.com.portalmanager.platform.library.testing.cloud.azure.blob.AzureBlobStorageContainer;
-import br.com.portalmanager.platform.library.testing.cloud.azure.blob.AzureBlobStorageTestSupport;
-import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.AzureServiceBusContainer;
-import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.AzureServiceBusTestSupport;
-import br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation.AzureBlobStorage;
-import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
-import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.blob.AzureBlobStorageContainer;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.blob.AzureBlobStorageTestSupport;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.servicebus.AzureServiceBusContainer;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.servicebus.AzureServiceBusTestSupport;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.blob.annotation.AzureBlobStorage;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.servicebus.annotation.AzureServiceBus;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.annotation.WithAzureEmulator;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;

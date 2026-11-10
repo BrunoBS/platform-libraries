@@ -1,9 +1,10 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure;
+package br.com.portalmanager.platform.library.testing.cloud.azure.internal;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.configuration.AzureEmulatorImportRegistrar;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation.AzureBlobStorage;
-import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
-import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.blob.annotation.AzureBlobStorage;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.servicebus.annotation.AzureServiceBus;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.annotation.WithAzureEmulator;
 
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;

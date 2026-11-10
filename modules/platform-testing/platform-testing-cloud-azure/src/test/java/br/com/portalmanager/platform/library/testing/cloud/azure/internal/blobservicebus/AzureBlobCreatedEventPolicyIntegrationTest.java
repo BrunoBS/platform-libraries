@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure.blobservicebus;
+package br.com.portalmanager.platform.library.testing.cloud.azure.internal.blobservicebus;
 
-import br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation.AzureBlobStorage;
-import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
-import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.blob.annotation.AzureBlobStorage;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.servicebus.annotation.AzureServiceBus;
+import br.com.portalmanager.platform.library.testing.cloud.azure.api.annotation.WithAzureEmulator;
 
 import com.azure.core.util.BinaryData;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;

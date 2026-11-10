@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure;
+package br.com.portalmanager.platform.library.testing.cloud.azure.api.configuration;
 
 /** Default images used by the Azure emulator fixtures. */
 public final class AzureContainerImages {

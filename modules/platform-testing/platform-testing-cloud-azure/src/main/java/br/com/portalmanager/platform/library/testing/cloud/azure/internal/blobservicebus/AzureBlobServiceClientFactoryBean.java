@@ -1,7 +1,7 @@
-package br.com.portalmanager.platform.library.testing.cloud.azure.blobservicebus;
+package br.com.portalmanager.platform.library.testing.cloud.azure.internal.blobservicebus;
 
-import br.com.portalmanager.platform.library.testing.cloud.azure.blob.AzureBlobStorageContainer;
-import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.AzureServiceBusContainer;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.blob.AzureBlobStorageContainer;
+import br.com.portalmanager.platform.library.testing.cloud.azure.internal.servicebus.AzureServiceBusContainer;
 import com.azure.messaging.servicebus.ServiceBusSenderAsyncClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
