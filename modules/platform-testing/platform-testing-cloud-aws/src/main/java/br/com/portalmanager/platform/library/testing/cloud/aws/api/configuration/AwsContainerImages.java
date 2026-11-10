@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.aws.api.configuration;
 
 /** Default image used by the aws test fixture. */
 public final class AwsContainerImages {

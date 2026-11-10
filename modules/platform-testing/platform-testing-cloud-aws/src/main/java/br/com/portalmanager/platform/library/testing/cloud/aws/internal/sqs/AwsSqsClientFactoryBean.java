@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.sqs;
+package br.com.portalmanager.platform.library.testing.cloud.aws.internal.sqs;
 
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackConnection;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.container.AwsLocalStackConnection;
 import org.springframework.beans.factory.FactoryBean;
 import software.amazon.awssdk.services.sqs.SqsClient;
 

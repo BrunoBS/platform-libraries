@@ -1,14 +1,17 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.aws.internal.configuration;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.container.AwsLocalStackConnection;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.container.AwsLocalStackContainer;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.container.AwsService;
 
-import br.com.portalmanager.platform.library.testing.cloud.aws.s3.AwsS3TestSupport;
-import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.AwsSqsTestSupport;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.s3.AwsS3TestSupport;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.sqs.AwsSqsTestSupport;
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
-import br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation.AwsS3SqsNotification;
-import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
-import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsTestingTechnicalErrors;
-import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.s3.annotation.AwsS3;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.s3notificationsqs.annotation.AwsS3SqsNotification;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.sqs.annotation.AwsSqs;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.annotation.WithAwsLocalStack;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.message.AwsTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.core.internal.container.PinnedDockerImage;
 
 import org.testcontainers.utility.DockerImageName;
 

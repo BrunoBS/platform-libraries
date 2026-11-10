@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.sqs;
+package br.com.portalmanager.platform.library.testing.cloud.aws.internal.sqs;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

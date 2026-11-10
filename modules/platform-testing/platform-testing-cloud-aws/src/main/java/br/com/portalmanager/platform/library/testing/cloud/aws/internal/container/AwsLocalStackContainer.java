@@ -1,7 +1,8 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.aws.internal.container;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.configuration.AwsContainerImages;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.message.AwsTestingTechnicalErrors;
 
 import org.testcontainers.localstack.LocalStackContainer;
 import org.testcontainers.utility.DockerImageName;

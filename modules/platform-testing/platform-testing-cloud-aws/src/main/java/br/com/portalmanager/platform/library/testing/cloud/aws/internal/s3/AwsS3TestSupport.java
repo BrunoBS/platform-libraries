@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.s3;
+package br.com.portalmanager.platform.library.testing.cloud.aws.internal.s3;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

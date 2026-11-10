@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.s3;
+package br.com.portalmanager.platform.library.testing.cloud.aws.internal.s3;
 
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackConnection;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.container.AwsLocalStackConnection;
 import org.springframework.beans.factory.FactoryBean;
 import software.amazon.awssdk.services.s3.S3Client;
 

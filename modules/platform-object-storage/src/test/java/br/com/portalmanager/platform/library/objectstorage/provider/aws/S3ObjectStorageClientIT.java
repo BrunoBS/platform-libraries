@@ -15,9 +15,9 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.response
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.WriteMode;
 import br.com.portalmanager.platform.library.messaging.api.exception.ConflictException;
 import br.com.portalmanager.platform.library.messaging.api.exception.NotFoundException;
-import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
-import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackConnection;
-import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.annotation.WithAwsLocalStack;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.container.AwsLocalStackConnection;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.s3.annotation.AwsS3;
 import java.io.ByteArrayInputStream;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;

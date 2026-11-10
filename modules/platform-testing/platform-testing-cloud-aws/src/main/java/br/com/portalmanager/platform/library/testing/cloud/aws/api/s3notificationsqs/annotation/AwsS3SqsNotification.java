@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation;
+package br.com.portalmanager.platform.library.testing.cloud.aws.api.s3notificationsqs.annotation;
 
-import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.annotation.WithAwsLocalStack;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

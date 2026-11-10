@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation;
+package br.com.portalmanager.platform.library.testing.cloud.aws.api.sqs.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

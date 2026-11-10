@@ -1,10 +1,12 @@
-package br.com.portalmanager.platform.library.testing.cloud.aws;
+package br.com.portalmanager.platform.library.testing.cloud.aws.internal;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.configuration.AwsLocalStackImportRegistrar;
+import br.com.portalmanager.platform.library.testing.cloud.aws.internal.container.AwsLocalStackConnection;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
-import br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation.AwsS3SqsNotification;
-import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
-import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.s3.annotation.AwsS3;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.s3notificationsqs.annotation.AwsS3SqsNotification;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.sqs.annotation.AwsSqs;
+import br.com.portalmanager.platform.library.testing.cloud.aws.api.annotation.WithAwsLocalStack;
 import org.testcontainers.utility.DockerImageName;
 
 import org.junit.jupiter.api.Test;
