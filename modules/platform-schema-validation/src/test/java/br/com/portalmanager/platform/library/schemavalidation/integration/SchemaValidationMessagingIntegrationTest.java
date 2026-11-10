@@ -8,7 +8,7 @@ import br.com.portalmanager.platform.library.messaging.api.model.ValidationDetai
 import br.com.portalmanager.platform.library.messaging.api.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.internal.resolver.DefaultApiMessageResolver;
 import br.com.portalmanager.platform.library.messaging.internal.web.ApiExceptionHandler;
-import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
+import br.com.portalmanager.platform.library.schemavalidation.internal.message.SchemaValidationMessageKeys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 

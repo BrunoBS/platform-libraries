@@ -1,0 +1,97 @@
+package br.com.portalmanager.platform.library.schemavalidation.internal.resolver;
+
+import br.com.portalmanager.platform.library.schemavalidation.api.configuration.PlatformSchemaValidationProperties;
+import br.com.portalmanager.platform.library.schemavalidation.api.contract.cache.ResourceSchemaCache;
+import br.com.portalmanager.platform.library.schemavalidation.internal.cache.NoOpResourceSchemaCache;
+import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import br.com.portalmanager.platform.library.schemavalidation.api.contract.model.ResourceSchema;
+import br.com.portalmanager.platform.library.schemavalidation.api.contract.repository.ResourceSchemaRepository;
+import br.com.portalmanager.platform.library.schemavalidation.internal.message.SchemaValidationTechnicalErrors;
+import br.com.portalmanager.platform.library.schemavalidation.api.exception.ResourceSchemaNotFoundException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+
+public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultResourceSchemaResolver.class);
+    private static final Duration CACHE_FAILURE_LOG_INTERVAL = Duration.ofMinutes(10);
+    private static final ConcurrentMap<String, Long> LAST_FAILURE_LOG = new ConcurrentHashMap<>();
+
+    private final ResourceSchemaRepository repository;
+    private final PlatformSchemaValidationProperties properties;
+    private final ResourceSchemaCache cache;
+
+    public DefaultResourceSchemaResolver(ResourceSchemaRepository repository, PlatformSchemaValidationProperties properties) {
+        this(repository, properties, new NoOpResourceSchemaCache());
+    }
+
+    public DefaultResourceSchemaResolver(
+            ResourceSchemaRepository repository,
+            PlatformSchemaValidationProperties properties,
+            ResourceSchemaCache cache
+    ) {
+        this.repository = repository;
+        this.properties = properties;
+        this.cache = cache;
+    }
+
+    @Override
+    public ResourceSchema resolve(String resourceType, String resourceCode) {
+        String type = requireText(resourceType, "resourceType");
+        String code = requireText(resourceCode, "resourceCode");
+
+        ResourceSchema exact = find(type, code).orElse(null);
+        if (exact != null) {
+            return exact;
+        }
+
+        return find(type, properties.resolveFallbackCode())
+                .orElseThrow(() -> new ResourceSchemaNotFoundException(
+                        SchemaValidationTechnicalErrors.publishedSchemaNotFound(type, code)
+                ));
+    }
+
+    private java.util.Optional<ResourceSchema> find(String type, String code) {
+        try {
+            var cached = cache.get(type, code);
+            if (cached.isPresent()) {
+                return cached;
+            }
+        } catch (RuntimeException exception) {
+            logCacheFailure("read", exception, "Schema validation Redis cache unavailable; continuing with datasource");
+        }
+
+        var resolved = repository.find(type, code);
+        resolved.ifPresent(schema -> {
+            try {
+                cache.put(schema);
+            } catch (RuntimeException exception) {
+                logCacheFailure("write", exception, "Schema validation Redis cache unavailable while storing schema; continuing");
+            }
+        });
+        return resolved;
+    }
+
+    private void logCacheFailure(String operation, RuntimeException exception, String message) {
+        String throttleKey = operation + ":" + exception.getClass().getName();
+        long now = System.currentTimeMillis();
+        Long previous = LAST_FAILURE_LOG.putIfAbsent(throttleKey, now);
+        if (previous != null && now - previous < CACHE_FAILURE_LOG_INTERVAL.toMillis()) {
+            return;
+        }
+        LAST_FAILURE_LOG.put(throttleKey, now);
+        log.error("{} [operation={}]", message, operation, exception);
+    }
+
+    private String requireText(String value, String field) {
+        if (value == null || value.isBlank()) {
+            throw new PlatformConfigurationException(
+                    SchemaValidationTechnicalErrors.requiredResolverArgument(field)
+            );
+        }
+        return value.trim();
+    }
+}
