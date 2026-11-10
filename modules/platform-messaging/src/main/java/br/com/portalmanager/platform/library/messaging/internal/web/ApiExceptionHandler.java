@@ -1,175 +1,508 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíë~8N‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹¥¹Ñ•É¹…°¹İ•ˆì()¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹•á•ÁÑ¥½¸¹Á¥á•ÁÑ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹•á•ÁÑ¥½¸¹Á¥5•ÍÍ…•9½Ñ½Õ¹‘á•ÁÑ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹•á•ÁÑ¥½¸¹½¹™±¥Ñá•ÁÑ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹•á•ÁÑ¥½¸¹9½Ñ½Õ¹‘á•ÁÑ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹•á•ÁÑ¥½¸¹I•Í½ÕÉ•Y•ÉÍ¥½¹½¹™±¥Ñá•ÁÑ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹•á•ÁÑ¥½¸¹Y…±¥‘…Ñ¥½¹á•ÁÑ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹•á•ÁÑ¥½¸¹Y…±¥‘…Ñ¥½¹•Ñ…¥±ÍAÉ½Ù¥‘•Èì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹µ•ÍÍ…”¹A±…Ñ™½Éµ5•ÍÍ…•-•åÌì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹µ•ÍÍ…”¹A±…Ñ™½ÉµQ•¡¹¥…±ÉÉ½ÉÌì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹µ½‘•°¹Á¥ÉÉ½ÉI•ÍÁ½¹Í”ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹µ½‘•°¹Á¥5•ÍÍ…”ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹µ½‘•°¹Á¥Y…±¥‘…Ñ¥½¹•Ñ…¥°ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹µ½‘•°¹Y…±¥‘…Ñ¥½¹•Ñ…¥°ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹É•Í½±Ù•È¹Á¥5•ÍÍ…•I•Í½±Ù•Èì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹¥¹Ñ•É¹…°¹É•Í½±Ù•È¹•™…Õ±ÑÁ¥5•ÍÍ…•I•Í½±Ù•Èì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹µ•ÍÍ…”¹5•ÍÍ…•A…É…µ•Ñ•ÉI•Í½±Ù•Èì)¥µÁ½ÉĞ©…­…ÉÑ„¹Í•ÉÙ±•Ğ¹¡ÑÑÀ¹!ÑÑÁM•ÉÙ±•ÑI•ÅÕ•ÍĞì)¥µÁ½ÉĞ½Éœ¹Í±˜Ñ¨¹1½•Èì)¥µÁ½ÉĞ½Éœ¹Í±˜Ñ¨¹1½•É…Ñ½Éäì)¥µÁ½ÉĞ½Éœ¹Í±˜Ñ¨¹5ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹½É”¹=É‘•É•ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹½É”¹…¹¹½Ñ…Ñ¥½¸¹=É‘•Èì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‘…¼¹…Ñ…•ÍÍá•ÁÑ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‘…¼¹…Ñ…%¹Ñ•É¥ÑåY¥½±…Ñ¥½¹á•ÁÑ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‘…¼¹=ÁÑ¥µ¥ÍÑ¥1½­¥¹…¥±ÕÉ•á•ÁÑ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹¡ÑÑÀ¹I•ÍÁ½¹Í•¹Ñ¥Ñäì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹¡ÑÑÀ¹!ÑÑÁMÑ…ÑÕÌì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹İ•ˆ¹!ÑÑÁI•ÅÕ•ÍÑ5•Ñ¡½‘9½ÑMÕÁÁ½ÉÑ•‘á•ÁÑ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹¡ÑÑÀ¹½¹Ù•ÉÑ•È¹!ÑÑÁ5•ÍÍ…•9½ÑI•…‘…‰±•á•ÁÑ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹İ•ˆ¹‰¥¹¹…¹¹½Ñ…Ñ¥½¸¹á•ÁÑ¥½¹!…¹‘±•Èì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹İ•ˆ¹‰¥¹¹…¹¹½Ñ…Ñ¥½¸¹I•ÍÑ½¹ÑÉ½±±•É‘Ù¥”ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹İ•ˆ¹µ•Ñ¡½¹…¹¹½Ñ…Ñ¥½¸¹5•Ñ¡½‘ÉÕµ•¹ÑQåÁ•5¥Íµ…Ñ¡á•ÁÑ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹İ•ˆ¹Í•ÉÙ±•Ğ¹É•Í½ÕÉ”¹9½I•Í½ÕÉ•½Õ¹‘á•ÁÑ¥½¸ì)¥µÁ½ÉĞÑ½½±Ì¹©…­Í½¸¹‘…Ñ…‰¥¹¹•áŒ¹%¹Ù…±¥‘½Éµ…Ñá•ÁÑ¥½¸ì()¥µÁ½ÉĞ©…Ù„¹Ñ¥µ”¹%¹ÍÑ…¹Ğì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹ÉÉ…åÌì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹1¥ÍĞì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹1½…±”ì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹5…Àì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹UU%ì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹ÍÑÉ•…´¹½±±•Ñ½ÉÌì()I•ÍÑ½¹ÑÉ½±±•É‘Ù¥”)=É‘•È¡=É‘•É•¹!%!MQ}AI9€¬€ÄÀÀ¤)ÁÕ‰±¥Œ±…ÍÌÁ¥á•ÁÑ¥½¹!…¹‘±•Èì((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°1½•È±½œ€ô1½•É…Ñ½Éä¹•Ñ1½•È¡Á¥á•ÁÑ¥½¹!…¹‘±•È¹±…ÍÌ¤ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°MÑÉ¥¹œMQIUQUI}II=I}5}-d€ô€‰Á±…Ñ™½É´¹•ÉÉ½Èˆì((€€€ÁÉ¥Ù…Ñ”™¥¹…°Á¥5•ÍÍ…•I•Í½±Ù•ÈÉ•Í½±Ù•Èì((€€€ÁÕ‰±¥ŒÁ¥á•ÁÑ¥½¹!…¹‘±•È¡Á¥5•ÍÍ…•I•Í½±Ù•ÈÉ•Í½±Ù•È¤ì(€€€€€€€Ñ¡¥Ì¹É•Í½±Ù•È€ôÉ•Í½±Ù•Èì(€€€ô((€€€á•ÁÑ¥½¹!…¹‘±•È¡Á¥á•ÁÑ¥½¸¹±…ÍÌ¤(€€€ÁÕ‰±¥ŒI•ÍÁ½¹Í•¹Ñ¥ÑäñÁ¥ÉÉ½ÉI•ÍÁ½¹Í”ø¡…¹‘±” (€€€€€€€€€€€Á¥á•ÁÑ¥½¸•á•ÁÑ¥½¸°(€€€€€€€€€€€1½…±”±½…±”°(€€€€€€€€€€€!ÑÑÁM•ÉÙ±•ÑI•ÅÕ•ÍĞÉ•ÅÕ•ÍĞ(€€€€¤ì(€€€€€€€É•ÑÕÉ¸É•Í½±Ù”¡•á•ÁÑ¥½¸°±½…±”°É•ÅÕ•ÍĞ¤ì(€€€ô((€€€á•ÁÑ¥½¹!…¹‘±•È¡=ÁÑ¥µ¥ÍÑ¥1½­¥¹…¥±ÕÉ•á•ÁÑ¥½¸¹±…ÍÌ¤(€€€ÁÕ‰±¥ŒI•ÍÁ½¹Í•¹Ñ¥ÑäñÁ¥ÉÉ½ÉI•ÍÁ½¹Í”ø¡…¹‘±•=ÁÑ¥µ¥ÍÑ¥1½¬ (€€€€€€€€€€€=ÁÑ¥µ¥ÍÑ¥1½­¥¹…¥±ÕÉ•á•ÁÑ¥½¸•á•ÁÑ¥½¸°(€€€€€€€€€€€1½…±”±½…±”°(€€€€€€€€€€€!ÑÑÁM•ÉÙ±•ÑI•ÅÕ•ÍĞÉ•ÅÕ•ÍĞ(€€€€¤ì(€€€€€€€É•ÑÕÉ¸É•Í½±Ù” (€€€€€€€€€€€€€€€¹•ÜI•Í½ÕÉ•Y•ÉÍ¥½¹½¹™±¥Ñá•ÁÑ¥½¸¡•á•ÁÑ¥½¸¤°(€€€€€€€€€€€€€€€±½…±”°(€€€€€€€€€€€€€€€É•ÅÕ•ÍĞ(€€€€€€€€¤ì(€€€ô((€€€á•ÁÑ¥½¹!…¹‘±•È¡…Ñ…%¹Ñ•É¥ÑåY¥½±…Ñ¥½¹á•ÁÑ¥½¸¹±…ÍÌ¤(€€€ÁÕ‰±¥ŒI•ÍÁ½¹Í•¹Ñ¥ÑäñÁ¥ÉÉ½ÉI•ÍÁ½¹Í”ø¡…¹‘±•…Ñ…%¹Ñ•É¥Ñä (€€€€€€€€€€€…Ñ…%¹Ñ•É¥ÑåY¥½±…Ñ¥½¹á•ÁÑ¥½¸•á•ÁÑ¥½¸°(€€€€€€€€€€€1½…±”±½…±”°(€€€€€€€€€€€!ÑÑÁM•ÉÙ±•ÑI•ÅÕ•ÍĞÉ•ÅÕ•ÍĞ(€€€€¤ì(€€€€€€€É•ÑÕÉ¸É•Í½±Ù” (€€€€€€€€€€€€€€€¹•Ü½¹™±¥Ñá•ÁÑ¥½¸ (€€€€€€€€€€€€€€€€€€€€€€€A±…Ñ™½Éµ5•ÍÍ…•-•åÌ¹Q}%9QI%Qd°(€€€€€€€€€€€€€€€€€€€€€€€•á•ÁÑ¥½¸(€€€€€€€€€€€€€€€€¤°(€€€€€€€€€€€€€€€±½…±”°(€€€€€€€€€€€€€€€É•ÅÕ•ÍĞ(€€€€€€€€¤ì(€€€ô((€€€á•ÁÑ¥½¹!…¹‘±•È¡…Ñ…•ÍÍá•ÁÑ¥½¸¹±…ÍÌ¤(€€€ÁÕ‰±¥ŒI•ÍÁ½¹Í•¹Ñ¥ÑäñÁ¥ÉÉ½ÉI•ÍÁ½¹Í”ø¡…¹‘±•…Ñ…•ÍÌ (€€€€€€€€€€€…Ñ…•ÍÍá•ÁÑ¥½¸•á•ÁÑ¥½¸°(€€€€€€€€€€€1½…±”±½…±”°(€€€€€€€€€€€!ÑÑÁM•ÉÙ±•ÑI•ÅÕ•ÍĞÉ•ÅÕ•ÍĞ(€€€€¤ì(€€€€€€€MÑÉ¥¹œ•ÉÉ½É%€ôUU%¹É…¹‘½µUU% ¤¹Ñ½MÑÉ¥¹œ ¤ì((€€€€€€€É•ÑÕÉ¸É•Í½±Ù” (€€€€€€€€€€€€€€€¹•ÜÁ¥á•ÁÑ¥½¸ (€€€€€€€€€€€€€€€€€€€€€€€A±…Ñ™½Éµ5•ÍÍ…•-•åÌ¹%9QI91}MIYI}II=H°(€€€€€€€€€€€€€€€€€€€€€€€5…À¹½˜ ˆÀˆ°•ÉÉ½É%¤°(€€€€€€€€€€€€€€€€€€€€€€€•á•ÁÑ¥½¸(€€€€€€€€€€€€€€€€¤°(€€€€€€€€€€€€€€€±½…±”°(€€€€€€€€€€€€€€€É•ÅÕ•ÍĞ(€€€€€€€€¤ì(€€€ô((€€€á•ÁÑ¥½¹!…¹‘±•È¡9½I•Í½ÕÉ•½Õ¹‘á•ÁÑ¥½¸¹±…ÍÌ¤(€€€ÁÕ‰±¥ŒI•ÍÁ½¹Í•¹Ñ¥ÑäñÁ¥ÉÉ½ÉI•ÍÁ½¹Í”ø¡…¹‘±•9½I•Í½ÕÉ•½Õ¹ (€€€€€€€€€€€9½I•Í½ÕÉ•½Õ¹‘á•ÁÑ¥½¸•á•ÁÑ¥½¸°(€€€€€€€€€€€1½…±”±½…±”°(€€€€€€€€€€€!ÑÑÁM•ÉÙ±•ÑI•ÅÕ•ÍĞÉ•ÅÕ•ÍĞ(€€€€¤ì(€€€€€€€É•ÑÕÉ¸É•Í½±Ù” (€€€€€€€€€€€€€€€¹•Ü9½Ñ½Õ¹‘á•ÁÑ¥½¸¡A±…Ñ™½Éµ5•ÍÍ…•-•åÌ¹IM=UI}9=Q}=U9¤°(€€€€€€€€€€€€€€€±½…±”°(€€€€€€€€€€€€€€€É•ÅÕ•ÍĞ(€€€€€€€€¤ì(€€€ô((€€€á•ÁÑ¥½¹!…¹‘±•È¡5•Ñ¡½‘ÉÕµ•¹ÑQåÁ•5¥Íµ…Ñ¡á•ÁÑ¥½¸¹±…ÍÌ¤(€€€ÁÕ‰±¥ŒI•ÍÁ½¹Í•¹Ñ¥ÑäñÁ¥ÉÉ½ÉI•ÍÁ½¹Í”ø¡…¹‘±•QåÁ•5¥Íµ…Ñ  (€€€€€€€€€€€5•Ñ¡½‘ÉÕµ•¹ÑQåÁ•5¥Íµ…Ñ¡á•ÁÑ¥½¸•á•ÁÑ¥½¸°(€€€€€€€€€€€1½…±”±½…±”°(€€€€€€€€€€€!ÑÑÁM•ÉÙ±•ÑI•ÅÕ•ÍĞÉ•ÅÕ•ÍĞ(€€€€¤ì(€€€€€€€MÑÉ¥¹œ™¥•±€ô•á•ÁÑ¥½¸¹•Ñ9…µ” ¤ì(€€€€€€€MÑÉ¥¹œÉ•ÅÕ¥É•‘QåÁ”€ô•á•ÁÑ¥½¸¹•ÑI•ÅÕ¥É•‘QåÁ” ¤€ôô¹Õ±°(€€€€€€€€€€€€€€€€ü€‰Õ¹­¹½İ¸ˆ(€€€€€€€€€€€€€€€€è•á•ÁÑ¥½¸¹•ÑI•ÅÕ¥É•‘QåÁ” ¤¹•ÑM¥µÁ±•9…µ” ¤ì((€€€€€€€É•ÑÕÉ¸É•Í½±Ù” (€€€€€€€€€€€€€€€¹•ÜY…±¥‘…Ñ¥½¹á•ÁÑ¥½¸ (€€€€€€€€€€€€€€€€€€€€€€€A±…Ñ™½Éµ5•ÍÍ…•-•åÌ¹Y1%Q%=9}%1°(€€€€€€€€€€€€€€€€€€€€€€€1¥ÍĞ¹½˜ (€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹•ÜY…±¥‘…Ñ¥½¹•Ñ…¥° (€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€™¥•±°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€A±…Ñ™½Éµ5•ÍÍ…•-•åÌ¹QeA}5%M5Q °(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€5…À¹½˜ (€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ˆÀˆ°™¥•±°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ˆÄˆ°É•ÅÕ¥É•‘QåÁ”(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€€€€€€¤°(€€€€€€€€€€€€€€€±½…±”°(€€€€€€€€€€€€€€€É•ÅÕ•ÍĞ(€€€€€€€€¤ì(€€€ô((€€€á•ÁÑ¥½¹!…¹‘±•È¡!ÑÑÁ5•ÍÍ…•9½ÑI•…‘…‰±•á•ÁÑ¥½¸¹±…ÍÌ¤(€€€ÁÕ‰±¥ŒI•ÍÁ½¹Í•¹Ñ¥ÑäñÁ¥ÉÉ½ÉI•ÍÁ½¹Í”ø¡…¹‘±•9½ÑI•…‘…‰±” (€€€€€€€€€€€!ÑÑÁ5•ÍÍ…•9½ÑI•…‘…‰±•á•ÁÑ¥½¸•á•ÁÑ¥½¸°(€€€€€€€€€€€1½…±”±½…±”°(€€€€€€€€€€€!ÑÑÁM•ÉÙ±•ÑI•ÅÕ•ÍĞÉ•ÅÕ•ÍĞ(€€€€¤ì(€€€€€€€%¹Ù…±¥‘½Éµ…Ñá•ÁÑ¥½¸¥¹Ù…±¥‘½Éµ…Ğ€ô™¥¹‘%¹Ù…±¥‘½Éµ…Ñá•ÁÑ¥½¸¡•á•ÁÑ¥½¸¤ì((€€€€€€€¥˜€¡¥¹Ù…±¥‘½Éµ…Ğ€„ô¹Õ±°¤ì(€€€€€€€€€€€MÑÉ¥¹œ™¥•±€ô¥¹Ù…±¥‘½Éµ…Ğ¹•ÑA…Ñ  ¤¹¥ÍµÁÑä ¤(€€€€€€€€€€€€€€€€€€€€ü€‰É•ÅÕ•ÍĞˆ(€€€€€€€€€€€€€€€€€€€€è¥¹Ù…±¥‘½Éµ…Ğ¹•ÑA…Ñ  ¤¹•Ñ1…ÍĞ ¤¹•ÑAÉ½Á•ÉÑå9…µ” ¤ì(€€€€€€€€€€€¥˜€¡™¥•±€ôô¹Õ±°ñğ™¥•±¹¥Í	±…¹¬ ¤¤ì(€€€€€€€€€€€€€€€¥¹Ğ¥¹‘•à€ô¥¹Ù…±¥‘½Éµ…Ğ¹•ÑA…Ñ  ¤¹¥ÍµÁÑä ¤(€€€€€€€€€€€€€€€€€€€€€€€€ü€´Ä(€€€€€€€€€€€€€€€€€€€€€€€€è¥¹Ù…±¥‘½Éµ…Ğ¹•ÑA…Ñ  ¤¹•Ñ1…ÍĞ ¤¹•Ñ%¹‘•à ¤ì(€€€€€€€€€€€€€€€™¥•±€ô¥¹‘•à€øô€À€ü€‰É•ÅÕ•ÍÑlˆ€¬¥¹‘•à€¬€‰tˆ€è€‰É•ÅÕ•ÍĞˆì(€€€€€€€€€€€ô((€€€€€€€€€€€±…ÍÌğüøÑ…É•ÑQåÁ”€ô¥¹Ù…±¥‘½Éµ…Ğ¹•ÑQ…É•ÑQåÁ” ¤ì((€€€€€€€€€€€¥˜€¡Ñ…É•ÑQåÁ”€„ô¹Õ±°€˜˜Ñ…É•ÑQåÁ”¹¥Í¹Õ´ ¤¤ì(€€€€€€€€€€€€€€€MÑÉ¥¹œ…±±½İ•‘Y…±Õ•Ì€ôÉÉ…åÌ¹ÍÑÉ•…´¡Ñ…É•ÑQåÁ”¹•Ñ¹Õµ½¹ÍÑ…¹ÑÌ ¤¤(€€€€€€€€€€€€€€€€€€€€€€€€¹µ…À¡=‰©•ĞèéÑ½MÑÉ¥¹œ¤(€€€€€€€€€€€€€€€€€€€€€€€€¹½±±•Ó]øâÚ$z{-®éÜj×^Ù\[Û‹™Ù]\˜[Y]\œÊ
-Bˆ
-KˆY\ÜØYÙT\˜[Y]\”™\ÛÛ™\‹œ™\ÛÛ™JˆY\ÜØYÙKœÛÛ][ÛŠ
-Kˆ^Ù\[Û‹™Ù]\˜[Y]\œÊ
-Bˆ
-Kˆ™\ÛÛ™U˜[Y][Û‘]Z[Ê^Ù\[Û‹™\]Y\İØØ[JKˆ[œİ[››İÊ
-Kˆ™\]Y\İ™Ù]™\]Y\İT’J
-KˆQË™Ù]
-˜ÛÜœ™[][Û’YŠBˆ
-NÂ‚ˆÙÔ™\ÛÛ™Y^Ù\[ÛŠ^Ù\[Û‹™\ÜÛœÙJNÂ‚ˆ™]\›ˆ™\ÜÛœÙQ[]Kœİ]\ÊY\ÜØYÙKšİ]\Ê
-JK˜›ÙJ™\ÜÛœÙJNÂˆHØ]Ú
-\SY\ÜØYÙS›İ›İ[™^Ù\[Ûˆ^Ù\[Û“›İ›İ[™
-HÂˆ™]\›ˆ[™S›İ›İ[™
-^Ù\[Û“›İ›İ[™™\]Y\İ
-NÂˆBˆB‚ˆš]˜]HØØ[H™\ÛÛ™T™\]Y\İØØ[JÙ\›]™\]Y\İ™\]Y\İØØ[H˜[˜XÚÓØØ[JHÂˆİš[™ÈXØÙ\[™İXYÙHH™\]Y\İ™Ù]XY\ŠXØÙ\S[™İXYÙHŠNÂˆYˆ
-XØÙ\[™İXYÙHOH[XØÙ\[™İXYÙKš\Ğ›[šÊ
-JHÂˆ™]\›ˆ[ÂˆB‚ˆØØ[H™\]Y\İØØ[HH™\]Y\İ™Ù]ØØ[J
-NÂˆ™]\›ˆ™\]Y\İØØ[HOH[È™\]Y\İØØ[Hˆ˜[˜XÚÓØØ[NÂˆB‚ˆš]˜]H\İ\U˜[Y][Û‘]Z[ˆ™\ÛÛ™U˜[Y][Û‘]Z[Êˆ\Q^Ù\[Ûˆ^Ù\[Û‹ˆØØ[HØØ[Bˆ
-HÂˆYˆ
-J^Ù\[Ûˆ[œİ[˜Ù[Ùˆ˜[Y][Û‘]Z[Ô›İšY\ˆ˜[Y][Û‘^Ù\[ÛŠBˆ˜[Y][Û‘^Ù\[Û‹™Ù]]Z[Ê
-Kš\Ñ[\J
-JHÂˆ™]\›ˆ\İ›ÙŠ
-NÂˆB‚ˆ™]\›ˆ˜[Y][Û‘^Ù\[Û‹™Ù]]Z[Ê
-Bˆœİ™X[J
-Bˆ›X\
-]Z[Oˆ™\ÛÛ™U˜[Y][Û‘]Z[
-]Z[ØØ[JJBˆÓ\İ
+package br.com.portalmanager.platform.library.messaging.internal.web;
 
-NÂˆB‚ˆš]˜]H\U˜[Y][Û‘]Z[™\ÛÛ™U˜[Y][Û‘]Z[
-ˆ˜[Y][Û‘]Z[]Z[ˆØØ[HØØ[Bˆ
-HÂˆYˆ
-]Z[›Y\ÜØYÙRÙ^J
-HOH[]Z[›Y\ÜØYÙRÙ^J
-Kš\Ğ›[šÊ
-JHÂˆ™]\›ˆ™]È\U˜[Y][Û‘]Z[
-ˆ]Z[™šY[
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiMessageNotFoundException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ConflictException;
+import br.com.portalmanager.platform.library.messaging.api.exception.NotFoundException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ResourceVersionConflictException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationDetailsProvider;
+import br.com.portalmanager.platform.library.messaging.api.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.internal.message.PlatformTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiErrorResponse;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiValidationDetail;
+import br.com.portalmanager.platform.library.messaging.api.model.ValidationDetail;
+import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.internal.resolver.DefaultApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.internal.message.MessageParameterResolver;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+import tools.jackson.databind.exc.InvalidFormatException;
 
-Kˆ[ˆ]Z[™Y˜][Y\ÜØYÙJ
-Kˆ[ˆ
-NÂˆB‚ˆ\SY\ÜØYÙHY\ÜØYÙNÂˆHÂˆY\ÜØYÙHH™\ÛÛ™\‹œ™\ÛÛ™J]Z[›Y\ÜØYÙRÙ^J
-KØØ[JNÂˆYˆ
-Y˜][\SY\ÜØYÙT™\ÛÛ™\‹‘QUSÒÑVK™\]X[ÊY\ÜØYÙK›Y\ÜØYÙRÙ^J
-JBˆ	‰ˆ]Z[™˜[˜XÚÓY\ÜØYÙRÙ^J
-HOH[ˆ	‰ˆY]Z[™˜[˜XÚÓY\ÜØYÙRÙ^J
-Kš\Ğ›[šÊ
-JHÂˆY\ÜØYÙHH™\ÛÛ™\‹œ™\ÛÛ™J]Z[™˜[˜XÚÓY\ÜØYÙRÙ^J
-KØØ[JNÂˆBˆHØ]Ú
-\SY\ÜØYÙS›İ›İ[™^Ù\[Ûˆ›İ›İ[™
-HÂˆYˆ
-]Z[™˜[˜XÚÓY\ÜØYÙRÙ^J
-HOH[]Z[™˜[˜XÚÓY\ÜØYÙRÙ^J
-Kš\Ğ›[šÊ
-JHÂˆ›İÈ›İ›İ[™ÂˆBˆY\ÜØYÙHH™\ÛÛ™\‹œ™\ÛÛ™J]Z[™˜[˜XÚÓY\ÜØYÙRÙ^J
-KØØ[JNÂˆB‚ˆ™]\›ˆ™]È\U˜[Y][Û‘]Z[
-ˆ]Z[™šY[
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-KˆY\ÜØYÙK˜ÛÙJ
-KˆY\ÜØYÙT\˜[Y]\”™\ÛÛ™\‹œ™\ÛÛ™JˆY\ÜØYÙK›Y\ÜØYÙJ
-Kˆ]Z[œ\˜[Y]\œÊ
-Bˆ
-KˆY\ÜØYÙT\˜[Y]\”™\ÛÛ™\‹œ™\ÛÛ™JˆY\ÜØYÙKœÛÛ][ÛŠ
-Kˆ]Z[œ\˜[Y]\œÊ
-Bˆ
-Bˆ
-NÂˆB‚ˆš]˜]H[˜[Y›Ü›X]^Ù\[Ûˆš[™[˜[Y›Ü›X]^Ù\[ÛŠ›İØX›H^Ù\[ÛŠHÂˆ›İØX›Hİ\œ™[H^Ù\[ÛÂ‚ˆÚ[H
-İ\œ™[OH[
-HÂˆYˆ
-İ\œ™[[œİ[˜Ù[Ùˆ[˜[Y›Ü›X]^Ù\[Ûˆ[˜[Y›Ü›X]^Ù\[ÛŠHÂˆ™]\›ˆ[˜[Y›Ü›X]^Ù\[ÛÂˆBˆİ\œ™[Hİ\œ™[™Ù]Ø]\ÙJ
-NÂˆB‚ˆ™]\›ˆ[ÂˆB‚ˆš]˜]H›ÚYÙÔ™\ÛÛ™Y^Ù\[ÛŠˆ\Q^Ù\[Ûˆ^Ù\[Û‹ˆ\Q\œ›Ü”™\ÜÛœÙH™\ÜÛœÙBˆ
-HÂˆİš[™ÈÙÓY\ÜØYÙHH^Ù\[Û‹™Ù]Ø]\ÙJ
-HOH[ˆÈ‘^ÙpéğèÛÈH™YğìØÚ[È™\ÛÛšYNˆˆ
-È™\ÜÛœÙK˜ÛÙJ
-Bˆˆ‘\œ›ÈH]Y›Ü›XH™\ÛÛšYÎˆˆ
-È™\ÜÛœÙK˜ÛÙJ
-NÂ‚ˆÙÔİXİ\™Y\œ›ÜŠˆ^Ù\[Û‹™Ù]Y\ÜØYÙRÙ^J
-Kˆ™\ÜÛœÙKˆ^Ù\[Û‹™Ù]Ø]\ÙJ
-KˆÙÓY\ÜØYÙBˆ
-NÂˆB‚ˆš]˜]H›ÚYÙÔİXİ\™Y\œ›ÜŠˆİš[™ÈY\ÜØYÙRÙ^Kˆ\Q\œ›Ü”™\ÜÛœÙH™\ÜÛœÙKˆ›İØX›HØ]\ÙKˆİš[™ÈÙÓY\ÜØYÙBˆ
-HÂˆİš[™È™]š[İ\ÔİXİ\™Y\œ›ÜˆHQË™Ù]
-Õ•PÕT‘QÑT”“Ô—ÓQ×ÒÑVJNÂ‚ˆHÂˆQËœ]
-ˆÕ•PÕT‘QÑT”“Ô—ÓQ×ÒÑVKˆÔİXİ\™Y\œ›Ü’œÛÛŠY\ÜØYÙRÙ^K™\ÜÛœÙJBˆ
-NÂ‚ˆYˆ
-Ø]\ÙHOH[
-HÂˆÙË™\œ›ÜŠÙÓY\ÜØYÙKØ]\ÙJNÂˆH[ÙHÂˆÙËØ\›ŠÙÓY\ÜØYÙJNÂˆBˆHš[˜[HÂˆYˆ
-™]š[İ\ÔİXİ\™Y\œ›ÜˆOH[
-HÂˆQËœ™[[İ™JÕ•PÕT‘QÑT”“Ô—ÓQ×ÒÑVJNÂˆH[ÙHÂˆQËœ]
-Õ•PÕT‘QÑT”“Ô—ÓQ×ÒÑVK™]š[İ\ÔİXİ\™Y\œ›ÜŠNÂˆBˆBˆB‚ˆš]˜]Hİš[™ÈÔİXİ\™Y\œ›Ü’œÛÛŠˆİš[™ÈY\ÜØYÙRÙ^Kˆ\Q\œ›Ü”™\ÜÛœÙH™\ÜÛœÙBˆ
-HÂˆ™]\›ˆÈˆ
-Âˆ—šÙ^Wˆˆ
-ÈœÛÛ”İš[™ÊY\ÜØYÙRÙ^JH
-È‹ˆ
-Âˆ—˜ÛÙWˆˆ
-ÈœÛÛ”İš[™Ê™\ÜÛœÙK˜ÛÙJ
-JH
-È‹ˆ
-Âˆ—›Y\ÜØYÙWˆˆ
-ÈœÛÛ”İš[™Ê™\ÜÛœÙK›Y\ÜØYÙJ
-JH
-È‹ˆ
-Âˆ—œÛÛ][Û—ˆˆ
-ÈœÛÛ”İš[™Ê™\ÜÛœÙKœÛÛ][ÛŠ
-JH
-È‹ˆ
-Âˆ—™]Z[×ˆˆ
-ÈÒœÛÛ‘]Z[Ê™\ÜÛœÙK™]Z[Ê
-JH
-È‹ˆ
-Âˆ—[Y\İ[\ˆˆ
-ÈœÛÛ”İš[™Êˆ™\ÜÛœÙK[Y\İ[\
+@RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE + 100)
+public class ApiExceptionHandler {
 
-HOH[ˆÈ[ˆˆ™\ÜÛœÙK[Y\İ[\
+    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+    private static final String STRUCTURED_ERROR_MDC_KEY = "platform.error";
 
-KÔİš[™Ê
-Bˆ
-H
-È‹ˆ
-Âˆ—œ]ˆˆ
-ÈœÛÛ”İš[™Ê™\ÜÛœÙKœ]
+    private final ApiMessageResolver resolver;
 
-JH
-È‹ˆ
-Âˆ—˜ÛÜœ™[][Û’Yˆˆ
-ÈœÛÛ”İš[™Ê™\ÜÛœÙK˜ÛÜœ™[][Û’Y
+    public ApiExceptionHandler(ApiMessageResolver resolver) {
+        this.resolver = resolver;
+    }
 
-JH
-ÂˆŸHÂˆB‚ˆİš[™ÈÒœÛÛ‘]Z[Ê\İ\U˜[Y][Û‘]Z[ˆ]Z[ÊHÂˆYˆ
-]Z[ÈOH[]Z[Ëš\Ñ[\J
-JHÂˆ™]\›ˆ–×HÂˆB‚ˆ™]\›ˆ]Z[Ëœİ™X[J
-Bˆ›X\
-]Z[OˆÈˆ
-Âˆ—™šY[ˆˆ
-ÈœÛÛ”İš[™Ê]Z[™šY[
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiErrorResponse> handle(
+            ApiException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        return resolve(exception, locale, request);
+    }
 
-JH
-È‹ˆ
-Âˆ—˜ÛÙWˆˆ
-ÈœÛÛ”İš[™Ê]Z[˜ÛÙJ
-JH
-È‹ˆ
-Âˆ—›Y\ÜØYÙWˆˆ
-ÈœÛÛ”İš[™Ê]Z[›Y\ÜØYÙJ
-JH
-È‹ˆ
-Âˆ—œÛÛ][Û—ˆˆ
-ÈœÛÛ”İš[™Ê]Z[œÛÛ][ÛŠ
-JH
-ÂˆŸHŠBˆ˜ÛÛXİ
-ÛÛXİÜœËš›Ú[š[™Ê‹‹–È‹—HŠJNÂˆB‚ˆš]˜]Hİš[™ÈœÛÛ”İš[™Êİš[™È˜[YJHÂˆYˆ
-˜[YHOH[
-HÂˆ™]\›ˆ›[ÂˆBˆ™]\›ˆ—ˆˆ
-È\ØØ\RœÛÛŠ˜[YJH
-È—ˆÂˆB‚ˆš]˜]Hİš[™È\ØØ\RœÛÛŠİš[™È˜[YJHÂˆİš[™ĞZ[\ˆ\ØØ\YH™]Èİš[™ĞZ[\Š˜[YK›[™İ
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiErrorResponse> handleOptimisticLock(
+            OptimisticLockingFailureException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        return resolve(
+                new ResourceVersionConflictException(exception),
+                locale,
+                request
+        );
+    }
 
-H
-ÈMŠNÂ‚ˆ›Üˆ
-[HHÈH˜[YK›[™İ
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrity(
+            DataIntegrityViolationException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        return resolve(
+                new ConflictException(
+                        PlatformMessageKeys.DATA_INTEGRITY,
+                        exception
+                ),
+                locale,
+                request
+        );
+    }
 
-NÈJÊÊHÂˆÚ\ˆÚ\˜Xİ\ˆH˜[YK˜Ú\]
-JNÂ‚ˆİÚ]Ú
-Ú\˜Xİ\ŠHÂˆØ\ÙH	×	ÈOˆ\ØØ\Y˜\[™
-—ŠNÂˆØ\ÙH	È‰ÈOˆ\ØØ\Y˜\[™
-—ˆŠNÂˆØ\ÙH	×‰ÈOˆ\ØØ\Y˜\[™
-—ˆŠNÂˆØ\ÙH	×‰ÈOˆ\ØØ\Y˜\[™
-—ˆŠNÂˆØ\ÙH	×‰ÈOˆ\ØØ\Y˜\[™
-—ˆŠNÂˆØ\ÙH	×‰ÈOˆ\ØØ\Y˜\[™
-—ˆŠNÂˆØ\ÙH	×	ÈOˆ\ØØ\Y˜\[™
-—ŠNÂˆY˜][OˆÂˆYˆ
-Ú\˜Xİ\ˆŒ
-HÂˆ\ØØ\Y˜\[™
-İš[™Ë™›Ü›X]
-—IL‹
-[
-HÚ\˜Xİ\ŠJNÂˆH[ÙHÂˆ\ØØ\Y˜\[™
-Ú\˜Xİ\ŠNÂˆBˆBˆBˆB‚ˆ™]\›ˆ\ØØ\YÔİš[™Ê
-NÂˆBŸB
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataAccess(
+            DataAccessException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        String errorId = UUID.randomUUID().toString();
+
+        return resolve(
+                new ApiException(
+                        PlatformMessageKeys.INTERNAL_SERVER_ERROR,
+                        Map.of("0", errorId),
+                        exception
+                ),
+                locale,
+                request
+        );
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(
+            NoResourceFoundException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        return resolve(
+                new NotFoundException(PlatformMessageKeys.RESOURCE_NOT_FOUND),
+                locale,
+                request
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        String field = exception.getName();
+        String requiredType = exception.getRequiredType() == null
+                ? "unknown"
+                : exception.getRequiredType().getSimpleName();
+
+        return resolve(
+                new ValidationException(
+                        PlatformMessageKeys.VALIDATION_FAILED,
+                        List.of(
+                                new ValidationDetail(
+                                        field,
+                                        PlatformMessageKeys.TYPE_MISMATCH,
+                                        Map.of(
+                                                "0", field,
+                                                "1", requiredType
+                                        )
+                                )
+                        )
+                ),
+                locale,
+                request
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotReadable(
+            HttpMessageNotReadableException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        InvalidFormatException invalidFormat = findInvalidFormatException(exception);
+
+        if (invalidFormat != null) {
+            String field = invalidFormat.getPath().isEmpty()
+                    ? "request"
+                    : invalidFormat.getPath().getLast().getPropertyName();
+            if (field == null || field.isBlank()) {
+                int index = invalidFormat.getPath().isEmpty()
+                        ? -1
+                        : invalidFormat.getPath().getLast().getIndex();
+                field = index >= 0 ? "request[" + index + "]" : "request";
+            }
+
+            Class<?> targetType = invalidFormat.getTargetType();
+
+            if (targetType != null && targetType.isEnum()) {
+                String allowedValues = Arrays.stream(targetType.getEnumConstants())
+                        .map(Object::toString)
+                        .collect(Collectors.joining(", "));
+
+                return resolve(
+                        new ValidationException(
+                                PlatformMessageKeys.VALIDATION_FAILED,
+                                List.of(
+                                        new ValidationDetail(
+                                                field,
+                                                PlatformMessageKeys.INVALID_ENUM,
+                                                Map.of(
+                                                        "0", field,
+                                                        "1", allowedValues
+                                                )
+                                        )
+                                )
+                        ),
+                        locale,
+                        request
+                );
+            }
+
+            return resolve(
+                    new ValidationException(PlatformMessageKeys.REQUEST_FORMAT_INVALID),
+                    locale,
+                    request
+            );
+        }
+
+        return resolve(
+                new ValidationException(PlatformMessageKeys.REQUEST_NOT_READABLE),
+                locale,
+                request
+        );
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        ResponseEntity<ApiErrorResponse> response = resolve(
+                new ApiException(
+                        PlatformMessageKeys.METHOD_NOT_ALLOWED,
+                        Map.of("0", exception.getMethod())
+                ),
+                locale,
+                request
+        );
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .headers(exception.getHeaders())
+                .body(response.getBody());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleUnexpected(
+            Exception exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        String errorId = UUID.randomUUID().toString();
+
+        return resolve(
+                new ApiException(
+                        PlatformMessageKeys.INTERNAL_SERVER_ERROR,
+                        Map.of("0", errorId),
+                        exception
+                ),
+                locale,
+                request
+        );
+    }
+
+    @ExceptionHandler(ApiMessageNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotFound(
+            ApiMessageNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        var definition = PlatformTechnicalErrors.messageDefinitionNotFound(
+                exception.getMessageKey()
+        );
+        ApiErrorResponse response = new ApiErrorResponse(
+                definition.code(),
+                definition.message(),
+                definition.solution(),
+                Instant.now(),
+                request.getRequestURI(),
+                MDC.get("correlationId")
+        );
+
+        logStructuredError(
+                exception.getMessageKey(),
+                response,
+                exception,
+                "DefiniÃ§Ã£o de mensagem nÃ£o encontrada: " + definition.code()
+        );
+
+        return ResponseEntity.internalServerError().body(response);
+    }
+
+    private ResponseEntity<ApiErrorResponse> resolve(
+            ApiException exception,
+            Locale locale,
+            HttpServletRequest request
+    ) {
+        try {
+            Locale requestLocale = resolveRequestLocale(request, locale);
+            ApiMessage message = resolver.resolve(exception.getMessageKey(), requestLocale);
+
+            ApiErrorResponse response = new ApiErrorResponse(
+                    message.code(),
+                    MessageParameterResolver.resolve(
+                            message.message(),
+                            exception.getParameters()
+                    ),
+                    MessageParameterResolver.resolve(
+                            message.solution(),
+                            exception.getParameters()
+                    ),
+                    resolveValidationDetails(exception, requestLocale),
+                    Instant.now(),
+                    request.getRequestURI(),
+                    MDC.get("correlationId")
+            );
+
+            logResolvedException(exception, response);
+
+            return ResponseEntity.status(message.httpStatus()).body(response);
+        } catch (ApiMessageNotFoundException exceptionNotFound) {
+            return handleNotFound(exceptionNotFound, request);
+        }
+    }
+
+    private Locale resolveRequestLocale(HttpServletRequest request, Locale fallbackLocale) {
+        String acceptLanguage = request.getHeader("Accept-Language");
+        if (acceptLanguage == null || acceptLanguage.isBlank()) {
+            return null;
+        }
+
+        Locale requestLocale = request.getLocale();
+        return requestLocale != null ? requestLocale : fallbackLocale;
+    }
+
+    private List<ApiValidationDetail> resolveValidationDetails(
+            ApiException exception,
+            Locale locale
+    ) {
+        if (!(exception instanceof ValidationDetailsProvider validationException)
+                || validationException.getDetails().isEmpty()) {
+            return List.of();
+        }
+
+        return validationException.getDetails()
+                .stream()
+                .map(detail -> resolveValidationDetail(detail, locale))
+                .toList();
+    }
+
+    private ApiValidationDetail resolveValidationDetail(
+            ValidationDetail detail,
+            Locale locale
+    ) {
+        if (detail.messageKey() == null || detail.messageKey().isBlank()) {
+            return new ApiValidationDetail(
+                    detail.field(),
+                    null,
+                    detail.defaultMessage(),
+                    null
+            );
+        }
+
+        ApiMessage message;
+        try {
+            message = resolver.resolve(detail.messageKey(), locale);
+            if (DefaultApiMessageResolver.DEFAULT_KEY.equals(message.messageKey())
+                    && detail.fallbackMessageKey() != null
+                    && !detail.fallbackMessageKey().isBlank()) {
+                message = resolver.resolve(detail.fallbackMessageKey(), locale);
+            }
+        } catch (ApiMessageNotFoundException notFound) {
+            if (detail.fallbackMessageKey() == null || detail.fallbackMessageKey().isBlank()) {
+                throw notFound;
+            }
+            message = resolver.resolve(detail.fallbackMessageKey(), locale);
+        }
+
+        return new ApiValidationDetail(
+                detail.field(),
+                message.code(),
+                MessageParameterResolver.resolve(
+                        message.message(),
+                        detail.parameters()
+                ),
+                MessageParameterResolver.resolve(
+                        message.solution(),
+                        detail.parameters()
+                )
+        );
+    }
+
+    private InvalidFormatException findInvalidFormatException(Throwable exception) {
+        Throwable current = exception;
+
+        while (current != null) {
+            if (current instanceof InvalidFormatException invalidFormatException) {
+                return invalidFormatException;
+            }
+            current = current.getCause();
+        }
+
+        return null;
+    }
+
+    private void logResolvedException(
+            ApiException exception,
+            ApiErrorResponse response
+    ) {
+        String logMessage = exception.getCause() == null
+                ? "ExceÃ§Ã£o de negÃ³cio resolvida: " + response.code()
+                : "Erro de plataforma resolvido: " + response.code();
+
+        logStructuredError(
+                exception.getMessageKey(),
+                response,
+                exception.getCause(),
+                logMessage
+        );
+    }
+
+    private void logStructuredError(
+            String messageKey,
+            ApiErrorResponse response,
+            Throwable cause,
+            String logMessage
+    ) {
+        String previousStructuredError = MDC.get(STRUCTURED_ERROR_MDC_KEY);
+
+        try {
+            MDC.put(
+                    STRUCTURED_ERROR_MDC_KEY,
+                    toStructuredErrorJson(messageKey, response)
+            );
+
+            if (cause != null) {
+                log.error(logMessage, cause);
+            } else {
+                log.warn(logMessage);
+            }
+        } finally {
+            if (previousStructuredError == null) {
+                MDC.remove(STRUCTURED_ERROR_MDC_KEY);
+            } else {
+                MDC.put(STRUCTURED_ERROR_MDC_KEY, previousStructuredError);
+            }
+        }
+    }
+
+    private String toStructuredErrorJson(
+            String messageKey,
+            ApiErrorResponse response
+    ) {
+        return "{" +
+                "\"key\":" + jsonString(messageKey) + "," +
+                "\"code\":" + jsonString(response.code()) + "," +
+                "\"message\":" + jsonString(response.message()) + "," +
+                "\"solution\":" + jsonString(response.solution()) + "," +
+                "\"details\":" + toJsonDetails(response.details()) + "," +
+                "\"timestamp\":" + jsonString(
+                        response.timestamp() == null
+                                ? null
+                                : response.timestamp().toString()
+                ) + "," +
+                "\"path\":" + jsonString(response.path()) + "," +
+                "\"correlationId\":" + jsonString(response.correlationId()) +
+                "}";
+    }
+
+    String toJsonDetails(List<ApiValidationDetail> details) {
+        if (details == null || details.isEmpty()) {
+            return "[]";
+        }
+
+        return details.stream()
+                .map(detail -> "{" +
+                        "\"field\":" + jsonString(detail.field()) + "," +
+                        "\"code\":" + jsonString(detail.code()) + "," +
+                        "\"message\":" + jsonString(detail.message()) + "," +
+                        "\"solution\":" + jsonString(detail.solution()) +
+                        "}")
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    private String jsonString(String value) {
+        if (value == null) {
+            return "null";
+        }
+        return "\"" + escapeJson(value) + "\"";
+    }
+
+    private String escapeJson(String value) {
+        StringBuilder escaped = new StringBuilder(value.length() + 16);
+
+        for (int i = 0; i < value.length(); i++) {
+            char character = value.charAt(i);
+
+            switch (character) {
+                case '\\' -> escaped.append("\\\\");
+                case '"' -> escaped.append("\\\"");
+                case '\b' -> escaped.append("\\b");
+                case '\f' -> escaped.append("\\f");
+                case '\n' -> escaped.append("\\n");
+                case '\r' -> escaped.append("\\r");
+                case '\t' -> escaped.append("\\t");
+                default -> {
+                    if (character < 0x20) {
+                        escaped.append(String.format("\\u%04x", (int) character));
+                    } else {
+                        escaped.append(character);
+                    }
+                }
+            }
+        }
+
+        return escaped.toString();
+    }
+}

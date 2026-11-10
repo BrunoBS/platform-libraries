@@ -1,1 +1,268 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíç½½N‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹Á…É…µ•Ñ•É±¥•¹Ðì()¥µÁ½ÉÐÍÑ…Ñ¥Œ½Éœ¹…ÍÍ•ÉÑ¨¹½É”¹…Á¤¹ÍÍ•ÉÑ¥½¹Ì¸¨ì)¥µÁ½ÉÐÍÑ…Ñ¥Œ½Éœ¹µ½­¥Ñ¼¹5½­¥Ñ¼¸¨ì)¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹…Á¤¹•á•ÁÑ¥½¸¹Á¥á•ÁÑ¥½¸ì)¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹Á…É…µ•Ñ•É±¥•¹Ð¹¥¹Ñ•É¹…°¹Í•É¥…±¥é…Ñ¥½¸¹á…Ñ½Õµ•¹Ðì)¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹Á…É…µ•Ñ•É±¥•¹Ð¹¥¹Ñ•É¹…°¹I•‘¥ÍáÁÉ•ÍÍ¥½¹AÉ½Ù¥‘•Èì)¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹Á…É…µ•Ñ•É±¥•¹Ð¹¥¹Ñ•É¹…°¹I•‘¥ÍA…É…µ•Ñ•ÉI•…‘•Èì)¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ì¹…Á¤¹ÍÑ½É”¹I•‘¥ÍMÑ½É”ì)¥µÁ½ÉÐ ¹Å½Ì¹±½‰…¬¹±…ÍÍ¥Œ¹1½•Èì)¥µÁ½ÉÐ ¹Å½Ì¹±½‰…¬¹±…ÍÍ¥Œ¹ÍÁ¤¹%1½¥¹Ù•¹Ðì)¥µÁ½ÉÐ ¹Å½Ì¹±½‰…¬¹½É”¹É•…¹1¥ÍÑÁÁ•¹‘•Èì)¥µÁ½ÉÐ©…Ù„¹µ…Ñ ¹	¥•¥µ…°ì)¥µÁ½ÉÐ©…Ù„¹µ…Ñ ¹	¥%¹Ñ••Èì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹1¥ÍÐì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹=ÁÑ¥½¹…°ì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹ÍÑÉ•…´¹MÑÉ•…´ì)¥µÁ½ÉÐ½Éœ¹©Õ¹¥Ð¹©ÕÁ¥Ñ•È¹…Á¤¹Q•ÍÐì)¥µÁ½ÉÐ½Éœ¹©Õ¹¥Ð¹©ÕÁ¥Ñ•È¹Á…É…µÌ¹A…É…µ•Ñ•É¥é•‘Q•ÍÐì)¥µÁ½ÉÐ½Éœ¹©Õ¹¥Ð¹©ÕÁ¥Ñ•È¹Á…É…µÌ¹ÁÉ½Ù¥‘•È¹ÉÕµ•¹ÑÌì)¥µÁ½ÉÐ½Éœ¹©Õ¹¥Ð¹©ÕÁ¥Ñ•È¹Á…É…µÌ¹ÁÉ½Ù¥‘•È¹5•Ñ¡½‘M½ÕÉ”ì)¥µÁ½ÉÐ½Éœ¹Í±˜Ñ¨¹1½•É…Ñ½Éäì)¥µÁ½ÉÐÑ½½±Ì¹©…­Í½¸¹‘…Ñ…‰¥¹¹©Í½¸¹)Í½¹5…ÁÁ•Èì)¥µÁ½ÉÐÑ½½±Ì¹©…­Í½¸¹‘…Ñ…‰¥¹¹=‰©•Ñ5…ÁÁ•Èì()±…ÍÌáÁÉ•ÍÍ¥½¹AÉ½Ù¥‘•ÉQ•ÍÐì(€€€™¥¹…°I•‘¥ÍMÑ½É”ÍÑ½É”€ôµ½¬¡I•‘¥ÍMÑ½É”¹±…ÍÌ¤ì(€€€™¥¹…°I•‘¥ÍMÑ½É”Í½Á•€ôµ½¬¡I•‘¥ÍMÑ½É”¹±…ÍÌ¤ì(€€€ìÝ¡•¸¡ÍÑ½É”¹Ý¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¤¹Ñ¡•¹I•ÑÕÉ¸¡Í½Á•¤ìô(€€€™¥¹…°=‰©•Ñ5…ÁÁ•Èµ…ÁÁ•È€ô)Í½¹5…ÁÁ•È¹‰Õ¥±‘•È ¤¹‰Õ¥± ¤ì(€€€™¥¹…°áÁÉ•ÍÍ¥½¹AÉ½Ù¥‘•ÈÁÉ½Ù¥‘•È€ô¹•ÜI•‘¥ÍáÁÉ•ÍÍ¥½¹AÉ½Ù¥‘•È¡¹•ÜI•‘¥ÍA…É…µ•Ñ•ÉI•…‘•È¡ÍÑ½É”°µ…ÁÁ•È¤¤ì((€€€Ù½¥‘½Õµ•¹Ð¡MÑÉ¥¹œ©Í½¸¤ì(€€€€€€€€¼¼á•É¥Í”Ñ¡”•á…Ð‘•Í•É¥…±¥é•È½¸•Ù•ÉäÉ•…°¥¹±Õ‘¥¹œ™…¥±ÕÉ•Ì¸(€€€€€€€‘½¹ÍÝ•È¡…±°€´øì(€€€€€€€€€€€ÑÉäì(€€€€€€€€€€€€€€€á…Ñ½Õµ•¹Ð•á…Ð€ôµ…ÁÁ•È¹É•…‘Y…±Õ”¡©Í½¸°á…Ñ½Õµ•¹Ð¹±…ÍÌ¤ì(€€€€€€€€€€€€€€€¥˜€¡•á…Ð€ôô¹Õ±°¤Ñ¡É½Ü¹•ÜÁ¥á•ÁÑ¥½¸ ‰É•‘¥Ì¹Í•É¥…±¥é…Ñ¥½¸ˆ°¹•ÜIÕ¹Ñ¥µ•á•ÁÑ¥½¸ ¤¤ì(€€€€€€€€€€€€€€€É•ÑÕÉ¸=ÁÑ¥½¹…°¹½˜¡•á…Ð¤ì(€€€€€€€€€€€ô…Ñ €¡Á¥á•ÁÑ¥½¸™…¥±ÕÉ”¤ì(€€€€€€€€€€€€€€€Ñ¡É½Ü™…¥±ÕÉ”ì(€€€€€€€€€€€ô…Ñ €¡á•ÁÑ¥½¸™…¥±ÕÉ”¤ì(€€€€€€€€€€€€€€€Ñ¡É½Ü¹•ÜÁ¥á•ÁÑ¥½¸ ‰É•‘¥Ì¹Í•É¥…±¥é…Ñ¥½¸ˆ°™…¥±ÕÉ”¤ì(€€€€€€€€€€€ô(€€€€€€€ô¤(€€€€€€€€€€€€€€€€¹Ý¡•¸¡Í½Á•¤¹•Ð ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°á…Ñ½Õµ•¹Ð¹±…ÍÌ¤ì(€€€ô(€€€Ù½¥•áÁÉ•ÍÍ¥½¸¡MÑÉ¥¹œ½Á•É…Ñ½È°MÑÉ¥¹œÑåÁ”°MÑÉ¥¹œÙ…±Õ”¤ì(€€€€€€€‘½Õµ•¹Ð ‰íp‰ÑåÁ•pˆép‰aAIMM%=9pˆ±p‰Ù…±Õ•pˆéíp‰½Á•É…Ñ½Épˆépˆˆ€¬½Á•É…Ñ½È(€€€€€€€€€€€€€€€€¬€‰pˆ±p‰Ù…±Õ•QåÁ•pˆépˆˆ€¬ÑåÁ”€¬€‰pˆ±p‰Ù…±Õ•pˆèˆ€¬Ù…±Õ”€¬€‰õôˆ¤ì(€€€ô(€€€ÍÑ…Ñ¥ŒMÑÉ•…´ñÉÕµ•¹ÑÌø½Á•É…Ñ½ÉÌ ¤ì(€€€€€€€É•ÑÕÉ¸MÑÉ•…´¹½˜ (€€€€€€€€€€€€€€€ÉÕµ•¹ÑÌ¹½˜ ‰EU1Lˆ°€ÄÜ°™…±Í”°ÑÉÕ”°™…±Í”¤°(€€€€€€€€€€€€€€€ÉÕµ•¹ÑÌ¹½˜ ‰9=Q}EU1Lˆ°€ÄÜ°ÑÉÕ”°™…±Í”°ÑÉÕ”¤°(€€€€€€€€€€€€€€€ÉÕµ•¹ÑÌ¹½˜ ‰IQI}Q!8ˆ°€ÄÜ°™…±Í”°™…±Í”°ÑÉÕ”¤°(€€€€€€€€€€€€€€€ÉÕµ•¹ÑÌ¹½˜ ‰IQI}Q!9}=I}EU1Lˆ°€ÄÜ°™…±Í”°ÑÉÕ”°ÑÉÕ”¤°(€€€€€€€€€€€€€€€ÉÕµ•¹ÑÌ¹½˜ ‰1MM}Q!8ˆ°€ÄÜ°ÑÉÕ”°™…±Í”°™…±Í”¤°(€€€€€€€€€€€€€€€ÉÕµ•¹ÑÌ¹½˜ ‰1MM}Q!9}=I}EU1Lˆ°€ÄÜ°ÑÉÕ”°ÑÉÕ”°™…±Í”¤°(€€€€€€€€€€€€€€€ÉÕµ•¹ÑÌ¹½˜ ‰=9Q%9Lˆ°€ÄÜ°™…±Í”°ÑÉÕ”°™…±Í”¤°(€€€€€€€€€€€€€€€ÉÕµ•¹ÑÌ¹½˜ ‰9=Q}=9Q%9Lˆ°€ÄÜ°ÑÉÕ”°™…±Í”°ÑÉÕ”¤¤ì(€€€ô(€€€A…É…µ•Ñ•É¥é•‘Q•ÍÐ5•Ñ¡½‘M½ÕÉ” ‰½Á•É…Ñ½ÉÌˆ¤(€€€Ù½¥…±±=Á•É…Ñ½ÉÍUÍ•%¹ÁÕÑ=¹1•™Ñ¹‘½Ù•ÉÅÕ…±¥Ñä¡MÑÉ¥¹œ½Á•É…Ñ½È°¥¹Ð±½Ý•È°(€€€€€€€€€€€‰½½±•…¸‰•±½Ü°‰½½±•…¸•ÅÕ…°°‰½½±•…¸…‰½Ù”¤ì(€€€€€€€•áÁÉ•ÍÍ¥½¸¡½Á•É…Ñ½È°€‰%9QHˆ°½Á•É…Ñ½È¹½¹Ñ…¥¹Ì ‰=9Q%9Lˆ¤€ü€‰lÄátˆ€è€ˆÄàˆ¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°±½Ý•È¤¤¹¥ÍÅÕ…±Q¼¡‰•±½Ü¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€Äà¤¤¹¥ÍÅÕ…±Q¼¡•ÅÕ…°¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€Ää¤¤¹¥ÍÅÕ…±Q¼¡…‰½Ù”¤ì(€€€€€€€€¼¼ÍÕ•ÍÍ™Õ°™…±Í”É•ÍÕ±ÐµÕÍÐ¹½Ð‰”É•Á±…•‰ä„ÑÉÕ”‘•™…Õ±Ð¸(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°±½Ý•È°€…‰•±½Ü¤¤¹¥ÍÅÕ…±Q¼¡‰•±½Ü¤ì(€€€ô(€€€ÍÑ…Ñ¥ŒMÑÉ•…´ñÉÕµ•¹ÑÌø¹Õµ•É¥QåÁ•Ì ¤ì(€€€€€€€É•ÑÕÉ¸MÑÉ•…´¹½˜ ‰%9QHˆ°€‰1=9ˆ°€‰%50ˆ¤¹™±…Ñ5…À¡ÑåÁ”€´ø½Á•É…Ñ½ÉÌ ¤¹µ…À¡É½Ü€´øì(€€€€€€€€€€€=‰©•ÑmtÙ…±Õ•Ì€ôÉ½Ü¹•Ð ¤ì(€€€€€€€€€€€É•ÑÕÉ¸ÉÕµ•¹ÑÌ¹½˜¡ÑåÁ”°Ù…±Õ•ÍlÁt°Ù…±Õ•ÍlÉt°Ù…±Õ•ÍlÍt°Ù…±Õ•ÍlÑt¤ì(€€€€€€€ô¤¤ì(€€€ô(€€€A…É…µ•Ñ•É¥é•‘Q•ÍÐ5•Ñ¡½‘M½ÕÉ” ‰¹Õµ•É¥QåÁ•Ìˆ¤(€€€Ù½¥•Ù•Éå9Õµ•É¥QåÁ•MÕÁÁ½ÉÑÍÙ•Éå=Á•É…Ñ½È¡MÑÉ¥¹œÑåÁ”°MÑÉ¥¹œ½Á•É…Ñ½È°(€€€€€€€€€€€‰½½±•…¸‰•±½Ü°‰½½±•…¸•ÅÕ…°°‰½½±•…¸…‰½Ù”¤ì(€€€€€€€•áÁÉ•ÍÍ¥½¸¡½Á•É…Ñ½È°ÑåÁ”°½Á•É…Ñ½È¹½¹Ñ…¥¹Ì ‰=9Q%9Lˆ¤€ü€‰lÄátˆ€è€ˆÄàˆ¤ì(€€€€€€€=‰©•Ð±½Ü€ôÑåÁ”¹•ÅÕ…±Ì ‰%50ˆ¤€ü¹•Ü	¥•¥µ…° ˆÄÜ¸ääˆ¤€è€ÄÝ0ì(€€€€€€€=‰©•Ð•Ä€ôÑåÁ”¹•ÅÕ…±Ì ‰%50ˆ¤€ü¹•Ü	¥•¥µ…° ˆÄà¸ÀÀˆ¤€è€Äá0ì(€€€€€€€=‰©•Ð¡¥ €ôÑåÁ”¹•ÅÕ…±Ì ‰%50ˆ¤€ü¹•Ü	¥•¥µ…° ˆÄà¸ÀÄˆ¤€è€Äå0ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°±½Ü¤¤¹¥ÍÅÕ…±Q¼¡‰•±½Ü¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°•Ä¤¤¹¥ÍÅÕ…±Q¼¡•ÅÕ…°¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°¡¥ ¤¤¹¥ÍÅÕ…±Q¼¡…‰½Ù”¤ì(€€€ô(€€€Q•ÍÐÙ½¥…±±=É‘•É¥¹=Á•É…Ñ½ÉÍI•©•ÑMÑÉ¥¹¹‘ÉÕµ•¹ÑY…±¥‘…Ñ¥½¹AÉ••‘•ÍI•‘¥Ì ¤ì(€€€€€€€™½È€¡MÑÉ¥¹œ½À€è1¥ÍÐ¹½˜ ‰IQI}Q!8ˆ°€‰IQI}Q!9}=I}EU1Lˆ°€‰1MM}Q!8ˆ°€‰1MM}Q!9}=I}EU1Lˆ¤¤ì(€€€€€€€€€€€•áÁÉ•ÍÍ¥½¸¡½À°€‰MQI%9ˆ°€‰p‰	pˆˆ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…ÑQ¡É½Ý¹	ä  ¤€´øÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€‰ˆ¤¤¹¡…Í5•ÍÍ…” ‰Á…É…µ•Ñ•Èµ±¥•¹Ð¹•áÁÉ•ÍÍ¥½¸¹¥¹Ù…±¥ˆ¤ì(€€€€€€€ô(€€€€€€€™½È€¡MÑÉ¥¹œ­•ä€è¹•ÜMÑÉ¥¹muí¹Õ±°°€ˆˆ°€ˆ€ˆ°€‰qÑq¸‰ô¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…ÑQ¡É½Ý¹	ä  ¤€´øÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì¡­•ä°€Ä¤¤¹¡…Í5•ÍÍ…” ‰Á…É…µ•Ñ•Èµ±¥•¹Ð¹Ù…±¥‘…Ñ¥½¸ˆ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…ÑQ¡É½Ý¹	ä  ¤€´øÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì¡­•ä°€Ä°™…±Í”¤¤¹¡…Í5•ÍÍ…” ‰Á…É…µ•Ñ•Èµ±¥•¹Ð¹Ù…±¥‘…Ñ¥½¸ˆ¤ì(€€€€€€€ô(€€€ô(€€€Q•ÍÐÙ½¥•Ù…±Õ…Ñ•Í9½¹	±…¹­-•åÍ]¥Ñ¡½ÕÑI•ÝÉ¥Ñ¥¹œ ¤Ñ¡É½ÝÌá•ÁÑ¥½¸ì(€€€€€€€MÑÉ¥¹œ©Í½¸€ô€‰íp‰ÑåÁ•pˆép‰aAIMM%=9pˆ±p‰Ù…±Õ•pˆéíp‰½Á•É…Ñ½Épˆép‰IQI}Q!9}=I}EU1Mpˆ±p‰Ù…±Õ•QåÁ•pˆép‰%9QIpˆ±p‰Ù…±Õ•pˆèÄáõôˆì(€€€€€€€á…Ñ½Õµ•¹Ð‘½Õµ•¹Ð€ôµ…ÁÁ•È¹É•…‘Y…±Õ”¡©Í½¸°á…Ñ½Õµ•¹Ð¹±…ÍÌ¤ì(€€€€€€€™½È€¡MÑÉ¥¹œ­•ä€è1¥ÍÐ¹½˜ ‰Í¥¹±”ˆ°€‰ÉÕ±•Ì¸¹Ù…±Õ”ˆ°€‰½¹™¥œéÉÕ±•Ì¹Ù…±Õ”ˆ°(€€€€€€€€€€€€€€€€‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•ÈéÉÕ±•Ì¹Ù…±Õ”ˆ°€ˆÉÕ±•Ì¹Ù…±Õ”€ˆ¤¤ì(€€€€€€€€€€€Ý¡•¸¡Í½Á•¹•Ð¡­•ä°á…Ñ½Õµ•¹Ð¹±…ÍÌ¤¤¹Ñ¡•¹I•ÑÕÉ¸¡=ÁÑ¥½¹…°¹½˜¡‘½Õµ•¹Ð¤¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì¡­•ä°€ÈÄ¤¤¹¥ÍQÉÕ” ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì¡­•ä°€ÈÄ°™…±Í”¤¤¹¥ÍQÉÕ” ¤ì(€€€€€€€€€€€Ù•É¥™ä¡Í½Á•°Ñ¥µ•Ì È¤¤¹•Ð¡­•ä°á…Ñ½Õµ•¹Ð¹±…ÍÌ¤ì(€€€€€€€ô(€€€ô(€€€Q•ÍÐÙ½¥ÍÑÉ¥¹¹‘±±9Õµ•É¥5•µ‰•ÉÍ¡¥ÁQåÁ•ÍÉ•á…Ð ¤ì(€€€€€€€•áÁÉ•ÍÍ¥½¸ ‰EU1Lˆ°€‰MQI%9ˆ°€‰p‰IQ%1pˆˆ¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€‰IQ%0ˆ¤¤¹¥ÍQÉÕ” ¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€‰É•Ñ…¥°ˆ¤¤¹¥Í…±Í” ¤ì(€€€€€€€•áÁÉ•ÍÍ¥½¸ ‰9=Q}EU1Lˆ°€‰MQI%9ˆ°€‰p‰IQ%1pˆˆ¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€‰=Q!Hˆ¤¤¹¥ÍQÉÕ” ¤ì(€€€€€€€™½È€¡MÑÉ¥¹œ½Á•É…Ñ½È€è1¥ÍÐ¹½˜ ‰=9Q%9Lˆ°€‰9=Q}=9Q%9Lˆ¤¤ì(€€€€€€€€€€€‰½½±•…¸•áÁ•Ñ•€ô½Á•É…Ñ½È¹•ÅÕ…±Ì ‰=9Q%9Lˆ¤ì(€€€€€€€€€€€•áÁÉ•ÍÍ¥½¸¡½Á•É…Ñ½È°€‰MQI%9ˆ°€‰mp‰IQ%1pˆ±p‰Y%Ap‰tˆ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€‰Y%@ˆ¤¤¹¥ÍÅÕ…±Q¼¡•áÁ•Ñ•¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€‰=Q!Hˆ¤¤¹¥ÍÅÕ…±Q¼ …•áÁ•Ñ•¤ì(€€€€€€€€€€€•áÁÉ•ÍÍ¥½¸¡½Á•É…Ñ½È°€‰1=9ˆ°€‰läÈÈÌÌÜÈÀÌØàÔÐÜÜÔàÀÜ°´äÈÈÌÌÜÈÀÌØàÔÐÜÜÔàÀátˆ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°1½¹œ¹5a}Y1U¤¤¹¥ÍÅÕ…±Q¼¡•áÁ•Ñ•¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°€Á0¤¤¹¥ÍÅÕ…±Q¼ …•áÁ•Ñ•¤ì(€€€€€€€€€€€•áÁÉ•ÍÍ¥½¸¡½Á•É…Ñ½È°€‰%50ˆ°€‰lÄÈÌÐÔØÜàäÀÄÈÌÐÔØÜàäÀÄÈÌÐÔØÜàäÀ¸ÄÈ°À¸ÄÁtˆ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ½Ù¥‘•È¹µ…Ñ¡•Ì ‰ÉÕ±•Ì¹Ù…±Õ”ˆ°¹•Ü	¥•¥µ…° ˆÄÈÌÐÔØÜàäÀÄÈÌÐÔØÜàäÀÄÈÌÐÔØÜàäÀ¸ÄÈˆ¤¤¤¹¥ÍÅÕ…±Q¼¡•áÁ•Ñ•¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð£½½¶‰žËkºwµçsƒ“#3CScsƒ“#3CScsƒ“ã2"’’’æ—5G'VR‚“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"ÂæWr&–tFV6–ÖÂ‚##3CScsƒ“#3CScsƒ“#3CScsƒ“ã#"’’’æ—4fÇ6R‚“°¢W‡&W76–öâ‚$ÄU55õD„â"Â$DT4”ÔÂ"Â#ã"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"ÂæWr&–tFV6–ÖÂ‚#ã“““““““““““““““““’"’’’æ—5G'VR‚“°¢Ð¢7FF–27G&VÓÄ&wVÖVçG3â–çfÆ–DW‡&W76–öç2‚’°¢&WGW&â7G&VÒæöb€¢&wVÖVçG2æöb‚$u$TDU%õD„â"Â%5E$”är"Â%Â'…Â""’À¢&wVÖVçG2æöb‚$UTÅ2"Â%Tä´äõtâ"Â#"’À¢&wVÖVçG2æöb‚$4ôåD”å2"Â$”åDTtU""Â%³ÅÂ#%Â%Ò"’À¢&wVÖVçG2æöb‚$4ôåD”å2"Â$”åDTtU""Â%µÒ"’À¢&wVÖVçG2æöb‚$4ôåD”å2"Â$DT4”ÔÂ"Â%³ãÃãÒ"’À¢&wVÖVçG2æöb‚$4ôåD”å2"Â$”åDTtU""Â#"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$”åDTtU""Â%³Ò"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$”åDTtU""Â&çVÆÂ"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$”åDTtU""Â'G'VR"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$”åDTtU""Â'·Ò"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$”åDTtU""Â%Â#…Â""’À¢&wVÖVçG2æöb‚$UTÅ2"Â$”åDTtU""Â#ãR"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$”åDTtU""Â##CsCƒ3cC‚"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$Äôär"Â#“##33s#3cƒSCssSƒ‚"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$Äôär"Â"Ó“##33s#3cƒSCssSƒ’"’À¢&wVÖVçG2æöb‚$UTÅ2"Â$DT4”ÔÂ"Â#ã"’“°¢Ð¢&ÖWFW&—¦VEFW7BÖWF†öE6÷W&6R‚&–çfÆ–DW‡&W76–öç2"¢fö–B&V¦V7G566†VÖf–öÆF–öç4æE7W÷'G4ÆövvVDfÆÆ&6²…7G&–ær÷W&F÷"Â7G&–ærG—RÂ7G&–ærfÇVR’°¢W‡&W76–öâ†÷W&F÷"ÂG—RÂfÇVR“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæW‡&W76–öâæ–çfÆ–B"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂG'VR’’æ—5G'VR‚“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂfÇ6R’’æ—4fÇ6R‚“°¢Ð¢FW7Bfö–B&V¦V7G4–æ6ö×ÆWFTFö7VÖVçG5Væ¶æ÷vä÷W&F÷$æDÖÆf÷&ÖVD§6öâ‚’°¢f÷"…7G&–ær§6öâ¢Æ—7Bæöb‚'·Ò"Â%µÒ"Â&çVÆÂ"Â'µÂ'G—UÂ#¥Â$4ôäd”uU$D”ôåÂ"ÅÂ'fÇVUÂ#£‡Ò"À¢'µÂ'G—UÂ#¥Â$U…$U54”ôåÂ"ÅÂ'fÇVUÂ#§·×Ò"À¢'µÂ'G—UÂ#¥Â$U…$U54”ôåÂ"ÅÂ'fÇVUÂ#§µÂ&÷W&F÷%Â#¥Â$UTÅ5Â"ÅÂ'fÇVUG—UÂ#¥Â$”åDTtU%Â"ÅÂ'fÇVUÂ#£‚ÅÂ&W‡G&Â#§G'VW×Ò"’’°¢Fö7VÖVçB†§6öâ“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚’’æ—4–ç7Fæ6Töb„”W†6WF–öâæ6Æ72“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂfÇ6R’’æ—4fÇ6R‚“°¢Ð¢W‡&W76–öâ‚$äB"Â$”åDTtU""Â#‚"“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæ÷W&F÷"æ–çfÆ–B"“°¢f÷"…7G&–ær§6öâ¢Æ—7Bæöb‚&æ÷BÖ§6öâ"Â'²"Â'·Ò·Ò"Â%²"Â'µÂ'G—UÂ#¢"’’°¢Fö7VÖVçB†§6öâ“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBçfÇVRæ–çfÆ–B"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂG'VR’’æ—5G'VR‚“°¢Ð¢Ð¢FW7Bfö–BfÆ–FFW5F†TVçF—&T6öæf–wW&F–öä&Vf÷&TWfÇVF–æuF†T–çWB‚’°¢f÷"…7G&–ærfÇVW2¢Æ—7Bæöb‚%³‚ÅÂ##Â%Ò"Â%³‚Ã…Ò"Â%³‚ÆçVÆÅÒ"’’°¢W‡&W76–öâ‚$4ôåD”å2"Â$”åDTtU""ÂfÇVW2“°¢òòÖF6†–ærf—'7BVÆVÖVçB6ææ÷B†–FRâ–çfÆ–BVÆVÖVçBÆFW"–âF†R'&’à¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚’¢æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæW‡&W76–öâæ–çfÆ–B"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂfÇ6R’’æ—4fÇ6R‚“°¢Ð¢W‡&W76–öâ‚$UTÅ2"Â$”åDTtU""Â#‚ãR"“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â&–çfÆ–B–çWB"’¢æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæW‡&W76–öâæ–çfÆ–B"“°¢W‡&W76–öâ‚%Tä´äõtâ"Â$”åDTtU""Â#‚"“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â&–çfÆ–B–çWB"’¢æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæ÷W&F÷"æ–çfÆ–B"“°¢Ð¢FW7Bfö–B–æ6ö×F–&ÆT–çWDæWfW$6öW&6W57G&–æw4fÆöG4÷$6öçF–æW'2‚’°¢W‡&W76–öâ‚$UTÅ2"Â$”åDTtU""Â#‚"“°¢f÷"„ö&¦V7BfÇVR¢Æ—7Bæöb‚#‚"Â‚ãÂæWr&–tFV6–ÖÂ‚#‚"’ÂG'VRÂÆ—7Bæöbƒ‚’À¢&–t–çFVvW"çfÇVTöb„ÆöæräÔ…õdÅTR’’’°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"ÂfÇVR’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæ–çWBæ–æ6ö×F–&ÆR"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"ÂfÇVRÂfÇ6R’’æ—4fÇ6R‚“°¢Ð¢W‡&W76–öâ‚$UTÅ2"Â%5E$”är"Â%Â#…Â""“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæ–çWBæ–æ6ö×F–&ÆR"“°¢W‡&W76–öâ‚$UTÅ2"Â$DT4”ÔÂ"Â#‚"“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"ÂF÷V&ÆRäæâ’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæ–çWBæ–æ6ö×F–&ÆR"“°¢Ð¢FW7Bfö–B'6Væ6T–æg&7G'V7GW&TfÆÆ&6´æE6fTÆöw2‚’°¢ÆövvW"ÆövvW"Ò„ÆövvW"’ÆövvW$f7F÷'’ævWDÆövvW"…&VF—4W‡&W76–öå&÷f–FW"æ6Æ72“°¢Æ—7DVæFW#Ä”Æövv–ætWfVçCâVæFW"ÒæWrÆ—7DVæFW#Ä”Æövv–ætWfVçCâ‚“²VæFW"ç7F'B‚“²ÆövvW"æFDVæFW"†VæFW"“°¢G'’°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBæÖ—76–ær"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂG'VR’’æ—5G'VR‚“°¢f÷"…7G&–ærW'&÷"¢Æ—7Bæöb‚'&VF—2çVæf–Æ&ÆR"Â'&VF—2çF–ÖV÷WB"Â'&VF—2ç6W&–Æ—¦F–öâ"Â'&VF—2çG—R"’’°¢FõF‡&÷r†æWr”W†6WF–öâ†W'&÷"ÂæWr'VçF–ÖTW†6WF–öâ‚%4T5$UEô¥4ôâ"’’¢çv†Vâ‡66÷VB’ævWB‚''VÆW2çfÇVR"ÂW†7DFö7VÖVçBæ6Æ72“°¢7G&–ærW‡V7FVBÒW'&÷"æWVÇ2‚'&VF—2çF–ÖV÷WB"’ò'&ÖWFW"Ö6Æ–VçBçF–ÖV÷WB ¢¢W'&÷"æWVÇ2‚'&VF—2çVæf–Æ&ÆR"’ò'&ÖWFW"Ö6Æ–VçBç&VBæf–ÆVB"¢'&ÖWFW"Ö6Æ–VçBçfÇVRæ–çfÆ–B#°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚’’æ†4ÖW76vR†W‡V7FVB’æ†46W6R†çVÆÂ“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂfÇ6R’’æ—4fÇ6R‚“°¢Ð¢W‡&W76–öâ‚$äB"Â$”åDTtU""Â#‚"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂfÇ6R’’æ—4fÇ6R‚“°¢W‡&W76–öâ‚$UTÅ2"Â$”åDTtU""Â&çVÆÂ"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂfÇ6R’’æ—4fÇ6R‚“°¢W‡&W76–öâ‚$UTÅ2"Â$”åDTtU""Â#‚"“°¢76W'EF†B‡&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â%4T5$UEô”åUB"ÂfÇ6R’’æ—4fÇ6R‚“°¢76W'EF†B†VæFW"æÆ—7B’æ†56—¦Rƒ‚’æÆÅ6F—6g’†WfVçBÓâ°¢76W'EF†B†WfVçBævWDf÷&ÖGFVDÖW76vR‚’’æ6öçF–ç2‚'&ÖWFW"Ö6Æ–VçBâ"’æFöW4æ÷D6öçF–â‚%4T5$UEô¥4ôâ"Â%4T5$UEô”åUB"Â''VÆW2çfÇVR"“°¢76W'EF†B†WfVçBævWEF‡&÷v&ÆU&÷‡’‚’’æ—4çVÆÂ‚“°¢Ò“°¢Òf–æÆÇ’²ÆövvW"æFWF6„VæFW"†VæFW"“²VæFW"ç7F÷‚“²Ð¢Ð¢FW7Bfö–B&wVÖVçDæE&öw&ÖÖ–ætW'&÷'4&Tæ÷D†–FFVä'”fÆÆ&6²‚’°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚""Â‚ÂfÇ6R’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBçfÆ–FF–öâ"“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"ÂçVÆÂÂG'VR’’æ†4ÖW76vR‚'&ÖWFW"Ö6Æ–VçBçfÆ–FF–öâ"“°¢fW&–g’‡7F÷&R’çv—F„æÖW76R‚&G–æÖ–2×&ÖWFW""“°¢fW&–g”æô–çFW&7F–öç2‡66÷VB“°¢FõF‡&÷r†æWr–ÆÆVvÅ7FFTW†6WF–öâ‚'&öw&ÖÖ–ærW'&÷""’’çv†Vâ‡66÷VB’ævWB‚''VÆW2çfÇVR"ÂW†7DFö7VÖVçBæ6Æ72“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂfÇ6R’’æ—4–ç7Fæ6Töb„–ÆÆVvÅ7FFTW†6WF–öâæ6Æ72“°¢FõF‡&÷r†æWr76W'F–öäW'&÷"‚&fFÂ"’’çv†Vâ‡66÷VB’ævWB‚''VÆW2çfÇVR"ÂW†7DFö7VÖVçBæ6Æ72“°¢76W'EF†EF‡&÷vä'’‚‚’Óâ&÷f–FW"æÖF6†W2‚''VÆW2çfÇVR"Â‚ÂfÇ6R’’æ—4–ç7Fæ6Töb„76W'F–öäW'&÷"æ6Æ72“°¢Ð§Ð 
+package br.com.portalmanager.platform.library.parameterclient;
+
+import br.com.portalmanager.platform.library.parameterclient.api.contract.ExpressionProvider;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
+import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;
+import br.com.portalmanager.platform.library.parameterclient.internal.RedisExpressionProvider;
+import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
+import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.LoggerFactory;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
+
+class ExpressionProviderTest {
+    final RedisStore store = mock(RedisStore.class);
+    final RedisStore scoped = mock(RedisStore.class);
+    { when(store.withNamespace("dynamic-parameter")).thenReturn(scoped); }
+    final ObjectMapper mapper = JsonMapper.builder().build();
+    final ExpressionProvider provider = new RedisExpressionProvider(new RedisParameterReader(store, mapper));
+
+    void document(String json) {
+        // Exercise the exact deserializer on every read, including failures.
+        doAnswer(call -> {
+            try {
+                ExactDocument exact = mapper.readValue(json, ExactDocument.class);
+                if (exact == null) throw new ApiException("redis.serialization", new RuntimeException());
+                return Optional.of(exact);
+            } catch (ApiException failure) {
+                throw failure;
+            } catch (Exception failure) {
+                throw new ApiException("redis.serialization", failure);
+            }
+        })
+                .when(scoped).get("rules.value", ExactDocument.class);
+    }
+    void expression(String operator, String type, String value) {
+        document("{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"" + operator
+                + "\",\"valueType\":\"" + type + "\",\"value\":" + value + "}}");
+    }
+    static Stream<Arguments> operators() {
+        return Stream.of(
+                Arguments.of("EQUALS", 17, false, true, false),
+                Arguments.of("NOT_EQUALS", 17, true, false, true),
+                Arguments.of("GREATER_THAN", 17, false, false, true),
+                Arguments.of("GREATER_THAN_OR_EQUALS", 17, false, true, true),
+                Arguments.of("LESS_THAN", 17, true, false, false),
+                Arguments.of("LESS_THAN_OR_EQUALS", 17, true, true, false),
+                Arguments.of("CONTAINS", 17, false, true, false),
+                Arguments.of("NOT_CONTAINS", 17, true, false, true));
+    }
+    @ParameterizedTest @MethodSource("operators")
+    void allOperatorsUseInputOnLeftAndCoverEquality(String operator, int lower,
+            boolean below, boolean equal, boolean above) {
+        expression(operator, "INTEGER", operator.contains("CONTAINS") ? "[18]" : "18");
+        assertThat(provider.matches("rules.value", lower)).isEqualTo(below);
+        assertThat(provider.matches("rules.value", 18)).isEqualTo(equal);
+        assertThat(provider.matches("rules.value", 19)).isEqualTo(above);
+        // A successful false result must not be replaced by a true default.
+        assertThat(provider.matches("rules.value", lower, !below)).isEqualTo(below);
+    }
+    static Stream<Arguments> numericTypes() {
+        return Stream.of("INTEGER", "LONG", "DECIMAL").flatMap(type -> operators().map(row -> {
+            Object[] values = row.get();
+            return Arguments.of(type, values[0], values[2], values[3], values[4]);
+        }));
+    }
+    @ParameterizedTest @MethodSource("numericTypes")
+    void everyNumericTypeSupportsEveryOperator(String type, String operator,
+            boolean below, boolean equal, boolean above) {
+        expression(operator, type, operator.contains("CONTAINS") ? "[18]" : "18");
+        Object low = type.equals("DECIMAL") ? new BigDecimal("17.99") : 17L;
+        Object eq = type.equals("DECIMAL") ? new BigDecimal("18.00") : 18L;
+        Object high = type.equals("DECIMAL") ? new BigDecimal("18.01") : 19L;
+        assertThat(provider.matches("rules.value", low)).isEqualTo(below);
+        assertThat(provider.matches("rules.value", eq)).isEqualTo(equal);
+        assertThat(provider.matches("rules.value", high)).isEqualTo(above);
+    }
+    @Test void allOrderingOperatorsRejectStringAndArgumentValidationPrecedesRedis() {
+        for (String op : List.of("GREATER_THAN", "GREATER_THAN_OR_EQUALS", "LESS_THAN", "LESS_THAN_OR_EQUALS")) {
+            expression(op, "STRING", "\"B\"");
+            assertThatThrownBy(() -> provider.matches("rules.value", "A")).hasMessage("parameter-client.expression.invalid");
+        }
+        for (String key : new String[]{null, "", " ", "\t\n"}) {
+            assertThatThrownBy(() -> provider.matches(key, 1)).hasMessage("parameter-client.validation");
+            assertThatThrownBy(() -> provider.matches(key, 1, false)).hasMessage("parameter-client.validation");
+        }
+    }
+    @Test void evaluatesNonBlankKeysWithoutRewriting() throws Exception {
+        String json = "{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"GREATER_THAN_OR_EQUALS\",\"valueType\":\"INTEGER\",\"value\":18}}";
+        ExactDocument document = mapper.readValue(json, ExactDocument.class);
+        for (String key : List.of("single", "rules..value", "config:rules.value",
+                "dynamic-parameter:rules.value", " rules.value ")) {
+            when(scoped.get(key, ExactDocument.class)).thenReturn(Optional.of(document));
+            assertThat(provider.matches(key, 21)).isTrue();
+            assertThat(provider.matches(key, 21, false)).isTrue();
+            verify(scoped, times(2)).get(key, ExactDocument.class);
+        }
+    }
+    @Test void stringAndAllNumericMembershipTypesAreExact() {
+        expression("EQUALS", "STRING", "\"RETAIL\"");
+        assertThat(provider.matches("rules.value", "RETAIL")).isTrue();
+        assertThat(provider.matches("rules.value", "retail")).isFalse();
+        expression("NOT_EQUALS", "STRING", "\"RETAIL\"");
+        assertThat(provider.matches("rules.value", "OTHER")).isTrue();
+        for (String operator : List.of("CONTAINS", "NOT_CONTAINS")) {
+            boolean expected = operator.equals("CONTAINS");
+            expression(operator, "STRING", "[\"RETAIL\",\"VIP\"]");
+            assertThat(provider.matches("rules.value", "VIP")).isEqualTo(expected);
+            assertThat(provider.matches("rules.value", "OTHER")).isEqualTo(!expected);
+            expression(operator, "LONG", "[9223372036854775807,-9223372036854775808]");
+            assertThat(provider.matches("rules.value", Long.MAX_VALUE)).isEqualTo(expected);
+            assertThat(provider.matches("rules.value", 0L)).isEqualTo(!expected);
+            expression(operator, "DECIMAL", "[123456789012345678901234567890.12,0.10]");
+            assertThat(provider.matches("rules.value", new BigDecimal("123456789012345678901234567890.12"))).isEqualTo(expected);
+            assertThat(provider.matches("rules.value", new BigDecimal("0.100"))).isEqualTo(expected);
+            assertThat(provider.matches("rules.value", new BigDecimal("0.11"))).isEqualTo(!expected);
+        }
+    }
+    @Test void nativeTreeReaderPreservesNestedValuesWithoutChangingTheSharedMapper() throws Exception {
+        ExactDocument document = mapper.readValue("{\"nested\":[9223372036854775807,123456789012345678901234567890.12,"
+                + "{\"flag\":true,\"empty\":null,\"text\":\"18\"}]}", ExactDocument.class);
+        tools.jackson.databind.JsonNode values = document.root().get("nested");
+        assertThat(values.get(0).isBigInteger()).isTrue();
+        assertThat(values.get(0).bigIntegerValue()).isEqualTo(BigInteger.valueOf(Long.MAX_VALUE));
+        assertThat(values.get(1).isBigDecimal()).isTrue();
+        assertThat(values.get(1).decimalValue()).isEqualByComparingTo("123456789012345678901234567890.12");
+        assertThat(values.get(2).get("flag").asBoolean()).isTrue();
+        assertThat(values.get(2).get("empty").isNull()).isTrue();
+        assertThat(values.get(2).get("text").asString()).isEqualTo("18");
+        assertThat(mapper.readTree("18").isBigInteger()).isFalse();
+        assertThatThrownBy(() -> mapper.readValue("{} {}", ExactDocument.class)).isInstanceOf(RuntimeException.class);
+    }
+    @Test void numericExtremesFractionsAndScaleDoNotLosePrecision() {
+        expression("EQUALS", "LONG", "9223372036854775807");
+        assertThat(provider.matches("rules.value", Long.MAX_VALUE)).isTrue();
+        assertThat(provider.matches("rules.value", Long.MAX_VALUE - 1)).isFalse();
+        expression("LESS_THAN", "LONG", "-9223372036854775807");
+        assertThat(provider.matches("rules.value", Long.MIN_VALUE)).isTrue();
+        expression("EQUALS", "INTEGER", "-2147483648");
+        assertThat(provider.matches("rules.value", Integer.MIN_VALUE)).isTrue();
+        expression("EQUALS", "INTEGER", "2147483647");
+        assertThat(provider.matches("rules.value", Integer.MAX_VALUE)).isTrue();
+        expression("GREATER_THAN", "DECIMAL", "123456789012345678901234567890.12");
+        assertThat(provider.matches("rules.value", new BigDecimal("123456789012345678901234567890.13"))).isTrue();
+        assertThat(provider.matches("rules.value", new BigDecimal("123456789012345678901234567890.1200"))).isFalse();
+        expression("LESS_THAN", "DECIMAL", "0.01");
+        assertThat(provider.matches("rules.value", new BigDecimal("0.00999999999999999999"))).isTrue();
+    }
+    static Stream<Arguments> invalidExpressions() {
+        return Stream.of(
+            Arguments.of("GREATER_THAN", "STRING", "\"x\""),
+            Arguments.of("EQUALS", "UNKNOWN", "1"),
+            Arguments.of("CONTAINS", "INTEGER", "[1,\"2\"]"),
+            Arguments.of("CONTAINS", "INTEGER", "[]"),
+            Arguments.of("CONTAINS", "DECIMAL", "[1.0,1.00]"),
+            Arguments.of("CONTAINS", "INTEGER", "1"),
+            Arguments.of("EQUALS", "INTEGER", "[1]"),
+            Arguments.of("EQUALS", "INTEGER", "null"),
+            Arguments.of("EQUALS", "INTEGER", "true"),
+            Arguments.of("EQUALS", "INTEGER", "{}"),
+            Arguments.of("EQUALS", "INTEGER", "\"18\""),
+            Arguments.of("EQUALS", "INTEGER", "1.5"),
+            Arguments.of("EQUALS", "INTEGER", "2147483648"),
+            Arguments.of("EQUALS", "LONG", "9223372036854775808"),
+            Arguments.of("EQUALS", "LONG", "-9223372036854775809"),
+            Arguments.of("EQUALS", "DECIMAL", "0.001"));
+    }
+    @ParameterizedTest @MethodSource("invalidExpressions")
+    void rejectsSchemaViolationsAndSupportsLoggedFallback(String operator, String type, String value) {
+        expression(operator, type, value);
+        assertThatThrownBy(() -> provider.matches("rules.value", 18)).hasMessage("parameter-client.expression.invalid");
+        assertThat(provider.matches("rules.value", 18, true)).isTrue();
+        assertThat(provider.matches("rules.value", 18, false)).isFalse();
+    }
+    @Test void rejectsIncompleteDocumentsUnknownOperatorAndMalformedJson() {
+        for (String json : List.of("{}", "[]", "null", "{\"type\":\"CONFIGURATION\",\"value\":18}",
+                "{\"type\":\"EXPRESSION\",\"value\":{}}",
+                "{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"EQUALS\",\"valueType\":\"INTEGER\",\"value\":18,\"extra\":true}}")) {
+            document(json);
+            assertThatThrownBy(() -> provider.matches("rules.value", 18)).isInstanceOf(ApiException.class);
+            assertThat(provider.matches("rules.value", 18, false)).isFalse();
+        }
+        expression("AND", "INTEGER", "18");
+        assertThatThrownBy(() -> provider.matches("rules.value", 18)).hasMessage("parameter-client.operator.invalid");
+        for (String json : List.of("not-json", "{", "{} {}", "[", "{\"type\":")) {
+            document(json);
+            assertThatThrownBy(() -> provider.matches("rules.value", 18)).hasMessage("parameter-client.value.invalid");
+            assertThat(provider.matches("rules.value", 18, true)).isTrue();
+        }
+    }
+    @Test void validatesTheEntireConfigurationBeforeEvaluatingTheInput() {
+        for (String values : List.of("[18,\"21\"]", "[18,18]", "[18,null]")) {
+            expression("CONTAINS", "INTEGER", values);
+            // A matching first element cannot hide an invalid element later in the array.
+            assertThatThrownBy(() -> provider.matches("rules.value", 18))
+                    .hasMessage("parameter-client.expression.invalid");
+            assertThat(provider.matches("rules.value", 18, false)).isFalse();
+        }
+        expression("EQUALS", "INTEGER", "18.5");
+        assertThatThrownBy(() -> provider.matches("rules.value", "invalid input"))
+                .hasMessage("parameter-client.expression.invalid");
+        expression("UNKNOWN", "INTEGER", "18");
+        assertThatThrownBy(() -> provider.matches("rules.value", "invalid input"))
+                .hasMessage("parameter-client.operator.invalid");
+    }
+    @Test void incompatibleInputNeverCoercesStringsFloatsOrContainers() {
+        expression("EQUALS", "INTEGER", "18");
+        for (Object value : List.of("18", 18.0, new BigDecimal("18"), true, List.of(18),
+                BigInteger.valueOf(Long.MAX_VALUE))) {
+            assertThatThrownBy(() -> provider.matches("rules.value", value)).hasMessage("parameter-client.input.incompatible");
+            assertThat(provider.matches("rules.value", value, false)).isFalse();
+        }
+        expression("EQUALS", "STRING", "\"18\"");
+        assertThatThrownBy(() -> provider.matches("rules.value", 18)).hasMessage("parameter-client.input.incompatible");
+        expression("EQUALS", "DECIMAL", "18");
+        assertThatThrownBy(() -> provider.matches("rules.value", Double.NaN)).hasMessage("parameter-client.input.incompatible");
+    }
+    @Test void absenceInfrastructureFallbackAndSafeLogs() {
+        Logger logger = (Logger) LoggerFactory.getLogger(RedisExpressionProvider.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<ILoggingEvent>(); appender.start(); logger.addAppender(appender);
+        try {
+            assertThatThrownBy(() -> provider.matches("rules.value", 18)).hasMessage("parameter-client.missing");
+            assertThat(provider.matches("rules.value", 18, true)).isTrue();
+            for (String error : List.of("redis.unavailable", "redis.timeout", "redis.serialization", "redis.type")) {
+                doThrow(new ApiException(error, new RuntimeException("SECRET_JSON")))
+                        .when(scoped).get("rules.value", ExactDocument.class);
+                String expected = error.equals("redis.timeout") ? "parameter-client.timeout"
+                        : error.equals("redis.unavailable") ? "parameter-client.read.failed" : "parameter-client.value.invalid";
+                assertThatThrownBy(() -> provider.matches("rules.value", 18)).hasMessage(expected).hasCause(null);
+                assertThat(provider.matches("rules.value", 18, false)).isFalse();
+            }
+            expression("AND", "INTEGER", "18");
+            assertThat(provider.matches("rules.value", 18, false)).isFalse();
+            expression("EQUALS", "INTEGER", "null");
+            assertThat(provider.matches("rules.value", 18, false)).isFalse();
+            expression("EQUALS", "INTEGER", "18");
+            assertThat(provider.matches("rules.value", "SECRET_INPUT", false)).isFalse();
+            assertThat(appender.list).hasSize(8).allSatisfy(event -> {
+                assertThat(event.getFormattedMessage()).contains("parameter-client.").doesNotContain("SECRET_JSON", "SECRET_INPUT", "rules.value");
+                assertThat(event.getThrowableProxy()).isNull();
+            });
+        } finally { logger.detachAppender(appender); appender.stop(); }
+    }
+    @Test void argumentAndProgrammingErrorsAreNotHiddenByFallback() {
+        assertThatThrownBy(() -> provider.matches("", 18, false)).hasMessage("parameter-client.validation");
+        assertThatThrownBy(() -> provider.matches("rules.value", null, true)).hasMessage("parameter-client.validation");
+        verify(store).withNamespace("dynamic-parameter");
+        verifyNoInteractions(scoped);
+        doThrow(new IllegalStateException("programming error")).when(scoped).get("rules.value", ExactDocument.class);
+        assertThatThrownBy(() -> provider.matches("rules.value", 18, false)).isInstanceOf(IllegalStateException.class);
+        doThrow(new AssertionError("fatal")).when(scoped).get("rules.value", ExactDocument.class);
+        assertThatThrownBy(() -> provider.matches("rules.value", 18, false)).isInstanceOf(AssertionError.class);
+    }
+}

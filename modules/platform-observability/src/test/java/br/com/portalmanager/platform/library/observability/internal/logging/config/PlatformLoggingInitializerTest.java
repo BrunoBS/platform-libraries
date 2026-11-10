@@ -1,1 +1,511 @@
-Yªηx-®ιάjΧΆλiΊΪ+§j[h‘ιάΆινηwN‹Z–‹­¦λew¬ΥΑ…­…”‰ΘΉ½΄ΉΑ½ΙΡ…±µ…Ή…•ΘΉΑ±…Ρ™½Ι΄Ή±¥‰Ι…ΙδΉ½‰Ν•ΙΩ…‰¥±¥ΡδΉ¥ΉΡ•ΙΉ…°Ή±½¥ΉΉ½Ή™¥μ()¥µΑ½ΙΠ‰ΘΉ½΄ΉΑ½ΙΡ…±µ…Ή…•ΘΉΑ±…Ρ™½Ι΄Ή±¥‰Ι…ΙδΉ½‰Ν•ΙΩ…‰¥±¥ΡδΉ…Α¤Ή±½¥ΉΉM•ΉΝ¥Ρ¥Ω•Y…±Υ”μ)¥µΑ½ΙΠ ΉΕ½ΜΉ±½‰…¬Ή±…ΝΝ¥Ή1•Ω•°μ)¥µΑ½ΙΠ ΉΕ½ΜΉ±½‰…¬Ή±…ΝΝ¥Ή1½•Θμ)¥µΑ½ΙΠ ΉΕ½ΜΉ±½‰…¬Ή±…ΝΝ¥Ή1½•Ι½ΉΡ•αΠμ)¥µΑ½ΙΠ ΉΕ½ΜΉ±½‰…¬Ή±…ΝΝ¥Ή•Ή½‘•ΘΉA…ΡΡ•ΙΉ1…ε½ΥΡΉ½‘•Θμ)¥µΑ½ΙΠ ΉΕ½ΜΉ±½‰…¬Ή±…ΝΝ¥ΉΝΑ¤Ή%1½¥ΉΩ•ΉΠμ)¥µΑ½ΙΠ ΉΕ½ΜΉ±½‰…¬Ή½Ι”ΉΑΑ•Ή‘•Θμ)¥µΑ½ΙΠ ΉΕ½ΜΉ±½‰…¬Ή½Ι”Ή½ΉΝ½±•ΑΑ•Ή‘•Θμ)¥µΑ½ΙΠ½ΙΉ©ΥΉ¥ΠΉ©ΥΑ¥Ρ•ΘΉ…Α¤Ή™Ρ•Ι… μ)¥µΑ½ΙΠ½ΙΉ©ΥΉ¥ΠΉ©ΥΑ¥Ρ•ΘΉ…Α¤Ή	•™½Ι•… μ)¥µΑ½ΙΠ½ΙΉ©ΥΉ¥ΠΉ©ΥΑ¥Ρ•ΘΉ…Α¤ΉQ•ΝΠμ)¥µΑ½ΙΠ½ΙΉΝ±Ρ¨Ή1½•Ι…Ρ½Ιδμ)¥µΑ½ΙΠ½ΙΉΝΑΙ¥Ή™Ι…µ•έ½Ι¬Ή½ΉΡ•αΠΉ½Ή™¥ΥΙ…‰±•ΑΑ±¥…Ρ¥½Ή½ΉΡ•αΠμ)¥µΑ½ΙΠ½ΙΉΝΑΙ¥Ή™Ι…µ•έ½Ι¬Ή½ΉΡ•αΠΉΝΥΑΑ½ΙΠΉ•Ή•Ι¥ΑΑ±¥…Ρ¥½Ή½ΉΡ•αΠμ)¥µΑ½ΙΠ½ΙΉΝΑΙ¥Ή™Ι…µ•έ½Ι¬Ή½Ι”Ή=Ι‘•Ι•μ)¥µΑ½ΙΠ½ΙΉΝΑΙ¥Ή™Ι…µ•έ½Ι¬Ήµ½¬Ή•ΉΨΉ5½­ΉΩ¥Ι½Ήµ•ΉΠμ()¥µΑ½ΙΠΝΡ…Ρ¥½ΙΉ…ΝΝ•ΙΡ¨Ή½Ι”Ή…Α¤ΉΝΝ•ΙΡ¥½ΉΜΉ…ΝΝ•ΙΡQ΅…Πμ)¥µΑ½ΙΠΝΡ…Ρ¥½ΙΉ…ΝΝ•ΙΡ¨Ή½Ι”Ή…Α¤ΉΝΝ•ΙΡ¥½ΉΜΉ…ΝΝ•ΙΡQ΅…Ρ½‘”μ()±…ΝΜA±…Ρ™½Ιµ1½¥Ή%Ή¥Ρ¥…±¥ι•ΙQ•ΝΠμ((€€€ΑΙ¥Ω…Ρ”A±…Ρ™½Ιµ1½¥Ή%Ή¥Ρ¥…±¥ι•Θ¥Ή¥Ρ¥…±¥ι•Θμ(€€€ΑΙ¥Ω…Ρ”½Ή™¥ΥΙ…‰±•ΑΑ±¥…Ρ¥½Ή½ΉΡ•αΠ½ΉΡ•αΠμ(€€€ΑΙ¥Ω…Ρ”5½­ΉΩ¥Ι½Ήµ•ΉΠ•ΉΩ¥Ι½Ήµ•ΉΠμ(€€€ΑΙ¥Ω…Ρ”1½•Ι½ΉΡ•αΠ±½•Ι½ΉΡ•αΠμ((€€€	•™½Ι•… (€€€Ω½¥Ν•ΡUΐ ¤μ((€€€€€€€¥Ή¥Ρ¥…±¥ι•Θ€τΉ•άA±…Ρ™½Ιµ1½¥Ή%Ή¥Ρ¥…±¥ι•Θ ¤μ((€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠ€τΉ•ά5½­ΉΩ¥Ι½Ήµ•ΉΠ ¤μ((€€€€€€€•Ή•Ι¥ΑΑ±¥…Ρ¥½Ή½ΉΡ•αΠ…ΑΑ±¥…Ρ¥½Ή½ΉΡ•αΠ€τ(€€€€€€€€€€€€€€€Ή•ά•Ή•Ι¥ΑΑ±¥…Ρ¥½Ή½ΉΡ•αΠ ¤μ((€€€€€€€…ΑΑ±¥…Ρ¥½Ή½ΉΡ•αΠΉΝ•ΡΉΩ¥Ι½Ήµ•ΉΠ΅•ΉΩ¥Ι½Ήµ•ΉΠ¤μ((€€€€€€€½ΉΡ•αΠ€τ…ΑΑ±¥…Ρ¥½Ή½ΉΡ•αΠμ((€€€€€€€±½•Ι½ΉΡ•αΠ€τ(€€€€€€€€€€€€€€€€΅1½•Ι½ΉΡ•αΠ¤1½•Ι…Ρ½ΙδΉ•Ρ%1½•Ι…Ρ½Ιδ ¤μ((€€€€€€€Ι•Ν•Ρ1½‰…¬ ¤μ(€€€τ((€€€™Ρ•Ι… (€€€Ω½¥Ρ•…Ι½έΈ ¤μ((€€€€€€€Ι•Ν•Ρ1½‰…¬ ¤μ(€€€€€€€M•ΉΝ¥Ρ¥Ω•Y…±Υ”ΉΝ•Ρ5…Ν­¥ΉΉ…‰±•΅ΡΙΥ”¤μ((€€€€€€€¥€΅½ΉΡ•αΠ€„τΉΥ±°¤μ(€€€€€€€€€€€½ΉΡ•αΠΉ±½Ν” ¤μ(€€€€€€€τ(€€€τ((€€€€ΌΌ€ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ(€€€€ΌΌ%9%Q%1%iQ%=8(€€€€ΌΌ€ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ((€€€Q•ΝΠ(€€€Ω½¥Ν΅½Υ±‘UΝ•)Ν½Ή1½¥Ή	ε•™…Υ±Π ¤μ((€€€€€€€¥Ή¥Ρ¥…±¥ι•ΘΉ¥Ή¥Ρ¥…±¥ι”΅½ΉΡ•αΠ¤μ((€€€€€€€1½•ΘΙ½½Ρ1½•Θ€τΙ½½Ρ1½•Θ ¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅Ι½½Ρ1½•ΘΉ•ΡΑΑ•Ή‘•Θ ‰)M=9}=9M=1¤¤Ή¥Ν9½Ρ9Υ±° ¤μ(€€€τ((€€€Q•ΝΠ(€€€Ω½¥Ν΅½Υ±‘%Ή¥Ρ¥…±¥ι•MΥ•ΝΝ™Υ±±ε]¥Ρ΅ΑΑ±¥…Ρ¥½Ή5•Ρ…‘…Ρ„ ¤μ(€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ ‰Α±…Ρ™½Ι΄Ή½‰Ν•ΙΩ…‰¥±¥ΡδΉ±½¥ΉΉ™½Ιµ…Π°€‰)M=8¤μ(€€€€€€€½ΉΝ½±•ΑΑ•Ή‘•Θρ%1½¥ΉΩ•ΉΠψ…ΑΑ±¥…Ρ¥½Ή½ΉΝ½±•ΑΑ•Ή‘•Θ€τΉ•ά½ΉΝ½±•ΑΑ•Ή‘•Θπψ ¤μ(€€€€€€€…ΑΑ±¥…Ρ¥½Ή½ΉΝ½±•ΑΑ•Ή‘•ΘΉΝ•Ρ½ΉΡ•αΠ΅±½•Ι½ΉΡ•αΠ¤μ(€€€€€€€…ΑΑ±¥…Ρ¥½Ή½ΉΝ½±•ΑΑ•Ή‘•ΘΉΝ•Ρ9…µ” ‰AA1%Q%=9}=9M=1¤μ(€€€€€€€…ΑΑ±¥…Ρ¥½Ή½ΉΝ½±•ΑΑ•Ή‘•ΘΉΝΡ…ΙΠ ¤μ(€€€€€€€Ι½½Ρ1½•Θ ¤Ή…‘‘ΑΑ•Ή‘•Θ΅…ΑΑ±¥…Ρ¥½Ή½ΉΝ½±•ΑΑ•Ή‘•Θ¤μ((€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ (€€€€€€€€€€€€€€€€‰ΝΑΙ¥ΉΉ…ΑΑ±¥…Ρ¥½ΈΉΉ…µ”°(€€€€€€€€€€€€€€€€‰…Α¤µ΅•­½ΥΠµΩ•Ή‘…Μ(€€€€€€€€¤μ((€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ (€€€€€€€€€€€€€€€€‰¥Ή™ΌΉ‰Υ¥±ΉΩ•ΙΝ¥½Έ°(€€€€€€€€€€€€€€€€ΘΈΠΈΔµI1M(€€€€€€€€¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Ρ½‘”  ¤€΄ψ¥Ή¥Ρ¥…±¥ι•ΘΉ¥Ή¥Ρ¥…±¥ι”΅½ΉΡ•αΠ¤¤(€€€€€€€€€€€€€€€€Ή‘½•Ν9½ΡQ΅Ι½έΉεα•ΑΡ¥½Έ ¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅Ι½½Ρ1½•Θ ¤Ή•ΡΑΑ•Ή‘•Θ ‰)M=9}=9M=1¤¤(€€€€€€€€€€€€€€€€Ή¥Ν9½Ρ9Υ±° ¤μ(€€€€€€€…ΝΝ•ΙΡQ΅…Π΅Ι½½Ρ1½•Θ ¤Ή•ΡΑΑ•Ή‘•Θ ‰AA1%Q%=9}=9M=1¤¤(€€€€€€€€€€€€€€€€Ή…Μ ‰9Ό™½Ιµ…ΡΌ)M=8°Ό½ΉΝ½±”…ΉΡ•Ι¥½Θ‘•Ω”Ν•ΘΝΥ‰ΝΡ¥ΡΧµ‘ΌΑ…Ι„•Ω¥Ρ…Θ‘ΥΑ±¥¥‘…‘”Έ¤(€€€€€€€€€€€€€€€€Ή¥Ν9Υ±° ¤μ(€€€τ((€€€Q•ΝΠ(€€€Ω½¥Ν΅½Υ±‘%Ή¥Ρ¥…±¥ι•MΥ•ΝΝ™Υ±±ε]¥Ρ΅½ΥΡΑΑ±¥…Ρ¥½Ή5•Ρ…‘…Ρ„ ¤μ(€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ ‰Α±…Ρ™½Ι΄Ή½‰Ν•ΙΩ…‰¥±¥ΡδΉ±½¥ΉΉ™½Ιµ…Π°€‰)M=8¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Ρ½‘”  ¤€΄ψ¥Ή¥Ρ¥…±¥ι•ΘΉ¥Ή¥Ρ¥…±¥ι”΅½ΉΡ•αΠ¤¤(€€€€€€€€€€€€€€€€Ή‘½•Ν9½ΡQ΅Ι½έΉεα•ΑΡ¥½Έ ¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅Ι½½Ρ1½•Θ ¤Ή•ΡΑΑ•Ή‘•Θ ‰)M=9}=9M=1¤¤(€€€€€€€€€€€€€€€€Ή…Μ ‰¥Ή¥¥…±¥ι‡Ό‘•Ω•Ι¥„™ΥΉ¥½Ή…Θµ•ΝµΌΝ•΄µ•Ρ…‘…‘½Μ‘„…Α±¥‡ΌΈ¤(€€€€€€€€€€€€€€€€Ή¥Ν9½Ρ9Υ±° ¤μ(€€€τ((€€€Q•ΝΠ(€€€Ω½¥Ν΅½Υ±‘½Ή™¥ΥΙ•MΡΙΥΡΥΙ•‘)Ν½Ή½ΉΡ•αΡΉ‘I•Ν½±Ω•!½ΝΡ…±±‰…¬ ¤μ(€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ ‰Α±…Ρ™½Ι΄Ή½‰Ν•ΙΩ…‰¥±¥ΡδΉ±½¥ΉΉ™½Ιµ…Π°€‰)M=8¤μ((€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ ‰!=MQ95°€‰ΉΥ±°¤μ((€€€€€€€¥Ή¥Ρ¥…±¥ι•ΘΉ¥Ή¥Ρ¥…±¥ι”΅½ΉΡ•αΠ¤μ((€€€€€€€MΥΑΑΙ•ΝΝ]…ΙΉ¥ΉΜ ‰ΥΉ΅•­•¤(€€€€€€€½ΉΝ½±•ΑΑ•Ή‘•Θρ%1½¥ΉΩ•ΉΠψ…ΑΑ•Ή‘•Θ€τ(€€€€€€€€€€€€€€€€΅½ΉΝ½±•ΑΑ•Ή‘•Θρ%1½¥ΉΩ•ΉΠψ¤Ι½½Ρ1½•Θ ¤Ή•ΡΑΑ•Ή‘•Θ ‰)M=9}=9M=1¤μ((€€€€€€€A…ΡΡ•ΙΉ1…ε½ΥΡΉ½‘•Θ•Ή½‘•Θ€τ€΅A…ΡΡ•ΙΉ1…ε½ΥΡΉ½‘•Θ¤…ΑΑ•Ή‘•ΘΉ•ΡΉ½‘•Θ ¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅•Ή½‘•ΘΉ•ΡA…ΡΡ•ΙΈ ¤¤(€€€€€€€€€€€€€€€€Ή…Μ ‰µ•ΉΝ…•΄)M=8‘•Ω•Ι¥„ΥΝ…ΘΌ½ΉΩ•ΙΝ½Θ‘Ό™½Ιµ…ΡΌΝ•΄Υ΄½ΉΩ•ΙΝ½Θ‘”Ν…Ή¥Ρ¥ι‡Ό…ΥΡ½·…Ρ¥ΌΈ¤(€€€€€€€€€€€€€€€€Ή½ΉΡ…¥ΉΜ ‰p‰µ•ΝΝ…•pιp•©Ν½Ή5•ΝΝ…•p¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅•Ή½‘•ΘΉ•ΡA…ΡΡ•ΙΈ ¤¤(€€€€€€€€€€€€€€€€Ή…Μ ‰<½ΉΡ•αΡΌ‘•Ω•Ι¥„ΥΝ…ΘΌ½ΉΩ•ΙΝ½Θ)M=8‘Ό5Έ¤(€€€€€€€€€€€€€€€€Ή½ΉΡ…¥ΉΜ ‰p‰½ΉΡ•αΡpθ•©Ν½Ή5‘¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅•Ή½‘•ΘΉ•ΡA…ΡΡ•ΙΈ ¤¤(€€€€€€€€€€€€€€€€Ή…Μ ‰ΙΙ½ΜΙ•Ν½±Ω¥‘½Μ‘•Ω•Ι¥…΄Ν•Θ•µ¥Ρ¥‘½Μ½µΌ½‰©•ΡΌ)M=8•ΝΡΙΥΡΥΙ…‘ΌΈ¤(€€€€€€€€€€€€€€€€Ή½ΉΡ…¥ΉΜ ‰p‰•ΙΙ½Ιpθ•©Ν½ΉΙΙ½Θ¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅•Ή½‘•ΘΉ•ΡA…ΡΡ•ΙΈ ¤¤(€€€€€€€€€€€€€€€€Ή…Μ ‰•α—Ό‘•Ω•Ι¥„Ν•ΘΙ•Ή‘•Ι¥ι…‘„½µΌ…µΑΌ)M=8…ΉΥ³…Ω•°Έ¤(€€€€€€€€€€€€€€€€Ή½ΉΡ…¥ΉΜ ‰p‰•α•ΑΡ¥½Ήpθ•©Ν½ΉQ΅Ι½έ…‰±”¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅•Ή½‘•ΘΉ•ΡA…ΡΡ•ΙΈ ¤¤(€€€€€€€€€€€€€€€€Ή…Μ ‰!=MQ95Ρ•αΡΥ…°ΉΥ±°»Ό‘•Ω•Ι¥„Ν•Θ•µ¥Ρ¥‘ΌΉΌ±½Έ¤(€€€€€€€€€€€€€€€€Ή‘½•Ν9½Ρ½ΉΡ…¥Έ ‰p‰΅½ΝΡpιp‰ΉΥ±±p¤μ(€€€τ((€€€€ΌΌ€ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ(€€€€ΌΌ1=	,MQQUL(€€€€ΌΌ€ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ((€€€Q•ΝΠ(€€€Ω½¥Ν΅½Υ±‘I•¥ΝΡ•Ι9½ΑMΡ…ΡΥΝ1¥ΝΡ•Ή•Θ ¤μ((€€€€€€€¥Ή¥Ρ¥…±¥ι•ΘΉ¥Ή¥Ρ¥…±¥ι”΅½ΉΡ•αΠ¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅±½•Ι½ΉΡ•αΠ(€€€€€€€€€€€€€€€€€€€€€€€€Ή•ΡMΡ…ΡΥΝ5…Ή…•Θ ¤(€€€€€€€€€€€€€€€€€€€€€€€€Ή•Ρ½Αε=™MΡ…ΡΥΝ1¥ΝΡ•Ή•Ι1¥ΝΠ ¤(€€€€€€€€€€€€€€€€€€€€€€€€Ή¥ΝµΑΡδ ¤¤(€€€€€€€€€€€€€€€€Ή…Μ ‰<9½ΑMΡ…ΡΥΝ1¥ΝΡ•Ή•Θ‘•Ω•Ι¥„•ΝΡ…ΘΙ•¥ΝΡΙ…‘ΌΈ¤(€€€€€€€€€€€€€€€€Ή¥Ν…±Ν” ¤μ(€€€τ((€€€€ΌΌ€ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ(€€€€ΌΌU1P1=1Y1L(€€€€ΌΌ€ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ((€€€Q•ΝΠ(€€€Ω½¥Ν΅½Υ±‘ΑΑ±ε½ΙΑ½Ι…Ρ••™…Υ±Ρ1½1•Ω•±Μ ¤μ((€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ (€€€€€€€€€€€€€€€€‰Α±…Ρ™½Ι΄Ή½‰Ν•ΙΩ…‰¥±¥ΡδΉ±½¥ΉΉ‘•™…Υ±ΡΜΉ½ΙΉΝΑΙ¥Ή™Ι…µ•έ½Ι¬°(€€€€€€€€€€€€€€€€‰II=H(€€€€€€€€¤μ((€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ (€€€€€€€€€€€€€€€€‰Α±…Ρ™½Ι΄Ή½‰Ν•ΙΩ…‰¥±¥ΡδΉ±½¥ΉΉ‘•™…Υ±ΡΜΉ½ΙΉ΅¥‰•ΙΉ…Ρ”°(€€€€€€€€€€€€€€€€‰II=H(€€€€€€€€¤μ((€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ (€€€€€€€€€€€€€€€€‰Α±…Ρ™½Ι΄Ή½‰Ν•ΙΩ…‰¥±¥ΡδΉ±½¥ΉΉ‘•™…Υ±ΡΜΉ½΄Ήι…αα•ΘΉ΅¥­…Ι¤°(€€€€€€€€€€€€€€€€‰II=H(€€€€€€€€¤μ((€€€€€€€¥Ή¥Ρ¥…±¥ι•ΘΉ¥Ή¥Ρ¥…±¥ι”΅½ΉΡ•αΠ¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅±½•Ι½ΉΡ•αΠ(€€€€€€€€€€€€€€€€€€€€€€€€Ή•Ρ1½•Θ ‰½ΙΉΝΑΙ¥Ή™Ι…µ•έ½Ι¬¤(€€€€€€€€€€€€€€€€€€€€€€€€Ή•Ρ1•Ω•° ¤¤(€€€€€€€€€€€€€€€€Ή¥ΝΕΥ…±QΌ΅1•Ω•°ΉII=H¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅±½•Ι½ΉΡ•αΠ(€€€€€€€€€€€€€€€€€€€€€€€€Ή•Ρ1½•Θ ‰½ΙΉ΅¥‰•ΙΉ…Ρ”¤(€€€€€€€€€€€€€€€€€€€€€€€€Ή•Ρ1•Ω•° ¤¤(€€€€€€€€€€€€€€€€Ή¥ΝΕΥ…±QΌ΅1•Ω•°ΉII=H¤μ((€€€€€€€…ΝΝ•ΙΡQ΅…Π΅±½•Ι½ΉΡ•αΠ(€€€€€€€€€€€€€€€€€€€€€€€€Ή•Ρ1½•Θ ‰½΄Ήι…αα•ΘΉ΅¥­…Ι¤¤(€€€€€€€€€€€€€€€€€€€€€€€€Ή•Ρ1•Ω•° ¤¤(€€€€€€€€€€€€€€€€Ή¥ΝΕΥ…±QΌ΅1•Ω•°ΉII=H¤μ(€€€τ((€€€€ΌΌ€ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ(€€€€ΌΌMAI%9	==P=YII%(€€€€ΌΌ€ττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττττ((€€€Q•ΝΠ(€€€Ω½¥Ν΅½Υ±‘¥Ω•ΑΑ±¥…Ρ¥½Ή1½¥Ή½Ή™¥ΥΙ…Ρ¥½ΉAΙ••‘•Ή•=Ω•Ι½ΙΑ½Ι…Ρ••™…Υ±ΡΜ ¤μ((€€€€€€€•ΉΩ¥Ι½Ήµ•ΉΠΉΝ•ΡAΙ½Α•ΙΡδ (€€€€€€€€€€€€€€€€‰Α±…Ρ™½Ι΄Ή½‰Ν•ΙΩ…‰¥±¥ΡδΉ±½¥ΉΉ‘•™…Υ±ΡΜΉ½ΙΉΝΑΙ¥Ήw¶‰ΛkΊwµηBζvWDΖφvvW"‚&χ&rζ†–&W&ζFR"ΆζvWDΖWfVΒ‚’Άζ—4WVΕFς„ΖWfVΒεt$β“°ΆΠ ΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠΆςς5U5DτÒΔτrΔUdTΕ0ΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠ ΆFW7@Άfφ–B6†χVΖDΗ”7W7FφΤΖφtΖWfVΗ4G–ζΦ–6ΖΗ’‚’° ΆVηf—&φζΦVηBη6WE&χW'G’€Ά'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζΖWfVΗ2ζ6φÒζζχfWV—RηfVζF2"ΐΆ$DT%Tr Ά“° ΆVηf—&φζΦVηBη6WE&χW'G’€Ά'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζΖWfVΗ2ζ6φÒζζχfWV—RηfVζF2ηWF–Η2"ΐΆ%t$β Ά“° Ά–ζ—F–Ζ—¦W"ζ–ζ—F–Ζ—¦R†6φηFW‡B“° Ά76W'EF†B†ΖφvvW$6φηFW‡@ΆζvWDΖφvvW"‚&6φÒζζχfWV—RηfVζF2"ΆζvWDΖWfVΒ‚’Άζ2‚$ς6χFR7W7FφΦ—¦FςFWfW&–77VΦ—"DT%Trβ"Άζ—4WVΕFς„ΖWfVΒδDT%Tr“° Ά76W'EF†B†ΖφvvW$6φηFW‡@ΆζvWDΖφvvW"‚&6φÒζζχfWV—RηfVζF2ηWF–Η2"ΆζvWDΖWfVΒ‚’Άζ2‚$ς7V'6χFR7W7FφΦ—¦FςFWfW&–77VΦ—"t$ββ"Άζ—4WVΕFς„ΖWfVΒεt$β“°ΆΠ ΆFW7@Άfφ–B6†χVΖE7Wχ'DΧVΗF—ΖT7W7FφΥ6¶vW2‚’° ΆVηf—&φζΦVηBη6WE&χW'G’€Ά'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζΖWfVΗ2ζ6φÒζVΧ&W6ζ’"ΐΆ$DT%Tr Ά“° ΆVηf—&φζΦVηBη6WE&χW'G’€Ά'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζΖWfVΗ2ζ6φÒζVΧ&W6η6W'f–6R"ΐΆ$”δdς Ά“° ΆVηf—&φζΦVηBη6WE&χW'G’€Ά'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζΖWfVΗ2ζ6φÒζVΧ&W6η&Wχ6—Fχ'’"ΐΆ%t$β Ά“° ΆVηf—&φζΦVηBη6WE&χW'G’€Ά'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζΖWfVΗ2ζ6φÒζVΧ&W6ζ–ηFVw&F–φβ"ΐΆ$U%$υ" Ά“° Ά–ζ—F–Ζ—¦W"ζ–ζ—F–Ζ—¦R†6φηFW‡B“° Ά76W'EF†B†ΖφvvW$6φηFW‡@ΆζvWDΖφvvW"‚&6φÒζVΧ&W6ζ’"ΆζvWDΖWfVΒ‚’Άζ—4WVΕFς„ΖWfVΒδDT%Tr“° Ά76W'EF†B†ΖφvvW$6φηFW‡@ΆζvWDΖφvvW"‚&6φÒζVΧ&W6η6W'f–6R"ΆζvWDΖWfVΒ‚’Άζ—4WVΕFς„ΖWfVΒδ”δdς“° Ά76W'EF†B†ΖφvvW$6φηFW‡@ΆζvWDΖφvvW"‚&6φÒζVΧ&W6η&Wχ6—Fχ'’"ΆζvWDΖWfVΒ‚’Άζ—4WVΕFς„ΖWfVΒεt$β“° Ά76W'EF†B†ΖφvvW$6φηFW‡@ΆζvWDΖφvvW"‚&6φÒζVΧ&W6ζ–ηFVw&F–φβ"ΆζvWDΖWfVΒ‚’Άζ—4WVΕFς„ΖWfVΒδU%$υ"“°ΆΠ ΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠΆςςTΥE’4τδd”uU$D”τΰΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠ ΆFW7@Άfφ–B6†χVΖD–ζ—F–Ζ—¦U7V66W76gVΖΗ•v†Vδζτ7W7FφΤΖWfVΗ4&T6φζf–wW&VB‚’° Ά76W'EF†D6φFR‚‚’Σβ–ζ—F–Ζ—¦W"ζ–ζ—F–Ζ—¦R†6φηFW‡B’ΆζFφW4ζχEF‡&χtη”W†6WF–φβ‚“° ΆΖφvvW"ΖφvvW"ΠΆΖφvvW$6φηFW‡BζvWDΖφvvW"‚&6φÒζ''Vζφ'2"“° Άς ΆΆςμ:ΧfVΒW‡Μ:Φ6—FςφFR6W"ηVΖΒχ'VRςΖφvvW"†W&FΆΆςμ:ΧfVΒFς&φχBΖφvvW"ΰΆ ΆΆχ"—76ςfW&–f–6Φχ2vWDVffV7F—fTΖWfVΒ‚’ΰΆΆπΆ76W'EF†B†ΖφvvW"ζvWDVffV7F—fTΖWfVΒ‚’Άζ2‚$ςΖφvvW"FWfW&–χ77V—"VÒμ:ΧfVΒVfWF—fςβ"Άζ—4ζχDηVΖΒ‚“° Ά76W'EF†B†ΖφvvW"ζvWDVffV7F—fTΖWfVΒ‚’Άζ—4WVΕFς„ΖWfVΒδ”δdς“°ΆΠ ΆFW7@Άfφ–B6†χVΖD–ζ—F–Ζ—¦U7V66W76gVΖΗ•v†VδφζΗ”FVfVΗG4&T6φζf–wW&VB‚’° ΆVηf—&φζΦVηBη6WE&χW'G’€Ά'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζFVfVΗG2ζ6φÒζVΧ&W6"ΐΆ%t$β Ά“° Ά76W'EF†D6φFR‚‚’Σβ–ζ—F–Ζ—¦W"ζ–ζ—F–Ζ—¦R†6φηFW‡B’ΆζFφW4ζχEF‡&χtη”W†6WF–φβ‚“° Ά76W'EF†B†ΖφvvW$6φηFW‡@ΆζvWDΖφvvW"‚&6φÒζVΧ&W6"ΆζvWDΖWfVΒ‚’Άζ—4WVΕFς„ΖWfVΒεt$β“°ΆΠ ΆFW7@Άfφ–B6†χVΖD–ζ—F–Ζ—¦U7V66W76gVΖΗ•v†VδφζΗ”7W7FφΤΖWfVΗ4&T6φζf–wW&VB‚’° ΆVηf—&φζΦVηBη6WE&χW'G’€Ά'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζΖWfVΗ2ζ6φÒζVΧ&W6"ΐΆ$DT%Tr Ά“° Ά76W'EF†D6φFR‚‚’Σβ–ζ—F–Ζ—¦W"ζ–ζ—F–Ζ—¦R†6φηFW‡B’ΆζFφW4ζχEF‡&χtη”W†6WF–φβ‚“° Ά76W'EF†B†ΖφvvW$6φηFW‡@ΆζvWDΖφvvW"‚&6φÒζVΧ&W6"ΆζvWDΖWfVΒ‚’Άζ—4WVΕFς„ΖWfVΒδDT%Tr“°ΆΠ ΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠΆςς$T”δ•D”Δ•¤D”τΰΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠ ΆFW7@Άfφ–B6†χVΖE&WΖ6U&Wf–χW4§6φδVζFW%v†Vδ–ζ—F–Ζ—¦VDv–β‚’°ΆVηf—&φζΦVηBη6WE&χW'G’‚'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζfχ&ΦB"Β$¥4τβ"“° Ά–ζ—F–Ζ—¦W"ζ–ζ—F–Ζ—¦R†6φηFW‡B“° ΆVζFW#Δ”Ζφvv–ζtWfVηCβf—'7DVζFW"ΠΆ&φχDΖφvvW"‚’ζvWDVζFW"‚$¥4τετ4τε4τΔR"“° Ά76W'EF†B†f—'7DVζFW"Άζ—4ζχDηVΖΒ‚“° Ά–ζ—F–Ζ—¦W"ζ–ζ—F–Ζ—¦R†6φηFW‡B“° ΆVζFW#Δ”Ζφvv–ζtWfVηCβ6V6φζDVζFW"ΠΆ&φχDΖφvvW"‚’ζvWDVζFW"‚$¥4τετ4τε4τΔR"“° Ά76W'EF†B‡6V6φζDVζFW"Άζ—4ζχDηVΖΒ‚“° Ά76W'EF†B‡6V6φζDVζFW"Άζ2‚%VΦζχf–ζ–6–Ζ—¦:|:6ςFWfW&–&V7&–"ςVζFW"β"Άζ—4ζχE6ΦT2†f—'7DVζFW"“°ΆΠ ΆFW7@Άfφ–B6†χVΖE&W6W'fTΖ–6F–φδVζFW$–δFVfVΗDfχ&ΦB‚’°ΆVηf—&φζΦVηBη6WE&χW'G’‚'ΖFfχ&Òζφ'6W'f&–Ζ—G’ζΖφvv–ζrζfχ&ΦB"Β$DTdTΕB"“° Ά6φη6φΖTVζFW#Δ”Ζφvv–ζtWfVηCβΖ–6F–φδVζFW"ÒζWr6φη6φΖTVζFW#Γβ‚“°ΆΖ–6F–φδVζFW"η6WD6φηFW‡B†ΖφvvW$6φηFW‡B“°ΆΖ–6F–φδVζFW"η6WDζΦR‚$Δ”4D”τετTδDU""“°ΆΖ–6F–φδVζFW"η7F'B‚“°Ά&φχDΖφvvW"‚’ζFDVζFW"†Ζ–6F–φδVζFW"“° Ά–ζ—F–Ζ—¦W"ζ–ζ—F–Ζ—¦R†6φηFW‡B“° Ά76W'EF†B‡&φχDΖφvvW"‚’ζvWDVζFW"‚$Δ”4D”τετTδDU""’Άζ—4ζχDηVΖΒ‚“°Ά76W'EF†B‡&φχDΖφvvW"‚’ζvWDVζFW"‚$¥4τετ4τε4τΔR"’Άζ—4ηVΖΒ‚“°ΆΠ ΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠΆςςυ$DU ΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠ ΆFW7@Άfφ–B6†χVΖD†fT†–v†W7E&V6VFVζ6R‚’° Ά76W'EF†B†–ζ—F–Ζ—¦W"ζvWDχ&FW"‚’Άζ2‚$ς–ζ–6–Ζ—¦Fχ"FWfW&–χ77V—"„”t„U5Eυ$T4TDTδ4Rβ"Άζ—4WVΕFς„χ&FW&VBδ„”t„U5Eυ$T4TDTδ4R“°ΆΠ ΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠΆςς„TΕU%0ΆςςΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΣΠ Ά&—fFRΖφvvW"&φχDΖφvvW"‚’° Ά&WGW&βΖφvvW$6φηFW‡BζvWDΖφvvW"€ΆΖφvvW"ε$τυEτΔτttU%τδΤPΆ“°ΆΠ Ά&—fFRfφ–B&W6WDΖφv&6²‚’° ΆΖφvvW$6φηFW‡BζvWE7FGW4ΦζvW"‚’ζ6ΖV"‚“°ΆΖφvvW"&φχDΖφvvW"Ò&φχDΖφvvW"‚“°Ά&φχDΖφvvW"ζFWF6„ζE7FχΖΔVζFW'2‚“°Ά&φχDΖφvvW"η6WDΖWfVΒ„ΖWfVΒδ”δdς“° Άς ΆΆΖφvvW$6φηFW‡B:’vΖφ&Βζ¥dÒΰΆ ΆΆχ2ΖφvvW'27&–Fχ2GW&ηFRVÒFW7FRW&ΦζV6VÒζς6φηFW‡FςΰΆΆχ'FηFς&VΦχfVΦχ2μ:ΧfV—2W‡Ζ–6—FΦVηFRFVf–ζ–Fχ2&Wf—F ΆΆf¦ΦVηFςFR6φζf–wW&:|:6ςVηG&Rχ2FW7FW2ΰΆΆπΆfχ"„ΖφvvW"ΖφvvW"ΆΖφvvW$6φηFW‡BζvWDΖφvvW$Ζ—7B‚’’° Ά–b‚ΖφvvW"ε$τυEτΔτttU%τδΤRζWVΗ2†ΖφvvW"ζvWDζΦR‚’’’°ΆΖφvvW"η6WDΖWfVΒ†ηVΖΒ“°ΆΠΆΠΆΠ§Π
+package br.com.portalmanager.platform.library.observability.internal.logging.config;
+
+import br.com.portalmanager.platform.library.observability.api.logging.SensitiveValue;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.ConsoleAppender;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.Ordered;
+import org.springframework.mock.env.MockEnvironment;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
+class PlatformLoggingInitializerTest {
+
+    private PlatformLoggingInitializer initializer;
+    private ConfigurableApplicationContext context;
+    private MockEnvironment environment;
+    private LoggerContext loggerContext;
+
+    @BeforeEach
+    void setUp() {
+
+        initializer = new PlatformLoggingInitializer();
+
+        environment = new MockEnvironment();
+
+        GenericApplicationContext applicationContext =
+                new GenericApplicationContext();
+
+        applicationContext.setEnvironment(environment);
+
+        context = applicationContext;
+
+        loggerContext =
+                (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        resetLogback();
+    }
+
+    @AfterEach
+    void tearDown() {
+
+        resetLogback();
+        SensitiveValue.setMaskingEnabled(true);
+
+        if (context != null) {
+            context.close();
+        }
+    }
+
+    // ========================================================================
+    // INITIALIZATION
+    // ========================================================================
+
+    @Test
+    void shouldUseJsonLoggingByDefault() {
+
+        initializer.initialize(context);
+
+        Logger rootLogger = rootLogger();
+
+        assertThat(rootLogger.getAppender("JSON_CONSOLE")).isNotNull();
+    }
+
+    @Test
+    void shouldInitializeSuccessfullyWithApplicationMetadata() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
+        ConsoleAppender<ILoggingEvent> applicationConsoleAppender = new ConsoleAppender<>();
+        applicationConsoleAppender.setContext(loggerContext);
+        applicationConsoleAppender.setName("APPLICATION_CONSOLE");
+        applicationConsoleAppender.start();
+        rootLogger().addAppender(applicationConsoleAppender);
+
+        environment.setProperty(
+                "spring.application.name",
+                "api-checkout-vendas"
+        );
+
+        environment.setProperty(
+                "info.build.version",
+                "2.4.1-RELEASE"
+        );
+
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
+
+        assertThat(rootLogger().getAppender("JSON_CONSOLE"))
+                .isNotNull();
+        assertThat(rootLogger().getAppender("APPLICATION_CONSOLE"))
+                .as("No formato JSON, o console anterior deve ser substituΓ­do para evitar duplicidade.")
+                .isNull();
+    }
+
+    @Test
+    void shouldInitializeSuccessfullyWithoutApplicationMetadata() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
+
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
+
+        assertThat(rootLogger().getAppender("JSON_CONSOLE"))
+                .as("A inicializaΓ§Γ£o deveria funcionar mesmo sem metadados da aplicaΓ§Γ£o.")
+                .isNotNull();
+    }
+
+    @Test
+    void shouldConfigureStructuredJsonContextAndResolveHostFallback() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
+
+        environment.setProperty("HOSTNAME", "null");
+
+        initializer.initialize(context);
+
+        @SuppressWarnings("unchecked")
+        ConsoleAppender<ILoggingEvent> appender =
+                (ConsoleAppender<ILoggingEvent>) rootLogger().getAppender("JSON_CONSOLE");
+
+        PatternLayoutEncoder encoder = (PatternLayoutEncoder) appender.getEncoder();
+
+        assertThat(encoder.getPattern())
+                .as("A mensagem JSON deveria usar o conversor do formato sem um conversor de sanitizaΓ§Γ£o automΓ΅tico.")
+                .contains("\"message\":\"%jsonMessage\"");
+
+        assertThat(encoder.getPattern())
+                .as("O contexto deveria usar o conversor JSON do MDC.")
+                .contains("\"context\":%jsonMdc");
+
+        assertThat(encoder.getPattern())
+                .as("Erros resolvidos deveriam ser emitidos como objeto JSON estruturado.")
+                .contains("\"error\":%jsonError");
+
+        assertThat(encoder.getPattern())
+                .as("A exceΓ§Γ£o deveria ser renderizada como campo JSON anulΓ΅vel.")
+                .contains("\"exception\":%jsonThrowable");
+
+        assertThat(encoder.getPattern())
+                .as("HOSTNAME textual null nΓ£o deveria ser emitido no log.")
+                .doesNotContain("\"host\":\"null\"");
+    }
+
+    // ========================================================================
+    // LOGBACK STATUS
+    // ========================================================================
+
+    @Test
+    void shouldRegisterNopStatusListener() {
+
+        initializer.initialize(context);
+
+        assertThat(loggerContext
+                        .getStatusManager()
+                        .getCopyOfStatusListenerList()
+                        .isEmpty())
+                .as("O NopStatusListener deveria estar registrado.")
+                .isFalse();
+    }
+
+    // ========================================================================
+    // DEFAULT LOG LEVELS
+    // ========================================================================
+
+    @Test
+    void shouldApplyCorporateDefaultLogLevels() {
+
+        environment.setProperty(
+                "platform.observability.logging.defaults.org.springframework",
+                "ERROR"
+        );
+
+        environment.setProperty(
+                "platform.observability.logging.defaults.org.hibernate",
+                "ERROR"
+        );
+
+        environment.setProperty(
+                "platform.observability.logging.defaults.com.zaxxer.hikari",
+                "ERROR"
+        );
+
+        initializer.initialize(context);
+
+        assertThat(loggerContext
+                        .getLogger("org.springframework")
+                        .getLevel())
+                .isEqualTo(Level.ERROR);
+
+        assertThat(loggerContext
+                        .getLogger("org.hibernate")
+                        .getLevel())
+                .isEqualTo(Level.ERROR);
+
+        assertThat(loggerContext
+                        .getLogger("com.zaxxer.hikari")
+                        .getLevel())
+                .isEqualTo(Level.ERROR);
+    }
+
+    // ========================================================================
+    // SPRING BOOT OVERRIDE
+    // ========================================================================
+
+    @Test
+    void shouldGiveApplicationLoggingConfigurationPrecedenceOverCorporateDefaults() {
+
+        environment.setProperty(
+                "platform.observability.logging.defaults.org.springframework",
+                "ERROR"
+        );
+
+        environment.setProperty(
+                "platform.observability.logging.defaults.org.hibernate",
+                "ERROR"
+        );
+
+        environment.setProperty(
+                "logging.level.org.springframework",
+                "DEBUG"
+        );
+
+        initializer.initialize(context);
+
+        assertThat(loggerContext
+                        .getLogger("org.springframework")
+                        .getLevel())
+                .as("A configuraΓ§Γ£o logging.level.* da aplicaΓ§Γ£o deveria sobrescrever o default corporativo.")
+                .isEqualTo(Level.DEBUG);
+
+        assertThat(loggerContext
+                        .getLogger("org.hibernate")
+                        .getLevel())
+                .as("O Hibernate deveria continuar utilizando o default corporativo.")
+                .isEqualTo(Level.ERROR);
+    }
+
+    @Test
+    void shouldSupportDifferentApplicationOverridesForDifferentPackages() {
+
+        environment.setProperty(
+                "platform.observability.logging.defaults.org.springframework",
+                "ERROR"
+        );
+
+        environment.setProperty(
+                "platform.observability.logging.defaults.org.hibernate",
+                "ERROR"
+        );
+
+        environment.setProperty(
+                "logging.level.org.springframework",
+                "DEBUG"
+        );
+
+        environment.setProperty(
+                "logging.level.org.hibernate",
+                "WARN"
+        );
+
+        initializer.initialize(context);
+
+        assertThat(loggerContext
+                        .getLogger("org.springframework")
+                        .getLevel())
+                .isEqualTo(Level.DEBUG);
+
+        assertThat(loggerContext
+                        .getLogger("org.hibernate")
+                        .getLevel())
+                .isEqualTo(Level.WARN);
+    }
+
+    // ========================================================================
+    // CUSTOM LOG LEVELS
+    // ========================================================================
+
+    @Test
+    void shouldApplyCustomLogLevelsDynamically() {
+
+        environment.setProperty(
+                "platform.observability.logging.levels.com.novaequipe.vendas",
+                "DEBUG"
+        );
+
+        environment.setProperty(
+                "platform.observability.logging.levels.com.novaequipe.vendas.utils",
+                "WARN"
+        );
+
+        initializer.initialize(context);
+
+        assertThat(loggerContext
+                        .getLogger("com.novaequipe.vendas")
+                        .getLevel())
+                .as("O pacote customizado deveria assumir DEBUG.")
+                .isEqualTo(Level.DEBUG);
+
+        assertThat(loggerContext
+                        .getLogger("com.novaequipe.vendas.utils")
+                        .getLevel())
+                .as("O subpacote customizado deveria assumir WARN.")
+                .isEqualTo(Level.WARN);
+    }
+
+    @Test
+    void shouldSupportMultipleCustomPackages() {
+
+        environment.setProperty(
+                "platform.observability.logging.levels.com.empresa.api",
+                "DEBUG"
+        );
+
+        environment.setProperty(
+                "platform.observability.logging.levels.com.empresa.service",
+                "INFO"
+        );
+
+        environment.setProperty(
+                "platform.observability.logging.levels.com.empresa.repository",
+                "WARN"
+        );
+
+        environment.setProperty(
+                "platform.observability.logging.levels.com.empresa.integration",
+                "ERROR"
+        );
+
+        initializer.initialize(context);
+
+        assertThat(loggerContext
+                        .getLogger("com.empresa.api")
+                        .getLevel())
+                .isEqualTo(Level.DEBUG);
+
+        assertThat(loggerContext
+                        .getLogger("com.empresa.service")
+                        .getLevel())
+                .isEqualTo(Level.INFO);
+
+        assertThat(loggerContext
+                        .getLogger("com.empresa.repository")
+                        .getLevel())
+                .isEqualTo(Level.WARN);
+
+        assertThat(loggerContext
+                        .getLogger("com.empresa.integration")
+                        .getLevel())
+                .isEqualTo(Level.ERROR);
+    }
+
+    // ========================================================================
+    // EMPTY CONFIGURATION
+    // ========================================================================
+
+    @Test
+    void shouldInitializeSuccessfullyWhenNoCustomLevelsAreConfigured() {
+
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
+
+        Logger logger =
+                loggerContext.getLogger("com.brunobs");
+
+        /*
+         * O nΓ­vel explΓ­cito pode ser null porque o logger herda
+         * o nΓ­vel do root logger.
+         *
+         * Por isso verificamos getEffectiveLevel().
+         */
+        assertThat(logger.getEffectiveLevel())
+                .as("O logger deveria possuir um nΓ­vel efetivo.")
+                .isNotNull();
+
+        assertThat(logger.getEffectiveLevel())
+                .isEqualTo(Level.INFO);
+    }
+
+    @Test
+    void shouldInitializeSuccessfullyWhenOnlyDefaultsAreConfigured() {
+
+        environment.setProperty(
+                "platform.observability.logging.defaults.com.empresa",
+                "WARN"
+        );
+
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
+
+        assertThat(loggerContext
+                        .getLogger("com.empresa")
+                        .getLevel())
+                .isEqualTo(Level.WARN);
+    }
+
+    @Test
+    void shouldInitializeSuccessfullyWhenOnlyCustomLevelsAreConfigured() {
+
+        environment.setProperty(
+                "platform.observability.logging.levels.com.empresa",
+                "DEBUG"
+        );
+
+        assertThatCode(() -> initializer.initialize(context))
+                .doesNotThrowAnyException();
+
+        assertThat(loggerContext
+                        .getLogger("com.empresa")
+                        .getLevel())
+                .isEqualTo(Level.DEBUG);
+    }
+
+    // ========================================================================
+    // REINITIALIZATION
+    // ========================================================================
+
+    @Test
+    void shouldReplacePreviousJsonAppenderWhenInitializedAgain() {
+        environment.setProperty("platform.observability.logging.format", "JSON");
+
+        initializer.initialize(context);
+
+        Appender<ILoggingEvent> firstAppender =
+                rootLogger().getAppender("JSON_CONSOLE");
+
+        assertThat(firstAppender)
+                .isNotNull();
+
+        initializer.initialize(context);
+
+        Appender<ILoggingEvent> secondAppender =
+                rootLogger().getAppender("JSON_CONSOLE");
+
+        assertThat(secondAppender)
+                .isNotNull();
+
+        assertThat(secondAppender)
+                .as("Uma nova inicializaΓ§Γ£o deveria recriar o appender.")
+                .isNotSameAs(firstAppender);
+    }
+
+    @Test
+    void shouldPreserveApplicationAppenderInDefaultFormat() {
+        environment.setProperty("platform.observability.logging.format", "DEFAULT");
+
+        ConsoleAppender<ILoggingEvent> applicationAppender = new ConsoleAppender<>();
+        applicationAppender.setContext(loggerContext);
+        applicationAppender.setName("APPLICATION_APPENDER");
+        applicationAppender.start();
+        rootLogger().addAppender(applicationAppender);
+
+        initializer.initialize(context);
+
+        assertThat(rootLogger().getAppender("APPLICATION_APPENDER"))
+                .isNotNull();
+        assertThat(rootLogger().getAppender("JSON_CONSOLE"))
+                .isNull();
+    }
+
+    // ========================================================================
+    // ORDER
+    // ========================================================================
+
+    @Test
+    void shouldHaveHighestPrecedence() {
+
+        assertThat(initializer.getOrder())
+                .as("O inicializador deveria possuir HIGHEST_PRECEDENCE.")
+                .isEqualTo(Ordered.HIGHEST_PRECEDENCE);
+    }
+
+    // ========================================================================
+    // HELPERS
+    // ========================================================================
+
+    private Logger rootLogger() {
+
+        return loggerContext.getLogger(
+                Logger.ROOT_LOGGER_NAME
+        );
+    }
+
+    private void resetLogback() {
+
+        loggerContext.getStatusManager().clear();
+        Logger rootLogger = rootLogger();
+        rootLogger.detachAndStopAllAppenders();
+        rootLogger.setLevel(Level.INFO);
+
+        /*
+         * LoggerContext Γ© global na JVM.
+         *
+         * Os loggers criados durante um teste permanecem no contexto.
+         * Portanto removemos nΓ­veis explicitamente definidos para evitar
+         * vazamento de configuraΓ§Γ£o entre os testes.
+         */
+        for (Logger logger : loggerContext.getLoggerList()) {
+
+            if (!Logger.ROOT_LOGGER_NAME.equals(logger.getName())) {
+                logger.setLevel(null);
+            }
+        }
+    }
+}

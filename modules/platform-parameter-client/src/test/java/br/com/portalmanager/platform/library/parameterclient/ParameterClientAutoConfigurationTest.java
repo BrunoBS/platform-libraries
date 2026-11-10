@@ -1,5 +1,8 @@
 package br.com.portalmanager.platform.library.parameterclient;
 
+import br.com.portalmanager.platform.library.parameterclient.api.contract.ConfigurationProvider;
+import br.com.portalmanager.platform.library.parameterclient.api.contract.ExpressionProvider;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import br.com.portalmanager.platform.library.parameterclient.configuration.ParameterClientAutoConfiguration;

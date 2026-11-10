@@ -81,7 +81,7 @@ public final class RedisStreamsLifecycle implements SmartLifecycle {
                 try {
                     access.text(name);
                 } catch (
-                        br.com.portalmanager.platform.library.messaging.exception
+                        br.com.portalmanager.platform.library.messaging.api.exception
                                         .ValidationException
                                 invalid) {
                     throw RedisErrors.configuration();

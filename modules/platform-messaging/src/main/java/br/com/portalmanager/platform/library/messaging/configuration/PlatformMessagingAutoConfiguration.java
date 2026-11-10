@@ -11,6 +11,7 @@ import br.com.portalmanager.platform.library.messaging.internal.repository.NoOpA
 import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
 import br.com.portalmanager.platform.library.messaging.internal.resolver.DefaultApiMessageResolver;
 import br.com.portalmanager.platform.library.messaging.internal.web.ApiExceptionHandler;
+import br.com.portalmanager.platform.library.messaging.api.configuration.PlatformMessagingProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

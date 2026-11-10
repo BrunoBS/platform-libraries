@@ -152,8 +152,7 @@ class RedisStreamsIT extends RedisIntegrationSupport {
                                                             Duration.ZERO,
                                                             String.class))
                                     .isInstanceOf(
-                                            br.com.portalmanager.platform.library.messaging
-                                                    .exception.ApiException.class);
+                                            br.com.portalmanager.platform.library.messaging.api.exception.ApiException.class);
                             assertThatThrownBy(
                                             () ->
                                                     streams.read(
@@ -163,8 +162,7 @@ class RedisStreamsIT extends RedisIntegrationSupport {
                                                             Duration.ofSeconds(6),
                                                             String.class))
                                     .isInstanceOf(
-                                            br.com.portalmanager.platform.library.messaging
-                                                    .exception.ApiException.class);
+                                            br.com.portalmanager.platform.library.messaging.api.exception.ApiException.class);
                         });
     }
 

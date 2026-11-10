@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.messaging.internal.repository;
 
 import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.repository.ApiMessageRepository;
 
 import java.util.Locale;
 import java.util.Optional;

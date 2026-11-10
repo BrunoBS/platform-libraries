@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.observability.internal.logging.config;
 
 import br.com.portalmanager.platform.library.observability.api.logging.SensitiveValue;
+import br.com.portalmanager.platform.library.observability.api.configuration.PlatformObservabilityProperties;
 import br.com.portalmanager.platform.library.observability.internal.logging.converter.JsonErrorMdcConverter;
 import br.com.portalmanager.platform.library.observability.internal.logging.converter.JsonMdcConverter;
 import br.com.portalmanager.platform.library.observability.internal.logging.converter.JsonMessageConverter;

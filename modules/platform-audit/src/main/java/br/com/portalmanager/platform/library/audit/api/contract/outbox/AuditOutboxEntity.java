@@ -60,7 +60,7 @@ public abstract class AuditOutboxEntity {
     protected AuditOutboxEntity() {
     }
 
-    void prepareForPersistence(JsonNode payload, JsonNode metadata) {
+    public void prepareForPersistence(JsonNode payload, JsonNode metadata) {
         this.identifier = UUID.randomUUID().toString();
         this.payload = payload;
         this.metadata = metadata;

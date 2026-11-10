@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.messaging.api.exception.ApiMessageN
 import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
 import br.com.portalmanager.platform.library.messaging.api.provider.ApiMessageProvider;
 import br.com.portalmanager.platform.library.messaging.api.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

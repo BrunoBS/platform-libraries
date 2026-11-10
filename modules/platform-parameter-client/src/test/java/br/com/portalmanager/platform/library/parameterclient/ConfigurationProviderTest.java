@@ -1,5 +1,7 @@
 package br.com.portalmanager.platform.library.parameterclient;
 
+import br.com.portalmanager.platform.library.parameterclient.api.contract.ConfigurationProvider;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;

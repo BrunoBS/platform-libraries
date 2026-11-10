@@ -1,5 +1,8 @@
 package br.com.portalmanager.platform.library.parameterclient;
 
+import br.com.portalmanager.platform.library.parameterclient.api.contract.ConfigurationProvider;
+import br.com.portalmanager.platform.library.parameterclient.api.contract.ExpressionProvider;
+
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.*;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
