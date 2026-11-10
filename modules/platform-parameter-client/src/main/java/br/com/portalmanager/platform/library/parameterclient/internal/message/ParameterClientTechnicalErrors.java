@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.parameterclient.message;
+package br.com.portalmanager.platform.library.parameterclient.internal.message;
 
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 

@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterFields;
 import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterType;
 import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;
-import br.com.portalmanager.platform.library.parameterclient.message.ParameterClientMessageKeys;
+import br.com.portalmanager.platform.library.parameterclient.internal.message.ParameterClientMessageKeys;
 import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import java.util.Objects;
 import java.util.Optional;

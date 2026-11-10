@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.parameterclient;
+package br.com.portalmanager.platform.library.parameterclient.api.contract;
 
 /** Evaluates published V1 EXPRESSION parameters by their complete logical key. */
 public interface ExpressionProvider {

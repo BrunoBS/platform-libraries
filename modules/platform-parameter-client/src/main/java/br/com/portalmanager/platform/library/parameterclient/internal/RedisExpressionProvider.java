@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.parameterclient.internal;
 
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.parameterclient.ExpressionProvider;
+import br.com.portalmanager.platform.library.parameterclient.api.contract.ExpressionProvider;
 import br.com.portalmanager.platform.library.parameterclient.internal.expression.ExpressionEvaluator;
 import java.util.Objects;
 import org.slf4j.Logger;

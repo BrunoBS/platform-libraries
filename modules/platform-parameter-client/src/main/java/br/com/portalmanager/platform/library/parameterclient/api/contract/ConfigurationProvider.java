@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.parameterclient;
+package br.com.portalmanager.platform.library.parameterclient.api.contract;
 
 import tools.jackson.core.type.TypeReference;
 

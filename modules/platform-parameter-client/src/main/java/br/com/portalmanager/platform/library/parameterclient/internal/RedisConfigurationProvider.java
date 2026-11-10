@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.parameterclient.internal;
 
-import br.com.portalmanager.platform.library.parameterclient.ConfigurationProvider;
+import br.com.portalmanager.platform.library.parameterclient.api.contract.ConfigurationProvider;
 import br.com.portalmanager.platform.library.parameterclient.internal.contract.ParameterFields;
 import org.springframework.util.ClassUtils;
 import tools.jackson.core.type.TypeReference;
