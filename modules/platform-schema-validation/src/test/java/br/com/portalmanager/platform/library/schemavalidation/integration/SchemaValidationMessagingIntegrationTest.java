@@ -1,13 +1,13 @@
 package br.com.portalmanager.platform.library.schemavalidation.integration;
 
-import br.com.portalmanager.platform.library.messaging.cache.NoOpApiMessageCache;
+import br.com.portalmanager.platform.library.messaging.internal.cache.NoOpApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
 import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
 import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
-import br.com.portalmanager.platform.library.messaging.resolver.DefaultApiMessageResolver;
-import br.com.portalmanager.platform.library.messaging.web.ApiExceptionHandler;
+import br.com.portalmanager.platform.library.messaging.internal.resolver.DefaultApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.internal.web.ApiExceptionHandler;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
