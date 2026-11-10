@@ -7,7 +7,7 @@ import br.com.portalmanager.platform.library.audit.api.contract.outbox.AuditOutb
 import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProvider;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
-import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
+import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformTaskScheduler;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.junit.jupiter.api.Test;

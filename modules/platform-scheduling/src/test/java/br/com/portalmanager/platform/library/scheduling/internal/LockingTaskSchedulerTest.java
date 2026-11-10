@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
+import br.com.portalmanager.platform.library.scheduling.api.configuration.PlatformSchedulingProperties;
 import java.lang.reflect.Method;
 import java.time.Clock;
 import java.time.Instant;

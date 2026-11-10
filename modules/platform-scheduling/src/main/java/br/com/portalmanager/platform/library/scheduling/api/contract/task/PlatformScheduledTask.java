@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.scheduling.task;
+package br.com.portalmanager.platform.library.scheduling.api.contract.task;
 
 /**
  * Programmatic scheduled task with an explicit, stable distributed-lock identity.

@@ -8,7 +8,7 @@ import br.com.portalmanager.platform.library.audit.api.contract.model.AuditActio
 import br.com.portalmanager.platform.library.audit.api.contract.model.AuditContext;
 import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
-import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
+import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformTaskScheduler;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;

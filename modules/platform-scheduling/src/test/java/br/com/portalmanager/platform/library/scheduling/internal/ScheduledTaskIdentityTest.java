@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
-import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
+import br.com.portalmanager.platform.library.scheduling.api.annotation.DisableScheduledLock;
+import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformScheduledTask;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;

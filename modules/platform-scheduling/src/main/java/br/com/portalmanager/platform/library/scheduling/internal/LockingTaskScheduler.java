@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
-import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingProperties;
-import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
-import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
+import br.com.portalmanager.platform.library.scheduling.api.configuration.PlatformSchedulingProperties;
+import br.com.portalmanager.platform.library.scheduling.internal.message.SchedulingTechnicalErrors;
+import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformScheduledTask;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;

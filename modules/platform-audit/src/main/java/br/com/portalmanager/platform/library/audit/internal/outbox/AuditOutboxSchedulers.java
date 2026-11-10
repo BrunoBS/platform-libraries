@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.audit.internal.outbox;
 
-import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
+import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformTaskScheduler;
 import java.time.Duration;
 import java.util.concurrent.ScheduledFuture;
 

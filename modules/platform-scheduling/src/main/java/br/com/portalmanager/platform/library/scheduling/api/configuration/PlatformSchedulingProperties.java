@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.scheduling.configuration;
+package br.com.portalmanager.platform.library.scheduling.api.configuration;
 
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;

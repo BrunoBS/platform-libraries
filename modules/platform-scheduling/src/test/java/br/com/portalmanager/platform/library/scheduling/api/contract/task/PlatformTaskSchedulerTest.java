@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.scheduling.task;
+package br.com.portalmanager.platform.library.scheduling.api.contract.task;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

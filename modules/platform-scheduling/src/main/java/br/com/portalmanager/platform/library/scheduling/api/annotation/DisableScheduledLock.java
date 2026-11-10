@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.scheduling.annotation;
+package br.com.portalmanager.platform.library.scheduling.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

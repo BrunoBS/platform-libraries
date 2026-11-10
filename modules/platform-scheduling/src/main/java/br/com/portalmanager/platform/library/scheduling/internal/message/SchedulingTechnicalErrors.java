@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.scheduling.message;
+package br.com.portalmanager.platform.library.scheduling.internal.message;
 
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 

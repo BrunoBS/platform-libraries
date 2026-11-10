@@ -1,9 +1,9 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
-import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
+import br.com.portalmanager.platform.library.scheduling.api.annotation.DisableScheduledLock;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
-import br.com.portalmanager.platform.library.scheduling.task.PlatformScheduledTask;
+import br.com.portalmanager.platform.library.scheduling.internal.message.SchedulingTechnicalErrors;
+import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformScheduledTask;
 import java.lang.reflect.Method;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;

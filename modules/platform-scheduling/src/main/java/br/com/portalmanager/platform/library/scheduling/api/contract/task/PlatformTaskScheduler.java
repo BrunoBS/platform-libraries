@@ -1,7 +1,7 @@
-package br.com.portalmanager.platform.library.scheduling.task;
+package br.com.portalmanager.platform.library.scheduling.api.contract.task;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
+import br.com.portalmanager.platform.library.scheduling.internal.message.SchedulingTechnicalErrors;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;

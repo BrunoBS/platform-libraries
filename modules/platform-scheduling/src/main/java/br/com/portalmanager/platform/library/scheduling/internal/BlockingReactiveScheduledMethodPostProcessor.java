@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.library.scheduling.internal;
 
-import br.com.portalmanager.platform.library.scheduling.annotation.DisableScheduledLock;
+import br.com.portalmanager.platform.library.scheduling.api.annotation.DisableScheduledLock;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.scheduling.message.SchedulingTechnicalErrors;
+import br.com.portalmanager.platform.library.scheduling.internal.message.SchedulingTechnicalErrors;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;

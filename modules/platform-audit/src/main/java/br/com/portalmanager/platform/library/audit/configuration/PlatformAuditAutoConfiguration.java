@@ -14,7 +14,7 @@ import br.com.portalmanager.platform.library.audit.internal.outbox.AuditOutboxSc
 import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageAutoConfiguration;
 import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
-import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
+import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformTaskScheduler;
 import jakarta.persistence.EntityManager;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.beans.factory.annotation.Qualifier;
