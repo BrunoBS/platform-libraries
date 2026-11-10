@@ -1,10 +1,9 @@
 package br.com.portalmanager.platform.library.audit.model;
 
-/** Technical delivery state for the future outbox worker. */
+/** Technical delivery state used by the audit outbox processor. */
 public enum AuditOutboxStatus {
     PENDING,
     PROCESSING,
-    PROCESSED,
     RETRY,
-    FAILED
+    ERROR
 }

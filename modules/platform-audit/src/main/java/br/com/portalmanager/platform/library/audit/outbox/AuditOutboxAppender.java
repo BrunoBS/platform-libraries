@@ -5,6 +5,7 @@ import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigu
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.repository.support.Repositories;
+import org.springframework.context.ApplicationEventPublisher;
 import tools.jackson.databind.JsonNode;
 
 import java.util.Objects;
@@ -14,13 +15,24 @@ public final class AuditOutboxAppender {
 
     private final AuditOutboxRepository<?> repository;
     private final Class<? extends AuditOutboxEntity> entityType;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuditOutboxAppender(
             AuditOutboxRepository<?> repository,
             EntityManager entityManager,
             Repositories repositories
     ) {
+        this(repository, entityManager, repositories, null);
+    }
+
+    public AuditOutboxAppender(
+            AuditOutboxRepository<?> repository,
+            EntityManager entityManager,
+            Repositories repositories,
+            ApplicationEventPublisher eventPublisher
+    ) {
         this.repository = Objects.requireNonNull(repository, "audit outbox repository must not be null");
+        this.eventPublisher = eventPublisher;
         Repositories repositoryRegistry = Objects.requireNonNull(repositories, "repositories must not be null");
         this.entityType = resolveEntityType(entityManager);
         validateRepository(repositoryRegistry);
@@ -30,6 +42,9 @@ public final class AuditOutboxAppender {
         AuditOutboxEntity entry = BeanUtils.instantiateClass(entityType);
         entry.prepareForPersistence(payload, metadata);
         repository.append(entry);
+        if (eventPublisher != null) {
+            eventPublisher.publishEvent(new AuditOutboxCreatedEvent(entry.getIdentifier()));
+        }
     }
 
     private void validateRepository(Repositories repositories) {

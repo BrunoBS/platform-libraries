@@ -36,6 +36,30 @@ public final class AuditTechnicalErrors {
                     500
             );
 
+    public static final PlatformErrorDefinition OBJECT_STORAGE_REQUIRED =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-007",
+                    "Platform Object Storage is required by platform-audit",
+                    "Add platform-object-storage and configure the audit outbox destination.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition OUTBOX_DESTINATION_REQUIRED =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-008",
+                    "The audit outbox destination is missing or not configured in Object Storage",
+                    "Set platform.audit.outbox.destination to a logical destination configured under platform.object-storage.destinations.",
+                    500
+            );
+
+    public static final PlatformErrorDefinition OUTBOX_CONFIGURATION_INVALID =
+            new PlatformErrorDefinition(
+                    "PLT-AUD-009",
+                    "The audit outbox retry configuration is invalid",
+                    "Review the retry limits, batch size, delays, recovery window and processing lease.",
+                    500
+            );
+
     private AuditTechnicalErrors() {
     }
 }

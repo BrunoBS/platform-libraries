@@ -34,6 +34,14 @@
             <artifactId>platform-messaging-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-object-storage</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.portalmanager.platform.library</groupId>
+            <artifactId>platform-scheduling</artifactId>
+        </dependency>
+        <dependency>
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
