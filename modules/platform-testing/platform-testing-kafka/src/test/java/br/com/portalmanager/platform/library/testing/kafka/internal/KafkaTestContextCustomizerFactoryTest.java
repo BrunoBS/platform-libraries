@@ -1,7 +1,9 @@
-package br.com.portalmanager.platform.library.testing.kafka;
+package br.com.portalmanager.platform.library.testing.kafka.internal;
+import br.com.portalmanager.platform.library.testing.kafka.internal.configuration.KafkaTestConfiguration;
+import br.com.portalmanager.platform.library.testing.kafka.internal.configuration.KafkaTestContextCustomizerFactory;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.kafka.annotation.WithKafka;
+import br.com.portalmanager.platform.library.testing.kafka.api.annotation.WithKafka;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

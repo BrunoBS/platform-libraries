@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.kafka;
+package br.com.portalmanager.platform.library.testing.kafka.internal.container;
 
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.NewTopic;

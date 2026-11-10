@@ -1,10 +1,10 @@
-package br.com.portalmanager.platform.library.testing.kafka;
+package br.com.portalmanager.platform.library.testing.kafka.internal.configuration;
 
 import org.testcontainers.utility.DockerImageName;
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
-import br.com.portalmanager.platform.library.testing.kafka.annotation.WithKafka;
-import br.com.portalmanager.platform.library.testing.kafka.KafkaTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.core.internal.container.PinnedDockerImage;
+import br.com.portalmanager.platform.library.testing.kafka.api.annotation.WithKafka;
+import br.com.portalmanager.platform.library.testing.kafka.internal.message.KafkaTestingTechnicalErrors;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;

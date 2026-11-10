@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.kafka;
+package br.com.portalmanager.platform.library.testing.kafka.internal.message;
 
 import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 

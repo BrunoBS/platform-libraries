@@ -1,7 +1,9 @@
-package br.com.portalmanager.platform.library.testing.kafka;
+package br.com.portalmanager.platform.library.testing.kafka.internal.configuration;
+import br.com.portalmanager.platform.library.testing.kafka.api.configuration.KafkaContainerImages;
+import br.com.portalmanager.platform.library.testing.kafka.internal.container.KafkaTestContainer;
 
 import org.testcontainers.utility.DockerImageName;
-import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
+import br.com.portalmanager.platform.library.testing.core.internal.container.PinnedDockerImage;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

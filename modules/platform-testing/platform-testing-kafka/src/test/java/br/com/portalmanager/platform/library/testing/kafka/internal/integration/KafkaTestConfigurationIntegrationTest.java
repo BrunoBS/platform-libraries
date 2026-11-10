@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.testing.integration;
+package br.com.portalmanager.platform.library.testing.kafka.internal.integration;
 
-import br.com.portalmanager.platform.library.testing.kafka.annotation.WithKafka;
+import br.com.portalmanager.platform.library.testing.kafka.api.annotation.WithKafka;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
