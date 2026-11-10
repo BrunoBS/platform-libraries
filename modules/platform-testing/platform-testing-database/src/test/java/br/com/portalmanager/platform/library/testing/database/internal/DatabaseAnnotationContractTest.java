@@ -1,7 +1,10 @@
-package br.com.portalmanager.platform.library.testing.database;
+package br.com.portalmanager.platform.library.testing.database.internal;
+import br.com.portalmanager.platform.library.testing.database.api.CleanupMode;
+import br.com.portalmanager.platform.library.testing.database.api.DatabaseCleanupPhase;
+import br.com.portalmanager.platform.library.testing.database.api.DatabaseSetupPhase;
 
-import br.com.portalmanager.platform.library.testing.database.annotation.WithDatabaseScripts;
-import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
+import br.com.portalmanager.platform.library.testing.database.api.annotation.WithDatabaseScripts;
+import br.com.portalmanager.platform.library.testing.database.api.annotation.WithMySql;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.AnnotationSupport;
 

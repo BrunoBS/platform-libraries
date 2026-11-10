@@ -1,4 +1,5 @@
-package br.com.portalmanager.platform.library.testing.database;
+package br.com.portalmanager.platform.library.testing.database.internal;
+import br.com.portalmanager.platform.library.testing.database.internal.DatabaseScriptExecutor;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.DefaultResourceLoader;

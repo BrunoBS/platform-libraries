@@ -1,10 +1,10 @@
-package br.com.portalmanager.platform.library.testing.database;
+package br.com.portalmanager.platform.library.testing.database.internal;
 
 import org.testcontainers.utility.DockerImageName;
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
-import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
-import br.com.portalmanager.platform.library.testing.database.DatabaseTestingTechnicalErrors;
+import br.com.portalmanager.platform.library.testing.core.internal.container.PinnedDockerImage;
+import br.com.portalmanager.platform.library.testing.database.api.annotation.WithMySql;
+import br.com.portalmanager.platform.library.testing.database.internal.DatabaseTestingTechnicalErrors;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;

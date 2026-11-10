@@ -1,6 +1,10 @@
-package br.com.portalmanager.platform.library.testing.database;
+package br.com.portalmanager.platform.library.testing.database.internal;
+import br.com.portalmanager.platform.library.testing.database.api.DatabaseCleanupPhase;
+import br.com.portalmanager.platform.library.testing.database.api.DatabaseSetupPhase;
+import br.com.portalmanager.platform.library.testing.database.internal.DatabaseCleaner;
+import br.com.portalmanager.platform.library.testing.database.internal.DatabaseScriptExecutor;
 
-import br.com.portalmanager.platform.library.testing.database.annotation.WithDatabaseScripts;
+import br.com.portalmanager.platform.library.testing.database.api.annotation.WithDatabaseScripts;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;

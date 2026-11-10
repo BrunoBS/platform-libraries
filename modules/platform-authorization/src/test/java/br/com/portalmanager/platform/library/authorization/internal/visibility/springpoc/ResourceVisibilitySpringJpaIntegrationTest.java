@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.authorization.api.model.ParsedGroup
 import br.com.portalmanager.platform.library.authorization.api.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.api.model.UserSession;
 import br.com.portalmanager.platform.library.authorization.internal.visibility.ResourceVisibilityFilterManager;
-import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
+import br.com.portalmanager.platform.library.testing.database.api.annotation.WithMySql;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;

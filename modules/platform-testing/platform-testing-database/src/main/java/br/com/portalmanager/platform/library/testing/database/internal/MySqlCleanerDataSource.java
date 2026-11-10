@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.database;
+package br.com.portalmanager.platform.library.testing.database.internal;
 
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.MySQLContainer;

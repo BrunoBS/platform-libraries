@@ -1,4 +1,7 @@
-package br.com.portalmanager.platform.library.testing.database;
+package br.com.portalmanager.platform.library.testing.database.internal;
+import br.com.portalmanager.platform.library.testing.database.api.configuration.MySqlContainerImages;
+import br.com.portalmanager.platform.library.testing.database.internal.MySqlCleanerDataSource;
+import br.com.portalmanager.platform.library.testing.database.internal.MySqlTestContainerManager;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

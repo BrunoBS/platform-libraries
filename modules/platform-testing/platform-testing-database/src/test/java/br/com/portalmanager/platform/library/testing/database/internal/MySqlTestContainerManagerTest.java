@@ -1,4 +1,6 @@
-package br.com.portalmanager.platform.library.testing.database;
+package br.com.portalmanager.platform.library.testing.database.internal;
+import br.com.portalmanager.platform.library.testing.database.api.configuration.MySqlContainerImages;
+import br.com.portalmanager.platform.library.testing.database.internal.MySqlTestContainerManager;
 
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MySQLContainer;

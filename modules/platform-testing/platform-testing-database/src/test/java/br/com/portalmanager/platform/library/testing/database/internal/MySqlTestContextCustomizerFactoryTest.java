@@ -1,7 +1,10 @@
-package br.com.portalmanager.platform.library.testing.database;
+package br.com.portalmanager.platform.library.testing.database.internal;
+import br.com.portalmanager.platform.library.testing.database.api.configuration.MySqlContainerImages;
+import br.com.portalmanager.platform.library.testing.database.internal.MySqlTestConfiguration;
+import br.com.portalmanager.platform.library.testing.database.internal.MySqlTestContextCustomizerFactory;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
+import br.com.portalmanager.platform.library.testing.database.api.annotation.WithMySql;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.testing.integration;
+package br.com.portalmanager.platform.library.testing.database.internal.integration;
 
-import br.com.portalmanager.platform.library.testing.lifecycle.annotation.PlatformIntegrationTest;
-import br.com.portalmanager.platform.library.testing.database.annotation.WithDatabaseScripts;
-import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
+import br.com.portalmanager.platform.library.testing.http.api.lifecycle.annotation.PlatformIntegrationTest;
+import br.com.portalmanager.platform.library.testing.database.api.annotation.WithDatabaseScripts;
+import br.com.portalmanager.platform.library.testing.database.api.annotation.WithMySql;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -116,7 +116,7 @@ class MySqlScriptLifecycleIT {
 
     private MySQLContainer<?> createIndependentContextContainer() {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.register(br.com.portalmanager.platform.library.testing.database.MySqlTestConfiguration.class);
+        context.register(br.com.portalmanager.platform.library.testing.database.internal.MySqlTestConfiguration.class);
         context.refresh();
         MySQLContainer<?> container = context.getBean(MySQLContainer.class);
         context.close();

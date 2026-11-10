@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.testing.database.annotation;
+package br.com.portalmanager.platform.library.testing.database.api.annotation;
 
-import br.com.portalmanager.platform.library.testing.database.DatabaseCleanupPhase;
-import br.com.portalmanager.platform.library.testing.database.DatabaseScriptExtension;
-import br.com.portalmanager.platform.library.testing.database.DatabaseSetupPhase;
+import br.com.portalmanager.platform.library.testing.database.api.DatabaseCleanupPhase;
+import br.com.portalmanager.platform.library.testing.database.internal.DatabaseScriptExtension;
+import br.com.portalmanager.platform.library.testing.database.api.DatabaseSetupPhase;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 
