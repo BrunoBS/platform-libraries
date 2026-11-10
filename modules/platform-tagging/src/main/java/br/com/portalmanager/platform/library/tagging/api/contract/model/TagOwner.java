@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.tagging.model;
+package br.com.portalmanager.platform.library.tagging.api.contract.model;
 
 import java.util.Collection;
 

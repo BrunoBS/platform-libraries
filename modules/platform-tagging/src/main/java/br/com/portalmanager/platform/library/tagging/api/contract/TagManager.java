@@ -1,13 +1,13 @@
-package br.com.portalmanager.platform.library.tagging;
+package br.com.portalmanager.platform.library.tagging.api.contract;
 
-import br.com.portalmanager.platform.library.tagging.model.Tag;
+import br.com.portalmanager.platform.library.tagging.api.contract.model.Tag;
 import br.com.portalmanager.platform.library.tagging.internal.TagNameNormalizer;
-import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
-import br.com.portalmanager.platform.library.tagging.model.TagOwner;
-import br.com.portalmanager.platform.library.tagging.exception.TaggingTechnicalErrors;
-import br.com.portalmanager.platform.library.tagging.message.TaggingMessageKeys;
-import br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName;
-import br.com.portalmanager.platform.library.tagging.storage.TagRepository;
+import br.com.portalmanager.platform.library.tagging.api.contract.model.TagOriginType;
+import br.com.portalmanager.platform.library.tagging.api.contract.model.TagOwner;
+import br.com.portalmanager.platform.library.tagging.internal.message.TaggingTechnicalErrors;
+import br.com.portalmanager.platform.library.tagging.internal.message.TaggingMessageKeys;
+import br.com.portalmanager.platform.library.tagging.internal.storage.TagOwnerTagName;
+import br.com.portalmanager.platform.library.tagging.internal.storage.TagRepository;
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;

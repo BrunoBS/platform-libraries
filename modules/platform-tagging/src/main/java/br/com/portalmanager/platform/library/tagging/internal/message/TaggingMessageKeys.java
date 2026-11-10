@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.tagging.message;
+package br.com.portalmanager.platform.library.tagging.internal.message;
 
 public final class TaggingMessageKeys {
 

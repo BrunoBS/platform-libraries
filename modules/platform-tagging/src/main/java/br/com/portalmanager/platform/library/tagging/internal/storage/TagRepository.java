@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.tagging.storage;
+package br.com.portalmanager.platform.library.tagging.internal.storage;
 
-import br.com.portalmanager.platform.library.tagging.model.Tag;
-import br.com.portalmanager.platform.library.tagging.model.TagOriginType;
-import br.com.portalmanager.platform.library.tagging.model.TagOwner;
+import br.com.portalmanager.platform.library.tagging.api.contract.model.Tag;
+import br.com.portalmanager.platform.library.tagging.api.contract.model.TagOriginType;
+import br.com.portalmanager.platform.library.tagging.api.contract.model.TagOwner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -30,7 +30,7 @@ public interface TagRepository<TAG extends Tag<OWNER>, OWNER extends TagOwner>
     List<TAG> findByOwnerId(@Param("ownerId") Long ownerId);
 
     @Query("""
-            select new br.com.portalmanager.platform.library.tagging.storage.TagOwnerTagName(
+            select new br.com.portalmanager.platform.library.tagging.internal.storage.TagOwnerTagName(
                 t.owner.identifier, t.name
             )
               from #{#entityName} t

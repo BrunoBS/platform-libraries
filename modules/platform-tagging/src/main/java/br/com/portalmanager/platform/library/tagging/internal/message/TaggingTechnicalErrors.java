@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.tagging.exception;
+package br.com.portalmanager.platform.library.tagging.internal.message;
 
 import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
 

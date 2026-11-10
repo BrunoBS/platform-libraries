@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.tagging.model;
+package br.com.portalmanager.platform.library.tagging.api.contract.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
@@ -11,7 +11,7 @@ import jakarta.persistence.MappedSuperclass;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
-import br.com.portalmanager.platform.library.tagging.message.TaggingMessageKeys;
+import br.com.portalmanager.platform.library.tagging.internal.message.TaggingMessageKeys;
 import br.com.portalmanager.platform.library.tagging.internal.TagNameNormalizer;
 
 import java.util.List;

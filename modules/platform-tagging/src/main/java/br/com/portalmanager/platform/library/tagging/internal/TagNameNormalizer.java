@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.tagging.internal;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
 import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
 import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
-import br.com.portalmanager.platform.library.tagging.message.TaggingMessageKeys;
+import br.com.portalmanager.platform.library.tagging.internal.message.TaggingMessageKeys;
 
 import java.text.Normalizer;
 import java.util.List;

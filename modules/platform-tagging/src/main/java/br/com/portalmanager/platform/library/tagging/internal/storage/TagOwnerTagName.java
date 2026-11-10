@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.tagging.storage;
+package br.com.portalmanager.platform.library.tagging.internal.storage;
 
-import br.com.portalmanager.platform.library.tagging.exception.TaggingTechnicalErrors;
+import br.com.portalmanager.platform.library.tagging.internal.message.TaggingTechnicalErrors;
 import br.com.portalmanager.platform.library.messaging.exception.ApiException;
 import br.com.portalmanager.platform.library.tagging.internal.TagNameNormalizer;
 import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
