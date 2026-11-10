@@ -153,7 +153,8 @@ public final class AuditOutboxProcessor {
 
             AuditOutboxEntity claimed = claim.entry();
             if (claim.attemptsBeforeClaim() >= properties.getOutbox().getMaximumAttempts()
-                    || !now.isBefore(claimed.getCreatedAt().plusDays(properties.getOutbox().getMaximumRecoveryDays()))) {
+                    || !now.isBefore(claimed.getCreatedAt()
+                            .plus(Duration.ofDays(properties.getOutbox().getMaximumRecoveryDays())))) {
                 discard(claimed, "retry_limit_or_recovery_window_expired");
                 return;
             }
@@ -225,7 +226,8 @@ public final class AuditOutboxProcessor {
     private void failed(AuditOutboxEntity entry, Exception failure) {
         int attempts = entry.getAttempts();
         if (attempts >= properties.getOutbox().getMaximumAttempts()
-                || !Instant.now().isBefore(entry.getCreatedAt().plusDays(properties.getOutbox().getMaximumRecoveryDays()))) {
+                || !Instant.now().isBefore(entry.getCreatedAt()
+                        .plus(Duration.ofDays(properties.getOutbox().getMaximumRecoveryDays())))) {
             discard(entry, failure.getClass().getSimpleName());
             return;
         }
