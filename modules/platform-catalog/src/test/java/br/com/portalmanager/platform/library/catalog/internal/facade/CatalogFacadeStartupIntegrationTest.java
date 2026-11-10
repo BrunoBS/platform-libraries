@@ -3,6 +3,8 @@ package br.com.portalmanager.platform.library.catalog.internal.facade;
 import br.com.portalmanager.platform.library.authorization.api.model.AuthorizationContext;
 import br.com.portalmanager.platform.library.catalog.api.contract.CatalogDTO;
 import br.com.portalmanager.platform.library.catalog.api.contract.model.CatalogEntity;
+import br.com.portalmanager.platform.library.catalog.api.facade.AbstractCatalogFacade;
+import br.com.portalmanager.platform.library.catalog.configuration.CatalogFacadePolicyAutoConfiguration;
 import br.com.portalmanager.platform.library.catalog.internal.service.AbstractCatalogService;
 import br.com.portalmanager.platform.library.catalog.internal.service.IncludedCatalogService;
 import org.junit.jupiter.api.Test;
