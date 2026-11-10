@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.observability.logging.converter;
+package br.com.portalmanager.platform.library.observability.internal.logging.converter;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.junit.jupiter.api.Test;

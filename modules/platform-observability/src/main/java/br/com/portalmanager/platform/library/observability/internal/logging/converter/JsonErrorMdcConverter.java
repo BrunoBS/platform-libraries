@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.observability.logging.converter;
+package br.com.portalmanager.platform.library.observability.internal.logging.converter;
 
 import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messaging.model.ApiErrorResponse;

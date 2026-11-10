@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.observability.logging;
+package br.com.portalmanager.platform.library.observability.api.logging;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,12 +1,12 @@
-package br.com.portalmanager.platform.library.observability.logging.config;
+package br.com.portalmanager.platform.library.observability.internal.logging.config;
 
-import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
-import br.com.portalmanager.platform.library.observability.logging.converter.JsonErrorMdcConverter;
-import br.com.portalmanager.platform.library.observability.logging.converter.JsonMdcConverter;
-import br.com.portalmanager.platform.library.observability.logging.converter.JsonMessageConverter;
-import br.com.portalmanager.platform.library.observability.logging.converter.JsonThrowableConverter;
-import br.com.portalmanager.platform.library.observability.logging.metadata.BuildVersionResolver;
-import br.com.portalmanager.platform.library.observability.logging.metadata.HostResolver;
+import br.com.portalmanager.platform.library.observability.api.logging.SensitiveValue;
+import br.com.portalmanager.platform.library.observability.internal.logging.converter.JsonErrorMdcConverter;
+import br.com.portalmanager.platform.library.observability.internal.logging.converter.JsonMdcConverter;
+import br.com.portalmanager.platform.library.observability.internal.logging.converter.JsonMessageConverter;
+import br.com.portalmanager.platform.library.observability.internal.logging.converter.JsonThrowableConverter;
+import br.com.portalmanager.platform.library.observability.internal.logging.metadata.BuildVersionResolver;
+import br.com.portalmanager.platform.library.observability.internal.logging.metadata.HostResolver;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;

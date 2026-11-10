@@ -1,6 +1,7 @@
-package br.com.portalmanager.platform.library.observability.logging.config;
+package br.com.portalmanager.platform.library.observability.api.configuration;
 
-import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
+import br.com.portalmanager.platform.library.observability.configuration.PlatformObservabilityAutoConfiguration;
+import br.com.portalmanager.platform.library.observability.api.logging.SensitiveValue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

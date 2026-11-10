@@ -1,6 +1,6 @@
-package br.com.portalmanager.platform.library.observability.logging.converter;
+package br.com.portalmanager.platform.library.observability.internal.logging.converter;
 
-import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
+import br.com.portalmanager.platform.library.observability.api.logging.SensitiveValue;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

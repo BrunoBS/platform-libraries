@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.observability.logging.config;
+package br.com.portalmanager.platform.library.observability.api.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

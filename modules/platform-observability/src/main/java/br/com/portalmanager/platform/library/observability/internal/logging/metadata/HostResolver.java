@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.observability.logging.metadata;
+package br.com.portalmanager.platform.library.observability.internal.logging.metadata;
 
 import org.springframework.core.env.Environment;
 

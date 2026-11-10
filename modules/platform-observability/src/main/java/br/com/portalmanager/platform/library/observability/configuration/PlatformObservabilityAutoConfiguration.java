@@ -1,6 +1,7 @@
-package br.com.portalmanager.platform.library.observability.logging.config;
+package br.com.portalmanager.platform.library.observability.configuration;
 
-import br.com.portalmanager.platform.library.observability.logging.SensitiveValue;
+import br.com.portalmanager.platform.library.observability.api.configuration.PlatformObservabilityProperties;
+import br.com.portalmanager.platform.library.observability.api.logging.SensitiveValue;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

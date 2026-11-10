@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.observability.logging;
+package br.com.portalmanager.platform.library.observability.api.logging;
 
 /**
  * Explicitly marks a value for partial masking when it is rendered in a log message.
