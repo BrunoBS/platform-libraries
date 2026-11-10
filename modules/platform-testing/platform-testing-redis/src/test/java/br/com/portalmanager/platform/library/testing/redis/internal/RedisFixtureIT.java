@@ -1,8 +1,8 @@
-package br.com.portalmanager.platform.library.testing.redis;
+package br.com.portalmanager.platform.library.testing.redis.internal;
 
 import static org.assertj.core.api.Assertions.*;
 
-import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
+import br.com.portalmanager.platform.library.testing.redis.api.annotation.WithRedis;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

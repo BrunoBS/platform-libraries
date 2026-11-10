@@ -1,7 +1,7 @@
-package br.com.portalmanager.platform.library.testing.redis.annotation;
+package br.com.portalmanager.platform.library.testing.redis.api.annotation;
 
-import br.com.portalmanager.platform.library.testing.redis.RedisContainerImages;
-import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
+import br.com.portalmanager.platform.library.testing.redis.api.configuration.RedisContainerImages;
+import br.com.portalmanager.platform.library.testing.redis.internal.configuration.RedisTestConfiguration;
 
 import org.springframework.context.annotation.Import;
 
@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Import(RedisTestConfiguration.class)
 @org.junit.jupiter.api.extension.ExtendWith(
-        br.com.portalmanager.platform.library.testing.redis.RedisTestExtension.class)
+        br.com.portalmanager.platform.library.testing.redis.internal.extension.RedisTestExtension.class)
 public @interface WithRedis {
     String image() default RedisContainerImages.REDIS;
 

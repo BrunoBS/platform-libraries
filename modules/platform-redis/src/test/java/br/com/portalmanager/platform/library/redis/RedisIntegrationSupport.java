@@ -8,11 +8,11 @@ import org.springframework.boot.data.redis.autoconfigure.*;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.testcontainers.containers.GenericContainer;
 
-@br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis
+@br.com.portalmanager.platform.library.testing.redis.api.annotation.WithRedis
 @org.junit.jupiter.api.extension.ExtendWith(
         org.springframework.test.context.junit.jupiter.SpringExtension.class)
 @org.springframework.test.context.ContextConfiguration(
-        classes = br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration.class)
+        classes = br.com.portalmanager.platform.library.testing.redis.internal.configuration.RedisTestConfiguration.class)
 abstract class RedisIntegrationSupport {
     static GenericContainer<?> REDIS;
 

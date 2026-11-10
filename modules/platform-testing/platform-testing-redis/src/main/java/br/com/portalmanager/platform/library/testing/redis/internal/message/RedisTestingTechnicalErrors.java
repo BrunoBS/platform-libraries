@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.redis;
+package br.com.portalmanager.platform.library.testing.redis.internal.message;
 
 import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 

@@ -9,8 +9,8 @@ import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAu
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
 import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
-import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
-import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
+import br.com.portalmanager.platform.library.testing.redis.api.annotation.WithRedis;
+import br.com.portalmanager.platform.library.testing.redis.internal.configuration.RedisTestConfiguration;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;

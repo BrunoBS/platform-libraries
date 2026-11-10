@@ -1,4 +1,4 @@
-package br.com.portalmanager.platform.library.testing.redis;
+package br.com.portalmanager.platform.library.testing.redis.api.configuration;
 
 /** Version-pinned Redis image used by the fixture. */
 public final class RedisContainerImages {

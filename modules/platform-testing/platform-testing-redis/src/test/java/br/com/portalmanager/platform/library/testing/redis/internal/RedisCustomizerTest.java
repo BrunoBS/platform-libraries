@@ -1,9 +1,10 @@
-package br.com.portalmanager.platform.library.testing.redis;
+package br.com.portalmanager.platform.library.testing.redis.internal;
+import br.com.portalmanager.platform.library.testing.redis.internal.configuration.RedisTestContextCustomizerFactory;
 
 import static org.assertj.core.api.Assertions.*;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
+import br.com.portalmanager.platform.library.testing.redis.api.annotation.WithRedis;
 
 import org.junit.jupiter.api.Test;
 

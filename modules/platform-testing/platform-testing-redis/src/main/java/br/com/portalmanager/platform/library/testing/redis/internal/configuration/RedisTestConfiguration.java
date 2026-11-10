@@ -1,7 +1,9 @@
-package br.com.portalmanager.platform.library.testing.redis;
+package br.com.portalmanager.platform.library.testing.redis.internal.configuration;
+import br.com.portalmanager.platform.library.testing.redis.api.configuration.RedisContainerImages;
+import br.com.portalmanager.platform.library.testing.redis.internal.message.RedisTestingTechnicalErrors;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
+import br.com.portalmanager.platform.library.testing.core.internal.container.PinnedDockerImage;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

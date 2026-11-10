@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.redis;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import br.com.portalmanager.platform.library.redis.internal.cache.PlatformRedisCacheManager;
-import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
+import br.com.portalmanager.platform.library.testing.redis.api.annotation.WithRedis;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

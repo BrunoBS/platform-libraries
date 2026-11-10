@@ -9,8 +9,8 @@ import br.com.portalmanager.platform.library.scheduling.api.annotation.DisableSc
 import br.com.portalmanager.platform.library.scheduling.configuration.PlatformSchedulingAutoConfiguration;
 import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformScheduleOptions;
 import br.com.portalmanager.platform.library.scheduling.api.contract.task.PlatformTaskScheduler;
-import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
-import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
+import br.com.portalmanager.platform.library.testing.redis.internal.configuration.RedisTestConfiguration;
+import br.com.portalmanager.platform.library.testing.redis.api.annotation.WithRedis;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
