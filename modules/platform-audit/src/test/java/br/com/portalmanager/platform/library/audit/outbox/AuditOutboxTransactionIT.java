@@ -5,6 +5,8 @@ import br.com.portalmanager.platform.library.audit.context.AuditAuthorizationCon
 import br.com.portalmanager.platform.library.audit.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.model.AuditContext;
 import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
+import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
+import br.com.portalmanager.platform.library.scheduling.task.PlatformTaskScheduler;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -22,9 +24,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.util.Map;
 import java.util.Objects;
@@ -41,6 +47,11 @@ import static org.mockito.Mockito.when;
                 "spring.application.name=platform-audit-transaction-test",
                 "platform.audit.enabled=true",
                 "platform.audit.service-name=transaction-test",
+                "platform.audit.outbox.destination=audit",
+                "platform.object-storage.provider=AWS",
+                "platform.object-storage.region=us-east-1",
+                "platform.object-storage.destinations.audit.bucket=audit-test",
+                "golden.scheduling.distributed-lock.enabled=false",
                 "spring.jpa.hibernate.ddl-auto=none",
                 "spring.jpa.properties.hibernate.type.json_format_mapper=jackson3",
                 "spring.flyway.enabled=false"
@@ -145,6 +156,34 @@ class AuditOutboxTransactionIT {
             when(resolver.resolve()).thenReturn(
                     new AuditContext("account-1", "application-1", "DEV", "user-1", "correlation-1"));
             return resolver;
+        }
+
+        @Bean
+        ObjectStorageClient objectStorageClient() {
+            return mock(ObjectStorageClient.class);
+        }
+
+        @Bean
+        S3Client testS3Client() {
+            return mock(S3Client.class);
+        }
+
+        @Bean
+        S3Presigner testS3Presigner() {
+            return mock(S3Presigner.class);
+        }
+
+        @Bean(initMethod = "initialize", destroyMethod = "shutdown")
+        ThreadPoolTaskScheduler testTaskScheduler() {
+            ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+            scheduler.setPoolSize(1);
+            scheduler.setThreadNamePrefix("audit-test-scheduler-");
+            return scheduler;
+        }
+
+        @Bean
+        PlatformTaskScheduler platformTaskScheduler(TaskScheduler testTaskScheduler) {
+            return new PlatformTaskScheduler(() -> testTaskScheduler);
         }
 
         @Bean
