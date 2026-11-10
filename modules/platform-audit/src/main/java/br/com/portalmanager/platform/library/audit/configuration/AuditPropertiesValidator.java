@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.audit.configuration;
 
 import br.com.portalmanager.platform.library.audit.api.configuration.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.internal.message.AuditTechnicalErrors;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
 import org.springframework.beans.factory.ObjectProvider;

@@ -5,7 +5,7 @@ import br.com.portalmanager.platform.library.messagequeue.api.configuration.Mess
 import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueListenerRegistry;
 import br.com.portalmanager.platform.library.messagequeue.internal.consumer.MessageQueueMdcContext;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.DeadLetterMessage;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueTechnicalErrors;
 import br.com.portalmanager.platform.library.messagequeue.internal.resolver.DestinationResolver;
 import br.com.portalmanager.platform.library.messagequeue.internal.serialization.MessageQueueSerializer;

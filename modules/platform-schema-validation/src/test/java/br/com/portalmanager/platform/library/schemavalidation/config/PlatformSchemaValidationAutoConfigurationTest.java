@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.schemavalidation.aspect.ResourceSchemaValidationAspect;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.repository.JdbcResourceSchemaRepository;

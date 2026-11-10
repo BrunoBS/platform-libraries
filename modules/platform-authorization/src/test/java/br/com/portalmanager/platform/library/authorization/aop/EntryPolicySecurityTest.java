@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.authorization.client.AuthorizationC
 import br.com.portalmanager.platform.library.authorization.config.*;
 import br.com.portalmanager.platform.library.authorization.exception.*;
 import br.com.portalmanager.platform.library.authorization.model.*;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import java.time.Instant;
 import java.util.*;
 import org.aspectj.lang.ProceedingJoinPoint;

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.redis.internal.common;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
 import br.com.portalmanager.platform.library.redis.api.listener.RedisListenerErrorHandler;
 import br.com.portalmanager.platform.library.redis.api.listener.RedisListenerMetrics;

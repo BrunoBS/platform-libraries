@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.audit.internal.aspect;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.audit.api.annotation.Auditable;
 import br.com.portalmanager.platform.library.audit.api.configuration.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.internal.context.AuditAuthorizationContextResolver;

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.messaging.internal.cache;
 
-import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
 import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

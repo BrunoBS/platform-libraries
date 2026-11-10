@@ -4,8 +4,8 @@ import br.com.portalmanager.platform.library.messagequeue.api.annotation.Message
 import br.com.portalmanager.platform.library.messagequeue.api.annotation.MessageQueueListener;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.DeadLetterMessage;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage;
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueTechnicalErrors;
 import org.springframework.beans.BeansException;

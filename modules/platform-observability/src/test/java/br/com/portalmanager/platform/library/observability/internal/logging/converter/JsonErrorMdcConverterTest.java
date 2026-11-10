@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.observability.internal.logging.converter;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import org.junit.jupiter.api.Test;

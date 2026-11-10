@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.parameterclient.internal;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.parameterclient.internal.message.ParameterClientMessageKeys;
 
 /** Never includes keys, parameter values or original exception messages/causes. */

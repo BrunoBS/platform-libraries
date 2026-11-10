@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.api.contract;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueMessageKeys;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messagequeue.internal.serialization;
 
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage;
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageMetadataResolver;
 import tools.jackson.core.JacksonException;

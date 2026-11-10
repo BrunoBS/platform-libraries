@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.redis;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
 
 import org.springframework.boot.test.context.TestConfiguration;

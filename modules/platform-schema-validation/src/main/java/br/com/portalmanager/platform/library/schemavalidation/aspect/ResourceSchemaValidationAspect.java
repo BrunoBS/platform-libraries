@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.schemavalidation.annotation.SchemaP
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

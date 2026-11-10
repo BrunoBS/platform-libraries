@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSch
 import br.com.portalmanager.platform.library.schemavalidation.cache.ResourceSchemaCache;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;

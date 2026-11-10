@@ -5,7 +5,7 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.model.Ob
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.WriteMode;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.response.SignedUrl;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;

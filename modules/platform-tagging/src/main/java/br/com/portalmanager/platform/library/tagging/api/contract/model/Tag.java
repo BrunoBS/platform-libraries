@@ -8,9 +8,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
-import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
-import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.api.model.ValidationDetail;
 import br.com.portalmanager.platform.library.tagging.internal.message.TaggingMessageKeys;
 import br.com.portalmanager.platform.library.tagging.internal.TagNameNormalizer;
 

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.messaging.internal.cache;
 
-import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
 
 import java.util.Locale;
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.catalog.exception;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 
 import java.util.Map;
 

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.kafka;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.kafka.annotation.WithKafka;
 
 import org.junit.jupiter.api.Test;

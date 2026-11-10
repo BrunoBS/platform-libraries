@@ -2,8 +2,8 @@ package br.com.portalmanager.platform.library.schemavalidation.validation;
 
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.resolver.ResourceSchemaResolver;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;

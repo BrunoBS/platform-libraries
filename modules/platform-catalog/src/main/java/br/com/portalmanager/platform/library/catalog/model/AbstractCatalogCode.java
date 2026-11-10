@@ -1,9 +1,9 @@
 package br.com.portalmanager.platform.library.catalog.model;
 
 import br.com.portalmanager.platform.library.catalog.message.CatalogMessageKeys;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
-import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
-import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.api.model.ValidationDetail;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 

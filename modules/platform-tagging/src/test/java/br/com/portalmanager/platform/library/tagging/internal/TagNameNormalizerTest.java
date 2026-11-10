@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.tagging.internal;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

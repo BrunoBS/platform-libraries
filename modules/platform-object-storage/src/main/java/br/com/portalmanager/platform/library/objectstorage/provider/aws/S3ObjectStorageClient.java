@@ -1,397 +1,145 @@
-package br.com.portalmanager.platform.library.objectstorage.provider.aws;
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíïİµN‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹ÁÉ½Ù¥‘•È¹…İÌì()¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹™¥ÕÉ…Ñ¥½¸¹=‰©•ÑMÑ½É…•AÉ½Á•ÉÑ¥•Ìì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÍÁ½¹Í”¹½İ¹±½…‘•‘=‰©•Ğì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÍÁ½¹Í”¹=‰©•Ñ5•Ñ…‘…Ñ„ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹µ½‘•°¹=‰©•Ñ!•…‘•ÉÌì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÍÁ½¹Í”¹=‰©•ÑA…”ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹µ½‘•°¹=‰©•ÑI•™•É•¹”ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹=‰©•ÑMÑ½É…•±¥•¹Ğì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÍÁ½¹Í”¹=‰©•ÑMÕµµ…Éäì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÍÁ½¹Í”¹=‰©•ÑY•ÉÍ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÅÕ•ÍĞ¹½İ¹±½…‘UÉ±I•ÅÕ•ÍĞì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÍÁ½¹Í”¹M¥¹•‘UÉ°ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹M¥¹•‘UÉ±±¥•¹Ğì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÅÕ•ÍĞ¹UÁ±½…‘UÉ±I•ÅÕ•ÍĞì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÅÕ•ÍĞ¹UÁ±½…‘I•ÅÕ•ÍĞì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÍÁ½¹Í”¹UÁ±½…‘I•ÍÕ±Ğì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹É•ÍÁ½¹Í”¹Y•ÉÍ¥½¹A…”ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹…Á¤¹½¹ÑÉ…Ğ¹µ½‘•°¹]É¥Ñ•5½‘”ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹…Á¤¹•á•ÁÑ¥½¸¹9½Ñ½Õ¹‘á•ÁÑ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹¥¹Ñ•É¹…°¹•ÉÉ½È¹=‰©•ÑMÑ½É…•…¥±ÕÉ•5…ÁÁ•Èì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹¥¹Ñ•É¹…°¹Ù…±¥‘…Ñ¥½¸¹=‰©•ÑMÑ½É…•Y…±¥‘…Ñ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹¥¹Ñ•É¹…°¹­•ä¹=‰©•ÑMÑ½É…•-•äì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹½‰©•ÑÍÑ½É…”¹¥¹Ñ•É¹…°¹½¹Ñ•¹Ğ¹=‰©•ÑMÑ½É…•UÁ±½…‘½¹Ñ•¹Ğì)¥µÁ½ÉĞ©…Ù„¹¥¼¹%¹ÁÕÑMÑÉ•…´ì)¥µÁ½ÉĞ©…Ù„¹¹¥¼¹	åÑ•	Õ™™•Èì)¥µÁ½ÉĞ©…Ù„¹¹¥¼¹¡…ÉÍ•Ğ¹MÑ…¹‘…É‘¡…ÉÍ•ÑÌì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹ÉÉ…å1¥ÍĞì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹	…Í”ØĞì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹1¥ÍĞì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹5…Àì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹=ÁÑ¥½¹…°ì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹½É”¹Íå¹Œ¹I•ÅÕ•ÍÑ	½‘äì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹½É”¹•á•ÁÑ¥½¸¹M‘­á•ÁÑ¥½¸ì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹Í•ÉÙ¥•Ì¹ÌÌ¹LÍ±¥•¹Ğì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹Í•ÉÙ¥•Ì¹ÌÌ¹ÁÉ•Í¥¹•È¹LÍAÉ•Í¥¹•Èì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹Í•ÉÙ¥•Ì¹ÌÌ¹ÁÉ•Í¥¹•È¹µ½‘•°¹•Ñ=‰©•ÑAÉ•Í¥¹I•ÅÕ•ÍĞì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹Í•ÉÙ¥•Ì¹ÌÌ¹ÁÉ•Í¥¹•È¹µ½‘•°¹AÉ•Í¥¹•‘•Ñ=‰©•ÑI•ÅÕ•ÍĞì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹Í•ÉÙ¥•Ì¹ÌÌ¹ÁÉ•Í¥¹•È¹µ½‘•°¹AÉ•Í¥¹•‘AÕÑ=‰©•ÑI•ÅÕ•ÍĞì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹Í•ÉÙ¥•Ì¹ÌÌ¹ÁÉ•Í¥¹•È¹µ½‘•°¹AÕÑ=‰©•ÑAÉ•Í¥¹I•ÅÕ•ÍĞì)¥µÁ½ÉĞÍ½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹Í•ÉÙ¥•Ì¹ÌÌ¹µ½‘•°¸¨ì()ÁÕ‰±¥Œ±…ÍÌLÍ=‰©•ÑMÑ½É…•±¥•¹Ğ¥µÁ±•µ•¹ÑÌ=‰©•ÑMÑ½É…•±¥•¹Ğ°M¥¹•‘UÉ±±¥•¹Ğì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°‰åÑ•mtYIM%=9}Q=-9}5%€ôì(€€€€€€€€€€€€¡‰åÑ”¤€Áá™˜°€@œ°€Lœ°€Pœ°€Xœ°€Ä(€€€ôì((€€€ÁÉ¥Ù…Ñ”™¥¹…°LÍ±¥•¹Ğ±¥•¹Ğì(€€€ÁÉ¥Ù…Ñ”™¥¹…°LÍAÉ•Í¥¹•ÈÁÉ•Í¥¹•Èì(€€€ÁÉ¥Ù…Ñ”™¥¹…°=‰©•ÑMÑ½É…•AÉ½Á•ÉÑ¥•ÌÁÉ½Á•ÉÑ¥•Ìì((€€€ÁÕ‰±¥ŒLÍ=‰©•ÑMÑ½É…•±¥•¹Ğ¡LÍ±¥•¹Ğ±¥•¹Ğ°LÍAÉ•Í¥¹•ÈÁÉ•Í¥¹•È°=‰©•ÑMÑ½É…•AÉ½Á•ÉÑ¥•ÌÁÉ½Á•ÉÑ¥•Ì¤ì(€€€€€€€Ñ¡¥Ì¹±¥•¹Ğ€ô±¥•¹Ğì(€€€€€€€Ñ¡¥Ì¹ÁÉ•Í¥¹•È€ôÁÉ•Í¥¹•Èì(€€€€€€€Ñ¡¥Ì¹ÁÉ½Á•ÉÑ¥•Ì€ôÁÉ½Á•ÉÑ¥•Ìì(€€€ô((€€€=Ù•ÉÉ¥‘”(€€€ÁÕ‰±¥ŒUÁ±½…‘I•ÍÕ±ĞÕÁ±½…¡UÁ±½…‘I•ÅÕ•ÍĞÉ•ÅÕ•ÍĞ°%¹ÁÕÑMÑÉ•…´½¹Ñ•¹Ğ¤ì(€€€€€€€¥˜€¡É•ÅÕ•ÍĞ€ôô¹Õ±°¤Ñ¡É½Ü=‰©•ÑMÑ½É…•Y…±¥‘…Ñ¥½¸¹¥¹Ù…±¥ ‰É•ÅÕ•ÍĞˆ¤ì(€€€€€€€¥˜€¡½¹Ñ•¹Ğ€ôô¹Õ±°¤Ñ¡É½Ü=‰©•ÑMÑ½É…•Y…±¥‘…Ñ¥½¸¹¥¹Ù…±¥ ‰½¹Ñ•¹Ğˆ¤ì(€€€€€€€I•Í½±Ù•É•Í½±Ù•€ôÉ•Í½±Ù”¡É•ÅÕ•ÍĞ¹‘•ÍÑ¥¹…Ñ¥½¸ ¤°É•ÅÕ•ÍĞ¹­•ä ¤¤ì(€€€€€€€=‰©•ÑMÑ½É…•UÁ±½…‘½¹Ñ•¹ĞÕÁ±½…‘½¹Ñ•¹Ğ€ô=‰©•ÑMÑ½É…•UÁ±½…‘½¹Ñ•¹Ğ¹™É½´¡½¹Ñ•¹Ğ¤ì(€€€€€€€ÑÉäì(€€€€€€€€€€€=‰©•Ñ!•…‘•ÉÌ¡•…‘•ÉÌ€ôÉ•ÅÕ•ÍĞ¹¡•…‘•ÉÌ ¤ì(€€€€€€€€€€€AÕÑ=‰©•ÑI•ÅÕ•ÍĞ¹	Õ¥±‘•È‰Õ¥±‘•È€ôAÕÑ=‰©•ÑI•ÅÕ•ÍĞ¹‰Õ¥±‘•È ¤¹‰Õ­•Ğ¡É•Í½±Ù•¹‰Õ­•Ğ ¤¤¹­•ä¡É•Í½±Ù•¹­•ä ¤¤(€€€€€€€€€€€€€€€€€€€€¹½¹Ñ•¹Ñ1•¹Ñ ¡É•ÅÕ•ÍĞ¹½¹Ñ•¹Ñ1•¹Ñ  ¤¤¹µ•Ñ…‘…Ñ„¡É•ÅÕ•ÍĞ¹µ•Ñ…‘…Ñ„ ¤¤(€€€€€€€€€€€€€€€€€€€€¹½¹Ñ•¹ÑQåÁ”¡¡•…‘•ÉÌ¹½¹Ñ•¹ÑQåÁ” ¤¤¹…¡•½¹ÑÉ½°¡¡•…‘•ÉÌ¹…¡•½¹ÑÉ½° ¤¤(€€€€€€€€€€€€€€€€€€€€¹½¹Ñ•¹Ñ¥ÍÁ½Í¥Ñ¥½¸¡¡•…‘•ÉÌ¹½¹Ñ•¹Ñ¥ÍÁ½Í¥Ñ¥½¸ ¤¤¹½¹Ñ•¹Ñ¹½‘¥¹œ¡¡•…‘•ÉÌ¹½¹Ñ•¹Ñ¹½‘¥¹œ ¤¤(€€€€€€€€€€€€€€€€€€€€¹½¹Ñ•¹Ñ1…¹Õ…”¡¡•…‘•ÉÌ¹½¹Ñ•¹Ñ1…¹Õ…” ¤¤ì(€€€€€€€€€€€¥˜€¡É•ÅÕ•ÍĞ¹İÉ¥Ñ•5½‘” ¤€ôô]É¥Ñ•5½‘”¹IQ}=91d¤‰Õ¥±‘•È¹¥™9½¹•5…Ñ  ˆ¨ˆ¤ì(€€€€€€€€€€€AÕÑ=‰©•ÑI•ÍÁ½¹Í”É•ÍÁ½¹Í”€ô±¥•¹Ğ¹ÁÕÑ=‰©•Ğ¡‰Õ¥±‘•È¹‰Õ¥± ¤°(€€€€€€€€€€€€€€€€€€€I•ÅÕ•ÍÑ	½‘ä¹™É½µ%¹ÁÕÑMÑÉ•…´¡ÕÁ±½…‘½¹Ñ•¹Ğ¹ÍÑÉ•…´ ¤°É•ÅÕ•ÍĞ¹½¹Ñ•¹Ñ1•¹Ñ  ¤¤¤ì(€€€€€€€€€€€MÑÉ¥¹œÙ•ÉÍ¥½¸€ôÉ•ÍÁ½¹Í”¹Ù•ÉÍ¥½¹% ¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹•ÜUÁ±½…‘I•ÍÕ±Ğ¡¹•Ü=‰©•ÑI•™•É•¹”¡É•ÅÕ•ÍĞ¹‘•ÍÑ¥¹…Ñ¥½¸ ¤°É•ÅÕ•ÍĞ¹­•ä ¤°Ù•ÉÍ¥½¸¤°É•ÍÁ½¹Í”¹•Q…œ ¤°(€€€€€€€€€€€€€€€€€€€É•ÅÕ•ÍĞ¹½¹Ñ•¹Ñ1•¹Ñ  ¤°ÕÁ±½…‘½¹Ñ•¹Ğ¹Í¡„ÈÔØ ¤¤ì(€€€€€€€ô…Ñ €¡LÍá•ÁÑ¥½¸•á•ÁÑ¥½¸¤ì(€€€€€€€€€€€Ñ¡É½ÜÑÉ…¹Í±…Ñ”¡•á•ÁÑ¥½¸°€‰ÕÁ±½…½‰©•Ğˆ°É•ÅÕ•ÍĞ¹İÉ¥Ñ•5½‘” ¤€ôô]É¥Ñ•5½‘”¹IQ}=91d¤ì(€€€€€€€ô…Ñ €¡M‘­á•ÁÑ¥½¸•á•ÁÑ¥½¸¤ì(€€€€€€€€€€€Ñ¡É½Ü=‰©•ÑMÑ½É…•…¥±ÕÉ•5…ÁÁ•È¹™É½µ…¥±ÕÉ” ‰ÕÁ±½…½‰©•Ğˆ°•á•ÁÑ¥½¸¤ì(€€€€€€€ô…Ñ €¡%±±•…±ÉÕµ•¹Ñá•ÁÑ¥½¸•á•ÁÑ¥½¸¤ì(€€€€€€€€€€€Ñ¡É½Ü=‰©•ÑMÑ½É…•…¥±ÕÉ•5…ÁÁ•È¹™É½µ…¥±ÕÉ” ‰ÕÁ±½…½‰©•Ğˆ°•á•ÁÑ¥½¸¤ì(€€€€€€€ô(€€€ô((€€€=Ù•ÉÉ¥‘”(€€€ÁÕ‰±¥Œ½İ¹±½…‘•‘=‰©•Ğ‘½İ¹±½…¡=‰©•ÑI•™•É•¹”É•™•É•¹”¤ì(€€€€€€€=‰©•ÑMÑ½É…•Y…±¥‘…Ñ¥½¸¹É•ÅÕ¥É•I•™•É•¹”¡É•™•É•¹”¤ì(€€€€€€€I•Í½±Ù•É•Í½±Ù•€ôÉ•Í½±Ù”¡É•™•É•¹”¹‘•ÍÑ¥¹…Ñ¥½¸ ¤°É•™•É•¹”¹­•ä ¤¤ì(€€€€€€€ÑÉäì(€€€€€€€€€€€•Ñ=‰©•ÑI•ÅÕ•ÍĞ¹	Õ¥±‘•È‰Õ¥±‘•È€ô•Ñ=‰©•ÑI•ÅÕ•ÍĞ¹‰Õ¥±‘•È ¤¹‰Õ­•Ğ¡É•Í½±Ù•¹‰Õ­•Ğ ¤¤¹­•ä¡É•Í½±Ù•¹­•ä ¤¤ì(€€€€€€€€€€€¥˜€¡É•™•É•¹”¹Ù•ÉÍ¥½¹% ¤€„ô¹Õ±°¤‰Õ¥±‘•È¹Ù•ÉÍ¥½¹%¡É•™•É•¹”¹Ù•ÉÍ¥½¹% ¤¤ì(€€€€€€€€€€€Í½™Ñİ…É”¹…µ…é½¸¹…İÍÍ‘¬¹½É”¹I•ÍÁ½¹Í•%¹ÁÕÑMÑÉ•…´ñ•Ñ=‰©•ÑI•ÍÁ½¹Í”øÉ•ÍÁ½¹Í”€ô±¥•¹Ğ¹•Ñ=‰©•Ğ¡‰Õ¥±‘•È¹‰Õ¥± ¤¤ì(€€€€€€€€€€€•Ñ=‰©•ÑI•ÍÁ½¹Í”É•ÍÕ±Ğ€ôÉ•ÍÁ½¹Í”¹É•ÍÁ½¹Í” ¤ì(€€€€€€€€€€€=‰©•ÑI•™•É•¹”…ÑÕ…°€ôÉ•™•É•¹”¹Ù•ÉÍ¥½¹% ¤€ôô¹Õ±°€˜˜É•ÍÕ±Ğ¹Ù•ÉÍ¥½¹% ¤€„ô¹Õ±°(€€€€€€€€€€€€€€€€€€€€ü¹•Ü=‰©•ÑI•™•É•¹”¡É•™•É•¹”¹‘•ÍÑ¥¹…Ñ¥½¸ ¤°É•™•É•¹”¹­•ä ¤°É•ÍÕ±Ğ¹Ù•ÉÍ¥½¹% ¤¤€èÉ•™•É•¹”ì(€€€€€€€€€€€=‰©•Ñ5•Ñ…‘…Ñ„µ•Ñ…‘…Ñ„€ô¹•Ü=‰©•Ñ5•Ñ…‘…Ñ„¡…ÑÕ…°°É•ÍÕ±Ğ¹½¹Ñ•¹Ñ1•¹Ñ  ¤°¡•…‘•ÉÌ¡É•ÍÕ±Ğ¹½¹Ñ•¹ÑQåÁ” ¤°(€€€€€€€€€€€€€€€€€€€É•ÍÕ±Ğ¹…¡•½¹ÑÉ½° ¤°É•ÍÕ±Ğ¹½¹Ñ•¹Ñ¥ÍÁ½Í¥Ñ¥½¸ ¤°É•ÍÕ±Ğ¹½¹Ñ•¹Ñ¹½‘¥¹œ ¤°É•ÍÕ±Ğ¹½¹Ñ•¹Ñ1…¹Õ…” ¤¤°(€€€€€€€€€€€€€€€€€€€É•ÍÕ±Ğ¹•Q…œ ¤°É•ÍÕ±Ğ¹±…ÍÑ5½‘¥™¥• ¤°É•ÍÕ±Ğ¹µ•Ñ…‘…Ñ„ ¤¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹•Ü½İ¹±½…‘•‘=‰©•Ğ¡µ•Ñ…‘…Ñ„°É•ÍÁ½¹Í”¤ì(€€€€€€€ô…Ñ €¡LÍá•ÁÑ¥½¸•á•ÁÑ¥½¸¤ì(€€€€€€€€€€€Ñ¡É½ÜÑÉ…¹Í±…Ñ”¡•á•ÁÑ¥½¸°€‰‘½İ¹±½…½‰©•Ğˆ¤ì(€€€€€€€ô…Ñ €¡M‘­á•ÁÑ¥½¸•á•ÁÑ¥½¸¤ì(€€€€€€€€€€€Ñ¡É½Ü=‰©•ÑMÑ½É…•…¥±ÕÉ•5…ÁÁ•È¹™É½µ…¥±ÕÉ” ‰‘½İ¹±½…½‰©•Ğˆ°•á•ÁÑ¥½¸¤ì(€€€€€€€ô(€€€ô((€€€=Ù•ÉÉ¥‘”(€€€ÁÕ‰±¥Œ=‰©•Ñ5•Ñ…‘…Ñ„¡•…¡=‰©•ÑI•™•É•¹”É•™•É•¹”¤ì(€€€€€€€=‰©•ÑMÑ½É…•Y…±¥‘…Ñ¥½¸¹É•ÅÕ¥É•I•™•É•¹”¡É•™•É•¹”¤ì(€€€€€€€I•Í½±Ù•É•Í½±Ù•€ôÉ•Í½±Ù”¡É•™•É•¹”¹‘•ÍÑ¥¹…Ñ¥½¸ ¤°É•™•É•¹”¹­•ä ¤¤ì(€€€€€€€ÑÉäì(€€€€€€€€€€€!•…‘=‰©•ÑI•ÅÕ•ÍĞ¹	Õ¥±‘•È‰Õ¥±‘•È€ô!•…‘=‰©•ÑI•ÅÕ•ÍĞ¹‰Õ¥±‘•È ¤¹‰Õ­•Ğ¡É•Í½±Ù•¹‰Õ­•Ğ ¤¤¹­•ä¡É•Í½±Ù•¹­•ä ¤¤ì(€€€€€€€€€€€¥˜€¡É•™•É•¹”¹Ù•ÉÍ¥½¹% ¤€„ô¹Õ±°¤‰Õ¥±‘•È¹Ù•ÉÍ¥½¹%¡É•™•É•¹”¹Ù•ÉÍ¥½¹% ¤¤ì(€€€€€€€€€€€!•…‘=‰©•ÑI•ÍÁ½¹Í”É•ÍÁ½¹Í”€ô±¥•¹Ğ¹¡•…‘=‰©•Ğ¡‰Õ¥±‘•È¹‰Õ¥± ¤¤ì(€€€€€€€€€€€=‰©•ÑI•™•É•¹”…ÑÕ…°€ôƒovÖÚ$z{-®éÜj×˜XÚÙ]
+™\ÛÛ™Y˜XÚÙ]
 
-import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.response.DownloadedObject;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.response.ObjectMetadata;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectHeaders;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.response.ObjectPage;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectReference;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.response.ObjectSummary;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.response.ObjectVersion;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.request.DownloadUrlRequest;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.response.SignedUrl;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.SignedUrlClient;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.request.UploadUrlRequest;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.request.UploadRequest;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.response.UploadResult;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.response.VersionPage;
-import br.com.portalmanager.platform.library.objectstorage.api.contract.model.WriteMode;
-import br.com.portalmanager.platform.library.messaging.exception.NotFoundException;
-import br.com.portalmanager.platform.library.objectstorage.internal.error.ObjectStorageFailureMapper;
-import br.com.portalmanager.platform.library.objectstorage.internal.validation.ObjectStorageValidation;
-import br.com.portalmanager.platform.library.objectstorage.internal.key.ObjectStorageKey;
-import br.com.portalmanager.platform.library.objectstorage.internal.content.ObjectStorageUploadContent;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.core.exception.SdkException;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
-import software.amazon.awssdk.services.s3.model.*;
+JKšÙ^J™\ÛÛ™YšÙ^J
+JBˆ˜ÛÛ[\JXY\œË˜ÛÛ[\J
+JK˜ØXÚPÛÛ›Û
+XY\œË˜ØXÚPÛÛ›Û
 
-public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClient {
-    private static final byte[] VERSION_TOKEN_MAGIC = {
-            (byte) 0xff, 'P', 'S', 'T', 'V', 1
-    };
+JBˆ˜ÛÛ[\ÜÜÚ][ÛŠXY\œË˜ÛÛ[\ÜÜÚ][ÛŠ
+JK˜ÛÛ[[˜ÛÙ[™ÊXY\œË˜ÛÛ[[˜ÛÙ[™Ê
+JBˆ˜ÛÛ[[™İXYÙJXY\œË˜ÛÛ[[™İXYÙJ
+JNÂˆYˆ
+™\]Y\İÜš]S[ÙJ
+HOHÜš]S[ÙKÔ‘PUWÓÓ“JHÂˆØš™Xİ™\]Y\İšY“›Û™SX]Ú
+ŠˆŠNÂˆ™\]Z\™YXY\œËœ]
+’Y‹S›Û™KSX]Ú‹ŠˆŠNÂˆBˆ]Øš™Xİ™\ÚYÛ”™\]Y\İ™\ÚYÛ”™\]Y\İH]Øš™Xİ™\ÚYÛ”™\]Y\İ˜Z[\Š
+BˆœÚYÛ˜]\™Q\˜][ÛŠ™\]Y\İ˜[Y]J
+JKœ]Øš™Xİ™\]Y\İ
+Øš™Xİ™\]Y\İ˜Z[
 
-    private final S3Client client;
-    private final S3Presigner presigner;
-    private final ObjectStorageProperties properties;
+JK˜Z[
 
-    public S3ObjectStorageClient(S3Client client, S3Presigner presigner, ObjectStorageProperties properties) {
-        this.client = client;
-        this.presigner = presigner;
-        this.properties = properties;
-    }
+NÂˆ™\ÚYÛ™Y]Øš™Xİ™\]Y\İÚYÛ™Y™\]Y\İH™\ÚYÛ™\‹œ™\ÚYÛ”]Øš™Xİ
+™\ÚYÛ”™\]Y\İ
+NÂˆ™]\›ˆ™]ÈÚYÛ™Y\›
+ÚYÛ™Y™\]Y\İ\›
 
-    @Override
-    public UploadResult upload(UploadRequest request, InputStream content) {
-        if (request == null) throw ObjectStorageValidation.invalid("request");
-        if (content == null) throw ObjectStorageValidation.invalid("content");
-        Resolved resolved = resolve(request.destination(), request.key());
-        ObjectStorageUploadContent uploadContent = ObjectStorageUploadContent.from(content);
-        try {
-            ObjectHeaders headers = request.headers();
-            PutObjectRequest.Builder builder = PutObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key())
-                    .contentLength(request.contentLength()).metadata(request.metadata())
-                    .contentType(headers.contentType()).cacheControl(headers.cacheControl())
-                    .contentDisposition(headers.contentDisposition()).contentEncoding(headers.contentEncoding())
-                    .contentLanguage(headers.contentLanguage());
-            if (request.writeMode() == WriteMode.CREATE_ONLY) builder.ifNoneMatch("*");
-            PutObjectResponse response = client.putObject(builder.build(),
-                    RequestBody.fromInputStream(uploadContent.stream(), request.contentLength()));
-            String version = response.versionId();
-            return new UploadResult(new ObjectReference(request.destination(), request.key(), version), response.eTag(),
-                    request.contentLength(), uploadContent.sha256());
-        } catch (S3Exception exception) {
-            throw translate(exception, "upload object", request.writeMode() == WriteMode.CREATE_ONLY);
-        } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("upload object", exception);
-        } catch (IllegalArgumentException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("upload object", exception);
-        }
-    }
+KÕT’J
+KÚYÛ™Y™\]Y\İ™^\˜][ÛŠ
+K™\]Z\™YXY\œÊNÂˆHØ]Ú
+ÌÑ^Ù\[Ûˆ^Ù\[ÛŠHÂˆ›İÈ˜[œÛ]J^Ù\[Û‹˜Ü™X]HÚYÛ™Y\ØYT“ŠNÂˆHØ]Ú
+ÙÑ^Ù\[Ûˆ^Ù\[ÛŠHÂˆ›İÈØš™XİİÜ˜YÙQ˜Z[\™SX\\‹™œ›ÛQ˜Z[\™J˜Ü™X]HÚYÛ™Y\ØYT“‹^Ù\[ÛŠNÂˆHØ]Ú
+˜]˜K›™]•T’TŞ[^^Ù\[Ûˆ^Ù\[ÛŠHÂˆ›İÈØš™XİİÜ˜YÙQ˜Z[\™SX\\‹™œ›ÛQ˜Z[\™J˜Ü™X]HÚYÛ™Y\ØYT“‹^Ù\[ÛŠNÂˆHØ]Ú
+[YØ[\™İ[Y[^Ù\[Ûˆ^Ù\[ÛŠHÂˆ›İÈØš™XİİÜ˜YÙQ˜Z[\™SX\\‹™œ›ÛQ˜Z[\™J˜Ü™X]HÚYÛ™Y\ØYT“‹^Ù\[ÛŠNÂˆBˆB‚ˆš]˜]H™\ÛÛ™Y™\ÛÛ™Jİš[™ÈÙÚXØ[İš[™ÈÙ^JHÂˆØš™XİİÜ˜YÙT›Ü\Y\Ë‘\İ[˜][Ûˆ\™Ù]H\İ[˜][ÛŠÙÚXØ[
+NÂˆ™]\›ˆ™]È™\ÛÛ™Y
+\™Ù]™Ù]XÚÙ]
 
-    @Override
-    public DownloadedObject download(ObjectReference reference) {
-        ObjectStorageValidation.requireReference(reference);
-        Resolved resolved = resolve(reference.destination(), reference.key());
-        try {
-            GetObjectRequest.Builder builder = GetObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key());
-            if (reference.versionId() != null) builder.versionId(reference.versionId());
-            software.amazon.awssdk.core.ResponseInputStream<GetObjectResponse> response = client.getObject(builder.build());
-            GetObjectResponse result = response.response();
-            ObjectReference actual = reference.versionId() == null && result.versionId() != null
-                    ? new ObjectReference(reference.destination(), reference.key(), result.versionId()) : reference;
-            ObjectMetadata metadata = new ObjectMetadata(actual, result.contentLength(), headers(result.contentType(),
-                    result.cacheControl(), result.contentDisposition(), result.contentEncoding(), result.contentLanguage()),
-                    result.eTag(), result.lastModified(), result.metadata());
-            return new DownloadedObject(metadata, response);
-        } catch (S3Exception exception) {
-            throw translate(exception, "download object");
-        } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("download object", exception);
-        }
-    }
+KØš™XİİÜ˜YÙRÙ^Kœ™\ÛÛ™J\™Ù]™Ù]™Yš^
 
-    @Override
-    public ObjectMetadata head(ObjectReference reference) {
-        ObjectStorageValidation.requireReference(reference);
-        Resolved resolved = resolve(reference.destination(), reference.key());
-        try {
-            HeadObjectRequest.Builder builder = HeadObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key());
-            if (reference.versionId() != null) builder.versionId(reference.versionId());
-            HeadObjectResponse response = client.headObject(builder.build());
-            ObjectReference actual = reference.versionId() == null && response.versionId() != null
-                    ? new ObjectReference(reference.destination(), reference.key(), response.versionId()) : reference;
-            return new ObjectMetadata(actual, response.contentLength(), headers(response.contentType(), response.cacheControl(),
-                    response.contentDisposition(), response.contentEncoding(), response.contentLanguage()), response.eTag(),
-                    response.lastModified(), response.metadata());
-        } catch (S3Exception exception) {
-            throw translate(exception, "read object properties");
-        } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("read object properties", exception);
-        }
-    }
+K\™Ù]™Ù]İY™š^
 
-    @Override
-    public boolean exists(ObjectReference reference) {
-        ObjectStorageValidation.requireReference(reference);
-        try { head(reference); return true; }
-        catch (NotFoundException exception) {
-            if (isMissingObject(exception)) return false;
-            throw exception;
-        }
-    }
+KÙ^JJNÂˆB‚ˆš]˜]HØš™XİİÜ˜YÙT›Ü\Y\Ë‘\İ[˜][Ûˆ\İ[˜][ÛŠİš[™ÈÙÚXØ[
+HÂˆØš™XİİÜ˜YÙT›Ü\Y\Ë‘\İ[˜][Ûˆ\™Ù]H›Ü\Y\Ë™Ù]\İ[˜][ÛœÊ
+K™Ù]
+ÙÚXØ[
+NÂˆYˆ
+\™Ù]OH[\™Ù]™Ù]XÚÙ]
 
-    @Override
-    public ObjectPage list(String destination, String prefix, String continuationToken, int pageSize) {
-        ObjectStorageValidation.requireText(destination, "destination");
-        requirePageSize(pageSize);
-        ObjectStorageProperties.Destination target = destination(destination);
-        String fullPrefix = ObjectStorageKey.resolvePrefix(target.getPrefix(), prefix);
-        ListObjectsV2Request.Builder builder = ListObjectsV2Request.builder().bucket(target.getBucket())
-                .prefix(fullPrefix).maxKeys(pageSize);
-        if (continuationToken != null) builder.continuationToken(continuationToken);
-        try {
-            ListObjectsV2Response response = client.listObjectsV2(builder.build());
-            List<ObjectSummary> objects = new ArrayList<>();
-            for (S3Object item : response.contents()) {
-                String relative = ObjectStorageKey.logical(target.getPrefix(), target.getSuffix(), item.key());
-                if (relative == null) continue;
-                ObjectReference reference = ObjectReference.current(destination, relative);
-                objects.add(new ObjectSummary(reference, item.size(), item.eTag(), item.lastModified()));
-            }
-            return new ObjectPage(objects, response.nextContinuationToken());
-        } catch (S3Exception exception) { throw translate(exception, "list objects"); }
-        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromFailure("list objects", exception); }
-    }
+HOH[\™Ù]™Ù]XÚÙ]
 
-    @Override
-    public VersionPage listVersions(String destination, String key, String continuationToken, int pageSize) {
-        ObjectStorageValidation.requireText(destination, "destination");
-        ObjectStorageValidation.requireText(key, "key");
-        requirePageSize(pageSize);
-        Resolved resolved = resolve(destination, key);
-        ListObjectVersionsRequest.Builder builder = ListObjectVersionsRequest.builder().bucket(resolved.bucket())
-                .prefix(resolved.key()).maxKeys(pageSize);
-        if (continuationToken != null) {
-            String[] markers = decodeToken(continuationToken);
-            builder.keyMarker(markers[0]);
-            if (markers[1] != null) builder.versionIdMarker(markers[1]);
-        }
-        try {
-            ListObjectVersionsResponse response = client.listObjectVersions(builder.build());
-            List<ObjectVersion> versions = new ArrayList<>();
-            response.versions().stream().filter(item -> item.key().equals(resolved.key())).forEach(item ->
-                    versions.add(new ObjectVersion(new ObjectReference(destination, key, item.versionId()), item.eTag(), item.size(),
-                            item.lastModified(), item.isLatest(), false)));
-            response.deleteMarkers().stream().filter(item -> item.key().equals(resolved.key())).forEach(item ->
-                    versions.add(new ObjectVersion(new ObjectReference(destination, key, item.versionId()), null, 0,
-                            item.lastModified(), item.isLatest(), true)));
-            versions.sort(java.util.Comparator.comparing(ObjectVersion::lastModified,
-                    java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())));
-            String next = response.isTruncated() ? encodeToken(response.nextKeyMarker(), response.nextVersionIdMarker()) : null;
-            return new VersionPage(versions, next);
-        } catch (S3Exception exception) { throw translate(exception, "list object versions"); }
-        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromFailure("list object versions", exception); }
-    }
+Kš\Ğ›[šÊ
+JBˆ›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+™\İ[˜][ÛˆŠNÂˆ™]\›ˆ\™Ù]ÂˆB‚ˆš]˜]Hİ]XÈØš™XİXY\œÈXY\œÊİš[™ÈÛÛ[\Kİš[™ÈØXÚPÛÛ›Ûİš[™ÈÛÛ[\ÜÜÚ][Û‹ˆİš[™ÈÛÛ[[˜ÛÙ[™Ëİš[™ÈÛÛ[[™İXYÙJHÂˆ™]\›ˆ™]ÈØš™XİXY\œÊÛÛ[\KØXÚPÛÛ›ÛÛÛ[\ÜÜÚ][Û‹ÛÛ[[˜ÛÙ[™ËÛÛ[[™İXYÙJNÂˆBˆš]˜]Hİ]XÈ›ÚY™\]Z\™TYÙTÚ^™J[YÙTÚ^™JHÂˆYˆ
+YÙTÚ^™HHYÙTÚ^™HˆØš™XİİÜ˜YÙPÛY[“PVÔQÑWÔÒV‘JHÂˆ›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+œYÙTÚ^™HŠNÂˆBˆBˆİ]XÈİš[™È[˜ÛÙUÚÙ[Šİš[™ÈÙ^Kİš[™È™\œÚ[ÛŠHÂˆYˆ
+Ù^HOH[
+H›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆYˆ
+ZÙ^K˜ÛÛZ[œÊ—ˆŠH	‰ˆ™\œÚ[ÛˆOH[	‰ˆ]™\œÚ[Û‹˜ÛÛZ[œÊ—ˆŠJHÂˆ™]\›ˆ˜\ÙM™Ù]\›[˜ÛÙ\Š
+KÚ]İ]Y[™Ê
+Bˆ™[˜ÛÙUÔİš[™Ê
+Ù^H
+È—ˆˆ
+È™\œÚ[ÛŠK™Ù]]\Êİ[™\™Ú\œÙ]Ë•U—Î
+JNÂˆBˆ]V×HÙ^P]\ÈHÙ^K™Ù]]\Êİ[™\™Ú\œÙ]Ë•U—Î
+NÂˆ]V×H™\œÚ[Û]\ÈH™\œÚ[ÛˆOH[È[ˆ™\œÚ[Û‹™Ù]]\Êİ[™\™Ú\œÙ]Ë•U—Î
+NÂˆ[™\œÚ[Û“[™İH™\œÚ[Û]\ÈOH[ÈLHˆ™\œÚ[Û]\Ë›[™İÂˆ]PY™™\ˆY™™\ˆH]PY™™\‹˜[ØØ]J‘T”ÒSÓ—ÕÒÑS—ÓPQÒPË›[™İ
+È[YÙ\‹–UTÈ
+ˆˆ
+ÈÙ^P]\Ë›[™İˆ
+È
+™\œÚ[Û]\ÈOH[Èˆ™\œÚ[Û]\Ë›[™İ
+JNÂˆY™™\‹œ]
+‘T”ÒSÓ—ÕÒÑS—ÓPQÒPÊNÂˆY™™\‹œ][
+Ù^P]\Ë›[™İ
+Kœ]
+Ù^P]\ÊKœ][
+™\œÚ[Û“[™İ
+NÂˆYˆ
+™\œÚ[Û]\ÈOH[
+HY™™\‹œ]
+™\œÚ[Û]\ÊNÂˆ™]\›ˆ˜\ÙM™Ù]\›[˜ÛÙ\Š
+KÚ]İ]Y[™Ê
+K™[˜ÛÙUÔİš[™ÊY™™\‹˜\œ˜^J
+JNÂˆBˆİ]XÈİš[™Ö×HXÛÙUÚÙ[Šİš[™ÈÚÙ[ŠHÂˆ]V×HXÛÙYÂˆHÂˆXÛÙYH˜\ÙM™Ù]\›XÛÙ\Š
+K™XÛÙJÚÙ[ŠNÂˆHØ]Ú
+[YØ[\™İ[Y[^Ù\[Ûˆ^Ù\[ÛŠHÂˆ›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆBˆYˆ
+Z\ÔİXİ\™YÚÙ[“XYÚXÊXÛÙY
+JHÂˆİš[™Ö×H\ÈH™]Èİš[™ÊXÛÙYİ[™\™Ú\œÙ]Ë•U—Î
+KœÜ]
+—ˆ‹ŠNÂˆYˆ
+\Ë›[™İOHˆ\ÖÌKš\Ñ[\J
+JHÂˆ›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆBˆ™]\›ˆ\ÎÂˆBˆHÂˆ]PY™™\ˆY™™\ˆH]PY™™\‹Ü˜\
+XÛÙY
+NÂˆY™™\‹œÜÚ][ÛŠ‘T”ÒSÓ—ÕÒÑS—ÓPQÒPË›[™İ
+NÂˆYˆ
+Y™™\‹œ™[XZ[š[™Ê
+H[YÙ\‹–UTÊH›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆ[Ù^S[™İHY™™\‹™Ù][
 
-    @Override
-    public Optional<ObjectVersion> findVersionByETag(String destination, String key, String eTag) {
-        ObjectStorageValidation.requireText(eTag, "eTag");
-        String token = null;
-        do {
-            VersionPage page = listVersions(destination, key, token, ObjectStorageClient.MAX_PAGE_SIZE);
-            Optional<ObjectVersion> found = page.versions().stream().filter(version -> sameETag(version.eTag(), eTag)).findFirst();
-            if (found.isPresent()) return found;
-            token = page.continuationToken();
-        } while (token != null);
-        return Optional.empty();
-    }
+NÂˆYˆ
+Ù^S[™İÙ^S[™İˆY™™\‹œ™[XZ[š[™Ê
+HH[YÙ\‹–UTÊHÂˆ›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆBˆ]V×HÙ^HH™]È]VÚÙ^S[™İNÂˆY™™\‹™Ù]
+Ù^JNÂˆYˆ
+Ù^K›[™İOH
+H›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆYˆ
+Y™™\‹œ™[XZ[š[™Ê
+H[YÙ\‹–UTÊH›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆ[™\œÚ[Û“[™İHY™™\‹™Ù][
 
-    @Override
-    public void delete(ObjectReference reference) {
-        ObjectStorageValidation.requireReference(reference);
-        if (reference.versionId() != null) {
-            deleteVersion(reference);
-            return;
-        }
-        Resolved resolved = resolve(reference.destination(), reference.key());
-        try { client.deleteObject(DeleteObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key()).build()); }
-        catch (S3Exception exception) { throw translate(exception, "delete object"); }
-        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromFailure("delete object", exception); }
-    }
-
-    @Override
-    public void deleteVersion(ObjectReference reference) {
-        ObjectStorageValidation.requireReference(reference);
-        if (reference.versionId() == null) throw ObjectStorageValidation.invalid("versionId");
-        Resolved resolved = resolve(reference.destination(), reference.key());
-        try { client.deleteObject(DeleteObjectRequest.builder().bucket(resolved.bucket()).key(resolved.key()).versionId(reference.versionId()).build()); }
-        catch (S3Exception exception) { throw translate(exception, "delete object version"); }
-        catch (SdkException exception) { throw ObjectStorageFailureMapper.fromFailure("delete object version", exception); }
-    }
-
-    @Override
-    public SignedUrl createDownloadUrl(DownloadUrlRequest request) {
-        if (request == null) throw ObjectStorageValidation.invalid("request");
-        Resolved resolved = resolve(request.reference().destination(), request.reference().key());
-        try {
-            GetObjectRequest.Builder objectRequest = GetObjectRequest.builder()
-                    .bucket(resolved.bucket()).key(resolved.key());
-            if (request.reference().versionId() != null) {
-                objectRequest.versionId(request.reference().versionId());
-            }
-            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(request.validity()).getObjectRequest(objectRequest.build()).build();
-            PresignedGetObjectRequest signedRequest = presigner.presignGetObject(presignRequest);
-            return new SignedUrl(signedRequest.url().toURI(), signedRequest.expiration(), Map.of());
-        } catch (S3Exception exception) {
-            throw translate(exception, "create signed download URL");
-        } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("create signed download URL", exception);
-        } catch (java.net.URISyntaxException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("create signed download URL", exception);
-        } catch (IllegalArgumentException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("create signed download URL", exception);
-        }
-    }
-
-    @Override
-    public SignedUrl createUploadUrl(UploadUrlRequest request) {
-        if (request == null) throw ObjectStorageValidation.invalid("request");
-        Resolved resolved = resolve(request.reference().destination(), request.reference().key());
-        try {
-            ObjectHeaders headers = request.headers();
-            Map<String, String> requiredHeaders = new java.util.LinkedHashMap<>(headers.asHttpHeaders());
-            PutObjectRequest.Builder objectRequest = PutObjectRequest.builder()
-                    .bucket(resolved.bucket()).key(resolved.key())
-                    .contentType(headers.contentType()).cacheControl(headers.cacheControl())
-                    .contentDisposition(headers.contentDisposition()).contentEncoding(headers.contentEncoding())
-                    .contentLanguage(headers.contentLanguage());
-            if (request.writeMode() == WriteMode.CREATE_ONLY) {
-                objectRequest.ifNoneMatch("*");
-                requiredHeaders.put("If-None-Match", "*");
-            }
-            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                    .signatureDuration(request.validity()).putObjectRequest(objectRequest.build()).build();
-            PresignedPutObjectRequest signedRequest = presigner.presignPutObject(presignRequest);
-            return new SignedUrl(signedRequest.url().toURI(), signedRequest.expiration(), requiredHeaders);
-        } catch (S3Exception exception) {
-            throw translate(exception, "create signed upload URL");
-        } catch (SdkException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("create signed upload URL", exception);
-        } catch (java.net.URISyntaxException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("create signed upload URL", exception);
-        } catch (IllegalArgumentException exception) {
-            throw ObjectStorageFailureMapper.fromFailure("create signed upload URL", exception);
-        }
-    }
-
-    private Resolved resolve(String logical, String key) {
-        ObjectStorageProperties.Destination target = destination(logical);
-        return new Resolved(target.getBucket(), ObjectStorageKey.resolve(target.getPrefix(), target.getSuffix(), key));
-    }
-
-    private ObjectStorageProperties.Destination destination(String logical) {
-        ObjectStorageProperties.Destination target = properties.getDestinations().get(logical);
-        if (target == null || target.getBucket() == null || target.getBucket().isBlank())
-            throw ObjectStorageValidation.invalid("destination");
-        return target;
-    }
-
-    private static ObjectHeaders headers(String contentType, String cacheControl, String contentDisposition,
-            String contentEncoding, String contentLanguage) {
-        return new ObjectHeaders(contentType, cacheControl, contentDisposition, contentEncoding, contentLanguage);
-    }
-    private static void requirePageSize(int pageSize) {
-        if (pageSize < 1 || pageSize > ObjectStorageClient.MAX_PAGE_SIZE) {
-            throw ObjectStorageValidation.invalid("pageSize");
-        }
-    }
-    static String encodeToken(String key, String version) {
-        if (key == null) throw ObjectStorageValidation.invalid("continuationToken");
-        if (!key.contains("\n") && version != null && !version.contains("\n")) {
-            return Base64.getUrlEncoder().withoutPadding()
-                    .encodeToString((key + "\n" + version).getBytes(StandardCharsets.UTF_8));
-        }
-        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
-        byte[] versionBytes = version == null ? null : version.getBytes(StandardCharsets.UTF_8);
-        int versionLength = versionBytes == null ? -1 : versionBytes.length;
-        ByteBuffer buffer = ByteBuffer.allocate(VERSION_TOKEN_MAGIC.length + Integer.BYTES * 2 + keyBytes.length
-                + (versionBytes == null ? 0 : versionBytes.length));
-        buffer.put(VERSION_TOKEN_MAGIC);
-        buffer.putInt(keyBytes.length).put(keyBytes).putInt(versionLength);
-        if (versionBytes != null) buffer.put(versionBytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(buffer.array());
-    }
-    static String[] decodeToken(String token) {
-        byte[] decoded;
-        try {
-            decoded = Base64.getUrlDecoder().decode(token);
-        } catch (IllegalArgumentException exception) {
-            throw ObjectStorageValidation.invalid("continuationToken");
-        }
-        if (!hasStructuredTokenMagic(decoded)) {
-            String[] parts = new String(decoded, StandardCharsets.UTF_8).split("\n", 2);
-            if (parts.length != 2 || parts[0].isEmpty()) {
-                throw ObjectStorageValidation.invalid("continuationToken");
-            }
-            return parts;
-        }
-        try {
-            ByteBuffer buffer = ByteBuffer.wrap(decoded);
-            buffer.position(VERSION_TOKEN_MAGIC.length);
-            if (buffer.remaining() < Integer.BYTES) throw ObjectStorageValidation.invalid("continuationToken");
-            int keyLength = buffer.getInt();
-            if (keyLength < 0 || keyLength > buffer.remaining() - Integer.BYTES) {
-                throw ObjectStorageValidation.invalid("continuationToken");
-            }
-            byte[] key = new byte[keyLength];
-            buffer.get(key);
-            if (key.length == 0) throw ObjectStorageValidation.invalid("continuationToken");
-            if (buffer.remaining() < Integer.BYTES) throw ObjectStorageValidation.invalid("continuationToken");
-            int versionLength = buffer.getInt();
-            if (versionLength == -1 && !buffer.hasRemaining()) {
-                return new String[] {new String(key, StandardCharsets.UTF_8), null};
-            }
-            if (versionLength < 0 || versionLength != buffer.remaining()) {
-                throw ObjectStorageValidation.invalid("continuationToken");
-            }
-            byte[] version = new byte[versionLength];
-            buffer.get(version);
-            return new String[] {
-                    new String(key, StandardCharsets.UTF_8),
-                    new String(version, StandardCharsets.UTF_8)
-            };
-        } catch (java.nio.BufferUnderflowException exception) {
-            throw ObjectStorageValidation.invalid("continuationToken");
-        }
-    }
-    private static boolean hasStructuredTokenMagic(byte[] token) {
-        if (token.length < VERSION_TOKEN_MAGIC.length) return false;
-        for (int index = 0; index < VERSION_TOKEN_MAGIC.length; index++) {
-            if (token[index] != VERSION_TOKEN_MAGIC[index]) return false;
-        }
-        return true;
-    }
-    private static boolean sameETag(String first, String second) {
-        return first != null && second != null && first.replace("\"", "").equals(second.replace("\"", ""));
-    }
-    private static RuntimeException translate(S3Exception exception, String operation) {
-        return translate(exception, operation, false);
-    }
-    private static RuntimeException translate(S3Exception exception, String operation, boolean createOnly) {
-        String providerCode = exception.awsErrorDetails() == null
-                ? null
-                : exception.awsErrorDetails().errorCode();
-        return ObjectStorageFailureMapper.fromAwsFailure(
-                exception.statusCode(), providerCode, operation, createOnly, exception);
-    }
-    private static boolean isMissingObject(Throwable failure) {
-        Throwable current = failure;
-        while (current != null) {
-            if (current instanceof S3Exception exception) {
-                String errorCode = exception.awsErrorDetails() == null
-                        ? null
-                        : exception.awsErrorDetails().errorCode();
-                return "NoSuchKey".equals(errorCode) || "NoSuchVersion".equals(errorCode);
-            }
-            current = current.getCause();
-        }
-        return false;
-    }
-    private record Resolved(String bucket, String key) { }
-}
+NÂˆYˆ
+™\œÚ[Û“[™İOHLH	‰ˆXY™™\‹š\Ô™[XZ[š[™Ê
+JHÂˆ™]\›ˆ™]Èİš[™Ö×HÛ™]Èİš[™ÊÙ^Kİ[™\™Ú\œÙ]Ë•U—Î
+K[NÂˆBˆYˆ
+™\œÚ[Û“[™İ™\œÚ[Û“[™İOHY™™\‹œ™[XZ[š[™Ê
+JHÂˆ›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆBˆ]V×H™\œÚ[ÛˆH™]È]Vİ™\œÚ[Û“[™İNÂˆY™™\‹™Ù]
+™\œÚ[ÛŠNÂˆ™]\›ˆ™]Èİš[™Ö×HÂˆ™]Èİš[™ÊÙ^Kİ[™\™Ú\œÙ]Ë•U—Î
+Kˆ™]Èİš[™Ê™\œÚ[Û‹İ[™\™Ú\œÙ]Ë•U—Î
+BˆNÂˆHØ]Ú
+˜]˜K›š[ËY™™\•[™\™›İÑ^Ù\[Ûˆ^Ù\[ÛŠHÂˆ›İÈØš™XİİÜ˜YÙU˜[Y][Û‹š[˜[Y
+˜ÛÛ[X][Û•ÚÙ[ˆŠNÂˆBˆBˆš]˜]Hİ]XÈ›ÛÛX[ˆ\ÔİXİ\™YÚÙ[“XYÚXÊ]V×HÚÙ[ŠHÂˆYˆ
+ÚÙ[‹›[™İ‘T”ÒSÓ—ÕÒÑS—ÓPQÒPË›[™İ
+H™]\›ˆ˜[ÙNÂˆ›Üˆ
+[[™^HÈ[™^‘T”ÒSÓ—ÕÒÑS—ÓPQÒPË›[™İÈ[™^
+ÊÊHÂˆYˆ
+ÚÙ[–Ú[™^HOH‘T”ÒSÓ—ÕÒÑS—ÓPQÒPÖÚ[™^JH™]\›ˆ˜[ÙNÂˆBˆ™]\›ˆYNÂˆBˆš]˜]Hİ]XÈ›ÛÛX[ˆØ[YQUYÊİš[™Èš\œİİš[™ÈÙXÛÛ™
+HÂˆ™]\›ˆš\œİOH[	‰ˆÙXÛÛ™OH[	‰ˆš\œİœ™\XÙJ—ˆ‹ˆŠK™\]X[ÊÙXÛÛ™œ™\XÙJ—ˆ‹ˆŠJNÂˆBˆš]˜]Hİ]XÈ[[YQ^Ù\[Ûˆ˜[œÛ]JÌÑ^Ù\[Ûˆ^Ù\[Û‹İš[™ÈÜ\˜][ÛŠHÂˆ™]\›ˆ˜[œÛ]J^Ù\[Û‹Ü\˜][Û‹˜[ÙJNÂˆBˆš]˜]Hİ]XÈ[[YQ^Ù\[Ûˆ˜[œÛ]JÌÑ^Ù\[Ûˆ^Ù\[Û‹İš[™ÈÜ\˜][Û‹›ÛÛX[ˆÜ™X]SÛ›JHÂˆİš[™È›İšY\ÛÙHH^Ù\[Û‹˜]ÜÑ\œ›Ü‘]Z[Ê
+HOH[ˆÈ[ˆˆ^Ù\[Û‹˜]ÜÑ\œ›Ü‘]Z[Ê
+K™\œ›ÜÛÙJ
+NÂˆ™]\›ˆØš™XİİÜ˜YÙQ˜Z[\™SX\\‹™œ›ÛP]ÜÑ˜Z[\™Jˆ^Ù\[Û‹œİ]\ĞÛÙJ
+K›İšY\ÛÙKÜ\˜][Û‹Ü™X]SÛ›K^Ù\[ÛŠNÂˆBˆš]˜]Hİ]XÈ›ÛÛX[ˆ\ÓZ\ÜÚ[™ÓØš™Xİ
+›İØX›H˜Z[\™JHÂˆ›İØX›Hİ\œ™[H˜Z[\™NÂˆÚ[H
+İ\œ™[OH[
+HÂˆYˆ
+İ\œ™[[œİ[˜Ù[ÙˆÌÑ^Ù\[Ûˆ^Ù\[ÛŠHÂˆİš[™È\œ›ÜÛÙHH^Ù\[Û‹˜]ÜÑ\œ›Ü‘]Z[Ê
+HOH[ˆÈ[ˆˆ^Ù\[Û‹˜]ÜÑ\œ›Ü‘]Z[Ê
+K™\œ›ÜÛÙJ
+NÂˆ™]\›ˆ“›ÔİXÚÙ^H‹™\]X[Ê\œ›ÜÛÙJH“›ÔİXÚ™\œÚ[Ûˆ‹™\]X[Ê\œ›ÜÛÙJNÂˆBˆİ\œ™[Hİ\œ™[™Ù]Ø]\ÙJ
+NÂˆBˆ™]\›ˆ˜[ÙNÂˆBˆš]˜]H™XÛÜ™™\ÛÛ™Y
+İš[™ÈXÚÙ]İš[™ÈÙ^JHÈBŸB

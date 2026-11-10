@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.messagequeue.internal.publisher;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueMessageKeys;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.database;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.database.annotation.WithMySql;
 
 import org.junit.jupiter.api.Test;

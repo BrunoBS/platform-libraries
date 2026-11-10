@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.scheduling.configuration;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.scheduling.internal.BlockingReactiveScheduledMethodPostProcessor;
 import br.com.portalmanager.platform.library.scheduling.internal.LockingTaskScheduler;
 import br.com.portalmanager.platform.library.scheduling.internal.message.SchedulingTechnicalErrors;

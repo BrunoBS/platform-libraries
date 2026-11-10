@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.library.messaging.internal.web;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
-import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;

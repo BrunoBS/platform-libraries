@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.library.starter;
 
 import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
-import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
-import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.api.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

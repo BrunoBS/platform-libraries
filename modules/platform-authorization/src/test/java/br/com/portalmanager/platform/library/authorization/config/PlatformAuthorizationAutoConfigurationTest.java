@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.authorization.config;
 import br.com.portalmanager.platform.library.authorization.aop.AuthorizationFacadeAspect;
 import br.com.portalmanager.platform.library.authorization.aop.MockAuthorizationFacadeAspect;
 import br.com.portalmanager.platform.library.authorization.client.AuthorizationClient;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;

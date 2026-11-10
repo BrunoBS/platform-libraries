@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.schemavalidation.aspect;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.SchemaPayload;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Test;

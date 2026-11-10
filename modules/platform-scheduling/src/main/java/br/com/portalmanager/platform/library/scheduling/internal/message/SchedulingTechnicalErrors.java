@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.scheduling.internal.message;
 
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 
 public final class SchedulingTechnicalErrors {
     public static final PlatformErrorDefinition LOCK_DISABLED = new PlatformErrorDefinition(

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.audit.internal.message;
 
-import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
+import br.com.portalmanager.platform.library.messaging.internal.message.PlatformDefaultMessageProvider;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;

@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.catalog.validation;
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

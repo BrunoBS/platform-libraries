@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.parameterclient.internal.RedisConfi
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisExpressionProvider;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
 import br.com.portalmanager.platform.library.parameterclient.internal.message.ParameterClientTechnicalErrors;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import org.springframework.beans.factory.ObjectProvider;

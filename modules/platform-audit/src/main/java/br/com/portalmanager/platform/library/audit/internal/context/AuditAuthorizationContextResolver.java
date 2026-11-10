@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.audit.internal.context;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.audit.internal.message.AuditMessageKeys;
 import br.com.portalmanager.platform.library.audit.api.contract.model.AuditContext;
 import br.com.portalmanager.platform.library.authorization.model.UserContext;

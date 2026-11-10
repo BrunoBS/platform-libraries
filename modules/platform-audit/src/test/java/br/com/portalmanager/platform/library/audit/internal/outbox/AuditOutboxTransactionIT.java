@@ -115,7 +115,7 @@ class AuditOutboxTransactionIT {
         jdbcTemplate.update("INSERT INTO DOMAIN_CHANGE (IDENTIFIER) VALUES (?)", "resource-1");
 
         assertThatThrownBy(() -> useCase.purgeWithoutSnapshot("resource-1"))
-                .isInstanceOf(br.com.portalmanager.platform.library.messaging.exception.ValidationException.class);
+                .isInstanceOf(br.com.portalmanager.platform.library.messaging.api.exception.ValidationException.class);
 
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DOMAIN_CHANGE", Integer.class)).isEqualTo(1);
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM audit_outbox", Integer.class)).isZero();

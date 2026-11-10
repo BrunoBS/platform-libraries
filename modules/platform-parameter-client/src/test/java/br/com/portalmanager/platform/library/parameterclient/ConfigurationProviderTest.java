@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.parameterclient;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisConfigurationProvider;
 import br.com.portalmanager.platform.library.parameterclient.internal.RedisParameterReader;
 import br.com.portalmanager.platform.library.parameterclient.internal.serialization.ExactDocument;

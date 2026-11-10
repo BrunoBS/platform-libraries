@@ -1,8 +1,8 @@
 package br.com.portalmanager.platform.library.parameterclient;
 
 import static org.assertj.core.api.Assertions.*;
-import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
-import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.internal.message.PlatformDefaultMessageProvider;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
 import br.com.portalmanager.platform.library.parameterclient.internal.message.ParameterClientMessageKeys;
 import java.util.Locale;
 import java.util.Map;

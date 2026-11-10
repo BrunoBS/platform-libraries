@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messaging.internal.repository;
 
 import br.com.portalmanager.platform.library.messaging.api.configuration.PlatformMessagingProperties;
-import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;

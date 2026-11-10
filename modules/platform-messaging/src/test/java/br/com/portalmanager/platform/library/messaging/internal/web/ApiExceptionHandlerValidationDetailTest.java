@@ -1,10 +1,10 @@
 package br.com.portalmanager.platform.library.messaging.internal.web;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
-import br.com.portalmanager.platform.library.messaging.model.ApiErrorResponse;
-import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
-import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
-import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiErrorResponse;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.model.ValidationDetail;
+import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;

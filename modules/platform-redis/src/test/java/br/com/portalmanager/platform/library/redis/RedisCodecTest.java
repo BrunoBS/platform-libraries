@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.redis;
 
 import static org.assertj.core.api.Assertions.*;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 import br.com.portalmanager.platform.library.redis.internal.serialization.RedisJsonCodec;
 

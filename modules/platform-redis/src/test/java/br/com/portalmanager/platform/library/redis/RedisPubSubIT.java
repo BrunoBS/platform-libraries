@@ -138,7 +138,7 @@ class RedisPubSubIT extends RedisIntegrationSupport {
     void handlerFailureIsObservableAndSanitized() {
         var observed =
                 new LinkedBlockingQueue<
-                        br.com.portalmanager.platform.library.messaging.exception.ApiException>();
+                        br.com.portalmanager.platform.library.messaging.api.exception.ApiException>();
         context()
                 .withBean(Broken.class, Broken::new)
                 .withBean(

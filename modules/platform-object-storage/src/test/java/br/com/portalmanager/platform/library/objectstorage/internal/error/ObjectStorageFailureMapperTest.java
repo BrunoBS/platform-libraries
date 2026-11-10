@@ -1,10 +1,10 @@
 package br.com.portalmanager.platform.library.objectstorage.internal.error;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
-import br.com.portalmanager.platform.library.messaging.exception.ForbiddenException;
-import br.com.portalmanager.platform.library.messaging.exception.NotFoundException;
-import br.com.portalmanager.platform.library.messaging.exception.UnauthorizedException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ConflictException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ForbiddenException;
+import br.com.portalmanager.platform.library.messaging.api.exception.NotFoundException;
+import br.com.portalmanager.platform.library.messaging.api.exception.UnauthorizedException;
 import br.com.portalmanager.platform.library.objectstorage.internal.message.ObjectStorageMessageKeys;
 import java.io.IOException;
 import java.net.SocketTimeoutException;

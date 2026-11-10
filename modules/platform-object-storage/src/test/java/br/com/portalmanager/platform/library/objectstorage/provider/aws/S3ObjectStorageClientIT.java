@@ -13,8 +13,8 @@ import br.com.portalmanager.platform.library.objectstorage.api.contract.request.
 import br.com.portalmanager.platform.library.objectstorage.api.contract.request.UploadRequest;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.response.UploadResult;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.WriteMode;
-import br.com.portalmanager.platform.library.messaging.exception.ConflictException;
-import br.com.portalmanager.platform.library.messaging.exception.NotFoundException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ConflictException;
+import br.com.portalmanager.platform.library.messaging.api.exception.NotFoundException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 import br.com.portalmanager.platform.library.testing.cloud.aws.AwsLocalStackConnection;
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;

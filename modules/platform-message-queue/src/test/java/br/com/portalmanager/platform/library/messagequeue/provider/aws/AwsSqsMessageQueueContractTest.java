@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractLi
 import br.com.portalmanager.platform.library.messagequeue.MessageQueueContractTestApplication;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublishOptions;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublisher;
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;
 import br.com.portalmanager.platform.library.testing.cloud.aws.annotation.WithAwsLocalStack;
 import org.junit.jupiter.api.BeforeEach;

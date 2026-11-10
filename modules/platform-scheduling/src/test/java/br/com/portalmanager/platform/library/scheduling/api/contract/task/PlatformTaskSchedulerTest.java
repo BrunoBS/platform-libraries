@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.scheduling.api.contract.task;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 

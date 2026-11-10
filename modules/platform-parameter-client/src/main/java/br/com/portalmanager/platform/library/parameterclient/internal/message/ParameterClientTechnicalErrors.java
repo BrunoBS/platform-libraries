@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.parameterclient.internal.message;
 
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 
 public final class ParameterClientTechnicalErrors {
     public static final PlatformErrorDefinition REDIS_REQUIRED = new PlatformErrorDefinition(

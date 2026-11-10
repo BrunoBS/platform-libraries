@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.redis.internal.cache;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 
 /** Configuration errors use the platform definitions; no Redis exception hierarchy. */
 final class CacheErrors {

@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.messagequeue.internal.serializatio
 
 import br.com.portalmanager.platform.library.messagequeue.api.annotation.QueueMessage;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage;
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import java.time.Instant;
 import java.util.Map;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.redis;
 
 import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import br.com.portalmanager.platform.library.redis.api.store.RedisKeyPage;
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import java.util.LinkedHashMap;

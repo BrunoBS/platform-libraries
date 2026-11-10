@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.objectstorage.api.contract.response;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import java.util.Map;
 
 final class ContractValidation {

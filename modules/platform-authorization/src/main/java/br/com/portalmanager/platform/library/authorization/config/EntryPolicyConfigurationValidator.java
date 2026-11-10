@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.authorization.annotation.Authorizat
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
 import br.com.portalmanager.platform.library.authorization.model.*;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import java.lang.reflect.Method;
 import java.util.*;
 import org.springframework.aop.support.AopUtils;

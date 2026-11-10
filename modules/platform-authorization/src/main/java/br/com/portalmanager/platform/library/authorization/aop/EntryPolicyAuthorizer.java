@@ -22,7 +22,7 @@ public final class EntryPolicyAuthorizer implements org.springframework.beans.fa
 
     @Override public void afterSingletonsInstantiated() {
         if (!properties.getEntryPolicies().isEmpty() && origins.size() != 1) {
-            throw new br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException(
+            throw new br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException(
                 br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors.ENTRY_POLICY_INVALID);
         }
     }

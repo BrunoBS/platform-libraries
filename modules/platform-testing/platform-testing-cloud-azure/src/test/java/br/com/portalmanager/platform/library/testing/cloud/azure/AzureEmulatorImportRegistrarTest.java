@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.cloud.azure.blob.annotation.AzureBlobStorage;
 import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
 import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;

@@ -1,11 +1,11 @@
 package br.com.portalmanager.platform.library.messaging.configuration;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
-import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.library.messaging.api.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.internal.repository.JdbcApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.internal.repository.NoOpApiMessageRepository;
-import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
 import br.com.portalmanager.platform.library.messaging.internal.web.ApiExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

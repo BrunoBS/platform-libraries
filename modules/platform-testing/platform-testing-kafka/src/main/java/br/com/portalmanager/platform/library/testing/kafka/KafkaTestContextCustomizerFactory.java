@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.testing.kafka;
 
 import org.testcontainers.utility.DockerImageName;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.container.PinnedDockerImage;
 import br.com.portalmanager.platform.library.testing.kafka.annotation.WithKafka;
 import br.com.portalmanager.platform.library.testing.kafka.KafkaTestingTechnicalErrors;

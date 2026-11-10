@@ -12,7 +12,7 @@ import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSche
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.exception.ResourceSchemaNotFoundException;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 
 public class DefaultResourceSchemaResolver implements ResourceSchemaResolver {
 

@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.catalog.model.CatalogEntity;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.library.catalog.validation.AbstractCatalogValidator;
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
-import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.messaging.api.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import tools.jackson.databind.ObjectMapper;
 

@@ -4,7 +4,7 @@ import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
 import br.com.portalmanager.platform.library.catalog.message.CatalogMessageKeys;
 import br.com.portalmanager.platform.library.catalog.model.CatalogEnum;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
-import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.messaging.api.validation.ValidationResult;
 
 import java.util.Map;
 

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.redis;
 
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 
 public final class RedisTestingTechnicalErrors {
     public static PlatformErrorDefinition invalidConfiguration() {

@@ -1,497 +1,128 @@
-package br.com.portalmanager.platform.library.redis;
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíï®øN‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ìì()¥µÁ½ÉÐÍÑ…Ñ¥Œ½Éœ¹…ÍÍ•ÉÑ¨¹½É”¹…Á¤¹ÍÍ•ÉÑ¥½¹Ì¸¨ì)¥µÁ½ÉÐÍÑ…Ñ¥Œ½Éœ¹…Ý…¥Ñ¥±¥Ñä¹Ý…¥Ñ¥±¥Ñä¹…Ý…¥Ðì()¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹µ•ÍÍ…¥¹œ¹…Á¤¹•á•ÁÑ¥½¸¹Á¥á•ÁÑ¥½¸ì)¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ì¹½¹™¥ÕÉ…Ñ¥½¸¹…¡”¹A±…Ñ™½ÉµI•‘¥Í…¡•ÕÑ½½¹™¥ÕÉ…Ñ¥½¸ì)¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ì¹¥¹Ñ•É¹…°¹½µµ½¸¹I•‘¥Í•ÍÌì)¥µÁ½ÉÐ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ì¹¥¹Ñ•É¹…°¹…¡”¹A±…Ñ™½ÉµI•‘¥Í…¡•5…¹…•Èì()¥µÁ½ÉÐ½Éœ¹©Õ¹¥Ð¹©ÕÁ¥Ñ•È¹…Á¤¹Q•ÍÐì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹‰½½Ð¹…ÕÑ½½¹™¥ÕÉ”¹ÕÑ½½¹™¥ÕÉ…Ñ¥½¹Ìì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹‰½½Ð¹Ñ•ÍÐ¹½¹Ñ•áÐ¹ÉÕ¹¹•È¹ÁÁ±¥…Ñ¥½¹½¹Ñ•áÑIÕ¹¹•Èì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹…¡”¹…¡•5…¹…•Èì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹…¡”¹…¹¹½Ñ…Ñ¥½¸¸¨ì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹…¡”¹½¹ÕÉÉ•¹Ð¹½¹ÕÉÉ•¹Ñ5…Á…¡•5…¹…•Èì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹½¹Ñ•áÐ¹…¹¹½Ñ…Ñ¥½¸¸¨ì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹‘…Ñ„¹É•‘¥Ì¹½É”¹MÑÉ¥¹I•‘¥ÍQ•µÁ±…Ñ”ì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹ÑÉ…¹Í…Ñ¥½¸¸¨ì)¥µÁ½ÉÐ½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹ÑÉ…¹Í…Ñ¥½¸¹ÍÕÁÁ½ÉÐ¸¨ì()¥µÁ½ÉÐ©…Ù„¹Ñ¥µ”¹ÕÉ…Ñ¥½¸ì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¸¨ì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹½¹ÕÉÉ•¹Ð¸¨ì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹½¹ÕÉÉ•¹Ð¹…Ñ½µ¥Œ¹Ñ½µ¥%¹Ñ••Èì()±…ÍÌI•‘¥Í…¡•%P•áÑ•¹‘ÌI•‘¥Í%¹Ñ•É…Ñ¥½¹MÕÁÁ½ÉÐì(€€€É•½É5•ÍÍ…”¡MÑÉ¥¹œÑ•áÐ°¥¹ÐÙ•ÉÍ¥½¸¤íô((€€€ÁÕ‰±¥ŒÍÑ…Ñ¥Œ±…ÍÌEÕ•É¥•Ìì(€€€€€€€™¥¹…°Ñ½µ¥%¹Ñ••ÈÉ•…‘Ì€ô¹•ÜÑ½µ¥%¹Ñ••È ¤ì((€€€€€€€ÁÕ‰±¥Œ¥¹ÐÉ•…‘½Õ¹Ð ¤ì(€€€€€€€€€€€É•ÑÕÉ¸É•…‘Ì¹•Ð ¤ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰µ•ÍÍ…•Ìˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”™¥¹¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹•Ü5•ÍÍ…”¡¥°É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤¤ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰Õ¹­¹½Ý¸ˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”Õ¹­¹½Ý¸¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹•Ü5•ÍÍ…”¡¥°É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤¤ì(€€€€€€€ô((€€€€€€€…¡•AÕÐ¡…¡•9…µ•Ì€ô€‰µ•ÍÍ…•Ìˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”ÕÁ‘…Ñ”¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹•Ü5•ÍÍ…”¡¥°É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤¤ì(€€€€€€€ô((€€€€€€€…¡•Ù¥Ð¡…¡•9…µ•Ì€ô€‰µ•ÍÍ…•Ìˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥ŒÙ½¥•Ù¥Ð¡MÑÉ¥¹œ¥¤íô((€€€€€€€…¡¥¹œ (€€€€€€€€€€€€€€€•Ù¥Ð€ôì(€€€€€€€€€€€€€€€€€€€…¡•Ù¥Ð¡…¡•9…µ•Ì€ô€‰µ•ÍÍ…•Ìˆ°­•ä€ô€ˆ¥ˆ¤°(€€€€€€€€€€€€€€€€€€€…¡•Ù¥Ð¡…¡•9…µ•Ì€ô€‰Õ¹­¹½Ý¸ˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€€€€€€€€€ô¤(€€€€€€€ÁÕ‰±¥ŒÙ½¥‰½Ñ ¡MÑÉ¥¹œ¥¤íô((€€€€€€€…¡•Ù¥Ð¡…¡•9…µ•Ì€ô€‰µ•ÍÍ…•Ìˆ°…±±¹ÑÉ¥•Ì€ôÑÉÕ”¤(€€€€€€€ÁÕ‰±¥ŒÙ½¥±•…È ¤íô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰±¥ÍÐˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ1¥ÍÐñ5•ÍÍ…”ø±¥ÍÐ¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤ì(€€€€€€€€€€€É•ÑÕÉ¸1¥ÍÐ¹½˜¡¹•Ü5•ÍÍ…”¡¥°€Ä¤¤ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰µ…Àˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ5…ÀñMÑÉ¥¹œ°1¥ÍÐñ5•ÍÍ…”øøµ…À¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤ì(€€€€€€€€€€€É•ÑÕÉ¸5…À¹½˜¡¥°1¥ÍÐ¹½˜¡¹•Ü5•ÍÍ…”¡¥°€Ä¤¤¤ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰½ÁÑ¥½¹…°ˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ=ÁÑ¥½¹…°ñ5•ÍÍ…”ø½ÁÑ¥½¹…°¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤ì(€€€€€€€€€€€É•ÑÕÉ¸=ÁÑ¥½¹…°¹½˜¡¹•Ü5•ÍÍ…”¡¥°€Ä¤¤ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰¹Õ±±…‰±”ˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”¹Õ±±…‰±”¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹Õ±°ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰Íå¹¹Õ±°ˆ°­•ä€ô€ˆ¥ˆ°Íå¹Œ€ôÑÉÕ”¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”Íå¹¹Õ±°¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹Õ±°ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰™…¥±ÕÉ”ˆ°­•ä€ô€ˆ¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”™…¥±ÕÉ”¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤ì(€€€€€€€€€€€Ñ¡É½Ü¹•ÜU¹ÍÕÁÁ½ÉÑ•‘=Á•É…Ñ¥½¹á•ÁÑ¥½¸ ‰É•Á½Í¥Ñ½Éä™…¥±ÕÉ”ˆ¤ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰Í•ÕÉ”ˆ°­•ä€ô€ˆÑ•¹…¹Ð¬œèœ¬ÕÍ•È¬œèœ¬±½…±”¬œèœ¬¥ˆ¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”Í•ÕÉ”¡MÑÉ¥¹œÑ•¹…¹Ð°MÑÉ¥¹œÕÍ•È°MÑÉ¥¹œ±½…±”°MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹•Ü5•ÍÍ…”¡Ñ•¹…¹Ð€¬ÕÍ•È€¬±½…±”€¬¥°€Ä¤ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰Íå¹Œˆ°­•ä€ô€ˆ¥ˆ°Íå¹Œ€ôÑÉÕ”¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”Íå¹Œ¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€¥¹Ð½Õ¹Ð€ôÉ•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤ì(€€€€€€€€€€€ÑÉäì(€€€€€€€€€€€€€€€Q¡É•…¹Í±••À ØÀ¤ì(€€€€€€€€€€€ô…Ñ €¡%¹Ñ•ÉÉÕÁÑ•‘á•ÁÑ¥½¸”¤ì(€€€€€€€€€€€€€€€Q¡É•…¹ÕÉÉ•¹ÑQ¡É•… ¤¹¥¹Ñ•ÉÉÕÁÐ ¤ì(€€€€€€€€€€€ô(€€€€€€€€€€€É•ÑÕÉ¸¹•Ü5•ÍÍ…”¡¥°½Õ¹Ð¤ì(€€€€€€€ô((€€€€€€€…¡•…‰±”¡…¡•9…µ•Ì€ô€‰¹…µ•ˆ°­•ä€ô€ˆ¥ˆ°…¡•5…¹…•È€ô€‰Á±…Ñ™½ÉµI•‘¥Í…¡•5…¹…•Èˆ¤(€€€€€€€ÁÕ‰±¥Œ5•ÍÍ…”¹…µ•¡MÑÉ¥¹œ¥¤ì(€€€€€€€€€€€É•ÑÕÉ¸¹•Ü5•ÍÍ…”¡¥°É•…‘Ì¹¥¹É•µ•¹Ñ¹‘•Ð ¤¤ì(€€€€€€€ô(€€€ô((€€€ÁÁ±¥…Ñ¥½¹½¹Ñ•áÑIÕ¹¹•È…¡¥¹œ ¤ì(€€€€€€€É•ÑÕÉ¸½¹Ñ•áÐ ¤(€€€€€€€€€€€€€€€€¹Ý¥Ñ¡½¹™¥ÕÉ…Ñ¥½¸¡ÕÑ½½¹™¥ÕÉ…Ñ¥½¹Ì¹½˜¡A±…Ñ™½ÉµI•‘¥Í…¡•ÕÑ½½¹™¥ÕÉ…Ñ¥½¸¹±…ÍÌ¤¤(€€€€€€€€€€€€€€€€¹Ý¥Ñ¡AÉ½Á•ÉÑåY…±Õ•Ì ‰Á±…Ñ™½É´¹É•‘¥Ì¹…¡”¹•¹…‰±•õÑÉÕ”ˆ¤(€€€€€€€€€€€€€€€€¹Ý¥Ñ¡	•…¸¡EÕ•É¥•Ì¹±…ÍÌ°EÕ•É¥•Ìèé¹•Ü¤ì(€€€ô((€€€MÑÉ¥¹œÁ¡åÍ¥…°¡½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹½¹Ñ•áÐ¹ÁÁ±¥…Ñ¥½¹½¹Ñ•áÐÑà°MÑÉ¥¹œÉ•¥½¸°MÑÉ¥¹œ­•ä¤ì(€€€€€€€Ù…È…¡”€ôÑà¹•Ñ	•…¸¡…¡•5…¹…•È¹±…ÍÌ¤¹•Ñ…¡”¡É•¥½¸¤ì(€€€€€€€¥˜€¡…¡”(€€€€€€€€€€€€€€€¥¹ÍÑ…¹•½˜½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹…¡”¹ÑÉ…¹Í…Ñ¥½¸¹QÉ…¹Í…Ñ¥½¹Ý…É•…¡••½É…Ñ½ÈÑà¤(€€€€€€€€€€€…¡”€ôÑà¹•ÑQ…É•Ñ…¡” ¤ì(€€€€€€€MÑÉ¥¹œÁÉ•™¥à€ô(€€€€€€€€€€€€€€€€ ¡½Éœ¹ÍÁÉ¥¹™É…µ•Ý½É¬¹‘…Ñ„¹É•‘¥Ì¹…¡”¹I•‘¥Í…¡”¤…¡”¤(€€€€€€€€€€€€€€€€€€€€€€€€¹•Ñ…¡•½¹™¥ÕÉ…Ñ¥½¸ ¤(€€€€€€€€€€€€€€€€€€€€€€€€¹•Ñ-•åAÉ•™¥á½È¡É•¥½¸¤ì(€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡ÁÉ•™¥à¤(€€€€€€€€€€€€€€€€¹¥ÍÅÕ…±Q¼ (€€€€€€€€€€€€€€€€€€€€€€€Ñà¹•Ñ	•…¸¡I•‘¥Í•ÍÌ¹±…ÍÌ¤¹­•ä ‰…¡”èˆ€¬É•¥½¸¤€¬€ˆèèˆ¤ì(€€€€€€€É•ÑÕÉ¸ÁÉ•™¥à€¬­•äì(€€€ô((€€€Q•ÍÐ(€€€Ù½¥…¹¹½Ñ…Ñ¥½¹ÍÉ•=™™	å•™…Õ±Ñ¹‘ÕÍÑ½µ5…¹…•ÉÍ!…Ù•AÉ••‘•¹” ¤ì(€€€€€€€½¹Ñ•áÐ ¤(€€€€€€€€€€€€€€€€¹Ý¥Ñ¡½¹™¥ÕÉ…Ñ¥½¸¡ÕÑ½½¹™¥ÕÉ…Ñ¥½¹Ì¹½˜¡A±…Ñ™½ÉµI•‘¥Í…¡•ÕÑ½½¹™¥ÕÉ…Ñ¥½¸¹±…ÍÌ¤¤(€€€€€€€€€€€€€€€€¹Ý¥Ñ¡	•…¸¡EÕ•É¥•Ì¹±…ÍÌ°EÕ•É¥•Ìèé¹•Ü¤(€€€€€€€€€€€€€€€€¹ÉÕ¸ (€€€€€€€€€€€€€€€€€€€€€€€Ñà€´øì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ñà¤¹‘½•Í9½Ñ!…Ù•	•…¸¡…¡•5…¹…•È¹±…ÍÌ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ù…ÈÄ€ôÑà¹•Ñ	•…¸¡EÕ•É¥•Ì¹±…ÍÌ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ä¹™¥¹ ‰½™˜ˆ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ä¹™¥¹ ‰½™˜ˆ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ä¹É•…‘½Õ¹Ð ¤¤¹¥ÍÅÕ…±Q¼ È¤ì(€€€€€€€€€€€€€€€€€€€€€€€ô¤ì(€€€€€€€Ù…ÈÕÍÑ½´€ô¹•Ü½¹ÕÉÉ•¹Ñ5…Á…¡•5…¹…•È ¤ì(€€€€€€€…¡¥¹œ ¤(€€€€€€€€€€€€€€€€¹Ý¥Ñ¡	•…¸¡…¡•5…¹…•È¹±…ÍÌ°€ ¤€´øÕÍÑ½´¤(€€€€€€€€€€€€€€€€¹ÉÕ¸ (€€€€€€€€€€€€€€€€€€€€€€€Ñà€´øì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ñà¹•Ñ	•…¸¡…¡•5…¹…•È¹±…ÍÌ¤¤¹¥ÍM…µ•Ì¡ÕÍÑ½´¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ñà¤¹‘½•Í9½Ñ!…Ù•	•…¸¡A±…Ñ™½ÉµI•‘¥Í…¡•5…¹…•È¹±…ÍÌ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ù…ÈÄ€ôÑà¹•Ñ	•…¸¡EÕ•É¥•Ì¹±…ÍÌ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ä¹™¥¹ ‰ÕÍÑ½´ˆ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ä¹™¥¹ ‰ÕÍÑ½´ˆ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ä¹É•…‘½Õ¹Ð ¤¤¹¥ÍÅÕ…±Q¼ Ä¤ì(€€€€€€€€€€€€€€€€€€€€€€€ô¤ì(€€€ô((€€€Q•ÍÐ(€€€Ù½¥‘å¹…µ¥…±±åI•Í½±Ù•ÍI•¥½¹Í!¥Ñ5¥ÍÍAÕÑÙ¥Ñ…¡¥¹¹‘±•…È ¤ì(€€€€€€€…¡¥¹œ ¤(€€€€€€€€€€€€€€€€¹ÉÕ¸ (€€€€€€€€€€€€€€€€€€€€€€€Ñà€´øì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ù…ÈÄ€ôÑà¹•Ñ	•…¸¡EÕ•É¥•Ì¹±…ÍÌ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€MÑÉ¥¹œ¥€ô­•ä ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ä¹™¥¹¡¥¤¤¹¥ÍÅÕ…±Q¼¡Ä¹™¥¹¡¥¤¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ä¹É•…‘½Õ¹Ð ¤¤¹¥ÍÅÕ…±Q¼ Ä¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ä¹ÕÁ‘…Ñ”¡¥¤¤¹¥ÍÅÕ…±Q¼¡Ä¹™¥¹¡¥¤¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ä¹É•…‘½Õ¹Ð ¤¤¹¥ÍÅÕ…±Q¼ È¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ä¹•Ù¥Ð¡¥¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Ä¹™¥¹¡¥¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ð¡Ä¹É•…‘½Õ¹Ð ¤¤¹¥ÍÅÕ…±Q¼ Ì¤ì(€€€€€€€€€€€€€€€€ƒn»âÚ$z{-®éÜj×[Û‚ˆ˜Û\ÜÊNÂˆJNÂˆB‚ˆ\Ýˆ›ÚYÞ[˜Ð]›ÚYÐÛÛ˜Ý\œ™[Z\ÜÔÝ[\YJ
+HÂˆØXÚ[™Ê
+Bˆœ[ŠˆÝOˆÂˆ˜\ˆHHÝ™Ù]™X[Š]Y\šY\Ë˜Û\ÜÊNÂˆÝš[™ÈYHÙ^J
+NÂˆžH
+˜\ˆ^XÝ]ÜˆH^XÝ]ÜœË›™]Ñš^Y™XYÛÛ
+
+JHÂˆ˜\ˆ\ÚÜÈH™]È\œ˜^S\ÝØ[X›OY\ÜØYÙOŠ
+NÂˆ›Üˆ
+[ˆHÈˆÈŠÊÊH\ÚÜË˜Y
 
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.redis.configuration.cache.PlatformRedisCacheAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.internal.common.RedisAccess;
-import br.com.portalmanager.platform.library.redis.internal.cache.PlatformRedisCacheManager;
+HOˆKœÞ[˜ÊY
+JNÂˆ˜\ˆ™\Ý[ÈH^XÝ]Ü‹š[›ÚÙP[
+\ÚÜÊNÂˆ›Üˆ
+˜\ˆ™\Ý[ˆ™\Ý[ÊBˆ\ÜÙ\]
+™\Ý[™Ù]
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.*;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.*;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.transaction.*;
-import org.springframework.transaction.support.*;
+K™\œÚ[ÛŠ
+JKš\Ñ\]X[ÊJNÂˆBˆ\ÜÙ\]
+Kœ™XYÛÝ[
 
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+JKš\Ñ\]X[ÊJNÂˆJNÂˆB‚ˆ\Ýˆ›ÚY˜Z[\™TÛXÞPž\\ÜÙ\ÓÛ›T™XYÐ[™™]™\”™\ÜÚ]ÜžSÜ‘^XÚ]Üš]\Ê
+HÂˆØXÚ[™Ê
+BˆÚ]›Ü\U˜[Y\Êˆœ]›Ü›Kœ™Y\Ë˜ÛÛ›™XÝ[Û‹œÜLH‹ˆœ]›Ü›Kœ™Y\Ë˜ÛÛ›™XÝ[Û‹˜ÛÛ›™XÝ][Y[Ý]ML\È‹ˆœ]›Ü›Kœ™Y\Ë˜ÛÛ›™XÝ[Û‹˜ÛÛ[X[™][Y[Ý]ML\ÈŠBˆœ[ŠˆÝO‚ˆ\ÜÙ\]›ÝÛžJ
 
-class RedisCacheIT extends RedisIntegrationSupport {
-    record Message(String text, int version) {}
+HOˆÝ™Ù]™X[Š]Y\šY\Ë˜Û\ÜÊK™š[™
+Ù^J
+JJBˆš\Ò[œÝ[˜ÙSÙŠ\Q^Ù\[Û‹˜Û\ÜÊJNÂˆØXÚ[™Ê
+BˆÚ]›Ü\U˜[Y\Êˆœ]›Ü›Kœ™Y\Ë˜ØXÚK™˜Z[\™K\ÛXÞOQRSÓÔS—Ô‘PQ‹ˆœ]›Ü›Kœ™Y\Ë˜ÛÛ›™XÝ[Û‹œÜLH‹ˆœ]›Ü›Kœ™Y\Ë˜ÛÛ›™XÝ[Û‹˜ÛÛ›™XÝ][Y[Ý]ML\È‹ˆœ]›Ü›Kœ™Y\Ë˜ÛÛ›™XÝ[Û‹˜ÛÛ[X[™][Y[Ý]ML\ÈŠBˆœ[ŠˆÝOˆÂˆ˜\ˆHHÝ™Ù]™X[Š]Y\šY\Ë˜Û\ÜÊNÂˆ\ÜÙ\]
+K™š[™
+Ù^J
+JJKš\Ó›Ý[
 
-    public static class Queries {
-        final AtomicInteger reads = new AtomicInteger();
+NÂˆ\ÜÙ\]›ÝÛžJ
 
-        public int readCount() {
-            return reads.get();
-        }
+HOˆK\]JÙ^J
+JJBˆš\Ò[œÝ[˜ÙSÙŠ\Q^Ù\[Û‹˜Û\ÜÊNÂˆ\ÜÙ\]›ÝÛžJ
 
-        @Cacheable(cacheNames = "messages", key = "#id")
-        public Message find(String id) {
-            return new Message(id, reads.incrementAndGet());
-        }
+HOˆK™]šXÝ
+Ù^J
+JJBˆš\Ò[œÝ[˜ÙSÙŠ\Q^Ù\[Û‹˜Û\ÜÊNÂˆ\ÜÙ\]›ÝÛžJ
 
-        @Cacheable(cacheNames = "unknown", key = "#id")
-        public Message unknown(String id) {
-            return new Message(id, reads.incrementAndGet());
-        }
+HOˆK™˜Z[\™JÙ^J
+JJBˆš\Ò[œÝ[˜ÙSÙŠ[œÝ\ÜYÜ\˜][Û‘^Ù\[Û‹˜Û\ÜÊNÂˆJNÂˆB‚ˆ\Ýˆ›ÚYÛÜœ\Y^[ØY\ÔÝ[™\™^™Y[™Ø[››ÝÙ[XÝ\˜š]˜\žU\\Ê
+HÂˆØXÚ[™Ê
+Bˆœ[ŠˆÝOˆÂˆ˜\ˆHHÝ™Ù]™X[Š]Y\šY\Ë˜Û\ÜÊNÂˆÝš[™ÈYHÙ^J
+NÂˆ˜\ˆ™Y\ÈHÝ™Ù]™X[ŠÝš[™Ô™Y\Õ[\]K˜Û\ÜÊNÂˆ™Y\Ë›ÜÑ›Ü•˜[YJ
+KœÙ]
+\ÚXØ[
+Ý›Y\ÜØYÙ\È‹Y
+K’S•SQÒ”ÓÓˆŠNÂˆ\ÜÙ\]›ÝÛžJ
 
-        @CachePut(cacheNames = "messages", key = "#id")
-        public Message update(String id) {
-            return new Message(id, reads.incrementAndGet());
-        }
+HOˆK™š[™
+Y
+JBˆš\Ò[œÝ[˜ÙSÙŠ\Q^Ù\[Û‹˜Û\ÜÊBˆš\ÓY\ÜØYÙJœ™Y\ËœÙ\šX[^˜][ÛˆŠNÂˆÝš[™ÈY]Y]HBˆ™]ÈÛÛËš˜XÚÜÛÛ‹™]Xš[™šœÛÛ‹’œÛÛ“X\\Š
+BˆÜš]U˜[YP\ÔÝš[™ÊˆX\›ÙŠÛ\ÜÈ‹š˜]˜K›[™Ë”[[YHŠJNÂˆ™Y\Ë›ÜÑ›Ü•˜[YJ
+KœÙ]
+\ÚXØ[
+Ý›Y\ÜØYÙ\È‹Y
+KY]Y]JNÂˆžHÂˆ\ÜÙ\]
+K™š[™
+Y
+JKš\Ò[œÝ[˜ÙSÙŠY\ÜØYÙK˜Û\ÜÊNÂˆHØ]Ú
+\Q^Ù\[Ûˆ™Z™XÝY
+HÂˆ\ÜÙ\]
+™Z™XÝY™Ù]Y\ÜØYÙRÙ^J
+JBˆš\Ñ\]X[Êœ™Y\ËœÙ\šX[^˜][ÛˆŠNÂˆBˆJNÂˆB‚ˆX›XÈÝ]XÈÛ\ÜÈØ]HÂˆš]˜]Hš[˜[ÛÝ[ÝÛ“]Ú[\™YH™]ÈÛÝ[ÝÛ“]Ú
+JKˆ™[X\ÙHH™]ÈÛÝ[ÝÛ“]Ú
+JNÂ‚ˆØXÚXX›JØXÚS˜[Y\ÈH™Ø]H‹Ù^HHˆÚY‹Þ[˜ÈHYJBˆX›XÈY\ÜØYÙH›ØÚÙY
+Ýš[™ÈY
+HÂˆ[\™Y˜ÛÝ[ÝÛŠ
+NÂˆžHÂˆ™[X\ÙK˜]ØZ]
+Ë[YU[š]”ÑPÓÓ‘ÊNÂˆHØ]Ú
+[\œ\Y^Ù\[ÛˆJHÂˆ™XY˜Ý\œ™[™XY
 
-        @CacheEvict(cacheNames = "messages", key = "#id")
-        public void evict(String id) {}
+Kš[\œ\
 
-        @Caching(
-                evict = {
-                    @CacheEvict(cacheNames = "messages", key = "#id"),
-                    @CacheEvict(cacheNames = "unknown", key = "#id")
-                })
-        public void both(String id) {}
+NÂˆBˆ™]\›ˆ™]ÈY\ÜØYÙJYJNÂˆB‚ˆX›XÈ›ÛÛX[ˆ[\™Y
 
-        @CacheEvict(cacheNames = "messages", allEntries = true)
-        public void clear() {}
+H›ÝÜÈ[\œ\Y^Ù\[ÛˆÂˆ™]\›ˆ[\™Y˜]ØZ]
+‹[YU[š]”ÑPÓÓ‘ÊNÂˆB‚ˆX›XÈ›ÚY™[X\ÙJ
+HÂˆ™[X\ÙK˜ÛÝ[ÝÛŠ
+NÂˆBˆB‚ˆ\Ýˆ›ÚYØÚÜÐ\™P[ÛÒ\ÛÛ]YXÜ›ÜÜÔÙ\šXÙ\Ê
+HÂˆØXÚ[™Ê
+BˆÚ]™X[ŠØ]K˜Û\ÜËØ]NŽ›™]ÊBˆœ[Šˆš\œÝOˆÂˆØXÚ[™Ê
+BˆÚ]›Ü\U˜[Y\ÊœÜš[™Ë˜\XØ][Û‹›˜[YO[Ý\‹\Ù\šXÙHŠBˆÚ]™X[ŠØ]K˜Û\ÜËØ]NŽ›™]ÊBˆœ[ŠˆÙXÛÛ™OˆÂˆ˜\ˆHHš\œÝ™Ù]™X[ŠØ]K˜Û\ÜÊNÂˆ˜\ˆˆHÙXÛÛ™™Ù]™X[ŠØ]K˜Û\ÜÊNÂˆžH
+˜\ˆ^XÝ]ÜˆBˆ^XÝ]ÜœË›™]Ñš^Y™XYÛÛ
+ŠJHÂˆ˜\ˆÛ™HBˆ^XÝ]Ü‹œÝX›Z]
+ˆ
 
-        @Cacheable(cacheNames = "list", key = "#id")
-        public List<Message> list(String id) {
-            reads.incrementAndGet();
-            return List.of(new Message(id, 1));
-        }
+HOˆK˜›ØÚÙY
+œØ[YHŠJNÂˆ\ÜÙ\]
+K™[\™Y
 
-        @Cacheable(cacheNames = "map", key = "#id")
-        public Map<String, List<Message>> map(String id) {
-            reads.incrementAndGet();
-            return Map.of(id, List.of(new Message(id, 1)));
-        }
+JKš\ÕYJ
+NÂˆ˜\ˆÛÈBˆ^XÝ]Ü‹œÝX›Z]
+ˆ
 
-        @Cacheable(cacheNames = "optional", key = "#id")
-        public Optional<Message> optional(String id) {
-            reads.incrementAndGet();
-            return Optional.of(new Message(id, 1));
-        }
+HOˆ‹˜›ØÚÙY
+œØ[YHŠJNÂˆžHÂˆ\ÜÙ\]
+‹™[\™Y
 
-        @Cacheable(cacheNames = "nullable", key = "#id")
-        public Message nullable(String id) {
-            reads.incrementAndGet();
-            return null;
-        }
+JKš\ÕYJ
+NÂˆHš[˜[HÂˆKœ™[X\ÙJ
+NÂˆ‹œ™[X\ÙJ
+NÂˆBˆ\ÜÙ\]
+Û™K™Ù]
 
-        @Cacheable(cacheNames = "syncnull", key = "#id", sync = true)
-        public Message syncnull(String id) {
-            reads.incrementAndGet();
-            return null;
-        }
+JKš\Ó›Ý[
 
-        @Cacheable(cacheNames = "failure", key = "#id")
-        public Message failure(String id) {
-            reads.incrementAndGet();
-            throw new UnsupportedOperationException("repository failure");
-        }
+NÂˆ\ÜÙ\]
+ÛË™Ù]
 
-        @Cacheable(cacheNames = "secure", key = "#tenant+':'+#user+':'+#locale+':'+#id")
-        public Message secure(String tenant, String user, String locale, String id) {
-            reads.incrementAndGet();
-            return new Message(tenant + user + locale + id, 1);
-        }
+JKš\Ó›Ý[
 
-        @Cacheable(cacheNames = "sync", key = "#id", sync = true)
-        public Message sync(String id) {
-            int count = reads.incrementAndGet();
-            try {
-                Thread.sleep(60);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return new Message(id, count);
-        }
+NÂˆBˆJNÂˆJNÂˆB‚ˆX›XÈÝ]XÈÛ\ÜÈÛÛ™›XÝÂˆØXÚXX›J›Y\ÜØYÙ\ÈŠBˆX›XÈÝš[™ÈY™™\™[
+Ýš[™ÈY
+HÂˆ™]\›ˆYÂˆBˆB‚ˆ\Ýˆ›ÚY[˜ÛÛ\]X›T™YÚ[Û•\\Ñ˜Z[Ú]]›Ü›PÛÛ™šYÝ\˜][Û‘\œ›ÜŠ
+HÂˆØXÚ[™Ê
+KÚ]™X[ŠÛÛ™›XÝ˜Û\ÜËÛÛ™›XÝŽ›™]ÊKœ[ŠÝOˆ\ÜÙ\]
+Ý
+Kš\Ñ˜Z[Y
 
-        @Cacheable(cacheNames = "named", key = "#id", cacheManager = "platformRedisCacheManager")
-        public Message named(String id) {
-            return new Message(id, reads.incrementAndGet());
-        }
-    }
+JNÂˆB‚ˆÝ]XÈÛ\ÜÈØØ[˜[œØXÝ[ÛœÈ^[™ÈXœÝ˜XÝ]›Ü›U˜[œØXÝ[Û“X[˜YÙ\ˆÂˆ›ÝXÝYØš™XÝÑÙ]˜[œØXÝ[ÛŠ
+HÂˆ™]\›ˆ™]ÈØš™XÝ
 
-    ApplicationContextRunner caching() {
-        return context()
-                .withConfiguration(AutoConfigurations.of(PlatformRedisCacheAutoConfiguration.class))
-                .withPropertyValues("platform.redis.cache.enabled=true")
-                .withBean(Queries.class, Queries::new);
-    }
-
-    String physical(org.springframework.context.ApplicationContext ctx, String region, String key) {
-        var cache = ctx.getBean(CacheManager.class).getCache(region);
-        if (cache
-                instanceof org.springframework.cache.transaction.TransactionAwareCacheDecorator tx)
-            cache = tx.getTargetCache();
-        String prefix =
-                ((org.springframework.data.redis.cache.RedisCache) cache)
-                        .getCacheConfiguration()
-                        .getKeyPrefixFor(region);
-        assertThat(prefix)
-                .isEqualTo(
-                        ctx.getBean(RedisAccess.class).key("cache:" + region) + "::");
-        return prefix + key;
-    }
-
-    @Test
-    void annotationsAreOffByDefaultAndCustomManagersHavePrecedence() {
-        context()
-                .withConfiguration(AutoConfigurations.of(PlatformRedisCacheAutoConfiguration.class))
-                .withBean(Queries.class, Queries::new)
-                .run(
-                        ctx -> {
-                            assertThat(ctx).doesNotHaveBean(CacheManager.class);
-                            var q = ctx.getBean(Queries.class);
-                            q.find("off");
-                            q.find("off");
-                            assertThat(q.readCount()).isEqualTo(2);
-                        });
-        var custom = new ConcurrentMapCacheManager();
-        caching()
-                .withBean(CacheManager.class, () -> custom)
-                .run(
-                        ctx -> {
-                            assertThat(ctx.getBean(CacheManager.class)).isSameAs(custom);
-                            assertThat(ctx).doesNotHaveBean(PlatformRedisCacheManager.class);
-                            var q = ctx.getBean(Queries.class);
-                            q.find("custom");
-                            q.find("custom");
-                            assertThat(q.readCount()).isEqualTo(1);
-                        });
-    }
-
-    @Test
-    void dynamicallyResolvesRegionsHitMissPutEvictCachingAndClear() {
-        caching()
-                .run(
-                        ctx -> {
-                            var q = ctx.getBean(Queries.class);
-                            String id = key();
-                            assertThat(q.find(id)).isEqualTo(q.find(id));
-                            assertThat(q.readCount()).isEqualTo(1);
-                            assertThat(q.update(id)).isEqualTo(q.find(id));
-                            assertThat(q.readCount()).isEqualTo(2);
-                            q.evict(id);
-                            q.find(id);
-                            assertThat(q.readCount()).isEqualTo(3);
-                            q.unknown(id);
-                            q.both(id);
-                            q.find(id);
-                            q.unknown(id);
-                            assertThat(q.readCount()).isEqualTo(6);
-                            q.clear();
-                            q.find(id);
-                            assertThat(q.readCount()).isEqualTo(7);
-                            q.named(id);
-                            q.named(id);
-                            assertThat(q.readCount()).isEqualTo(8);
-                            assertThat(ctx.getBean(CacheManager.class).getCacheNames())
-                                    .contains("messages", "unknown", "named");
-                        });
-    }
-
-    @Test
-    void ttlDefaultsOverridesAndRealExpiration() {
-        caching()
-                .withPropertyValues(
-                        "platform.redis.cache.default-ttl=250ms",
-                        "platform.redis.cache.regions.messages.ttl=1200ms")
-                .run(
-                        ctx -> {
-                            var q = ctx.getBean(Queries.class);
-                            String id = key();
-                            q.find(id);
-                            q.unknown(id);
-                            var nativeRedis = ctx.getBean(StringRedisTemplate.class);
-                            assertThat(
-                                            nativeRedis.getExpire(
-                                                    physical(ctx, "messages", id),
-                                                    TimeUnit.MILLISECONDS))
-                                    .isBetween(500L, 1200L);
-                            assertThat(
-                                            nativeRedis.getExpire(
-                                                    physical(ctx, "unknown", id),
-                                                    TimeUnit.MILLISECONDS))
-                                    .isBetween(1L, 250L);
-                            await().atMost(Duration.ofSeconds(2))
-                                    .untilAsserted(
-                                            () ->
-                                                    assertThat(
-                                                                    nativeRedis.hasKey(
-                                                                            physical(
-                                                                                    ctx, "unknown",
-                                                                                    id)))
-                                                            .isFalse());
-                            q.unknown(id);
-                            assertThat(q.readCount()).isEqualTo(3);
-                        });
-        caching()
-                .withPropertyValues("platform.redis.cache.default-ttl=0s")
-                .run(ctx -> assertThat(ctx).hasFailed());
-        caching()
-                .withPropertyValues("platform.redis.cache.regions.messages.ttl=-1s")
-                .run(ctx -> assertThat(ctx).hasFailed());
-    }
-
-    @Test
-    void typedCollectionsOptionalNullAndExceptions() {
-        caching()
-                .run(
-                        ctx -> {
-                            var q = ctx.getBean(Queries.class);
-                            String id = key();
-                            assertThat(q.list(id)).isEqualTo(q.list(id));
-                            assertThat(q.map(id)).isEqualTo(q.map(id));
-                            assertThat(q.optional(id)).isEqualTo(q.optional(id));
-                            assertThat(q.readCount()).isEqualTo(3);
-                            assertThat(q.nullable(id)).isNull();
-                            assertThat(q.nullable(id)).isNull();
-                            assertThat(q.readCount()).isEqualTo(5);
-                            assertThat(q.syncnull(id)).isNull();
-                            assertThat(q.syncnull(id)).isNull();
-                            assertThat(q.readCount()).isEqualTo(7);
-                            assertThatThrownBy(() -> q.failure(id))
-                                    .isInstanceOf(UnsupportedOperationException.class);
-                            assertThatThrownBy(() -> q.failure(id))
-                                    .isInstanceOf(UnsupportedOperationException.class);
-                            assertThat(q.readCount()).isEqualTo(9);
-                            String json =
-                                    ctx.getBean(StringRedisTemplate.class)
-                                            .opsForValue()
-                                            .get(physical(ctx, "map", id));
-                            assertThat(json).doesNotContain("@class", "java.util", "Message");
-                        });
-    }
-
-    @Test
-    void tenantUserLocaleRegionEnvironmentAndServiceIsolation() {
-        caching()
-                .run(
-                        ctx -> {
-                            var q = ctx.getBean(Queries.class);
-                            String id = key();
-                            q.secure("t1", "u1", "pt", id);
-                            q.secure("t1", "u1", "pt", id);
-                            q.secure("t2", "u1", "pt", id);
-                            q.secure("t1", "u2", "pt", id);
-                            q.secure("t1", "u1", "en", id);
-                            assertThat(q.readCount()).isEqualTo(4);
-                            q.find(id);
-                            q.unknown(id);
-                            assertThat(q.readCount()).isEqualTo(6);
-                            caching()
-                                    .withPropertyValues("spring.application.name=another-service")
-                                    .run(
-                                            other -> {
-                                                other.getBean(Queries.class).find(id);
-                                                assertThat(other.getBean(Queries.class).readCount())
-                                                        .isEqualTo(1);
-                                            });
-                        });
-    }
-
-    @Test
-    void transactionCommitRollbackAndEviction() {
-        caching()
-                .run(
-                        ctx -> {
-                            var q = ctx.getBean(Queries.class);
-                            String id = key();
-                            var tx = new TransactionTemplate(new LocalTransactions());
-                            tx.executeWithoutResult(
-                                    status -> {
-                                        q.find(id);
-                                        status.setRollbackOnly();
-                                    });
-                            q.find(id);
-                            assertThat(q.readCount()).isEqualTo(2);
-                            tx.executeWithoutResult(
-                                    status -> {
-                                        q.evict(id);
-                                        status.setRollbackOnly();
-                                    });
-                            q.find(id);
-                            assertThat(q.readCount()).isEqualTo(2);
-                            tx.executeWithoutResult(status -> q.evict(id));
-                            q.find(id);
-                            assertThat(q.readCount()).isEqualTo(3);
-                            String another = key();
-                            tx.executeWithoutResult(status -> q.find(another));
-                            q.find(another);
-                            assertThat(q.readCount()).isEqualTo(4);
-                            assertThatThrownBy(
-                                            () -> tx.executeWithoutResult(status -> q.sync(key())))
-                                    .isInstanceOf(
-                                            br.com.portalmanager.platform.library.messaging
-                                                    .exception.PlatformConfigurationException
-                                                    .class);
-                        });
-    }
-
-    @Test
-    void syncAvoidsConcurrentMissStampede() {
-        caching()
-                .run(
-                        ctx -> {
-                            var q = ctx.getBean(Queries.class);
-                            String id = key();
-                            try (var executor = Executors.newFixedThreadPool(8)) {
-                                var tasks = new ArrayList<Callable<Message>>();
-                                for (int n = 0; n < 8; n++) tasks.add(() -> q.sync(id));
-                                var results = executor.invokeAll(tasks);
-                                for (var result : results)
-                                    assertThat(result.get().version()).isEqualTo(1);
-                            }
-                            assertThat(q.readCount()).isEqualTo(1);
-                        });
-    }
-
-    @Test
-    void failurePolicyBypassesOnlyReadsAndNeverRepositoryOrExplicitWrites() {
-        caching()
-                .withPropertyValues(
-                        "platform.redis.connection.port=1",
-                        "platform.redis.connection.connect-timeout=50ms",
-                        "platform.redis.connection.command-timeout=50ms")
-                .run(
-                        ctx ->
-                                assertThatThrownBy(() -> ctx.getBean(Queries.class).find(key()))
-                                        .isInstanceOf(ApiException.class));
-        caching()
-                .withPropertyValues(
-                        "platform.redis.cache.failure-policy=FAIL_OPEN_READ",
-                        "platform.redis.connection.port=1",
-                        "platform.redis.connection.connect-timeout=50ms",
-                        "platform.redis.connection.command-timeout=50ms")
-                .run(
-                        ctx -> {
-                            var q = ctx.getBean(Queries.class);
-                            assertThat(q.find(key())).isNotNull();
-                            assertThatThrownBy(() -> q.update(key()))
-                                    .isInstanceOf(ApiException.class);
-                            assertThatThrownBy(() -> q.evict(key()))
-                                    .isInstanceOf(ApiException.class);
-                            assertThatThrownBy(() -> q.failure(key()))
-                                    .isInstanceOf(UnsupportedOperationException.class);
-                        });
-    }
-
-    @Test
-    void corruptedPayloadIsStandardizedAndCannotSelectArbitraryTypes() {
-        caching()
-                .run(
-                        ctx -> {
-                            var q = ctx.getBean(Queries.class);
-                            String id = key();
-                            var redis = ctx.getBean(StringRedisTemplate.class);
-                            redis.opsForValue().set(physical(ctx, "messages", id), "INVALID_JSON");
-                            assertThatThrownBy(() -> q.find(id))
-                                    .isInstanceOf(ApiException.class)
-                                    .hasMessage("redis.serialization");
-                            String metadata =
-                                    new tools.jackson.databind.json.JsonMapper()
-                                            .writeValueAsString(
-                                                    Map.of("@class", "java.lang.Runtime"));
-                            redis.opsForValue().set(physical(ctx, "messages", id), metadata);
-                            try {
-                                assertThat(q.find(id)).isInstanceOf(Message.class);
-                            } catch (ApiException rejected) {
-                                assertThat(rejected.getMessageKey())
-                                        .isEqualTo("redis.serialization");
-                            }
-                        });
-    }
-
-    public static class Gate {
-        private final CountDownLatch entered = new CountDownLatch(1),
-                release = new CountDownLatch(1);
-
-        @Cacheable(cacheNames = "gate", key = "#id", sync = true)
-        public Message blocked(String id) {
-            entered.countDown();
-            try {
-                release.await(3, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return new Message(id, 1);
-        }
-
-        public boolean entered() throws InterruptedException {
-            return entered.await(2, TimeUnit.SECONDS);
-        }
-
-        public void release() {
-            release.countDown();
-        }
-    }
-
-    @Test
-    void locksAreAlsoIsolatedAcrossServices() {
-        caching()
-                .withBean(Gate.class, Gate::new)
-                .run(
-                        first -> {
-                            caching()
-                                    .withPropertyValues("spring.application.name=other-service")
-                                    .withBean(Gate.class, Gate::new)
-                                    .run(
-                                            second -> {
-                                                var a = first.getBean(Gate.class);
-                                                var b = second.getBean(Gate.class);
-                                                try (var executor =
-                                                        Executors.newFixedThreadPool(2)) {
-                                                    var one =
-                                                            executor.submit(
-                                                                    () -> a.blocked("same"));
-                                                    assertThat(a.entered()).isTrue();
-                                                    var two =
-                                                            executor.submit(
-                                                                    () -> b.blocked("same"));
-                                                    try {
-                                                        assertThat(b.entered()).isTrue();
-                                                    } finally {
-                                                        a.release();
-                                                        b.release();
-                                                    }
-                                                    assertThat(one.get()).isNotNull();
-                                                    assertThat(two.get()).isNotNull();
-                                                }
-                                            });
-                        });
-    }
-
-    public static class Conflict {
-        @Cacheable("messages")
-        public String different(String id) {
-            return id;
-        }
-    }
-
-    @Test
-    void incompatibleRegionTypesFailWithPlatformConfigurationError() {
-        caching().withBean(Conflict.class, Conflict::new).run(ctx -> assertThat(ctx).hasFailed());
-    }
-
-    static class LocalTransactions extends AbstractPlatformTransactionManager {
-        protected Object doGetTransaction() {
-            return new Object();
-        }
-
-        protected void doBegin(Object transaction, TransactionDefinition definition) {}
-
-        protected void doCommit(DefaultTransactionStatus status) {}
-
-        protected void doRollback(DefaultTransactionStatus status) {}
-    }
-}
+NÂˆB‚ˆ›ÝXÝY›ÚYÐ™YÚ[ŠØš™XÝ˜[œØXÝ[Û‹˜[œØXÝ[Û‘Yš[š][ÛˆYš[š][ÛŠHßB‚ˆ›ÝXÝY›ÚYÐÛÛ[Z]
+Y˜][˜[œØXÝ[Û”Ý]\ÈÝ]\ÊHßB‚ˆ›ÝXÝY›ÚYÔ›Û˜XÚÊY˜][˜[œØXÝ[Û”Ý]\ÈÝ]\ÊHßBˆBŸB

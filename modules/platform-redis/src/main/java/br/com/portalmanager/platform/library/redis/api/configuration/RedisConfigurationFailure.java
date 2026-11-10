@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.redis.api.configuration;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 
 /** Builds the public configuration error without coupling API properties to Redis internals. */
 final class RedisConfigurationFailure {

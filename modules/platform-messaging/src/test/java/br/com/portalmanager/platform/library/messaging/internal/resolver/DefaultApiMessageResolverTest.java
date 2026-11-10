@@ -2,11 +2,11 @@ package br.com.portalmanager.platform.library.messaging.internal.resolver;
 
 import br.com.portalmanager.platform.library.messaging.internal.cache.ApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.internal.cache.NoOpApiMessageCache;
-import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
-import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
-import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
-import br.com.portalmanager.platform.library.messaging.provider.ApiMessageProvider;
-import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.library.messaging.internal.message.PlatformDefaultMessageProvider;
+import br.com.portalmanager.platform.library.messaging.api.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.provider.ApiMessageProvider;
+import br.com.portalmanager.platform.library.messaging.api.repository.ApiMessageRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;

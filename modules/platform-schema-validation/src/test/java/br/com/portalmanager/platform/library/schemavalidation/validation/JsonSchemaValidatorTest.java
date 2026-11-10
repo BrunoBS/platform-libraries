@@ -2,9 +2,9 @@ package br.com.portalmanager.platform.library.schemavalidation.validation;
 
 import static org.assertj.core.api.Assertions.*;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
-import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.cache.CaffeineCompiledSchemaCache;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 

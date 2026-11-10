@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.redis.internal.common;
 
-import br.com.portalmanager.platform.library.messaging.exception.*;
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.messaging.api.exception.*;
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 
 import java.util.Map;
 import java.util.concurrent.CompletionException;

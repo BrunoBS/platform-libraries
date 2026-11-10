@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.cloud.aws;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.AwsTestingTechnicalErrors;
 
 import org.testcontainers.localstack.LocalStackContainer;

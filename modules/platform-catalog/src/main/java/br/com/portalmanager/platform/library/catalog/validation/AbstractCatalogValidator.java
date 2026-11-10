@@ -3,9 +3,9 @@ package br.com.portalmanager.platform.library.catalog.validation;
 import br.com.portalmanager.platform.library.catalog.dto.CatalogDTO;
 import br.com.portalmanager.platform.library.catalog.message.CatalogMessageKeys;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
-import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
-import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.api.validation.ValidationResult;
 
 import java.util.Map;
 import java.util.regex.Pattern;

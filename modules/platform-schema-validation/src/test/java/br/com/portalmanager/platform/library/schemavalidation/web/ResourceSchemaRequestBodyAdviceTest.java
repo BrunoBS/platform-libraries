@@ -3,8 +3,8 @@ package br.com.portalmanager.platform.library.schemavalidation.web;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.schemavalidation.annotation.ValidateResourceSchemaRequest;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;
 import br.com.portalmanager.platform.library.schemavalidation.normalization.SchemaPayloadNormalizer;

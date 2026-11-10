@@ -3,7 +3,7 @@ package br.com.portalmanager.platform.library.authorization.config;
 import br.com.portalmanager.platform.library.authorization.config.PlatformAuthorizationProperties;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.authorization.config.AuthorizationMetadataRegistry;
 import br.com.portalmanager.platform.library.authorization.client.AuthorizationClient;
 import br.com.portalmanager.platform.library.authorization.aop.AuthorizationFacadeAspect;

@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.catalog.model;
 
 import br.com.portalmanager.platform.library.catalog.validation.AbstractCatalogValidator;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

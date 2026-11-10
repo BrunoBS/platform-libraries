@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.schemavalidation.config;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.repository.ResourceSchemaRepository;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

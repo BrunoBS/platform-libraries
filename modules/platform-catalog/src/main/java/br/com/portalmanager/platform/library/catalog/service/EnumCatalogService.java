@@ -7,7 +7,7 @@ import br.com.portalmanager.platform.library.catalog.model.CatalogEnum;
 import br.com.portalmanager.platform.library.catalog.repository.CatalogRepository;
 import br.com.portalmanager.platform.library.catalog.validation.CatalogSettingsValidator;
 import br.com.portalmanager.platform.library.catalog.validation.EnumCatalogValidator;
-import br.com.portalmanager.platform.library.messaging.validation.ValidationResult;
+import br.com.portalmanager.platform.library.messaging.api.validation.ValidationResult;
 import br.com.portalmanager.platform.library.schemavalidation.validation.SchemaValidator;
 import tools.jackson.databind.ObjectMapper;
 

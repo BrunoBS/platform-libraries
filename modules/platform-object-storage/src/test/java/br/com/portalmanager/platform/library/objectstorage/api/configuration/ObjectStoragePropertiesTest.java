@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.objectstorage.api.configuration;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 

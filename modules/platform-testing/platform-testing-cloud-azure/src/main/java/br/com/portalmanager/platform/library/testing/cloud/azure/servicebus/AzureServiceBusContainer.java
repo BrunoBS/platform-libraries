@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.cloud.azure.servicebus;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.cloud.azure.AzureContainerImages;
 import br.com.portalmanager.platform.library.testing.cloud.azure.AzureTestingTechnicalErrors;
 

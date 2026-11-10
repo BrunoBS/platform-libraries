@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.objectstorage.provider.aws.configu
 
 import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.objectstorage.provider.aws.S3ObjectStorageClient;
 import br.com.portalmanager.platform.library.objectstorage.internal.message.ObjectStorageTechnicalErrors;
 import java.net.URI;

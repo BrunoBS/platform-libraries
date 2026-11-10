@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messaging.internal.validation;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.message.PlatformTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.internal.message.PlatformTechnicalErrors;
 
 import java.util.regex.Pattern;
 

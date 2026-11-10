@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.testing.cloud.aws;
 
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3.AwsS3TestSupport;
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.AwsSqsTestSupport;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3.annotation.AwsS3;
 import br.com.portalmanager.platform.library.testing.cloud.aws.s3notificationsqs.annotation.AwsS3SqsNotification;
 import br.com.portalmanager.platform.library.testing.cloud.aws.sqs.annotation.AwsSqs;

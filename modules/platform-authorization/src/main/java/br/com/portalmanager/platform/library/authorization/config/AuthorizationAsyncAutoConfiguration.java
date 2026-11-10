@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.authorization.config;
 
 import br.com.portalmanager.platform.library.authorization.model.AuthorizationContextPropagation;
 import br.com.portalmanager.platform.library.authorization.message.AuthorizationTechnicalErrors;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

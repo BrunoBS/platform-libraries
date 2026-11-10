@@ -1,0 +1,22 @@
+package br.com.portalmanager.platform.library.messaging.api.message;
+
+public final class PlatformMessageKeys {
+
+    private static final String PREFIX = "platform.";
+
+    public static final String VALIDATION_FAILED = PREFIX + "global.validation.failed";
+    public static final String REQUEST_NOT_READABLE = PREFIX + "global.request.readable";
+    public static final String REQUEST_FORMAT_INVALID = PREFIX + "global.request.format";
+    public static final String DATA_INTEGRITY = PREFIX + "global.data.integrity";
+    public static final String RESOURCE_NOT_FOUND = PREFIX + "global.resource.not.found";
+    public static final String INTERNAL_SERVER_ERROR = PREFIX + "global.internal.server.error";
+    @Deprecated(forRemoval = true)
+    public static final String UNEXPECTED_ERROR = INTERNAL_SERVER_ERROR;
+    public static final String TYPE_MISMATCH = PREFIX + "global.validation.type.mismatch";
+    public static final String INVALID_ENUM = PREFIX + "validation.invalid.enum";
+    public static final String METHOD_NOT_ALLOWED = PREFIX + "global.method.not.allowed";
+    public static final String RESOURCE_VERSION_CONFLICT = PREFIX + "global.resource.version.conflict";
+
+    private PlatformMessageKeys() {
+    }
+}

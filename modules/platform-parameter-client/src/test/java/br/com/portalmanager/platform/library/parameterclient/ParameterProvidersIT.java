@@ -1,295 +1,124 @@
-package br.com.portalmanager.platform.library.parameterclient;
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíëİ¼N‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹Á…É…µ•Ñ•É±¥•¹Ğì()¥µÁ½ÉĞÍÑ…Ñ¥Œ½Éœ¹…ÍÍ•ÉÑ¨¹½É”¹…Á¤¹ÍÍ•ÉÑ¥½¹Ì¸¨ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹Á…É…µ•Ñ•É±¥•¹Ğ¹½¹™¥ÕÉ…Ñ¥½¸¹A…É…µ•Ñ•É±¥•¹ÑÕÑ½½¹™¥ÕÉ…Ñ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ì¹½¹™¥ÕÉ…Ñ¥½¸¹A±…Ñ™½ÉµI•‘¥ÍÕÑ½½¹™¥ÕÉ…Ñ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ì¹½¹™¥ÕÉ…Ñ¥½¸¹A±…Ñ™½ÉµI•‘¥Í½¹¹•Ñ¥½¹ÕÑ½½¹™¥ÕÉ…Ñ¥½¸ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ì¹…Á¤¹½¹™¥ÕÉ…Ñ¥½¸¹A±…Ñ™½ÉµI•‘¥ÍAÉ½Á•ÉÑ¥•Ìì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹É•‘¥Ì¹…Á¤¹ÍÑ½É”¹I•‘¥ÍMÑ½É”ì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹Ñ•ÍÑ¥¹œ¹É•‘¥Ì¹…¹¹½Ñ…Ñ¥½¸¹]¥Ñ¡I•‘¥Ìì)¥µÁ½ÉĞ‰È¹½´¹Á½ÉÑ…±µ…¹…•È¹Á±…Ñ™½É´¹±¥‰É…Éä¹Ñ•ÍÑ¥¹œ¹É•‘¥Ì¹I•‘¥ÍQ•ÍÑ½¹™¥ÕÉ…Ñ¥½¸ì)¥µÁ½ÉĞ©…Ù„¹¹¥¼¹¡…ÉÍ•Ğ¹MÑ…¹‘…É‘¡…ÉÍ•ÑÌì)¥µÁ½ÉĞ©…Ù„¹Ñ¥µ”¹ÕÉ…Ñ¥½¸ì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹1¥ÍĞì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¹5…Àì)¥µÁ½ÉĞ½Éœ¹©Õ¹¥Ğ¹©ÕÁ¥Ñ•È¹…Á¤¹	•™½É•±°ì)¥µÁ½ÉĞ½Éœ¹©Õ¹¥Ğ¹©ÕÁ¥Ñ•È¹…Á¤¹Q•ÍĞì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‰•…¹Ì¹™…Ñ½Éä¹…¹¹½Ñ…Ñ¥½¸¹ÕÑ½İ¥É•ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‰½½Ğ¹…ÕÑ½½¹™¥ÕÉ”¹ÕÑ½½¹™¥ÕÉ…Ñ¥½¹Ìì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‰½½Ğ¹‘…Ñ„¹É•‘¥Ì¹…ÕÑ½½¹™¥ÕÉ”¹…Ñ…I•‘¥ÍÕÑ½½¹™¥ÕÉ…Ñ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‰½½Ğ¹‘…Ñ„¹É•‘¥Ì¹…ÕÑ½½¹™¥ÕÉ”¹…Ñ…I•‘¥ÍI•…Ñ¥Ù•ÕÑ½½¹™¥ÕÉ…Ñ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‰½½Ğ¹Ñ•ÍĞ¹½¹Ñ•áĞ¹ÉÕ¹¹•È¹ÁÁ±¥…Ñ¥½¹½¹Ñ•áÑIÕ¹¹•Èì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‘…Ñ„¹É•‘¥Ì¹½É”¹I•‘¥Í…±±‰…¬ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹‘…Ñ„¹É•‘¥Ì¹½É”¹MÑÉ¥¹I•‘¥ÍQ•µÁ±…Ñ”ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹Ñ•ÍĞ¹½¹Ñ•áĞ¹½¹Ñ•áÑ½¹™¥ÕÉ…Ñ¥½¸ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹Ñ•ÍĞ¹½¹Ñ•áĞ¹©Õ¹¥Ğ¹©ÕÁ¥Ñ•È¹MÁÉ¥¹áÑ•¹Í¥½¸ì)¥µÁ½ÉĞ½Éœ¹©Õ¹¥Ğ¹©ÕÁ¥Ñ•È¹…Á¤¹•áÑ•¹Í¥½¸¹áÑ•¹‘]¥Ñ ì)¥µÁ½ÉĞ½Éœ¹Ñ•ÍÑ½¹Ñ…¥¹•ÉÌ¹½¹Ñ…¥¹•ÉÌ¹•¹•É¥½¹Ñ…¥¹•Èì)¥µÁ½ÉĞÑ½½±Ì¹©…­Í½¸¹½É”¹ÑåÁ”¹QåÁ•I•™•É•¹”ì)¥µÁ½ÉĞÑ½½±Ì¹©…­Í½¸¹‘…Ñ…‰¥¹¹)Í½¹9½‘”ì)¥µÁ½ÉĞÑ½½±Ì¹©…­Í½¸¹‘…Ñ…‰¥¹¹©Í½¸¹)Í½¹5…ÁÁ•Èì((¼¨¨AÉ½‘Õ•Èµ½µÁ…Ñ¥‰±”•¹Ù•±½Á”™¥áÑÕÉ•Ìì¹¼‘•Á•¹‘•¹ä½¸Ñ¡”ÁÉ½‘Õ•È½È¥ÑÌ‘…Ñ…‰…Í”½A$¸€¨¼)]¥Ñ¡I•‘¥Ì)áÑ•¹‘]¥Ñ ¡MÁÉ¥¹áÑ•¹Í¥½¸¹±…ÍÌ¤)½¹Ñ•áÑ½¹™¥ÕÉ…Ñ¥½¸¡±…ÍÍ•Ì€ôI•‘¥ÍQ•ÍÑ½¹™¥ÕÉ…Ñ¥½¸¹±…ÍÌ¤)±…ÍÌA…É…µ•Ñ•ÉAÉ½Ù¥‘•ÉÍ%Pì(€€€ÍÑ…Ñ¥Œ•¹•É¥½¹Ñ…¥¹•ÈğüøÉ•‘¥Í½¹Ñ…¥¹•Èì(€€€ÍÑ…Ñ¥Œ™¥¹…°)Í½¹5…ÁÁ•È)M=8€ô)Í½¹5…ÁÁ•È¹‰Õ¥±‘•È ¤¹‰Õ¥± ¤ì((€€€	•™½É•±°(€€€ÍÑ…Ñ¥ŒÙ½¥™¥áÑÕÉ”¡ÕÑ½İ¥É••¹•É¥½¹Ñ…¥¹•Èğüø½¹Ñ…¥¹•È¤ìÉ•‘¥Í½¹Ñ…¥¹•È€ô½¹Ñ…¥¹•Èìô((€€€ÁÁ±¥…Ñ¥½¹½¹Ñ•áÑIÕ¹¹•È½¹Ñ•áĞ ¤ì(€€€€€€€É•ÑÕÉ¸¹•ÜÁÁ±¥…Ñ¥½¹½¹Ñ•áÑIÕ¹¹•È ¤¹İ¥Ñ¡½¹™¥ÕÉ…Ñ¥½¸¡ÕÑ½½¹™¥ÕÉ…Ñ¥½¹Ì¹½˜ (€€€€€€€€€€€€€€€…Ñ…I•‘¥ÍÕÑ½½¹™¥ÕÉ…Ñ¥½¸¹±…ÍÌ°…Ñ…I•‘¥ÍI•…Ñ¥Ù•ÕÑ½½¹™¥ÕÉ…Ñ¥½¸¹±…ÍÌ°(€€€€€€€€€€€€€€€A±…Ñ™½ÉµI•‘¥Í½¹¹•Ñ¥½¹ÕÑ½½¹™¥ÕÉ…Ñ¥½¸¹±…ÍÌ°A±…Ñ™½ÉµI•‘¥ÍÕÑ½½¹™¥ÕÉ…Ñ¥½¸¹±…ÍÌ°A…É…µ•Ñ•É±¥•¹ÑÕÑ½½¹™¥ÕÉ…Ñ¥½¸¹±…ÍÌ¤¤(€€€€€€€€€€€€€€€€¹İ¥Ñ¡AÉ½Á•ÉÑåY…±Õ•Ì ‰ÍÁÉ¥¹œ¹…ÁÁ±¥…Ñ¥½¸¹¹…µ”õÁ…É…µ•Ñ•Èµ½¹ÍÕµ•Èˆ°(€€€€€€€€€€€€€€€€€€€€€€€€‰Á±…Ñ™½É´¹É•‘¥Ì¹½¹¹•Ñ¥½¸¹¡½ÍĞôˆ€¬É•‘¥Í½¹Ñ…¥¹•È¹•Ñ!½ÍĞ ¤°(€€€€€€€€€€€€€€€€€€€€€€€€‰Á±…Ñ™½É´¹É•‘¥Ì¹½¹¹•Ñ¥½¸¹Á½ÉĞôˆ€¬É•‘¥Í½¹Ñ…¥¹•È¹•Ñ5…ÁÁ•‘A½ÉĞ ØÌÜä¤°(€€€€€€€€€€€€€€€€€€€€€€€€‰Á±…Ñ™½É´¹É•‘¥Ì¹½¹¹•Ñ¥½¸¹½µµ…¹µÑ¥µ•½ÕĞôÅÌˆ°€‰Á±…Ñ™½É´¹É•‘¥Ì¹½¹¹•Ñ¥½¸¹½¹¹•ĞµÑ¥µ•½ÕĞôÅÌˆ¤ì(€€€ô((€€€Q•ÍĞ(€€€Ù½¥¥¹Ñ•É½Á•É…Ñ•Í]¥Ñ¡ÑÕ…±AÉ½‘Õ•ÉM¡…Á•¹‘AÉ•™¥á½ÉÙ•ÉåY…±Õ•-¥¹ ¤ì(€€€€€€€½¹Ñ•áĞ ¤¹ÉÕ¸¡Ñà€´øì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡Ñà¤¹¡…ÍM¥¹±•	•…¸¡½¹™¥ÕÉ…Ñ¥½¹AÉ½Ù¥‘•È¹±…ÍÌ¤¹¡…ÍM¥¹±•	•…¸¡áÁÉ•ÍÍ¥½¹AÉ½Ù¥‘•È¹±…ÍÌ¤¹¡…ÍM¥¹±•	•…¸¡I•‘¥ÍMÑ½É”¹±…ÍÌ¤ì(€€€€€€€€€€€I•‘¥ÍMÑ½É”ÍÑ½É”€ôÑà¹•Ñ	•…¸¡I•‘¥ÍMÑ½É”¹±…ÍÌ¤ì(€€€€€€€€€€€½¹™¥ÕÉ…Ñ¥½¹AÉ½Ù¥‘•ÈÁÉ½Ù¥‘•È€ôÑà¹•Ñ	•…¸¡½¹™¥ÕÉ…Ñ¥½¹AÉ½Ù¥‘•È¹±…ÍÌ¤ì(€€€€€€€€€€€áÁÉ•ÍÍ¥½¹AÉ½Ù¥‘•È•áÁÉ•ÍÍ¥½¹Ì€ôÑà¹•Ñ	•…¸¡áÁÉ•ÍÍ¥½¹AÉ½Ù¥‘•È¹±…ÍÌ¤ì(€€€€€€€€€€€MÑÉ¥¹I•‘¥ÍQ•µÁ±…Ñ”É…Ü€ôÑà¹•Ñ	•…¸¡MÑÉ¥¹I•‘¥ÍQ•µÁ±…Ñ”¹±…ÍÌ¤ì(€€€€€€€€€€€5…ÀñMÑÉ¥¹œ°=‰©•ĞøÙ…±Õ•Ì€ô5…À¹½˜ ‰½É‘•ÉÌ¹‘…åÌˆ°€ÌÀ°€‰Á±…Ñ™½É´¹…Õ‘¥Ğµ•¹…‰±•ˆ°ÑÉÕ”°(€€€€€€€€€€€€€€€€€€€€‰Á±…Ñ™½É´¹µ½‘”ˆ°€‰MQ9Iˆ°€‰Á±…Ñ™½É´¹Í•ÑÑ¥¹Ìˆ°¹•ÜM•ÑÑ¥¹Ì È¤°(€€€€€€€€€€€€€€€€€€€€‰Á±…Ñ™½É´¹É•¥½¹Ìˆ°1¥ÍĞ¹½˜ ‰	Hˆ°€‰ULˆ¤¤ì(€€€€€€€€€€€€¼¼M…µ”Í•Ñ±°…¹AÕ‰±¥Í¡•‘Y…±Õ”™¥•±¹…µ•Ì…ÌA…É…µ•Ñ•É-•åAÕ‰±¥Í¡•ÉM•ÉÙ¥”¹Í•¹¸(€€€€€€€€€€€©…Ù„¹ÕÑ¥°¹1¥¹­•‘!…Í¡5…ÀñMÑÉ¥¹œ°AÕ‰±¥Í¡•‘Y…±Õ”øÁÕ‰±¥Í¡•€ô¹•Ü©…Ù„¹ÕÑ¥°¹1¥¹­•‘!…Í¡5…ÀñMÑÉ¥¹œ°AÕ‰±¥Í¡•‘Y…±Õ”ø ¤ì(€€€€€€€€€€€Ù…±Õ•Ì¹™½É…  ¡­•ä°Ù…±Õ”¤€´øÁÕ‰±¥Í¡•¹ÁÕĞ¡­•ä°¹•ÜAÕ‰±¥Í¡•‘Y…±Õ” ‰=9%UIQ%=8ˆ°)M=8¹Ù…±Õ•Q½QÉ•”¡Ù…±Õ”¤¤¤¤ì(€€€€€€€€€€€ÍÑ½É”¹İ¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¹Í•Ñ±°¡ÁÕ‰±¥Í¡•¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰½É‘•ÉÌ¹‘…åÌˆ°€Ä¤¤¹¥ÍÅÕ…±Q¼ ÌÀ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹…Õ‘¥Ğµ•¹…‰±•ˆ°™…±Í”¤¤¹¥ÍQÉÕ” ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹µ½‘”ˆ°€‰™…±±‰…¬ˆ¤¤¹¥ÍÅÕ…±Q¼ ‰MQ9Iˆ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹Í•ÑÑ¥¹Ìˆ°M•ÑÑ¥¹Ì¹±…ÍÌ°¹Õ±°¤¤¹¥ÍÅÕ…±Q¼¡¹•ÜM•ÑÑ¥¹Ì È¤¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹É•¥½¹Ìˆ°¹•ÜQåÁ•I•™•É•¹”ñ1¥ÍĞñMÑÉ¥¹œøø ¤íô°1¥ÍĞ¹½˜ ¤¤¤(€€€€€€€€€€€€€€€€€€€€¹½¹Ñ…¥¹Íá…Ñ±ä ‰	Hˆ°€‰ULˆ¤ì(€€€€€€€€€€€Ù…±Õ•Ì¹™½É…  ¡­•ä°Ù…±Õ”¤€´øì(€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡É…Ü¹¡…Í-•ä ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èèˆ€¬­•ä¤¤¹¥ÍQÉÕ” ¤ì(€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡É…Ü¹¡…Í-•ä ‰Á…É…µ•Ñ•Èµ½¹ÍÕµ•Èé‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èèˆ€¬­•ä¤¤¹¥Í…±Í” ¤ì(€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡É…Ü¹¡…Í-•ä ‰½¹™¥œèˆ€¬­•ä¤¤¹¥Í…±Í” ¤ì(€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÍÑ½É”¹İ¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¹ÑÑ°¡­•ä¤¤¹¥ÍµÁÑä ¤ì(€€€€€€€€€€€€€€€)Í½¹9½‘”•¹Ù•±½Á”€ô)M=8¹É•…‘QÉ•”¡É…Ü¹½ÁÍ½ÉY…±Õ” ¤¹•Ğ ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èèˆ€¬­•ä¤¤ì(€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡•¹Ù•±½Á”¹•Ğ ‰ÑåÁ”ˆ¤¹…ÍMÑÉ¥¹œ ¤¤¹¥ÍÅÕ…±Q¼ ‰=9%UIQ%=8ˆ¤ì(€€€€€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡•¹Ù•±½Á”¹•Ğ ‰Ù…±Õ”ˆ¤¤¹¥ÍÅÕ…±Q¼¡)M=8¹Ù…±Õ•Q½QÉ•”¡Ù…±Õ”¤¤ì(€€€€€€€€€€€ô¤ì(€€€€€€€€€€€€¼¼=Ù•ÉİÉ¥Ñ”Ù¥„Ñ¡”ÁÕ‰±¥ŒÍÑ½É”…ÌÍÁ•¥™¥•¥¸Ñ¡”¥µÁ±•µ•¹Ñ…Ñ¥½¸½¹ÑÉ…Ğ¸(€€€€€€€€€€€ÍÑ½É”¹İ¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¹Í•Ğ ‰½É‘•ÉÌ¹‘…åÌˆ°¹•ÜAÕ‰±¥Í¡•‘Y…±Õ” ‰=9%UIQ%=8ˆ°)M=8¹Ù…±Õ•Q½QÉ•” ØÀ¤¤¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰½É‘•ÉÌ¹‘…åÌˆ°€Ä¤¤¹¥ÍÅÕ…±Q¼ ØÀ¤ì(€€€€€€€€€€€ÍÑ½É”¹İ¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¹Í•Ğ ‰Á±…Ñ™½É´¹…Õ‘¥Ğµ•¹…‰±•ˆ°¹•ÜAÕ‰±¥Í¡•‘Y…±Õ” ‰=9%UIQ%=8ˆ°)M=8¹Ù…±Õ•Q½QÉ•”¡™…±Í”¤¤¤ì(€€€€€€€€€€€ÍÑ½É”¹İ¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¹Í•Ğ ‰Á±…Ñ™½É´¹µ½‘”ˆ°¹•ÜAÕ‰±¥Í¡•‘Y…±Õ” ‰=9%UIQ%=8ˆ°)M=8¹Ù…±Õ•Q½QÉ•” ‰UAQˆ¤¤¤ì(€€€€€€€€€€€ÍÑ½É”¹İ¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¹Í•Ğ ‰Á±…Ñ™½É´¹Í•ÑÑ¥¹Ìˆ°¹•ÜAÕ‰±¥Í¡•‘Y…±Õ” ‰=9%UIQ%=8ˆ°)M=8¹Ù…±Õ•Q½QÉ•”¡¹•ÜM•ÑÑ¥¹Ì Ğ¤¤¤¤ì(€€€€€€€€€€€ÍÑ½É”¹İ¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¹Í•Ğ ‰Á±…Ñ™½É´¹É•¥½¹Ìˆ°¹•ÜAÕ‰±¥Í¡•‘Y…±Õ” ‰=9%UIQ%=8ˆ°)M=8¹Ù…±Õ•Q½QÉ•”¡1¥ÍĞ¹½˜ ‰Tˆ¤¤¤¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹…Õ‘¥Ğµ•¹…‰±•ˆ°ÑÉÕ”¤¤¹¥Í…±Í” ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹µ½‘”ˆ°€‰™…±±‰…¬ˆ¤¤¹¥ÍÅÕ…±Q¼ ‰UAQˆ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹Í•ÑÑ¥¹Ìˆ°M•ÑÑ¥¹Ì¹±…ÍÌ°¹Õ±°¤¤¹¥ÍÅÕ…±Q¼¡¹•ÜM•ÑÑ¥¹Ì Ğ¤¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹É•¥½¹Ìˆ°¹•ÜQåÁ•I•™•É•¹”ñ1¥ÍĞñMÑÉ¥¹œøø ¤íô°1¥ÍĞ¹½˜ ¤¤¤(€€€€€€€€€€€€€€€€€€€€¹½¹Ñ…¥¹Íá…Ñ±ä ‰Tˆ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰½Ñ¡•È¹‘…åÌˆ°€Ü¤¤¹¥ÍÅÕ…±Q¼ Ü¤ì(€€€€€€€€€€€™½È€¡MÑÉ¥¹œ­•ä€èÙ…±Õ•Ì¹­•åM•Ğ ¤¤…ÍÍ•ÉÑQ¡…Ğ¡ÍÑ½É”¹İ¥Ñ¡9…µ•ÍÁ…” ‰‘å¹…µ¥ŒµÁ…É…µ•Ñ•Èˆ¤¹‘•±•Ñ”¡­•ä¤¤¹¥ÍQÉÕ” ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰½É‘•ÉÌ¹‘…åÌˆ°€Ü¤¤¹¥ÍÅÕ…±Q¼ Ü¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹…Õ‘¥Ğµ•¹…‰±•ˆ°ÑÉÕ”¤¤¹¥ÍQÉÕ” ¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹µ½‘”ˆ°€‰™…±±‰…¬ˆ¤¤¹¥ÍÅÕ…±Q¼ ‰™…±±‰…¬ˆ¤ì(€€€€€€€€€€€M•ÑÑ¥¹ÌÍ•ÑÑ¥¹Ì€ô¹•ÜM•ÑÑ¥¹Ì ä¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹Í•ÑÑ¥¹Ìˆ°M•ÑÑ¥¹Ì¹±…ÍÌ°Í•ÑÑ¥¹Ì¤¤¹¥ÍM…µ•Ì¡Í•ÑÑ¥¹Ì¤ì(€€€€€€€€€€€…ÍÍ•ÉÑQ¡…Ğ¡ÁÉ½Ù¥‘•È¹•Ğ ‰Á±…Ñ™½É´¹É•¥½¹Ìˆ°¹•ÜQåÁ•I•™•É•¹”ñ1¥ÍĞñMÑÉ¥¹œøø ¤íô°1¥ÍĞ¹½˜ ‰™…±±‰…¬ˆ¤¤¤(€€€€€€€€€€€€€€€€€€€€¹½¹Ñ…¥¹Íá…Ñ±ä ‰™…±±‰…¯_vòÚ$z{-®éÜj×\•\İ“^TÙ][™ÜÊJJNÂˆ\ÜÙ\]
+˜]Ë›ÜÑ›Ü•˜[YJ
+K™Ù]
+™[˜[ZXË\\˜[Y]\œ[\Ë›Z[š[][KXYÙHŠJBˆ˜ÛÛZ[œÊ‘V‘TÔÒSÓˆ‹‘Ô‘PUT—ÕS—ÓÔ—ÑTUPSÈŠNÂˆ\ÜÙ\]
+˜]Ëš\ÒÙ^J˜ÛÛ™šYÎœ[\Ë›Z[š[][KXYÙHŠJKš\Ñ˜[ÙJ
+NÂˆ\ÜÙ\]
+˜]Ëš\ÒÙ^Jœ\˜[Y]\‹XÛÛœİ[Y\™[˜[ZXË\\˜[Y]\œ[\Ë›Z[š[][KXYÙHŠJKš\Ñ˜[ÙJ
+NÂˆ\ÜÙ\]
+İÜ™KÚ]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠK
+œ[\Ë›Z[š[][KXYÙHŠJKš\Ñ[\J
+NÂˆİÜ™KÚ]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠKœÙ]
+œ[\Ë›Z[š[][KXYÙH‹š^\™\Ë™Ù]
+ŠJNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë›Z[š[][KXYÙH‹ŒS
+JKš\Ñ˜[ÙJ
+NÂˆ\ÜÙ\]
+İÜ™KÚ]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠK™[]Jœ[\Ë›Z[š[][KXYÙHŠJKš\ÕYJ
+NÂˆ\ÜÙ\]›İÛJ
 
-import static org.assertj.core.api.Assertions.*;
-import br.com.portalmanager.platform.library.parameterclient.configuration.ParameterClientAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisConnectionAutoConfiguration;
-import br.com.portalmanager.platform.library.redis.api.configuration.PlatformRedisProperties;
-import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
-import br.com.portalmanager.platform.library.testing.redis.annotation.WithRedis;
-import br.com.portalmanager.platform.library.testing.redis.RedisTestConfiguration;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration;
-import org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.testcontainers.containers.GenericContainer;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
+HOˆ^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë›Z[š[][KXYÙH‹ŒJJKš\ÓY\ÜØYÙJœ\˜[Y]\‹XÛY[›Z\ÜÚ[™ÈŠNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë›Z[š[][KXYÙH‹ŒKYJJKš\ÕYJ
+NÂˆİÜ™KÚ]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠKœÙ]
+œ[\Ë™^™\ÜÚ[Û‹]‹š^\™\Ë™Ù]
+
+K\˜][Û‹›Ù“Z[\ÊL
+JNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë™^™\ÜÚ[Û‹]‹ŒJJKš\ÕYJ
+NÂˆÜ™Ë˜]ØZ][]K]ØZ][]K˜]ØZ]
 
-/** Producer-compatible envelope fixtures; no dependency on the producer or its database/API. */
-@WithRedis
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = RedisTestConfiguration.class)
-class ParameterProvidersIT {
-    static GenericContainer<?> redisContainer;
-    static final JsonMapper JSON = JsonMapper.builder().build();
+K˜][Üİ
+\˜][Û‹›Ù”ÙXÛÛ™ÊÊJK[[\ÜÙ\Y
 
-    @BeforeAll
-    static void fixture(@Autowired GenericContainer<?> container) { redisContainer = container; }
 
-    ApplicationContextRunner context() {
-        return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
-                DataRedisAutoConfiguration.class, DataRedisReactiveAutoConfiguration.class,
-                PlatformRedisConnectionAutoConfiguration.class, PlatformRedisAutoConfiguration.class, ParameterClientAutoConfiguration.class))
-                .withPropertyValues("spring.application.name=parameter-consumer",
-                        "platform.redis.connection.host=" + redisContainer.getHost(),
-                        "platform.redis.connection.port=" + redisContainer.getMappedPort(6379),
-                        "platform.redis.connection.command-timeout=1s", "platform.redis.connection.connect-timeout=1s");
-    }
+HO‚ˆ\ÜÙ\]›İÛJ
 
-    @Test
-    void interoperatesWithActualProducerShapeAndPrefixForEveryValueKind() {
-        context().run(ctx -> {
-            assertThat(ctx).hasSingleBean(ConfigurationProvider.class).hasSingleBean(ExpressionProvider.class).hasSingleBean(RedisStore.class);
-            RedisStore store = ctx.getBean(RedisStore.class);
-            ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
-            Map<String, Object> values = Map.of("orders.days", 30, "platform.audit-enabled", true,
-                    "platform.mode", "STANDARD", "platform.settings", new Settings(2),
-                    "platform.regions", List.of("BR", "US"));
-            // Same setAll and PublishedValue field names as ParameterKeyPublisherService.send.
-            java.util.LinkedHashMap<String, PublishedValue> published = new java.util.LinkedHashMap<String, PublishedValue>();
-            values.forEach((key, value) -> published.put(key, new PublishedValue("CONFIGURATION", JSON.valueToTree(value))));
-            store.withNamespace("dynamic-parameter").setAll(published);
-            assertThat(provider.get("orders.days", 1)).isEqualTo(30);
-            assertThat(provider.get("platform.audit-enabled", false)).isTrue();
-            assertThat(provider.get("platform.mode", "fallback")).isEqualTo("STANDARD");
-            assertThat(provider.get("platform.settings", Settings.class, null)).isEqualTo(new Settings(2));
-            assertThat(provider.get("platform.regions", new TypeReference<List<String>>() {}, List.of()))
-                    .containsExactly("BR", "US");
-            values.forEach((key, value) -> {
-                assertThat(raw.hasKey("dynamic-parameter:" + key)).isTrue();
-                assertThat(raw.hasKey("parameter-consumer:dynamic-parameter:" + key)).isFalse();
-                assertThat(raw.hasKey("config:" + key)).isFalse();
-                assertThat(store.withNamespace("dynamic-parameter").ttl(key)).isEmpty();
-                JsonNode envelope = JSON.readTree(raw.opsForValue().get("dynamic-parameter:" + key));
-                assertThat(envelope.get("type").asString()).isEqualTo("CONFIGURATION");
-                assertThat(envelope.get("value")).isEqualTo(JSON.valueToTree(value));
-            });
-            // Overwrite via the public store as specified in the implementation contract.
-            store.withNamespace("dynamic-parameter").set("orders.days", new PublishedValue("CONFIGURATION", JSON.valueToTree(60)));
-            assertThat(provider.get("orders.days", 1)).isEqualTo(60);
-            store.withNamespace("dynamic-parameter").set("platform.audit-enabled", new PublishedValue("CONFIGURATION", JSON.valueToTree(false)));
-            store.withNamespace("dynamic-parameter").set("platform.mode", new PublishedValue("CONFIGURATION", JSON.valueToTree("UPDATED")));
-            store.withNamespace("dynamic-parameter").set("platform.settings", new PublishedValue("CONFIGURATION", JSON.valueToTree(new Settings(4))));
-            store.withNamespace("dynamic-parameter").set("platform.regions", new PublishedValue("CONFIGURATION", JSON.valueToTree(List.of("EU"))));
-            assertThat(provider.get("platform.audit-enabled", true)).isFalse();
-            assertThat(provider.get("platform.mode", "fallback")).isEqualTo("UPDATED");
-            assertThat(provider.get("platform.settings", Settings.class, null)).isEqualTo(new Settings(4));
-            assertThat(provider.get("platform.regions", new TypeReference<List<String>>() {}, List.of()))
-                    .containsExactly("EU");
-            assertThat(provider.get("other.days", 7)).isEqualTo(7);
-            for (String key : values.keySet()) assertThat(store.withNamespace("dynamic-parameter").delete(key)).isTrue();
-            assertThat(provider.get("orders.days", 7)).isEqualTo(7);
-            assertThat(provider.get("platform.audit-enabled", true)).isTrue();
-            assertThat(provider.get("platform.mode", "fallback")).isEqualTo("fallback");
-            Settings settings = new Settings(9);
-            assertThat(provider.get("platform.settings", Settings.class, settings)).isSameAs(settings);
-            assertThat(provider.get("platform.regions", new TypeReference<List<String>>() {}, List.of("fallback")))
-                    .containsExactly("fallback");
-        });
-    }
+HOˆ^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë™^™\ÜÚ[Û‹]‹ŒJJKš\ÓY\ÜØYÙJœ\˜[Y]\‹XÛY[›Z\ÜÚ[™ÈŠJNÂˆJNÂˆB‚ˆ\İˆ›ÚY^™\ÜÚ[Û‘˜Z[\™\ÕÚ]™X[™Y\Ò]™Q^XÚ]˜[˜XÚÓÛ›J
+HÂˆÛÛ^
 
-    @Test
-    void corruptNullAndCoercedValuesNeverReturnDefaults() {
-        context().run(ctx -> {
-            StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
-            ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            for (String json : List.of("not-json", "null", "{}",
-                    "{\"type\":\"CONFIGURATION\",\"value\":null}",
-                    "{\"type\":\"CONFIGURATION\",\"value\":\"30\"}")) {
-                raw.opsForValue().set("dynamic-parameter:platform.bad", json);
-                assertThatThrownBy(() -> provider.get("platform.bad", 99))
-                        .hasMessage("parameter-client.value.invalid");
-            }
-            raw.delete("dynamic-parameter:platform.bad");
-            raw.opsForList().leftPush("dynamic-parameter:platform.bad", "native-list");
-            assertThatThrownBy(() -> provider.get("platform.bad", 99))
-                    .hasMessage("parameter-client.value.invalid");
-        });
-    }
+Kœ[ŠİOˆÂˆİš[™Ô™Y\Õ[\]H˜]ÈHİ™Ù]™X[Šİš[™Ô™Y\Õ[\]K˜Û\ÜÊNÂˆÛÛ™šYİ\˜][Û”›İšY\ˆ›İšY\ˆHİ™Ù]™X[ŠÛÛ™šYİ\˜][Û”›İšY\‹˜Û\ÜÊNÂˆ^™\ÜÚ[Û”›İšY\ˆ^™\ÜÚ[ÛœÈHİ™Ù]™X[Š^™\ÜÚ[Û”›İšY\‹˜Û\ÜÊNÂˆ›Üˆ
+İš[™ÈœÛÛˆˆ\İ›ÙŠ˜œ›ÚÙ[‹ZœÛÛˆ‹ßH‹›[‹ˆ×\W—‘V‘TÔÒSÓ—‹˜[YW×›Ü\˜]Ü——S‘‹˜[YU\W—’S•QÑT—‹˜[YWŒN_HŠJHÂˆ˜]Ë›ÜÑ›Ü•˜[YJ
+KœÙ]
+™[˜[ZXË\\˜[Y]\œ[\Ë˜ÛÜœ\‹œÛÛŠNÂˆ\ÜÙ\]›İÛJ
 
-    @Test
-    void ttlExpiryIsAbsenceButProducerOverwritesArePersistent() {
-        context().run(ctx -> {
-            RedisStore store = ctx.getBean(RedisStore.class);
-            ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            PublishedValue envelope = new PublishedValue("CONFIGURATION", JSON.valueToTree(3));
-            store.withNamespace("dynamic-parameter").set("orders.ttl", envelope, Duration.ofMillis(100));
-            org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(3)).untilAsserted(
-                    () -> assertThat(provider.get("orders.ttl", 7)).isEqualTo(7));
-            store.withNamespace("dynamic-parameter").set("orders.ttl", envelope, Duration.ofMinutes(1));
-            store.withNamespace("dynamic-parameter").set("orders.ttl", new PublishedValue("CONFIGURATION", JSON.valueToTree(4)));
-            assertThat(store.withNamespace("dynamic-parameter").ttl("orders.ttl")).isEmpty();
-            assertThat(provider.get("orders.ttl", 7)).isEqualTo(4);
-        });
-    }
+HOˆ^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë˜ÛÜœ\‹ŒJJKš\Ò[œİ[˜ÙSÙŠˆœ‹˜ÛÛKœÜ[X[˜YÙ\‹œ]›Ü›K›Xœ˜\K›Y\ÜØYÚ[™Ë˜\K™^Ù\[Û‹\Q^Ù\[Û‹˜Û\ÜÊNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë˜ÛÜœ\‹ŒKYJJKš\ÕYJ
+NÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë˜ÛÜœ\‹ŒK˜[ÙJJKš\Ñ˜[ÙJ
+NÂˆBˆJNÂˆÛÛ^
 
-    @Test
-    void actualConnectionFailureAndTimeoutAreNotAbsence() {
-        context().withPropertyValues("platform.redis.connection.port=1",
-                "platform.redis.connection.command-timeout=100ms", "platform.redis.connection.connect-timeout=100ms")
-                .run(ctx -> assertThatThrownBy(() -> ctx.getBean(ConfigurationProvider.class)
-                        .get("platform.missing", 7)).hasMessage("parameter-client.read.failed"));
-        context().withPropertyValues("platform.redis.connection.command-timeout=100ms").run(ctx -> {
-            ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            assertThat(provider.get("platform.missing", 7)).isEqualTo(7); // Warm connection first.
-            ctx.getBean(StringRedisTemplate.class).execute((RedisCallback<Object>) connection ->
-                    connection.execute("CLIENT", "PAUSE".getBytes(StandardCharsets.UTF_8),
-                            "450".getBytes(StandardCharsets.UTF_8), "ALL".getBytes(StandardCharsets.UTF_8)));
-            assertThatThrownBy(() -> provider.get("platform.missing", 7)).hasMessage("parameter-client.timeout");
-        });
-    }
+KÚ]›Ü\U˜[Y\Êœ]›Ü›Kœ™Y\Ë˜ÛÛ›™Xİ[Û‹œÜLH‹ˆœ]›Ü›Kœ™Y\Ë˜ÛÛ›™Xİ[Û‹˜ÛÛ[X[™][Y[İ]LL\È‹œ]›Ü›Kœ™Y\Ë˜ÛÛ›™Xİ[Û‹˜ÛÛ›™Xİ][Y[İ]LL\ÈŠKœ[ŠİOˆÂˆÛÛ™šYİ\˜][Û”›İšY\ˆ›İšY\ˆHİ™Ù]™X[ŠÛÛ™šYİ\˜][Û”›İšY\‹˜Û\ÜÊNÂˆ^™\ÜÚ[Û”›İšY\ˆ^™\ÜÚ[ÛœÈHİ™Ù]™X[Š^™\ÜÚ[Û”›İšY\‹˜Û\ÜÊNÂˆ\ÜÙ\]›İÛJ
 
-    /** Fixture serialized by the actual Workspace PublishedValue record and schema-validated.
-     * Producer source is identical at e87aefd07d11175e11e9fc8ca99752d60bd75bc5 and 883ea071.
-     */
-    @Test
-    void evaluatesActualProducerFixturesWithoutPrefixOrPrecisionLoss() throws Exception {
-        JsonMapper exact = JsonMapper.builder().enable(tools.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).build();
-        JsonNode fixtures;
-        try (java.io.InputStream source = getClass().getResourceAsStream("/producer-published-values.json")) {
-            fixtures = exact.readTree(source);
-        }
-        context().run(ctx -> {
-            RedisStore store = ctx.getBean(RedisStore.class);
-            ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
-            store.withNamespace("dynamic-parameter").setAll(Map.of("rules.minimum-age", fixtures.get(0), "rules.allowed-segments", fixtures.get(1),
-                    "rules.long-limit", fixtures.get(2), "rules.decimal-limit", fixtures.get(3),
-                    "platform.producer-settings", fixtures.get(4)));
-            assertThat(expressions.matches("rules.minimum-age", 21)).isTrue();
-            assertThat(expressions.matches("rules.minimum-age", 17, true)).isFalse();
-            assertThat(expressions.matches("rules.allowed-segments", "RETAIL", false)).isTrue();
-            assertThat(expressions.matches("rules.allowed-segments", "OTHER")).isFalse();
-            assertThat(expressions.matches("rules.long-limit", Long.MAX_VALUE)).isTrue();
-            assertThat(expressions.matches("rules.long-limit", Long.MAX_VALUE - 1)).isFalse();
-            assertThat(expressions.matches("rules.decimal-limit", new java.math.BigDecimal("123456789012345678901234567890.13"))).isTrue();
-            assertThat(expressions.matches("rules.decimal-limit", new java.math.BigDecimal("123456789012345678901234567890.12"))).isFalse();
-            assertThat(provider.get("platform.producer-settings", ConfigurationProviderTest.MySettings.class, null))
-                    .isEqualTo(new ConfigurationProviderTest.MySettings(5));
-            assertThat(raw.opsForValue().get("dynamic-parameter:rules.minimum-age"))
-                    .contains("EXPRESSION", "GREATER_THAN_OR_EQUALS");
-            assertThat(raw.hasKey("config:rules.minimum-age")).isFalse();
-            assertThat(raw.hasKey("parameter-consumer:dynamic-parameter:rules.minimum-age")).isFalse();
-            assertThat(store.withNamespace("dynamic-parameter").ttl("rules.minimum-age")).isEmpty();
-            store.withNamespace("dynamic-parameter").set("rules.minimum-age", fixtures.get(2));
-            assertThat(expressions.matches("rules.minimum-age", 21L)).isFalse();
-            assertThat(store.withNamespace("dynamic-parameter").delete("rules.minimum-age")).isTrue();
-            assertThatThrownBy(() -> expressions.matches("rules.minimum-age", 21)).hasMessage("parameter-client.missing");
-            assertThat(expressions.matches("rules.minimum-age", 21, true)).isTrue();
-            store.withNamespace("dynamic-parameter").set("rules.expression-ttl", fixtures.get(0), Duration.ofMillis(100));
-            assertThat(expressions.matches("rules.expression-ttl", 21)).isTrue();
-            org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(3)).untilAsserted(() ->
-                    assertThatThrownBy(() -> expressions.matches("rules.expression-ttl", 21)).hasMessage("parameter-client.missing"));
-        });
-    }
+HOˆ^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë›Z\ÜÚ[™È‹ŒJJKš\ÓY\ÜØYÙJœ\˜[Y]\‹XÛY[œ™XY™˜Z[YŠNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë›Z\ÜÚ[™È‹ŒKYJJKš\ÕYJ
+NÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\Êœ[\Ë›Z\ÜÚ[™È‹ŒK˜[ÙJJKš\Ñ˜[ÙJ
+NÂˆJNÂˆB‚ˆ\İˆ›ÚY\Ù\Ó›Û›[šÒÙ^\Ó]\˜[P[™ÙY\Ô™Y\Õ˜[Y][ÛŠ
+HÂˆÛÛ^
 
-    @Test
-    void expressionFailuresWithRealRedisHaveExplicitFallbackOnly() {
-        context().run(ctx -> {
-            StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
-            ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            for (String json : List.of("broken-json", "{}", "null",
-                    "{\"type\":\"EXPRESSION\",\"value\":{\"operator\":\"AND\",\"valueType\":\"INTEGER\",\"value\":18}}")) {
-                raw.opsForValue().set("dynamic-parameter:rules.corrupt", json);
-                assertThatThrownBy(() -> expressions.matches("rules.corrupt", 21)).isInstanceOf(
-                        br.com.portalmanager.platform.library.messaging.exception.ApiException.class);
-                assertThat(expressions.matches("rules.corrupt", 21, true)).isTrue();
-                assertThat(expressions.matches("rules.corrupt", 21, false)).isFalse();
-            }
-        });
-        context().withPropertyValues("platform.redis.connection.port=1",
-                "platform.redis.connection.command-timeout=100ms", "platform.redis.connection.connect-timeout=100ms").run(ctx -> {
-            ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            assertThatThrownBy(() -> expressions.matches("rules.missing", 21)).hasMessage("parameter-client.read.failed");
-            assertThat(expressions.matches("rules.missing", 21, true)).isTrue();
-            assertThat(expressions.matches("rules.missing", 21, false)).isFalse();
-        });
-    }
+Kœ[ŠİOˆÂˆ™Y\ÔİÜ™HİÜ™HHİ™Ù]™X[Š™Y\ÔİÜ™K˜Û\ÜÊNÂˆÛÛ™šYİ\˜][Û”›İšY\ˆ›İšY\ˆHİ™Ù]™X[ŠÛÛ™šYİ\˜][Û”›İšY\‹˜Û\ÜÊNÂˆ^™\ÜÚ[Û”›İšY\ˆ^™\ÜÚ[ÛœÈHİ™Ù]™X[Š^™\ÜÚ[Û”›İšY\‹˜Û\ÜÊNÂˆİš[™Ô™Y\Õ[\]H˜]ÈHİ™Ù]™X[Šİš[™Ô™Y\Õ[\]K˜Û\ÜÊNÂˆX›\ÚY˜[YHÛÛ™šYİ\˜][ÛˆH™]ÈX›\ÚY˜[YJÓÓ‘’QÕTUSÓˆ‹”ÓÓ‹˜[YUÕ™YJÌ
+JNÂˆX›\ÚY˜[YH^™\ÜÚ[ÛˆH™]ÈX›\ÚY˜[YJ‘V‘TÔÒSÓˆ‹”ÓÓ‹œ™XY™YJˆ×›Ü\˜]Ü——‘Ô‘PUT—ÕS—ÓÔ—ÑTUPS×‹˜[YU\W—’S•QÑT—‹˜[YWŒNHŠJNÂˆ›Üˆ
+İš[™ÈÙ^Hˆ\İ›ÙŠœÚ[™ÛH‹œ[\Ë‹˜[YH‹˜ÛÛ™šYÎœ[\Ë˜[YH‹ˆ™[˜[ZXË\\˜[Y]\œ[\Ë˜[YH‹ˆ[\Ë˜[YHŠJHÂˆİÜ™KÚ]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠKœÙ]
+Ù^KÛÛ™šYİ\˜][ÛŠNÂˆ\ÜÙ\]
+›İšY\‹™Ù]
+Ù^KJJKš\Ñ\]X[ÊÌ
+NÂˆ\ÜÙ\]
+˜]Ëš\ÒÙ^J™[˜[ZXË\\˜[Y]\ˆˆ
+ÈÙ^JJKš\ÕYJ
+NÂˆİÜ™KÚ]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠKœÙ]
+Ù^K^™\ÜÚ[ÛŠNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\ÊÙ^KŒJJKš\ÕYJ
+NÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\ÊÙ^KMËYJJKš\Ñ˜[ÙJ
+NÂˆ\ÜÙ\]
+İÜ™KÚ]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠK™[]JÙ^JJKš\ÕYJ
+NÂˆ\ÜÙ\]
+›İšY\‹™Ù]
+Ù^KÊJKš\Ñ\]X[ÊÊNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\ÊÙ^KŒK˜[ÙJJKš\Ñ˜[ÙJ
+NÂˆBˆ[X^Ù^P]\ÈHİ™Ù]™X[Š]›Ü›T™Y\Ô›Ü\Y\Ë˜Û\ÜÊK›[Z]Ê
+K›X^Ù^P]\Ê
+NÂˆ›Üˆ
+İš[™ÈÙ^Hˆ\İ›ÙŠœ[\Ë—˜[YH‹‹œ™\X]
+X^Ù^P]\ÊJJHÂˆ\ÜÙ\]›İÛJ
 
-    @Test
-    void usesNonBlankKeysLiterallyAndKeepsRedisValidation() {
-        context().run(ctx -> {
-            RedisStore store = ctx.getBean(RedisStore.class);
-            ConfigurationProvider provider = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
-            PublishedValue configuration = new PublishedValue("CONFIGURATION", JSON.valueToTree(30));
-            PublishedValue expression = new PublishedValue("EXPRESSION", JSON.readTree(
-                    "{\"operator\":\"GREATER_THAN_OR_EQUALS\",\"valueType\":\"INTEGER\",\"value\":18}"));
-            for (String key : List.of("single", "rules..value", "config:rules.value",
-                    "dynamic-parameter:rules.value", " rules.value ")) {
-                store.withNamespace("dynamic-parameter").set(key, configuration);
-                assertThat(provider.get(key, 1)).isEqualTo(30);
-                assertThat(raw.hasKey("dynamic-parameter:" + key)).isTrue();
-                store.withNamespace("dynamic-parameter").set(key, expression);
-                assertThat(expressions.matches(key, 21)).isTrue();
-                assertThat(expressions.matches(key, 17, true)).isFalse();
-                assertThat(store.withNamespace("dynamic-parameter").delete(key)).isTrue();
-                assertThat(provider.get(key, 7)).isEqualTo(7);
-                assertThat(expressions.matches(key, 21, false)).isFalse();
-            }
-            int maxKeyBytes = ctx.getBean(PlatformRedisProperties.class).limits().maxKeyBytes();
-            for (String key : List.of("rules.\nvalue", "x".repeat(maxKeyBytes))) {
-                assertThatThrownBy(() -> provider.get(key, 7)).hasMessage("parameter-client.validation");
-                assertThatThrownBy(() -> expressions.matches(key, 21)).hasMessage("parameter-client.validation");
-                // Redis validation occurs during the controlled read and uses the explicit fallback.
-                assertThat(expressions.matches(key, 21, true)).isTrue();
-            }
-        });
-    }
+HOˆ›İšY\‹™Ù]
+Ù^KÊJKš\ÓY\ÜØYÙJœ\˜[Y]\‹XÛY[˜[Y][ÛˆŠNÂˆ\ÜÙ\]›İÛJ
 
-    @Test
-    void bothProvidersShareTheirNamespaceWhileOtherStoresRemainIndependent() {
-        context().run(ctx -> {
-            RedisStore standard = ctx.getBean(RedisStore.class);
-            ConfigurationProvider configurations = ctx.getBean(ConfigurationProvider.class);
-            ExpressionProvider expressions = ctx.getBean(ExpressionProvider.class);
-            StringRedisTemplate raw = ctx.getBean(StringRedisTemplate.class);
-            PublishedValue configuration = new PublishedValue("CONFIGURATION", JSON.valueToTree(30));
-            PublishedValue expression = new PublishedValue("EXPRESSION", JSON.readTree(
-                    "{\"operator\":\"GREATER_THAN_OR_EQUALS\",\"valueType\":\"INTEGER\",\"value\":18}"));
-            standard.set("shared.key", "default");
-            standard.withNamespace("session").set("shared.key", "session");
-            standard.withNamespace("dynamic-parameter").set("shared.key", configuration);
-            assertThat(configurations.get("shared.key", 1)).isEqualTo(30);
-            assertThatThrownBy(() -> expressions.matches("shared.key", 21))
-                    .hasMessage("parameter-client.expression.invalid");
-            assertThat(expressions.matches("shared.key", 21, false)).isFalse();
-            standard.withNamespace("dynamic-parameter").set("shared.key", expression);
-            assertThat(expressions.matches("shared.key", 21)).isTrue();
-            assertThatThrownBy(() -> configurations.get("shared.key", JsonNode.class, null))
-                    .hasMessage("parameter-client.value.invalid");
-            assertThat(standard.get("shared.key", String.class)).contains("default");
-            assertThat(standard.withNamespace("session").get("shared.key", String.class)).contains("session");
-            assertThat(raw.hasKey("parameter-consumer:shared.key")).isTrue();
-            assertThat(raw.hasKey("session:shared.key")).isTrue();
-            assertThat(raw.hasKey("dynamic-parameter:shared.key")).isTrue();
-            assertThat(raw.hasKey("parameter-consumer:dynamic-parameter:shared.key")).isFalse();
-        });
-    }
+HOˆ^™\ÜÚ[ÛœË›X]Ú\ÊÙ^KŒJJKš\ÓY\ÜØYÙJœ\˜[Y]\‹XÛY[˜[Y][ÛˆŠNÂˆËÈ™Y\È˜[Y][ÛˆØØİ\œÈ\š[™ÈHÛÛ›ÛY™XY[™\Ù\ÈH^XÚ]˜[˜XÚË‚ˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\ÊÙ^KŒKYJJKš\ÕYJ
+NÂˆBˆJNÂˆB‚ˆ\İˆ›ÚY›İ›İšY\œÔÚ\™UZ\“˜[Y\ÜXÙUÚ[Sİ\”İÜ™\Ô™[XZ[’[™\[™[
 
-    public record PublishedValue(String type, JsonNode value) {}
-    public record Settings(int retries) {}
-}
+HÂˆÛÛ^
+
+Kœ[ŠİOˆÂˆ™Y\ÔİÜ™Hİ[™\™Hİ™Ù]™X[Š™Y\ÔİÜ™K˜Û\ÜÊNÂˆÛÛ™šYİ\˜][Û”›İšY\ˆÛÛ™šYİ\˜][ÛœÈHİ™Ù]™X[ŠÛÛ™šYİ\˜][Û”›İšY\‹˜Û\ÜÊNÂˆ^™\ÜÚ[Û”›İšY\ˆ^™\ÜÚ[ÛœÈHİ™Ù]™X[Š^™\ÜÚ[Û”›İšY\‹˜Û\ÜÊNÂˆİš[™Ô™Y\Õ[\]H˜]ÈHİ™Ù]™X[Šİš[™Ô™Y\Õ[\]K˜Û\ÜÊNÂˆX›\ÚY˜[YHÛÛ™šYİ\˜][ÛˆH™]ÈX›\ÚY˜[YJÓÓ‘’QÕTUSÓˆ‹”ÓÓ‹˜[YUÕ™YJÌ
+JNÂˆX›\ÚY˜[YH^™\ÜÚ[ÛˆH™]ÈX›\ÚY˜[YJ‘V‘TÔÒSÓˆ‹”ÓÓ‹œ™XY™YJˆ×›Ü\˜]Ü——‘Ô‘PUT—ÕS—ÓÔ—ÑTUPS×‹˜[YU\W—’S•QÑT—‹˜[YWŒNHŠJNÂˆİ[™\™œÙ]
+œÚ\™YšÙ^H‹™Y˜][ŠNÂˆİ[™\™Ú]˜[Y\ÜXÙJœÙ\ÜÚ[ÛˆŠKœÙ]
+œÚ\™YšÙ^H‹œÙ\ÜÚ[ÛˆŠNÂˆİ[™\™Ú]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠKœÙ]
+œÚ\™YšÙ^H‹ÛÛ™šYİ\˜][ÛŠNÂˆ\ÜÙ\]
+ÛÛ™šYİ\˜][ÛœË™Ù]
+œÚ\™YšÙ^H‹JJKš\Ñ\]X[ÊÌ
+NÂˆ\ÜÙ\]›İÛJ
+
+HOˆ^™\ÜÚ[ÛœË›X]Ú\ÊœÚ\™YšÙ^H‹ŒJJBˆš\ÓY\ÜØYÙJœ\˜[Y]\‹XÛY[™^™\ÜÚ[Û‹š[˜[YŠNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\ÊœÚ\™YšÙ^H‹ŒK˜[ÙJJKš\Ñ˜[ÙJ
+NÂˆİ[™\™Ú]˜[Y\ÜXÙJ™[˜[ZXË\\˜[Y]\ˆŠKœÙ]
+œÚ\™YšÙ^H‹^™\ÜÚ[ÛŠNÂˆ\ÜÙ\]
+^™\ÜÚ[ÛœË›X]Ú\ÊœÚ\™YšÙ^H‹ŒJJKš\ÕYJ
+NÂˆ\ÜÙ\]›İÛJ
+
+HOˆÛÛ™šYİ\˜][ÛœË™Ù]
+œÚ\™YšÙ^H‹œÛÛ“›ÙK˜Û\ÜË[
+JBˆš\ÓY\ÜØYÙJœ\˜[Y]\‹XÛY[˜[YKš[˜[YŠNÂˆ\ÜÙ\]
+İ[™\™™Ù]
+œÚ\™YšÙ^H‹İš[™Ë˜Û\ÜÊJK˜ÛÛZ[œÊ™Y˜][ŠNÂˆ\ÜÙ\]
+İ[™\™Ú]˜[Y\ÜXÙJœÙ\ÜÚ[ÛˆŠK™Ù]
+œÚ\™YšÙ^H‹İš[™Ë˜Û\ÜÊJK˜ÛÛZ[œÊœÙ\ÜÚ[ÛˆŠNÂˆ\ÜÙ\]
+˜]Ëš\ÒÙ^Jœ\˜[Y]\‹XÛÛœİ[Y\œÚ\™YšÙ^HŠJKš\ÕYJ
+NÂˆ\ÜÙ\]
+˜]Ëš\ÒÙ^JœÙ\ÜÚ[ÛœÚ\™YšÙ^HŠJKš\ÕYJ
+NÂˆ\ÜÙ\]
+˜]Ëš\ÒÙ^J™[˜[ZXË\\˜[Y]\œÚ\™YšÙ^HŠJKš\ÕYJ
+NÂˆ\ÜÙ\]
+˜]Ëš\ÒÙ^Jœ\˜[Y]\‹XÛÛœİ[Y\™[˜[ZXË\\˜[Y]\œÚ\™YšÙ^HŠJKš\Ñ˜[ÙJ
+NÂˆJNÂˆB‚ˆX›XÈ™XÛÜ™X›\ÚY˜[YJİš[™È\KœÛÛ“›ÙH˜[YJHßBˆX›XÈ™XÛÜ™Ù][™ÜÊ[™]šY\ÊHßBŸB

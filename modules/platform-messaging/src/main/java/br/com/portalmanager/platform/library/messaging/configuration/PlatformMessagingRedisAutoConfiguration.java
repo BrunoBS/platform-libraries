@@ -2,8 +2,8 @@ package br.com.portalmanager.platform.library.messaging.configuration;
 
 import br.com.portalmanager.platform.library.messaging.internal.cache.ApiMessageCache;
 import br.com.portalmanager.platform.library.messaging.internal.cache.RedisApiMessageCache;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
-import br.com.portalmanager.platform.library.messaging.message.PlatformTechnicalErrors;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.internal.message.PlatformTechnicalErrors;
 import br.com.portalmanager.platform.library.redis.configuration.PlatformRedisAutoConfiguration;
 import br.com.portalmanager.platform.library.redis.api.store.RedisStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

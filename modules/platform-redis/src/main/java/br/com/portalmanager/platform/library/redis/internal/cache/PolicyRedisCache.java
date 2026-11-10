@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.redis.internal.cache;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.redis.internal.common.RedisErrors;
 
 import org.slf4j.LoggerFactory;

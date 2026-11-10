@@ -1,11 +1,11 @@
 package br.com.portalmanager.platform.library.schemavalidation.integration;
 
 import br.com.portalmanager.platform.library.messaging.internal.cache.NoOpApiMessageCache;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
-import br.com.portalmanager.platform.library.messaging.message.PlatformMessageKeys;
-import br.com.portalmanager.platform.library.messaging.model.ApiMessage;
-import br.com.portalmanager.platform.library.messaging.model.ValidationDetail;
-import br.com.portalmanager.platform.library.messaging.repository.ApiMessageRepository;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.message.PlatformMessageKeys;
+import br.com.portalmanager.platform.library.messaging.api.model.ApiMessage;
+import br.com.portalmanager.platform.library.messaging.api.model.ValidationDetail;
+import br.com.portalmanager.platform.library.messaging.api.repository.ApiMessageRepository;
 import br.com.portalmanager.platform.library.messaging.internal.resolver.DefaultApiMessageResolver;
 import br.com.portalmanager.platform.library.messaging.internal.web.ApiExceptionHandler;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationMessageKeys;

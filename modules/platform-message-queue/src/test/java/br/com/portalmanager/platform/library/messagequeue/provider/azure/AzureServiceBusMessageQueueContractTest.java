@@ -6,7 +6,7 @@ import br.com.portalmanager.platform.library.messagequeue.internal.capability.Qu
 import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesResolver;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublisher;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublishOptions;
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.testing.cloud.azure.servicebus.annotation.AzureServiceBus;
 import br.com.portalmanager.platform.library.testing.cloud.azure.annotation.WithAzureEmulator;
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;

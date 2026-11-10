@@ -45,7 +45,7 @@ class RedisScanTest {
         DefaultRedisStore store = new DefaultRedisStore(template, codec, access);
         clearInvocations(template);
         assertThatThrownBy(() -> store.scan("service.", "0", 10))
-                .isInstanceOf(br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException.class);
+                .isInstanceOf(br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException.class);
         verifyNoInteractions(template);
     }
 

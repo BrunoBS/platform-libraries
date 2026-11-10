@@ -2,8 +2,8 @@ package br.com.portalmanager.platform.library.messagequeue.provider.aws;
 
 import br.com.portalmanager.platform.library.messagequeue.internal.capability.QueueCapabilitiesRegistry;
 import br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueuePublishOptions;
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.messagequeue.internal.message.MessageQueueMessageKeys;
 import br.com.portalmanager.platform.library.messagequeue.internal.transport.MessageQueueTransport;
 import br.com.portalmanager.platform.library.messagequeue.internal.resolver.ResolvedDestination;

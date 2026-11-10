@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.messagequeue.internal.resolver;
 
 import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProperties;
 import br.com.portalmanager.platform.library.messagequeue.api.configuration.MessageQueueProvider;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;

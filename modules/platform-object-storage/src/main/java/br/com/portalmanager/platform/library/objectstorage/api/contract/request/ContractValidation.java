@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.objectstorage.api.contract.request;
 
-import br.com.portalmanager.platform.library.messaging.exception.ValidationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.model.ObjectReference;
 import java.util.Map;
 

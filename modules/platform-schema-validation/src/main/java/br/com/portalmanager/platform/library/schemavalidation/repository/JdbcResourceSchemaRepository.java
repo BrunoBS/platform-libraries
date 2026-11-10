@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.schemavalidation.repository;
 
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.schemavalidation.config.PlatformSchemaValidationProperties;
 import br.com.portalmanager.platform.library.schemavalidation.message.SchemaValidationTechnicalErrors;
 import br.com.portalmanager.platform.library.schemavalidation.model.ResourceSchema;

@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.authorization.exception;
 
-import br.com.portalmanager.platform.library.messaging.exception.ApiException;
+import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 
 public abstract class AuthorizationException extends ApiException {
 

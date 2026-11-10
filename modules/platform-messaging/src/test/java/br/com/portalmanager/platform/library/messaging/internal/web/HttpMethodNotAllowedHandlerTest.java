@@ -1,7 +1,7 @@
 package br.com.portalmanager.platform.library.messaging.internal.web;
 
-import br.com.portalmanager.platform.library.messaging.message.PlatformDefaultMessageProvider;
-import br.com.portalmanager.platform.library.messaging.resolver.ApiMessageResolver;
+import br.com.portalmanager.platform.library.messaging.internal.message.PlatformDefaultMessageProvider;
+import br.com.portalmanager.platform.library.messaging.api.resolver.ApiMessageResolver;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;

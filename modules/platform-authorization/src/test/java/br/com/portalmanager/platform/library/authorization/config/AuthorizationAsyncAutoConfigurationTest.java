@@ -40,7 +40,7 @@ class AuthorizationAsyncAutoConfigurationTest {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
                             .isInstanceOf(
-                                    br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException.class);
+                                    br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException.class);
                 });
     }
 

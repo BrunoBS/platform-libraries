@@ -2,7 +2,7 @@ package br.com.portalmanager.platform.library.audit.internal.outbox;
 
 import br.com.portalmanager.platform.library.audit.api.contract.outbox.AuditOutboxEntity;
 import br.com.portalmanager.platform.library.audit.api.contract.outbox.AuditOutboxRepository;
-import br.com.portalmanager.platform.library.messaging.exception.PlatformConfigurationException;
+import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;

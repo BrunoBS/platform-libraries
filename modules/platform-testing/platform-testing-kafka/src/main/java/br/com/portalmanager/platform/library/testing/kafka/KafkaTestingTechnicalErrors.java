@@ -1,6 +1,6 @@
 package br.com.portalmanager.platform.library.testing.kafka;
 
-import br.com.portalmanager.platform.library.messaging.model.PlatformErrorDefinition;
+import br.com.portalmanager.platform.library.messaging.api.model.PlatformErrorDefinition;
 
 public final class KafkaTestingTechnicalErrors {
 
