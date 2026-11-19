@@ -1,5 +1,4 @@
-package br.com.portalmanager.platform.library.testing.authorization.internal;
-import br.com.portalmanager.platform.library.testing.authorization.internal.extension.UserContextIsolationExtension;
+package br.com.portalmanager.platform.library.testing.authorization.internal.extension;
 
 import br.com.portalmanager.platform.library.authorization.api.model.UserContext;
 import br.com.portalmanager.platform.library.authorization.api.model.UserSession;
