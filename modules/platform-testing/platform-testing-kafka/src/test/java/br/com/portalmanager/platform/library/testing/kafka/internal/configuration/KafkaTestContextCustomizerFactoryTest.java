@@ -1,6 +1,4 @@
-package br.com.portalmanager.platform.library.testing.kafka.internal;
-import br.com.portalmanager.platform.library.testing.kafka.internal.configuration.KafkaTestConfiguration;
-import br.com.portalmanager.platform.library.testing.kafka.internal.configuration.KafkaTestContextCustomizerFactory;
+package br.com.portalmanager.platform.library.testing.kafka.internal.configuration;
 
 import br.com.portalmanager.platform.library.messaging.api.exception.PlatformConfigurationException;
 import br.com.portalmanager.platform.library.testing.kafka.api.annotation.WithKafka;
