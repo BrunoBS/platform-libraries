@@ -1,5 +1,11 @@
 package br.com.portalmanager.platform.library.audit.internal.outbox;
 
+import br.com.portalmanager.platform.library.audit.api.configuration.PlatformAuditProperties;
+import br.com.portalmanager.platform.library.audit.api.contract.model.AuditContext;
+import br.com.portalmanager.platform.library.audit.api.annotation.Auditable;
+import br.com.portalmanager.platform.library.audit.api.contract.model.AuditAction;
+import br.com.portalmanager.platform.library.audit.internal.context.AuditAuthorizationContextResolver;
+import br.com.portalmanager.platform.library.audit.internal.event.AuditEventFactory;
 import br.com.portalmanager.platform.library.audit.api.contract.outbox.AuditOutboxRepository;
 import br.com.portalmanager.platform.library.objectstorage.api.configuration.ObjectStorageProperties;
 import br.com.portalmanager.platform.library.objectstorage.api.contract.ObjectStorageClient;
@@ -31,10 +37,21 @@ class AuditOutboxHeaderLocalStackIT {
                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")))
                 .build()) {
             s3.createBucket(request -> request.bucket(bucket));
-            AuditOutboxProcessorTest.Entry entry = new AuditOutboxProcessorTest.Entry(
-                    AuditOutboxProcessorTest.JSON.readTree("{\"identifier\":\"resource-1\",\"name\":\"Snapshot local\"}"),
-                    AuditOutboxProcessorTest.JSON.readTree("{\"service\":\"workspace-service\",\"eventType\":\"WORKSPACE_CREATED\","
-                            + "\"username\":\"José\",\"accountIdentifier\":null,\"occurredAt\":\"2026-11-21T19:17:14Z\"}"));
+            PlatformAuditProperties auditProperties =
+                    new PlatformAuditProperties();
+            auditProperties.setServiceName("workspace-service");
+            AuditAuthorizationContextResolver context =
+                    mock(AuditAuthorizationContextResolver.class);
+            when(context.resolve()).thenReturn(new AuditContext(
+                    null, null, null, "José", "correlation"));
+            AuditEventFactory factory =
+                    new AuditEventFactory(
+                            auditProperties, context, AuditOutboxProcessorTest.JSON);
+            AuditEventFactory.CapturedAuditEvent captured = factory.create(
+                    getClass().getMethod("auditableUpdate").getAnnotation(
+                            Auditable.class),
+                    AuditOutboxProcessorTest.JSON.readTree("{\"identifier\":\"resource-1\",\"name\":\"Snapshot local\",\"version\":7}"));
+            AuditOutboxProcessorTest.Entry entry = new AuditOutboxProcessorTest.Entry(captured.payload(), captured.metadata());
             String key = "platform-audit/" + entry.getIdentifier() + ".json";
             try {
                 ObjectStorageProperties properties = new ObjectStorageProperties();
@@ -46,7 +63,9 @@ class AuditOutboxHeaderLocalStackIT {
                 AuditOutboxProcessorTest.processor(repository, storage, entry).processNew(entry.getIdentifier());
                 verify(repository).deleteByIdentifier(entry.getIdentifier());
                 ObjectMetadata head = storage.head(ObjectReference.current("audit", key));
-                assertThat(AuditOutboxProcessorTest.JSON.readTree(head.metadata().get("audit-metadata"))).isEqualTo(entry.getMetadata());
+                assertThat(AuditOutboxProcessorTest.JSON.readTree(head.metadata().get("audit-metadata"))).isEqualTo(AuditOutboxProcessorTest.JSON.readTree(AuditOutboxProcessorTest.JSON.writeValueAsString(entry.getMetadata())));
+                assertThat(AuditOutboxProcessorTest.JSON.readTree(head.metadata().get("audit-metadata")).path("resourceVersion").longValue())
+                        .isEqualTo(7);
                 assertThat(head.metadata()).containsEntry("audit-event-id", entry.getIdentifier())
                         .containsEntry("audit-format-version", "2")
                         .containsEntry("audit-outbox-created-at", entry.getCreatedAt().toString());
@@ -65,4 +84,8 @@ class AuditOutboxHeaderLocalStackIT {
             }
         }
     }
+    @Auditable(
+            action = AuditAction.UPDATE,
+            event = "WORKSPACE_UPDATED", resourceType = "WORKSPACE")
+    public void auditableUpdate() { }
 }

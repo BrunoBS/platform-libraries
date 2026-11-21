@@ -13,6 +13,14 @@ public record AuditMetadata(
         String environmentIdentifier,
         String correlationId,
         String username,
-        Instant occurredAt
+        Instant occurredAt,
+        Long resourceVersion
 ) {
+    /** Preserves callers that do not supply a resource version. */
+    public AuditMetadata(String service, String resourceType, String eventType, String resourceIdentifier,
+            String accountIdentifier, String applicationIdentifier, String environmentIdentifier,
+            String correlationId, String username, Instant occurredAt) {
+        this(service, resourceType, eventType, resourceIdentifier, accountIdentifier, applicationIdentifier,
+                environmentIdentifier, correlationId, username, occurredAt, null);
+    }
 }

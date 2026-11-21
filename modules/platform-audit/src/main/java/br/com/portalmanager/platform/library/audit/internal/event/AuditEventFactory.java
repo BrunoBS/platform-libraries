@@ -60,7 +60,8 @@ public final class AuditEventFactory {
                 context.environmentId(),
                 context.correlationId(),
                 context.actor(),
-                Instant.now()
+                Instant.now(),
+                resourceVersion(payload)
         );
         JsonNode metadataNode = toMetadataNode(metadata);
         return new CapturedAuditEvent(payload, metadataNode);
@@ -72,6 +73,17 @@ public final class AuditEventFactory {
             value = payload.get("id");
         }
         return value == null || value.isNull() ? null : value.asText();
+    }
+
+    private Long resourceVersion(JsonNode payload) {
+        JsonNode version = payload.get("version");
+        if (version == null || version.isNull()) {
+            return null;
+        }
+        if (!version.isIntegralNumber() || !version.canConvertToLong()) {
+            throw new ValidationException(AuditMessageKeys.RESOURCE_VERSION_INVALID);
+        }
+        return version.longValue();
     }
 
     private ObjectNode toMetadataNode(AuditMetadata metadata) {
@@ -86,6 +98,11 @@ public final class AuditEventFactory {
         putNullable(node, "correlationId", metadata.correlationId());
         putNullable(node, "username", metadata.username());
         node.put("occurredAt", metadata.occurredAt().toString());
+        if (metadata.resourceVersion() == null) {
+            node.putNull("resourceVersion");
+        } else {
+            node.put("resourceVersion", metadata.resourceVersion().longValue());
+        }
         return node;
     }
 

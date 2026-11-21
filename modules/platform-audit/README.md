@@ -27,7 +27,12 @@ Os metadados ficam no objeto, consultáveis por HEAD sem baixar o snapshot:
 No S3, esses campos aparecem como headers `x-amz-meta-*`. `audit-metadata` preserva
 `service`, `resourceType`, `eventType`, `resourceIdentifier`, `accountIdentifier`,
 `applicationIdentifier`, `environmentIdentifier`, `correlationId`, `username` e
-`occurredAt`, incluindo valores nulos. Caracteres não ASCII são escapados como
+`occurredAt` e `resourceVersion`, incluindo valores nulos.
+`resourceVersion` é copiado do campo `version` do snapshot retornado pela operação
+auditável, tanto na criação quanto na atualização. Zero é preservado. Se `version`
+estiver ausente ou nulo, `resourceVersion` será nulo; valores não inteiros ou fora
+do intervalo de `Long` são rejeitados antes de escrever a outbox. Essa versão é
+independente do `versionId` S3 e do `audit-format-version`. Caracteres não ASCII são escapados como
 JSON (`\uXXXX`); um parser JSON recupera o valor original. A outbox no banco
 continua guardando payload e metadata separadamente, sem alteração de schema.
 
