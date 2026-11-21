@@ -20,9 +20,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.core.json.JsonWriteFeature;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
@@ -168,14 +169,14 @@ public final class AuditOutboxProcessor {
 
     private void upload(AuditOutboxEntity entry) {
         byte[] content;
-        String sha256;
+        Map<String, String> metadata;
         try {
-            ObjectNode storedEvent = objectMapper.createObjectNode();
-            storedEvent.put("identifier", entry.getIdentifier());
-            storedEvent.set("payload", entry.getPayload());
-            storedEvent.set("metadata", entry.getMetadata());
-            content = objectMapper.writeValueAsBytes(storedEvent);
-            sha256 = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
+            if (entry.getPayload() == null || !entry.getPayload().isObject()) {
+                throw new IllegalArgumentException("Audit snapshot must be a JSON object");
+            }
+            content = objectMapper.writeValueAsBytes(entry.getPayload());
+            String sha256 = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
+            metadata = objectMetadata(entry, sha256);
         } catch (Exception failure) {
             failed(entry, failure);
             return;
@@ -189,7 +190,7 @@ public final class AuditOutboxProcessor {
                     key,
                     content.length,
                     new ObjectHeaders("application/json", null, null, null, null),
-                    Map.of("audit-event-id", entry.getIdentifier(), "audit-sha256", sha256),
+                    metadata,
                     WriteMode.CREATE_ONLY);
             UploadResult result = objectStorageClient.upload(request, new ByteArrayInputStream(content));
             if (result == null || result.sizeBytes() != content.length) {
@@ -197,7 +198,7 @@ public final class AuditOutboxProcessor {
             }
             remove(entry.getIdentifier());
         } catch (RuntimeException failure) {
-            if (storedObjectMatches(reference, entry.getIdentifier(), content.length, sha256, failure)) {
+            if (storedObjectMatches(reference, content.length, metadata, failure)) {
                 remove(entry.getIdentifier());
                 return;
             }
@@ -205,11 +206,33 @@ public final class AuditOutboxProcessor {
         }
     }
 
+    /** Snapshot bytes and business metadata are kept separate so HEAD is sufficient for ingestion. */
+    private Map<String, String> objectMetadata(AuditOutboxEntity entry, String sha256) {
+        if (entry.getMetadata() == null || !entry.getMetadata().isObject() || entry.getCreatedAt() == null) {
+            throw new IllegalArgumentException("Audit metadata and original outbox timestamp are required");
+        }
+        String businessMetadata = objectMapper.writer().with(JsonWriteFeature.ESCAPE_NON_ASCII)
+                .without(tools.jackson.databind.SerializationFeature.INDENT_OUTPUT)
+                .writeValueAsString(entry.getMetadata());
+        Map<String, String> headers = Map.of(
+                "audit-format-version", "2",
+                "audit-event-id", entry.getIdentifier(),
+                "audit-sha256", sha256,
+                "audit-outbox-created-at", entry.getCreatedAt().toString(),
+                "audit-metadata", businessMetadata);
+        int sizeBytes = headers.entrySet().stream().mapToInt(header ->
+                header.getKey().getBytes(StandardCharsets.UTF_8).length
+                        + header.getValue().getBytes(StandardCharsets.UTF_8).length).sum();
+        if (sizeBytes > 2048) {
+            throw new IllegalArgumentException("Audit object metadata exceeds the S3 2048-byte limit");
+        }
+        return headers;
+    }
+
     private boolean storedObjectMatches(
             ObjectReference reference,
-            String identifier,
             long contentLength,
-            String sha256,
+            Map<String, String> expectedMetadata,
             RuntimeException uploadFailure) {
         try {
             if (!objectStorageClient.exists(reference)) {
@@ -217,8 +240,7 @@ public final class AuditOutboxProcessor {
             }
             ObjectMetadata metadata = objectStorageClient.head(reference);
             return metadata.sizeBytes() == contentLength
-                    && identifier.equals(metadata.metadata().get("audit-event-id"))
-                    && sha256.equals(metadata.metadata().get("audit-sha256"));
+                    && metadata.metadata().entrySet().containsAll(expectedMetadata.entrySet());
         } catch (RuntimeException verificationFailure) {
             uploadFailure.addSuppressed(verificationFailure);
             return false;
