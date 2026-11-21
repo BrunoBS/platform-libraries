@@ -170,6 +170,7 @@ public final class AuditOutboxProcessor {
     private void upload(AuditOutboxEntity entry) {
         byte[] content;
         Map<String, String> metadata;
+        String key;
         try {
             if (entry.getPayload() == null || !entry.getPayload().isObject()) {
                 throw new IllegalArgumentException("Audit snapshot must be a JSON object");
@@ -177,12 +178,12 @@ public final class AuditOutboxProcessor {
             content = objectMapper.writeValueAsBytes(entry.getPayload());
             String sha256 = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
             metadata = objectMetadata(entry, sha256);
+            key = objectKey(entry.getMetadata());
         } catch (Exception failure) {
             failed(entry, failure);
             return;
         }
 
-        String key = objectKey(entry.getIdentifier());
         ObjectReference reference = ObjectReference.current(properties.getOutbox().getDestination(), key);
         try {
             UploadRequest request = new UploadRequest(
@@ -191,7 +192,7 @@ public final class AuditOutboxProcessor {
                     content.length,
                     new ObjectHeaders("application/json", null, null, null, null),
                     metadata,
-                    WriteMode.CREATE_ONLY);
+                    WriteMode.OVERWRITE);
             UploadResult result = objectStorageClient.upload(request, new ByteArrayInputStream(content));
             if (result == null || result.sizeBytes() != content.length) {
                 throw new IllegalStateException("Object Storage returned an invalid upload result");
@@ -279,10 +280,16 @@ public final class AuditOutboxProcessor {
                 entry.getAttempts(), reason);
     }
 
-    private String objectKey(String identifier) {
+    private String objectKey(JsonNode metadata) {
+        JsonNode service = metadata.get("service");
+        JsonNode identifier = metadata.get("resourceIdentifier");
+        if (service == null || !service.isTextual() || service.asText().isBlank()
+                || identifier == null || !identifier.isTextual() || identifier.asText().isBlank()) {
+            throw new IllegalArgumentException("Audit object key requires service and resourceIdentifier");
+        }
         String prefix = properties.getOutbox().getKeyPrefix();
         String separator = prefix.endsWith("/") ? "" : "/";
-        return prefix + separator + identifier + ".json";
+        return prefix + separator + service.asText() + "/" + identifier.asText() + ".json";
     }
 
     private String resourceIdentifier(JsonNode metadata) {

@@ -11,8 +11,12 @@ Execute os comandos de build na raiz do repositório para incluir os módulos de
 
 O arquivo JSON contém **somente o snapshot** (`AuditOutboxEntity.payload`), sem
 wrapper `identifier/payload/metadata`. O identificador do recurso presente no
-próprio snapshot é preservado. A chave continua `<key-prefix>/<event-id>.json` e
-o upload continua `CREATE_ONLY` com `Content-Type: application/json`.
+próprio snapshot é preservado. A chave usa `<key-prefix>/{service}/{resourceIdentifier}.json`, com uma pasta por serviço. Com os padrões do Workspace, um exemplo é
+`platform-audit/workspace-service/6dbe06ab-cf43-40ab-9fb3-b48c080a87cc.json`.
+O upload usa `OVERWRITE` com `Content-Type: application/json`: o bucket deve ter
+versionamento habilitado para que cada evento preserve uma versão do snapshot.
+O identificador do evento permanece nos metadados `audit-event-id`, independente
+da chave do recurso e do versionId atribuído pelo S3.
 
 Os metadados ficam no objeto, consultáveis por HEAD sem baixar o snapshot:
 
@@ -42,8 +46,10 @@ Se excedido, não trunca nem envia o arquivo: mantém o fluxo de falha/retry da 
 A recuperação de upload com resposta perdida exige tamanho e todos os metadados
 esperados iguais antes de remover a outbox.
 
-Arquivos já existentes no formato antigo não são regravados. O novo formato se
-aplica aos novos uploads; um objeto antigo com a mesma chave não é sobrescrito.
+Arquivos com as chaves antigas por evento não são renomeados. Novos uploads usam
+a chave por serviço/recurso; snapshots sucessivos dessa chave são preservados
+pelo versionamento do bucket. O consumidor deve consultar a versão indicada pela
+notificação S3 para não confundir eventos de uma mesma chave.
 Consumers que liam o wrapper antigo devem passar a obter os metadados por HEAD.
 
 Para validar o contrato contra um LocalStack já em execução (bucket exclusivo,

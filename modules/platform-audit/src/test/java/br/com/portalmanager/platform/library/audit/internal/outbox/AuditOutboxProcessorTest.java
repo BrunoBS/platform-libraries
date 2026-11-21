@@ -70,6 +70,9 @@ class AuditOutboxProcessorTest {
         assertThat(JSON.readTree(uploaded[0])).isEqualTo(entry.getPayload());
         assertThat(request.getValue().contentLength()).isEqualTo(uploaded[0].length);
         assertThat(request.getValue().contentType()).isEqualTo("application/json");
+        assertThat(request.getValue().key()).isEqualTo("platform-audit/workspace-service/resource-1.json");
+        assertThat(request.getValue().writeMode()).isEqualTo(
+                br.com.portalmanager.platform.library.objectstorage.api.contract.model.WriteMode.OVERWRITE);
         Map<String, String> headers = request.getValue().metadata();
         assertThat(headers).containsEntry("audit-format-version", "2")
                 .containsEntry("audit-event-id", entry.getIdentifier())
@@ -107,6 +110,15 @@ class AuditOutboxProcessorTest {
     @Test void recoveryAcknowledgesCompleteMatchingSnapshotAndMetadata() {
         recovery(true);
         verify(repository).deleteByIdentifier(entry.getIdentifier());
+    }
+
+    @Test void absentResourceIdentifierDoesNotUploadUnderAnEventIdFallback() {
+        Entry missing = new Entry(entry.getPayload(), JSON.createObjectNode().put("service", "workspace-service"));
+        processor(repository, storage, missing).processNew(missing.getIdentifier());
+        verifyNoInteractions(storage);
+        verify(repository, never()).deleteByIdentifier(anyString());
+        verify(repository).scheduleRetry(eq(missing.getIdentifier()), eq(AuditOutboxStatus.PROCESSING),
+                eq(AuditOutboxStatus.RETRY), any(Instant.class));
     }
 
     private void recovery(boolean matchingMetadata) {
