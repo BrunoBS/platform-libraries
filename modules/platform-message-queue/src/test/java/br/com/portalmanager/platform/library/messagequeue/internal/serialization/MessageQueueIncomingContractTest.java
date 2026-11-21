@@ -45,4 +45,18 @@ class MessageQueueIncomingContractTest {
         assertThatThrownBy(()->serializer.deserialize("{\"Records\":[{\"eventSource\":\"aws:s3\"}]}",Payload.class,"orders"))
             .isInstanceOf(ApiException.class);
     }
+    @Test void nativeJsonRequiresExplicitRawModeAndKeepsBodyWithoutInventingMetadata() {
+        String nativeBody = "{\"Records\":[{\"eventSource\":\"aws:s3\"}]}";
+        MessageQueueMessage<tools.jackson.databind.JsonNode> raw = serializer.deserializeRaw(
+                nativeBody, tools.jackson.databind.JsonNode.class, "sqs-transport-id");
+        assertThat(raw.messageId()).isEqualTo("sqs-transport-id");
+        assertThat(raw.payload().path("Records").get(0).path("eventSource").asText()).isEqualTo("aws:s3");
+        assertThat(raw.timestamp()).isNull();
+        assertThat(raw.messageType()).isNull();
+        assertThat(raw.correlationId()).isNull();
+        assertThatThrownBy(() -> serializer.deserializeRaw("null", PlainPayload.class, "id"))
+                .isInstanceOf(ApiException.class);
+        assertThatThrownBy(() -> serializer.deserializeRaw("{} {}", PlainPayload.class, "id"))
+                .isInstanceOf(ApiException.class);
+    }
 }

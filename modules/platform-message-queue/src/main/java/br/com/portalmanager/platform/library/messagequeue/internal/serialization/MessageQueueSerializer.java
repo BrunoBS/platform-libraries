@@ -24,6 +24,21 @@ public class MessageQueueSerializer {
         }
     }
 
+    /** Native bodies carry no platform type/version, event timestamp or correlation identifier. */
+    public <T> MessageQueueMessage<T> deserializeRaw(String content, Class<T> payloadType, String transportMessageId) {
+        try {
+            T payload = objectMapper.readerFor(payloadType)
+                    .with(tools.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                    .readValue(content);
+            if (payload == null) {
+                throw new ApiException(MessageQueueMessageKeys.DESERIALIZATION_FAILED);
+            }
+            return new MessageQueueMessage<>(transportMessageId, null, null, null, null, java.util.Map.of(), payload);
+        } catch (JacksonException exception) {
+            throw new ApiException(MessageQueueMessageKeys.DESERIALIZATION_FAILED, exception);
+        }
+    }
+
     public <T> MessageQueueMessage<T> deserialize(String content, Class<T> payloadType, String destination) {
         try {
             JavaType type = objectMapper.getTypeFactory()

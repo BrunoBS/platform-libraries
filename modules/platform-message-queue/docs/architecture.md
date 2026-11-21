@@ -285,3 +285,16 @@ Os dois consumers e transports são necessários porque SQS e Service Bus difere
 - `MessageQueueProperties` concentra propriedades comuns e específicas dos dois providers em uma árvore de configuração. Essa forma dá um único prefixo consistente; se novos providers forem adicionados, reavaliar o tamanho e a validação central dessa classe.
 - As opções `orderingKey` e `deduplicationId` são uma API neutra com suporte desigual entre providers. O comportamento hoje está explícito e validado; documentar essa diferença é mais simples que fingir equivalência entre brokers.
 
+
+## Recepção explícita de JSON nativo
+
+`@MessageQueueListener(value = "destino", raw = true)` opta por receber JSON nativo
+sem envelope de plataforma. O parâmetro continua `MessageQueueMessage<T>`: a biblioteca
+desserializa o corpo completo em `T` e usa apenas o identificador do transporte no
+wrapper interno. Tipo, versão, timestamp e correlação permanecem nulos; não são
+inferidos nem inventados. MDC e contexto de entrega continuam restritos à execução
+do listener. Retorno normal confirma; exceção deixa redelivery. O modo padrão continua
+exigindo o envelope e validando `@QueueMessage`; não há detecção automática de formato.
+O modo `raw` é para listeners normais; listeners de dead-letter mantêm seu contrato
+de envelope atual. `platform.message-queue.aws.endpoint` permite apontar o client
+para LocalStack; credenciais continuam na cadeia padrão do AWS SDK.

@@ -24,9 +24,12 @@ public class AwsMessageQueueAutoConfiguration {
     @Bean(destroyMethod = "close")
     @ConditionalOnMissingBean(SqsClient.class)
     SqsClient messageQueueSqsClient(MessageQueueProperties properties) {
-        return SqsClient.builder()
-                .region(Region.of(properties.getAws().getRegion()))
-                .build();
+        software.amazon.awssdk.services.sqs.SqsClientBuilder builder = SqsClient.builder()
+                .region(Region.of(properties.getAws().getRegion()));
+        if (properties.getAws().getEndpoint() != null && !properties.getAws().getEndpoint().isBlank()) {
+            builder.endpointOverride(java.net.URI.create(properties.getAws().getEndpoint()));
+        }
+        return builder.build();
     }
 
     @Bean

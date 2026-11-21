@@ -119,4 +119,13 @@ class MessageQueueListenerRegistryTest {
 
     record ProductUpdatedEvent(String identifier) {
     }
+    public static class NativeListener {
+        @MessageQueueListener(value = "native", raw = true)
+        public void receive(MessageQueueMessage<String> message) { }
+    }
+    @Test void explicitRawModeIsDiscovered() {
+        MessageQueueListenerRegistry registry = new MessageQueueListenerRegistry();
+        registry.postProcessAfterInitialization(new NativeListener(), "nativeListener");
+        assertEquals(true, registry.listeners().iterator().next().raw());
+    }
 }

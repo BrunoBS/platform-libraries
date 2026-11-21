@@ -10,4 +10,7 @@ import java.lang.annotation.Target;
 public @interface MessageQueueListener {
 
     String value();
+
+    /** Opt in to a native JSON body instead of a platform envelope. */
+    boolean raw() default false;
 }

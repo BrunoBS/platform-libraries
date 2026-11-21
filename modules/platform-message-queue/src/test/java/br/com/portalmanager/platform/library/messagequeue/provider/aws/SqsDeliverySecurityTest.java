@@ -81,4 +81,26 @@ class SqsDeliverySecurityTest {
         assertThat(commits).hasValue(2); // Business deduplication belongs to the transactional use case, not the queue.
         verify(client,times(2)).deleteMessage(any(DeleteMessageRequest.class));
     }
+    @Test void nativeBodyIsAcknowledgedOnlyAfterSuccessfulHandler() throws Exception {
+        MessageQueueMessage<String> nativeMessage = new MessageQueueMessage<>(
+                "sqs-native-id", null, null, null, null, Map.of(), "native-body");
+        when(serializer.deserializeRaw("raw", String.class, "sqs-native-id")).thenReturn(nativeMessage);
+        ListenerDefinition definition = new ListenerDefinition("configured", listener,
+                Listener.class.getMethod("receive", MessageQueueMessage.class), String.class, true);
+        Method process = SqsMessageQueueConsumer.class.getDeclaredMethod(
+                "process", ListenerDefinition.class, String.class, Message.class);
+        process.setAccessible(true);
+        Message received = Message.builder().messageId("sqs-native-id").body("raw").receiptHandle("native-receipt").build();
+        listener.effect = () -> {
+            assertThat(MessageQueueDeliveryContext.current().orElseThrow().transportMessageId()).isEqualTo("sqs-native-id");
+            verify(client, never()).deleteMessage(any(DeleteMessageRequest.class));
+        };
+        process.invoke(consumer, definition, "http://localhost/queue", received);
+        verify(client).deleteMessage(any(DeleteMessageRequest.class));
+        reset(client);
+        listener.effect = () -> { throw new IllegalStateException("HEAD failed"); };
+        process.invoke(consumer, definition, "http://localhost/queue", received);
+        verify(client, never()).deleteMessage(any(DeleteMessageRequest.class));
+        verify(serializer, never()).deserialize(anyString(), any(), anyString());
+    }
 }

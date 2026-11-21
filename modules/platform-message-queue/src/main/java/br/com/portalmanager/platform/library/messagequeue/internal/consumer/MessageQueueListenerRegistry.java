@@ -40,7 +40,7 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor,
                         "Message queue method cannot be both listener and dead-letter listener: " + method.getName());
             }
             if (listener != null) {
-                registerListener(listener.value(), bean, method);
+                registerListener(listener.value(), bean, method, listener.raw());
             }
             if (deadLetterListener != null) {
                 registerDeadLetterListener(deadLetterListener.value(), bean, method);
@@ -65,7 +65,7 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor,
         return deadLetterListeners.values();
     }
 
-    private void registerListener(String destination, Object bean, Method method) {
+    private void registerListener(String destination, Object bean, Method method, boolean raw) {
         validateDestination(destination, "listener");
         if (listeners.containsKey(destination)) {
             throw configurationError(
@@ -73,7 +73,7 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor,
         }
         Class<?> payloadType = resolvePayloadType(method, destination, MessageQueueMessage.class, "MessageQueueMessage<T>");
         Method invocableMethod = selectInvocableMethod(method, bean, destination);
-        listeners.put(destination, new ListenerDefinition(destination, bean, invocableMethod, payloadType));
+        listeners.put(destination, new ListenerDefinition(destination, bean, invocableMethod, payloadType, raw));
     }
 
     private void registerDeadLetterListener(String destination, Object bean, Method method) {
@@ -163,7 +163,10 @@ public class MessageQueueListenerRegistry implements BeanPostProcessor,
         }
     }
 
-    public record ListenerDefinition(String destination, Object bean, Method method, Class<?> payloadType) {
+    public record ListenerDefinition(String destination, Object bean, Method method, Class<?> payloadType, boolean raw) {
+        public ListenerDefinition(String destination, Object bean, Method method, Class<?> payloadType) {
+            this(destination, bean, method, payloadType, false);
+        }
         public void invoke(MessageQueueMessage<?> message) {
             MessageQueueListenerRegistry.invoke(bean, method, message, destination);
         }

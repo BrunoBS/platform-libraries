@@ -287,7 +287,9 @@ public class AzureServiceBusMessageQueueConsumer implements SmartLifecycle {
         String messageId = null;
         String correlationId = null;
         try {
-            var message = serializer.deserialize(received.getBody().toString(), listener.payloadType(), listener.destination());
+            MessageQueueMessage<?> message = listener.raw()
+                    ? serializer.deserializeRaw(received.getBody().toString(), listener.payloadType(), received.getMessageId())
+                    : serializer.deserialize(received.getBody().toString(), listener.payloadType(), listener.destination());
             messageId = message.messageId();
             correlationId = message.correlationId();
             String entryPoint = org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName()

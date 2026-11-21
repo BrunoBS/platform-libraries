@@ -13,7 +13,8 @@ public record ObjectMetadata(
         ObjectHeaders headers,
         String eTag,
         Instant lastModified,
-        Map<String, String> metadata) {
+        Map<String, String> metadata,
+        Map<String, java.util.List<String>> responseHeaders) {
     public ObjectMetadata {
         if (reference == null) throw ContractValidation.invalid("reference");
         if (sizeBytes < 0) throw ContractValidation.invalid("sizeBytes");
@@ -23,6 +24,15 @@ public record ObjectMetadata(
         }
         metadata = metadata == null ? Map.of() : Map.copyOf(metadata);
         headers = headers == null ? ObjectHeaders.empty() : headers;
+        responseHeaders = responseHeaders == null ? Map.of() : responseHeaders.entrySet().stream()
+                .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                        Map.Entry::getKey, entry -> java.util.List.copyOf(entry.getValue())));
+    }
+
+    /** Backwards-compatible constructor for normalized metadata without provider response headers. */
+    public ObjectMetadata(ObjectReference reference, long sizeBytes, ObjectHeaders headers,
+            String eTag, Instant lastModified, Map<String, String> metadata) {
+        this(reference, sizeBytes, headers, eTag, lastModified, metadata, Map.of());
     }
 
     public ObjectMetadata(

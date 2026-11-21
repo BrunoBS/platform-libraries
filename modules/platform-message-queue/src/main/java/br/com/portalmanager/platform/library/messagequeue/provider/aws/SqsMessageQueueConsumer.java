@@ -165,7 +165,9 @@ public class SqsMessageQueueConsumer implements SmartLifecycle {
         String messageId = null;
         String correlationId = null;
         try {
-            var message = serializer.deserialize(receivedMessage.body(), listener.payloadType(), listener.destination());
+            br.com.portalmanager.platform.library.messagequeue.api.contract.MessageQueueMessage<?> message = listener.raw()
+                    ? serializer.deserializeRaw(receivedMessage.body(), listener.payloadType(), receivedMessage.messageId())
+                    : serializer.deserialize(receivedMessage.body(), listener.payloadType(), listener.destination());
             messageId = safeLogIdentifier(message.messageId()) ? message.messageId() : null;
             correlationId = safeLogIdentifier(message.correlationId()) ? message.correlationId() : null;
             String entryPoint = org.springframework.aop.support.AopUtils.getTargetClass(listener.bean()).getName()

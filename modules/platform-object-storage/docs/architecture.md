@@ -328,3 +328,11 @@ sequenceDiagram
 ## Testes e validação
 
 Os testes de contrato e configuração ficam em `src/test/java`. Os testes de integração usam os emuladores AWS/Azure; os testes unitários cobrem tradução de erro e transformação de chaves. Esta revisão não executou a suíte local; a validação automatizada deve ser acompanhada pela pipeline do commit.
+
+## Cabeçalhos da resposta HEAD
+
+`ObjectMetadata.responseHeaders` expõe um mapa imutável de cabeçalhos HTTP e seus
+valores. O adapter S3 preenche esse campo a partir da resposta de `HeadObject`, sem
+baixar conteúdo. Os construtores anteriores permanecem disponíveis e usam um mapa
+vazio quando o adapter não fornece cabeçalhos brutos; os campos normalizados e os
+metadados do usuário continuam com o mesmo significado.

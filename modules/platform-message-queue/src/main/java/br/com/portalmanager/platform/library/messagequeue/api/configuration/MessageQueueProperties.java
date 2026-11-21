@@ -111,7 +111,10 @@ public class MessageQueueProperties implements InitializingBean {
 
     public static class Aws {
         private String region;
+        private String endpoint;
         private final AwsConsumerOptions defaults = new AwsConsumerOptions();
+        public String getEndpoint() { return endpoint; }
+        public void setEndpoint(String endpoint) { this.endpoint = endpoint; }
         public String getRegion() { return region; }
         public void setRegion(String region) { this.region = region; }
         public AwsConsumerOptions getDefaults() { return defaults; }

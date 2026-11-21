@@ -117,7 +117,8 @@ public class S3ObjectStorageClient implements ObjectStorageClient, SignedUrlClie
                     ? new ObjectReference(reference.destination(), reference.key(), response.versionId()) : reference;
             return new ObjectMetadata(actual, response.contentLength(), headers(response.contentType(), response.cacheControl(),
                     response.contentDisposition(), response.contentEncoding(), response.contentLanguage()), response.eTag(),
-                    response.lastModified(), response.metadata());
+                    response.lastModified(), response.metadata(), response.sdkHttpResponse() == null
+                            ? Map.of() : response.sdkHttpResponse().headers());
         } catch (S3Exception exception) {
             throw translate(exception, "read object properties");
         } catch (SdkException exception) {
