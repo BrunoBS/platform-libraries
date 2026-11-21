@@ -32,10 +32,11 @@ No S3, esses campos aparecem como headers `x-amz-meta-*`. `audit-metadata` prese
 `service`, `resourceType`, `eventType`, `resourceIdentifier`, `accountIdentifier`,
 `applicationIdentifier`, `environmentIdentifier`, `correlationId`, `username` e
 `occurredAt` e `resourceVersion`, incluindo valores nulos.
-`resourceVersion` é copiado do campo `version` do snapshot retornado pela operação
-auditável, tanto na criação quanto na atualização. Zero é preservado. Se `version`
-estiver ausente ou nulo, `resourceVersion` será nulo; valores não inteiros ou fora
-do intervalo de `Long` são rejeitados antes de escrever a outbox. Essa versão é
+Por padrão, `resourceVersion` é copiado do campo `version` do snapshot retornado pela
+operação auditável. O mapeamento pode ser personalizado em `@Auditable.attributes`.
+Zero é preservado. Atributos de origem inexistentes são omitidos; nulos explícitos
+são preservados. `resourceVersion`, quando presente e não nulo, deve ser um inteiro
+no intervalo de `Long`; valores inválidos são rejeitados antes de escrever a outbox. Essa versão é
 independente do `versionId` S3 e do `audit-format-version`. Caracteres não ASCII são escapados como
 JSON (`\uXXXX`); um parser JSON recupera o valor original. A outbox no banco
 continua guardando payload e metadata separadamente, sem alteração de schema.
@@ -59,3 +60,43 @@ removido pelo teste):
 mvn --offline -pl modules/platform-audit \
   -Dtest=AuditOutboxHeaderLocalStackIT -Daudit.localstack.enabled=true test
 ```
+
+## Mapeamento de atributos do snapshot
+
+`@AuditAttribute.key` é o nome do atributo nos metadados da auditoria e `value` é o
+nome exato de um campo no primeiro nível do snapshot. `@Auditable` usa estes defaults:
+
+```java
+AuditAttribute[] attributes() default {
+    @AuditAttribute(key = "resourceIdentifier", value = "identifier"),
+    @AuditAttribute(key = "resourceVersion", value = "version")
+};
+```
+
+Um array explícito **substitui**, sem adicionar aos defaults:
+
+```java
+@Auditable(
+    action = AuditAction.UPDATE,
+    event = "WORKSPACE_UPDATED",
+    resourceType = "WORKSPACE",
+    attributes = {
+        @AuditAttribute(key = "resourceIdentifier", value = "code"),
+        @AuditAttribute(key = "resourceVersion", value = "revision"),
+        @AuditAttribute(key = "resourceStatus", value = "lifecycle")
+    }
+)
+```
+
+Campos de origem inexistentes são ignorados. Campos presentes com valor nulo,
+`false`, zero, arrays ou objetos preservam o valor e tipo JSON nos atributos
+adicionais. `resourceIdentifier` mantém seu tipo textual e `resourceVersion` seu
+tipo inteiro de 64 bits. O snapshot completo não é alterado. Os valores mapeados
+ficam diretamente no JSON `audit-metadata`, ainda sujeito ao limite total de 2 KB.
+
+A chave S3 depende de `resourceIdentifier`: esse atributo deve ser resolvido e não
+vazio para capturar um evento enviável. Não há fallback implícito para `id`; para
+esse caso, declare `@AuditAttribute(key = "resourceIdentifier", value = "id")`.
+Chaves duplicadas, nomes vazios ou tentativas de sobrescrever campos de contexto
+(`service`, `resourceType`, `eventType`, conta/aplicação/ambiente, correlationId,
+username e occurredAt) são rejeitadas antes da gravação da outbox.

@@ -3,6 +3,9 @@ package br.com.portalmanager.platform.library.audit.internal.event;
 import br.com.portalmanager.platform.library.messaging.api.exception.ApiException;
 import br.com.portalmanager.platform.library.messaging.api.exception.ValidationException;
 import br.com.portalmanager.platform.library.audit.api.annotation.Auditable;
+import br.com.portalmanager.platform.library.audit.api.annotation.AuditAttribute;
+import java.util.HashSet;
+import java.util.Set;
 import br.com.portalmanager.platform.library.audit.api.configuration.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.internal.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.internal.message.AuditMessageKeys;
@@ -44,7 +47,9 @@ public final class AuditEventFactory {
         if (payload == null || payload.isNull() || !payload.isObject()) {
             throw new ValidationException(AuditMessageKeys.SNAPSHOT_REQUIRED);
         }
-        String resourceIdentifier = identifier(payload);
+        ObjectNode attributes = mappedAttributes(auditable, payload);
+        JsonNode identifier = attributes.get("resourceIdentifier");
+        String resourceIdentifier = identifier == null || identifier.isNull() ? null : identifier.asText();
         if (resourceIdentifier == null || resourceIdentifier.isBlank()) {
             throw new ValidationException(AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING);
         }
@@ -61,25 +66,36 @@ public final class AuditEventFactory {
                 context.correlationId(),
                 context.actor(),
                 Instant.now(),
-                resourceVersion(payload)
+                resourceVersion(attributes.get("resourceVersion"))
         );
-        JsonNode metadataNode = toMetadataNode(metadata);
+        ObjectNode metadataNode = toMetadataNode(metadata);
+        metadataNode.setAll(attributes);
+        // Canonical identity fields keep their established String/Long types.
+        metadataNode.put("resourceIdentifier", metadata.resourceIdentifier());
+        if (attributes.has("resourceVersion") && metadata.resourceVersion() != null) {
+            metadataNode.put("resourceVersion", metadata.resourceVersion().longValue());
+        }
         return new CapturedAuditEvent(payload, metadataNode);
     }
 
-    private String identifier(JsonNode payload) {
-        JsonNode value = payload.get("identifier");
-        if (value == null || value.isNull() || value.asText().isBlank()) {
-            value = payload.get("id");
+    private ObjectNode mappedAttributes(Auditable auditable, JsonNode payload) {
+        ObjectNode attributes = objectMapper.createObjectNode();
+        Set<String> keys = new HashSet<>();
+        Set<String> contextKeys = Set.of("service", "resourceType", "eventType", "accountIdentifier",
+                "applicationIdentifier", "environmentIdentifier", "correlationId", "username", "occurredAt");
+        for (AuditAttribute mapping : auditable.attributes()) {
+            if (mapping.key().isBlank() || mapping.value().isBlank()
+                    || contextKeys.contains(mapping.key()) || !keys.add(mapping.key())) {
+                throw new ValidationException(AuditMessageKeys.ATTRIBUTE_MAPPING_INVALID);
+            }
+            JsonNode value = payload.get(mapping.value());
+            if (value != null) attributes.set(mapping.key(), value.deepCopy());
         }
-        return value == null || value.isNull() ? null : value.asText();
+        return attributes;
     }
 
-    private Long resourceVersion(JsonNode payload) {
-        JsonNode version = payload.get("version");
-        if (version == null || version.isNull()) {
-            return null;
-        }
+    private Long resourceVersion(JsonNode version) {
+        if (version == null || version.isNull()) return null;
         if (!version.isIntegralNumber() || !version.canConvertToLong()) {
             throw new ValidationException(AuditMessageKeys.RESOURCE_VERSION_INVALID);
         }
@@ -98,11 +114,6 @@ public final class AuditEventFactory {
         putNullable(node, "correlationId", metadata.correlationId());
         putNullable(node, "username", metadata.username());
         node.put("occurredAt", metadata.occurredAt().toString());
-        if (metadata.resourceVersion() == null) {
-            node.putNull("resourceVersion");
-        } else {
-            node.put("resourceVersion", metadata.resourceVersion().longValue());
-        }
         return node;
     }
 

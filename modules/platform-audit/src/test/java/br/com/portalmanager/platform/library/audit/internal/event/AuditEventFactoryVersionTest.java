@@ -1,6 +1,7 @@
 package br.com.portalmanager.platform.library.audit.internal.event;
 
 import br.com.portalmanager.platform.library.audit.api.annotation.Auditable;
+import br.com.portalmanager.platform.library.audit.api.annotation.AuditAttribute;
 import br.com.portalmanager.platform.library.audit.api.configuration.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.api.contract.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.api.contract.model.AuditContext;
@@ -20,7 +21,9 @@ class AuditEventFactoryVersionTest {
 
     @Auditable(action = AuditAction.CREATE, event = "CREATED", resourceType = "WORKSPACE")
     public void create() { }
-    @Auditable(action = AuditAction.UPDATE, event = "UPDATED", resourceType = "WORKSPACE")
+    @Auditable(action = AuditAction.UPDATE, event = "UPDATED", resourceType = "WORKSPACE", attributes = {
+            @AuditAttribute(key = "resourceIdentifier", value = "id"),
+            @AuditAttribute(key = "resourceVersion", value = "version")})
     public void update() { }
 
     private AuditEventFactory.CapturedAuditEvent capture(String operation, String snapshot) throws Exception {
@@ -46,12 +49,12 @@ class AuditEventFactoryVersionTest {
         assertThat(event.metadata().path("resourceVersion").longValue()).isEqualTo(Long.MAX_VALUE);
     }
 
-    @Test void missingOrNullVersionRemainsNull() throws Exception {
-        for (String snapshot : new String[]{"{\"id\":\"resource\"}", "{\"id\":\"resource\",\"version\":null}"}) {
-            JsonNode metadata = capture("create", snapshot).metadata();
-            assertThat(metadata.has("resourceVersion")).isTrue();
-            assertThat(metadata.get("resourceVersion").isNull()).isTrue();
-        }
+    @Test void missingVersionIsSkippedAndExplicitNullIsPreserved() throws Exception {
+        JsonNode missing = capture("create", "{\"identifier\":\"resource\"}").metadata();
+        assertThat(missing.has("resourceVersion")).isFalse();
+        JsonNode explicitNull = capture("create", "{\"identifier\":\"resource\",\"version\":null}").metadata();
+        assertThat(explicitNull.has("resourceVersion")).isTrue();
+        assertThat(explicitNull.get("resourceVersion").isNull()).isTrue();
     }
 
     @Test void invalidVersionsAreRejectedRatherThanCoercedOrTruncated() {

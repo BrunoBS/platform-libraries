@@ -6,6 +6,7 @@ public final class AuditMessageKeys {
 
     public static final String USER_CONTEXT_MISSING = PREFIX + "context.user.missing";
     public static final String RESOURCE_IDENTIFIER_MISSING = PREFIX + "resource.identifier.missing";
+    public static final String ATTRIBUTE_MAPPING_INVALID = PREFIX + "attribute.mapping.invalid";
     public static final String RESOURCE_VERSION_INVALID = PREFIX + "resource.version.invalid";
     public static final String EVENT_DEFINITION_REQUIRED = PREFIX + "event-definition.required";
     public static final String SNAPSHOT_REQUIRED = PREFIX + "snapshot.required";

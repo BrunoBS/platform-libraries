@@ -21,4 +21,10 @@ public @interface Auditable {
     String event();
 
     String resourceType();
+
+    /** Replaces the defaults when supplied; missing source attributes are skipped. */
+    AuditAttribute[] attributes() default {
+            @AuditAttribute(key = "resourceIdentifier", value = "identifier"),
+            @AuditAttribute(key = "resourceVersion", value = "version")
+    };
 }

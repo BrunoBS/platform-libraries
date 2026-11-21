@@ -29,6 +29,7 @@ class AuditMessageBundleTest {
                 AuditMessageKeys.USER_CONTEXT_MISSING,
                 AuditMessageKeys.RESOURCE_IDENTIFIER_MISSING,
                 AuditMessageKeys.RESOURCE_VERSION_INVALID,
+                AuditMessageKeys.ATTRIBUTE_MAPPING_INVALID,
                 AuditMessageKeys.EVENT_DEFINITION_REQUIRED,
                 AuditMessageKeys.SNAPSHOT_REQUIRED,
                 AuditMessageKeys.TRANSACTION_REQUIRED,

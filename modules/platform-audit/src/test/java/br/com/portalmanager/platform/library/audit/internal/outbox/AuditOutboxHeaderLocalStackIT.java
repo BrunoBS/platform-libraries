@@ -3,6 +3,7 @@ package br.com.portalmanager.platform.library.audit.internal.outbox;
 import br.com.portalmanager.platform.library.audit.api.configuration.PlatformAuditProperties;
 import br.com.portalmanager.platform.library.audit.api.contract.model.AuditContext;
 import br.com.portalmanager.platform.library.audit.api.annotation.Auditable;
+import br.com.portalmanager.platform.library.audit.api.annotation.AuditAttribute;
 import br.com.portalmanager.platform.library.audit.api.contract.model.AuditAction;
 import br.com.portalmanager.platform.library.audit.internal.context.AuditAuthorizationContextResolver;
 import br.com.portalmanager.platform.library.audit.internal.event.AuditEventFactory;
@@ -50,7 +51,7 @@ class AuditOutboxHeaderLocalStackIT {
             AuditEventFactory.CapturedAuditEvent captured = factory.create(
                     getClass().getMethod("auditableUpdate").getAnnotation(
                             Auditable.class),
-                    AuditOutboxProcessorTest.JSON.readTree("{\"identifier\":\"resource-1\",\"name\":\"Snapshot local\",\"version\":7}"));
+                    AuditOutboxProcessorTest.JSON.readTree("{\"code\":\"resource-1\",\"name\":\"Snapshot local\",\"revision\":7,\"lifecycle\":\"ACTIVE\"}"));
             AuditOutboxProcessorTest.Entry entry = new AuditOutboxProcessorTest.Entry(captured.payload(), captured.metadata());
             String key = "platform-audit/workspace-service/resource-1.json";
             try {
@@ -69,6 +70,9 @@ class AuditOutboxHeaderLocalStackIT {
                 assertThat(AuditOutboxProcessorTest.JSON.readTree(head.metadata().get("audit-metadata"))).isEqualTo(AuditOutboxProcessorTest.JSON.readTree(AuditOutboxProcessorTest.JSON.writeValueAsString(entry.getMetadata())));
                 assertThat(AuditOutboxProcessorTest.JSON.readTree(head.metadata().get("audit-metadata")).path("resourceVersion").longValue())
                         .isEqualTo(7);
+                assertThat(AuditOutboxProcessorTest.JSON.readTree(head.metadata().get("audit-metadata"))
+                        .path("resourceStatus").asText()).isEqualTo("ACTIVE");
+                assertThat(AuditOutboxProcessorTest.JSON.readTree(head.metadata().get("audit-metadata")).has("ignored")).isFalse();
                 assertThat(head.metadata()).containsEntry("audit-event-id", entry.getIdentifier())
                         .containsEntry("audit-format-version", "2")
                         .containsEntry("audit-outbox-created-at", entry.getCreatedAt().toString());
@@ -81,7 +85,7 @@ class AuditOutboxHeaderLocalStackIT {
                         .isEqualTo(HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(snapshot)));
                 AuditEventFactory.CapturedAuditEvent nextCaptured = factory.create(
                         getClass().getMethod("auditableUpdate").getAnnotation(Auditable.class),
-                        AuditOutboxProcessorTest.JSON.readTree("{\"identifier\":\"resource-1\",\"name\":\"Second snapshot\",\"version\":8}"));
+                        AuditOutboxProcessorTest.JSON.readTree("{\"code\":\"resource-1\",\"name\":\"Second snapshot\",\"revision\":8,\"lifecycle\":\"INACTIVE\"}"));
                 AuditOutboxProcessorTest.Entry next = new AuditOutboxProcessorTest.Entry(nextCaptured.payload(), nextCaptured.metadata());
                 AuditOutboxRepository<AuditOutboxProcessorTest.Entry> nextRepository = AuditOutboxProcessorTest.repository();
                 AuditOutboxProcessorTest.processor(nextRepository, storage, next).processNew(next.getIdentifier());
@@ -114,6 +118,10 @@ class AuditOutboxHeaderLocalStackIT {
     }
     @Auditable(
             action = AuditAction.UPDATE,
-            event = "WORKSPACE_UPDATED", resourceType = "WORKSPACE")
+            event = "WORKSPACE_UPDATED", resourceType = "WORKSPACE", attributes = {
+                    @AuditAttribute(key = "resourceIdentifier", value = "code"),
+                    @AuditAttribute(key = "resourceVersion", value = "revision"),
+                    @AuditAttribute(key = "resourceStatus", value = "lifecycle"),
+                    @AuditAttribute(key = "ignored", value = "missing")})
     public void auditableUpdate() { }
 }
